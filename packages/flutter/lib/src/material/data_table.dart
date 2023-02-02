@@ -44,7 +44,7 @@ class DataColumn {
     this.tooltip,
     this.numeric = false,
     this.onSort,
-  }) : assert(label != null);
+  });
 
   /// The column heading.
   ///
@@ -107,7 +107,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-  }) : assert(cells != null);
+  });
 
   /// Creates the configuration for a row of a [DataTable], deriving
   /// the key from a row index.
@@ -120,8 +120,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-  }) : assert(cells != null),
-       key = ValueKey<int?>(index);
+  }) : key = ValueKey<int?>(index);
 
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
@@ -234,7 +233,7 @@ class DataCell {
     this.onTapDown,
     this.onDoubleTap,
     this.onTapCancel,
-  }) : assert(child != null);
+  });
 
   /// A cell that has no content and has zero width and height.
   static const DataCell empty = DataCell(SizedBox.shrink());
@@ -406,12 +405,9 @@ class DataTable extends StatelessWidget {
     required this.rows,
     this.checkboxHorizontalMargin,
     this.border,
-  }) : assert(columns != null),
-       assert(columns.isNotEmpty),
+    this.clipBehavior = Clip.none,
+  }) : assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(showCheckboxColumn != null),
-       assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
        _onlyTextColumn = _initOnlyTextColumn(columns);
@@ -637,6 +633,13 @@ class DataTable extends StatelessWidget {
 
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// This can be used to clip the content within the border of the [DataTable].
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -964,7 +967,7 @@ class DataTable extends StatelessWidget {
     int displayColumnIndex = 0;
     if (displayCheckboxColumn) {
       tableColumns[0] = FixedColumnWidth(effectiveCheckboxHorizontalMarginStart + Checkbox.width + effectiveCheckboxHorizontalMarginEnd);
-      tableRows[0].children![0] = _buildCheckbox(
+      tableRows[0].children[0] = _buildCheckbox(
         context: context,
         checked: someChecked ? null : allChecked,
         onRowTap: null,
@@ -974,7 +977,7 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
-        tableRows[rowIndex].children![0] = _buildCheckbox(
+        tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
           checked: row.selected,
           onRowTap: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
@@ -1017,7 +1020,7 @@ class DataTable extends StatelessWidget {
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
-      tableRows[0].children![displayColumnIndex] = _buildHeadingCell(
+      tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
         padding: padding,
         label: column.label,
@@ -1031,7 +1034,7 @@ class DataTable extends StatelessWidget {
       rowIndex = 1;
       for (final DataRow row in rows) {
         final DataCell cell = row.cells[dataColumnIndex];
-        tableRows[rowIndex].children![displayColumnIndex] = _buildDataCell(
+        tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
           padding: padding,
           label: cell.child,
@@ -1056,6 +1059,8 @@ class DataTable extends StatelessWidget {
       decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
       child: Material(
         type: MaterialType.transparency,
+        borderRadius: border?.borderRadius,
+        clipBehavior: clipBehavior,
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,

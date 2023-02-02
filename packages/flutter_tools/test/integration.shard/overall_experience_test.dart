@@ -24,6 +24,7 @@
 
 // This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -297,11 +298,10 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  })
-  // TODO(srawlins): Fix this static issue,
-  // https://github.com/flutter/flutter/issues/105750.
-  // ignore: body_might_complete_normally_catch_error
-  .catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
+  }).catchError((Object error) {
+    // ignore errors here, they will be reported on the next line
+    return -1; // discarded
+  }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -519,7 +519,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:12$')),
+        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),
@@ -548,6 +548,7 @@ void main() {
         '  verticalDirection: down',
         '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
         '════════════════════════════════════════════════════════════════════════════════════════════════════',
+        '',
         startsWith('Reloaded 0 libraries in '),
         '',
         'Application finished.',

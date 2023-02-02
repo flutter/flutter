@@ -281,8 +281,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.onEnd,
-  }) : assert(curve != null),
-       assert(duration != null);
+  });
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -360,7 +359,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
-  late Animation<double> _animation = _createCurve();
+  late CurvedAnimation _animation = _createCurve();
 
   @override
   void initState() {
@@ -383,7 +382,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve) {
-      (_animation as CurvedAnimation).dispose();
+      _animation.dispose();
       _animation = _createCurve();
     }
     _controller.duration = widget.duration;
@@ -405,7 +404,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   @override
   void dispose() {
-    (_animation as CurvedAnimation).dispose();
+    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -816,8 +815,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative);
+  }) : assert(padding.isNonNegative);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -907,8 +905,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
+  }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
   /// How to align the child.
@@ -1361,7 +1358,7 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(scale != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1488,7 +1485,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(turns != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1559,7 +1556,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 ///
 /// {@tool dartpad}
 /// This code defines a widget that uses [AnimatedSlide] to translate a [FlutterLogo]
-/// up or down by the amount of it's height with each press of the corresponding button.
+/// up or down and right or left by dragging the X and Y axis sliders.
 ///
 /// ** See code in examples/api/lib/widgets/implicit_animations/animated_slide.0.dart **
 /// {@end-tool}
@@ -1699,7 +1696,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     required super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
+  }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -1794,7 +1791,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     required super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
+  }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
   /// The sliver below this widget in the tree.
   final Widget? sliver;
@@ -1889,12 +1886,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(style != null),
-       assert(child != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null);
+  }) : assert(maxLines == null || maxLines > 0);
 
   /// The widget below this widget in the tree.
   ///
@@ -2017,15 +2009,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(borderRadius != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null),
-       assert(shadowColor != null),
-       assert(animateColor != null),
-       assert(animateShadowColor != null);
+  }) : assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -2151,8 +2135,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
+  }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
   /// The widget below this widget in the tree.

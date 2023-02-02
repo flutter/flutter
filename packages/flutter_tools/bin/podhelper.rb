@@ -65,6 +65,9 @@ def flutter_additional_ios_build_settings(target)
     # Skip other updates if it's not a Flutter plugin (transitive dependency).
     next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
 
+    # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
+    build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
@@ -102,11 +105,11 @@ def flutter_additional_macos_build_settings(target)
   # [target.deployment_target] is a [String] formatted as "10.8".
   deployment_target_major, deployment_target_minor = target.deployment_target.match(/(\d+).?(\d*)/).captures
 
-  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.13).
+  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.14).
   # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
   inherit_deployment_target = !target.deployment_target.blank? &&
     (deployment_target_major.to_i < 10) ||
-    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 13)
+    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 14)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -227,7 +230,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.osx.deployment_target = '10.13'
+        s.osx.deployment_target = '10.14'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'FlutterMacOS'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -263,6 +266,11 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
     has_native_build = plugin_hash.fetch('native_build', true)
+
+    # iOS and macOS code can be shared in "darwin" directory, otherwise
+    # respectively in "ios" or "macos" directories.
+    shared_darwin_source = plugin_hash.fetch('shared_darwin_source', false)
+    platform_directory = shared_darwin_source ? 'darwin' : platform
     next unless plugin_name && plugin_path && has_native_build
     symlink = File.join(symlink_plugins_dir, plugin_name)
     File.symlink(plugin_path, symlink)
@@ -270,7 +278,7 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     # Keep pod path relative so it can be checked into Podfile.lock.
     relative = flutter_relative_path_from_podfile(symlink)
 
-    pod plugin_name, path: File.join(relative, platform)
+    pod plugin_name, path: File.join(relative, platform_directory)
   end
 end
 
@@ -285,7 +293,7 @@ def flutter_parse_plugins_file(file, platform)
 
   # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
   return [] unless dependencies_hash.has_key?('plugins')
-  return [] unless dependencies_hash['plugins'].has_key?('ios')
+  return [] unless dependencies_hash['plugins'].has_key?(platform)
   dependencies_hash['plugins'][platform] || []
 end
 

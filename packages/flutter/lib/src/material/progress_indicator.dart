@@ -145,7 +145,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.value,
     required this.animationValue,
     required this.textDirection,
-  }) : assert(textDirection != null);
+  });
 
   final Color backgroundColor;
   final Color valueColor;
@@ -252,6 +252,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a [LinearProgressIndicator] with a changing value.
+/// When toggling the switch, [LinearProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -474,6 +482,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [CircularProgressIndicator] with a changing value.
+/// When toggling the switch, [CircularProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [LinearProgressIndicator], which displays progress along a line.
@@ -499,8 +515,8 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
   /// material theme/non-iOS.
   ///
-  /// The [value], [backgroundColor], [valueColor], [strokeWidth],
-  /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
+  /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
+  /// [semanticsValue] will be ignored in iOS.
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
@@ -638,7 +654,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
@@ -909,7 +924,7 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_152
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);

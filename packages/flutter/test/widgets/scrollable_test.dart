@@ -16,13 +16,17 @@ Future<void> pumpTest(
   TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
+  Set<LogicalKeyboardKey>? axisModifier,
+  Axis scrollDirection = Axis.vertical,
   ScrollController? controller,
   bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
-      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
-      : null,
+    scrollBehavior: const NoScrollbarBehavior().copyWith(
+      dragDevices: enableMouseDrag
+        ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+        : null,
+      pointerAxisModifiers: axisModifier,
     ),
     theme: ThemeData(
       platform: platform,
@@ -30,9 +34,13 @@ Future<void> pumpTest(
     home: CustomScrollView(
       controller: controller,
       reverse: reverse,
+      scrollDirection: scrollDirection,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-      slivers: const <Widget>[
-        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      slivers: <Widget>[
+        SliverToBoxAdapter(child: SizedBox(
+          height: scrollDirection == Axis.vertical ? 2000.0 : null,
+          width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+        )),
       ],
     ),
   ));
@@ -398,6 +406,118 @@ void main() {
 
     expect(getScrollOffset(tester), 20.0);
   });
+
+  testWidgets('Scrolls horizontally when shift is pressed by default', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not flipped.
+    expect(getScrollOffset(tester), 0.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
@@ -941,7 +1061,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -970,7 +1090,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -1014,7 +1134,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1426,6 +1546,51 @@ void main() {
       return true;
     });
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
+    handle.dispose();
+  });
+
+  testWidgets('Two panel semantics is added to the sibling nodes of direct children', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          key: key,
+          children: const <Widget>[
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                prefixText: 'prefix',
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+    // Wait for focus.
+    await tester.pumpAndSettle();
+
+    final SemanticsNode scrollableNode = tester.getSemantics(find.byKey(key));
+    SemanticsNode? intermediateNode;
+    scrollableNode.visitChildren((SemanticsNode node) {
+      intermediateNode = node;
+      return true;
+    });
+    SemanticsNode? syntheticScrollableNode;
+    intermediateNode!.visitChildren((SemanticsNode node) {
+      syntheticScrollableNode = node;
+      return true;
+    });
+    expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
+
+    int numberOfChild = 0;
+    syntheticScrollableNode!.visitChildren((SemanticsNode node) {
+      expect(node.isTagged(RenderViewport.useTwoPaneSemantics), isTrue);
+      numberOfChild += 1;
+      return true;
+    });
+    expect(numberOfChild, 2);
+
     handle.dispose();
   });
 

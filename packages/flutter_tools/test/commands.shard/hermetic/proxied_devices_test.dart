@@ -302,7 +302,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => logReader;
 
@@ -310,7 +310,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late LaunchResult launchResult;
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -326,7 +326,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   ApplicationPackage? stopAppPackage;
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     stopAppPackage = app;

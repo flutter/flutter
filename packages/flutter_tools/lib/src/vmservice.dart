@@ -187,7 +187,7 @@ Future<vm_service.VmService> setUpVmService(
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
-  final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
+  final List<Future<vm_service.Success?>> registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -285,14 +285,12 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
-    // It is safe to ignore this error because we expect an error to be
-    // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      // TODO(srawlins): Fix this static issue,
-      // https://github.com/flutter/flutter/issues/105750.
-      // ignore: body_might_complete_normally_catch_error
-      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
+      .then<vm_service.Success?>((vm_service.Success success) => success)
+      // It is safe to ignore this error because we expect an error to be
+      // thrown if we're already subscribed.
+      .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
     );
   }
 
@@ -741,6 +739,18 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterEvictScene(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeScene',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
 
   /// Exit the application by calling [exit] from `dart:io`.
   ///
@@ -999,7 +1009,6 @@ class FlutterVmService {
 
   /// Set the VM timeline flags.
   Future<void> setTimelineFlags(List<String> recordedStreams) async {
-    assert(recordedStreams != null);
     await _checkedCallServiceExtension(
       'setVMTimelineFlags',
       args: <String, Object?>{

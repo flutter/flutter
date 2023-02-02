@@ -44,19 +44,14 @@ class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     required AndroidSdk? androidSdk,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _androidSdk = androidSdk,
-       _featureFlags = featureFlags,
-       _operatingSystemUtils = operatingSystemUtils;
+       _featureFlags = featureFlags;
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
-    // Android Studio is not currently supported on Linux Arm64 Hosts.
-    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
   bool get canListDevices => appliesToHostPlatform && _androidSdk != null
@@ -263,7 +258,7 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Success.
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 }
 
@@ -332,7 +327,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {

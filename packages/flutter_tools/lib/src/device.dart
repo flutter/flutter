@@ -17,18 +17,19 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// A description of the kind of workflow the device supports.
-class Category {
-  const Category._(this.value);
+enum Category {
+  web._('web'),
+  desktop._('desktop'),
+  mobile._('mobile');
 
-  static const Category web = Category._('web');
-  static const Category desktop = Category._('desktop');
-  static const Category mobile = Category._('mobile');
+  const Category._(this.value);
 
   final String value;
 
@@ -36,7 +37,7 @@ class Category {
   String toString() => value;
 
   static Category? fromString(String category) {
-    return <String, Category>{
+    return const <String, Category>{
       'web': web,
       'desktop': desktop,
       'mobile': mobile,
@@ -45,17 +46,17 @@ class Category {
 }
 
 /// The platform sub-folder that a device type supports.
-class PlatformType {
-  const PlatformType._(this.value);
+enum PlatformType {
+  web._('web'),
+  android._('android'),
+  ios._('ios'),
+  linux._('linux'),
+  macos._('macos'),
+  windows._('windows'),
+  fuchsia._('fuchsia'),
+  custom._('custom');
 
-  static const PlatformType web = PlatformType._('web');
-  static const PlatformType android = PlatformType._('android');
-  static const PlatformType ios = PlatformType._('ios');
-  static const PlatformType linux = PlatformType._('linux');
-  static const PlatformType macos = PlatformType._('macos');
-  static const PlatformType windows = PlatformType._('windows');
-  static const PlatformType fuchsia = PlatformType._('fuchsia');
-  static const PlatformType custom = PlatformType._('custom');
+  const PlatformType._(this.value);
 
   final String value;
 
@@ -63,7 +64,7 @@ class PlatformType {
   String toString() => value;
 
   static PlatformType? fromString(String platformType) {
-    return <String, PlatformType>{
+    return const <String, PlatformType>{
       'web': web,
       'android': android,
       'ios': ios,
@@ -470,18 +471,18 @@ abstract class Device {
   ///
   /// Specify [userIdentifier] to check if installed for a particular user (Android only).
   Future<bool> isAppInstalled(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   });
 
   /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
 
   /// Install an app package on the current device.
   ///
   /// Specify [userIdentifier] to install for a particular user (Android only).
   Future<bool> installApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   });
 
@@ -490,7 +491,7 @@ abstract class Device {
   /// Specify [userIdentifier] to uninstall for a particular user,
   /// defaults to all users (Android only).
   Future<bool> uninstallApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   });
 
@@ -516,7 +517,7 @@ abstract class Device {
   /// For example, the desktop device classes can use a writer which
   /// copies the files across the local file system.
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return null;
@@ -531,7 +532,7 @@ abstract class Device {
   /// reader will also include log messages from before the invocation time.
   /// Defaults to false.
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   });
 
@@ -583,7 +584,7 @@ abstract class Device {
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   });
 
@@ -753,6 +754,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
+    this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -771,6 +773,7 @@ class DebuggingOptions {
       this.traceAllowlist,
       this.enableImpeller = false,
       this.uninstallFirst = false,
+      this.enableDartProfiling = true,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -841,6 +844,7 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
+    required this.enableDartProfiling,
   });
 
   final bool debuggingEnabled;
@@ -876,6 +880,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
+  final bool enableDartProfiling;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -913,7 +918,54 @@ class DebuggingOptions {
   ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
-  bool get hasObservatoryPort => hostVmServicePort != null;
+  List<String> getIOSLaunchArguments(
+    EnvironmentType environmentType,
+    String? route,
+    Map<String, Object?> platformArgs, {
+    bool ipv6 = false,
+    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+  }) {
+    final String dartVmFlags = computeDartVmFlags(this);
+    return <String>[
+      if (enableDartProfiling) '--enable-dart-profiling',
+      if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (disablePortPublication) '--disable-observatory-publication',
+      if (startPaused) '--start-paused',
+      // Wrap dart flags in quotes for physical devices
+      if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
+        '--dart-flags="$dartVmFlags"',
+      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
+        '--dart-flags=$dartVmFlags',
+      if (useTestFonts) '--use-test-fonts',
+      if (debuggingEnabled) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (enableSoftwareRendering) '--enable-software-rendering',
+      if (traceSystrace) '--trace-systrace',
+      if (skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (traceSkia) '--trace-skia',
+      if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
+      if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
+      if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (verboseSystemLogs) '--verbose-logging',
+      if (cacheSkSL) '--cache-sksl',
+      if (purgePersistentCache) '--purge-persistent-cache',
+      if (route != null) '--route=$route',
+      if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+      if (enableImpeller) '--enable-impeller',
+      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
+        '--observatory-port=$deviceVmServicePort',
+      // The simulator "device" is actually on the host machine so no ports will be forwarded.
+      // Use the suggested host port.
+      if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
+        '--observatory-port=$hostVmServicePort',
+      // Tell the observatory to listen on all interfaces, don't restrict to the loopback.
+      if (interfaceType == IOSDeviceConnectionInterface.network)
+        '--observatory-host=${ipv6 ? '::0' : '0.0.0.0'}',
+    ];
+  }
 
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
@@ -956,52 +1008,54 @@ class DebuggingOptions {
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
+    'enableDartProfiling': enableDartProfiling,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
     DebuggingOptions._(
       buildInfo: buildInfo,
-      debuggingEnabled: (json['debuggingEnabled'] as bool?)!,
-      startPaused: (json['startPaused'] as bool?)!,
-      dartFlags: (json['dartFlags'] as String?)!,
-      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
-      disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
-      enableDds: (json['enableDds'] as bool?)!,
-      cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
-      enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
-      skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
-      traceSkia: (json['traceSkia'] as bool?)!,
+      debuggingEnabled: json['debuggingEnabled']! as bool,
+      startPaused: json['startPaused']! as bool,
+      dartFlags: json['dartFlags']! as String,
+      dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
+      disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+      enableDds: json['enableDds']! as bool,
+      cacheStartupProfile: json['cacheStartupProfile']! as bool,
+      enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
+      skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
+      traceSkia: json['traceSkia']! as bool,
       traceAllowlist: json['traceAllowlist'] as String?,
       traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
-      traceSystrace: (json['traceSystrace'] as bool?)!,
-      endlessTraceBuffer: (json['endlessTraceBuffer'] as bool?)!,
-      dumpSkpOnShaderCompilation: (json['dumpSkpOnShaderCompilation'] as bool?)!,
-      cacheSkSL: (json['cacheSkSL'] as bool?)!,
-      purgePersistentCache: (json['purgePersistentCache'] as bool?)!,
-      useTestFonts: (json['useTestFonts'] as bool?)!,
-      verboseSystemLogs: (json['verboseSystemLogs'] as bool?)!,
+      traceSystrace: json['traceSystrace']! as bool,
+      endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+      dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
+      cacheSkSL: json['cacheSkSL']! as bool,
+      purgePersistentCache: json['purgePersistentCache']! as bool,
+      useTestFonts: json['useTestFonts']! as bool,
+      verboseSystemLogs: json['verboseSystemLogs']! as bool,
       hostVmServicePort: json['hostVmServicePort'] as int? ,
       deviceVmServicePort: json['deviceVmServicePort'] as int?,
-      disablePortPublication: (json['disablePortPublication'] as bool?)!,
+      disablePortPublication: json['disablePortPublication']! as bool,
       ddsPort: json['ddsPort'] as int?,
       devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
       port: json['port'] as String?,
       hostname: json['hostname'] as String?,
       webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
-      webUseSseForDebugProxy: (json['webUseSseForDebugProxy'] as bool?)!,
-      webUseSseForDebugBackend: (json['webUseSseForDebugBackend'] as bool?)!,
-      webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
-      webRunHeadless: (json['webRunHeadless'] as bool?)!,
+      webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
+      webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
+      webUseSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
+      webRunHeadless: json['webRunHeadless']! as bool,
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
-      webBrowserFlags: ((json['webBrowserFlags'] as List<dynamic>?)?.cast<String>())!,
-      webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
+      webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
+      webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
-      fastStart: (json['fastStart'] as bool?)!,
-      nullAssertions: (json['nullAssertions'] as bool?)!,
-      nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      fastStart: json['fastStart']! as bool,
+      nullAssertions: json['nullAssertions']! as bool,
+      nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+      enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     );
 }
 

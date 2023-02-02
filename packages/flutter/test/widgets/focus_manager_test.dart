@@ -1228,7 +1228,9 @@ void main() {
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
           ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
-          ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
+          ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
+          ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
+          ' │   TestWindow#00000] ← [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'
@@ -1265,7 +1267,6 @@ void main() {
       );
     });
   });
-
 
   group('Autofocus', () {
     testWidgets(
@@ -1695,7 +1696,6 @@ void main() {
       debugPrint = oldDebugPrint;
     }
     final String messagesStr = messages.toString();
-    expect(messagesStr.split('\n').length, equals(58));
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
     expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));

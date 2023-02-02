@@ -422,7 +422,14 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder && other.side == side;
+    return other is StarBorder
+        && other.side == side
+        && other.points == points
+        && other._innerRadiusRatio == _innerRadiusRatio
+        && other.pointRounding == pointRounding
+        && other.valleyRounding == valleyRounding
+        && other._rotationRadians == _rotationRadians
+        && other.squash == squash;
   }
 
   @override
@@ -461,8 +468,8 @@ class _StarGenerator {
     required this.rotation,
     required this.squash,
   })  : assert(points > 1),
-        assert(innerRadiusRatio == null || innerRadiusRatio <= 1),
-        assert(innerRadiusRatio == null || innerRadiusRatio >= 0),
+        assert(innerRadiusRatio <= 1),
+        assert(innerRadiusRatio >= 0),
         assert(squash >= 0),
         assert(squash <= 1),
         assert(pointRounding >= 0),
@@ -477,7 +484,6 @@ class _StarGenerator {
   final double valleyRounding;
   final double rotation;
   final double squash;
-  bool get isStar => innerRadiusRatio != null;
 
   Path generate(Rect rect) {
     final double radius = rect.shortestSide / 2;

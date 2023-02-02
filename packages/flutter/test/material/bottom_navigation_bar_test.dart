@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -991,7 +992,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -1018,7 +1019,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               selectedFontSize: 8,
@@ -1039,6 +1040,58 @@ void main() {
     );
 
     const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('BottomNavigationBar height will not change when toggle keyboard', (WidgetTester tester) async {
+
+    final Widget child = Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        selectedFontSize: 8,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.ac_unit),
+            label: 'AC',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.access_alarm),
+            label: 'Alarm',
+          ),
+        ],
+      ),
+    );
+
+    // Test the bar height is correct when not showing the keyboard.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.only(bottom: 40.0),
+            padding: EdgeInsets.only(bottom: 40.0),
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    // Expect the height is the correct.
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+
+    // Now we show the keyboard.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.only(bottom: 40.0),
+            viewInsets: EdgeInsets.only(bottom: 336.0),
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    // Expect the height is the same.
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
@@ -2438,7 +2491,6 @@ void main() {
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
-  assert(textDirection != null);
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),

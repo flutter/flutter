@@ -8,117 +8,17 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
 
+import '../services/dom.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
-
-/// [DomXMLHttpRequest] interop class.
-@JS()
-@staticInterop
-class DomXMLHttpRequest {}
-
-/// [DomXMLHttpRequest] extension.
-extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
-  /// Gets the response.
-  external dynamic get response;
-
-  /// Gets the response text.
-  external String? get responseText;
-
-  /// Gets the response type.
-  external String get responseType;
-
-  /// Gets the status.
-  external int? get status;
-
-  /// Set the response type.
-  external set responseType(String value);
-
-  /// Set the request header.
-  external void setRequestHeader(String header, String value);
-
-  /// Open the request.
-  void open(String method, String url, bool isAsync) => js_util.callMethod(
-      this, 'open', <Object>[method, url, isAsync]);
-
-  /// Send the request.
-  void send() => js_util.callMethod(this, 'send', <Object>[]);
-
-  /// Add event listener.
-  void addEventListener(String type, DomEventListener? listener,
-      [bool? useCapture]) {
-    if (listener != null) {
-      js_util.callMethod(this, 'addEventListener',
-          <Object>[type, listener, if (useCapture != null) useCapture]);
-    }
-  }
-}
-
-/// Factory function for creating [DomXMLHttpRequest].
-DomXMLHttpRequest createDomXMLHttpRequest() =>
-    domCallConstructorString('XMLHttpRequest', <Object?>[])!
-        as DomXMLHttpRequest;
-
-/// Type for event listener.
-typedef DomEventListener = void Function(DomEvent event);
-
-/// [DomEvent] interop object.
-@JS()
-@staticInterop
-class DomEvent {}
-
-/// [DomEvent] reqiured extension.
-extension DomEventExtension on DomEvent {
-  /// Get the event type.
-  external String get type;
-
-  /// Initialize an event.
-  void initEvent(String type, [bool? bubbles, bool? cancelable]) =>
-      js_util.callMethod(this, 'initEvent', <Object>[
-        type,
-        if (bubbles != null) bubbles,
-        if (cancelable != null) cancelable
-      ]);
-}
-
-/// [DomProgressEvent] interop object.
-@JS()
-@staticInterop
-class DomProgressEvent extends DomEvent {}
-
-/// [DomProgressEvent] reqiured extension.
-extension DomProgressEventExtension on DomProgressEvent {
-  /// Amount of work done.
-  external int? get loaded;
-
-  /// Total amount of work.
-  external int? get total;
-}
-
-/// Gets a constructor from a [String].
-Object? domGetConstructor(String constructorName) =>
-    js_util.getProperty(domWindow, constructorName);
-
-/// Calls a constructor as a [String].
-Object? domCallConstructorString(String constructorName, List<Object?> args) {
-  final Object? constructor = domGetConstructor(constructorName);
-  if (constructor == null) {
-    return null;
-  }
-  return js_util.callConstructor(constructor, args);
-}
-
-/// The underyling window object.
-@JS('window')
-external Object get domWindow;
 
 /// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = DomXMLHttpRequest Function();
 
 /// Default HTTP client.
 DomXMLHttpRequest _httpClient() {
-  return DomXMLHttpRequest();
+  return createDomXMLHttpRequest();
 }
 
 /// Creates an overridable factory function.
@@ -139,9 +39,7 @@ class NetworkImage
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
-      : assert(url != null),
-        assert(scale != null);
+  const NetworkImage(this.url, {this.scale = 1.0, this.headers});
 
   @override
   final String url;
@@ -167,7 +65,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, null, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, null, decode, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -184,7 +82,23 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, null, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, decode, null, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, decode, null, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -203,34 +117,36 @@ class NetworkImage
     return collector;
   }
 
-  // TODO(garyq): We should eventually support custom decoding of network images on Web as
-  // well, see https://github.com/flutter/flutter/issues/42789.
-  //
-  // Web does not support decoding network images to a specified size. The decode parameter
+  // Html renderer does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    image_provider.DecoderBufferCallback? decode,
-    image_provider.DecoderCallback? decodeDepreacted,
+    image_provider.ImageDecoderCallback? decode,
+    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    image_provider.DecoderCallback? decodeDeprecated,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
 
+    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
-    if (key.headers?.isNotEmpty ?? false) {
+    if (isCanvasKit || containsNetworkImageHeaders) {
       final Completer<DomXMLHttpRequest> completer =
           Completer<DomXMLHttpRequest>();
       final DomXMLHttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
-      key.headers!.forEach((String header, String value) {
-        request.setRequestHeader(header, value);
-      });
+      if (containsNetworkImageHeaders) {
+        key.headers!.forEach((String header, String value) {
+          request.setRequestHeader(header, value);
+        });
+      }
 
       request.addEventListener('load', allowInterop((DomEvent e) {
         final int? status = request.status;
@@ -266,9 +182,12 @@ class NetworkImage
       if (decode != null) {
         final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         return decode(buffer);
+      } else if (decodeBufferDeprecated != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decodeBufferDeprecated(buffer);
       } else {
-        assert(decodeDepreacted != null);
-        return decodeDepreacted!(bytes);
+        assert(decodeDeprecated != null);
+        return decodeDeprecated!(bytes);
       }
     } else {
       // This API only exists in the web engine implementation and is not

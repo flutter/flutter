@@ -843,8 +843,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerAddedEvent extends _TransformedPointerEvent with _CopyPointerAddedEvent implements PointerAddedEvent {
-  _TransformedPointerAddedEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerAddedEvent(this.original, this.transform);
 
   @override
   final PointerAddedEvent original;
@@ -934,8 +933,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
 }
 
 class _TransformedPointerRemovedEvent extends _TransformedPointerEvent with _CopyPointerRemovedEvent implements PointerRemovedEvent {
-  _TransformedPointerRemovedEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerRemovedEvent(this.original, this.transform);
 
   @override
   final PointerRemovedEvent original;
@@ -1051,8 +1049,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerHoverEvent extends _TransformedPointerEvent with _CopyPointerHoverEvent implements PointerHoverEvent {
-  _TransformedPointerHoverEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerHoverEvent(this.original, this.transform);
 
   @override
   final PointerHoverEvent original;
@@ -1198,8 +1195,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
 }
 
 class _TransformedPointerEnterEvent extends _TransformedPointerEvent with _CopyPointerEnterEvent implements PointerEnterEvent {
-  _TransformedPointerEnterEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerEnterEvent(this.original, this.transform);
 
   @override
   final PointerEnterEvent original;
@@ -1344,8 +1340,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerExitEvent extends _TransformedPointerEvent with _CopyPointerExitEvent implements PointerExitEvent {
-  _TransformedPointerExitEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerExitEvent(this.original, this.transform);
 
   @override
   final PointerExitEvent original;
@@ -1453,8 +1448,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerDownEvent extends _TransformedPointerEvent with _CopyPointerDownEvent implements PointerDownEvent {
-  _TransformedPointerDownEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerDownEvent(this.original, this.transform);
 
   @override
   final PointerDownEvent original;
@@ -1571,8 +1565,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
 }
 
 class _TransformedPointerMoveEvent extends _TransformedPointerEvent with _CopyPointerMoveEvent implements PointerMoveEvent {
-  _TransformedPointerMoveEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerMoveEvent(this.original, this.transform);
 
   @override
   final PointerMoveEvent original;
@@ -1684,8 +1677,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
 }
 
 class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPointerUpEvent implements PointerUpEvent {
-  _TransformedPointerUpEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerUpEvent(this.original, this.transform);
 
   @override
   final PointerUpEvent original;
@@ -1784,12 +1776,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-  }) : assert(timeStamp != null),
-       assert(kind != null),
-       assert(device != null),
-       assert(position != null),
-       assert(scrollDelta != null),
-       assert(!identical(kind, PointerDeviceKind.trackpad));
+  });
 
   @override
   final Offset scrollDelta;
@@ -1810,8 +1797,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
 }
 
 class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _CopyPointerScrollEvent implements PointerScrollEvent {
-  _TransformedPointerScrollEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerScrollEvent(this.original, this.transform);
 
   @override
   final PointerScrollEvent original;
@@ -1889,10 +1875,7 @@ class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEv
     super.device,
     super.position,
     super.embedderId,
-  }) : assert(timeStamp != null),
-       assert(kind != null),
-       assert(device != null),
-       assert(position != null);
+  });
 
   @override
   PointerScrollInertiaCancelEvent transformed(Matrix4? transform) {
@@ -1904,8 +1887,7 @@ class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEv
 }
 
 class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEvent with _CopyPointerScrollInertiaCancelEvent implements PointerScrollInertiaCancelEvent {
-  _TransformedPointerScrollInertiaCancelEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerScrollInertiaCancelEvent(this.original, this.transform);
 
   @override
   final PointerScrollInertiaCancelEvent original;
@@ -1915,6 +1897,99 @@ class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEve
 
   @override
   PointerScrollInertiaCancelEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
+mixin _CopyPointerScaleEvent on PointerEvent {
+  /// The scale (zoom factor) of the event.
+  double get scale;
+
+  @override
+  PointerScaleEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+    double? scale,
+  }) {
+    return PointerScaleEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+      scale: scale ?? this.scale,
+    ).transformed(transform);
+  }
+}
+
+/// The pointer issued a scale event.
+///
+/// Pinching-to-zoom in the browser is an example of an event
+/// that would create a [PointerScaleEvent].
+///
+/// See also:
+///
+///  * [Listener.onPointerSignal], which allows callers to be notified of these
+///    events in a widget tree.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
+class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScaleEvent {
+  /// Creates a pointer scale event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerScaleEvent({
+    super.timeStamp,
+    super.kind,
+    super.device,
+    super.position,
+    super.embedderId,
+    this.scale = 1.0,
+  });
+
+  @override
+  final double scale;
+
+  @override
+  PointerScaleEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerScaleEvent(original as PointerScaleEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerScaleEvent extends _TransformedPointerEvent with _CopyPointerScaleEvent implements PointerScaleEvent {
+  _TransformedPointerScaleEvent(this.original, this.transform);
+
+  @override
+  final PointerScaleEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  double get scale => original.scale;
+
+  @override
+  PointerScaleEvent transformed(Matrix4? transform) => original.transformed(transform);
 }
 
 mixin _CopyPointerPanZoomStartEvent on PointerEvent {
@@ -1970,13 +2045,7 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
     super.position,
     super.embedderId,
     super.synthesized,
-  }) : assert(timeStamp != null),
-       assert(device != null),
-       assert(pointer != null),
-       assert(position != null),
-       assert(embedderId != null),
-       assert(synthesized != null),
-       super(kind: PointerDeviceKind.trackpad);
+  }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
   PointerPanZoomStartEvent transformed(Matrix4? transform) {
@@ -1988,8 +2057,7 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
 }
 
 class _TransformedPointerPanZoomStartEvent extends _TransformedPointerEvent with _CopyPointerPanZoomStartEvent implements PointerPanZoomStartEvent {
-  _TransformedPointerPanZoomStartEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerPanZoomStartEvent(this.original, this.transform);
 
   @override
   final PointerPanZoomStartEvent original;
@@ -2081,17 +2149,7 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
     this.scale = 1.0,
     this.rotation = 0.0,
     super.synthesized,
-  }) : assert(timeStamp != null),
-       assert(device != null),
-       assert(pointer != null),
-       assert(position != null),
-       assert(embedderId != null),
-       assert(pan != null),
-       assert(panDelta != null),
-       assert(scale != null),
-       assert(rotation != null),
-       assert(synthesized != null),
-       super(kind: PointerDeviceKind.trackpad);
+  }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
   final Offset pan;
@@ -2116,8 +2174,7 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
 }
 
 class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent with _CopyPointerPanZoomUpdateEvent implements PointerPanZoomUpdateEvent {
-  _TransformedPointerPanZoomUpdateEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerPanZoomUpdateEvent(this.original, this.transform);
 
   @override
   Offset get pan => original.pan;
@@ -2205,13 +2262,7 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
     super.position,
     super.embedderId,
     super.synthesized,
-  }) : assert(timeStamp != null),
-       assert(device != null),
-       assert(pointer != null),
-       assert(position != null),
-       assert(embedderId != null),
-       assert(synthesized != null),
-       super(kind: PointerDeviceKind.trackpad);
+  }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
   PointerPanZoomEndEvent transformed(Matrix4? transform) {
@@ -2223,8 +2274,7 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
 }
 
 class _TransformedPointerPanZoomEndEvent extends _TransformedPointerEvent with _CopyPointerPanZoomEndEvent implements PointerPanZoomEndEvent {
-  _TransformedPointerPanZoomEndEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerPanZoomEndEvent(this.original, this.transform);
 
   @override
   final PointerPanZoomEndEvent original;
@@ -2374,8 +2424,7 @@ double computeScaleSlop(PointerDeviceKind kind) {
 }
 
 class _TransformedPointerCancelEvent extends _TransformedPointerEvent with _CopyPointerCancelEvent implements PointerCancelEvent {
-  _TransformedPointerCancelEvent(this.original, this.transform)
-    : assert(original != null), assert(transform != null);
+  _TransformedPointerCancelEvent(this.original, this.transform);
 
   @override
   final PointerCancelEvent original;

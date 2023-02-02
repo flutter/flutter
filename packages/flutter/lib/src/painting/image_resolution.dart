@@ -244,7 +244,7 @@ class AssetImage extends AssetBundleImageProvider {
     this.assetName, {
     this.bundle,
     this.package,
-  }) : assert(assetName != null);
+  });
 
   /// The name of the main asset from the set of images to choose from. See the
   /// documentation for the [AssetImage] class itself for details.
@@ -284,7 +284,7 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, _manifestParser).then<void>(
+    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, manifestParser).then<void>(
       (Map<String, List<String>>? manifest) {
         final String chosenName = _chooseVariant(
           keyName,
@@ -328,7 +328,9 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  static Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
+  /// Parses the asset manifest string into a strongly-typed map.
+  @visibleForTesting
+  static Future<Map<String, List<String>>?> manifestParser(String? jsonData) {
     if (jsonData == null) {
       return SynchronousFuture<Map<String, List<String>>?>(null);
     }

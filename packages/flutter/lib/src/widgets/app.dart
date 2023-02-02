@@ -241,9 +241,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// Builds a [MediaQuery] using [MediaQuery.fromWindow]. To use an inherited
-/// [MediaQuery] instead, set [useInheritedMediaQuery] to true.
-///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
 ///
@@ -343,10 +340,13 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
-  }) : assert(navigatorObservers != null),
-       assert(routes != null),
-       assert(
+  }) : assert(
          home == null ||
          onGenerateInitialRoutes == null,
          'If onGenerateInitialRoutes is specified, the home argument will be '
@@ -398,15 +398,7 @@ class WidgetsApp extends StatefulWidget {
          'pageRouteBuilder must be specified so that the default handler '
          'will know what kind of PageRoute transition to build.',
        ),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -447,6 +439,11 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
   }) : assert((){
          if (routerConfig != null) {
@@ -463,15 +460,7 @@ class WidgetsApp extends StatefulWidget {
          );
          return true;
        }()),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        navigatorObservers = null,
        navigatorKey = null,
        onGenerateRoute = null,
@@ -1171,11 +1160,16 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// If true, an inherited MediaQuery will be used. If one is not available,
-  /// or this is false, one will be built from the window.
+  /// Deprecated. This setting is not ignored.
   ///
-  /// Cannot be null, defaults to false.
+  /// The widget never introduces its own [MediaQuery]; the [View] widget takes
+  /// care of that.
   /// {@endtemplate}
+  @Deprecated(
+    'This setting is now ignored. '
+    'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
   final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
@@ -1432,7 +1426,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         settings,
         pageContentBuilder,
       );
-      assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
     if (widget.onGenerateRoute != null) {
@@ -1722,7 +1715,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle!(context);
-          assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
             color: widget.color.withOpacity(1.0),
@@ -1744,19 +1736,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    Widget child = Localizations(
-      locale: appLocale,
-      delegates: _localizationsDelegates.toList(),
-      child: title,
-    );
-
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (!widget.useInheritedMediaQuery || data == null) {
-      child = MediaQuery.fromWindow(
-        child: child,
-      );
-    }
-
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
@@ -1767,12 +1746,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           // fall through to the defaultShortcuts.
           child: DefaultTextEditingShortcuts(
             child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
+              actions: widget.actions ?? <Type, Action<Intent>>{
+                ...WidgetsApp.defaultActions,
+                ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+              },
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
                 child: TapRegionSurface(
                   child: ShortcutRegistrar(
-                    child: child,
+                    child: Localizations(
+                      locale: appLocale,
+                      delegates: _localizationsDelegates.toList(),
+                      child: title,
+                    ),
                   ),
                 ),
               ),

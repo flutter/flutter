@@ -107,6 +107,7 @@ class TextButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -152,6 +153,8 @@ class TextButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -192,6 +195,11 @@ class TextButton extends ButtonStyleButton {
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
       : _TextButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
+      ? null
+      : disabledIconColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(iconColor)
+        : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
@@ -203,6 +211,7 @@ class TextButton extends ButtonStyleButton {
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -240,7 +249,7 @@ class TextButton extends ButtonStyleButton {
   /// each state and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
@@ -373,7 +382,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+    MediaQuery.textScaleFactorOf(context),
   );
 }
 
@@ -422,6 +431,27 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 }
 
 @immutable
+class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultIconColor(this.iconColor, this.disabledIconColor);
+
+  final Color? iconColor;
+  final Color? disabledIconColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledIconColor;
+    }
+    return iconColor;
+  }
+
+  @override
+  String toString() {
+    return '{disabled: $disabledIconColor, color: $iconColor}';
+  }
+}
+
+@immutable
 class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
@@ -448,11 +478,10 @@ class _TextButtonWithIcon extends TextButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),
@@ -464,7 +493,7 @@ class _TextButtonWithIcon extends TextButton {
       const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.textScaleFactorOf(context),
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -483,7 +512,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -499,7 +528,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_152
 
 class _TextButtonDefaultsM3 extends ButtonStyle {
   _TextButtonDefaultsM3(this.context)

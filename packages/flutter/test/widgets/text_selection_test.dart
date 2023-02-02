@@ -25,16 +25,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void handleTapDown(TapDownDetails details) { tapCount++; }
-  void handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void handleTapDown(TapDragDownDetails details) { tapCount++; }
+  void handleSingleTapUp(TapDragUpDetails details) { singleTapUpCount++; }
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void handleDoubleTapDown(TapDragDownDetails details) { doubleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
-  void handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
-  void handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void handleDragSelectionStart(TapDragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionUpdate(TapDragUpdateDetails details) { dragUpdateCount++; }
+  void handleDragSelectionEnd(TapDragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -79,8 +79,9 @@ void main() {
       forcePressEnabled: forcePressEnabled,
       selectionEnabled: selectionEnabled,
     );
+
     final TextSelectionGestureDetectorBuilder provider =
-    TextSelectionGestureDetectorBuilder(delegate: delegate);
+      TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -172,7 +173,12 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
+    // Before the move to TapAndDragGestureRecognizer the tapCount was 0 because the
+    // TapGestureRecognizer rejected itself when the initial pointer moved past a certain
+    // threshold. With TapAndDragGestureRecognizer, we have two thresholds, a normal tap
+    // threshold, and a drag threshold, so it is possible for the tap count to increase
+    // even though the original pointer has moved beyond the tap threshold.
+    expect(tapCount, 1);
     expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
@@ -180,7 +186,7 @@ void main() {
     await gesture.up();
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
+    expect(tapCount, 1);
     expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
@@ -194,7 +200,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -369,7 +375,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a touch drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -383,11 +389,12 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(tapCount, 0);
+    expect(tapCount, 1);
     expect(singleTapUpCount, 0);
-    expect(dragStartCount, 0);
-    expect(dragUpdateCount, 0);
-    expect(dragEndCount, 0);
+    expect(singleTapCancelCount, 0);
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
@@ -405,8 +412,11 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(tapCount, 0);
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(singleTapUpCount, 0);
+
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
@@ -427,12 +437,17 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 0);
+    expect(singleTapUpCount, 0);
+
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder long press', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
@@ -446,7 +461,23 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isTrue);
+    expect(renderEditable.selectWordCalled, isTrue);
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
@@ -569,6 +600,59 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('test TextSelectionGestureDetectorBuilder toggles toolbar on single tap on previous selection iOS', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        expect(renderEditable.selectWordEdgeCalled, isFalse);
+        expect(state.toggleToolbarCalled, isTrue);
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(renderEditable.selectPositionAtCalled, isTrue);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on Android', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
@@ -676,12 +760,18 @@ void main() {
     final Offset position = textOffsetToPosition(tester, 4);
 
     await tester.tapAt(position);
-    await tester.pump();
+    // Don't do a double tap drag.
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
 
     final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+
+    // Checking that double-tap was not registered.
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
     addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(textOffsetToPosition(tester, 7));
@@ -1329,6 +1419,160 @@ void main() {
       });
     });
   });
+
+  testWidgets('Mouse edge scrolling works in an outer scrollable', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!\n' * 8,
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 16.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText will expand to the full 8 line height and will
+                  // not scroll itself.
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    // Select all text with the mouse.
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
+
+  testWidgets('Mouse edge scrolling works with both an outer scrollable and scrolling in the EditableText', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102484
+    final TextEditingController controller = TextEditingController(
+      text: 'I love flutter!\n' * 8,
+    );
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: false,
+      selectionEnabled: true,
+    );
+
+    final ScrollController scrollController = ScrollController();
+    const double kLineHeight = 16.0;
+    final TextSelectionGestureDetectorBuilder provider =
+        TextSelectionGestureDetectorBuilder(
+          delegate: delegate,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: FocusNode(),
+                  backgroundCursorColor: Colors.white,
+                  cursorColor: Colors.white,
+                  style: const TextStyle(),
+                  selectionControls: materialTextSelectionControls,
+                  // EditableText is taller than the SizedBox but not taller
+                  // than the text.
+                  maxLines: 6,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, -1);
+    expect(scrollController.position.pixels, 0.0);
+
+    final Offset position = textOffsetToPosition(tester, 4);
+
+    await tester.tapAt(position);
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
+    // Select all text with the mouse.
+    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, (controller.text.length / 2).floor()));
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, controller.text.length);
+    expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -1364,6 +1608,8 @@ class FakeEditableText extends EditableText {
 class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
   bool showToolbarCalled = false;
+  bool toggleToolbarCalled = false;
+  bool showSpellCheckSuggestionsToolbarCalled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1375,8 +1621,15 @@ class FakeEditableTextState extends EditableTextState {
   }
 
   @override
-  void toggleToolbar() {
+  void toggleToolbar([bool hideHandles = true]) {
+    toggleToolbarCalled = true;
     return;
+  }
+
+  @override
+  bool showSpellCheckSuggestionsToolbar() {
+    showSpellCheckSuggestionsToolbarCalled = true;
+    return true;
   }
 
   @override

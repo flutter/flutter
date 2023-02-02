@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
+import 'dart:ui' as ui show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -31,6 +32,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _pipelineOwner = PipelineOwner(
       onNeedVisualUpdate: ensureVisualUpdate,
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
+      onSemanticsUpdate: _handleSemanticsUpdate,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
     platformDispatcher
@@ -41,7 +43,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
     _handleSemanticsEnabledChanged();
-    assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
@@ -232,7 +233,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
-    assert(value != null);
     _pipelineOwner.rootNode = value;
   }
 
@@ -242,7 +242,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   @visibleForTesting
   void handleMetricsChanged() {
-    assert(renderView != null);
     renderView.configuration = createViewConfiguration();
     if (renderView.child != null) {
       scheduleForcedFrame();
@@ -365,6 +364,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handleSemanticsOwnerCreated() {
     renderView.scheduleInitialSemantics();
+  }
+
+  void _handleSemanticsUpdate(ui.SemanticsUpdate update) {
+    renderView.updateSemantics(update);
   }
 
   void _handleSemanticsOwnerDisposed() {
@@ -506,7 +509,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   // When editing the above, also update widgets/binding.dart's copy.
   @protected
   void drawFrame() {
-    assert(renderView != null);
     pipelineOwner.flushLayout();
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
@@ -538,9 +540,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void hitTest(HitTestResult result, Offset position) {
-    assert(renderView != null);
-    assert(result != null);
-    assert(position != null);
     renderView.hitTest(result, position: position);
     super.hitTest(result, position);
   }
@@ -614,7 +613,6 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   /// This binding does not automatically schedule any frames. Callers are
   /// responsible for deciding when to first call [scheduleFrame].
   RenderingFlutterBinding({ RenderBox? root }) {
-    assert(renderView != null);
     renderView.child = root;
   }
 

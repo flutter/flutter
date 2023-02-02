@@ -54,7 +54,7 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
 ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
 ///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class TextEditingDelta {
+abstract class TextEditingDelta with Diagnosticable {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
@@ -64,9 +64,7 @@ abstract class TextEditingDelta {
     required this.oldText,
     required this.selection,
     required this.composing,
-  }) : assert(oldText != null),
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
@@ -95,7 +93,7 @@ abstract class TextEditingDelta {
     // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
     // can be considered an insertion. In this case we inserted 'd'.
     //
-    // Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    // Similarly for a deletion, say we are currently composing the word: 'worl'.
     // Our current state is 'world|' with the cursor at the end of 'd'. If we
     // press backspace to delete the character 'd', the platform will tell us 'world'
     // was replaced with 'worl' at range (0,5). Here we can check if the text found
@@ -288,6 +286,16 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaInsertion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textInserted', textInserted));
+    properties.add(DiagnosticsProperty<int>('insertionOffset', insertionOffset));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
+  }
 }
 
 /// A structure representing the deletion of a single/or contiguous sequence of
@@ -323,6 +331,16 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaDeletion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaDeletion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textDeleted', textDeleted));
+    properties.add(DiagnosticsProperty<TextRange>('deletedRange', deletedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -370,6 +388,17 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaReplacement failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textReplaced', textReplaced));
+    properties.add(DiagnosticsProperty<String>('replacementText', replacementText));
+    properties.add(DiagnosticsProperty<TextRange>('replacedRange', replacedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
+  }
 }
 
 /// A structure representing changes to the selection and/or composing regions
@@ -401,5 +430,13 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
     assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }

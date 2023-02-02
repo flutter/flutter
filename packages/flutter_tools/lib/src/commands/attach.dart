@@ -12,15 +12,19 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import  '../build_info.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/signals.dart';
+import '../base/terminal.dart';
+import '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
@@ -58,7 +62,26 @@ import '../vmservice.dart';
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
-  AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
+  AttachCommand({
+    bool verboseHelp = false,
+    HotRunnerFactory? hotRunnerFactory,
+    required Artifacts? artifacts,
+    required Stdio stdio,
+    required Logger logger,
+    required Terminal terminal,
+    required Signals signals,
+    required Platform platform,
+    required ProcessInfo processInfo,
+    required FileSystem fileSystem,
+  }): _artifacts = artifacts,
+      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+      _stdio = stdio,
+      _logger = logger,
+      _terminal = terminal,
+      _signals = signals,
+      _platform = platform,
+      _processInfo = processInfo,
+      _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -117,10 +140,17 @@ class AttachCommand extends FlutterCommand {
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
-    hotRunnerFactory ??= HotRunnerFactory();
   }
 
-  HotRunnerFactory? hotRunnerFactory;
+  final HotRunnerFactory _hotRunnerFactory;
+  final Artifacts? _artifacts;
+  final Stdio _stdio;
+  final Logger _logger;
+  final Terminal _terminal;
+  final Signals _signals;
+  final Platform _platform;
+  final ProcessInfo _processInfo;
+  final FileSystem _fileSystem;
 
   @override
   final String name = 'attach';
@@ -200,7 +230,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     if (debugPort != null && debugUri != null) {
       throwToolExit(
-        'Either --debugPort or --debugUri can be provided, not both.');
+        'Either --debug-port or --debug-url can be provided, not both.');
     }
 
     if (userIdentifier != null) {
@@ -221,7 +251,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    final Artifacts? overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
+    final Artifacts? overrideArtifacts = device.artifactOverrides ?? _artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
@@ -238,12 +268,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final Daemon? daemon = boolArgDeprecated('machine')
       ? Daemon(
           DaemonConnection(
-            daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-            logger: globals.logger,
+            daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
+            logger: _logger,
           ),
-          notifyingLogger: (globals.logger is NotifyingLogger)
-            ? globals.logger as NotifyingLogger
-            : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+          notifyingLogger: (_logger is NotifyingLogger)
+            ? _logger as NotifyingLogger
+            : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
       : null;
@@ -253,10 +283,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
+    final bool isNetworkDevice = (device is IOSDevice) && device.interfaceType == IOSDeviceConnectionInterface.network;
 
-    if (debugPort == null && debugUri == null) {
+    if ((debugPort == null && debugUri == null) || isNetworkDevice) {
       if (device is FuchsiaDevice) {
-        final String module = stringArgDeprecated('module')!;
+        final String? module = stringArgDeprecated('module');
         if (module == null) {
           throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }
@@ -274,16 +305,73 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
-        final Uri? uriFromMdns =
-          await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
-            appId,
-            device,
-            usesIpv6: usesIpv6,
-            deviceVmservicePort: deviceVmservicePort,
+        // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
+        // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
+        // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
+        // Also, network devices must be found using mDNS and cannot use Protocol Discovery.
+        final bool compatibleWithProtocolDiscovery = (device is IOSDevice) &&
+          device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+          !isNetworkDevice;
+
+        _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        final Status discoveryStatus = _logger.startSpinner(
+          timeout: const Duration(seconds: 30),
+          slowWarningCallback: () {
+            // If relying on mDNS to find Dart VM Service, remind the user to allow local network permissions.
+            if (!compatibleWithProtocolDiscovery) {
+              return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
+                'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
+            }
+
+            return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
+          },
+        );
+
+        int? devicePort;
+        if (debugPort != null) {
+          devicePort = debugPort;
+        } else if (debugUri != null) {
+          devicePort = debugUri?.port;
+        } else if (deviceVmservicePort != null) {
+          devicePort = deviceVmservicePort;
+        }
+
+        final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!.getVMServiceUriForAttach(
+          appId,
+          device,
+          usesIpv6: usesIpv6,
+          isNetworkDevice: isNetworkDevice,
+          deviceVmservicePort: devicePort,
+        );
+
+        Future<Uri?>? protocolDiscoveryFuture;
+        if (compatibleWithProtocolDiscovery) {
+          final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.observatory(
+            device.getLogReader(),
+            portForwarder: device.portForwarder,
+            ipv6: ipv6!,
+            devicePort: devicePort,
+            hostPort: hostVmservicePort,
+            logger: _logger,
           );
-        observatoryUri = uriFromMdns == null
+          protocolDiscoveryFuture = vmServiceDiscovery.uri;
+        }
+
+        final Uri? foundUrl;
+        if (protocolDiscoveryFuture == null) {
+          foundUrl = await mDNSDiscoveryFuture;
+        } else {
+          foundUrl = await Future.any(
+            <Future<Uri?>>[mDNSDiscoveryFuture, protocolDiscoveryFuture]
+          );
+        }
+        discoveryStatus.stop();
+
+        observatoryUri = foundUrl == null
           ? null
-          : Stream<Uri>.value(uriFromMdns).asBroadcastStream();
+          : Stream<Uri>.value(foundUrl).asBroadcastStream();
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
       if (observatoryUri == null) {
@@ -296,9 +384,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ipv6: ipv6!,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
-            logger: globals.logger,
+            logger: _logger,
           );
-        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
@@ -306,7 +394,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     } else {
       observatoryUri = Stream<Uri>
         .fromFuture(
-          buildObservatoryUri(
+          buildVMServiceUri(
             device,
             debugUri?.host ?? hostname,
             debugPort ?? debugUri!.port,
@@ -316,7 +404,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         ).asBroadcastStream();
     }
 
-    globals.terminal.usesTerminalUi = daemon == null;
+    _terminal.usesTerminalUi = daemon == null;
 
     try {
       int? result;
@@ -343,15 +431,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             device,
             null,
             true,
-            globals.fs.currentDirectory,
+            _fileSystem.currentDirectory,
             LaunchMode.attach,
-            globals.logger as AppRunLogger,
+            _logger as AppRunLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());
         }
         result = await app.runner!.waitForAppToFinish();
-        assert(result != null);
         return;
       }
       while (true) {
@@ -366,10 +453,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         unawaited(onAppStart.future.whenComplete(() {
           terminalHandler = TerminalHandler(
             runner,
-            logger: globals.logger,
-            terminal: globals.terminal,
-            signals: globals.signals,
-            processInfo: globals.processInfo,
+            logger: _logger,
+            terminal: _terminal,
+            signals: _signals,
+            processInfo: _processInfo,
             reportReady: boolArgDeprecated('report-ready'),
             pidFile: stringArgDeprecated('pid-file'),
           )
@@ -389,7 +476,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         if (runner.exited || !runner.isWaitingForObservatory) {
           break;
         }
-        globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
       if (err.code == RPCErrorCodes.kServiceDisappeared) {
@@ -410,10 +497,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required FlutterProject flutterProject,
     required bool usesIpv6,
   }) async {
-    assert(observatoryUris != null);
-    assert(device != null);
-    assert(flutterProject != null);
-    assert(usesIpv6 != null);
     final BuildInfo buildInfo = await getBuildInfo();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -422,7 +505,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       targetModel: TargetModel(stringArgDeprecated('target-model')!),
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      platform: globals.platform,
+      platform: _platform,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
@@ -434,7 +517,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     );
 
     return buildInfo.isDebug
-      ? hotRunnerFactory!.build(
+      ? _hotRunnerFactory.build(
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,

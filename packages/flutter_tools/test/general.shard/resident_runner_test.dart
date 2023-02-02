@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -312,7 +313,7 @@ void main() {
       <FlutterDevice>[
         flutterDevice,
       ],
-      applicationBinary: globals.fs.file('app.apk'),
+      applicationBinary: globals.fs.file('app-debug.apk'),
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -1943,7 +1944,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1974,7 +1975,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -2111,6 +2112,73 @@ flutter:
     if (!caught) {
       fail('Expected ToolExit to be thrown.');
     }
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      required Logger logger,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+  }));
+
+  testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice()
+      ..dds = DartDevelopmentService();
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+      throw dds.DartDevelopmentServiceException.existingDdsInstance(
+        'Existing DDS at http://localhost/existingDdsInMessage.',
+        ddsUri: Uri.parse('http://localhost/existingDdsInField'),
+      );
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      device,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    final Completer<void> done = Completer<void>();
+    await runZonedGuarded(
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
+      (_, __) => done.complete(),
+    );
+    await done.future;
+    expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      required Logger logger,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+  }));
+
+  testUsingContext('Falls back to existing DDS URI from exception message', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice()
+      ..dds = DartDevelopmentService();
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+      throw dds.DartDevelopmentServiceException.existingDdsInstance(
+        'Existing DDS at http://localhost/existingDdsInMessage.',
+      );
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      device,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    final Completer<void>done = Completer<void>();
+    await runZonedGuarded(
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
+      (_, __) => done.complete(),
+    );
+    await done.future;
+    expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
       ReloadSources? reloadSources,
@@ -2649,7 +2717,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     appStopped = true;
     return true;
   }
@@ -2664,7 +2732,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => NoOpDeviceLogReader(name);
 
@@ -2695,6 +2763,9 @@ class FakeDevFS extends Fake implements DevFS {
   Set<String> shaderPathsToEvict = <String>{};
 
   @override
+  Set<String> scenePathsToEvict = <String>{};
+
+  @override
   bool didUpdateFontManifest = false;
 
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
@@ -2722,6 +2793,7 @@ class FakeDevFS extends Fake implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,

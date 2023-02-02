@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -12,13 +13,17 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/signals.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -48,9 +53,11 @@ class DriveCommand extends RunCommandBase {
   DriveCommand({
     bool verboseHelp = false,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    @visibleForTesting this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     required FileSystem fileSystem,
-    required Logger? logger,
+    required Logger logger,
     required Platform platform,
+    required this.signals,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -146,8 +153,18 @@ class DriveCommand extends RunCommandBase {
           'Dart VM running The test script.')
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
-          valueHelp: 'profile_memory.json');
+          valueHelp: 'profile_memory.json')
+      ..addOption('timeout',
+        help: 'Timeout the test after the given number of seconds. If the '
+              '"--screenshot" option is provided, a screenshot will be taken '
+              'before exiting. Defaults to no timeout.',
+        valueHelp: '360');
   }
+
+  final Signals signals;
+
+  /// The [ProcessSignal]s that will lead to a screenshot being taken (if the option is provided).
+  final Set<ProcessSignal> signalsToHandle;
 
   // `pub` must always be run due to the test script running from source,
   // even if an application binary is used. Default to true unless the user explicitly
@@ -162,8 +179,10 @@ class DriveCommand extends RunCommandBase {
 
   FlutterDriverFactory? _flutterDriverFactory;
   final FileSystem _fileSystem;
-  final Logger? _logger;
+  final Logger _logger;
   final FileSystemUtils _fsUtils;
+  Timer? timeoutTimer;
+  Map<ProcessSignal, Object>? screenshotTokens;
 
   @override
   final String name = 'drive';
@@ -187,6 +206,27 @@ class DriveCommand extends RunCommandBase {
   @override
   bool get cachePubGet => false;
 
+  String? get applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+
+  Future<Device?> get targetedDevice async {
+    return findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+  }
+
+  // Network devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a network device,
+  // change it to be enabled.
+  @override
+  Future<bool> get disablePortPublication async {
+    final ArgResults? localArgResults = argResults;
+    final Device? device = await targetedDevice;
+    final bool isNetworkDevice = device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
+    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+      return false;
+    }
+    return !boolArgDeprecated('publish-port');
+  }
+
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
@@ -200,33 +240,32 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String testFile = _getTestFile()!;
+    final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final String? applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
-    final Device? device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+    final Device? device = await targetedDevice;
     if (device == null) {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      _logger!.printError('Screenshot not supported for ${device.name}.');
+      _logger.printError('Screenshot not supported for ${device.name}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      logger: _logger!,
+      logger: _logger,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file('.packages'),
-      logger: _logger!,
+      logger: _logger,
       throwOnError: false,
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
@@ -270,7 +309,7 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      final int testResult = await driverService.startTest(
+      final Future<int> testResultFuture = driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
         <String, String>{},
@@ -286,6 +325,17 @@ class DriveCommand extends RunCommandBase {
         androidEmulator: boolArgDeprecated('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
       );
+
+      // If the test is sent a signal or times out, take a screenshot
+      _registerScreenshotCallbacks(device);
+
+      final int testResult = await testResultFuture;
+
+      if (timeoutTimer != null) {
+        timeoutTimer!.cancel();
+      }
+      _unregisterScreenshotCallbacks();
+
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
         await _takeScreenshot(device);
@@ -293,7 +343,7 @@ class DriveCommand extends RunCommandBase {
       }
 
       if (boolArgDeprecated('keep-app-running')) {
-        _logger!.printStatus('Leaving the application running.');
+        _logger.printStatus('Leaving the application running.');
       } else {
         final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null
           ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
@@ -315,6 +365,59 @@ class DriveCommand extends RunCommandBase {
     return FlutterCommandResult.success();
   }
 
+  int? get _timeoutSeconds {
+    final String? timeoutString = stringArg('timeout');
+    if (timeoutString == null) {
+      return null;
+    }
+    final int? timeoutSeconds = int.tryParse(timeoutString);
+    if (timeoutSeconds == null || timeoutSeconds <= 0) {
+      throwToolExit(
+        'Invalid value "$timeoutString" provided to the option --timeout: '
+        'expected a positive integer representing seconds.',
+      );
+    }
+    return timeoutSeconds;
+  }
+
+  void _registerScreenshotCallbacks(Device device) {
+    _logger.printTrace('Registering signal handlers...');
+    final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
+    for (final ProcessSignal signal in signalsToHandle) {
+      tokens[signal] = signals.addHandler(
+        signal,
+        (ProcessSignal signal) {
+          _unregisterScreenshotCallbacks();
+          _logger.printError('Caught $signal');
+          return _takeScreenshot(device);
+        },
+      );
+    }
+    screenshotTokens = tokens;
+
+    final int? timeoutSeconds = _timeoutSeconds;
+    if (timeoutSeconds != null) {
+      timeoutTimer = Timer(
+        Duration(seconds: timeoutSeconds),
+        () {
+          _unregisterScreenshotCallbacks();
+          _takeScreenshot(device);
+          throwToolExit('Timed out after $timeoutSeconds seconds');
+        }
+      );
+    }
+  }
+
+  void _unregisterScreenshotCallbacks() {
+    if (screenshotTokens != null) {
+      _logger.printTrace('Unregistering signal handlers...');
+      for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
+        signals.removeHandler(entry.key, entry.value);
+      }
+    }
+    timeoutTimer?.cancel();
+  }
+
   String? _getTestFile() {
     if (argResults!['driver'] != null) {
       return stringArgDeprecated('driver');
@@ -331,7 +434,7 @@ class DriveCommand extends RunCommandBase {
     // for the corresponding test file relative to it.
     if (!_fileSystem.path.isRelative(appFile)) {
       if (!_fileSystem.path.isWithin(packageDir, appFile)) {
-        _logger!.printError(
+        _logger.printError(
           'Application file $appFile is outside the package directory $packageDir'
         );
         return null;
@@ -343,7 +446,7 @@ class DriveCommand extends RunCommandBase {
     final List<String> parts = _fileSystem.path.split(appFile);
 
     if (parts.length < 2) {
-      _logger!.printError(
+      _logger.printError(
         'Application file $appFile must reside in one of the sub-directories '
         'of the package structure, not in the root directory.'
       );
@@ -371,9 +474,9 @@ class DriveCommand extends RunCommandBase {
         'png',
       );
       await device.takeScreenshot(outputFile);
-      _logger!.printStatus('Screenshot written to ${outputFile.path}');
+      _logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      _logger!.printError('Error taking screenshot: $error');
+      _logger.printError('Error taking screenshot: $error');
     }
   }
 }

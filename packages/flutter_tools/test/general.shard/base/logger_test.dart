@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/executable.dart';
@@ -86,7 +87,7 @@ void main() {
     final WindowsStdoutLogger logger = WindowsStdoutLogger(
       outputPreferences: OutputPreferences.test(),
       stdio: stdio,
-      terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+      terminal: Terminal.test(),
     );
 
     logger.printStatus('🔥🖼️✗✓🔨💪✏️');
@@ -246,12 +247,15 @@ void main() {
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
-      verboseLogger.printError('Helpless!');
+      final StackTrace stackTrace = StackTrace.current;
+      verboseLogger.printError('Helpless!', stackTrace: stackTrace);
 
       expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
                                              r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
-      expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
+      expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n'));
+      final String lastLine = LineSplitter.split(stackTrace.toString()).toList().last;
+      expect(mockLogger.errorText, endsWith('$lastLine\n\n'));
     });
 
     testWithoutContext('ANSI colored errors', () async {
@@ -1238,6 +1242,21 @@ void main() {
       logger.startProgress('BBB').stop();
 
       expect(logger.statusText, 'AAA\nBBB\n');
+    });
+
+    testWithoutContext('BufferLogger prints status, trace, error', () async {
+      final BufferLogger mockLogger = BufferLogger.test(
+        outputPreferences: OutputPreferences.test(),
+      );
+
+      mockLogger.printStatus('Hey Hey Hey Hey');
+      mockLogger.printTrace('Oooh, I do I do I do');
+      final StackTrace stackTrace = StackTrace.current;
+      mockLogger.printError('Helpless!', stackTrace: stackTrace);
+
+      expect(mockLogger.statusText, 'Hey Hey Hey Hey\n');
+      expect(mockLogger.traceText, 'Oooh, I do I do I do\n');
+      expect(mockLogger.errorText, 'Helpless!\n$stackTrace\n');
     });
   });
 }

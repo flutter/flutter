@@ -155,6 +155,30 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
+  testUsingContext(
+      'Confirmation that the reporter and timeout args are not set by default',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, isNot(contains('-r')));
+    expect(fakePackageTest.lastArgs, isNot(contains('compact')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
+    expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
   group('shard-index and total-shards', () {
     testUsingContext('with the params they are Piped to package:test',
         () async {
@@ -789,6 +813,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   Duration? leastRunTime;
   bool? lastEnableObservatoryValue;
   late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastReporterOption;
 
   @override
   Future<int> runTests(
@@ -824,6 +849,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastReporterOption = reporter;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);

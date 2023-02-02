@@ -135,13 +135,13 @@ void main() {
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-        'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+        'hello': ExceptionMeasurement('hello', 'bar', stackTrace, fatal: true),
       }))
     ));
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
+    expect(testLogger.errorText, contains('Target hello failed: bar'));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),

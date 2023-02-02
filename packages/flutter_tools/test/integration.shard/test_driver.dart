@@ -334,7 +334,6 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate?> _resume(String? step, bool waitForNextPause) async {
-    assert(waitForNextPause != null);
     final String isolateId = await _getFlutterIsolateId();
 
     final Future<Event> resume = subscribeToResumeEvent(isolateId);
@@ -400,7 +399,6 @@ abstract class FlutterTestDriver {
     Duration timeout = defaultTimeout,
     bool ignoreAppStopEvent = false,
   }) async {
-    assert(timeout != null);
     assert(event != null || id != null);
     assert(event == null || id == null);
     final String interestingOccurrence = event != null ? '$event event' : 'response to request $id';
@@ -447,8 +445,6 @@ abstract class FlutterTestDriver {
     required String task,
     Duration timeout = defaultTimeout,
   }) {
-    assert(task != null);
-    assert(timeout != null);
 
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
@@ -763,6 +759,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
   Future<void> test({
     String testFile = 'test/test.dart',
+    String? deviceId,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     bool coverage = false,
@@ -775,6 +772,8 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       '--machine',
       if (coverage)
         '--coverage',
+      if (deviceId != null)
+        ...<String>['-d', deviceId],
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, beforeStart: beforeStart);
   }
 
@@ -817,7 +816,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   Future<Map<String, Object?>?> _waitForJson({
     Duration timeout = defaultTimeout,
   }) async {
-    assert(timeout != null);
     return _timeoutWithMessages<Map<String, Object?>?>(
       () => _stdout.stream.map<Map<String, Object?>?>(_parseJsonResponse)
           .firstWhere((Map<String, Object?>? output) => output != null),

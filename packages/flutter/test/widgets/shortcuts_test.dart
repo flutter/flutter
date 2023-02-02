@@ -72,6 +72,7 @@ void main() {
         }),
       );
     });
+
     test('LogicalKeySet works as a map key.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
       final LogicalKeySet set2 = LogicalKeySet(
@@ -109,6 +110,7 @@ void main() {
           })),
       );
     });
+
     testWidgets('handles two keys', (WidgetTester tester) async {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
@@ -537,6 +539,7 @@ void main() {
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, isEmpty);
     });
+
     testWidgets('Default constructed Shortcuts.manager has empty shortcuts', (WidgetTester tester) async {
       final ShortcutManager manager = ShortcutManager();
       expect(manager.shortcuts, isNotNull);
@@ -546,9 +549,10 @@ void main() {
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, isEmpty);
     });
+
     testWidgets('Shortcuts.manager passes on shortcuts', (WidgetTester tester) async {
       final Map<LogicalKeySet, Intent> testShortcuts = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+        LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
       };
       final ShortcutManager manager = ShortcutManager(shortcuts: testShortcuts);
       expect(manager.shortcuts, isNotNull);
@@ -558,6 +562,7 @@ void main() {
       expect(shortcuts.shortcuts, isNotNull);
       expect(shortcuts.shortcuts, equals(testShortcuts));
     });
+
     testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -592,6 +597,7 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
+
     testWidgets('Shortcuts.manager lets manager handle shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -633,6 +639,7 @@ void main() {
       expect(shortcutsSet, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
+
     testWidgets('ShortcutManager ignores key presses with no primary focus', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -665,6 +672,7 @@ void main() {
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
     });
+
     testWidgets("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -704,6 +712,7 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
+
     testWidgets('Shortcuts can disable a shortcut with Intent.doNothing', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -745,6 +754,7 @@ void main() {
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
     });
+
     testWidgets("Shortcuts that aren't bound to an action don't absorb keys meant for text fields", (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -769,6 +779,7 @@ void main() {
       expect(handled, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
     });
+
     testWidgets('Shortcuts that are bound to an action do override text fields', (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -805,6 +816,7 @@ void main() {
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
     });
+
     testWidgets('Shortcuts can override intents that apply to text fields', (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -845,6 +857,7 @@ void main() {
       expect(result, isFalse);
       expect(invoked, isFalse);
     });
+
     testWidgets('Shortcuts can override intents that apply to text fields with DoNothingAndStopPropagationIntent', (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -885,6 +898,7 @@ void main() {
       expect(result, isFalse);
       expect(invoked, isFalse);
     });
+
     test('Shortcuts diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -914,6 +928,7 @@ void main() {
         ),
       );
     });
+
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -935,6 +950,7 @@ void main() {
       expect(description.length, equals(1));
       expect(description[0], equals('shortcuts: <Debug Label>'));
     });
+
     test('Shortcuts diagnostics work when manager not specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -955,6 +971,7 @@ void main() {
       expect(description.length, equals(1));
       expect(description[0], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: ActivateIntent#00000}'));
     });
+
     test('Shortcuts diagnostics work when manager specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -981,6 +998,7 @@ void main() {
       expect(description[0], equalsIgnoringHashCodes('manager: TestShortcutManager#00000(shortcuts: {LogicalKeySet#00000(keys: Key A + Key B): ActivateIntent#00000})'));
       expect(description[1], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: ActivateIntent#00000}'));
     });
+
     testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool? value = true;
@@ -1028,7 +1046,7 @@ void main() {
       );
       final ScrollController controller = PrimaryScrollController.of(
         tester.element(find.byType(ListView)),
-      )!;
+      );
       expect(controller.position.pixels, 0.0);
       expect(value, isTrue);
 
@@ -1162,10 +1180,10 @@ void main() {
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('handles Ctrl and Meta', (WidgetTester tester) async {
+    testWidgets('handles Alt, Ctrl and Meta', (WidgetTester tester) async {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
-        const CharacterActivator('?', meta: true, control: true),
+        const CharacterActivator('?', alt: true, meta: true, control: true),
         (Intent intent) { invoked += 1; },
       ));
       await tester.pump();
@@ -1176,7 +1194,8 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
       expect(invoked, 0);
 
-      // Press Ctrl + Meta + Shift + /
+      // Press Left Alt + Ctrl + Meta + Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       expect(invoked, 0);
@@ -1185,7 +1204,24 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // Press Right Alt + Ctrl + Meta + Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
       expect(invoked, 1);
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
@@ -1872,7 +1908,7 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
 class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
-  })  : assert(onInvoke != null);
+  });
 
   static const LocalKey key = ValueKey<Type>(TestAction);
 }
@@ -1934,11 +1970,11 @@ class TestShortcutManager extends ShortcutManager {
 }
 
 Widget activatorTester(
-    ShortcutActivator activator,
-    ValueSetter<Intent> onInvoke, [
-      ShortcutActivator? activator2,
-      ValueSetter<Intent>? onInvoke2,
-    ]) {
+  ShortcutActivator activator,
+  ValueSetter<Intent> onInvoke, [
+  ShortcutActivator? activator2,
+  ValueSetter<Intent>? onInvoke2,
+]) {
   final bool hasSecond = activator2 != null && onInvoke2 != null;
   return Actions(
     key: GlobalKey(),

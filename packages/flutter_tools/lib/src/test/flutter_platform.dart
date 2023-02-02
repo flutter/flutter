@@ -68,7 +68,6 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
 }) {
-  assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
@@ -134,9 +133,6 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  assert(testUrl != null);
-  assert(host != null);
-  assert(updateGoldens != null);
 
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
@@ -294,7 +290,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
-  }) : assert(shellPath != null);
+  });
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
@@ -418,6 +414,7 @@ class FlutterPlatform extends PlatformPlugin {
         debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
         userIdentifier: integrationTestUserIdentifier,
+        compileExpression: _compileExpressionService
       );
     }
     return FlutterTesterTestDevice(
@@ -457,21 +454,25 @@ class FlutterPlatform extends PlatformPlugin {
         controllerSinkClosed = true;
       }));
 
+      void initializeExpressionCompiler(String path) {
+        // When start paused is specified, it means that the user is likely
+        // running this with a debugger attached. Initialize the resident
+        // compiler in this case.
+        if (debuggingOptions.startPaused) {
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
+          final Uri uri = globals.fs.file(path).uri;
+          // Trigger a compilation to initialize the resident compiler.
+          unawaited(compiler!.compile(uri));
+        }
+      }
+
       // If a kernel file is given, then use that to launch the test.
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
       String? mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
-        // When start paused is specified, it means that the user is likely
-        // running this with a debugger attached. Initialize the resident
-        // compiler in this case.
-        if (debuggingOptions.startPaused) {
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
-          final Uri testUri = globals.fs.file(testPath).uri;
-          // Trigger a compilation to initialize the resident compiler.
-          unawaited(compiler!.compile(testUri));
-        }
+        initializeExpressionCompiler(testPath);
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
@@ -487,6 +488,9 @@ class FlutterPlatform extends PlatformPlugin {
             testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
             return null;
           }
+        } else {
+          // For integration tests, we may still need to set up expression compilation service.
+          initializeExpressionCompiler(mainDart);
         }
       }
 
