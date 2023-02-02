@@ -9145,6 +9145,423 @@ void main() {
   );
 
   testWidgets(
+    'Can triple tap to select a paragraph on mobile platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              maxLines: null,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 6);
+
+      // Tap on text field to gain focus, and set selection to 'is|' on the first line.
+      final TestGesture gesture = await tester.startGesture(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 6);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.extentOffset, 7);
+
+      // Here we tap on same position again, to register a triple tap. This will select
+      // the paragraph at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 20);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
+  testWidgets(
+    'triple click chains work',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // First click moves the cursor to the point of the click, not the edge of
+      // the clicked word.
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(200.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      // Second click selects the word.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      // Triple click selects the paragraph.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      // Wait for the consecutive tap timer to timeout so the next
+      // tap is not detected as a triple tap.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      // Triple click selecting the same paragraph somewhere else is fine.
+      await gesture.down(textFieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // First click moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 6),
+      );
+      await gesture.down(textFieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Second click selected the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 6, extentOffset: 7),
+      );
+
+      await gesture.down(textFieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      // Wait for the consecutive tap timer to timeout so the tap count
+      // is reset.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      // Third click selected the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // First click moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9),
+      );
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Second click selected the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 7, extentOffset: 10),
+      );
+
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Third click selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'triple click after a click on desktop platforms',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(50.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 3),
+      );
+      // First click moves the selection.
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9),
+      );
+
+      // Double click selection to select a word.
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 7, extentOffset: 10),
+      );
+
+      // Triple click selection to select a paragraph.
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'Can triple click to select a paragraph on desktop platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              maxLines: null,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 5);
+
+      // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
+      final TestGesture gesture = await tester.startGesture(
+        firstLinePos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 6);
+
+      // Here we tap on same position again, to register a triple tap. This will select
+      // the paragraph at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 20);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'Can triple click + drag to select paragraph by paragraph on desktop platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              maxLines: null,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 5);
+
+      // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
+      final TestGesture gesture = await tester.startGesture(
+        firstLinePos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 6);
+
+      // Here we tap on the same position again, to register a triple tap. This will select
+      // the paragraph at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 20);
+
+      // Drag, down after the triple tap, to select paragraph by paragraph.
+      // Moving down will extend the selection to the second line.
+      await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 36);
+
+      // Moving down will extend the selection to the third line.
+      await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 55);
+
+      // Moving down will extend the selection to the last line.
+      await gesture.moveTo(firstLinePos + const Offset(0, 40.0));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 72);
+
+      // Moving up will extend the selection to the third line.
+      await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 55);
+
+      // Moving up will extend the selection to the second line.
+      await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 36);
+
+      // Moving up will extend the selection to the first line.
+      await gesture.moveTo(firstLinePos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 20);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
     'double tap on top of cursor also selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -10391,7 +10808,7 @@ void main() {
   );
 
   testWidgets(
-    'double click after a click on Mac',
+    'double click after a click on desktop platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -10446,7 +10863,7 @@ void main() {
       // The text selection toolbar isn't shown on Mac without a right click.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }),
+    variant: TargetPlatformVariant.desktop(),
   );
 
   testWidgets(
