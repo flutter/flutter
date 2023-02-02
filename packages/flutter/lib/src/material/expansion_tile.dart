@@ -34,16 +34,10 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// to the [leading] and [trailing] properties of [ExpansionTile].
 ///
 /// {@tool dartpad}
-/// This example demonstrates different configurations of ExpansionTile.
+/// This example demonstrates how the [ExpansionTile] icon's location and appearance
+/// can be customized.
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of a [ExpansionTile] using [ThemeData.useMaterial3] flag,
-/// as described in: https://m3.material.io/components/lists/overview.
-///
-/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
 ///
 /// See also:
