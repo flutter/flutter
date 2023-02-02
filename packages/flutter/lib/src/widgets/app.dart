@@ -241,9 +241,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
-/// Builds a [MediaQuery] using [MediaQuery.fromWindow]. To use an inherited
-/// [MediaQuery] instead, set [useInheritedMediaQuery] to true.
-///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
 ///
@@ -343,6 +340,11 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
   }) : assert(
          home == null ||
@@ -437,6 +439,11 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
   }) : assert((){
          if (routerConfig != null) {
@@ -1153,11 +1160,16 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// If true, an inherited MediaQuery will be used. If one is not available,
-  /// or this is false, one will be built from the window.
+  /// Deprecated. This setting is not ignored.
   ///
-  /// Cannot be null, defaults to false.
+  /// The widget never introduces its own [MediaQuery]; the [View] widget takes
+  /// care of that.
   /// {@endtemplate}
+  @Deprecated(
+    'This setting is now ignored. '
+    'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
   final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
@@ -1724,18 +1736,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    Widget child = Localizations(
-      locale: appLocale,
-      delegates: _localizationsDelegates.toList(),
-      child: title,
-    );
-
-    if (!widget.useInheritedMediaQuery || MediaQuery.maybeOf(context) == null) {
-      child = MediaQuery.fromWindow(
-        child: child,
-      );
-    }
-
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
@@ -1754,7 +1754,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                 policy: ReadingOrderTraversalPolicy(),
                 child: TapRegionSurface(
                   child: ShortcutRegistrar(
-                    child: child,
+                    child: Localizations(
+                      locale: appLocale,
+                      delegates: _localizationsDelegates.toList(),
+                      child: title,
+                    ),
                   ),
                 ),
               ),

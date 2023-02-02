@@ -478,15 +478,13 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return MediaQuery.fromWindow(
-        child: MediaQuery(
-          data: MediaQueryData(
-            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
-          ),
-          child: MaterialApp(
-            useInheritedMediaQuery: true,
-            home: scaffold,
-          ),
+      return MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: scaffold,
         ),
       );
     }
@@ -1289,10 +1287,10 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Tooltip(
                 message: 'message1',
                 waitDuration: waitDuration,

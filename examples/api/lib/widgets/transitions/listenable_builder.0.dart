@@ -152,9 +152,9 @@ class ListenableBuilderExample extends StatelessWidget {
                     // The container background will change color to this when
                     // the subtree has focus.
                     focusedColor: Colors.blue.shade50,
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text('Owner:'),
                         MyField(label: 'First Name'),
                         MyField(label: 'Last Name'),
