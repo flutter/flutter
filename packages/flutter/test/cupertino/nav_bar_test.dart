@@ -173,6 +173,32 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  // Assert that two SystemUiOverlayStyle instances have the same values for
+  // status bar properties and that the first instance has no system navigation
+  // bar properties set.
+  void expectSameStatusBarStyle(SystemUiOverlayStyle style, SystemUiOverlayStyle expectedStyle) {
+    expect(style.statusBarColor, expectedStyle.statusBarColor);
+    expect(style.statusBarBrightness, expectedStyle.statusBarBrightness);
+    expect(style.statusBarIconBrightness, expectedStyle.statusBarIconBrightness);
+    expect(style.systemStatusBarContrastEnforced, expectedStyle.systemStatusBarContrastEnforced);
+    expect(style.systemNavigationBarColor, isNull);
+    expect(style.systemNavigationBarContrastEnforced, isNull);
+    expect(style.systemNavigationBarDividerColor, isNull);
+    expect(style.systemNavigationBarIconBrightness, isNull);
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/119270
+  testWidgets('System navigation bar properties are not overriden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF0F9F9F9),
+        ),
+      ),
+    );
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
+  });
+
   testWidgets('Can specify custom brightness', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -182,11 +208,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region1.value, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -196,11 +218,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region2.value, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -215,11 +233,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region3.value, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -234,11 +248,7 @@ void main() {
         ),
       ),
     );
-
-    final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets
-        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
-        .single;
-    expect(region4.value, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
@@ -1021,7 +1031,7 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
   });
 
   testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
@@ -1041,7 +1051,7 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+    expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {

@@ -187,31 +187,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   /// The require js binary.
-  File get _requireJs {
-    // TODO(nshahan): Remove the initializing function once the file location
-    //                change in the Dart SDK has landed and rolled to the engine
-    //                and flutter repos. There is no long-term need for the
-    //                fallback logic.
-    //                See https://github.com/flutter/flutter/issues/118119
-    final File oldFile = _fileSystem.file(_fileSystem.path.join(
-      _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-      'lib',
-      'dev_compiler',
-      'kernel',
-      'amd',
-      'require.js',
-    ));
-
-    return oldFile.existsSync()
-        ? oldFile
-        : _fileSystem.file(_fileSystem.path.join(
-            _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-            'lib',
-            'dev_compiler',
-            'amd',
-            'require.js',
-          ));
-  }
+  File get _requireJs => _fileSystem.file(_fileSystem.path.join(
+        _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+        'lib',
+        'dev_compiler',
+        'amd',
+        'require.js',
+      ));
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(

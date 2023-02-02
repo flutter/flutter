@@ -2304,7 +2304,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
   /// The [delegate] argument must not be null.
-  CustomMultiChildLayout({
+  const CustomMultiChildLayout({
     super.key,
     required this.delegate,
     super.children,
@@ -3666,7 +3666,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// given axis.
   ///
   /// By default, the [mainAxis] is [Axis.vertical].
-  ListBody({
+  const ListBody({
     super.key,
     this.mainAxis = Axis.vertical,
     this.reverse = false,
@@ -3825,7 +3825,7 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// By default, the non-positioned children of the stack are aligned by their
   /// top left corners.
-  Stack({
+  const Stack({
     super.key,
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
@@ -3941,7 +3941,7 @@ class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
-  IndexedStack({
+  const IndexedStack({
     super.key,
     super.alignment,
     super.textDirection,
@@ -4445,6 +4445,8 @@ class Flex extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
+  // TODO(goderbauer): Figure out whether this can be const.
+  // ignore: prefer_const_constructors_in_immutables
   Flex({
     super.key,
     required this.direction,
@@ -5212,7 +5214,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Wrap({
+  const Wrap({
     super.key,
     this.direction = Axis.horizontal,
     this.alignment = WrapAlignment.start,
@@ -5474,7 +5476,7 @@ class Flow extends MultiChildRenderObjectWidget {
   /// a repaint boundary.
   ///
   /// The [delegate] argument must not be null.
-  Flow.unwrapped({
+  const Flow.unwrapped({
     super.key,
     required this.delegate,
     super.children,

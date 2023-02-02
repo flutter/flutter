@@ -706,7 +706,6 @@ targets:
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -2376,6 +2375,7 @@ targets:
       task_name: gradient_static_perf__e2e_summary
 
   - name: Linux_android android_choreographer_do_frame_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/119720
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2597,7 +2597,6 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac complex_layout_scroll_perf_macos__timeline_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2638,6 +2637,20 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+
+  - name: Mac flavors_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: flavors_test_macos
 
   - name: Mac flutter_gallery_macos__compile
     presubmit: false
@@ -3315,7 +3328,6 @@ targets:
       task_name: integration_ui_frame_number
 
   - name: Mac_android microbenchmarks
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/118692
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3326,7 +3338,6 @@ targets:
 
   - name: Mac_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
@@ -4018,7 +4029,6 @@ targets:
 
   - name: Mac run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4358,6 +4368,24 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows plugin_test_windows
+    bringup: true # New task
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_windows
     runIf:
       - dev/**
       - packages/flutter_tools/**

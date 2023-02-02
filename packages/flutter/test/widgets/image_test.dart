@@ -2173,7 +2173,7 @@ class _DebouncingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  ImageStreamCompleter loadBuffer(Object key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 }
 
 class _FailingImageProvider extends ImageProvider<int> {

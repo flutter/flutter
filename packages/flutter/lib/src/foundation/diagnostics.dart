@@ -2561,7 +2561,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
   /// arguments must not be null.
   ///
-  /// The [level] argument is just a suggestion and can be overridden if
+  /// The [level] argument is just a suggestion and can be overridden
   /// if something else about the property causes it to have a lower or higher
   /// level. For example, if calling `computeValue` throws an exception, [level]
   /// will always return [DiagnosticLevel.error].
@@ -3087,6 +3087,8 @@ mixin Diagnosticable {
   }
 
   /// Add additional properties associated with the node.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=DnC7eT-vh1k}
   ///
   /// Use the most specific [DiagnosticsProperty] existing subclass to describe
   /// each property instead of the [DiagnosticsProperty] base class. There are

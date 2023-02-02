@@ -1332,21 +1332,21 @@ void main() {
             height: 100,
             child: IntrinsicWidth(
               child: RichText(
-                text: TextSpan(
-                  style: const TextStyle(fontSize: 16, height: 1),
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 16, height: 1),
                   children: <InlineSpan>[
-                    const TextSpan(text: 'S '),
+                    TextSpan(text: 'S '),
                     WidgetSpan(
                       alignment: PlaceholderAlignment.top,
                       child: Wrap(
                         direction: Axis.vertical,
-                        children: const <Widget>[
+                        children: <Widget>[
                           SizedBox(width: 200, height: 100),
                           SizedBox(width: 200, height: 30),
                         ],
                       ),
                     ),
-                    const TextSpan(text: ' E'),
+                    TextSpan(text: ' E'),
                   ],
                 ),
               ),
