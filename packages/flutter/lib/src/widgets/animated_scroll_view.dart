@@ -1140,8 +1140,6 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// removes all the items in the list
   ///
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    assert(builder != null);
-    assert(duration != null);
     for(int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
