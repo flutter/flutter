@@ -2197,7 +2197,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(
         find.byType(EditableText),
       );
-            
+
       expect(state.cutEnabled, isFalse);
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
@@ -2225,7 +2225,7 @@ void main() {
 
       // Selecting all
       controller.selection = TextSelection(
-        baseOffset: 0, 
+        baseOffset: 0,
         extentOffset: controller.text.length,
       );
       expect(state.cutEnabled, isTrue);
@@ -2270,7 +2270,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(
         find.byType(EditableText),
       );
-            
+
       expect(state.copyEnabled, isFalse);
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
@@ -2298,7 +2298,7 @@ void main() {
 
       // Selecting all
       controller.selection = TextSelection(
-        baseOffset: 0, 
+        baseOffset: 0,
         extentOffset: controller.text.length,
       );
       expect(state.copyEnabled, isTrue);
@@ -2343,7 +2343,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(
         find.byType(EditableText),
       );
-            
+
       expect(state.pasteEnabled, isFalse);
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
@@ -2414,7 +2414,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(
         find.byType(EditableText),
       );
-            
+
       expect(state.selectAllEnabled, isFalse);
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
