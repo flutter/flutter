@@ -1233,7 +1233,7 @@ class ThemeData with Diagnosticable {
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
-  ///     - Common buttons: [ElevatedButton], [FilledButton], FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
+  ///     - Common buttons: [ElevatedButton], [FilledButton] (*new*), FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
   ///     - Icon buttons: [IconButton]
   ///     - Segmented buttons: [SegmentedButton] (*new*, replacing [ToggleButtons])
