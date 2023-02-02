@@ -11,7 +11,7 @@ double _decodeBGR10(int x) {
   const double max = 1.25098;
   const double min = -0.752941;
   const double intercept = min;
-  double slope = (max - min) / 1024.0;
+  const double slope = (max - min) / 1024.0;
   return (x * slope) + intercept;
 }
 
@@ -23,13 +23,13 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
-    testWidgets('look for display p3 deepest red',
-        (tester) async {
+    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      MethodChannel channel = const MethodChannel('flutter/screenshot');
-      List<Object?> result = await channel.invokeMethod('test');
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
       expect(result, isNotNull);
       expect(result.length, 4);
       final int width = (result[0] as int?)!;
@@ -37,7 +37,7 @@ void main() {
       final String format = (result[2] as String?)!;
       expect(format, 'MTLPixelFormatBGR10_XR');
       final Uint8List bytes = (result[3] as Uint8List?)!;
-      ByteData byteData = ByteData.sublistView(bytes);    
+      final ByteData byteData = ByteData.sublistView(bytes);
       expect(bytes.lengthInBytes, width * height * 4);
       expect(bytes.lengthInBytes, byteData.lengthInBytes);
       bool foundDeepRed = false;
