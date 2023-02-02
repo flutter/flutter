@@ -45,6 +45,10 @@ body:
         with the backticks below. If you are running any `flutter` commands,
         please include the output of running them with `--verbose`; for example,
         the output of running `flutter --verbose create foo`.
+
+        If the logs are too large to be uploaded to Github, you may upload
+        it as a `txt` file or use online tools like https://pastebin.com to
+        share it.
       value: |
         <details>
         <summary>Logs</summary>
