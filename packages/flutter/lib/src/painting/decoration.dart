@@ -59,7 +59,7 @@ abstract class Decoration with Diagnosticable {
   /// [EdgeInsetsGeometry.resolve] to obtain an absolute [EdgeInsets]. (For
   /// example, [BorderDirectional] will return an [EdgeInsetsDirectional] for
   /// its [padding].)
-  EdgeInsetsGeometry? get padding => EdgeInsets.zero;
+  EdgeInsetsGeometry get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;
