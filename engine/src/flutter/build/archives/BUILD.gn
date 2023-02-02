@@ -258,6 +258,18 @@ if (host_os == "win") {
         source = "$root_out_dir/flutter_windows.dll"
         destination = "flutter_windows.dll"
       },
+      {
+        source = "$root_out_dir/flutter_windows.dll.exp"
+        destination = "flutter_windows.dll.exp"
+      },
+      {
+        source = "$root_out_dir/flutter_windows.dll.lib"
+        destination = "flutter_windows.dll.lib"
+      },
+      {
+        source = "$root_out_dir/flutter_windows.dll.pdb"
+        destination = "flutter_windows.dll.pdb"
+      },
     ]
   }
 }
