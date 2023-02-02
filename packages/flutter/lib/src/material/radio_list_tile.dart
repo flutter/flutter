@@ -87,8 +87,8 @@ import 'theme_data.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This sample shows the creation of a [RadioListTile] using [ThemeData.useMaterial3] flag,
-/// as described in: https://m3.material.io/components/lists/overview.
+/// This sample demonstrates how [RadioListTile] positions the radio widget
+/// relative to the text in different configurations.
 ///
 /// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.1.dart **
 /// {@end-tool}
