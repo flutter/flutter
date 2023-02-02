@@ -145,21 +145,21 @@ platform_properties:
       cpu: arm64
       device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
-  ios_benchmark: &IOS_BENCHMARK_TEMPLATE
-    timeout: 60
+  mac_benchmark: &MAC_BENCHMARK_TEMPLATE
     properties:
-      cpu: x86
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "xcode", "version": "14a5294e"},
         ]
+      device_type: none
+      drone_dimensions: >
+        ["mac_model=Macmini8,1"]
       os: Mac-12
-      device_os: iOS-16
       tags: >
-        ["devicelab", "ios", "mac"]
-      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+        ["devicelab", "hostonly", "mac"]
+      xcode: 14a5294e # xcode 14.0 beta 5
   windows:
     properties:
       dependencies: >-
@@ -2611,17 +2611,11 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac complex_layout_scroll_perf_macos__timeline_summary
+    << : *MAC_BENCHMARK_TEMPLATE
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
@@ -3395,10 +3389,12 @@ targets:
       task_name: run_release_test
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
-    << : *IOS_BENCHMARK_TEMPLATE
     recipe: devicelab/devicelab_drone
     presubmit: false
+    timeout: 60
     properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
