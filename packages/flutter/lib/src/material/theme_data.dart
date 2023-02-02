@@ -1229,37 +1229,37 @@ class ThemeData with Diagnosticable {
   ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  ///   * Badges: [Badge]
+  ///   * Badges: [Badge] (*new*)
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
-  ///     - Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
+  ///     - Common buttons: [ElevatedButton], [FilledButton], FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
   ///     - Icon buttons: [IconButton]
-  ///     - Segmented buttons: [SegmentedButton]
+  ///     - Segmented buttons: [SegmentedButton] (*new*, replacing [ToggleButtons])
   ///   * Cards: [Card]
-  ///   * Checkbox: [Checkbox]
+  ///   * Checkbox: [Checkbox], [CheckboxListTile]
   ///   * Chips:
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
   ///   * Date pickers: [showDatePicker], [showDateRangePicker], [DatePickerDialog], [DateRangePickerDialog], [InputDatePickerFormField]
-  ///   * Dialogs: [Dialog], [AlertDialog]
-  ///   * Divider: [Divider]
+  ///   * Dialogs: [AlertDialog], [Dialog.fullscreen] (*new*)
+  ///   * Divider: [Divider], [VerticalDivider]
   ///   * Lists: [ListTile]
-  ///   * Menus: [MenuBar], [DropdownMenu]
-  ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * Navigation drawer: [NavigationDrawer]
+  ///   * Menus: [MenuAnchor] (*new*), [DropdownMenu] (*new*), [MenuBar] (*new*)
+  ///   * Navigation bar: [NavigationBar] (*new*, replacing [BottomNavigationBar])
+  ///   * Navigation drawer: [NavigationDrawer] (*new*, replacing [Drawer])
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
-  ///   * Radio button: [Radio]
+  ///   * Radio button: [Radio], [RadioListTile]
   ///   * Snack bar: [SnackBar]
-  ///   * Slider: [Slider]
-  ///   * Switch: [Switch]
+  ///   * Slider: [Slider], [RangeSlider]
+  ///   * Switch: [Switch], [SwitchListTile]
   ///   * Tabs: [TabBar]
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Time pickers: [showTimePicker], [TimePickerDialog]
-  ///   * Top app bar: [AppBar]
+  ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium] (*new*), [SliverAppBar.large] (*new*)
   ///
   /// In addition, this flag enables features introduced in Android 12.
   ///   * Stretch overscroll: [MaterialScrollBehavior]
