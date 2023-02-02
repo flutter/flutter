@@ -56,10 +56,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             },
           ),
         },
-        child: Focus(
+        child: const Focus(
           autofocus: true,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Text('Press question mark for help'),
             ],
           ),

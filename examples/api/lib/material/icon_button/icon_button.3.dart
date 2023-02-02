@@ -38,15 +38,15 @@ class DemoIconToggleButtons extends StatefulWidget {
 class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return const Padding(
+      padding: EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             // Standard IconButton
-            children: const <Widget>[
+            children: <Widget>[
               DemoIconToggleButton(isEnabled: true),
               SizedBox(width: 10),
               DemoIconToggleButton(isEnabled: false),
@@ -54,7 +54,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               // Filled IconButton
               DemoIconToggleButton(isEnabled: true, getDefaultStyle: enabledFilledButtonStyle,),
               SizedBox(width: 10),
@@ -63,7 +63,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               // Filled Tonal IconButton
               DemoIconToggleButton(isEnabled: true, getDefaultStyle: enabledFilledTonalButtonStyle,),
               SizedBox(width: 10),
@@ -72,7 +72,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               // Outlined IconButton
               DemoIconToggleButton(isEnabled: true, getDefaultStyle: enabledOutlinedButtonStyle,),
               SizedBox(width: 10),

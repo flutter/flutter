@@ -701,7 +701,7 @@ void main() {
           appBar: AppBar(
             title: const Text('X'),
           ),
-          drawer: Column(), // Doesn't really matter. Triggers a hamburger regardless.
+          drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
         ),
       ),
     );

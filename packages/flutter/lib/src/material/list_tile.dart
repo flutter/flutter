@@ -160,8 +160,8 @@ enum ListTileControlAffinity {
 /// whereas a [Row] does not constrain its children.
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Expanded(
 ///       child: ListTile(
 ///         leading: FlutterLogo(),
