@@ -700,7 +700,6 @@ void main() {
                       tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
-                        SemanticsAction.longPress,
                       ],
                       flags: <SemanticsFlag>[
                         SemanticsFlag.hasEnabledState,
