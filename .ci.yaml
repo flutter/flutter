@@ -1376,16 +1376,25 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
-  # TODO (ricardoamador) https://github.com/flutter/flutter/issues/119026
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
+    presubmit: true
     timeout: 60
+    dimensions: {
+      kvm: "1",
+      cores: "8",
+      machine_type: "n1-standard-8"
+    }
     properties:
+      device_type: "none"
       tags: >
-        ["devicelab" ,"android", "linux"]
+        ["devicelab", "linux"]
       task_name: android_defines_test
+      dependencies: >-
+        [
+          {"dependency": "android_virtual_device", "version": "31"}
+        ]
+      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
