@@ -283,8 +283,8 @@ class AssetImage extends AssetBundleImageProvider {
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
-        final Iterable<AssetVariant> candidateVariants = manifest.getAssetVariants(keyName);
-        final AssetVariant chosenVariant = _chooseVariant(
+        final Iterable<AssetMetadata> candidateVariants = manifest.getAssetVariants(keyName);
+        final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
           configuration,
           candidateVariants,
@@ -292,7 +292,7 @@ class AssetImage extends AssetBundleImageProvider {
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenVariant.key,
-          scale: chosenVariant.targetDevicePixelRatio,
+          scale: chosenVariant.targetDevicePixelRatio ?? _naturalResolution,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -326,18 +326,15 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetVariant _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetVariant> candidateVariants) {
-    final AssetVariant mainAsset = AssetVariant(key: mainAssetKey,
-      targetDevicePixelRatio: _naturalResolution);
+  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata> candidateVariants) {
     if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
-      return mainAsset;
+      return candidateVariants.firstWhere((AssetMetadata variant) => variant.main);
     }
-    final SplayTreeMap<double, AssetVariant> candidatesByDevicePixelRatio =
-      SplayTreeMap<double, AssetVariant>();
-    for (final AssetVariant candidate in candidateVariants) {
-      candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio] = candidate;
+    final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
+      SplayTreeMap<double, AssetMetadata>();
+    for (final AssetMetadata candidate in candidateVariants) {
+      candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio ?? _naturalResolution] = candidate;
     }
-    candidatesByDevicePixelRatio.putIfAbsent(_naturalResolution, () => mainAsset);
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
@@ -356,7 +353,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  AssetVariant _findBestVariant(SplayTreeMap<double, AssetVariant> candidatesByDpr, double value) {
+  AssetMetadata _findBestVariant(SplayTreeMap<double, AssetMetadata> candidatesByDpr, double value) {
     if (candidatesByDpr.containsKey(value)) {
       return candidatesByDpr[value]!;
     }
