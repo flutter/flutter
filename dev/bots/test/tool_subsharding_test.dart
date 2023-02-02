@@ -23,8 +23,8 @@ void main() {
       {"missing": "entry"}
       {"other": true}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
-      expect(result, isEmpty);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      expect(result.allTestSpecs, isEmpty);
     });
 
     test('have metrics', () async {
@@ -47,7 +47,7 @@ void main() {
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"ProjectValidatorTask","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}
       {"success":true,"type":"done","time":4870}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
+      final Map<int, TestSpecs> result = TestFileReporterResults.fromFile(file).allTestSpecs;
       expect(result, contains(0));
       expect(result, contains(1));
       expect(result[0]!.path, 'test/general.shard/project_validator_result_test.dart');
@@ -62,8 +62,37 @@ void main() {
       {"suite":{"id":1,"platform":"vm","path":"other_path"},"type":"suite","time":1000}
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
-      expect(result, isEmpty);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      expect(result.hasFailedTests, true);
+    });
+
+    test('has failed stack traces', () async {
+      final File file = fileSystem.file('success_file');
+      const String output = '''
+      {"protocolVersion":"0.1.1","runnerVersion":"1.22.1","pid":47372,"type":"start","time":0}
+      {"suite":{"id":0,"platform":"vm","path":"test/tool_subsharding_test.dart"},"type":"suite","time":0}
+      {"test":{"id":1,"name":"loading test/tool_subsharding_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+      {"count":1,"time":11,"type":"allSuites"}
+      {"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1021}
+      {"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":1026}
+      {"group":{"id":3,"suiteID":0,"parentID":2,"name":"generateMetrics","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":13,"column":3,"url":"file:///Users/user/Documents/flutter/dev/bots/test/tool_subsharding_test.dart"},"type":"group","time":1027}
+      {"test":{"id":4,"name":"generateMetrics empty metrics","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":20,"column":5,"url":"file:///Users/user/Documents/flutter/dev/bots/test/tool_subsharding_test.dart"},"type":"testStart","time":1027}
+      {"testID":4,"error":"Expected: <true>  Actual: <false>","stackTrace":"package:test_api                      expect test/tool_subsharding_test.dart 28:7  main.<fn>.<fn> ","isFailure":true,"type":"error","time":1095}
+      {"testID":4,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":1096}
+      {"test":{"id":5,"name":"generateMetrics have metrics","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":31,"column":5,"url":"file:///Users/user/Documents/flutter/dev/bots/test/tool_subsharding_test.dart"},"type":"testStart","time":1097}
+      {"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1103}
+      {"test":{"id":6,"name":"generateMetrics missing success entry","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":60,"column":5,"url":"file:///Users/user/Documents/flutter/dev/bots/test/tool_subsharding_test.dart"},"type":"testStart","time":1103}
+      {"testID":6,"error":"Expected: <false>  Actual: <true>","stackTrace":"package:test_api                      expect test/tool_subsharding_test.dart 68:7  main.<fn>.<fn> ","isFailure":true,"type":"error","time":1107}
+      {"testID":6,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":1107}
+      {"testID":6,"error":"my error","isFailure":true,"type":"error","time":1107}
+      {"success":false,"type":"done","time":1120}''';
+      file.writeAsStringSync(output);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      expect(result.hasFailedTests, true);
+      expect(result.errors.length == 3, true);
+      expect(result.errors[0].contains('Expected: <true>  Actual: <false>'), true);
+      expect(result.errors[1].contains('Expected: <false>  Actual: <true>'), true);
+      expect(result.errors[2].contains('my error'), true);
     });
   });
 }
