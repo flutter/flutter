@@ -2614,7 +2614,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      *MAC_BENCHMARK_PROPERTIES_TEMPLATE
+      * MAC_BENCHMARK_PROPERTIES_TEMPLATE
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
