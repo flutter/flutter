@@ -1418,9 +1418,6 @@ void main() {
           id: 1,
           tooltip: 'TIP',
           textDirection: TextDirection.ltr,
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-          ],
         ),
       ],
     );
@@ -1621,9 +1618,6 @@ void main() {
                       tooltip: 'Foo',
                       label: 'Bar',
                       textDirection: TextDirection.ltr,
-                      actions: <SemanticsAction>[
-                        SemanticsAction.longPress,
-                      ],
                     ),
                   ],
                 ),
