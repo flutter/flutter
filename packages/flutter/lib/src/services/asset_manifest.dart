@@ -9,8 +9,12 @@ import 'message_codecs.dart';
 
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
+/// Contains details about available assets and their variants.
+/// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+/// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
+  /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
