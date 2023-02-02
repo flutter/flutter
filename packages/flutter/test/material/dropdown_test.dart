@@ -246,7 +246,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromView(View.of(context)).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -401,7 +401,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(tester.binding.window),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
@@ -717,7 +717,6 @@ void main() {
       expect(itemBoxes.length, equals(2));
       for (final RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
-        assert(textDirection != null);
         switch (textDirection) {
           case TextDirection.rtl:
             expect(
@@ -1145,13 +1144,11 @@ void main() {
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
         if (element.toString().startsWith('_DropdownMenu')) {
           final RenderBox box = element.findRenderObject()! as RenderBox;
-          assert(box != null);
           menuRect = box.localToGlobal(Offset.zero) & box.size;
           return false;
         }
         return true;
       });
-      assert(menuRect != null);
       return menuRect;
     }
 
@@ -1859,9 +1856,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1895,9 +1890,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1932,9 +1925,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1969,9 +1960,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 

@@ -213,6 +213,7 @@ class PackagesGetCommand extends FlutterCommand {
     argParser.addOption('git-ref');
     argParser.addOption('git-path');
     argParser.addFlag('dev');
+    argParser.addFlag('verbose', abbr: 'v');
     return argParser;
   }
 
@@ -238,7 +239,11 @@ class PackagesGetCommand extends FlutterCommand {
     FlutterProject? rootProject;
 
     if (!isHelp) {
-      if (directoryOption == null && rest.length == 1 &&
+      if (directoryOption == null &&
+          rest.length == 1 &&
+          // Anything that looks like an argument should not be interpreted as
+          // a directory.
+          !rest.single.startsWith('-') &&
           ((rest.single.contains('/') || rest.single.contains(r'\')) ||
             name == 'get')) {
         // For historical reasons, if there is one argument to the command and it contains

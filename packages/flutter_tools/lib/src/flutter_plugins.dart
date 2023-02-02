@@ -361,7 +361,6 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
 AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
-  assert(project.android != null);
   return project.android.getEmbeddingVersion();
 }
 
@@ -912,9 +911,8 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
     if (platformPlugin == null) {
       return false;
     }
-    assert(variant == null || platformPlugin is VariantPlatformPlugin);
-    return variant == null ||
-        (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
+    assert(platformPlugin is VariantPlatformPlugin);
+    return (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
   }).toList();
 }
 

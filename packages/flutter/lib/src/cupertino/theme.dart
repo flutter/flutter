@@ -53,8 +53,7 @@ class CupertinoTheme extends StatelessWidget {
     super.key,
     required this.data,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
@@ -137,7 +136,7 @@ class _InheritedCupertinoTheme extends InheritedWidget {
   const _InheritedCupertinoTheme({
     required this.theme,
     required super.child,
-  }) : assert(theme != null);
+  });
 
   final CupertinoTheme theme;
 
@@ -312,6 +311,35 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     properties.add(DiagnosticsProperty<bool>('applyThemeToAll', applyThemeToAll, defaultValue: defaultData.applyThemeToAll));
     textTheme.debugFillProperties(properties);
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CupertinoThemeData
+      && other.brightness == brightness
+      && other.primaryColor == primaryColor
+      && other.primaryContrastingColor == primaryContrastingColor
+      && other.textTheme == textTheme
+      && other.barBackgroundColor == barBackgroundColor
+      && other.scaffoldBackgroundColor == scaffoldBackgroundColor
+      && other.applyThemeToAll == applyThemeToAll;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    brightness,
+    primaryColor,
+    primaryContrastingColor,
+    textTheme,
+    barBackgroundColor,
+    scaffoldBackgroundColor,
+    applyThemeToAll,
+  );
 }
 
 /// Styling specifications for a cupertino theme without default values for
@@ -528,7 +556,6 @@ class _CupertinoTextThemeDefaults {
   }
 
   CupertinoTextThemeData createDefaults({ required Color primaryColor }) {
-    assert(primaryColor != null);
     return _DefaultCupertinoTextThemeData(
       primaryColor: primaryColor,
       labelColor: labelColor,
@@ -545,9 +572,7 @@ class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
     required this.labelColor,
     required this.inactiveGray,
     required super.primaryColor,
-  }) : assert(labelColor != null),
-       assert(inactiveGray != null),
-       assert(primaryColor != null);
+  });
 
   final Color labelColor;
   final Color inactiveGray;

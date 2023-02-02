@@ -53,8 +53,7 @@ class FlutterDevice {
     this.userIdentifier,
     required this.developmentShaderCompiler,
     this.developmentSceneImporter,
-  }) : assert(buildInfo.trackWidgetCreation != null),
-       generator = generator ?? ResidentCompiler(
+  }) : generator = generator ?? ResidentCompiler(
          globals.artifacts!.getArtifactPath(
            Artifact.flutterPatchedSdkPath,
            platform: targetPlatform,
@@ -83,10 +82,8 @@ class FlutterDevice {
     required Platform platform,
     TargetModel targetModel = TargetModel.flutter,
     List<String>? experimentalFlags,
-    ResidentCompiler? generator,
     String? userIdentifier,
   }) async {
-    ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -111,6 +108,8 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
+    final ResidentCompiler generator;
+
     // For both web and non-web platforms we initialize dill to/from
     // a shared location for faster bootstrapping. If the compiler fails
     // due to a kernel target or version mismatch, no error is reported
@@ -119,7 +118,7 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      late String platformDillName;
+      final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillName = 'ddc_outline.dill';
@@ -132,12 +131,12 @@ class FlutterDevice {
           extraFrontEndOptions.add('--sound-null-safety');
         }
       } else {
-        assert(false);
+        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
       }
 
       final String platformDillPath = globals.fs.path.join(
         getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
-        platformDillName
+        platformDillName,
       );
 
       generator = ResidentCompiler(
@@ -396,10 +395,6 @@ class FlutterDevice {
       return;
     }
     final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
-    if (logStream == null) {
-      globals.printError('Failed to read device log stream');
-      return;
-    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
@@ -514,23 +509,13 @@ class FlutterDevice {
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
-    if (coldRunner.mainPath == null) {
-      assert(prebuiltMode);
-      globals.printStatus(
-        'Launching ${applicationPackage.displayName} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    } else {
-      globals.printStatus(
-        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    }
+    globals.printStatus(
+      'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
+      'on ${device!.name} in $modeName mode...',
+    );
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (coldRunner.traceStartup != null) {
-      platformArgs['trace-startup'] = coldRunner.traceStartup;
-    }
+    platformArgs['trace-startup'] = coldRunner.traceStartup;
     platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
@@ -1344,9 +1329,25 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   void printStructuredErrorLog(vm_service.Event event) {
     if (event.extensionKind == 'Flutter.Error' && !machine) {
-      final Map<dynamic, dynamic>? json = event.extensionData?.data;
+      final Map<String, Object?>? json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
-        globals.printStatus('\n${json['renderedErrorText']}');
+        final int errorsSinceReload;
+        if (json.containsKey('errorsSinceReload') && json['errorsSinceReload'] is int) {
+          errorsSinceReload = json['errorsSinceReload']! as int;
+        } else {
+          errorsSinceReload = 0;
+        }
+        if (errorsSinceReload == 0) {
+          // We print a blank line around the first error, to more clearly emphasize it
+          // in the output. (Other errors don't get this.)
+          globals.printStatus('');
+        }
+        globals.printStatus('${json['renderedErrorText']}');
+        if (errorsSinceReload == 0) {
+          globals.printStatus('');
+        }
+      } else {
+        globals.printError('Received an invalid ${globals.logger.terminal.bolden("Flutter.Error")} message from app: $json');
       }
     }
   }
@@ -1433,7 +1434,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
-    assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
   }
@@ -1911,9 +1911,6 @@ class DevToolsServerAddress {
   final int port;
 
   Uri? get uri {
-    if (host == null || port == null) {
-      return null;
-    }
     return Uri(scheme: 'http', host: host, port: port);
   }
 }

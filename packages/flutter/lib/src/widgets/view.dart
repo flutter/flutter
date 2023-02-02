@@ -6,9 +6,13 @@ import 'dart:ui' show FlutterView;
 
 import 'framework.dart';
 import 'lookup_boundary.dart';
+import 'media_query.dart';
 
 /// Injects a [FlutterView] into the tree and makes it available to descendants
 /// within the same [LookupBoundary] via [View.of] and [View.maybeOf].
+///
+/// The provided [child] is wrapped in a [MediaQuery] constructed from the given
+/// [view].
 ///
 /// In a future version of Flutter, the functionality of this widget will be
 /// extended to actually bootstrap the render tree that is going to be rendered
@@ -20,15 +24,26 @@ import 'lookup_boundary.dart';
 /// [FlutterView] must never exist within the same widget tree at the same time.
 /// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
 /// its identity from the [view] provided to this widget.
-class View extends InheritedWidget {
+class View extends StatelessWidget {
   /// Injects the provided [view] into the widget tree.
-  View({required this.view, required super.child}) : super(key: GlobalObjectKey(view));
+  View({required this.view, required this.child}) : super(key: GlobalObjectKey(view));
 
   /// The [FlutterView] to be injected into the tree.
   final FlutterView view;
 
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
   @override
-  bool updateShouldNotify(View oldWidget) => view != oldWidget.view;
+  Widget build(BuildContext context) {
+    return _ViewScope(
+      view: view,
+      child: MediaQuery.fromView(
+        view: view,
+        child: child,
+      ),
+    );
+  }
 
   /// Returns the [FlutterView] that the provided `context` will render into.
   ///
@@ -47,7 +62,7 @@ class View extends InheritedWidget {
   ///  * [View.of], which throws instead of returning null if no [FlutterView]
   ///    is found.
   static FlutterView? maybeOf(BuildContext context) {
-    return LookupBoundary.dependOnInheritedWidgetOfExactType<View>(context)?.view;
+    return LookupBoundary.dependOnInheritedWidgetOfExactType<_ViewScope>(context)?.view;
   }
 
   /// Returns the [FlutterView] that the provided `context` will render into.
@@ -70,7 +85,7 @@ class View extends InheritedWidget {
     final FlutterView? result = maybeOf(context);
     assert(() {
       if (result == null) {
-        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<View>(context);
+        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<_ViewScope>(context);
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
           if (hiddenByBoundary) ...<DiagnosticsNode>[
             ErrorSummary('View.of() was called with a context that does not have access to a View widget.'),
@@ -91,4 +106,13 @@ class View extends InheritedWidget {
     }());
     return result!;
   }
+}
+
+class _ViewScope extends InheritedWidget {
+  const _ViewScope({required this.view, required super.child});
+
+  final FlutterView view;
+
+  @override
+  bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
 }

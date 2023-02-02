@@ -21,7 +21,7 @@ abstract class MergeableMaterialItem {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The argument is the [key], which must not be null.
-  const MergeableMaterialItem(this.key) : assert(key != null);
+  const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.
   ///
@@ -42,8 +42,7 @@ class MaterialSlice extends MergeableMaterialItem {
     required LocalKey key,
     required this.child,
     this.color,
-  }) : assert(key != null),
-       super(key);
+  }) : super(key);
 
   /// The contents of this slice.
   ///
@@ -69,8 +68,7 @@ class MaterialGap extends MergeableMaterialItem {
   const MaterialGap({
     required LocalKey key,
     this.size = 16.0,
-  }) : assert(key != null),
-       super(key);
+  }) : super(key);
 
   /// The main axis extent of this gap. For example, if the [MergeableMaterial]
   /// is vertical, then this is the height of the gap.
@@ -657,7 +655,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 }
 
 class _MergeableMaterialListBody extends ListBody {
-  _MergeableMaterialListBody({
+  const _MergeableMaterialListBody({
     required super.children,
     super.mainAxis,
     required this.items,

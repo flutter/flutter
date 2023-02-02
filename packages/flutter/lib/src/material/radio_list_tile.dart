@@ -173,12 +173,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -245,7 +240,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The primary content of the list tile.

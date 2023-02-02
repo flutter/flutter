@@ -112,13 +112,12 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) :  assert(destinations != null && destinations.length >= 2),
+  }) :  assert(destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
-        assert(extended != null),
         assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
@@ -546,19 +545,7 @@ class _RailDestination extends StatelessWidget {
     required this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) : assert(minWidth != null),
-       assert(minExtendedWidth != null),
-       assert(icon != null),
-       assert(label != null),
-       assert(destinationAnimation != null),
-       assert(extendedTransitionAnimation != null),
-       assert(labelType != null),
-       assert(selected != null),
-       assert(iconTheme != null),
-       assert(labelTextStyle != null),
-       assert(onTap != null),
-       assert(indexLabel != null),
-       _positionAnimation = CurvedAnimation(
+  }) : _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
           reverseCurve: Curves.easeInOut.flipped,
@@ -925,9 +912,7 @@ class NavigationRailDestination {
     this.indicatorShape,
     required this.label,
     this.padding,
-  }) : selectedIcon = selectedIcon ?? icon,
-       assert(icon != null),
-       assert(label != null);
+  }) : selectedIcon = selectedIcon ?? icon;
 
   /// The icon of the destination.
   ///
@@ -978,7 +963,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   const _ExtendedNavigationRailAnimation({
     required this.animation,
     required super.child,
-  }) : assert(child != null);
+  });
 
   final Animation<double> animation;
 
@@ -1047,7 +1032,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

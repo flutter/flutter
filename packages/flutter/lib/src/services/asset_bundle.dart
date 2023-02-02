@@ -109,9 +109,6 @@ abstract class AssetBundle {
   /// used with one parser for the lifetime of the asset bundle.
   Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
     final ByteData data = await load(key);
-    if (data == null) {
-      throw FlutterError('Unable to load asset: $key');
-    }
     return parser(data);
   }
 
@@ -164,8 +161,6 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
-    assert(key != null);
-    assert(parser != null);
     return parser(await loadString(key));
   }
 
@@ -176,8 +171,6 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
-    assert(key != null);
-    assert(parser != null);
     return parser(await load(key));
   }
 
@@ -222,8 +215,6 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// callback synchronously.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
-    assert(key != null);
-    assert(parser != null);
     if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
     }
@@ -262,9 +253,6 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// callback synchronously.
   @override
   Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) {
-    assert(key != null);
-    assert(parser != null);
-
     if (_structuredBinaryDataCache.containsKey(key)) {
       return _structuredBinaryDataCache[key]! as Future<T>;
     }
@@ -284,8 +272,8 @@ abstract class CachingAssetBundle extends AssetBundle {
           // was given the future of the completer.
           completer.complete(value);
         }
-      }, onError: (Object err, StackTrace? stack) {
-        completer!.completeError(err, stack);
+      }, onError: (Object error, StackTrace stack) {
+        completer!.completeError(error, stack);
       });
 
     if (result != null) {

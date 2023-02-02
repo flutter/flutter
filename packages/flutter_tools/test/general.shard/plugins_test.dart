@@ -379,8 +379,6 @@ flutter:
       required String name,
       required List<String> dependencies,
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
       pluginDirectory
@@ -412,8 +410,6 @@ dependencies:
       required Map<String, _PluginPlatformInfo> platforms,
       List<String> dependencies = const <String>[],
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Iterable<String> platformSections = platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
       ${entry.key}:

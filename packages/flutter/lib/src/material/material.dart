@@ -194,13 +194,9 @@ class Material extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
-  }) : assert(type != null),
-       assert(elevation != null && elevation >= 0.0),
+  }) : assert(elevation >= 0.0),
        assert(!(shape != null && borderRadius != null)),
-       assert(animationDuration != null),
-       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
-       assert(borderOnForeground != null),
-       assert(clipBehavior != null);
+       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null)));
 
   /// The widget below this widget in the tree.
   ///
@@ -258,6 +254,7 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
+  /// {@template flutter.material.material.shadowColor}
   /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
   /// [ColorScheme.shadow] will be used. If [ThemeData.useMaterial3] is false
   /// then [ThemeData.shadowColor] will be used.
@@ -270,11 +267,13 @@ class Material extends StatefulWidget {
   ///    property if it is null.
   ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
   /// on or off for dark themes.
+  /// {@endtemplate}
   final Color? shadowColor;
 
   /// The color of the surface tint overlay applied to the material color
   /// to indicate elevation.
   ///
+  /// {@template flutter.material.material.surfaceTintColor}
   /// Material Design 3 introduced a new way for some components to indicate
   /// their elevation by using a surface tint color overlay on top of the
   /// base material [color]. This overlay is painted with an opacity that is
@@ -295,6 +294,7 @@ class Material extends StatefulWidget {
   ///     tint.
   ///   * https://m3.material.io/styles/color/the-color-system/color-roles
   ///     which specifies how the overlay is applied.
+  /// {@endtemplate}
   final Color? surfaceTintColor;
 
   /// The typographical style to use for text within this material.
@@ -302,11 +302,13 @@ class Material extends StatefulWidget {
 
   /// Defines the material's shape as well its shadow.
   ///
+  /// {@template flutter.material.material.shape}
   /// If shape is non null, the [borderRadius] is ignored and the material's
   /// clip boundary and shadow are defined by the shape.
   ///
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
+  /// {@endtemplate}
   final ShapeBorder? shape;
 
   /// Whether to paint the [shape] border in front of the [child].
@@ -457,7 +459,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final Color? backgroundColor = _getBackgroundColor(context);
     final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
-    final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
+    final double modelElevation = widget.elevation;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '
@@ -597,8 +599,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     required this.vsync,
     required this.absorbHitTest,
     this.color,
-  }) : assert(vsync != null),
-       super(child);
+  }) : super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
   // since there's no current support for dynamically changing the ticker
@@ -710,9 +711,7 @@ abstract class InkFeature {
     required MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _controller = controller as _RenderInkFeatures;
+  }) : _controller = controller as _RenderInkFeatures;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -817,11 +816,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     required this.surfaceTintColor,
     super.curve,
     required super.duration,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null);
+  }) : assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Size _kTestViewSize = Size(800.0, 600.0);
 
 class ScheduledFrameTrackingWindow extends TestWindow {
-  ScheduledFrameTrackingWindow() : super(window: ui.window);
+  ScheduledFrameTrackingWindow({ required super.window });
 
   int _scheduledFrameCount = 0;
   int get scheduledFrameCount => _scheduledFrameCount;
@@ -28,7 +26,7 @@ class ScheduledFrameTrackingWindow extends TestWindow {
 }
 
 class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding {
-  final ScheduledFrameTrackingWindow _window = ScheduledFrameTrackingWindow();
+  late final ScheduledFrameTrackingWindow _window = ScheduledFrameTrackingWindow(window: super.window);
 
   @override
   ScheduledFrameTrackingWindow get window => _window;

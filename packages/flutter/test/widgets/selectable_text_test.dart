@@ -2707,14 +2707,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText throws when not descended from a MediaQuery widget', (WidgetTester tester) async {
-    const Widget selectableText = SelectableText('something');
-    await tester.pumpWidget(selectableText);
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
-  });
-
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
