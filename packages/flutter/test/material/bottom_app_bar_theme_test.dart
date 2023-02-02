@@ -173,10 +173,10 @@ void main() {
         home: const Scaffold(body: BottomAppBar()),
       ));
 
-      final PhysicalShape widget = _getBabRenderObject(tester);
+      final Material material = tester.widget(find.byType(Material).at(1));
 
-      expect(widget.color, theme.colorScheme.surface);
-      expect(widget.elevation, equals(3.0));
+      expect(material.color, theme.colorScheme.surface);
+      expect(material.elevation, equals(3.0));
     });
 
     testWidgets('BAB theme overrides surfaceTintColor - M3', (WidgetTester tester) async {
