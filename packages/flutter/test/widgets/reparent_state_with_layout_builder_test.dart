@@ -96,7 +96,7 @@ void main() {
     Widget deepChild = Container();
 
     await tester.pumpWidget(MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      data: MediaQueryData.fromView(tester.binding.window),
       child: Column(
         children: <Widget>[
           StatefulBuilder(builder: (BuildContext context, StateSetter setState) {

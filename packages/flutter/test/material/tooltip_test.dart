@@ -476,15 +476,13 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return MediaQuery.fromWindow(
-        child: MediaQuery(
-          data: MediaQueryData(
-            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
-          ),
-          child: MaterialApp(
-            useInheritedMediaQuery: true,
-            home: scaffold,
-          ),
+      return MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: scaffold,
         ),
       );
     }
@@ -1418,6 +1416,9 @@ void main() {
           id: 1,
           tooltip: 'TIP',
           textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.longPress,
+          ],
         ),
       ],
     );
@@ -1618,6 +1619,9 @@ void main() {
                       tooltip: 'Foo',
                       label: 'Bar',
                       textDirection: TextDirection.ltr,
+                      actions: <SemanticsAction>[
+                        SemanticsAction.longPress,
+                      ],
                     ),
                   ],
                 ),
