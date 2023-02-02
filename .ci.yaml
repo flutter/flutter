@@ -146,7 +146,6 @@ platform_properties:
       device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   ios_benchmark: &IOS_BENCHMARK_TEMPLATE
-    recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
@@ -3398,6 +3397,7 @@ targets:
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     << : *IOS_BENCHMARK_TEMPLATE
+    recipe: devicelab/devicelab_drone
     properties:
       task_name: animation_with_microtasks_perf_ios__timeline_summary
 
