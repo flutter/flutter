@@ -1728,10 +1728,10 @@ void main() {
       await testDebugFocusChanges();
       expect(messages, isEmpty);
       expect(tester.takeException(), isNull);
-      // debugFocusChanges = true;
-      // await testDebugFocusChanges();
-      // expect(messages.toString(), contains('FOCUS: Notified 3 dirty nodes:'));
-      // expect(tester.takeException(), isNull);
+      debugFocusChanges = true;
+      await testDebugFocusChanges();
+      expect(messages.toString(), contains('FOCUS: Notified 3 dirty nodes:'));
+      expect(tester.takeException(), isNull);
     } finally {
       debugFocusChanges = oldDebugFocusChanges;
       debugPrint = oldDebugPrint;
