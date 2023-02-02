@@ -13,6 +13,8 @@ import 'package:test/test.dart';
 
 import 'package:ui/ui.dart';
 
+import 'matchers.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -31,34 +33,32 @@ void testMain() {
   });
   test('Offset.fromDirection', () {
     expect(Offset.fromDirection(0.0, 0.0), const Offset(0.0, 0.0));
-    expect(Offset.fromDirection(pi / 2.0).dx,
-        closeTo(0.0, 1e-12)); // aah, floating point math. i love you so.
-    expect(Offset.fromDirection(pi / 2.0).dy, 1.0);
-    expect(Offset.fromDirection(-pi / 2.0).dx, closeTo(0.0, 1e-12));
-    expect(Offset.fromDirection(-pi / 2.0).dy, -1.0);
+     // aah, floating point math. i love you so.
+    expect(Offset.fromDirection(pi / 2.0), within(from: const Offset(0.0, 1.0)));
+    expect(Offset.fromDirection(-pi / 2.0), within(from: const Offset(0.0, -1.0)));
     expect(Offset.fromDirection(0.0), const Offset(1.0, 0.0));
-    expect(Offset.fromDirection(pi / 4.0).dx,
-        closeTo(1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(pi / 4.0).dy,
-        closeTo(1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(-pi / 4.0).dx,
-        closeTo(1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(-pi / 4.0).dy,
-        closeTo(-1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(pi).dx, -1.0);
-    expect(Offset.fromDirection(pi).dy, closeTo(0.0, 1e-12));
-    expect(Offset.fromDirection(pi * 3.0 / 4.0).dx,
-        closeTo(-1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(pi * 3.0 / 4.0).dy,
-        closeTo(1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(-pi * 3.0 / 4.0).dx,
-        closeTo(-1.0 / math.sqrt(2.0), 1e-12));
-    expect(Offset.fromDirection(-pi * 3.0 / 4.0).dy,
-        closeTo(-1.0 / math.sqrt(2.0), 1e-12));
+    expect(
+      Offset.fromDirection(pi / 4.0),
+      within(from: Offset(1.0 / math.sqrt(2.0), 1.0 / math.sqrt(2.0))),
+    );
+    expect(
+      Offset.fromDirection(-pi / 4.0),
+      within(from: Offset(1.0 / math.sqrt(2.0), -1.0 / math.sqrt(2.0))),
+    );
+    expect(Offset.fromDirection(pi), within(from: const Offset(-1.0, 0.0)));
+    expect(
+      Offset.fromDirection(pi * 3.0 / 4.0),
+      within(from: Offset(-1.0 / math.sqrt(2.0), 1.0 / math.sqrt(2.0))),
+    );
+    expect(
+      Offset.fromDirection(-pi * 3.0 / 4.0),
+      within(from: Offset(-1.0 / math.sqrt(2.0), -1.0 / math.sqrt(2.0))),
+    );
     expect(Offset.fromDirection(0.0, 2.0), const Offset(2.0, 0.0));
     expect(
-        Offset.fromDirection(pi / 6, 2.0).dx, closeTo(math.sqrt(3.0), 1e-12));
-    expect(Offset.fromDirection(pi / 6, 2.0).dy, closeTo(1.0, 1e-12));
+      Offset.fromDirection(pi / 6, 2.0),
+      within(from: Offset(math.sqrt(3.0), 1.0)),
+    );
   });
   test('Size.aspectRatio', () {
     expect(const Size(0.0, 0.0).aspectRatio, 0.0);
