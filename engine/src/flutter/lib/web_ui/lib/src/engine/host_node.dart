@@ -317,16 +317,16 @@ void applyGlobalCssRulesToSheet(
     }
   ''', sheet.cssRules.length);
 
-  // This css prevents an autofill overlay brought by the browser during
-  // text field autofill by delaying the transition effect.
-  // See: https://github.com/flutter/flutter/issues/61132.
+  // This CSS makes the autofill overlay transparent in order to prevent it
+  // from overlaying on top of Flutter-rendered text inputs.
+  // See: https://github.com/flutter/flutter/issues/118337.
   if (browserHasAutofillOverlay()) {
     sheet.insertRule('''
       $cssSelectorPrefix .transparentTextEditing:-webkit-autofill,
       $cssSelectorPrefix .transparentTextEditing:-webkit-autofill:hover,
       $cssSelectorPrefix .transparentTextEditing:-webkit-autofill:focus,
       $cssSelectorPrefix .transparentTextEditing:-webkit-autofill:active {
-        -webkit-transition-delay: 99999s;
+        opacity: 0 !important;
       }
     ''', sheet.cssRules.length);
   }
