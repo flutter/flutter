@@ -13,8 +13,9 @@ class LabeledCheckboxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LabeledCheckboxExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const LabeledCheckboxExample(),
     );
   }
 }

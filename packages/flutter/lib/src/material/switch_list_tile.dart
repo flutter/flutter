@@ -90,8 +90,8 @@ enum _SwitchListTileType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This sample shows the creation of a [SwitchListTile] using [ThemeData.useMaterial3] flag,
-/// as described in: https://m3.material.io/components/lists/overview.
+/// This sample demonstrates how [SwitchListTile] positions the switch widget
+/// relative to the text in different configurations.
 ///
 /// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
 /// {@end-tool}
