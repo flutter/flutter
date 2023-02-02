@@ -13,11 +13,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
-import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
@@ -73,7 +73,6 @@ void main() {
         flutterRoot: null, // ignore: avoid_redundant_argument_values
         platform: FakePlatform(),
         webBuildDirectory: null, // ignore: avoid_redundant_argument_values
-        basePath: null,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
