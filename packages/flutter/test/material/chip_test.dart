@@ -80,7 +80,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
     ),
@@ -2047,7 +2047,10 @@ void main() {
                             children: <TestSemantics>[
                               TestSemantics(
                                 tooltip: 'Delete',
-                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.tap,
+                                  SemanticsAction.longPress
+                                ],
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isButton,

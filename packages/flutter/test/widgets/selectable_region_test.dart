@@ -842,7 +842,7 @@ void main() {
       // Add a little offset to cross the boundary between paragraph 2 and 3.
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6) + const Offset(0, 1));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();

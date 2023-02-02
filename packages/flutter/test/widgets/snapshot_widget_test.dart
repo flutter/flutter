@@ -371,8 +371,7 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
-          .copyWith(devicePixelRatio: devicePixelRatio),
+        data: const MediaQueryData().copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

@@ -22,6 +22,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'data_table_theme.dart';
+import 'date_picker_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
@@ -348,6 +349,7 @@ class ThemeData with Diagnosticable {
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
+    DatePickerThemeData? datePickerTheme,
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
@@ -600,6 +602,7 @@ class ThemeData with Diagnosticable {
     checkboxTheme ??= const CheckboxThemeData();
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
+    datePickerTheme ??= const DatePickerThemeData();
     dialogTheme ??= const DialogTheme();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
@@ -697,6 +700,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: checkboxTheme,
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
+      datePickerTheme: datePickerTheme,
       dialogTheme: dialogTheme,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
@@ -810,6 +814,7 @@ class ThemeData with Diagnosticable {
     required this.checkboxTheme,
     required this.chipTheme,
     required this.dataTableTheme,
+    required this.datePickerTheme,
     required this.dialogTheme,
     required this.dividerTheme,
     required this.drawerTheme,
@@ -1238,6 +1243,7 @@ class ThemeData with Diagnosticable {
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
+  ///   * Date pickers: [showDatePicker], [showDateRangePicker], [DatePickerDialog], [DateRangePickerDialog], [InputDatePickerFormField]
   ///   * Dialogs: [Dialog], [AlertDialog]
   ///   * Divider: [Divider]
   ///   * Lists: [ListTile]
@@ -1252,6 +1258,7 @@ class ThemeData with Diagnosticable {
   ///   * Switch: [Switch]
   ///   * Tabs: [TabBar]
   ///   * TextFields: [TextField] together with its [InputDecoration]
+  ///   * Time pickers: [showTimePicker], [TimePickerDialog]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.
@@ -1472,6 +1479,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [DataTable]
   /// widgets.
   final DataTableThemeData dataTableTheme;
+
+  /// A theme for customizing the appearance and layout of [DatePickerDialog]
+  /// widgets.
+  final DatePickerThemeData datePickerTheme;
 
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
@@ -1811,6 +1822,7 @@ class ThemeData with Diagnosticable {
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
+    DatePickerThemeData? datePickerTheme,
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
@@ -1971,6 +1983,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
+      datePickerTheme: datePickerTheme ?? this.datePickerTheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
@@ -2165,6 +2178,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
+      datePickerTheme: DatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
@@ -2273,6 +2287,7 @@ class ThemeData with Diagnosticable {
         other.checkboxTheme == checkboxTheme &&
         other.chipTheme == chipTheme &&
         other.dataTableTheme == dataTableTheme &&
+        other.datePickerTheme == datePickerTheme &&
         other.dialogTheme == dialogTheme &&
         other.dividerTheme == dividerTheme &&
         other.drawerTheme == drawerTheme &&
@@ -2378,6 +2393,7 @@ class ThemeData with Diagnosticable {
       checkboxTheme,
       chipTheme,
       dataTableTheme,
+      datePickerTheme,
       dialogTheme,
       dividerTheme,
       drawerTheme,
@@ -2485,6 +2501,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DatePickerThemeData>('datePickerTheme', datePickerTheme, defaultValue: defaultData.datePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
