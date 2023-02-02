@@ -4,7 +4,7 @@
 # This file should be version controlled.
 
 version:
-  revision: 58cf7c1c90b87188cefef09b78a5b0a471fc9111
+  revision: 32c950aa693bf11e6224c6a1a13a94e84488a1cc
   channel: wide-gamut-integration-test
 
 project_type: app
@@ -13,11 +13,11 @@ project_type: app
 migration:
   platforms:
     - platform: root
-      create_revision: 58cf7c1c90b87188cefef09b78a5b0a471fc9111
-      base_revision: 58cf7c1c90b87188cefef09b78a5b0a471fc9111
+      create_revision: 32c950aa693bf11e6224c6a1a13a94e84488a1cc
+      base_revision: 32c950aa693bf11e6224c6a1a13a94e84488a1cc
     - platform: ios
-      create_revision: 58cf7c1c90b87188cefef09b78a5b0a471fc9111
-      base_revision: 58cf7c1c90b87188cefef09b78a5b0a471fc9111
+      create_revision: 32c950aa693bf11e6224c6a1a13a94e84488a1cc
+      base_revision: 32c950aa693bf11e6224c6a1a13a94e84488a1cc
 
   # User provided section
 

@@ -230,7 +230,8 @@ class IntegrationTest {
 
       if (createPlatforms.isNotEmpty) {
         await flutter('create', options: <String>[
-          '--platforms="${createPlatforms.join(',')}"',
+          '--platforms',
+          createPlatforms.join(','),
           '--no-overwrite',
           '.'
         ]);
