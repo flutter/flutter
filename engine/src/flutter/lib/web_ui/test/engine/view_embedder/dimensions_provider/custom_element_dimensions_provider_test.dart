@@ -110,41 +110,23 @@ void doTests() {
     });
 
     test('funnels resize events on sizeSource', () async {
-      final Future<Object?> event = provider.onResize.first;
-      final Future<List<Object?>> events = provider.onResize.take(3).toList();
+      sizeSource
+        ..style.width = '100px'
+        ..style.height = '100px';
 
-      // The resize observer fires asynchronously, so we wait a little between
-      // resizes, so the observer has time to fire events separately.
-      await Future<void>.delayed(const Duration(milliseconds: 100), () {
-        sizeSource
-          ..style.width = '100px'
-          ..style.height = '100px';
-      });
+      expect(await provider.onResize.first, const ui.Size(100, 100));
 
-      await Future<void>.delayed(const Duration(milliseconds: 100), () {
-        sizeSource
-          ..style.width = '200px'
-          ..style.height = '200px';
-      });
+      sizeSource
+        ..style.width = '200px'
+        ..style.height = '200px';
 
-      await Future<void>.delayed(const Duration(milliseconds: 100), () {
-        sizeSource
-          ..style.width = '300px'
-          ..style.height = '300px';
-      });
+      expect(await provider.onResize.first, const ui.Size(200, 200));
 
-      // Let the DOM settle so the observer reports the last 300x300 mutation...
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      sizeSource
+        ..style.width = '300px'
+        ..style.height = '300px';
 
-      expect(event, completion(const ui.Size(100, 100)));
-      expect(events, completes);
-      expect(
-          events,
-          completion(const <ui.Size>[
-            ui.Size(100, 100),
-            ui.Size(200, 200),
-            ui.Size(300, 300),
-          ]));
+      expect(await provider.onResize.first, const ui.Size(300, 300));
     });
 
     test('closed by onHotRestart', () async {
