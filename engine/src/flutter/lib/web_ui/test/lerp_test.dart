@@ -7,12 +7,7 @@ import 'package:test/test.dart';
 
 import 'package:ui/ui.dart';
 
-/// The epsilon of tolerable double precision error.
-///
-/// This is used in various places in the framework to allow for floating point
-/// precision loss in calculations. Differences below this threshold are safe
-/// to disregard.
-const double precisionErrorTolerance = 1e-10;
+import 'matchers.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -31,19 +26,19 @@ void testMain() {
   });
 
   test('lerpDouble should treat a null input as 0 if the other input is non-null', () {
-    expect(lerpDouble(null, 10.0, 0.25), closeTo(2.5, precisionErrorTolerance));
-    expect(lerpDouble(10.0, null, 0.25), closeTo(7.5, precisionErrorTolerance));
+    expect(lerpDouble(null, 10.0, 0.25), within(from: 2.5));
+    expect(lerpDouble(10.0, null, 0.25), within(from: 7.5));
 
-    expect(lerpDouble(null, 10, 0.25), closeTo(2.5, precisionErrorTolerance));
-    expect(lerpDouble(10, null, 0.25), closeTo(7.5, precisionErrorTolerance));
+    expect(lerpDouble(null, 10, 0.25), within(from: 2.5));
+    expect(lerpDouble(10, null, 0.25), within(from: 7.5));
   });
 
   test('lerpDouble should handle interpolation values < 0.0', () {
-    expect(lerpDouble(0.0, 10.0, -5.0), closeTo(-50.0, precisionErrorTolerance));
-    expect(lerpDouble(10.0, 0.0, -5.0), closeTo(60.0, precisionErrorTolerance));
+    expect(lerpDouble(0.0, 10.0, -5.0), within(from: -50.0));
+    expect(lerpDouble(10.0, 0.0, -5.0), within(from: 60.0));
 
-    expect(lerpDouble(0, 10, -5), closeTo(-50, precisionErrorTolerance));
-    expect(lerpDouble(10, 0, -5), closeTo(60, precisionErrorTolerance));
+    expect(lerpDouble(0, 10, -5), within(from: -50.0));
+    expect(lerpDouble(10, 0, -5), within(from: 60.0));
   });
 
   test('lerpDouble should return the start value at 0.0', () {
@@ -55,17 +50,17 @@ void testMain() {
   });
 
   test('lerpDouble should interpolate between two values', () {
-    expect(lerpDouble(0.0, 10.0, 0.25), closeTo(2.5, precisionErrorTolerance));
-    expect(lerpDouble(10.0, 0.0, 0.25), closeTo(7.5, precisionErrorTolerance));
+    expect(lerpDouble(0.0, 10.0, 0.25), within(from: 2.5));
+    expect(lerpDouble(10.0, 0.0, 0.25), within(from: 7.5));
 
-    expect(lerpDouble(0, 10, 0.25), closeTo(2.5, precisionErrorTolerance));
-    expect(lerpDouble(10, 0, 0.25), closeTo(7.5, precisionErrorTolerance));
+    expect(lerpDouble(0, 10, 0.25), within(from: 2.5));
+    expect(lerpDouble(10, 0, 0.25), within(from: 7.5));
 
     // Exact answer: 20.0 - 1.0e-29
-    expect(lerpDouble(10.0, 1.0e30, 1.0e-29), closeTo(20.0, precisionErrorTolerance));
+    expect(lerpDouble(10.0, 1.0e30, 1.0e-29), within(from: 20.0));
 
     // Exact answer: 5.0 + 5.0e29
-    expect(lerpDouble(10.0, 1.0e30, 0.5), closeTo(5.0e29, precisionErrorTolerance));
+    expect(lerpDouble(10.0, 1.0e30, 0.5), within(from: 5.0e29));
   });
 
   test('lerpDouble should return the end value at 1.0', () {
@@ -80,11 +75,11 @@ void testMain() {
   });
 
   test('lerpDouble should handle interpolation values > 1.0', () {
-    expect(lerpDouble(0.0, 10.0, 5.0), closeTo(50.0, precisionErrorTolerance));
-    expect(lerpDouble(10.0, 0.0, 5.0), closeTo(-40.0, precisionErrorTolerance));
+    expect(lerpDouble(0.0, 10.0, 5.0), within(from: 50.0));
+    expect(lerpDouble(10.0, 0.0, 5.0), within(from: -40.0));
 
-    expect(lerpDouble(0, 10, 5), closeTo(50, precisionErrorTolerance));
-    expect(lerpDouble(10, 0, 5), closeTo(-40, precisionErrorTolerance));
+    expect(lerpDouble(0, 10, 5), within(from: 50.0));
+    expect(lerpDouble(10, 0, 5), within(from: -40.0));
   });
 
   test('lerpDouble should return input value in all cases if begin/end are equal', () {
