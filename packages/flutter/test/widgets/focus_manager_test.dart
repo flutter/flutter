@@ -229,7 +229,7 @@ void main() {
         'hasFocus: false',
         'hasPrimaryFocus: false',
       ]);
-    }, skip: true);
+    });
 
     testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node 3');
@@ -1266,7 +1266,7 @@ void main() {
         ),
       );
     });
-  }, skip: true);
+  });
 
   group('Autofocus', () {
     testWidgets(
@@ -1699,7 +1699,7 @@ void main() {
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
     expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
-  }, skip: true);
+  });
 
     testWidgets("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
