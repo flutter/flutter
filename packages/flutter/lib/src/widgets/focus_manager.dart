@@ -27,12 +27,15 @@ bool debugFocusChanges = false;
 // assert(_focusDebug(() => 'Blah $foo'));
 //
 // It needs to be inside the assert in order to be removed in release mode, and
-// it needs to use a closure to generate the string in order to avoid the string
+// it needs to use a closure to generate the string in order to avoid string
 // interpolation when debugFocusChanges is false.
 //
 // It will throw a StateError if you try to call it when the app is in release
 // mode.
-bool _focusDebug(String Function() messageFunc, [Iterable<Object> Function()? detailsFunc]) {
+bool _focusDebug(
+  String Function() messageFunc, [
+  Iterable<Object> Function()? detailsFunc,
+]) {
   if (kReleaseMode) {
     throw StateError(
       '_focusDebug was called in Release mode. It should always be wrapped in '

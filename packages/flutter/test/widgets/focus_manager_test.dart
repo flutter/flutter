@@ -1701,7 +1701,7 @@ void main() {
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 
-    testWidgets("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
+  testWidgets("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
     final DebugPrintCallback oldDebugPrint = debugPrint;
     final StringBuffer messages = StringBuffer();
