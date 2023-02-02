@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'colors.dart';
 import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -177,6 +178,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color? shadowColor = isMaterial3 ? Colors.transparent : null;
 
     final Widget child = Padding(
       padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
@@ -190,12 +192,14 @@ class _BottomAppBarState extends State<BottomAppBar> {
         elevation: elevation,
         color: effectiveColor,
         clipBehavior: widget.clipBehavior,
+        elevation: isMaterial3 ? 0 : elevation,
         child: Material(
           key: materialKey,
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
           color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
+          shadowColor: shadowColor,
           child: SafeArea(child: child),
         ),
       ),

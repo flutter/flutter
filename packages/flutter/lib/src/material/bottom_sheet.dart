@@ -270,14 +270,16 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
-    final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
+    final BottomSheetThemeData defaults = useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
+    final Color? shadowColor = useMaterial3 ? Colors.transparent : null;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -286,6 +288,7 @@ class _BottomSheetState extends State<BottomSheet> {
       surfaceTintColor: surfaceTintColor,
       shape: shape,
       clipBehavior: clipBehavior,
+      shadowColor: shadowColor,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: widget.builder(context),
