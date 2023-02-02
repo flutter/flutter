@@ -286,7 +286,7 @@ void main() {
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java'),
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
             '-version',
           ],
           stderr: '123',
