@@ -39,14 +39,14 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Expected results
-      description: Please tell us what you expect to happen
+      label: Actual results
+      description: Please tell us what is actually happening
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Actual results
-      description: Please tell us what is actually happening
+      label: Expected results
+      description: Please tell us what you expect to happen
     validations:
       required: true
   - type: textarea
