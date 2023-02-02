@@ -23,9 +23,9 @@ body:
       label: Is there an existing issue for this?
       description: Please search to see if an issue already exists for the bug you encountered.
       options:
-      - label: I have read [our guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-        required: true
       - label: I have searched the existing issues
+        required: true
+      - label: I have read [our guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
         required: true
   - type: textarea
     attributes:
