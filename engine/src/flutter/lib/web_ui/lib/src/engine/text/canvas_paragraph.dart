@@ -174,6 +174,9 @@ class CanvasParagraph implements ui.Paragraph {
         }
 
         final DomElement spanElement = domDocument.createElement('flt-span');
+        if (fragment.textDirection == ui.TextDirection.rtl) {
+          spanElement.setAttribute('dir', 'rtl');
+        }
         applyTextStyleToElement(element: spanElement, style: fragment.style);
         _positionSpanElement(spanElement, line, fragment);
 

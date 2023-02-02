@@ -455,6 +455,40 @@ Future<void> testMain() async {
     );
     debugEmulateFlutterTesterEnvironment = true;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/108431.
+  // Set dir attribute for RTL fragments in order to let the browser
+  // handle mirrored characters.
+  test('Sets "dir" attribute for RTL fragment', () {
+    final EngineParagraphStyle style = EngineParagraphStyle(
+      fontSize: 20.0,
+      textDirection: TextDirection.rtl,
+    );
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+
+    builder.addText('(1)');
+
+    final CanvasParagraph paragraph = builder.build();
+    expect(paragraph.paragraphStyle, style);
+    expect(paragraph.plainText, '(1)');
+
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    expectOuterHtml(
+      paragraph,
+      '<flt-paragraph style="${paragraphStyle()}">'
+      '<flt-span dir="rtl" style="${spanStyle(top: null, left: null, width: null, fontSize: 20)}">'
+      '('
+      '</flt-span>'
+      '<flt-span style="${spanStyle(top: null, left: null, width: null, fontSize: 20)}">'
+      '1'
+      '</flt-span>'
+      '<flt-span dir="rtl" style="${spanStyle(top: null, left: null, width: null, fontSize: 20)}">'
+      ')'
+      '</flt-span>'
+      '</flt-paragraph>',
+      ignorePositions: true,
+    );
+  });
 }
 
 const String defaultFontFamily = 'Ahem';
