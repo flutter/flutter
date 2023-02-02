@@ -831,7 +831,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Can find Android Studio >=2022.1 bundled Java version on Linux', () {
+    testUsingContext('Can find Android Studio 2022.1 bundled Java version on Linux', () {
       const String studioHomeFilePath =
           '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
