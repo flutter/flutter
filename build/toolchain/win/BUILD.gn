@@ -178,6 +178,10 @@ template("msvc_toolchain") {
       dllname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # e.g. foo.dll
       libname =
           "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.lib"  # e.g. foo.dll.lib
+      expname =
+          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.exp"  # e.g. foo.dll.exp
+      pdbname =
+          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.pdb"  # e.g. foo.dll.pdb
       rspfile = "${dllname}.rsp"
 
       link_command = "$python_path $tool_wrapper_path link-wrapper $env False link.exe /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
@@ -191,7 +195,9 @@ template("msvc_toolchain") {
       description = "LINK(DLL) {{output}}"
       outputs = [
         dllname,
+        expname,
         libname,
+        pdbname,
       ]
       link_output = libname
       depend_output = libname
