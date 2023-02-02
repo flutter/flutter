@@ -29,6 +29,16 @@ body:
         required: true
   - type: textarea
     attributes:
+      label: Steps to reproduce
+      description: Please tell us exactly how to reproduce the problem you are running into.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: Expected results
       description: Please tell us what you expect to happen
     validations:
@@ -37,16 +47,6 @@ body:
     attributes:
       label: Actual results
       description: Please tell us what is actually happening
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Steps to reproduce
-      description: Please tell us exactly how to reproduce the problem you are running into.
-      placeholder: |
-        1. ...
-        2. ...
-        3. ...
     validations:
       required: true
   - type: textarea
