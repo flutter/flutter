@@ -3075,15 +3075,15 @@ void main() {
       void verifyAutocorrectionRectVisibility({ required bool expectVisible }) {
         PaintPattern evaluate() {
           if (expectVisible) {
-            return paints..something(((Symbol method, List<dynamic> arguments) {
+            return paints..something((Symbol method, List<dynamic> arguments) {
               if (method != #drawRect) {
                 return false;
               }
               final Paint paint = arguments[1] as Paint;
               return paint.color == rectColor;
-            }));
+            });
           } else {
-            return paints..everything(((Symbol method, List<dynamic> arguments) {
+            return paints..everything((Symbol method, List<dynamic> arguments) {
               if (method != #drawRect) {
                 return true;
               }
@@ -3092,7 +3092,7 @@ void main() {
                 return true;
               }
               throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
-            }));
+            });
           }
         }
 
