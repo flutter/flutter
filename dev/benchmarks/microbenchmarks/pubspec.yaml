@@ -5,7 +5,7 @@ environment:
   sdk: '>=2.19.0-0 <4.0.0'
 
 dependencies:
-  meta: 1.8.0
+  meta: 1.9.0
   flutter:
     sdk: flutter
   flutter_test:
@@ -136,4 +136,4 @@ flutter:
     - packages/flutter_gallery_assets/people/square/stella.png
     - packages/flutter_gallery_assets/people/square/trevor.png
 
-# PUBSPEC CHECKSUM: 5a38
+# PUBSPEC CHECKSUM: 4b39

@@ -34,7 +34,7 @@ void main() {
 
     testWithoutContext('is correct', () {
       expect(configuration.sdkDirectory, 'HostArtifact.flutterWebSdk');
-      expect(configuration.unsoundSdkSummaryPath, 'HostArtifact.webPlatformDDCKernelDill');
+      expect(configuration.weakSdkSummaryPath, 'HostArtifact.webPlatformDDCKernelDill');
       expect(configuration.soundSdkSummaryPath, 'HostArtifact.webPlatformDDCSoundKernelDill');
       expect(configuration.librariesPath, 'HostArtifact.flutterWebLibrariesJson');
       expect(configuration.compilerWorkerPath, isNull);
