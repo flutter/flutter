@@ -37,7 +37,8 @@ void main() {
       theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onError),
     );
 
-    // default badge alignment = AlignmentDirectional(12, -4)
+    // default badge alignment = AlignmentDirection.topEnd
+    // default offset for LTR = Offset(4, -4)
     // default padding = EdgeInsets.symmetric(horizontal: 4)
     // default largeSize = 16
     // '0'.width = 12
@@ -46,16 +47,9 @@ void main() {
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    // x = alignment.start + padding.left
-    // y = alignment.top
     expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    // '0'.width = 12
-    // L = alignment.start
-    // T = alignment.top
-    // R = L + '0'.width + padding.width
-    // B = T + largeSize, R = largeSize/2
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
   });
 
@@ -89,26 +83,13 @@ void main() {
       theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onError),
     );
 
-    // default badge alignment = AlignmentDirectional(12, -4)
-    // default padding = EdgeInsets.symmetric(horizontal: 4)
-    // default largeSize = 16
-    // '0'.width = 12
-    // icon.width = 24
-
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    // x = icon.width - alignment.start - '0'.width - padding.right
-    // y = alignment.top
-    expect(tester.getTopLeft(find.text('0')), const Offset(-4, -4));
+    expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    // L = icon.width - alignment.start - '0.width' - padding.width
-    // T = alignment.top
-    // R = L + '0.width' + padding.width
-    // B = T + largeSize
-    // R = largeSize/2
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(-8, -4, 12, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8)), color: theme.colorScheme.error));
   });
 
   // Essentially the same as 'Large Badge defaults'
