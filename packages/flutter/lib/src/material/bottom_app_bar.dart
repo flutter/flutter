@@ -189,7 +189,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
       height: height,
       child: PhysicalShape(
         clipper: clipper,
-        elevation: elevation,
         color: effectiveColor,
         clipBehavior: widget.clipBehavior,
         elevation: isMaterial3 ? 0 : elevation,
