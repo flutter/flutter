@@ -145,21 +145,20 @@ platform_properties:
       cpu: arm64
       device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
-  mac_benchmark: &MAC_BENCHMARK_TEMPLATE
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"},
-          {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "xcode", "version": "14a5294e"},
-        ]
-      device_type: none
-      drone_dimensions: >
-        ["mac_model=Macmini8,1"]
-      os: Mac-12
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      xcode: 14a5294e # xcode 14.0 beta 5
+  mac_benchmark_properties: &MAC_BENCHMARK_PROPERTIES_TEMPLATE
+    dependencies: >-
+      [
+        {"dependency": "apple_signing", "version": "version:2022_to_2023"},
+        {"dependency": "gems", "version": "v3.3.14"},
+        {"dependency": "xcode", "version": "14a5294e"},
+      ]
+    device_type: none
+    drone_dimensions: >
+      ["mac_model=Macmini8,1"]
+    os: Mac-12
+    tags: >
+      ["devicelab", "hostonly", "mac"]
+    xcode: 14a5294e # xcode 14.0 beta 5
   windows:
     properties:
       dependencies: >-
@@ -2611,11 +2610,11 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac complex_layout_scroll_perf_macos__timeline_summary
-    << : *MAC_BENCHMARK_TEMPLATE
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      *MAC_BENCHMARK_PROPERTIES_TEMPLATE
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
