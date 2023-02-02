@@ -23,7 +23,7 @@ body:
       label: Is there an existing issue for this?
       description: Please search to see if an issue already exists for the bug you encountered.
       options:
-      - label: I have read https://flutter.dev/docs/resources/bug-reports
+      - label: I have read [our guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
         required: true
       - label: I have searched the existing issues
         required: true
@@ -31,10 +31,14 @@ body:
     attributes:
       label: Expected results
       description: Please tell us what you expect to happen
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Actual results
       description: Please tell us what is actually happening
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Steps to reproduce
