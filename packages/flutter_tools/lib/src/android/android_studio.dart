@@ -441,7 +441,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return;
     }
 
-    final String javaDirName = version != null && version.major < 2022 ? 'jre' : 'jbr';
     final String javaPath = globals.platform.isMacOS ?
         version != null && version.major < 2020 ?
         globals.fs.path.join(directory, javaDirName, 'jdk', 'Contents', 'Home') :
