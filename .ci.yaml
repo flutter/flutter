@@ -9,6 +9,35 @@ enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
 
+mac_ios_template: &MAC_IOS_TEMPLATE
+  properties:
+    dependencies: >-
+      [
+        {"dependency": "xcode", "version": "14c18"},
+        {"dependency": "gems", "version": "v3.3.14"},
+        {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+      ]
+    os: Mac-12
+    device_os: iOS-16
+    xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+
+mac_x64_ios_template: &MAC_X64_IOS_TEMPLATE
+  properties:
+    cpu: x86
+
+mac_arm64_ios_template: &MAC_ARM64_IOS_TEMPLATE
+  properties:
+    cpu: arm64
+
+ios_benchmark_template: &IOS_BENCHMARK_TEMPLATE
+  << : *MAC_X64_IOS_TEMPLATE
+  recipe: devicelab/devicelab_drone
+  presubmit: false
+  timeout: 60
+  properties:
+    tags: >
+      ["devicelab", "ios", "mac"]
+
 platform_properties:
   staging_build_linux:
     properties:
@@ -122,29 +151,9 @@ platform_properties:
       cpu: arm64
       device_type: "msm8952"
   mac_ios:
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14c18"},
-          {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
-        ]
-      os: Mac-12
-      cpu: x86
-      device_os: iOS-16
-      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+    << : *MAC_X64_IOS_TEMPLATE
   mac_arm64_ios:
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14c18"},
-          {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "none"}
-        ]
-      os: Mac-12
-      cpu: arm64
-      device_os: iOS-16
-      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+    << : *MAC_ARM64_IOS_TEMPLATE
   windows:
     properties:
       dependencies: >-
@@ -3380,12 +3389,8 @@ targets:
       task_name: run_release_test
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
+    << : *IOS_BENCHMARK_TEMPLATE
     properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
