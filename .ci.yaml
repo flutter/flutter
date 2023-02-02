@@ -1389,7 +1389,7 @@ targets:
     properties:
       device_type: "none"
       tags: >
-        ["devicelab" ,"android", "linux"]
+        ["devicelab", "linux"]
       task_name: android_defines_test
       dependencies: >-
         [
