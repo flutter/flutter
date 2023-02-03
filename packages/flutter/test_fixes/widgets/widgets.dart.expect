@@ -10,6 +10,13 @@ void main() {
   RenderObjectWidget renderObjectWidget;
   RenderObject renderObject;
   Object object;
+  TickerProvider vsync;
+
+  // Changes made in https://github.com/flutter/flutter/pull/119647
+  MediaQueryData.fromView(View.of(context));
+
+  // Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
+  AnimatedSize(duration: Duration.zero);
 
   // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance;

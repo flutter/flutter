@@ -432,25 +432,25 @@ class _FocusDemoState extends State<FocusDemo> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'One'),
                             DemoButton(name: 'Two'),
                             DemoButton(name: 'Three'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Four'),
                             DemoButton(name: 'Five'),
                             DemoButton(name: 'Six'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Seven'),
                             DemoButton(name: 'Eight'),
                             DemoButton(name: 'Nine'),

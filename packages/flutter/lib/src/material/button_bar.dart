@@ -233,7 +233,7 @@ class ButtonBar extends StatelessWidget {
 class _ButtonBarRow extends Flex {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
-  _ButtonBarRow({
+  const _ButtonBarRow({
     required super.children,
     super.mainAxisSize,
     super.mainAxisAlignment,

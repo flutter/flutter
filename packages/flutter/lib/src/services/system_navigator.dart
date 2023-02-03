@@ -98,28 +98,4 @@ class SystemNavigator {
       },
     );
   }
-
-  /// Notifies the platform of a route change, and selects single-entry history
-  /// mode.
-  ///
-  /// This is equivalent to calling [selectSingleEntryHistory] and
-  /// [routeInformationUpdated] together.
-  ///
-  /// The `previousRouteName` argument is ignored.
-  @Deprecated(
-    'Use routeInformationUpdated instead. '
-    'This feature was deprecated after v2.3.0-1.0.pre.'
-  )
-  static Future<void> routeUpdated({
-    String? routeName,
-    String? previousRouteName,
-  }) {
-    return SystemChannels.navigation.invokeMethod<void>(
-      'routeUpdated',
-      <String, dynamic>{
-        'previousRouteName': previousRouteName,
-        'routeName': routeName,
-      },
-    );
-  }
 }

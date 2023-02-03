@@ -10,9 +10,9 @@ import 'mock_canvas.dart';
 void main() {
   testWidgets('Flex overflow indicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 200.0, height: 200.0),
           ],
         ),
@@ -22,11 +22,11 @@ void main() {
     expect(find.byType(Column), isNot(paints..rect()));
 
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 100.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(width: 200.0, height: 200.0),
             ],
           ),
@@ -39,11 +39,11 @@ void main() {
     expect(find.byType(Column), paints..rect());
 
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 0.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(width: 200.0, height: 200.0),
             ],
           ),

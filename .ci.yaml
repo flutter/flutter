@@ -90,6 +90,18 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+  mac_benchmark:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
+      device_type: none
+      mac_model: "Macmini8,1"
+      os: Mac-12
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      xcode: 14a5294e # xcode 14.0 beta 5
   mac_x64:
     properties:
       dependencies: >-
@@ -105,7 +117,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Mac-12
@@ -1376,16 +1388,25 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
-  # TODO (ricardoamador) https://github.com/flutter/flutter/issues/119026
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
+    presubmit: true
     timeout: 60
+    dimensions: {
+      kvm: "1",
+      cores: "8",
+      machine_type: "n1-standard-8"
+    }
     properties:
+      device_type: "none"
       tags: >
-        ["devicelab" ,"android", "linux"]
+        ["devicelab", "linux"]
       task_name: android_defines_test
+      dependencies: >-
+        [
+          {"dependency": "android_virtual_device", "version": "31"}
+        ]
+      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -2375,6 +2396,7 @@ targets:
       task_name: gradient_static_perf__e2e_summary
 
   - name: Linux_android android_choreographer_do_frame_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/119720
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2428,7 +2450,8 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Mac animated_complex_opacity_perf_macos__e2e_summary
+  - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2438,11 +2461,10 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
-  - name: Mac basic_material_app_macos__compile
+  - name: Mac_benchmark basic_material_app_macos__compile
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2451,8 +2473,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
@@ -2492,11 +2512,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -2512,11 +2531,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -2532,11 +2550,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -2552,11 +2569,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -2567,7 +2583,8 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac complex_layout_macos__compile
+  - name: Mac_benchmark complex_layout_macos__compile
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2577,13 +2594,12 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__compile
 
-  - name: Mac complex_layout_macos__start_up
-    recipe: devicelab/devicelab_drone
+  - name: Mac_benchmark complex_layout_macos__start_up
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
+    recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2591,13 +2607,12 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
 
-  - name: Mac complex_layout_scroll_perf_macos__timeline_summary
-    recipe: devicelab/devicelab_drone
+  - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
+    recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2605,8 +2620,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
@@ -2637,8 +2650,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac flutter_gallery_macos__compile
-    presubmit: false
+  - name: Mac flavors_test_macos
+    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2649,9 +2662,23 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
+      task_name: flavors_test_macos
+
+  - name: Mac_benchmark flutter_gallery_macos__compile
+    bringup: true # https://github.com/flutter/flutter/pull/119871
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: flutter_gallery_macos__compile
 
-  - name: Mac flutter_gallery_macos__start_up
+  - name: Mac_benchmark flutter_gallery_macos__start_up
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2661,8 +2688,6 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
   - name: Mac flutter_packaging_test
@@ -2673,7 +2698,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging_v2/packaging_v2
@@ -2686,7 +2710,8 @@ targets:
     dimensions:
       cpu: "arm64"
 
-  - name: Mac flutter_view_macos__start_up
+  - name: Mac_benchmark flutter_view_macos__start_up
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2695,8 +2720,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
@@ -2795,7 +2818,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac hello_world_macos__compile
+  - name: Mac_benchmark hello_world_macos__compile
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2804,8 +2828,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
@@ -2909,7 +2931,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac platform_view_macos__start_up
+  - name: Mac_benchmark platform_view_macos__start_up
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2918,8 +2941,6 @@ targets:
         [
           {"dependency": "xcode", "version": "14a5294e"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: platform_view_macos__start_up
 
   - name: Mac plugin_dependencies_test
@@ -3074,11 +3095,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -3100,11 +3120,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -3126,11 +3145,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -3152,11 +3170,10 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
@@ -3227,11 +3244,10 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3313,7 +3329,6 @@ targets:
       task_name: integration_ui_frame_number
 
   - name: Mac_android microbenchmarks
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/118692
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3324,7 +3339,6 @@ targets:
 
   - name: Mac_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
@@ -4852,13 +4866,12 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: flutter_tool_startup__linux
 
-  - name: Mac flutter_tool_startup__macos
-    recipe: devicelab/devicelab_drone
+  - name: Mac_benchmark flutter_tool_startup__macos
+    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
+    recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
   - name: Linux flutter_packaging
