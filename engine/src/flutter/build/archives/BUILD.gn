@@ -229,6 +229,7 @@ if (host_os == "win") {
   zip_bundle("windows_flutter") {
     output = "$full_target_platform_name-$flutter_runtime_mode/$full_target_platform_name-flutter.zip"
     deps = [
+      "//flutter:gen_snapshot",
       "//flutter/shell/platform/common:publish_headers",
       "//flutter/shell/platform/windows:flutter_windows",
       "//flutter/shell/platform/windows:publish_headers_windows",
@@ -269,6 +270,10 @@ if (host_os == "win") {
       {
         source = "$root_out_dir/flutter_windows.dll.pdb"
         destination = "flutter_windows.dll.pdb"
+      },
+      {
+        source = "$root_out_dir/gen_snapshot/gen_snapshot.exe"
+        destination = "gen_snapshot.exe"
       },
     ]
   }
