@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
@@ -16,6 +17,8 @@ import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
+  // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
+  debugPrintHitTestResults = true;
   runApp(const TestApp());
 }
 

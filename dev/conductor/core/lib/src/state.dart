@@ -45,6 +45,9 @@ String luciConsoleLink(String channel, String groupName) {
   );
   final String consoleName =
       channel == 'master' ? groupName : '${channel}_$groupName';
+  if (groupName == 'packaging') {
+    return 'https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console';
+  }
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
 

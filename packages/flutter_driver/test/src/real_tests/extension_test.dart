@@ -649,10 +649,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
               home: Column(
-                key: const ValueKey<String>('column'),
-                children: const <Widget>[
+                key: ValueKey<String>('column'),
+                children: <Widget>[
                   Text('Hello1', key: ValueKey<String>('text1')),
                   Text('Hello2', key: ValueKey<String>('text2')),
                   Text('Hello3', key: ValueKey<String>('text3')),
@@ -694,10 +694,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Column(
-            key: const ValueKey<String>('column'),
-            children: const <Widget>[
+            key: ValueKey<String>('column'),
+            children: <Widget>[
               Text('Hello1', key: ValueKey<String>('text1')),
               Text('Hello2', key: ValueKey<String>('text2')),
               Text('Hello3', key: ValueKey<String>('text3')),
@@ -729,15 +729,15 @@ void main() {
       }
 
       await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Center(
                 child: SizedBox(
-                  key: const ValueKey<String>('parent'),
+                  key: ValueKey<String>('parent'),
                   height: 100,
                   width: 100,
                   child: Center(
                     child: Row(
-                      children: const <Widget>[
+                      children: <Widget>[
                         SizedBox(
                           key: ValueKey<String>('leftchild'),
                           width: 25,
@@ -1147,9 +1147,9 @@ void main() {
       return result;
     }
 
-    final Widget testWidget = MaterialApp(
+    const Widget testWidget = MaterialApp(
       home: Material(
-        child: Column(children: const<Widget> [
+        child: Column(children: <Widget> [
           Text('Hello ', key: Key('widgetOne')),
           SizedBox.shrink(
             child: Text('World!', key: Key('widgetTwo')),

@@ -284,12 +284,12 @@ void main() {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
-    await tester.pumpWidget(Center(
+    await tester.pumpWidget(const Center(
       child: SizedBox.shrink(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(
               key: childKey,
               width: 100.0,
@@ -704,13 +704,13 @@ void main() {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
-    await tester.pumpWidget(Center(
+    await tester.pumpWidget(const Center(
       child: SizedBox.shrink(
         child: Row(
           textDirection: TextDirection.ltr,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(
               key: childKey,
               width: 100.0,
@@ -1125,13 +1125,13 @@ void main() {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
-    await tester.pumpWidget(Center(
+    await tester.pumpWidget(const Center(
       child: SizedBox.shrink(
         child: Row(
           textDirection: TextDirection.rtl,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(
               key: childKey,
               width: 100.0,

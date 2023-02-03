@@ -253,9 +253,9 @@ Widget _withTheme(BottomAppBarTheme theme, [bool useMaterial3 = false]) {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: RepaintBoundary(
         key: _painterKey,
-        child: BottomAppBar(
+        child: const BottomAppBar(
           child: Row(
-            children: const <Widget>[
+            children: <Widget>[
               Icon(Icons.add),
               Expanded(child: SizedBox()),
               Icon(Icons.add),
