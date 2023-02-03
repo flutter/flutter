@@ -38,6 +38,7 @@ Future<void> withFlutterLeakTracking(
   // The method is not combined with [testWidgets], because the combining will
   // impact VSCode's ability to recognize tests.
 
+  // Leak tracker does not work for web platform.
   if (kIsWeb) {
     await callback();
     return;
