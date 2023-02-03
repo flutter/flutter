@@ -78,7 +78,6 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
-      cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_arm64:
     properties:
@@ -2707,8 +2706,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "arm64"
 
   - name: Mac_benchmark flutter_view_macos__start_up
     bringup: true # https://github.com/flutter/flutter/pull/119871
@@ -2726,6 +2723,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
@@ -2751,6 +2749,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
@@ -2780,6 +2779,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
@@ -3019,6 +3019,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119750
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -3074,7 +3075,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: arm64
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -4915,8 +4915,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "arm64"
 
   - name: Windows flutter_packaging
     recipe: packaging_v2/packaging_v2
