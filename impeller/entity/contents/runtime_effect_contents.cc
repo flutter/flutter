@@ -238,7 +238,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   pass.AddCommand(std::move(cmd));
 
   if (geometry_result.prevent_overdraw) {
-    return ClipRestoreContents().Render(renderer, entity, pass);
+    auto restore = ClipRestoreContents();
+    restore.SetRestoreCoverage(GetCoverage(entity));
+    return restore.Render(renderer, entity, pass);
   }
   return true;
 }
