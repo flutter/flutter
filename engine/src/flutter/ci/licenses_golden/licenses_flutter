@@ -1226,6 +1226,8 @@ ORIGIN: ../../../flutter/impeller/compiler/switches.cc + ../../../flutter/LICENS
 ORIGIN: ../../../flutter/impeller/compiler/switches.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/types.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/types.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/uniform_sorter.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/uniform_sorter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/utilities.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/utilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/display_list_dispatcher.cc + ../../../flutter/LICENSE
@@ -3705,6 +3707,8 @@ FILE: ../../../flutter/impeller/compiler/switches.cc
 FILE: ../../../flutter/impeller/compiler/switches.h
 FILE: ../../../flutter/impeller/compiler/types.cc
 FILE: ../../../flutter/impeller/compiler/types.h
+FILE: ../../../flutter/impeller/compiler/uniform_sorter.cc
+FILE: ../../../flutter/impeller/compiler/uniform_sorter.h
 FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc

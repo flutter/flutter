@@ -182,7 +182,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
         ShaderUniformSlot uniform_slot;
         uniform_slot.name = uniform.name.c_str();
-        uniform_slot.ext_res_0 = buffer_index;
+        uniform_slot.ext_res_0 = uniform.location;
         cmd.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
                          buffer_view);
         buffer_index++;
