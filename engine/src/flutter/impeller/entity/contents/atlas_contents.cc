@@ -126,8 +126,6 @@ bool AtlasContents::Render(const ContentContext& renderer,
   auto dst_contents = std::make_shared<AtlasColorContents>(*this);
   dst_contents->SetCoverage(coverage);
 
-  // For some reason this looks backwards compared to Skia unless
-  // we reverse the src/dst.
   auto contents = ColorFilterContents::MakeBlend(
       blend_mode_,
       {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});

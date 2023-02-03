@@ -378,7 +378,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   GetCurrentPass().AddEntity(entity);
 }
 
-void Canvas::DrawVertices(std::unique_ptr<VerticesGeometry> vertices,
+void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                           BlendMode blend_mode,
                           const Paint& paint) {
   Entity entity;
@@ -386,20 +386,23 @@ void Canvas::DrawVertices(std::unique_ptr<VerticesGeometry> vertices,
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (paint.color_source.has_value()) {
-    auto& source = paint.color_source.value();
-    auto contents = source();
-    contents->SetGeometry(std::move(vertices));
-    contents->SetAlpha(paint.color.alpha);
-    entity.SetContents(paint.WithFilters(std::move(contents), true));
-  } else {
-    std::shared_ptr<VerticesContents> contents =
-        std::make_shared<VerticesContents>();
-    contents->SetColor(paint.color);
-    contents->SetBlendMode(blend_mode);
-    contents->SetGeometry(std::move(vertices));
-    entity.SetContents(paint.WithFilters(std::move(contents), true));
+  if (!vertices->HasVertexColors()) {
+    auto contents = paint.CreateContentsForGeometry(vertices);
+    entity.SetContents(paint.WithFilters(std::move(contents)));
+    GetCurrentPass().AddEntity(entity);
+    return;
   }
+
+  auto src_paint = paint;
+  src_paint.color = paint.color.WithAlpha(1.0);
+  auto src_contents = src_paint.CreateContentsForGeometry(vertices);
+
+  auto contents = std::make_shared<VerticesContents>();
+  contents->SetAlpha(paint.color.alpha);
+  contents->SetBlendMode(blend_mode);
+  contents->SetGeometry(vertices);
+  contents->SetSourceContents(std::move(src_contents));
+  entity.SetContents(paint.WithFilters(std::move(contents)));
 
   GetCurrentPass().AddEntity(entity);
 }
@@ -413,11 +416,6 @@ void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
                        std::optional<Rect> cull_rect,
                        const Paint& paint) {
   if (!atlas) {
-    return;
-  }
-  auto size = atlas->GetSize();
-
-  if (size.IsEmpty()) {
     return;
   }
 
