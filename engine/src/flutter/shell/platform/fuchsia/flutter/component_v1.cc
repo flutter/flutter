@@ -217,8 +217,7 @@ ComponentV1::ComponentV1(
 
   // Clone and check if client is servicing the directory.
   directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
-                            fuchsia::io::OpenFlags::RIGHT_READABLE |
-                            fuchsia::io::OpenFlags::RIGHT_WRITABLE,
+                            fuchsia::io::OpenFlags::CLONE_SAME_RIGHTS,
                         cloned_directory_ptr_.NewRequest());
 
   cloned_directory_ptr_.events().OnOpen = [this](zx_status_t status,
@@ -234,8 +233,11 @@ ComponentV1::ComponentV1(
     for (auto& dir_str : other_dirs) {
       fuchsia::io::DirectoryHandle dir;
       auto request = dir.NewRequest().TakeChannel();
-      auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
-                                            dir_str, request.release());
+      auto status = fdio_open_at(
+          directory_ptr_.channel().get(), dir_str,
+          static_cast<uint32_t>(fuchsia::io::OpenFlags::DIRECTORY |
+                                fuchsia::io::OpenFlags::RIGHT_READABLE),
+          request.release());
       if (status == ZX_OK) {
         outgoing_dir_->AddEntry(
             dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));

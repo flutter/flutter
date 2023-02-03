@@ -267,8 +267,7 @@ ComponentV2::ComponentV2(
 
   // Clone and check if client is servicing the directory.
   directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
-                            fuchsia::io::OpenFlags::RIGHT_READABLE |
-                            fuchsia::io::OpenFlags::RIGHT_WRITABLE,
+                            fuchsia::io::OpenFlags::CLONE_SAME_RIGHTS,
                         cloned_directory_ptr_.NewRequest());
 
   // Collect our standard set of directories along with directories that are
@@ -291,8 +290,11 @@ ComponentV2::ComponentV2(
     for (auto& dir_str : other_dirs) {
       fuchsia::io::DirectoryHandle dir;
       auto request = dir.NewRequest().TakeChannel();
-      auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
-                                            dir_str.c_str(), request.release());
+      auto status = fdio_open_at(
+          directory_ptr_.channel().get(), dir_str.c_str(),
+          static_cast<uint32_t>(fuchsia::io::OpenFlags::DIRECTORY |
+                                fuchsia::io::OpenFlags::RIGHT_READABLE),
+          request.release());
       if (status == ZX_OK) {
         outgoing_dir_->AddEntry(
             dir_str.c_str(),
