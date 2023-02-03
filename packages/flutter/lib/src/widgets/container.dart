@@ -101,7 +101,11 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
         label = 'fg';
         break;
     }
-    properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
+    properties.add(EnumProperty<DecorationPosition>(
+      'position',
+      position,
+      level: DiagnosticLevel.hidden,
+    ));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
 }
@@ -263,20 +267,8 @@ class Container extends StatelessWidget {
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(decoration != null || clipBehavior == Clip.none),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".',
-       ),
-       constraints =
-        (width != null || height != null)
-          ? constraints?.tighten(width: width, height: height)
-            ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints;
+  })  : _width = width,
+        _height = height;
 
   final double? _width;
   final double? _height;
@@ -370,14 +362,14 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null) {
+    if (decoration == null || decoration!.padding == null) {
       return padding;
     }
-    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
+    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
-    return padding!.add(decorationPadding);
+    return padding!.add(decorationPadding!);
   }
 
   @override
@@ -483,7 +475,8 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  }) : textDirection = textDirection ?? TextDirection.ltr;
+  })  : assert(decoration != null),
+        textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;
@@ -495,7 +488,6 @@ class _DecorationClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_DecorationClipper oldClipper) {
-    return oldClipper.decoration != decoration
-         || oldClipper.textDirection != textDirection;
+    return oldClipper.decoration != decoration || oldClipper.textDirection != textDirection;
   }
 }
