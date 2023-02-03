@@ -11822,7 +11822,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
     await tester.pump();
 
-    // Selection should not be updated as the new position is within the selection range.
+    // Selection should not be changed since it wasn't previously collapsed.
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
@@ -11859,7 +11859,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
     await tester.pump();
 
-    // Selection should not be updated as the new position is within the selection range.
+    // Selection should not be changed since it wasn't previously collapsed.
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
@@ -11898,7 +11898,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
     await tester.pump();
 
-    // Selection affinity should be updated.
+    // Selection should be changed as it was previously collapsed.
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 27);
     expect(controller.selection.extentOffset, 27);
