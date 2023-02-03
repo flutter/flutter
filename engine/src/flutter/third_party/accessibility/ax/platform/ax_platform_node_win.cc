@@ -5266,7 +5266,6 @@ std::optional<EVENTID> AXPlatformNodeWin::MojoEventToUIAEvent(
   }
 }
 
-// static
 std::optional<PROPERTYID> AXPlatformNodeWin::MojoEventToUIAProperty(
     ax::mojom::Event event) {
   switch (event) {
@@ -5281,6 +5280,11 @@ std::optional<PROPERTYID> AXPlatformNodeWin::MojoEventToUIAProperty(
     case ax::mojom::Event::kSelectionAdd:
     case ax::mojom::Event::kSelectionRemove:
       return UIA_SelectionItemIsSelectedPropertyId;
+    case ax::mojom::Event::kValueChanged:
+      if (SupportsToggle(GetData().role)) {
+        return UIA_ToggleToggleStatePropertyId;
+      }
+      return std::nullopt;
     default:
       return std::nullopt;
   }

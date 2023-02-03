@@ -470,8 +470,7 @@ class AX_EXPORT __declspec(uuid("26f5641a-246d-457b-a96d-07f3fae6acf2"))
   static std::optional<EVENTID> MojoEventToUIAEvent(ax::mojom::Event event);
 
   // Convert a mojo event to a UIA property id. Exposed for testing.
-  static std::optional<PROPERTYID> MojoEventToUIAProperty(
-      ax::mojom::Event event);
+  std::optional<PROPERTYID> MojoEventToUIAProperty(ax::mojom::Event event);
 
   // |AXPlatformNodeBase|
   bool IsDescendantOf(AXPlatformNode* ancestor) const override;
