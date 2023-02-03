@@ -95,7 +95,6 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "apple_signing", "version": "version:2022_to_2023"},
-          {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "xcode", "version": "14a5294e"}
         ]
       device_type: none
@@ -2459,6 +2458,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
   - name: Mac_benchmark basic_material_app_macos__compile
@@ -2583,6 +2586,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: complex_layout_macos__compile
 
   - name: Mac_benchmark complex_layout_macos__start_up
@@ -2591,6 +2598,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
@@ -2599,6 +2610,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
@@ -2649,6 +2664,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: flutter_gallery_macos__compile
 
   - name: Mac_benchmark flutter_gallery_macos__start_up
@@ -2657,6 +2676,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       task_name: flutter_gallery_macos__start_up
 
   - name: Mac flutter_packaging_test
