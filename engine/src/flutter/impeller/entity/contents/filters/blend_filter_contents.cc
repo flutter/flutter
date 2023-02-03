@@ -205,7 +205,7 @@ static std::optional<Snapshot> PipelineBlend(
       FS::FragInfo frag_info;
       frag_info.texture_sampler_y_coord_scale =
           input->texture->GetYCoordScale();
-      frag_info.input_alpha = absorb_opacity ? input->opacity : 1.0f;
+      frag_info.input_alpha = absorb_opacity ? input->opacity : 1.0;
       FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
       VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 

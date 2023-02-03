@@ -36,7 +36,7 @@ class FilterInput {
 
   virtual ~FilterInput();
 
-  static FilterInput::Ref Make(Variant input);
+  static FilterInput::Ref Make(Variant input, bool msaa_enabled = true);
 
   static FilterInput::Ref Make(std::shared_ptr<Texture> input,
                                Matrix local_transform);

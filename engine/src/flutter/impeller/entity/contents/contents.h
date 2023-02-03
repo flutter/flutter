@@ -60,7 +60,8 @@ class Contents {
   ///        `GetCoverage(entity)`.
   virtual std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
-      const Entity& entity) const;
+      const Entity& entity,
+      bool msaa_enabled = true) const;
 
   virtual bool ShouldRender(const Entity& entity,
                             const std::optional<Rect>& stencil_coverage) const;

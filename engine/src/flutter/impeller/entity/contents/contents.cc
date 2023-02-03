@@ -40,7 +40,8 @@ Contents::StencilCoverage Contents::GetStencilCoverage(
 
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
-    const Entity& entity) const {
+    const Entity& entity,
+    bool msaa_enabled) const {
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {
     return std::nullopt;
@@ -56,7 +57,8 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
             Matrix::MakeTranslation(Vector3(-coverage->origin)) *
             entity.GetTransformation());
         return contents.Render(renderer, sub_entity, pass);
-      });
+      },
+      msaa_enabled);
 
   if (!texture) {
     return std::nullopt;

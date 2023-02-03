@@ -29,7 +29,7 @@ class SolidColorContents final : public Contents {
   static std::unique_ptr<SolidColorContents> Make(const Path& path,
                                                   Color color);
 
-  void SetGeometry(std::unique_ptr<Geometry> geometry);
+  void SetGeometry(std::shared_ptr<Geometry> geometry);
 
   void SetColor(Color color);
 
@@ -48,7 +48,7 @@ class SolidColorContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  std::unique_ptr<Geometry> geometry_;
+  std::shared_ptr<Geometry> geometry_;
 
   Color color_;
 

@@ -40,6 +40,21 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
   return solid_color;
 }
 
+std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
+    const std::shared_ptr<Geometry>& geometry) const {
+  if (color_source.has_value()) {
+    auto& source = color_source.value();
+    auto contents = source();
+    contents->SetGeometry(geometry);
+    contents->SetAlpha(color.alpha);
+    return contents;
+  }
+  auto solid_color = std::make_shared<SolidColorContents>();
+  solid_color->SetGeometry(geometry);
+  solid_color->SetColor(color);
+  return solid_color;
+}
+
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input,
     std::optional<bool> is_solid_color,

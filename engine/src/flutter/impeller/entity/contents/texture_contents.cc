@@ -66,7 +66,8 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
-    const Entity& entity) const {
+    const Entity& entity,
+    bool msaa_enabled) const {
   auto bounds = path_.GetBoundingBox();
   if (!bounds.has_value()) {
     return std::nullopt;
