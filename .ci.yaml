@@ -2466,7 +2466,7 @@ targets:
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2626,7 +2626,7 @@ targets:
         ["framework", "hostonly", "mac"]
 
   - name: Mac dart_plugin_registry_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2645,7 +2645,7 @@ targets:
 
   - name: Mac flavors_test_macos
     bringup: true
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2799,7 +2799,7 @@ targets:
       - .ci.yaml
 
   - name: Mac gradle_plugin_bundle_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2829,8 +2829,7 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    recipe: devicelab/devicelab_drone
-    presubmit: false
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2843,7 +2842,7 @@ targets:
       task_name: integration_ui_test_test_macos
 
   - name: Mac module_custom_host_app_name_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2861,7 +2860,7 @@ targets:
       - .ci.yaml
 
   - name: Mac module_host_with_custom_build_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2879,7 +2878,7 @@ targets:
       - .ci.yaml
 
   - name: Mac module_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2897,7 +2896,7 @@ targets:
       - .ci.yaml
 
   - name: Mac module_test_ios
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
@@ -2943,7 +2942,7 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac plugin_dependencies_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2963,7 +2962,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_lint_mac
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -2997,7 +2996,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -3015,7 +3014,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test_ios
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -3033,7 +3032,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test_macos
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -3992,7 +3991,7 @@ targets:
       task_name: spell_check_test_ios
 
   - name: Mac native_ui_tests_macos
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -4010,7 +4009,7 @@ targets:
       - .ci.yaml
 
   - name: Mac channels_integration_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -4028,7 +4027,7 @@ targets:
       - .ci.yaml
 
   - name: Mac run_debug_test_macos
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
@@ -4060,7 +4059,7 @@ targets:
       - .ci.yaml
 
   - name: Mac run_release_test_macos
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
     properties:
