@@ -2755,7 +2755,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
       // Only change if new position is out of current selection range, as the
       // selection may have been modified using the iOS keyboard selection gesture.
-      if (_lastTextPosition!.offset < renderEditable.selection!.start || _lastTextPosition!.offset >= renderEditable.selection!.end) {
+      if (renderEditable.selection!.isCollapsed
+          || _lastTextPosition!.offset < renderEditable.selection!.start
+          || _lastTextPosition!.offset > renderEditable.selection!.end) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
