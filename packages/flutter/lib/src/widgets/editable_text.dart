@@ -3695,7 +3695,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      if (kIsWeb && !_isMultiline && !_nextFocusChangeIsInternal) {
+      final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
+          && !_isMultiline && !_nextFocusChangeIsInternal;
+      if (shouldSelectAll) {
         // On native web, single line <input> tags select all when receiving
         // focus.
         _handleSelectionChanged(
