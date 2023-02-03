@@ -15,6 +15,13 @@
 
 @interface DisplayLinkManager : NSObject
 
+// Whether the max refresh rate on iPhone Pro-motion devices are enabled.
+// This reflects the value of `CADisableMinimumFrameDurationOnPhone` in the
+// info.plist file.
+//
+// Note on iPads that support Pro-motion, the max refresh rate is always enabled.
+@property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
+
 //------------------------------------------------------------------------------
 /// @brief      The display refresh rate used for reporting purposes. The engine does not care
 ///             about this for frame scheduling. It is only used by tools for instrumentation. The
@@ -51,6 +58,8 @@
 
 - (double)getRefreshRate;
 
+- (void)setMaxRefreshRate:(double)refreshRate;
+
 @end
 
 namespace flutter {
@@ -64,11 +73,16 @@ class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateRepor
   // |VariableRefreshRateReporter|
   double GetRefreshRate() const override;
 
- private:
-  fml::scoped_nsobject<VSyncClient> client_;
+  // Made public for testing.
+  fml::scoped_nsobject<VSyncClient> GetVsyncClient() const;
 
   // |VsyncWaiter|
+  // Made public for testing.
   void AwaitVSync() override;
+
+ private:
+  fml::scoped_nsobject<VSyncClient> client_;
+  double max_refresh_rate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };
