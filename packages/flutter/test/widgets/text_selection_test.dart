@@ -653,26 +653,31 @@ void main() {
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
-
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
-    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
 
-    // Mark word being tapped as misspelled.
+    // Mark word to be tapped as misspelled for testing.
     state.markCurrentSelectionAsMisspelled = true;
+    await tester.pump();
 
-    // Test touch gesture.
-    final TestGesture touchGesture = await tester.startGesture(
-      const Offset(25.0, 200.0),
-      pointer: 0,
-    );
-    await touchGesture.up();
+    // Test spell check suggestions toolbar is shown on first tap of misspelled word
+    const Offset position = Offset(25.0, 200.0);
+    await tester.tapAt(position);
     await tester.pumpAndSettle();
 
     expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
 
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    // Reset and test text selection toolbar is toggled for additional taps.
+    state.showSpellCheckSuggestionsToolbarCalled = false;
+    await tester.pump();
+
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.showToolbarCalled, isTrue);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);

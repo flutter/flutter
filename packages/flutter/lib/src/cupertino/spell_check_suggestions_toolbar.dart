@@ -13,7 +13,7 @@ const int maxSuggestions = 3;
 
 /// The default spell check suggestions toolbar for Android.
 ///
-/// Tries to position itself below the [anchor], but if it doesn't fit, then it
+/// Tries to position itself below the [anchors], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
 class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [SpellCheckSuggestionsToolbar].
