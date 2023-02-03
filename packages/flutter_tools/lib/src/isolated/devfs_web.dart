@@ -387,7 +387,6 @@ class WebAssetServer implements AssetReader {
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
-      headers[HttpHeaders.contentLengthHeader] = bytes!.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/javascript';
       headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
@@ -400,7 +399,6 @@ class WebAssetServer implements AssetReader {
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
-      headers[HttpHeaders.contentLengthHeader] = bytes!.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
       headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
@@ -414,7 +412,6 @@ class WebAssetServer implements AssetReader {
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
-      headers[HttpHeaders.contentLengthHeader] = bytes!.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
       headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
@@ -504,7 +501,6 @@ class WebAssetServer implements AssetReader {
 
     final Map<String, String> headers = <String, String>{
       HttpHeaders.contentTypeHeader: 'text/html',
-      HttpHeaders.contentLengthHeader: indexHtml.content.length.toString(),
     };
     return shelf.Response.ok(indexHtml.content, headers: headers);
   }
