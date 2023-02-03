@@ -97,7 +97,7 @@ class Canvas {
                      Point position,
                      const Paint& paint);
 
-  void DrawVertices(std::unique_ptr<VerticesGeometry> vertices,
+  void DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                     BlendMode blend_mode,
                     const Paint& paint);
 

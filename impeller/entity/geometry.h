@@ -75,13 +75,13 @@ class VerticesGeometry : public Geometry {
  public:
   virtual GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
                                                 const Entity& entity,
-                                                RenderPass& pass,
-                                                Color paint_color,
-                                                BlendMode blend_mode) = 0;
+                                                RenderPass& pass) = 0;
 
   virtual GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
                                              const Entity& entity,
                                              RenderPass& pass) = 0;
+
+  virtual bool HasVertexColors() const = 0;
 };
 
 /// @brief A geometry that is created from a filled path object.

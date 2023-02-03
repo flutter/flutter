@@ -23,10 +23,11 @@ class ContentsFilterInput final : public FilterInput {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
  private:
-  ContentsFilterInput(std::shared_ptr<Contents> contents);
+  ContentsFilterInput(std::shared_ptr<Contents> contents, bool msaa_enabled);
 
   std::shared_ptr<Contents> contents_;
   mutable std::optional<Snapshot> snapshot_;
+  bool msaa_enabled_;
 
   friend FilterInput;
 };

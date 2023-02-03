@@ -23,15 +23,13 @@ class DLVerticesGeometry : public VerticesGeometry {
 
   ~DLVerticesGeometry();
 
-  static std::unique_ptr<VerticesGeometry> MakeVertices(
+  static std::shared_ptr<VerticesGeometry> MakeVertices(
       const flutter::DlVertices* vertices);
 
   // |VerticesGeometry|
   GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
                                         const Entity& entity,
-                                        RenderPass& pass,
-                                        Color paint_color,
-                                        BlendMode blend_mode) override;
+                                        RenderPass& pass) override;
 
   // |VerticesGeometry|
   GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
@@ -48,6 +46,9 @@ class DLVerticesGeometry : public VerticesGeometry {
 
   // |Geometry|
   GeometryVertexType GetVertexType() const override;
+
+  // |VerticesGeometry|
+  bool HasVertexColors() const override;
 
  private:
   void NormalizeIndices();
