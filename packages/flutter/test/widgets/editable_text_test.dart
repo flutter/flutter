@@ -2223,7 +2223,7 @@ void main() {
         find.byType(EditableText),
       );
 
-      // Selecting all
+      // Selecting all.
       controller.selection = TextSelection(
         baseOffset: 0,
         extentOffset: controller.text.length,
@@ -2232,15 +2232,10 @@ void main() {
 
       final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
 
-      if (items == null) {
-        fail('Cut button was not returned');
-      }
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
 
-      if (items.length > 1) {
-        fail('Not only the cut button was returned');
-      }
-
-      final ContextMenuButtonItem cutButton = items.first;
+      final ContextMenuButtonItem cutButton = items!.first;
       expect(cutButton.type, ContextMenuButtonType.cut);
 
       cutButton.onPressed();
@@ -2296,7 +2291,7 @@ void main() {
         find.byType(EditableText),
       );
 
-      // Selecting all
+      // Selecting all.
       controller.selection = TextSelection(
         baseOffset: 0,
         extentOffset: controller.text.length,
@@ -2305,15 +2300,10 @@ void main() {
 
       final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
 
-      if (items == null) {
-        fail('Copy button was not returned');
-      }
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
 
-      if (items.length > 1) {
-        fail('Not only the copy button was returned');
-      }
-
-      final ContextMenuButtonItem copyButton = items.first;
+      final ContextMenuButtonItem copyButton = items!.first;
       expect(copyButton.type, ContextMenuButtonType.copy);
 
       copyButton.onPressed();
@@ -2369,24 +2359,19 @@ void main() {
         find.byType(EditableText),
       );
 
-      // Moving caret to the end
+      // Moving caret to the end.
       controller.selection = TextSelection.collapsed(offset: controller.text.length);
       expect(state.pasteEnabled, isTrue);
 
       final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
 
-      if (items == null) {
-        fail('Paste button was not returned');
-      }
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
 
-      if (items.length > 1) {
-        fail('Not only the paste button was returned');
-      }
-
-      final ContextMenuButtonItem pasteButton = items.first;
+      final ContextMenuButtonItem pasteButton = items!.first;
       expect(pasteButton.type, ContextMenuButtonType.paste);
 
-      // Setting data which will be pasted into the clipboard
+      // Setting data which will be pasted into the clipboard.
       await Clipboard.setData(const ClipboardData(text: text));
 
       pasteButton.onPressed();
@@ -2442,15 +2427,10 @@ void main() {
 
       final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
 
-      if (items == null) {
-        fail('Select all button was not returned');
-      }
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
 
-      if (items.length > 1) {
-        fail('Not only the select all button was returned');
-      }
-
-      final ContextMenuButtonItem selectAllButton = items.first;
+      final ContextMenuButtonItem selectAllButton = items!.first;
       expect(selectAllButton.type, ContextMenuButtonType.selectAll);
 
       selectAllButton.onPressed();
