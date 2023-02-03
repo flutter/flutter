@@ -697,7 +697,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
     super.debugOwner,
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : _deadline = kPressTimeout,

@@ -248,11 +248,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   LongPressGestureRecognizer({
     Duration? duration,
     super.postAcceptSlopTolerance = null,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.debugOwner,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,

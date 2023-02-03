@@ -215,11 +215,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   MultiDragGestureRecognizer({
     required super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
@@ -371,11 +366,6 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ImmediateMultiDragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
@@ -429,11 +419,6 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalMultiDragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
@@ -487,11 +472,6 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalMultiDragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
@@ -597,11 +577,6 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   DelayedMultiDragGestureRecognizer({
     this.delay = kLongPressTimeout,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
