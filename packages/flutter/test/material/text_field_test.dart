@@ -9265,7 +9265,7 @@ void main() {
   );
 
   testWidgets(
-    'triple tap chains work on Non-Apple platforms',
+    'triple tap chains work on Non-Apple mobile platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -9929,6 +9929,335 @@ void main() {
       expect(controller.selection.extentOffset, 20);
     },
     variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'Going past triple click retains the selection on Apple platforms',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // First click moves the cursor to the point of the click, not the edge of
+      // the clicked word.
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(200.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      // Second click selects the word.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      // Triple click selects the paragraph.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      // Clicking again retains the selection.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Clicking again retains the selection.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Clicking again retains the selection.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets(
+    'Tap count resets when going past a triple tap on Android, Fuchsia, and Linux',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // First click moves the cursor to the point of the click, not the edge of
+      // the clicked word.
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(200.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      // Second click selects the word.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      // Triple click selects the paragraph.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      // Clicking again moves the caret to the tapped positio.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Clicking again selects the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Clicking again selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // Clicking again moves the caret to the tapped position.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Clicking again selects the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Clicking again selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux }),
+  );
+
+  testWidgets(
+    'Double click and triple click alternate on Windows',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // First click moves the cursor to the point of the click, not the edge of
+      // the clicked word.
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(200.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 13);
+
+      // Second click selects the word.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      // Triple click selects the paragraph.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      // Clicking again selects the word.
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Clicking again selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Clicking again selects the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // Clicking again selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Clicking again selects the word.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 15),
+      );
+
+      await gesture.down(textFieldStart + const Offset(200.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Clicking again selects the paragraph.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 20),
+      );
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
   );
 
   testWidgets(
