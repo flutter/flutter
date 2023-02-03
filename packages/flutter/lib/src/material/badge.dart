@@ -120,7 +120,7 @@ class Badge extends StatelessWidget {
   /// This value is only used if [label] is non-null.
   ///
   /// Defaults to the [BadgeTheme]'s alignment, or
-  /// [AlignmentDirectional.topRight] if the theme's value is null.
+  /// [AlignmentDirectional.topEnd] if the theme's value is null.
   final AlignmentGeometry? alignment;
 
   /// Combined with [alignment] to determine the location of the [label]
