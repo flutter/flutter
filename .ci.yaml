@@ -90,6 +90,21 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+  mac_benchmark:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"},
+          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "xcode", "version": "14a5294e"},
+        ]
+      device_type: none
+      drone_dimensions: >
+        ["mac_model=Macmini8,1"]
+      os: Mac-12
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      xcode: 14a5294e # xcode 14.0 beta 5
   mac_x64:
     properties:
       dependencies: >-
@@ -2438,31 +2453,18 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Mac animated_complex_opacity_perf_macos__e2e_summary
+  - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
-  - name: Mac basic_material_app_macos__compile
+  - name: Mac_benchmark basic_material_app_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
@@ -2573,46 +2575,25 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac complex_layout_macos__compile
+  - name: Mac_benchmark complex_layout_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__compile
 
-  - name: Mac complex_layout_macos__start_up
+  - name: Mac_benchmark complex_layout_macos__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
 
-  - name: Mac complex_layout_scroll_perf_macos__timeline_summary
+  - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
@@ -2657,32 +2638,18 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_macos
 
-  - name: Mac flutter_gallery_macos__compile
+  - name: Mac_benchmark flutter_gallery_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__compile
 
-  - name: Mac flutter_gallery_macos__start_up
+  - name: Mac_benchmark flutter_gallery_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
   - name: Mac flutter_packaging_test
@@ -2693,7 +2660,6 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging_v2/packaging_v2
@@ -2706,17 +2672,11 @@ targets:
     dimensions:
       cpu: "arm64"
 
-  - name: Mac flutter_view_macos__start_up
+  - name: Mac_benchmark flutter_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
@@ -2815,17 +2775,11 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac hello_world_macos__compile
+  - name: Mac_benchmark hello_world_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
@@ -2929,17 +2883,11 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac platform_view_macos__start_up
+  - name: Mac_benchmark platform_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: platform_view_macos__start_up
 
   - name: Mac plugin_dependencies_test
@@ -4865,13 +4813,11 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: flutter_tool_startup__linux
 
-  - name: Mac flutter_tool_startup__macos
+  - name: Mac_benchmark flutter_tool_startup__macos
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
   - name: Linux flutter_packaging
