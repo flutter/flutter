@@ -40,6 +40,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
+    @Deprecated(
+      'Use overlayConstraints instead of optionsMaxHeight '
+      'This allows a better control on the Overlay sizing '
+      'This feature was deprecated after v3.7.0-1.5.pre.'
+    )
+    this.optionsMaxHeight = 200,
     this.overlayConstraints,
     this.optionsViewBuilder,
     this.initialValue,
@@ -61,6 +67,19 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.optionsBuilder}
   final AutocompleteOptionsBuilder<T> optionsBuilder;
 
+  /// The maximum height used for the default Material options list widget.
+  ///
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
+  /// that the options widget can occupy.
+  ///
+  /// The default value is set to 200.
+  @Deprecated(
+    'Use overlayConstraints instead of optionsMaxHeight '
+    'This allows a better control on the Overlay sizing '
+    'This feature was deprecated after v3.7.0-1.5.pre.'
+  )
+  final double? optionsMaxHeight;
+
   /// {@macro flutter.widgets.RawAutocomplete.optionsViewBuilder}
   ///
   /// If not provided, will build a standard Material-style list of results by
@@ -69,11 +88,11 @@ class Autocomplete<T extends Object> extends StatelessWidget {
 
   /// The constraints of the suggestions Overlay.
   ///
-  /// The default height constraint is set to 200
+  /// The default height constraint is set to 200.
+  ///
   /// The default width constraint is set to the width of the Input Widget
   /// or custom widget given.
   final BoxConstraints? overlayConstraints;
-
 
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
@@ -99,7 +118,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
-          constraints: overlayConstraints ?? BoxConstraints(maxHeight: 200, maxWidth: maxWidth),
+          constraints: overlayConstraints ?? BoxConstraints(maxHeight: optionsMaxHeight ?? 200, maxWidth: maxWidth),
         );
       },
       onSelected: onSelected,

@@ -69,7 +69,7 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
   TextEditingController textEditingController,
   FocusNode focusNode,
   VoidCallback onFieldSubmitted,
-  GlobalKey fieldKey,
+  GlobalKey textFieldKey,
 );
 
 /// The type of the [RawAutocomplete] callback that converts an option value to
@@ -276,7 +276,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> with WidgetsBindingObserver {
-  final GlobalKey _fieldKey = GlobalKey();
   double _fieldWidth = double.maxFinite;
   final GlobalKey _textFieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
@@ -563,26 +562,23 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   Widget build(BuildContext context) {
     return TextFieldTapRegion(
-      child: Container(
-        key: _fieldKey,
-        child: Shortcuts(
-          shortcuts: _shortcuts,
-          child: Actions(
-            actions: _actionMap,
-            child: CompositedTransformTarget(
-              link: _optionsLayerLink,
-              child: widget.fieldViewBuilder == null
-                ? SizedBox.shrink(
-                  key: _textFieldKey,
-                )
-                : widget.fieldViewBuilder!(
-                  context,
-                  _textEditingController,
-                  _focusNode,
-                  _onFieldSubmitted,
-                  _textFieldKey,
-                ),
-            ),
+      child: Shortcuts(
+        shortcuts: _shortcuts,
+        child: Actions(
+          actions: _actionMap,
+          child: CompositedTransformTarget(
+            link: _optionsLayerLink,
+            child: widget.fieldViewBuilder == null
+              ? SizedBox.shrink(
+                key: _textFieldKey,
+              )
+              : widget.fieldViewBuilder!(
+                context,
+                _textEditingController,
+                _focusNode,
+                _onFieldSubmitted,
+                _textFieldKey,
+              ),
           ),
         ),
       ),
