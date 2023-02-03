@@ -72,7 +72,7 @@ class ApplicationSwitcherDescription {
 
 /// Specifies a system overlay at a particular location.
 ///
-/// Used by [SystemChrome.setEnabledSystemUIOverlays].
+/// Used by [SystemChrome.setEnabledSystemUIMode].
 enum SystemUiOverlay {
   /// The status bar provided by the embedder on the top of the application
   /// surface, if any.
@@ -478,7 +478,7 @@ class SystemChrome {
   }
 
   /// Restores the system overlays to the last settings provided via
-  /// [setEnabledSystemUIOverlays]. May be used when the platform force enables/disables
+  /// [setEnabledSystemUIMode]. May be used when the platform force enables/disables
   /// UI elements.
   ///
   /// For example, when the Android keyboard disables hidden status and navigation bars,
