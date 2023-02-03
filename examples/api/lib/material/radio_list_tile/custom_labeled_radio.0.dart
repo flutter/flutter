@@ -57,8 +57,8 @@ class LinkedLabelRadio extends StatelessWidget {
           RichText(
             text: TextSpan(
               text: label,
-              style: const TextStyle(
-                color: Colors.blueAccent,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
