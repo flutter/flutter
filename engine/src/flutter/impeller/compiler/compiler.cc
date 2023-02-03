@@ -16,6 +16,7 @@
 #include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
 #include "impeller/compiler/types.h"
+#include "impeller/compiler/uniform_sorter.h"
 
 namespace impeller {
 namespace compiler {
@@ -35,6 +36,51 @@ static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
   sl_options.msl_version =
       spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
   sl_compiler->set_msl_options(sl_options);
+
+  // Sort the float and sampler uniforms according to their declared/decorated
+  // order. For user authored fragment shaders, the API for setting uniform
+  // values uses the index of the uniform in the declared order. By default, the
+  // metal backend of spirv-cross will order uniforms according to usage. To fix
+  // this, we use the sorted order and the add_msl_resource_binding API to force
+  // the ordering to match the declared order. Note that while this code runs
+  // for all compiled shaders, it will only affect fragment shaders due to the
+  // specified stage.
+  auto floats =
+      SortUniforms(&ir, sl_compiler.get(), spirv_cross::SPIRType::Float);
+  auto images =
+      SortUniforms(&ir, sl_compiler.get(), spirv_cross::SPIRType::SampledImage);
+
+  uint32_t buffer_offset = 0;
+  uint32_t sampler_offset = 0;
+  for (auto& float_id : floats) {
+    sl_compiler->add_msl_resource_binding(
+        {.stage = spv::ExecutionModel::ExecutionModelFragment,
+         .basetype = spirv_cross::SPIRType::BaseType::Float,
+         .desc_set = sl_compiler->get_decoration(float_id,
+                                                 spv::DecorationDescriptorSet),
+         .binding =
+             sl_compiler->get_decoration(float_id, spv::DecorationBinding),
+         .count = 1u,
+         .msl_buffer = buffer_offset});
+    buffer_offset++;
+  }
+  for (auto& image_id : images) {
+    sl_compiler->add_msl_resource_binding({
+        .stage = spv::ExecutionModel::ExecutionModelFragment,
+        .basetype = spirv_cross::SPIRType::BaseType::SampledImage,
+        .desc_set =
+            sl_compiler->get_decoration(image_id, spv::DecorationDescriptorSet),
+        .binding =
+            sl_compiler->get_decoration(image_id, spv::DecorationBinding),
+        .count = 1u,
+        // A sampled image is both an image and a sampler, so both
+        // offsets need to be set or depending on the partiular shader
+        // the bindings may be incorrect.
+        .msl_texture = sampler_offset,
+        .msl_sampler = sampler_offset,
+    });
+    sampler_offset++;
+  }
 
   return CompilerBackend(sl_compiler);
 }
