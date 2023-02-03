@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'custom_paint.dart';
+import 'debug_overflow_indicator.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'paragraph.dart';
@@ -265,7 +266,7 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextLayoutMetrics {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>, DebugOverflowIndicatorMixin implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -1699,9 +1700,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  // We need to check the paint offset here because during animation, the start of
-  // the text may position outside the visible region even when the text fits.
-  bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
+  bool _hasVisualOverflow = false;
 
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
@@ -2386,6 +2385,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
+  late Rect _debugOverflowContainerRect;
+  late Rect _debugOverflowChildRect;
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -2417,6 +2419,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
+
+    // We need to check the paint offset here because during animation, the
+    // start of the text may position outside the visible region even when the
+    // text fits.
+    _hasVisualOverflow = _paintOffset != Offset.zero || contentSize.width > size.width || contentSize.height > size.height;
+    assert(() {
+      switch (_viewportAxis) {
+        case Axis.horizontal:
+          _debugOverflowContainerRect = Offset.zero & size;
+          _debugOverflowChildRect = Offset.zero & Size(size.width, preferredHeight);
+          break;
+        case Axis.vertical:
+          _debugOverflowContainerRect = Rect.zero;
+          _debugOverflowChildRect = Rect.zero;
+          break;
+      }
+      return true;
+    }());
   }
 
   // The relative origin in relation to the distance the user has theoretically
@@ -2635,6 +2655,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         clipBehavior: clipBehavior,
         oldLayer: _clipRectLayer.layer,
       );
+      assert(() {
+        final List<DiagnosticsNode> hints = <DiagnosticsNode>[
+          ErrorDescription(
+            'A single-line $runtimeType is vertically overflowing. It has been '
+            'marked in the rendering with a yellow and black striped pattern. '
+          ),
+          ErrorHint(
+            'The text field needed a minimum vertical space of '
+            '${_debugOverflowChildRect.height} pixels. Consider increasing the '
+            'vertical space given to the text field, or give the text field a '
+            'unbounded max height constraint.'
+          ),
+        ];
+        paintOverflowIndicator(context, offset, _debugOverflowContainerRect, _debugOverflowChildRect, overflowHints: hints);
+        return true;
+      }());
     } else {
       _clipRectLayer.layer = null;
       _paintContents(context, offset);
