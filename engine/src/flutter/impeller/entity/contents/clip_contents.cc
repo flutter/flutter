@@ -136,6 +136,11 @@ ClipRestoreContents::ClipRestoreContents() = default;
 
 ClipRestoreContents::~ClipRestoreContents() = default;
 
+void ClipRestoreContents::SetRestoreCoverage(
+    std::optional<Rect> restore_coverage) {
+  restore_coverage_ = restore_coverage;
+}
+
 std::optional<Rect> ClipRestoreContents::GetCoverage(
     const Entity& entity) const {
   return std::nullopt;
@@ -164,19 +169,20 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   auto options = OptionsFromPassAndEntity(pass, entity);
   options.stencil_compare = CompareFunction::kLess;
   options.stencil_operation = StencilOperation::kSetToReferenceValue;
+  options.primitive_type = PrimitiveType::kTriangleStrip;
   cmd.pipeline = renderer.GetClipPipeline(options);
   cmd.stencil_reference = entity.GetStencilDepth();
 
-  // Create a rect that covers the whole render target.
-  auto size = pass.GetRenderTargetSize();
+  // Create a rect that covers either the given restore area, or the whole
+  // render target texture.
+  auto ltrb = restore_coverage_.value_or(Rect(Size(pass.GetRenderTargetSize())))
+                  .GetLTRB();
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   vtx_builder.AddVertices({
-      {Point(0.0, 0.0)},
-      {Point(size.width, 0.0)},
-      {Point(size.width, size.height)},
-      {Point(0.0, 0.0)},
-      {Point(size.width, size.height)},
-      {Point(0.0, size.height)},
+      {Point(ltrb[0], ltrb[1])},
+      {Point(ltrb[2], ltrb[1])},
+      {Point(ltrb[0], ltrb[3])},
+      {Point(ltrb[2], ltrb[3])},
   });
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
