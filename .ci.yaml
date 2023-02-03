@@ -92,6 +92,10 @@ platform_properties:
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_benchmark:
     properties:
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       device_type: none
       mac_model: "Macmini8,1"
       os: Mac-12
