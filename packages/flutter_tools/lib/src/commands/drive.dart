@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -21,6 +22,8 @@ import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -203,6 +206,27 @@ class DriveCommand extends RunCommandBase {
   @override
   bool get cachePubGet => false;
 
+  String? get applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+
+  Future<Device?> get targetedDevice async {
+    return findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+  }
+
+  // Network devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a network device,
+  // change it to be enabled.
+  @override
+  Future<bool> get disablePortPublication async {
+    final ArgResults? localArgResults = argResults;
+    final Device? device = await targetedDevice;
+    final bool isNetworkDevice = device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
+    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+      return false;
+    }
+    return !boolArgDeprecated('publish-port');
+  }
+
   @override
   Future<void> validateCommand() async {
     if (userIdentifier != null) {
@@ -216,15 +240,14 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String testFile = _getTestFile()!;
+    final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final String? applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
-    final Device? device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+    final Device? device = await targetedDevice;
     if (device == null) {
       throwToolExit(null);
     }
@@ -237,7 +260,7 @@ class DriveCommand extends RunCommandBase {
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(

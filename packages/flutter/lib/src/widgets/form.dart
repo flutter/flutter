@@ -46,8 +46,7 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : assert(child != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -296,7 +295,7 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
@@ -318,8 +317,7 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : assert(builder != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].

@@ -45,10 +45,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -104,10 +101,7 @@ void main() {
                           padding: const EdgeInsets.all(5.0),
                           verticalOffset: 20.0,
                           preferBelow: false,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -164,10 +158,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -218,10 +209,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -274,10 +262,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -341,10 +326,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -396,10 +378,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -453,10 +432,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -500,15 +476,13 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return MediaQuery.fromWindow(
-        child: MediaQuery(
-          data: MediaQueryData(
-            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
-          ),
-          child: MaterialApp(
-            useInheritedMediaQuery: true,
-            home: scaffold,
-          ),
+      return MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: scaffold,
         ),
       );
     }
@@ -559,10 +533,7 @@ void main() {
                   message: tooltipText,
                   padding: EdgeInsets.zero,
                   margin: const EdgeInsets.all(customMarginValue),
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -859,10 +830,7 @@ void main() {
                   key: tooltipKey,
                   decoration: customDecoration,
                   message: tooltipText,
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -1312,10 +1280,10 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Tooltip(
                 message: 'message1',
                 waitDuration: waitDuration,
@@ -1370,9 +1338,7 @@ void main() {
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));

@@ -226,7 +226,6 @@ class AnsiTerminal implements Terminal {
 
   @override
   String bolden(String message) {
-    assert(message != null);
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -247,8 +246,7 @@ class AnsiTerminal implements Terminal {
 
   @override
   String color(String message, TerminalColor color) {
-    assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty) {
+    if (!supportsColor || message.isEmpty) {
       return message;
     }
     final StringBuffer buffer = StringBuffer();

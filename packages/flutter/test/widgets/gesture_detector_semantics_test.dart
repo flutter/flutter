@@ -725,9 +725,7 @@ class _RenderTestLayoutPerformer extends RenderBox {
   @override
   void performLayout() {
     size = const Size(1, 1);
-    if (_performLayout != null) {
-      _performLayout();
-    }
+    _performLayout();
   }
 }
 

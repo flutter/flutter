@@ -176,7 +176,18 @@ void main() {
       minimumMatches: 1,
     ), shouldHaveErrors: true);
 
-    expect(result, contains('L15'));
-    expect(result, isNot(contains('L12')));
+    expect(result, contains(':15'));
+    expect(result, isNot(contains(':12')));
+  });
+
+  test('analyze.dart - verifyTabooDocumentation', () async {
+    final String result = await capture(() => verifyTabooDocumentation(
+      testRootPath,
+      minimumMatches: 1,
+    ), shouldHaveErrors: true);
+
+    expect(result, isNot(contains(':19')));
+    expect(result, contains(':20'));
+    expect(result, contains(':21'));
   });
 }

@@ -30,8 +30,7 @@ typedef MouseDetectorAnnotationFinder = HitTestResult Function(Offset offset);
 class _MouseState {
   _MouseState({
     required PointerEvent initialEvent,
-  }) : assert(initialEvent != null),
-       _latestEvent = initialEvent;
+  }) : _latestEvent = initialEvent;
 
   // The list of annotations that contains this device.
   //
@@ -40,7 +39,6 @@ class _MouseState {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> replaceAnnotations(LinkedHashMap<MouseTrackerAnnotation, Matrix4> value) {
-    assert(value != null);
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> previous = _annotations;
     _annotations = value;
     return previous;
@@ -51,7 +49,6 @@ class _MouseState {
   PointerEvent _latestEvent;
 
   PointerEvent replaceLatestEvent(PointerEvent value) {
-    assert(value != null);
     assert(value.device == _latestEvent.device);
     final PointerEvent previous = _latestEvent;
     _latestEvent = value;
@@ -83,10 +80,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
     required this.lastAnnotations,
     required this.nextAnnotations,
     required PointerEvent this.previousEvent,
-  }) : assert(previousEvent != null),
-       assert(lastAnnotations != null),
-       assert(nextAnnotations != null),
-       triggeringEvent = null;
+  }) : triggeringEvent = null;
 
   /// When device update is triggered by a pointer event.
   ///
@@ -97,9 +91,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
     required this.nextAnnotations,
     this.previousEvent,
     required PointerEvent this.triggeringEvent,
-  }) : assert(triggeringEvent != null),
-       assert(lastAnnotations != null),
-       assert(nextAnnotations != null);
+  });
 
   /// The annotations that the device is hovering before the update.
   ///
@@ -129,7 +121,6 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// The pointing device of this update.
   int get device {
     final int result = (previousEvent ?? triggeringEvent)!.device;
-    assert(result != null);
     return result;
   }
 
@@ -138,7 +129,6 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// The [latestEvent] is never null.
   PointerEvent get latestEvent {
     final PointerEvent result = triggeringEvent ?? previousEvent!;
-    assert(result != null);
     return result;
   }
 
@@ -219,7 +209,6 @@ class MouseTracker extends ChangeNotifier {
     if (state == null) {
       return true;
     }
-    assert(event != null);
     final PointerEvent lastEvent = state.latestEvent;
     assert(event.device == lastEvent.device);
     // An Added can only follow a Removed, and a Removed can only be followed
@@ -236,7 +225,6 @@ class MouseTracker extends ChangeNotifier {
   }
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestResultToAnnotations(HitTestResult result) {
-    assert(result != null);
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
@@ -253,8 +241,6 @@ class MouseTracker extends ChangeNotifier {
   // If the device is not connected or not a mouse, an empty map is returned
   // without calling `hitTest`.
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state, MouseDetectorAnnotationFinder hitTest) {
-    assert(state != null);
-    assert(hitTest != null);
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
     if (!_mouseStates.containsKey(device)) {
@@ -302,8 +288,8 @@ class MouseTracker extends ChangeNotifier {
   /// [MouseTracker] filter which to react to.
   ///
   /// The `getResult` is a function to return the hit test result at the
-  /// position of the event. It should not simply return cached hit test
-  /// result, because the cache does not change throughout a tap sequence.
+  /// position of the event. It should not return a cached hit test
+  /// result, because the cache would not change during a tap sequence.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     if (event.kind != PointerDeviceKind.mouse) {
       return;

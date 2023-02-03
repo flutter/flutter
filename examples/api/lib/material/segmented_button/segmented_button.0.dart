@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SegmentedButton].
+// Flutter code sample for [SegmentedButton].
 
 import 'package:flutter/material.dart';
 
@@ -17,11 +17,11 @@ class SegmentedButtonApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
+      home: const Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               Spacer(),
               Text('Single choice'),
               SingleChoice(),

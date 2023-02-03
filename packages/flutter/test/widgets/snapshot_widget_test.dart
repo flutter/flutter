@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui;
 
@@ -299,23 +300,6 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
-class TestController extends SnapshotController {
-  int addedListenerCount = 0;
-  int removedListenerCount = 0;
-
-  @override
-  void addListener(ui.VoidCallback listener) {
-    addedListenerCount += 1;
-    super.addListener(listener);
-  }
-
-  @override
-  void removeListener(ui.VoidCallback listener) {
-    removedListenerCount += 1;
-    super.removeListener(listener);
-  }
-}
-
 class TestPlatformView extends SingleChildRenderObjectWidget {
   const TestPlatformView({super.key});
 
@@ -387,8 +371,7 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
-          .copyWith(devicePixelRatio: devicePixelRatio),
+        data: const MediaQueryData().copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

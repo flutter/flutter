@@ -34,7 +34,7 @@ import 'toggleable.dart';
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default theme of
-/// of a [Checkbox] with a [MaterialStateProperty].
+/// a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
@@ -88,9 +88,7 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(autofocus != null);
+  }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -321,6 +319,7 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///  * [MaterialState.error].
   ///
   /// If this property is not a [MaterialStateBorderSide] and it is
   /// non-null, then it is only rendered when the checkbox's value is
@@ -396,7 +395,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
-      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
+      final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
+      return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
     }
     if (!states.contains(MaterialState.selected)) {
       return side;
@@ -764,7 +764,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)

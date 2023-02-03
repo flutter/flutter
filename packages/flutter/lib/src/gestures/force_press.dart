@@ -52,9 +52,7 @@ class ForcePressDetails {
     required this.globalPosition,
     Offset? localPosition,
     required this.pressure,
-  }) : assert(globalPosition != null),
-       assert(pressure != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the function was called.
   final Offset globalPosition;
@@ -127,16 +125,9 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
-  }) : assert(startPressure != null),
-       assert(peakPressure != null),
-       assert(interpolation != null),
-       assert(peakPressure > startPressure);
+    super.allowedButtonsFilter,
+  }) : assert(peakPressure > startPressure);
 
   /// A pointer is in contact with the screen and has just pressed with a force
   /// exceeding the [startPressure]. Consequently, if there were other gesture

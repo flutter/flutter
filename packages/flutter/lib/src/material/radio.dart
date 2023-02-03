@@ -93,8 +93,7 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  }) : assert(autofocus != null),
-       assert(toggleable != null);
+  });
 
   /// The value represented by this radio button.
   final T value;
@@ -537,7 +536,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);
