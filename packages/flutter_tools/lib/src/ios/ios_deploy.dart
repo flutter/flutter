@@ -290,6 +290,8 @@ class IOSDeployDebugger {
 
   // (lldb)    platform select remote-'ios' --sysroot
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
+  // 
+  // This regex is to get the current lldb prompt.
   static final RegExp _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
 
   // (lldb)     run
@@ -343,6 +345,9 @@ class IOSDeployDebugger {
         _monitorIOSDeployFailure(line, _logger);
 
         // (lldb)    platform select remote-'ios' --sysroot
+        // Need to get the current lldb prompt and reassigns it to lldbRun to
+        // avoid lldbRun matching failure caused by the custom lldb prompt.
+        // Example: "(mylldb)    platform select remote-'ios' --sysroot"
         if (_lldbPlatformSelect.hasMatch(line)) {
           final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
           if (platformSelect.isEmpty) {
