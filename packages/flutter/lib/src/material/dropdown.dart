@@ -1130,9 +1130,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// instead.
   final Color? dropdownColor;
 
-  /// Padding around the dropdown button.
+  /// Padding around the visible portion of the dropdown widget.
   ///
-  /// Increasing the padding also increases the user clickable area.
+  /// As the padding increases, the size of the [DropdownButton] will also
+  /// increase. The padding is included in the clickable area of the dropdown
+  /// widget, so this can make the widget easier to click.
+  ///
+  /// Padding can be useful when used with a custom border. The clickable
+  /// area will stay flush with the border, as opposed to an external [Padding]
+  /// widget which will leave a non-clickable gap.
   final EdgeInsetsGeometry? padding;
 
   /// The maximum height of the menu.
