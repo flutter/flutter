@@ -111,7 +111,9 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
   }
 
   if (geometry_result.prevent_overdraw) {
-    return ClipRestoreContents().Render(renderer, entity, pass);
+    auto restore = ClipRestoreContents();
+    restore.SetRestoreCoverage(GetCoverage(entity));
+    return restore.Render(renderer, entity, pass);
   }
   return true;
 }
@@ -165,7 +167,9 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
   }
 
   if (geometry_result.prevent_overdraw) {
-    return ClipRestoreContents().Render(renderer, entity, pass);
+    auto restore = ClipRestoreContents();
+    restore.SetRestoreCoverage(GetCoverage(entity));
+    return restore.Render(renderer, entity, pass);
   }
   return true;
 }
