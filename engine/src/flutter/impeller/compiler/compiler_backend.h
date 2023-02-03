@@ -44,8 +44,6 @@ struct CompilerBackend {
 
   const spirv_cross::Compiler* operator->() const;
 
-  spirv_cross::Compiler* GetCompiler();
-
   operator bool() const;
 
   enum class ExtendedResourceIndex {
@@ -56,6 +54,8 @@ struct CompilerBackend {
                                          spirv_cross::ID id) const;
 
   const spirv_cross::Compiler* GetCompiler() const;
+
+  spirv_cross::Compiler* GetCompiler();
 
  private:
   Type type_ = Type::kMSL;
