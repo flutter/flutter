@@ -503,6 +503,8 @@ class _AndroidViewState extends State<AndroidView> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 
@@ -562,7 +564,7 @@ class _UiKitViewState extends State<UiKitView> {
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
-  late FocusNode _focusNode;
+  FocusNode? _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -634,6 +636,9 @@ class _UiKitViewState extends State<UiKitView> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 
@@ -646,7 +651,7 @@ class _UiKitViewState extends State<UiKitView> {
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
-        _focusNode.requestFocus();
+        _focusNode?.requestFocus();
       }
     );
     if (!mounted) {
@@ -936,6 +941,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void dispose() {
     _controller?.dispose();
     _controller = null;
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 }
