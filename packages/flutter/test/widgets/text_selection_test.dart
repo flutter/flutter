@@ -656,12 +656,15 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    const TextSelection selection = TextSelection.collapsed(offset: 1);
+    state.updateEditingValue(const TextEditingValue(text: 'something misspelled', selection: selection));
 
     // Mark word to be tapped as misspelled for testing.
     state.markCurrentSelectionAsMisspelled = true;
     await tester.pump();
 
-    // Test spell check suggestions toolbar is shown on first tap of misspelled word
+    // Test spell check suggestions toolbar is shown on first tap of misspelled word.
     const Offset position = Offset(25.0, 200.0);
     await tester.tapAt(position);
     await tester.pumpAndSettle();
@@ -670,13 +673,25 @@ void main() {
 
     // Reset and test text selection toolbar is toggled for additional taps.
     state.showSpellCheckSuggestionsToolbarCalled = false;
-    await tester.pump();
+    renderEditable.selection = selection;
+    await tester.pump(const Duration(seconds: 10));
+
+    // Test first tap.
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isTrue);
+
+    // Reset and test second tap.
+    state.toggleToolbarCalled = false;
+    await tester.pump(const Duration(seconds: 10));
 
     await tester.tapAt(position);
     await tester.pumpAndSettle();
 
     expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
-    expect(state.showToolbarCalled, isTrue);
+    expect(state.toggleToolbarCalled, isTrue);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
