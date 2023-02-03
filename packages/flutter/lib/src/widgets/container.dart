@@ -365,11 +365,11 @@ class Container extends StatelessWidget {
     if (decoration == null || decoration!.padding == null) {
       return padding;
     }
-    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
-    return padding!.add(decorationPadding!);
+    return padding!.add(decorationPadding);
   }
 
   @override
@@ -385,7 +385,7 @@ class Container extends StatelessWidget {
       'To provide both, use "decoration: BoxDecoration(color: color)".',
     );
 
-    final _constraints = widgetContraints;
+    final BoxConstraints? _constraints = widgetContraints;
 
     Widget? current = child;
 
@@ -475,8 +475,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  })  : assert(decoration != null),
-        textDirection = textDirection ?? TextDirection.ltr;
+  }) : textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;
