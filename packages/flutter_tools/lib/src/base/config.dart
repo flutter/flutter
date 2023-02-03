@@ -116,7 +116,11 @@ class Config {
       if (managed) {
         rethrow;
       } else {
-        _file.deleteSync();
+        try {
+          _file.deleteSync();
+        } on FileSystemException {
+          // ignore
+        }
       }
     } on Exception catch (err) {
       _logger
