@@ -32,11 +32,16 @@ Future<void> withFlutterLeakTracking(
   Duration? timeoutForFinalGarbageCollection,
   LeaksObtainer? leaksObtainer,
 }) async {
-  // The method is copied from
+  // The method is copied (with improvements) from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
 
   // The method is not combined with [testWidgets], because the combining will
   // impact VSCode's ability to recognize tests.
+
+  if (kIsWeb) {
+    await callback();
+    return;
+  }
 
   void flutterEventToLeakTracker(ObjectEvent event) {
     return dispatchObjectEvent(event.toMap());
