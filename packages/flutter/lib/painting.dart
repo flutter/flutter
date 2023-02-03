@@ -35,7 +35,7 @@ export 'src/painting/colors.dart';
 export 'src/painting/continuous_rectangle_border.dart';
 export 'src/painting/debug.dart';
 export 'src/painting/decoration.dart';
-export 'src/painting/decoration_image.dart' hide ImageTilingInfo, createTilingInfo;
+export 'src/painting/decoration_image.dart';
 export 'src/painting/edge_insets.dart';
 export 'src/painting/flutter_logo.dart';
 export 'src/painting/fractional_offset.dart';

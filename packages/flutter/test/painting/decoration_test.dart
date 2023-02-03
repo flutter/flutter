@@ -8,7 +8,6 @@ import 'dart:ui' as ui show ColorFilter, Image;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/src/painting/decoration_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
