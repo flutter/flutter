@@ -52,6 +52,8 @@ impeller_component("compiler_lib") {
     "switches.h",
     "types.cc",
     "types.h",
+    "uniform_sorter.cc",
+    "uniform_sorter.h",
   ]
 
   public_deps = [
