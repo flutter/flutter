@@ -2451,7 +2451,6 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2464,7 +2463,6 @@ targets:
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
   - name: Mac_benchmark basic_material_app_macos__compile
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2584,7 +2582,6 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac_benchmark complex_layout_macos__compile
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2597,7 +2594,6 @@ targets:
       task_name: complex_layout_macos__compile
 
   - name: Mac_benchmark complex_layout_macos__start_up
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2610,7 +2606,6 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2665,7 +2660,6 @@ targets:
       task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2678,7 +2672,6 @@ targets:
       task_name: flutter_gallery_macos__compile
 
   - name: Mac_benchmark flutter_gallery_macos__start_up
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2711,7 +2704,6 @@ targets:
       cpu: "arm64"
 
   - name: Mac_benchmark flutter_view_macos__start_up
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2819,7 +2811,6 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark hello_world_macos__compile
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2932,7 +2923,6 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark platform_view_macos__start_up
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4867,7 +4857,6 @@ targets:
       task_name: flutter_tool_startup__linux
 
   - name: Mac_benchmark flutter_tool_startup__macos
-    bringup: true # https://github.com/flutter/flutter/pull/119871
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
