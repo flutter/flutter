@@ -72,7 +72,7 @@ enum ListTileControlAffinity {
 ///  * [ListTile.titleAlignment], to configure the title alignment for an
 ///    individual [ListTile].
 ///  * [ListTileThemeData.titleAlignment], to configure the title alignment
-///    for all of the [ListTiles] under a [ListTileTheme].
+///    for all of the [ListTile]s under a [ListTileTheme].
 ///  * [ThemeData.listTileTheme], to configure the [ListTileTheme]
 ///    for an entire app.
 enum ListTileTitleAlignment {
