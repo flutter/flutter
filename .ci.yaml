@@ -98,8 +98,7 @@ platform_properties:
           {"dependency": "xcode", "version": "14a5294e"}
         ]
       device_type: none
-      drone_dimensions: >
-        ["mac_model=Macmini8,1"]
+      mac_model: "Macmini8,1"
       os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2457,8 +2456,7 @@ targets:
     timeout: 60
     properties:
       device_type: none
-      drone_dimensions: >
-        ["mac_model=Macmini8,1"]
+      mac_model: "Macmini8,1"
       os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
