@@ -9,7 +9,8 @@
 namespace impeller {
 
 GlyphAtlasContext::GlyphAtlasContext()
-    : atlas_(std::make_shared<GlyphAtlas>(GlyphAtlas::Type::kAlphaBitmap)) {}
+    : atlas_(std::make_shared<GlyphAtlas>(GlyphAtlas::Type::kAlphaBitmap)),
+      atlas_size_(ISize(0, 0)) {}
 
 GlyphAtlasContext::~GlyphAtlasContext() {}
 
@@ -17,8 +18,31 @@ std::shared_ptr<GlyphAtlas> GlyphAtlasContext::GetGlyphAtlas() const {
   return atlas_;
 }
 
-void GlyphAtlasContext::UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas) {
+const ISize& GlyphAtlasContext::GetAtlasSize() const {
+  return atlas_size_;
+}
+
+std::shared_ptr<SkBitmap> GlyphAtlasContext::GetBitmap() const {
+  return bitmap_;
+}
+
+std::shared_ptr<skgpu::Rectanizer> GlyphAtlasContext::GetRectPacker() const {
+  return rect_packer_;
+}
+
+void GlyphAtlasContext::UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas,
+                                         ISize size) {
   atlas_ = std::move(atlas);
+  atlas_size_ = size;
+}
+
+void GlyphAtlasContext::UpdateBitmap(std::shared_ptr<SkBitmap> bitmap) {
+  bitmap_ = std::move(bitmap);
+}
+
+void GlyphAtlasContext::UpdateRectPacker(
+    std::shared_ptr<skgpu::Rectanizer> rect_packer) {
+  rect_packer_ = std::move(rect_packer);
 }
 
 GlyphAtlas::GlyphAtlas(Type type) : type_(type) {}
@@ -76,13 +100,15 @@ size_t GlyphAtlas::IterateGlyphs(
   return count;
 }
 
-bool GlyphAtlas::HasSamePairs(const FontGlyphPair::Vector& new_glyphs) {
-  for (const auto& pair : new_glyphs) {
+FontGlyphPair::Vector GlyphAtlas::HasSamePairs(
+    const FontGlyphPair::Vector& new_glyphs) {
+  std::vector<FontGlyphPair> new_pairs;
+  for (auto pair : new_glyphs) {
     if (positions_.find(pair) == positions_.end()) {
-      return false;
+      new_pairs.push_back(pair);
     }
   }
-  return true;
+  return new_pairs;
 }
 
 }  // namespace impeller

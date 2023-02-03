@@ -168,5 +168,38 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
             atlas->GetTexture()->GetSize().height);
 }
 
+TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
+  auto context = TextRenderContext::Create(GetContext());
+  auto atlas_context = std::make_shared<GlyphAtlasContext>();
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font;
+  auto blob = SkTextBlob::MakeFromString("spooky 1", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob));
+  auto old_packer = atlas_context->GetRectPacker();
+
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+  ASSERT_EQ(atlas, atlas_context->GetGlyphAtlas());
+
+  auto* first_texture = atlas->GetTexture().get();
+
+  // now create a new glyph atlas with a nearly identical blob.
+
+  auto blob2 = SkTextBlob::MakeFromString("spooky 2", sk_font);
+  auto next_atlas =
+      context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                TextFrameFromTextBlob(blob2));
+  ASSERT_EQ(atlas, next_atlas);
+  auto* second_texture = next_atlas->GetTexture().get();
+
+  auto new_packer = atlas_context->GetRectPacker();
+
+  ASSERT_EQ(second_texture, first_texture);
+  ASSERT_EQ(old_packer, new_packer);
+}
+
 }  // namespace testing
 }  // namespace impeller
