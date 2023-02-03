@@ -14533,7 +14533,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
-
       state.replaceComposingRegion(
         cause: SelectionChangedCause.toolbar,
         text: 'test',
@@ -14541,7 +14540,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       await tester.pumpAndSettle();
       expect(state.currentTextEditingValue.text, equals('test test test'));
-
     });
 
     testWidgets('replaceComposingRegion succeeds appropriately when composing region is invalid', (WidgetTester tester) async {
