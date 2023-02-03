@@ -1728,6 +1728,34 @@ void main() {
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
 
+  test(
+    'overflow warning when single-line text field is not given enough height',
+    () {
+      final TextSelectionDelegate delegate = _FakeEditableTextState();
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+          text: 'A',
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        locale: const Locale('en', 'US'),
+        offset: ViewportOffset.fixed(10.0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection.collapsed(offset: 0),
+        cursorColor: const Color(0xFFFFFFFF),
+        showCursor: ValueNotifier<bool>(true),
+      );
+
+      FlutterErrorDetails? errorDetails;
+      layout(editable, constraints: const BoxConstraints(maxHeight: 5), phase: EnginePhase.composite, onErrors: () {
+        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
+      });
+      expect(errorDetails?.toString(), contains('A RenderEditable overflowed by 5.0 pixels on the bottom'));
+    },
+  );
+
   test('Floating cursor position is independent of viewport offset', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
