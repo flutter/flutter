@@ -9265,6 +9265,191 @@ void main() {
   );
 
   testWidgets(
+    'triple tap chains work on Non-Apple platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 3);
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 35),
+      );
+      // Triple tap selecting the same paragraph somewhere else is fine.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap hides the toolbar and moves the selection.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 6);
+      expect(find.byType(TextButton), findsNothing);
+      // Second tap shows the toolbar and selects the word.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+
+      // Third tap shows the toolbar and selects the paragraph.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 35),
+      );
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor and hid the toolbar.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 9);
+      expect(find.byType(TextButton), findsNothing);
+      // Second tap selects the word.
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 8, extentOffset: 12),
+      );
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+
+      // Third tap selects the paragraph and shows the toolbar.
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 35),
+      );
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
+  testWidgets(
+    'triple tap chains work on Apple platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure\nThe fox jumped over the fence.',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 36),
+      );
+      // Triple tap selecting the same paragraph somewhere else is fine.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap hides the toolbar and retains the selection.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 36),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+      // Second tap shows the toolbar and selects the word.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      // Third tap shows the toolbar and selects the paragraph.
+      await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 36),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      await tester.tapAt(textfieldStart + const Offset(150.0, 50.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor and hid the toolbar.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 50, affinity: TextAffinity.upstream),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+      // Second tap selects the word.
+      await tester.tapAt(textfieldStart + const Offset(150.0, 50.0));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 44, extentOffset: 50),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+
+      // Third tap selects the paragraph and shows the toolbar.
+      await tester.tapAt(textfieldStart + const Offset(150.0, 50.0));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 36, extentOffset: 66),
+      );
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets(
     'triple click chains work',
     (WidgetTester tester) async {
       const String testValue = 'Now is the time for\n' // 20
