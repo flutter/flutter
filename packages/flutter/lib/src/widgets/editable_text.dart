@@ -2590,7 +2590,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted && renderEditable.hasSize) {
-          _nextFocusChangeIsInternal = true;
+          _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
@@ -3240,6 +3240,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // focus changes.
   bool _nextFocusChangeIsInternal = false;
 
+  // Sets _nextFocusChangeIsInternal to true only until any subsequent focus
+  // change happens.
+  void _flagInternalFocus() {
+    _nextFocusChangeIsInternal = true;
+    FocusManager.instance.addListener(_unflagInternalFocus);
+  }
+
+  void _unflagInternalFocus() {
+    _nextFocusChangeIsInternal = false;
+    FocusManager.instance.removeListener(_unflagInternalFocus);
+  }
+
   /// Express interest in interacting with the keyboard.
   ///
   /// If this control is already attached to the keyboard, this function will
@@ -3251,7 +3263,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
-      _nextFocusChangeIsInternal = true;
+      _flagInternalFocus();
       widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
@@ -3701,7 +3713,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
-    _nextFocusChangeIsInternal = false;
   }
 
   void _compositeCallback(Layer layer) {
@@ -3850,7 +3861,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // unfocused field that previously had a selection in the same spot.
     if (value == textEditingValue) {
       if (!widget.focusNode.hasFocus) {
-        _nextFocusChangeIsInternal = true;
+        _flagInternalFocus();
         widget.focusNode.requestFocus();
         _selectionOverlay = _createSelectionOverlay();
       }
