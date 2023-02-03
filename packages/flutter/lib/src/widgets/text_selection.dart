@@ -2425,7 +2425,11 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onTripleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
-      editableText.selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+      if (renderEditable.maxLines == 1) {
+        editableText.selectAll(SelectionChangedCause.tap);
+      } else {
+        editableText.selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+      }
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
       }

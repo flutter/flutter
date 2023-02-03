@@ -9148,6 +9148,7 @@ void main() {
     'Can triple tap to select a paragraph on mobile platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -9167,17 +9168,18 @@ void main() {
           'of their country.';                        // 55 + 17 => 72
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
+      expect(controller.value.text, testValue);
 
-      final Offset firstLinePos = textOffsetToPosition(tester, 6);
+      final Offset firstLinePos = textOffsetToPosition(tester, 5);
 
-      // Tap on text field to gain focus, and set selection to 'is|' on the first line.
+      // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
       final TestGesture gesture = await tester.startGesture(firstLinePos);
       await tester.pump();
       await gesture.up();
       await tester.pump();
 
       expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 6);
+      expect(controller.selection.baseOffset, isTargetPlatformApple ? 6 : 5);
 
       // Here we tap on same position again, to register a double tap. This will select
       // the word at the tapped position.
@@ -9186,8 +9188,8 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(controller.selection.baseOffset, 6);
-      expect(controller.selection.extentOffset, 7);
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 6);
 
       // Here we tap on same position again, to register a triple tap. This will select
       // the paragraph at the tapped position.
@@ -9199,7 +9201,7 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 20);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+    variant: TargetPlatformVariant.mobile(),
   );
 
   testWidgets(
@@ -9342,6 +9344,7 @@ void main() {
             child: Center(
               child: TextField(
                 controller: controller,
+                maxLines: null,
               ),
             ),
           ),
@@ -9397,6 +9400,126 @@ void main() {
   );
 
   testWidgets(
+    'Can triple tap to select all on a single-line textfield on mobile platforms',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 5);
+
+      // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
+      final TestGesture gesture = await tester.startGesture(
+        firstLinePos,
+        pointer: 7,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, isTargetPlatformApple ? 6 : 5);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 6);
+
+      // Here we tap on same position again, to register a triple tap. This will select
+      // the entire text field if it is a single-line field.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 72);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
+
+  testWidgets(
+    'Can triple click to select all on a single-line textfield on desktop platforms',
+    (WidgetTester tester) async {
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 5);
+
+      // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
+      final TestGesture gesture = await tester.startGesture(
+        firstLinePos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 6);
+
+      // Here we tap on same position again, to register a triple tap. This will select
+      // the entire text field if it is a single-line field.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 72);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
     'Can triple click to select a paragraph on desktop platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
@@ -9419,6 +9542,7 @@ void main() {
           'of their country.';                        // 55 + 17 => 72
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
+      expect(controller.value.text, testValue);
 
       final Offset firstLinePos = textOffsetToPosition(tester, 5);
 
@@ -9481,6 +9605,7 @@ void main() {
           'of their country.';                        // 55 + 17 => 72
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
+      expect(controller.value.text, testValue);
 
       final Offset firstLinePos = textOffsetToPosition(tester, 5);
 
