@@ -92,11 +92,6 @@ platform_properties:
       xcode: 14a5294e # xcode 14.0 beta 5
   mac_benchmark:
     properties:
-      dependencies: >-
-        [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"},
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
       device_type: none
       mac_model: "Macmini8,1"
       os: Mac-12
@@ -2463,6 +2458,7 @@ targets:
       xcode: 14a5294e
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
@@ -2473,6 +2469,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
@@ -2591,6 +2591,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__compile
@@ -2603,6 +2604,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__start_up
@@ -2615,6 +2617,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
@@ -2669,6 +2672,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__compile
@@ -2681,6 +2685,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__start_up
@@ -2711,6 +2716,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
       task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
@@ -2815,6 +2824,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
@@ -2924,6 +2937,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
       task_name: platform_view_macos__start_up
 
   - name: Mac plugin_dependencies_test
