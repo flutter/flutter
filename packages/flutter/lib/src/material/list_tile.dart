@@ -90,7 +90,7 @@ enum ListTileTitleAlignment {
   /// centered relative to the [ListTile.title] and [ListTile.subtitle] widgets.
   ///
   /// This is the default when [ThemeData.useMaterial3] is false.
-  titlesHeight,
+  titleHeight,
 
   /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
   /// placed [ListTile.minVerticalPadding] below the top of the [ListTile.title].
@@ -830,7 +830,7 @@ class ListTile extends StatelessWidget {
 
     final ListTileTitleAlignment effectiveTitleAlignment = titleAlignment
       ?? tileTheme.titleAlignment
-      ?? (theme.useMaterial3 ? ListTileTitleAlignment.threeLine : ListTileTitleAlignment.titlesHeight);
+      ?? (theme.useMaterial3 ? ListTileTitleAlignment.threeLine : ListTileTitleAlignment.titleHeight);
 
 
     return InkWell(
@@ -1390,7 +1390,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
         }
         break;
       }
-      case ListTileTitleAlignment.titlesHeight: {
+      case ListTileTitleAlignment.titleHeight: {
         // This attempts to implement the redlines for the vertical position of the
         // leading and trailing icons on the spec page:
         //   https://m2.material.io/components/lists#specs
