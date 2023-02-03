@@ -1744,7 +1744,7 @@ void main() {
           useMaterial3: true,
           iconButtonTheme: const IconButtonThemeData(
             style: ButtonStyle(
-              foregroundColor: MaterialStatePropertyAll(Colors.blue),
+              foregroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
             ),
           ),
         );
@@ -1754,7 +1754,7 @@ void main() {
         home: Material(
           child: TextField(
             decoration: InputDecoration(
-              suffixIcon: IconButton(icon: Icon(Icons.close), onPressed: () {}),
+              suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
               errorText: 'error state',
               filled: true,
             ),
