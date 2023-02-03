@@ -37,15 +37,15 @@ import 'text_editing_intents.dart';
 ///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
 ///   // then DefaultTextEditingShortcuts is already being inserted into the
 ///   // widget tree.
-///   return DefaultTextEditingShortcuts(
+///   return const DefaultTextEditingShortcuts(
 ///     child: Center(
 ///       child: Shortcuts(
-///         shortcuts: const <ShortcutActivator, Intent>{
+///         shortcuts: <ShortcutActivator, Intent>{
 ///           SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): NextFocusIntent(),
 ///           SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): PreviousFocusIntent(),
 ///         },
 ///         child: Column(
-///           children: const <Widget>[
+///           children: <Widget>[
 ///             TextField(
 ///               decoration: InputDecoration(
 ///                 hintText: 'alt + down moves to the next field.',
@@ -303,8 +303,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -560,8 +560,8 @@ Intent? intentForMacOSSelector(String selectorName) {
 
     'moveWordLeftAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     'moveWordRightAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    'moveParagraphForwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: false),
+    'moveParagraphForwardAndModifySelection:': ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: true),
 
     'moveToLeftEndOfLine:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     'moveToRightEndOfLine:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),

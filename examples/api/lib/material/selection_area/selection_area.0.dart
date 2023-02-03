@@ -20,10 +20,10 @@ class MyApp extends StatelessWidget {
       home: SelectionArea(
         child: Scaffold(
           appBar: AppBar(title: const Text(_title)),
-          body: Center(
+          body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Row 1'),
                 Text('Row 2'),
                 Text('Row 3'),

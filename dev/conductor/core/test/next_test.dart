@@ -990,7 +990,8 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+          contains(
+              'Release archive packages must be verified on cloud storage: https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console'),
         );
         expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });

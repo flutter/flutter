@@ -118,11 +118,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DoubleTapGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
@@ -486,11 +481,6 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   MultiTapGestureRecognizer({
     this.longTapDelay = Duration.zero,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
