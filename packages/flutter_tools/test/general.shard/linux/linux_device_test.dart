@@ -154,9 +154,9 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    expect(device.executablePathForDevice(mockApp, BuildMode.debug), 'debug/executable');
-    expect(device.executablePathForDevice(mockApp, BuildMode.profile), 'profile/executable');
-    expect(device.executablePathForDevice(mockApp, BuildMode.release), 'release/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.profile), 'profile/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.release), 'release/executable');
   });
 }
 

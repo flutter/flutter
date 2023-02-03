@@ -302,9 +302,9 @@ class Dialog extends StatelessWidget {
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
 ///         title: const Text('AlertDialog Title'),
-///         content: SingleChildScrollView(
+///         content: const SingleChildScrollView(
 ///           child: ListBody(
-///             children: const <Widget>[
+///             children: <Widget>[
 ///               Text('This is a demo alert dialog.'),
 ///               Text('Would you like to approve of this message?'),
 ///             ],

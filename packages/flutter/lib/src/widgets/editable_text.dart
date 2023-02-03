@@ -46,7 +46,7 @@ import 'ticker_provider.dart';
 import 'view.dart';
 import 'widget_span.dart';
 
-export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
+export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
 // Examples can assume:
 // late BuildContext context;
@@ -83,6 +83,64 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
+
+/// The default mime types to be used when allowedMimeTypes is not provided.
+///
+/// The default value supports inserting images of any supported format.
+const List<String> kDefaultContentInsertionMimeTypes = <String>[
+  'image/png',
+  'image/bmp',
+  'image/jpg',
+  'image/tiff',
+  'image/gif',
+  'image/jpeg',
+  'image/webp'
+];
+
+class _CompositionCallback extends SingleChildRenderObjectWidget {
+  const _CompositionCallback({ required this.compositeCallback, required this.enabled, super.child });
+  final CompositionCallback compositeCallback;
+  final bool enabled;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCompositionCallback(compositeCallback, enabled);
+  }
+  @override
+  void updateRenderObject(BuildContext context, _RenderCompositionCallback renderObject) {
+    super.updateRenderObject(context, renderObject);
+    // _EditableTextState always uses the same callback.
+    assert(renderObject.compositeCallback == compositeCallback);
+    renderObject.enabled = enabled;
+  }
+}
+
+class _RenderCompositionCallback extends RenderProxyBox {
+  _RenderCompositionCallback(this.compositeCallback, this._enabled);
+
+  final CompositionCallback compositeCallback;
+  VoidCallback? _cancelCallback;
+
+  bool get enabled => _enabled;
+  bool _enabled = false;
+  set enabled(bool newValue) {
+    _enabled = newValue;
+    if (!newValue) {
+      _cancelCallback?.call();
+      _cancelCallback = null;
+    } else if (_cancelCallback == null) {
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset) {
+    if (enabled) {
+      _cancelCallback ??= context.addCompositionCallback(compositeCallback);
+    }
+    super.paint(context, offset);
+  }
+}
 
 /// A controller for an editable text field.
 ///
@@ -330,6 +388,72 @@ class ToolbarOptions {
   ///
   /// Defaults to false. Must not be null.
   final bool selectAll;
+}
+
+/// Configures the ability to insert media content through the soft keyboard.
+///
+/// The configuration provides a handler for any rich content inserted through
+/// the system input method, and also provides the ability to limit the mime
+/// types of the inserted content.
+///
+/// See also:
+///
+/// * [EditableText.contentInsertionConfiguration]
+class ContentInsertionConfiguration {
+  /// Creates a content insertion configuration with the specified options.
+  ///
+  /// A handler for inserted content, in the form of [onContentInserted], must
+  /// be supplied.
+  ///
+  /// The allowable mime types of inserted content may also
+  /// be provided via [allowedMimeTypes], which cannot be an empty list.
+  ContentInsertionConfiguration({
+    required this.onContentInserted,
+    this.allowedMimeTypes = kDefaultContentInsertionMimeTypes,
+  }) : assert(allowedMimeTypes.isNotEmpty);
+
+  /// Called when a user inserts content through the virtual / on-screen keyboard,
+  /// currently only used on Android.
+  ///
+  /// [KeyboardInsertedContent] holds the data representing the inserted content.
+  ///
+  /// {@tool dartpad}
+  ///
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  final ValueChanged<KeyboardInsertedContent> onContentInserted;
+
+  /// {@template flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
+  /// Used when a user inserts image-based content through the device keyboard,
+  /// currently only used on Android.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard.
+  ///
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
+  /// These are all the mime types that are able to be handled and inserted
+  /// from keyboards.
+  ///
+  /// This field cannot be an empty list.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to limit image insertion to specific file types.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
+  /// {@endtemplate}
+  final List<String> allowedMimeTypes;
 }
 
 // A time-value pair that represents a key frame in an animation.
@@ -678,6 +802,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.contentInsertionConfiguration,
     this.contextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
@@ -1587,6 +1712,37 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@template flutter.widgets.editableText.contentInsertionConfiguration}
+  /// Configuration of handler for media content inserted via the system input
+  /// method.
+  ///
+  /// Defaults to null in which case media content insertion will be disabled,
+  /// and the system will display a message informing the user that the text field
+  /// does not support inserting media content.
+  ///
+  /// Set [ContentInsertionConfiguration.onContentInserted] to provide a handler.
+  /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
+  /// to limit the allowable mime types for inserted content.
+  ///
+  /// {@tool dartpad}
+  ///
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// If [contentInsertionConfiguration] is not provided, by default
+  /// an empty list of mime types will be sent to the Flutter Engine.
+  /// A handler function must be provided in order to customize the allowable
+  /// mime types for inserted content.
+  ///
+  /// If rich content is inserted without a handler, the system will display
+  /// a message informing the user that the current text input does not support
+  /// inserting rich content.
+  /// {@endtemplate}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   ///
@@ -1875,6 +2031,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
@@ -2685,6 +2842,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.onAppPrivateCommand?.call(action, data);
   }
 
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    assert(widget.contentInsertionConfiguration?.allowedMimeTypes.contains(content.mimeType) ?? false);
+    widget.contentInsertionConfiguration?.onContentInserted.call(content);
+  }
+
   // The original position of the caret on FloatingCursorDragState.start.
   Rect? _startCaretRect;
 
@@ -2970,8 +3133,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
-      _updateComposingRectIfNeeded();
-      _updateCaretRectIfNeeded();
+      _schedulePeriodicPostFrameCallbacks();
       final TextStyle style = widget.style;
       _textInputConnection!
         ..setStyle(
@@ -2999,6 +3161,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.close();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
+      removeTextPlaceholder();
     }
   }
 
@@ -3540,6 +3703,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _nextFocusChangeIsInternal = false;
   }
 
+  void _compositeCallback(Layer layer) {
+    // The callback can be invoked when the layer is detached.
+    // The input connection can be closed by the platform in which case this
+    // widget doesn't rebuild.
+    if (!renderEditable.attached || !_hasInputConnection) {
+      return;
+    }
+    assert(mounted);
+    assert((context as Element).debugIsActive);
+    _updateSizeAndTransform();
+  }
+
+  void _updateSizeAndTransform() {
+    final Size size = renderEditable.size;
+    final Matrix4 transform = renderEditable.getTransformTo(null);
+    _textInputConnection!.setEditableSizeAndTransform(size, transform);
+  }
+
+  void _schedulePeriodicPostFrameCallbacks([Duration? duration]) {
+    if (!_hasInputConnection) {
+      return;
+    }
+    _updateSelectionRects();
+    _updateComposingRectIfNeeded();
+    _updateCaretRectIfNeeded();
+    SchedulerBinding.instance.addPostFrameCallback(_schedulePeriodicPostFrameCallbacks);
+  }
   _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
@@ -3602,18 +3792,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  void _updateSizeAndTransform() {
-    if (_hasInputConnection) {
-      final Size size = renderEditable.size;
-      final Matrix4 transform = renderEditable.getTransformTo(null);
-      _textInputConnection!.setEditableSizeAndTransform(size, transform);
-      _updateSelectionRects();
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
-    } else if (_placeholderLocation != -1) {
-      removeTextPlaceholder();
-    }
-  }
-
   // Sends the current composing rect to the iOS text input plugin via the text
   // input channel. We need to keep sending the information even if no text is
   // currently marked, as the information usually lags behind. The text input
@@ -3621,42 +3799,34 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // when the composing rect info didn't arrive in time.
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
-    if (_hasInputConnection) {
-      assert(mounted);
-      Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
-      // Send the caret location instead if there's no marked text yet.
-      if (composingRect == null) {
-        assert(!composingRange.isValid || composingRange.isCollapsed);
-        final int offset = composingRange.isValid ? composingRange.start : 0;
-        composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
-      }
-      _textInputConnection!.setComposingRect(composingRect);
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+    assert(mounted);
+    Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
+    // Send the caret location instead if there's no marked text yet.
+    if (composingRect == null) {
+      assert(!composingRange.isValid || composingRange.isCollapsed);
+      final int offset = composingRange.isValid ? composingRange.start : 0;
+      composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
+    _textInputConnection!.setComposingRect(composingRect);
   }
 
   void _updateCaretRectIfNeeded() {
-    if (_hasInputConnection) {
-      if (renderEditable.selection != null && renderEditable.selection!.isValid &&
-          renderEditable.selection!.isCollapsed) {
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
-        final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-        _textInputConnection!.setCaretRect(caretRect);
-      }
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+    final TextSelection? selection = renderEditable.selection;
+    if (selection == null || !selection.isValid || !selection.isCollapsed) {
+      return;
     }
+    final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
+    final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    _textInputConnection!.setCaretRect(caretRect);
   }
 
-  TextDirection get _textDirection {
-    final TextDirection result = widget.textDirection ?? Directionality.of(context);
-    return result;
-  }
+  TextDirection get _textDirection => widget.textDirection ?? Directionality.of(context);
 
   /// The renderer for this widget's descendant.
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
-  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
+  late final RenderEditable renderEditable = _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
@@ -3830,7 +4000,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled) {
+    if (!widget.scribbleEnabled || _placeholderLocation == -1) {
       return;
     }
 
@@ -3882,6 +4052,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      allowedMimeTypes: widget.contentInsertionConfiguration == null
+        ? const <String>[]
+        : widget.contentInsertionConfiguration!.allowedMimeTypes,
     );
   }
 
@@ -3996,6 +4169,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
+  TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -4236,6 +4410,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
@@ -4259,100 +4434,104 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return TextFieldTapRegion(
-      onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
-      debugLabel: kReleaseMode ? null : 'EditableText',
-      child: MouseRegion(
-        cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-        child: Actions(
-          actions: _actions,
-          child: _TextEditingHistory(
-            controller: widget.controller,
-            onTriggered: (TextEditingValue value) {
-              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
-            },
-            child: Focus(
-              focusNode: widget.focusNode,
-              includeSemantics: false,
-              debugLabel: kReleaseMode ? null : 'EditableText',
-              child: Scrollable(
-                key: _scrollableKey,
-                excludeFromSemantics: true,
-                axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                controller: _scrollController,
-                physics: widget.scrollPhysics,
-                dragStartBehavior: widget.dragStartBehavior,
-                restorationId: widget.restorationId,
-                // If a ScrollBehavior is not provided, only apply scrollbars when
-                // multiline. The overscroll indicator should not be applied in
-                // either case, glowing or stretching.
-                scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                  scrollbars: _isMultiline,
-                  overscroll: false,
-                ),
-                viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                  return CompositedTransformTarget(
-                    link: _toolbarLayerLink,
-                    child: Semantics(
-                      onCopy: _semanticsOnCopy(controls),
-                      onCut: _semanticsOnCut(controls),
-                      onPaste: _semanticsOnPaste(controls),
-                      child: _ScribbleFocusable(
-                        focusNode: widget.focusNode,
-                        editableKey: _editableKey,
-                        enabled: widget.scribbleEnabled,
-                        updateSelectionRects: () {
-                          _openInputConnection();
-                          _updateSelectionRects(force: true);
-                        },
-                        child: _Editable(
-                          key: _editableKey,
-                          startHandleLayerLink: _startHandleLayerLink,
-                          endHandleLayerLink: _endHandleLayerLink,
-                          inlineSpan: buildTextSpan(),
-                          value: _value,
-                          cursorColor: _cursorColor,
-                          backgroundCursorColor: widget.backgroundCursorColor,
-                          showCursor: EditableText.debugDeterministicCursor
-                              ? ValueNotifier<bool>(widget.showCursor)
-                              : _cursorVisibilityNotifier,
-                          forceLine: widget.forceLine,
-                          readOnly: widget.readOnly,
-                          hasFocus: _hasFocus,
-                          maxLines: widget.maxLines,
-                          minLines: widget.minLines,
-                          expands: widget.expands,
-                          strutStyle: widget.strutStyle,
-                          selectionColor: widget.selectionColor,
-                          textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                          textAlign: widget.textAlign,
-                          textDirection: _textDirection,
-                          locale: widget.locale,
-                          textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                          textWidthBasis: widget.textWidthBasis,
-                          obscuringCharacter: widget.obscuringCharacter,
-                          obscureText: widget.obscureText,
-                          offset: offset,
-                          onCaretChanged: _handleCaretChanged,
-                          rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                          cursorWidth: widget.cursorWidth,
-                          cursorHeight: widget.cursorHeight,
-                          cursorRadius: widget.cursorRadius,
-                          cursorOffset: widget.cursorOffset ?? Offset.zero,
-                          selectionHeightStyle: widget.selectionHeightStyle,
-                          selectionWidthStyle: widget.selectionWidthStyle,
-                          paintCursorAboveText: widget.paintCursorAboveText,
-                          enableInteractiveSelection: widget._userSelectionEnabled,
-                          textSelectionDelegate: this,
-                          devicePixelRatio: _devicePixelRatio,
-                          promptRectRange: _currentPromptRectRange,
-                          promptRectColor: widget.autocorrectionTextRectColor,
-                          clipBehavior: widget.clipBehavior,
+    return _CompositionCallback(
+      compositeCallback: _compositeCallback,
+      enabled: _hasInputConnection,
+      child: TextFieldTapRegion(
+        onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+        debugLabel: kReleaseMode ? null : 'EditableText',
+        child: MouseRegion(
+          cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+          child: Actions(
+            actions: _actions,
+            child: _TextEditingHistory(
+              controller: widget.controller,
+              onTriggered: (TextEditingValue value) {
+                userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+              },
+              child: Focus(
+                focusNode: widget.focusNode,
+                includeSemantics: false,
+                debugLabel: kReleaseMode ? null : 'EditableText',
+                child: Scrollable(
+                  key: _scrollableKey,
+                  excludeFromSemantics: true,
+                  axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                  controller: _scrollController,
+                  physics: widget.scrollPhysics,
+                  dragStartBehavior: widget.dragStartBehavior,
+                  restorationId: widget.restorationId,
+                  // If a ScrollBehavior is not provided, only apply scrollbars when
+                  // multiline. The overscroll indicator should not be applied in
+                  // either case, glowing or stretching.
+                  scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                    scrollbars: _isMultiline,
+                    overscroll: false,
+                  ),
+                  viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                    return CompositedTransformTarget(
+                      link: _toolbarLayerLink,
+                      child: Semantics(
+                        onCopy: _semanticsOnCopy(controls),
+                        onCut: _semanticsOnCut(controls),
+                        onPaste: _semanticsOnPaste(controls),
+                        child: _ScribbleFocusable(
+                          focusNode: widget.focusNode,
+                          editableKey: _editableKey,
+                          enabled: widget.scribbleEnabled,
+                          updateSelectionRects: () {
+                            _openInputConnection();
+                            _updateSelectionRects(force: true);
+                          },
+                          child: _Editable(
+                            key: _editableKey,
+                            startHandleLayerLink: _startHandleLayerLink,
+                            endHandleLayerLink: _endHandleLayerLink,
+                            inlineSpan: buildTextSpan(),
+                            value: _value,
+                            cursorColor: _cursorColor,
+                            backgroundCursorColor: widget.backgroundCursorColor,
+                            showCursor: EditableText.debugDeterministicCursor
+                                ? ValueNotifier<bool>(widget.showCursor)
+                                : _cursorVisibilityNotifier,
+                            forceLine: widget.forceLine,
+                            readOnly: widget.readOnly,
+                            hasFocus: _hasFocus,
+                            maxLines: widget.maxLines,
+                            minLines: widget.minLines,
+                            expands: widget.expands,
+                            strutStyle: widget.strutStyle,
+                            selectionColor: widget.selectionColor,
+                            textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                            textAlign: widget.textAlign,
+                            textDirection: _textDirection,
+                            locale: widget.locale,
+                            textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                            textWidthBasis: widget.textWidthBasis,
+                            obscuringCharacter: widget.obscuringCharacter,
+                            obscureText: widget.obscureText,
+                            offset: offset,
+                            onCaretChanged: _handleCaretChanged,
+                            rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                            cursorWidth: widget.cursorWidth,
+                            cursorHeight: widget.cursorHeight,
+                            cursorRadius: widget.cursorRadius,
+                            cursorOffset: widget.cursorOffset ?? Offset.zero,
+                            selectionHeightStyle: widget.selectionHeightStyle,
+                            selectionWidthStyle: widget.selectionWidthStyle,
+                            paintCursorAboveText: widget.paintCursorAboveText,
+                            enableInteractiveSelection: widget._userSelectionEnabled,
+                            textSelectionDelegate: this,
+                            devicePixelRatio: _devicePixelRatio,
+                            promptRectRange: _currentPromptRectRange,
+                            promptRectColor: widget.autocorrectionTextRectColor,
+                            clipBehavior: widget.clipBehavior,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),
