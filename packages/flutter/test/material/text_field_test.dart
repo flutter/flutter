@@ -9145,6 +9145,66 @@ void main() {
   );
 
   testWidgets(
+    'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              maxLines: null,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+      expect(controller.value.text, testValue);
+
+      final Offset firstLinePos = textOffsetToPosition(tester, 6);
+
+      // Tap on text field to gain focus, and set selection to 'is|' on the first line.
+      final TestGesture gesture = await tester.startGesture(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 6);
+
+      // Here we tap on same position again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 6);
+      expect(controller.selection.extentOffset, isTargetPlatformApple ? 6 : 7);
+
+      // Here we tap on same position again, to register a triple tap. This will select
+      // the paragraph at the tapped position.
+      await gesture.down(firstLinePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 20);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
+
+  testWidgets(
     'Can triple tap to select a paragraph on mobile platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
