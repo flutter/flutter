@@ -9,7 +9,6 @@ class BottomSheetTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends BottomSheetThemeData {
    const _${blockName}DefaultsM3(this.context)
     : super(

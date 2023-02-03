@@ -188,17 +188,16 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-    'lib',
-    'dev_compiler',
-    'kernel',
-    'amd',
-    'require.js',
-  ));
+        _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+        'lib',
+        'dev_compiler',
+        'amd',
+        'require.js',
+      ));
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'web',
@@ -377,10 +376,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       } on FormatException catch (ex) {
         _logger.printError('Caught FormatException: $ex');
         return shelf.Response.ok('Caught exception: $ex');
-      }
-
-      if (bytes == null) {
-        return shelf.Response.ok('Unknown error, bytes is null');
       }
 
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);

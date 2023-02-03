@@ -72,15 +72,15 @@ void main() {
   test('light, dark and fallback constructors support useMaterial3', () {
     final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
     expect(lightTheme.useMaterial3, true);
-    expect(lightTheme.typography, Typography.material2021());
+    expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     expect(darkTheme.useMaterial3, true);
-    expect(darkTheme.typography, Typography.material2021());
+    expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
     final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
     expect(fallbackTheme.useMaterial3, true);
-    expect(fallbackTheme.typography, Typography.material2021());
+    expect(fallbackTheme.typography, Typography.material2021(colorScheme: fallbackTheme.colorScheme));
   });
 
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
@@ -611,7 +611,7 @@ void main() {
         textStyle: TextStyle(fontSize: 100),
       );
 
-      // Both ThemeDatas include both extensions
+      // Both ThemeData arguments include both extensions.
       ThemeData lerped = ThemeData.lerp(
         ThemeData(
           extensions: const <ThemeExtension<dynamic>>[
@@ -781,9 +781,11 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(foregroundColor: Colors.green)),
@@ -815,7 +817,6 @@ void main() {
       accentColorBrightness: Brightness.dark,
       accentTextTheme: ThemeData.dark().textTheme,
       accentIconTheme: ThemeData.dark().iconTheme,
-      buttonColor: Colors.black,
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
@@ -901,9 +902,11 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.amber),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: const FilledButtonThemeData(),
@@ -936,7 +939,6 @@ void main() {
       accentColorBrightness: Brightness.light,
       accentIconTheme: ThemeData.light().iconTheme,
       accentTextTheme: ThemeData.light().textTheme,
-      buttonColor: Colors.white,
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -1008,6 +1010,7 @@ void main() {
       chipTheme: otherTheme.chipTheme,
       dataTableTheme: otherTheme.dataTableTheme,
       dialogTheme: otherTheme.dialogTheme,
+      datePickerTheme: otherTheme.datePickerTheme,
       dividerTheme: otherTheme.dividerTheme,
       drawerTheme: otherTheme.drawerTheme,
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
@@ -1041,7 +1044,6 @@ void main() {
       accentColorBrightness: otherTheme.accentColorBrightness,
       accentIconTheme: otherTheme.accentIconTheme,
       accentTextTheme: otherTheme.accentTextTheme,
-      buttonColor: otherTheme.buttonColor,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
@@ -1111,6 +1113,7 @@ void main() {
     expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.dataTableTheme, equals(otherTheme.dataTableTheme));
+    expect(themeDataCopy.datePickerTheme, equals(otherTheme.datePickerTheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.dividerTheme, equals(otherTheme.dividerTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
@@ -1147,7 +1150,6 @@ void main() {
     expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
     expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
-    expect(themeDataCopy.buttonColor, equals(otherTheme.buttonColor));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
@@ -1250,9 +1252,11 @@ void main() {
       'checkboxTheme',
       'chipTheme',
       'dataTableTheme',
+      'datePickerTheme',
       'dialogTheme',
       'dividerTheme',
       'drawerTheme',
+      'dropdownMenuTheme',
       'elevatedButtonTheme',
       'expansionTileTheme',
       'filledButtonTheme',
@@ -1284,7 +1288,6 @@ void main() {
       'accentColorBrightness',
       'accentTextTheme',
       'accentIconTheme',
-      'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',

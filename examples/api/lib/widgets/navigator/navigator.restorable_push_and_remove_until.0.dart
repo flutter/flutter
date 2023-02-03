@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Navigator.restorablePushAndRemoveUntil].
+// Flutter code sample for [Navigator.restorablePushAndRemoveUntil].
 
 import 'package:flutter/material.dart';
 
@@ -30,6 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
       builder: (BuildContext context) => const MyStatefulWidget(),

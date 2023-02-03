@@ -99,7 +99,6 @@ class DrawerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -174,7 +173,7 @@ class DrawerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.

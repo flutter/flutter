@@ -106,7 +106,7 @@ class MenuButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final MenuButtonThemeData data;

@@ -233,7 +233,7 @@ class ButtonBar extends StatelessWidget {
 class _ButtonBarRow extends Flex {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
-  _ButtonBarRow({
+  const _ButtonBarRow({
     required super.children,
     super.mainAxisSize,
     super.mainAxisAlignment,
@@ -300,8 +300,7 @@ class _RenderButtonBarRow extends RenderFlex {
     super.verticalDirection,
     super.textBaseline,
     this.overflowButtonSpacing,
-  }) : assert(textDirection != null),
-       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
+  }) : assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
 
   bool _hasCheckedLayoutWidth = false;
   double? overflowButtonSpacing;

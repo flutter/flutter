@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showCupertinoModalPopup].
+// Flutter code sample for [showCupertinoModalPopup].
 
 import 'package:flutter/cupertino.dart';
 
@@ -41,6 +41,7 @@ class ModalPopupExample extends StatelessWidget {
     );
   }
 
+  @pragma('vm:entry-point')
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

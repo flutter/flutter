@@ -212,9 +212,7 @@ class DateTimeRange {
   DateTimeRange({
     required this.start,
     required this.end,
-  }) : assert(start != null),
-       assert(end != null),
-       assert(!start.isAfter(end));
+  }) : assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;

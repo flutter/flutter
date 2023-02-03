@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Container(
+        child: ColoredBox(
           color: const Color(0xFF00FF00),
           child: Stack(
             children: <Widget>[
@@ -49,9 +49,9 @@ void main() {
 
   testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Row(
+      const Row(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Flexible(child: SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
@@ -64,11 +64,11 @@ void main() {
   testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 400.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
@@ -81,11 +81,11 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 199.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
@@ -104,7 +104,7 @@ void main() {
     // we only get a single exception. Otherwise we'd get two, the one we want and
     // an extra one when we discover we never computed a size.
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Column(),
         ],
@@ -134,11 +134,17 @@ void main() {
   });
 
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(direction: Axis.vertical));
+    await tester.pumpWidget(const Flex(direction: Axis.vertical));
     final RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
+    await tester.pumpWidget(const Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  test('Flex/Column/Row can be const-constructed', () {
+    const Flex(direction: Axis.vertical);
+    const Column();
+    const Row();
   });
 }

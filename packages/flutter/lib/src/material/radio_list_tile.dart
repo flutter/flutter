@@ -53,7 +53,7 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: RadioListTile<Meridiem>(
@@ -171,13 +171,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -244,7 +240,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The primary content of the list tile.
@@ -320,6 +316,9 @@ class RadioListTile<T> extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
   /// See also:
@@ -385,6 +384,7 @@ class RadioListTile<T> extends StatelessWidget {
         contentPadding: contentPadding,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
       ),
     );

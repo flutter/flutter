@@ -190,12 +190,7 @@ class NestedScrollView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
-  }) : assert(scrollDirection != null),
-       assert(reverse != null),
-       assert(headerSliverBuilder != null),
-       assert(body != null),
-       assert(floatHeaderSlivers != null),
-       assert(clipBehavior != null);
+  });
 
   /// An object that can be used to control the position to which the outer
   /// scroll view is scrolled.
@@ -510,8 +505,7 @@ class _InheritedNestedScrollView extends InheritedWidget {
   const _InheritedNestedScrollView({
     required this.state,
     required super.child,
-  }) : assert(state != null),
-       assert(child != null);
+  });
 
   final NestedScrollViewState state;
 
@@ -526,6 +520,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     required super.pixels,
     required super.viewportDimension,
     required super.axisDirection,
+    required super.devicePixelRatio,
     required this.minRange,
     required this.maxRange,
     required this.correctionOffset,
@@ -538,6 +533,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? devicePixelRatio,
     double? minRange,
     double? maxRange,
     double? correctionOffset,
@@ -548,6 +544,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       minRange: minRange ?? this.minRange,
       maxRange: maxRange ?? this.maxRange,
       correctionOffset: correctionOffset ?? this.correctionOffset,
@@ -630,7 +627,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
 
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }
@@ -749,7 +745,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   _NestedScrollMetrics _getMetrics(_NestedScrollPosition innerPosition, double velocity) {
-    assert(innerPosition != null);
     double pixels, minRange, maxRange, correctionOffset;
     double extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
@@ -815,6 +810,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       minRange: minRange,
       maxRange: maxRange,
       correctionOffset: correctionOffset,
+      devicePixelRatio: _outerPosition!.devicePixelRatio,
     );
   }
 
@@ -903,7 +899,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(
@@ -1180,7 +1179,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     super.debugLabel,
     required this.coordinator,
   }) {
-    if (!hasPixels && initialPixels != null) {
+    if (!hasPixels) {
       correctPixels(initialPixels);
     }
     if (activity == null) {
@@ -1369,7 +1368,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     if (simulation == null) {
       return IdleScrollActivity(this);
     }
-    assert(mode != null);
     switch (mode) {
       case _NestedBallisticScrollActivityMode.outer:
         assert(metrics != null);
@@ -1670,8 +1668,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
     super.key,
     required this.handle,
     Widget? sliver,
-  }) : assert(handle != null),
-      super(child: sliver);
+  }) : super(child: sliver);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1715,8 +1712,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   RenderSliverOverlapAbsorber({
     required SliverOverlapAbsorberHandle handle,
     RenderSliver? sliver,
-  }) : assert(handle != null),
-       _handle = handle {
+  }) : _handle = handle {
     child = sliver;
   }
 
@@ -1727,7 +1723,6 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }
@@ -1832,8 +1827,7 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
     super.key,
     required this.handle,
     Widget? sliver,
-  }) : assert(handle != null),
-       super(child: sliver);
+  }) : super(child: sliver);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///
@@ -1873,8 +1867,7 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     required SliverOverlapAbsorberHandle handle,
-  }) : assert(handle != null),
-       _handle = handle;
+  }) : _handle = handle;
 
   double? _currentLayoutExtent;
   double? _currentMaxExtent;
@@ -1887,7 +1880,6 @@ class RenderSliverOverlapInjector extends RenderSliver {
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }
@@ -1998,7 +1990,7 @@ class NestedScrollViewViewport extends Viewport {
     super.slivers,
     required this.handle,
     super.clipBehavior,
-  }) : assert(handle != null);
+  });
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   final SliverOverlapAbsorberHandle handle;
@@ -2057,15 +2049,13 @@ class RenderNestedScrollViewViewport extends RenderViewport {
     super.center,
     required SliverOverlapAbsorberHandle handle,
     super.clipBehavior,
-  }) : assert(handle != null),
-       _handle = handle;
+  }) : _handle = handle;
 
   /// The object to notify when [markNeedsLayout] is called.
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   /// Setting this will trigger notifications on the new object.
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }
