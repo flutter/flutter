@@ -780,13 +780,28 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    expect(controller.value, value);
+    // On web, focusing a single-line input selects the entire field.
+    final TextEditingValue webValue = value.copyWith(
+      selection: TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.value.text.length,
+      ),
+    );
+    if (kIsWeb) {
+      expect(controller.value, webValue);
+    } else {
+      expect(controller.value, value);
+    }
     expect(focusNode.hasFocus, isTrue);
 
     focusNode.unfocus();
     await tester.pump();
 
-    expect(controller.value, value);
+    if (kIsWeb) {
+      expect(controller.value, webValue);
+    } else {
+      expect(controller.value, value);
+    }
     expect(focusNode.hasFocus, isFalse);
   });
 
@@ -4065,7 +4080,10 @@ void main() {
                           ],
                           value: expectedValue,
                           textDirection: TextDirection.ltr,
-                          textSelection: const TextSelection.collapsed(offset: 24),
+                          // Focusing a single-line field on web selects it.
+                          textSelection: kIsWeb
+                              ? const TextSelection(baseOffset: 0, extentOffset: 24)
+                              : const TextSelection.collapsed(offset: 24),
                         ),
                       ],
                     ),

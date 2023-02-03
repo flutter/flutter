@@ -2590,6 +2590,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted && renderEditable.hasSize) {
+          _nextFocusChangeIsInternal = true;
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
