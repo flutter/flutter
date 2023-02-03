@@ -727,10 +727,10 @@ void main() {
 
       testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: Row(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('hello'),
                   Text('hello'),
                 ],

@@ -7,6 +7,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
+import '../html_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -127,7 +128,7 @@ class BuildWebCommand extends BuildSubCommand {
         baseHref != null) {
       throwToolExit(
         "Couldn't find the placeholder for base href. "
-        r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
+        'Please add `<base href="$kBaseHrefPlaceholder">` to web/index.html'
       );
     }
 
