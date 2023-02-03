@@ -1765,7 +1765,7 @@ void main() {
 
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
-  
+
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
     const Key pKey = Key('p');
     const Key sKey = Key('s');
