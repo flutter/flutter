@@ -42,7 +42,18 @@ class RouteInformation {
   /// Creates a route information object.
   ///
   /// The arguments may be null.
-  const RouteInformation({this.location, this.state});
+  const RouteInformation({
+    @Deprecated(
+      'Passes Uri.parse(location) to uri parameter instead. '
+      'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
+    String? location,
+    Uri? uri,
+    this.state,
+  }) : _location = location,
+       _uri = uri,
+       assert((location != null) != (uri != null));
 
   /// The location of the application.
   ///
@@ -50,7 +61,32 @@ class RouteInformation {
   /// slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
   ///
   /// It is equivalent to the URL in a web application.
-  final String? location;
+  String get location {
+    if (_location != null) {
+      return _location!;
+    }
+    final Uri uri = _uri!;
+    return Uri(
+      path: uri.path.isEmpty ? '/' : uri.path,
+      queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+      fragment: uri.fragment.isEmpty ? null : uri.fragment,
+    ).toString();
+  }
+  final String? _location;
+
+  /// The location of the application.
+  ///
+  /// The string is usually in the format of multiple string identifiers with
+  /// slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
+  ///
+  /// It is equivalent to the URL in a web application.
+  Uri get uri {
+    if (_uri != null){
+      return _uri!;
+    }
+    return Uri.parse(_location!);
+  }
+  final Uri? _uri;
 
   /// The state of the application in the [location].
   ///
@@ -1435,7 +1471,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
        _valueInEngine.location == routeInformation.location);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
-      location: routeInformation.location!,
+      location: routeInformation.location,
       state: routeInformation.state,
       replace: replace,
     );

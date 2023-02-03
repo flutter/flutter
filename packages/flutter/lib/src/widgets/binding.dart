@@ -87,7 +87,7 @@ abstract mixin class WidgetsBindingObserver {
   /// The default implementation is to call the [didPushRoute] directly with the
   /// [RouteInformation.location].
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    return didPushRoute(routeInformation.location!);
+    return didPushRoute(routeInformation.location);
   }
 
   /// Called when the application's dimensions change. For example,
@@ -684,7 +684,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       if (
         await observer.didPushRouteInformation(
           RouteInformation(
-            location: routeArguments['location'] as String,
+            uri: Uri.parse(routeArguments['location'] as String),
             state: routeArguments['state'] as Object?,
           ),
         )

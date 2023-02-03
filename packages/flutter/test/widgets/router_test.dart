@@ -21,7 +21,7 @@ void main() {
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: SimpleRouterDelegate(
           builder: (BuildContext context, RouteInformation? information) {
-            return Text(information!.location!);
+            return Text(information!.location);
           },
         ),
       ),
@@ -47,7 +47,7 @@ void main() {
         if (information == null) {
           return const Text('waiting');
         }
-        return Text(information.location!);
+        return Text(information.location);
       },
     );
     await tester.runAsync(() async {
@@ -91,7 +91,7 @@ void main() {
         if (information == null) {
           return const Text('waiting');
         }
-        return Text(information.location!);
+        return Text(information.location);
       },
     );
     await tester.runAsync(() async {
@@ -159,7 +159,7 @@ void main() {
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: SimpleRouterDelegate(
           builder: (BuildContext context, RouteInformation? information) {
-            return Text(information!.location!);
+            return Text(information!.location);
           },
           onPopRoute: () {
             provider.value = const RouteInformation(
@@ -196,7 +196,7 @@ void main() {
           routeInformationProvider: provider,
           routerDelegate: SimpleRouterDelegate(
             builder: (BuildContext context, RouteInformation? information) {
-              return Text(information!.location!);
+              return Text(information!.location);
             },
           ),
         );
@@ -217,7 +217,7 @@ void main() {
     final BackButtonDispatcher dispatcher = RootBackButtonDispatcher();
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
-        return Text(information!.location!);
+        return Text(information!.location);
       },
       onPopPage: (Route<void> route, void result) {
         provider.value = const RouteInformation(
@@ -282,7 +282,7 @@ void main() {
               backButtonDispatcher: innerDispatcher,
               routerDelegate: SimpleRouterDelegate(
                 builder: (BuildContext context, RouteInformation? innerInformation) {
-                  return Text(information!.location!);
+                  return Text(information!.location);
                 },
                 onPopRoute: () {
                   provider.value = const RouteInformation(
@@ -330,7 +330,7 @@ void main() {
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 Router<RouteInformation>(
                   backButtonDispatcher: innerDispatcher1,
                   routerDelegate: SimpleRouterDelegate(
@@ -522,7 +522,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation? information) {
-        return Text(information!.location!);
+        return Text(information!.location);
       },
     );
     delegate.onPopRoute = () {
@@ -603,7 +603,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
     delegate.builder = (BuildContext context, RouteInformation? information) {
       return ElevatedButton(
-        child: Text(information!.location!),
+        child: Text(information!.location),
         onPressed: () {
           if (isNavigating) {
             Router.navigate(context, () {
@@ -679,7 +679,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
     delegate.builder = (BuildContext context, RouteInformation? information) {
       return ElevatedButton(
-        child: Text(information!.location!),
+        child: Text(information!.location),
         onPressed: () {
           Router.neglect(context, () {
             if (delegate.routeInformation != nextRouteInformation) {
@@ -736,7 +736,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(reportConfiguration: true);
     delegate.builder = (BuildContext context, RouteInformation? information) {
       return ElevatedButton(
-        child: Text(information!.location!),
+        child: Text(information!.location),
         onPressed: () {
           delegate.routeInformation = nextRouteInformation;
         },
@@ -778,8 +778,8 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
         final List<Widget> children = <Widget>[];
-        if (information!.location != null) {
-          children.add(Text(information.location!));
+        if (information!.location.isNotEmpty) {
+          children.add(Text(information.location));
         }
         if (information.state != null) {
           children.add(Text(information.state.toString()));
@@ -877,7 +877,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation? information) {
-        return Text(information!.location!);
+        return Text(information!.location);
       },
     );
     delegate.onPopRoute = () {
@@ -918,7 +918,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 BackButtonListener(
                   child: Container(),
                   onBackButtonPressed: () {
@@ -960,7 +960,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 BackButtonListener(
                   child: Container(),
                   onBackButtonPressed: () {
@@ -994,7 +994,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         // Creates the sub-router.
         return Column(
           children: <Widget>[
-            Text(information!.location!),
+            Text(information!.location),
             BackButtonListener(
               child: Container(),
               onBackButtonPressed: () {
@@ -1039,7 +1039,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 BackButtonListener(
                   child: Container(),
                   onBackButtonPressed: () {
@@ -1073,7 +1073,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         // Creates the sub-router.
         return Column(
           children: <Widget>[
-            Text(information!.location!),
+            Text(information!.location),
           ],
         );
       }
@@ -1114,7 +1114,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 BackButtonListener(
                   child: BackButtonListener(
                     child: Container(),
@@ -1169,7 +1169,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
             // Creates the sub-router.
             return Column(
               children: <Widget>[
-                Text(information!.location!),
+                Text(information!.location),
                 BackButtonListener(
                   child: BackButtonListener(
                     child: Container(),
@@ -1221,7 +1221,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         // Creates the sub-router.
         return Column(
           children: <Widget>[
-            Text(information!.location!),
+            Text(information!.location),
             StatefulBuilder(
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
@@ -1312,7 +1312,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }),
       routerDelegate: SimpleRouterDelegate(
         builder: (BuildContext context, RouteInformation? information) {
-          return Text(information!.location!);
+          return Text(information!.location);
         },
         onPopRoute: () {
           provider.value = const RouteInformation(
@@ -1365,7 +1365,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       }),
       routerDelegate: SimpleRouterDelegate(
         builder: (BuildContext context, RouteInformation? information) {
-          return Text(information!.location!);
+          return Text(information!.location);
         },
         onPopRoute: () {
           provider.value = const RouteInformation(
@@ -1476,6 +1476,41 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     await tester.pumpWidget(buildBoilerPlate(router));
 
     expect(find.text(expected), findsOneWidget);
+  });
+
+  group('RouteInformation uri api', () {
+    test('can produce correct uri from location', () async {
+      const RouteInformation info1 = RouteInformation(location: '/a?abc=def&abc=jkl#mno');
+      expect(info1.location, '/a?abc=def&abc=jkl#mno');
+      final Uri uri1 = info1.uri;
+      expect(uri1.scheme, '');
+      expect(uri1.host, '');
+      expect(uri1.path, '/a');
+      expect(uri1.fragment, 'mno');
+      expect(uri1.queryParametersAll.length, 1);
+      expect(uri1.queryParametersAll['abc']!.length, 2);
+      expect(uri1.queryParametersAll['abc']![0], 'def');
+      expect(uri1.queryParametersAll['abc']![1], 'jkl');
+
+      const RouteInformation info2 = RouteInformation(location: '1');
+      expect(info2.location, '1');
+      final Uri uri2 = info2.uri;
+      expect(uri2.scheme, '');
+      expect(uri2.host, '');
+      expect(uri2.path, '1');
+      expect(uri2.fragment, '');
+      expect(uri2.queryParametersAll.length, 0);
+    });
+
+    test('can produce correct location from uri', () async {
+      final RouteInformation info1 = RouteInformation(uri: Uri.parse('http://mydomain.com'));
+      expect(info1.uri.toString(), 'http://mydomain.com');
+      expect(info1.location, '/');
+
+      final RouteInformation info2 = RouteInformation(uri: Uri.parse('http://mydomain.com/abc?def=ghi&def=jkl#mno'));
+      expect(info2.uri.toString(), 'http://mydomain.com/abc?def=ghi&def=jkl#mno');
+      expect(info2.location, '/abc?def=ghi&def=jkl#mno');
+    });
   });
 }
 
@@ -1605,7 +1640,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation.location),
           child: builder(context, routeInformation),
         ),
       ],

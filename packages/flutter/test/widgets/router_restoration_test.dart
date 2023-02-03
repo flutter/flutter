@@ -80,7 +80,7 @@ void main() {
 class _TestRouteInformationParser extends RouteInformationParser<String> {
   @override
   Future<String> parseRouteInformation(RouteInformation routeInformation) {
-    return SynchronousFuture<String>(routeInformation.location!);
+    return SynchronousFuture<String>(routeInformation.location);
   }
 
   @override

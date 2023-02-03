@@ -154,7 +154,7 @@ void main() {
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -180,7 +180,7 @@ void main() {
   testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -205,7 +205,7 @@ void main() {
   testWidgets('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -230,7 +230,7 @@ void main() {
   testWidgets('CupertinoApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -258,7 +258,7 @@ void main() {
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
-            return Text(information.location!);
+            return Text(information.location);
           },
           onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
             delegate.routeInformation = const RouteInformation(

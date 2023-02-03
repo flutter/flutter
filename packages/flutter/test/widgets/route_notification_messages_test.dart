@@ -276,7 +276,7 @@ void main() {
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
     );
 
