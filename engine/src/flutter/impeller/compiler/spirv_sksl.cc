@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/compiler/spirv_sksl.h"
+#include "impeller/compiler/uniform_sorter.h"
 
 using namespace spv;
 using namespace SPIRV_CROSS_NAMESPACE;
@@ -219,46 +220,12 @@ bool CompilerSkSL::emit_uniform_resources() {
   bool emitted = false;
 
   // Output Uniform Constants (values, samplers, images, etc).
-  std::vector<ID> regular_uniforms;
-  std::vector<ID> shader_uniforms;
-  for (auto& id : ir.ids) {
-    if (id.get_type() == TypeVariable) {
-      auto& var = id.get<SPIRVariable>();
-      auto& type = get<SPIRType>(var.basetype);
-      if (var.storage != StorageClassFunction && !is_hidden_variable(var) &&
-          type.pointer &&
-          (type.storage == StorageClassUniformConstant ||
-           type.storage == StorageClassAtomicCounter)) {
-        // Separate out the uniforms that will be of SkSL 'shader' type since
-        // we need to make sure they are emitted only after the other uniforms.
-        if (type.basetype == SPIRType::SampledImage) {
-          shader_uniforms.push_back(var.self);
-        } else {
-          regular_uniforms.push_back(var.self);
-        }
-        emitted = true;
-      }
-    }
+  std::vector<ID> regular_uniforms = SortUniforms(&ir, this, SPIRType::Float);
+  std::vector<ID> shader_uniforms =
+      SortUniforms(&ir, this, SPIRType::SampledImage);
+  if (regular_uniforms.size() > 0 || shader_uniforms.size() > 0) {
+    emitted = true;
   }
-
-  // Sort uniforms by location.
-  auto compare_locations = [this](ID id1, ID id2) {
-    auto& flags1 = get_decoration_bitset(id1);
-    auto& flags2 = get_decoration_bitset(id2);
-    // Put the uniforms with no location after the ones that have a location.
-    if (!flags1.get(DecorationLocation)) {
-      return false;
-    }
-    if (!flags2.get(DecorationLocation)) {
-      return true;
-    }
-    // Sort in increasing order of location.
-    return get_decoration(id1, DecorationLocation) <
-           get_decoration(id2, DecorationLocation);
-  };
-  std::sort(regular_uniforms.begin(), regular_uniforms.end(),
-            compare_locations);
-  std::sort(shader_uniforms.begin(), shader_uniforms.end(), compare_locations);
 
   for (const auto& id : regular_uniforms) {
     auto& var = get<SPIRVariable>(id);

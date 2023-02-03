@@ -16,6 +16,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/code_gen_template.h"
+#include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
@@ -359,23 +360,25 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
   if (sksl_data_) {
     data->SetSkSLData(sksl_data_);
   }
-  ir_->for_each_typed_id<spirv_cross::SPIRVariable>(
-      [&](uint32_t, const spirv_cross::SPIRVariable& var) {
-        if (var.storage != spv::StorageClassUniformConstant) {
-          return;
-        }
-        const auto spir_type = compiler_->get_type(var.basetype);
-        UniformDescription uniform_description;
-        uniform_description.name = compiler_->get_name(var.self);
-        uniform_description.location = compiler_->get_decoration(
-            var.self, spv::Decoration::DecorationLocation);
-        uniform_description.type = spir_type.basetype;
-        uniform_description.rows = spir_type.vecsize;
-        uniform_description.columns = spir_type.columns;
-        uniform_description.bit_width = spir_type.width;
-        uniform_description.array_elements = GetArrayElements(spir_type);
-        data->AddUniformDescription(std::move(uniform_description));
-      });
+
+  // Sort the IR so that the uniforms are in declaration order.
+  std::vector<spirv_cross::ID> uniforms =
+      SortUniforms(ir_.get(), compiler_.GetCompiler());
+
+  for (auto& sorted_id : uniforms) {
+    auto var = ir_->ids[sorted_id].get<spirv_cross::SPIRVariable>();
+    const auto spir_type = compiler_->get_type(var.basetype);
+    UniformDescription uniform_description;
+    uniform_description.name = compiler_->get_name(var.self);
+    uniform_description.location = compiler_->get_decoration(
+        var.self, spv::Decoration::DecorationLocation);
+    uniform_description.type = spir_type.basetype;
+    uniform_description.rows = spir_type.vecsize;
+    uniform_description.columns = spir_type.columns;
+    uniform_description.bit_width = spir_type.width;
+    uniform_description.array_elements = GetArrayElements(spir_type);
+    data->AddUniformDescription(std::move(uniform_description));
+  }
   return data;
 }
 
