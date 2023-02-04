@@ -525,34 +525,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     );
   }
 
-  Widget _cupertinoBuilder(BuildContext context, Widget? child) {
-    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
-
-    return CupertinoTheme(
-      data: effectiveThemeData,
-      // DefaultTextStyle has to be declared here because
-      // passing a textStyle directly to the WidgetsApp
-      // will make it non-resolvable.
-      child: DefaultTextStyle(
-        style: effectiveThemeData.textTheme.textStyle,
-        child: DefaultSelectionStyle(
-          selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
-          cursorColor: effectiveThemeData.primaryColor,
-          child: widget.builder != null
-              ? Builder(
-                  builder: (BuildContext context) {
-                    return widget.builder!(context, child);
-                  },
-                )
-              : child ?? const SizedBox.shrink(),
-        ),
-      ),
-    );
-  }
-
   WidgetsApp _buildWidgetApp(BuildContext context) {
-    // CupertinoTheme won't resolve colors in this context if brightness
-    // is null, so this doesn't really work.
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
     final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
@@ -564,9 +537,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routerDelegate: widget.routerDelegate,
         routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
-        builder: _cupertinoBuilder,
+        builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
+        textStyle: effectiveThemeData.textTheme.textStyle,
         color: color,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
@@ -584,6 +558,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         restorationScopeId: widget.restorationScopeId,
       );
     }
+
     return WidgetsApp(
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
@@ -597,9 +572,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
-      builder: _cupertinoBuilder,
+      builder: widget.builder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
+      textStyle: effectiveThemeData.textTheme.textStyle,
       color: color,
       locale: widget.locale,
       localizationsDelegates: _localizationsDelegates,
@@ -620,16 +596,22 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
+
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
-          data: widget.theme ?? const CupertinoThemeData(),
-          child: HeroControllerScope(
-            controller: _heroController,
-            child: Builder(
-              builder: _buildWidgetApp,
+          data: effectiveThemeData,
+          child: DefaultSelectionStyle(
+            selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
+            cursorColor: effectiveThemeData.primaryColor,
+            child: HeroControllerScope(
+              controller: _heroController,
+              child: Builder(
+                builder: _buildWidgetApp,
+              ),
             ),
           ),
         ),

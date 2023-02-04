@@ -373,6 +373,58 @@ void main() {
     debugBrightnessOverride = null;
   });
 
+  testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+    debugBrightnessOverride = Brightness.dark;
+
+    RenderEditable findRenderEditable(WidgetTester tester) {
+      final RenderObject root = tester.renderObject(find.byType(EditableText));
+      expect(root, isNotNull);
+
+      RenderEditable? renderEditable;
+      void recursiveFinder(RenderObject child) {
+        if (child is RenderEditable) {
+          renderEditable = child;
+          return;
+        }
+        child.visitChildren(recursiveFinder);
+      }
+
+      root.visitChildren(recursiveFinder);
+      expect(renderEditable, isNotNull);
+      return renderEditable!;
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          primaryColor: CupertinoColors.activeOrange,
+        ),
+        home: CupertinoPageScaffold(
+          child: Builder(
+            builder: (BuildContext context) {
+              return EditableText(
+                backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
+                cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
+                controller: TextEditingController(),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable editableText = findRenderEditable(tester);
+    final Color cursorColor = editableText.cursorColor!;
+
+    // Cursor color should be equal to the dark variant of the primary color.
+    // Alpha value needs to be 0, because cursor is not visible by default.
+    expect(cursorColor, CupertinoColors.activeOrange.darkColor.withAlpha(0));
+
+    debugBrightnessOverride = null;
+  });
+
   testWidgets('Properties of CupertinoThemeData are effective', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
