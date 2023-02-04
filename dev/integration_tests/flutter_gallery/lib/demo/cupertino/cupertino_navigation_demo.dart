@@ -510,12 +510,12 @@ class Tab2Header extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: CupertinoDynamicColor.resolve(CupertinoColors.quaternarySystemFill, context),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
+                      Text(
                         'Product or product packaging damaged during transit',
                         style: TextStyle(
                           fontSize: 16.0,
@@ -523,8 +523,8 @@ class Tab2Header extends StatelessWidget {
                           letterSpacing: -0.46,
                         ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 16.0)),
-                      const Text(
+                      Padding(padding: EdgeInsets.only(top: 16.0)),
+                      Text(
                         'REVIEWERS',
                         style: TextStyle(
                           color: Color(0xFF646464),
@@ -533,13 +533,13 @@ class Tab2Header extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 8.0)),
+                      Padding(padding: EdgeInsets.only(top: 8.0)),
                       Row(
                         children: <Widget>[
                           Container(
                             width: 44.0,
                             height: 44.0,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
                                   'people/square/trevor.png',
@@ -549,11 +549,11 @@ class Tab2Header extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const Padding(padding: EdgeInsets.only(left: 8.0)),
+                          Padding(padding: EdgeInsets.only(left: 8.0)),
                           Container(
                             width: 44.0,
                             height: 44.0,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage(
                                   'people/square/sandra.png',
@@ -563,8 +563,8 @@ class Tab2Header extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const Padding(padding: EdgeInsets.only(left: 2.0)),
-                          const Icon(
+                          Padding(padding: EdgeInsets.only(left: 2.0)),
+                          Icon(
                             CupertinoIcons.check_mark_circled,
                             color: Color(0xFF646464),
                             size: 20.0,

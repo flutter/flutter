@@ -54,9 +54,9 @@ class MyStatelessWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: Stack(
               children: <Widget>[
-                Positioned.fill(
+                const Positioned.fill(
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: <Color>[
                           Color(0xFF0D47A1),

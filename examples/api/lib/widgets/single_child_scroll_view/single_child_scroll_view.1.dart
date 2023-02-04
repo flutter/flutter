@@ -36,24 +36,24 @@ class MyStatelessWidget extends StatelessWidget {
               constraints: BoxConstraints(
                 minHeight: viewportConstraints.maxHeight,
               ),
-              child: IntrinsicHeight(
+              child: const IntrinsicHeight(
                 child: Column(
                   children: <Widget>[
                     Container(
                       // A fixed-height child.
-                      color: const Color(0xffeeee00), // Yellow
+                      color: Color(0xffeeee00), // Yellow
                       height: 120.0,
                       alignment: Alignment.center,
-                      child: const Text('Fixed Height Content'),
+                      child: Text('Fixed Height Content'),
                     ),
                     Expanded(
                       // A flexible child that will grow to fit the viewport but
                       // still be at least as big as necessary to fit its contents.
                       child: Container(
-                        color: const Color(0xffee0000), // Red
+                        color: Color(0xffee0000), // Red
                         height: 120.0,
                         alignment: Alignment.center,
-                        child: const Text('Flexible Content'),
+                        child: Text('Flexible Content'),
                       ),
                     ),
                   ],

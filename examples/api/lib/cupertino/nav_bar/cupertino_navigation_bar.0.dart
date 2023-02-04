@@ -36,7 +36,7 @@ class _NavBarExampleState extends State<NavBarExample> {
         backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
         middle: const Text('CupertinoNavigationBar Sample'),
       ),
-      child: Column(
+      child: const Column(
         children: <Widget>[
           Container(height: 50, color: CupertinoColors.systemRed),
           Container(height: 50, color: CupertinoColors.systemGreen),

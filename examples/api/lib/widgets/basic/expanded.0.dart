@@ -31,7 +31,7 @@ class MyStatelessWidget extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Expanded Column Sample'),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           children: <Widget>[
             Container(

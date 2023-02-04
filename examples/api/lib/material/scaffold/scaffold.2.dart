@@ -41,8 +41,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body: Center(
         child: Text('You have pressed the button $_count times.'),
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
+      bottomNavigationBar: const BottomAppBar(
+        shape: CircularNotchedRectangle(),
         child: Container(height: 50.0),
       ),
       floatingActionButton: FloatingActionButton(

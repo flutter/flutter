@@ -33,7 +33,7 @@ class MyStatelessWidget extends StatelessWidget {
         children: <CupertinoListTile>[
           CupertinoListTile.notched(
             title: const Text('Open pull request'),
-            leading: Container(
+            leading: const Container(
               width: double.infinity,
               height: double.infinity,
               color: CupertinoColors.activeGreen,
@@ -47,18 +47,18 @@ class MyStatelessWidget extends StatelessWidget {
               ),
             ),
           ),
-          CupertinoListTile.notched(
-            title: const Text('Push to master'),
+          const CupertinoListTile.notched(
+            title: Text('Push to master'),
             leading: Container(
               width: double.infinity,
               height: double.infinity,
               color: CupertinoColors.systemRed,
             ),
-            additionalInfo: const Text('Not available'),
+            additionalInfo: Text('Not available'),
           ),
           CupertinoListTile.notched(
             title: const Text('View last commit'),
-            leading: Container(
+            leading: const Container(
               width: double.infinity,
               height: double.infinity,
               color: CupertinoColors.activeOrange,

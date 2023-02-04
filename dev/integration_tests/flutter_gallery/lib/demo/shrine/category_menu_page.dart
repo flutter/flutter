@@ -37,7 +37,7 @@ class CategoryMenuPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 14.0),
-                    Container(
+                    const Container(
                       width: 70.0,
                       height: 2.0,
                       color: kShrinePink400,

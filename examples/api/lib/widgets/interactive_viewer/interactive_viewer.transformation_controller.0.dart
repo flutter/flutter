@@ -103,8 +103,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           minScale: 0.1,
           maxScale: 1.0,
           onInteractionStart: _onInteractionStart,
-          child: Container(
-            decoration: const BoxDecoration(
+          child: const Container(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

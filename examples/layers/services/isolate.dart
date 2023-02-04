@@ -229,10 +229,10 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
         children: <Widget>[
           RotationTransition(
             turns: _animation,
-            child: Container(
+            child: const Container(
               width: 120.0,
               height: 120.0,
-              color: const Color(0xFF882222),
+              color: Color(0xFF882222),
             ),
           ),
           Opacity(

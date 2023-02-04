@@ -42,7 +42,7 @@ class MyStatelessWidget extends StatelessWidget {
   }
 
   Widget _buildNormalContainer() {
-    return Center(
+    return const Center(
       child: Container(
         height: 100.0,
         width: 100.0,
@@ -52,7 +52,7 @@ class MyStatelessWidget extends StatelessWidget {
   }
 
   Widget _buildWideContainers() {
-    return Center(
+    return const Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[

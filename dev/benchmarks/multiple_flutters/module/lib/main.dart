@@ -116,36 +116,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {},
                 child: const Text('Next'),
               ),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  const Icon(
+                  Icon(
                     Icons.favorite,
                     color: Colors.pink,
                     size: 24.0,
                     semanticLabel: 'Text to announce in accessibility modes',
                   ),
-                  const Icon(
+                  Icon(
                     Icons.audiotrack,
                     color: Colors.green,
                     size: 30.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.beach_access,
                     color: Colors.blue,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.zoom_out,
                     color: Colors.amber,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.money,
                     color: Colors.lightGreen,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.bug_report,
                     color: Colors.teal,
                     size: 36.0,
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     width: 36.0,
                     height: 36.0,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment(0.8,

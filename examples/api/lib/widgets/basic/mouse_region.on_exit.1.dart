@@ -80,7 +80,7 @@ class _MyTimedButton extends State<MyTimedButton> {
                   });
                   widget.onExitButton();
                 },
-                child: Container(color: Colors.red),
+                child: const Container(color: Colors.red),
               ),
       ),
     );

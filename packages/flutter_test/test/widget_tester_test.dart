@@ -447,11 +447,11 @@ void main() {
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
-                        return CupertinoPageScaffold(
-                          navigationBar: const CupertinoNavigationBar(
+                        return const CupertinoPageScaffold(
+                          navigationBar: CupertinoNavigationBar(
                             middle: Text('Page 2'),
                           ),
-                          child: const Container(),
+                          child: Container(),
                         );
                       },
                     ));

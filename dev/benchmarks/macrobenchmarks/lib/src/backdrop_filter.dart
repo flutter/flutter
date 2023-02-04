@@ -46,9 +46,9 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
       }
     }
 
-    final Widget txt = addBlur(Container(
-      padding: const EdgeInsets.all(5),
-      child: const Text('txt'),
+    final Widget txt = addBlur(const Container(
+      padding: EdgeInsets.all(5),
+      child: Text('txt'),
     ), _blurTexts);
 
     Widget col(Widget w, int numRows) {

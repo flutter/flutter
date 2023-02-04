@@ -42,7 +42,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
-          background: Container(
+          background: const Container(
             color: Colors.green,
           ),
           key: ValueKey<int>(items[index]),

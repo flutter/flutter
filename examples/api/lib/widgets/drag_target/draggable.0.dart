@@ -40,20 +40,20 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        Draggable<int>(
+        const Draggable<int>(
           // Data is the value this Draggable stores.
           data: 10,
           feedback: Container(
             color: Colors.deepOrange,
             height: 100,
             width: 100,
-            child: const Icon(Icons.directions_run),
+            child: Icon(Icons.directions_run),
           ),
           childWhenDragging: Container(
             height: 100.0,
             width: 100.0,
             color: Colors.pinkAccent,
-            child: const Center(
+            child: Center(
               child: Text('Child When Dragging'),
             ),
           ),
@@ -61,7 +61,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             height: 100.0,
             width: 100.0,
             color: Colors.lightGreenAccent,
-            child: const Center(
+            child: Center(
               child: Text('Draggable'),
             ),
           ),

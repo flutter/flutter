@@ -56,9 +56,9 @@ class MyApp extends StatelessWidget {
           // order to show the context menu, but it could also wrap a single
           // wiget like an Image to give it a context menu.
           child: ListView(
-            children: <Widget>[
+            children: const <Widget>[
               Container(height: 20.0),
-              const Text('Right click or long press anywhere (not just on this text!) to show the custom menu.'),
+              Text('Right click or long press anywhere (not just on this text!) to show the custom menu.'),
             ],
           ),
         ),

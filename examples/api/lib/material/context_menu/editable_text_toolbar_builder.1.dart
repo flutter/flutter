@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: Column(
             children: <Widget>[
-              Container(height: 20.0),
+              const Container(height: 20.0),
               TextField(
                 controller: _controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {

@@ -60,14 +60,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           _index = index;
         });
       },
-      steps: <Step>[
+      steps: const <Step>[
         Step(
-          title: const Text('Step 1 title'),
+          title: Text('Step 1 title'),
           content: Container(
               alignment: Alignment.centerLeft,
-              child: const Text('Content for Step 1')),
+              child: Text('Content for Step 1')),
         ),
-        const Step(
+        Step(
           title: Text('Step 2 title'),
           content: Text('Content for Step 2'),
         ),

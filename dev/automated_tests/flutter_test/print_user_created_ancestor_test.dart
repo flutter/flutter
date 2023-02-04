@@ -9,9 +9,9 @@ void main() {
   testWidgets('Rendering Error', (WidgetTester tester) async {
     // this should fail
     await tester.pumpWidget(
-      CustomScrollView(
+      const CustomScrollView(
         slivers: <Widget>[
-         const SliverToBoxAdapter(child: Container()),
+         SliverToBoxAdapter(child: Container()),
         ],
       )
     );

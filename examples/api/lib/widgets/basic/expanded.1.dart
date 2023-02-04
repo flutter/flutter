@@ -31,7 +31,7 @@ class MyStatelessWidget extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Expanded Row Sample'),
       ),
-      body: Center(
+      body: const Center(
         child: Row(
           children: <Widget>[
             Expanded(

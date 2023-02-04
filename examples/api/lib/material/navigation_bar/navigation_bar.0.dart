@@ -54,20 +54,20 @@ class _NavigationExampleState extends State<NavigationExample> {
         ],
       ),
       body: <Widget>[
-        Container(
+        const Container(
           color: Colors.red,
           alignment: Alignment.center,
-          child: const Text('Page 1'),
+          child: Text('Page 1'),
         ),
-        Container(
+        const Container(
           color: Colors.green,
           alignment: Alignment.center,
-          child: const Text('Page 2'),
+          child: Text('Page 2'),
         ),
-        Container(
+        const Container(
           color: Colors.blue,
           alignment: Alignment.center,
-          child: const Text('Page 3'),
+          child: Text('Page 3'),
         ),
       ][currentPageIndex],
     );

@@ -30,7 +30,7 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return const Container(
       color: Colors.blue,
       alignment: Alignment.center,
       width: 100.0,

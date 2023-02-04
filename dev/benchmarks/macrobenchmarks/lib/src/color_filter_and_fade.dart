@@ -75,7 +75,7 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 fadeTransition,
-                Container(height: 20),
+                const Container(height: 20),
                 const Text('Use Color Filter:'),
                 Checkbox(
                   value: _useColorFilter,

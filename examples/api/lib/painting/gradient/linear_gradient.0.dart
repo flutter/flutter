@@ -22,9 +22,9 @@ class MoodyGradient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return const Material(
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment(0.8, 1),
@@ -41,7 +41,7 @@ class MoodyGradient extends StatelessWidget {
             tileMode: TileMode.mirror,
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'From Night to Day',
             style: TextStyle(fontSize: 24, color: Colors.white),

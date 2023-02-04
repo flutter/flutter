@@ -68,19 +68,19 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80.0),
+        preferredSize: Size.fromHeight(80.0),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[Colors.blue, Colors.pink],
             ),
           ),
-          child: const AppBarContent(),
+          child: AppBarContent(),
         ),
       ),
-      body: const Center(
+      body: Center(
         child: Text('Content'),
       ),
     );

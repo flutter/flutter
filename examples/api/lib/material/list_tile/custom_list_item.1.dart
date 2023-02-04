@@ -150,10 +150,10 @@ class CustomListItemExample extends StatelessWidget {
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(
         padding: const EdgeInsets.all(10.0),
-        children: <Widget>[
+        children: const <Widget>[
           CustomListItemTwo(
             thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.pink),
+              decoration: BoxDecoration(color: Colors.pink),
             ),
             title: 'Flutter 1.0 Launch',
             subtitle: 'Flutter continues to improve and expand its horizons. '
@@ -164,7 +164,7 @@ class CustomListItemExample extends StatelessWidget {
           ),
           CustomListItemTwo(
             thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.blue),
+              decoration: BoxDecoration(color: Colors.blue),
             ),
             title: 'Flutter 1.2 Release - Continual updates to the framework',
             subtitle: 'Flutter once again improves and makes updates.',

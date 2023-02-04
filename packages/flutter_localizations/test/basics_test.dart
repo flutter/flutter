@@ -51,13 +51,13 @@ void main() {
   testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        supportedLocales: const <Locale>[
+        supportedLocales: <Locale>[
           Locale('es', 'ES'),
           Locale('zh'),
         ],
-        home: const Container(),
+        home: Container(),
       )
     );
 

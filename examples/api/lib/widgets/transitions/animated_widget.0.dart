@@ -36,7 +36,7 @@ class SpinningContainer extends AnimatedWidget {
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: _progress.value * 2.0 * math.pi,
-      child: Container(width: 200.0, height: 200.0, color: Colors.green),
+      child: const Container(width: 200.0, height: 200.0, color: Colors.green),
     );
   }
 }

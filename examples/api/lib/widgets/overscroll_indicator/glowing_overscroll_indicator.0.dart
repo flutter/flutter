@@ -39,17 +39,17 @@ class MyStatelessWidget extends StatelessWidget {
         }
         return false;
       },
-      child: CustomScrollView(
+      child: const CustomScrollView(
         slivers: <Widget>[
-          const SliverAppBar(title: Text('Custom PaintOffset')),
+          SliverAppBar(title: Text('Custom PaintOffset')),
           SliverToBoxAdapter(
             child: Container(
               color: Colors.amberAccent,
               height: 100,
-              child: const Center(child: Text('Glow all day!')),
+              child: Center(child: Text('Glow all day!')),
             ),
           ),
-          const SliverFillRemaining(child: FlutterLogo()),
+          SliverFillRemaining(child: FlutterLogo()),
         ],
       ),
     );

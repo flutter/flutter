@@ -34,9 +34,9 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
     CupertinoColors.systemPink,
   ];
   List<Widget> items = <Widget>[
-    Container(color: CupertinoColors.systemPink, height: 100.0),
-    Container(color: CupertinoColors.systemOrange, height: 100.0),
-    Container(color: CupertinoColors.systemYellow, height: 100.0),
+    const Container(color: CupertinoColors.systemPink, height: 100.0),
+    const Container(color: CupertinoColors.systemOrange, height: 100.0),
+    const Container(color: CupertinoColors.systemYellow, height: 100.0),
   ];
 
   @override

@@ -50,11 +50,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      child: Container(
+      child: const Container(
         width: 200.0,
         height: 200.0,
         color: Colors.green,
-        child: const Center(
+        child: Center(
           child: Text('Whee!'),
         ),
       ),

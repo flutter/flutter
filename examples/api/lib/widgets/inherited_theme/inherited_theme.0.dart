@@ -33,10 +33,10 @@ class MyAppBody extends StatelessWidget {
               // Wrap the actual child of the route in the previously
               // captured themes.
               return themes.wrap(
-                Container(
+                const Container(
                   alignment: Alignment.center,
                   color: Colors.white,
-                  child: const Text('Hello World'),
+                  child: Text('Hello World'),
                 ),
               );
             },

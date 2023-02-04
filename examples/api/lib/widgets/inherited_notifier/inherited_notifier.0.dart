@@ -46,11 +46,11 @@ class Spinner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: SpinModel.of(context) * 2.0 * math.pi,
-      child: Container(
+      child: const Container(
         width: 100,
         height: 100,
         color: Colors.green,
-        child: const Center(
+        child: Center(
           child: Text('Whee!'),
         ),
       ),

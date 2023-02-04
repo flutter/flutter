@@ -22,11 +22,11 @@ class _FlutterLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Container(
         width: 34.0,
         height: 34.0,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
               'logos/flutter_white/logo.png',
@@ -354,7 +354,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                 ? const Text('Flutter gallery')
                 : Text(_category!.name),
             ),
-            frontHeading: widget.testMode ? null : Container(height: 24.0),
+            frontHeading: widget.testMode ? null : const Container(height: 24.0),
             frontLayer: AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,

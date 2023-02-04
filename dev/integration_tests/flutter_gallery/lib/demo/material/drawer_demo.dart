@@ -221,10 +221,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Container(
+                const Container(
                   width: 100.0,
                   height: 100.0,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       image: AssetImage(

@@ -262,13 +262,13 @@ class ExampleWidget extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Slotted RenderObject Example')),
-        body: Center(
+        body: const Center(
           child: Diagonal(
             topLeft: Container(
               color: Colors.green,
               height: 100,
               width: 200,
-              child: const Center(
+              child: Center(
                 child: Text('topLeft'),
               ),
             ),
@@ -276,7 +276,7 @@ class ExampleWidget extends StatelessWidget {
               color: Colors.yellow,
               height: 60,
               width: 30,
-              child: const Center(
+              child: Center(
                 child: Text('bottomRight'),
               ),
             ),

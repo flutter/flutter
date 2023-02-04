@@ -127,7 +127,7 @@ class _RotationContainerState extends State<RotationContainer>
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: Tween<double>(begin: 0.0, end: 1.0).animate(_rotationController),
-      child: Container(
+      child: const Container(
         color: Colors.purple,
         width: 50.0,
         height: 50.0,

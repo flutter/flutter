@@ -38,7 +38,7 @@ class MyStatelessWidget extends StatelessWidget {
         2: FixedColumnWidth(64),
       },
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      children: <TableRow>[
+      children: const <TableRow>[
         TableRow(
           children: <Widget>[
             Container(
@@ -60,7 +60,7 @@ class MyStatelessWidget extends StatelessWidget {
           ],
         ),
         TableRow(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.grey,
           ),
           children: <Widget>[

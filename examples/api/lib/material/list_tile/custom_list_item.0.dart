@@ -113,12 +113,12 @@ class CustomListItemExample extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(8.0),
         itemExtent: 106.0,
-        children: <CustomListItem>[
+        children: const <CustomListItem>[
           CustomListItem(
             user: 'Flutter',
             viewCount: 999000,
             thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.blue),
+              decoration: BoxDecoration(color: Colors.blue),
             ),
             title: 'The Flutter YouTube Channel',
           ),
@@ -126,7 +126,7 @@ class CustomListItemExample extends StatelessWidget {
             user: 'Dash',
             viewCount: 884000,
             thumbnail: Container(
-              decoration: const BoxDecoration(color: Colors.yellow),
+              decoration: BoxDecoration(color: Colors.yellow),
             ),
             title: 'Announcing Flutter 1.0',
           ),

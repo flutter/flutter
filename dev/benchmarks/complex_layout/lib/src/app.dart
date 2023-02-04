@@ -691,10 +691,10 @@ class FancyDrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return const Container(
       color: Colors.purple,
       height: 200.0,
-      child: const SafeArea(
+      child: SafeArea(
         bottom: false,
         child: Placeholder(),
       ),

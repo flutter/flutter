@@ -32,10 +32,10 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.headlineMedium!,
-      child: Container(
+      child: const Container(
         color: Colors.white,
         alignment: Alignment.center,
-        child: const Text('Home Page'),
+        child: Text('Home Page'),
       ),
     );
   }
@@ -55,10 +55,10 @@ class CollectPersonalInfoPage extends StatelessWidget {
           Navigator.of(context)
               .pushReplacementNamed('signup/choose_credentials');
         },
-        child: Container(
+        child: const Container(
           color: Colors.lightBlue,
           alignment: Alignment.center,
-          child: const Text('Collect Personal Info Page'),
+          child: Text('Collect Personal Info Page'),
         ),
       ),
     );
@@ -79,10 +79,10 @@ class ChooseCredentialsPage extends StatelessWidget {
       onTap: onSignupComplete,
       child: DefaultTextStyle(
         style: Theme.of(context).textTheme.headlineMedium!,
-        child: Container(
+        child: const Container(
           color: Colors.pinkAccent,
           alignment: Alignment.center,
-          child: const Text('Choose Credentials Page'),
+          child: Text('Choose Credentials Page'),
         ),
       ),
     );

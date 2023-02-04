@@ -43,7 +43,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
       icon: const Icon(Icons.arrow_downward),
       elevation: 16,
       style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
+      underline: const Container(
         height: 2,
         color: Colors.deepPurpleAccent,
       ),

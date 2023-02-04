@@ -91,7 +91,7 @@ class _FrontLayer extends StatelessWidget {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
-            child: Container(
+            child: const Container(
               height: 40.0,
               alignment: AlignmentDirectional.centerStart,
             ),

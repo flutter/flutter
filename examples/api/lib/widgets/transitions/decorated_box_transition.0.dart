@@ -75,11 +75,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       child: Center(
         child: DecoratedBoxTransition(
           decoration: decorationTween.animate(_controller),
-          child: Container(
+          child: const Container(
             width: 200,
             height: 200,
-            padding: const EdgeInsets.all(10),
-            child: const FlutterLogo(),
+            padding: EdgeInsets.all(10),
+            child: FlutterLogo(),
           ),
         ),
       ),

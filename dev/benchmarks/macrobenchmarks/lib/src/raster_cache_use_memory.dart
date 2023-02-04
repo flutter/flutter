@@ -48,7 +48,7 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
                 sigmaX: 4,
                 sigmaY: 4,
               ),
-              child: RepaintBoundary(
+              child: const RepaintBoundary(
                 child: Container(
                   width: 50,
                   height: 50,
@@ -113,7 +113,7 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
               size: 50,
             ),
           ),
-          Container(
+          const Container(
             height: 800,
           ),
         ],
