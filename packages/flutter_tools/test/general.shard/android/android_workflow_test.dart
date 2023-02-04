@@ -339,7 +339,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     await licenseValidator.runLicenseManager();
-    expect(logger.traceText, contains(exceptionMessage));
+    expect(logger.errorText, contains(exceptionMessage));
     expect(processManager, hasNoRemainingExpectations);
   });
 
