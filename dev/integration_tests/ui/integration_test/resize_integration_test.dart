@@ -47,7 +47,7 @@ void main() {
       (WidgetTester tester) async {
     const app.ResizeApp root = app.ResizeApp();
     widgets.runApp(root);
-    widgets.runApp(widgets.const Container());
+    widgets.runApp(widgets.Container());
 
     await tester.pumpAndSettle();
 
