@@ -148,6 +148,13 @@ double getOpacity(WidgetTester tester, String textValue) {
   return opacityWidget.opacity.value;
 }
 
+TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
 void main() {
   for(final bool useMaterial3 in  <bool>[true, false]){
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
@@ -1730,6 +1737,33 @@ void main() {
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+  });
+
+  testWidgets('InputDecorator suffixIconColor in M3 error state', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+          useMaterial3: true,
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              foregroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+            ),
+          ),
+        );
+    await tester.pumpWidget(
+       MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
+              errorText: 'error state',
+              filled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
 
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
