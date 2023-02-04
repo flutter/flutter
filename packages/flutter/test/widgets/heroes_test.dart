@@ -578,7 +578,7 @@ Future<void> main() async {
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => const Hero(tag: 'test', child: Container()),
+          builder: (BuildContext context) => const Hero(tag: 'test', child: const Container()),
         );
       },
     ));
@@ -599,7 +599,7 @@ Future<void> main() async {
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => const Hero(tag: 'test', child: Container()),
+          builder: (BuildContext context) => const Hero(tag: 'test', child: const Container()),
         );
       },
     ));

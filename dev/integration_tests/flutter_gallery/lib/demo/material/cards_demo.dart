@@ -265,7 +265,7 @@ class TravelDestinationContent extends StatelessWidget {
                 child: Ink.image(
                   image: AssetImage(destination.assetName, package: destination.assetPackage),
                   fit: BoxFit.cover,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
               Positioned(

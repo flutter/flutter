@@ -484,7 +484,7 @@ void main() {
           }
 
           @override
-          Widget build(BuildContext context) => Container();
+          Widget build(BuildContext context) => const Container();
         }
       ''',
     );
@@ -659,7 +659,7 @@ void main() {
           }
 
           @override
-          Widget build(BuildContext context) => Container();
+          Widget build(BuildContext context) => const Container();
         }
       ''',
     );
@@ -685,7 +685,7 @@ void main() {
           StatelessElement createElement() => TestElement(this);
 
           @override
-          Widget build(BuildContext context) => Container();
+          Widget build(BuildContext context) => const Container();
         }
 
         class TestElement extends StatelessElement {

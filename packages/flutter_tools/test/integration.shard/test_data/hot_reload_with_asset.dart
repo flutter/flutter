@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
     }, onError: (dynamic error, StackTrace stackTrace) {
       print('FAILED TO LOAD');
     });
-    return Container();
+    return const Container();
   }
 }
 ''';

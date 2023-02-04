@@ -1542,7 +1542,7 @@ void main() {
               appBar: AppBar(
                 bottom: const PreferredSize(
                   preferredSize: Size.fromHeight(200.0),
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
             ),
@@ -1568,7 +1568,7 @@ void main() {
               appBar: AppBar(
                 bottom: const PreferredSize(
                   preferredSize: Size.fromHeight(200.0),
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
             ),
@@ -3775,8 +3775,8 @@ void main() {
                 controller: controller,
                 child: ListView(
                   controller: controller,
-                  children: <Widget>[
-                    const Container(height: 1200.0, color: Colors.teal),
+                  children: const <Widget>[
+                    Container(height: 1200.0, color: Colors.teal),
                   ],
                 ),
               ),
@@ -3802,8 +3802,8 @@ void main() {
               ),
               body: ListView(
                 scrollDirection: Axis.horizontal,
-                children: <Widget>[
-                  const Container(height: 600.0, width: 1200.0, color: Colors.teal),
+                children: const <Widget>[
+                  Container(height: 600.0, width: 1200.0, color: Colors.teal),
                 ],
               ),
             ),

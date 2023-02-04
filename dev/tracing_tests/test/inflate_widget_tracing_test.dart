@@ -71,7 +71,7 @@ class TestRootState extends State<TestRoot> {
             TestChildWidget(),
           ],
         )
-      : Container();
+      : const Container();
   }
 }
 
@@ -80,6 +80,6 @@ class TestChildWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }

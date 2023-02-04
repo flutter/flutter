@@ -80,7 +80,7 @@ void main() {
     // Dispose the scrollables while the finger is still down, this should not crash.
     await tester.pumpWidget(
       const MaterialApp(
-        home: Container(),
+        home: const Container(),
       ),
     );
     await tester.pumpAndSettle();

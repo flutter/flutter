@@ -22,7 +22,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: const <Widget>[Container()],
+          children: const <Widget>[const Container()],
         ),
       ),
     );
@@ -43,7 +43,7 @@ void main() {
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
           clipBehavior: Clip.antiAlias,
-          children: const <Widget>[Container()],
+          children: const <Widget>[const Container()],
         ),
       ),
     );
@@ -90,7 +90,7 @@ void main() {
             useMagnifier: true,
             magnification: -1.0,
             itemExtent: 20.0,
-            children: const <Widget>[Container()],
+            children: const <Widget>[const Container()],
           );
         },
         throwsAssertionError,
@@ -103,7 +103,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: -1,
             itemExtent: 20.0,
-            children: const <Widget>[Container()],
+            children: const <Widget>[const Container()],
           );
         },
         throwsAssertionError,
@@ -114,7 +114,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: 2,
             itemExtent: 20.0,
-            children: const <Widget>[Container()],
+            children: const <Widget>[const Container()],
           );
         },
         throwsAssertionError,
@@ -124,7 +124,7 @@ void main() {
         () {
           ListWheelScrollView(
             itemExtent: 20.0,
-            children: const <Widget>[Container()],
+            children: const <Widget>[const Container()],
           );
         },
         isNot(throwsAssertionError),
@@ -135,7 +135,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: 0,
             itemExtent: 20.0,
-            children: const <Widget>[Container()],
+            children: const <Widget>[const Container()],
           );
         },
         isNot(throwsAssertionError),

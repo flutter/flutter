@@ -49,7 +49,7 @@ class HotReloadProject extends Project {
     @override
     Widget build(BuildContext context) {
       print('STATELESS');
-      return Container();
+      return const Container();
     }
   }
 
@@ -61,7 +61,7 @@ class HotReloadProject extends Project {
     @override
     Widget build(BuildContext context) {
       print('STATEFUL');
-      return Container();
+      return const Container();
     }
   }
   ''';

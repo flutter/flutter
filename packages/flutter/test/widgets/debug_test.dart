@@ -153,7 +153,7 @@ void main() {
   });
 
   test('debugWidgetBuilderValue control test', () {
-    final Widget widget = const Container();
+    const Widget widget = const Container();
     FlutterError? error;
     try {
       debugWidgetBuilderValue(widget, null);
@@ -177,7 +177,7 @@ void main() {
         error.diagnostics[3].toStringDeep(),
         equalsIgnoringHashCodes(
           'To return an empty space that causes the building widget to fill\n'
-          'available room, return "Container()". To return an empty space\n'
+          'available room, return "const Container()". To return an empty space\n'
           'that takes as little room as possible, return "Container(width:\n'
           '0.0, height: 0.0)".\n',
         ),
@@ -191,7 +191,7 @@ void main() {
           '     Container\n'
           '   Build functions must never return null.\n'
           '   To return an empty space that causes the building widget to fill\n'
-          '   available room, return "Container()". To return an empty space\n'
+          '   available room, return "const Container()". To return an empty space\n'
           '   that takes as little room as possible, return "Container(width:\n'
           '   0.0, height: 0.0)".\n',
         ),

@@ -40,7 +40,7 @@ class HotReloadConstProject extends Project {
     Widget build(BuildContext context) {
       return MaterialApp(
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }

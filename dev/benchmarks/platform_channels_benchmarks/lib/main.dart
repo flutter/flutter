@@ -289,7 +289,7 @@ class _BenchmarkWidgetState extends State<_BenchmarkWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 void main() {

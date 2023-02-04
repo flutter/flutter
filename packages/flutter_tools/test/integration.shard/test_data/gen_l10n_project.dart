@@ -93,7 +93,7 @@ class ResultBuilder extends StatelessWidget {
           print('#l10n A(n) $e has occurred trying to generate "$test" results.');
           print('#l10n END');
         }
-        return Container();
+        return const Container();
       },
     );
   }

@@ -534,7 +534,7 @@ class ExtraProductsNumber extends StatelessWidget {
 
   Widget _buildOverflow(AppStateModel model, BuildContext context) {
     if (model.productsInCart.length <= 3) {
-      return Container();
+      return const Container();
     }
 
     final int numOverflowProducts = _calculateOverflow(model);

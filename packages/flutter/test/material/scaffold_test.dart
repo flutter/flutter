@@ -295,18 +295,18 @@ void main() {
   });
 
   testWidgets('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = const Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Container(),
+        body: const Container(),
         floatingActionButton: Placeholder(),
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -320,8 +320,8 @@ void main() {
 
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -342,7 +342,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
-            body: Container(),
+            body: const Container(),
             floatingActionButton: Placeholder(),
           ),
         ),
@@ -538,18 +538,18 @@ void main() {
   });
 
   testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = const Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Container(),
+        body: const Container(),
         bottomSheet: Placeholder(),
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -558,8 +558,8 @@ void main() {
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -712,18 +712,18 @@ void main() {
   });
 
   testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = const Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Container(),
+        body: const Container(),
         persistentFooterButtons: <Widget>[Placeholder()],
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -732,8 +732,8 @@ void main() {
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -2078,7 +2078,7 @@ void main() {
             home: Scaffold(
               key: key,
               body: const Center(
-                child: Container(),
+                child: const Container(),
               ),
               bottomSheet: const Text('Bottom sheet'),
             ),

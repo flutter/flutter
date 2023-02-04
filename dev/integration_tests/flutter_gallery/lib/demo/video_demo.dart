@@ -261,7 +261,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
             opacity: 1.0 - animationController.value,
             child: widget.child,
           )
-        : Container();
+        : const Container();
   }
 }
 

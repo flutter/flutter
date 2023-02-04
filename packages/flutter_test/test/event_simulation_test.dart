@@ -48,7 +48,7 @@ void main() {
       RawKeyboardListener(
         focusNode: focusNode,
         onKey: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -79,7 +79,7 @@ void main() {
       events.clear();
     }
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     focusNode.dispose();
 
     debugKeyEventSimulatorTransitModeOverride = null;
@@ -96,7 +96,7 @@ void main() {
       KeyboardListener(
         focusNode: focusNode,
         onKeyEvent: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -242,7 +242,7 @@ void main() {
 
     await tester.idle();
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     focusNode.dispose();
 
     debugKeyEventSimulatorTransitModeOverride = null;
@@ -265,7 +265,7 @@ void main() {
           events.add(event);
           return KeyEventResult.ignored;
         },
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -321,7 +321,7 @@ void main() {
           events.add(event);
           return KeyEventResult.ignored;
         },
-        child: Container(),
+        child: const Container(),
       ),
     );
 

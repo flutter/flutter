@@ -390,7 +390,7 @@ void main() {
 
   group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(
         expectAsync0(tester.pageBack),
@@ -451,7 +451,7 @@ void main() {
                           navigationBar: const CupertinoNavigationBar(
                             middle: Text('Page 2'),
                           ),
-                          child: Container(),
+                          child: const Container(),
                         );
                       },
                     ));

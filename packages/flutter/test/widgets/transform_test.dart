@@ -265,7 +265,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -305,7 +305,7 @@ void main() {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -320,7 +320,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -344,7 +344,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.nan,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -356,7 +356,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.infinity,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -368,7 +368,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.negativeInfinity,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -379,7 +379,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -390,7 +390,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -406,7 +406,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -422,7 +422,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: 3 * math.pi / 2,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -438,7 +438,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: 0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -451,7 +451,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -460,7 +460,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scaleX: 0.0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -469,7 +469,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scaleY: 0.0,
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 
@@ -478,7 +478,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.01, // small but non-zero
-        child: const RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: const Container()),
       ),
     );
 

@@ -36,7 +36,7 @@ class BasicProject extends Project {
       topLevelFunction();
       return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }
@@ -108,7 +108,7 @@ class BasicProjectThatThrows extends Project {
         theme: ThemeData(
           primarySwatch: Colors.green,
         ),
-        home: Container(),
+        home: const Container(),
       );
     }
   }
@@ -148,7 +148,7 @@ class BasicProjectWithTimelineTraces extends Project {
       topLevelFunction();
       return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }
@@ -216,7 +216,7 @@ class BasicProjectWithUnaryMain extends Project {
       topLevelFunction();
       return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }

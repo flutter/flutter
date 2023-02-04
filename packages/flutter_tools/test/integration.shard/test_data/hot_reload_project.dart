@@ -72,7 +72,7 @@ class HotReloadProject extends Project {
 
       return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }

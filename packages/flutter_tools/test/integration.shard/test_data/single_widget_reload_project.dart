@@ -54,7 +54,7 @@ class SingleWidgetReloadProject extends Project {
       // Do not remove the next line, it's uncommented by a test to verify that
       // hot reloading worked:
       // printHotReloadWorked();
-      return Container();
+      return const Container();
     }
   }
 

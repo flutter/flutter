@@ -56,7 +56,7 @@ class DeferredComponentsProject extends Project {
       topLevelFunction();
       return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }

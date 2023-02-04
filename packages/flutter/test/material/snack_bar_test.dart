@@ -1478,7 +1478,7 @@ void main() {
           await tester.pumpWidget(
             const MaterialApp(
               home: Scaffold(
-                body: Container(),
+                body: const Container(),
               ),
             ),
           );

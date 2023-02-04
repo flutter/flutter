@@ -8,7 +8,7 @@ final GlobalKey<NavigatorState> navKey = GlobalKey(debugLabel: 'mainNavigator');
 Map<String, WidgetBuilder>? appRoutes;
 
 final Map<String, WidgetBuilder> _defaultAppRoutes = <String, WidgetBuilder>{
-  '/': (BuildContext context) => Container(),
+  '/': (BuildContext context) => const Container(),
 };
 
 void main() {

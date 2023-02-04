@@ -22,7 +22,7 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
     return Column(
       children: <Widget>[
         Container(height: minExtent),
-        const Expanded(child: Container()),
+        const Expanded(child: const Container()),
       ],
     );
   }

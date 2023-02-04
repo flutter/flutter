@@ -235,7 +235,7 @@ class _TestWidget extends StatelessWidget {
             title: const Text('Hallo Welt!!1'),
             bottom: !bottom ? null :  const PreferredSize(
               preferredSize: Size.fromHeight(35.0),
-              child: Container(),
+              child: const Container(),
             ),
           ),
           SliverList(

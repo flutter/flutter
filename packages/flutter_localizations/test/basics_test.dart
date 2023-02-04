@@ -45,7 +45,7 @@ void main() {
 
     await tester.binding.setLocale('es', 'US');
     await tester.pump();
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgets('Locale without countryCode', (WidgetTester tester) async {
@@ -57,7 +57,7 @@ void main() {
           Locale('es', 'ES'),
           Locale('zh'),
         ],
-        home: Container(),
+        home: const Container(),
       )
     );
 
@@ -97,6 +97,6 @@ class LocalizationTrackerState extends State<LocalizationTracker> {
   @override
   Widget build(BuildContext context) {
     bodySmallFontSize = Theme.of(context).textTheme.bodySmall!.fontSize!;
-    return Container();
+    return const Container();
   }
 }

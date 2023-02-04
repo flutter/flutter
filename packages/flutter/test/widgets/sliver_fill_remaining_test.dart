@@ -46,7 +46,7 @@ void main() {
             child: CustomScrollView(
               controller: controller,
               slivers: const <Widget>[
-                SliverFillRemaining(child: Container()),
+                SliverFillRemaining(child: const Container()),
               ],
             ),
           ),
@@ -87,7 +87,7 @@ void main() {
               controller: controller,
               slivers: const <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 100.0)),
-                SliverFillRemaining(child: Container()),
+                SliverFillRemaining(child: const Container()),
               ],
             ),
           ),

@@ -89,7 +89,7 @@ void main() {
       const SafeArea child = SafeArea(
         right: false,
         bottom: false,
-        child: Container(),
+        child: const Container(),
       );
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);

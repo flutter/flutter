@@ -925,7 +925,7 @@ void main() {
           Container(
             key: child2,
             child: const LookupBoundary(
-              child: Container(),
+              child: const Container(),
             ),
           ),
           Container(

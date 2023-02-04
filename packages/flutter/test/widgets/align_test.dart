@@ -10,13 +10,13 @@ void main() {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment(0.50, 0.50),
-        child: Container(),
+        child: const Container(),
       ),
     );
 
     await tester.pumpWidget(
       const Align(
-        child: Container(),
+        child: const Container(),
       ),
     );
 

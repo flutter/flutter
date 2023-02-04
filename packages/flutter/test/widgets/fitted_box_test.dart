@@ -475,11 +475,11 @@ void main() {
   });
 
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(const FittedBox(fit: BoxFit.none, child: Container()));
+    await tester.pumpWidget(const FittedBox(fit: BoxFit.none, child: const Container()));
     final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(const FittedBox(fit: BoxFit.none, clipBehavior: Clip.antiAlias, child: Container()));
+    await tester.pumpWidget(const FittedBox(fit: BoxFit.none, clipBehavior: Clip.antiAlias, child: const Container()));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 

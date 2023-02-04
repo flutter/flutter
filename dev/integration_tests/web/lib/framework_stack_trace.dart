@@ -77,7 +77,7 @@ class _ThrowingWidgetState extends State<ThrowingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

@@ -38,7 +38,7 @@ void main() {
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Builder(builder: (BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatHour(timeOfDay));
-            return Container();
+            return const Container();
           }),
         ));
         return completer.future;
@@ -83,7 +83,7 @@ void main() {
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Builder(builder: (BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatTimeOfDay(timeOfDay));
-            return Container();
+            return const Container();
           }),
         ));
         return completer.future;
@@ -137,7 +137,7 @@ void main() {
               DateType.full: localizations.formatFullDate(dateTime),
               DateType.monthYear: localizations.formatMonthYear(dateTime),
             });
-            return Container();
+            return const Container();
           }),
         ));
         return completer.future;
@@ -187,7 +187,7 @@ void main() {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: Builder(builder: (BuildContext context) {
         dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss', 'en_US');
-        return Container();
+        return const Container();
       }),
     ));
 

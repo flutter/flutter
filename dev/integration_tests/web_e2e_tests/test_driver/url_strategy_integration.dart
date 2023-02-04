@@ -22,8 +22,8 @@ void main() {
     setUrlStrategy(strategy);
 
     app.appRoutes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => Container(),
-      '/foo': (BuildContext context) => Container(),
+      '/': (BuildContext context) => const Container(),
+      '/foo': (BuildContext context) => const Container(),
     };
     app.main();
     await tester.pumpAndSettle();

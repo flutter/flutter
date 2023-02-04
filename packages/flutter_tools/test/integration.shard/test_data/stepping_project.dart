@@ -47,7 +47,7 @@ class SteppingProject extends Project {
     Widget build(BuildContext context) {
       return MaterialApp(
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }
@@ -103,7 +103,7 @@ class WebSteppingProject extends Project {
     Widget build(BuildContext context) {
       return MaterialApp(
         title: 'Flutter Demo',
-        home: Container(),
+        home: const Container(),
       );
     }
   }

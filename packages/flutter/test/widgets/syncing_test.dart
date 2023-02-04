@@ -57,7 +57,7 @@ void main() {
           child: TestWidget(
             persistentState: 1,
             syncedState: 0,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -76,7 +76,7 @@ void main() {
           child: TestWidget(
             persistentState: 2,
             syncedState: 0,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -97,7 +97,7 @@ void main() {
           child: TestWidget(
             persistentState: 10,
             syncedState: 0,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -114,7 +114,7 @@ void main() {
         child: TestWidget(
           persistentState: 11,
           syncedState: 0,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );

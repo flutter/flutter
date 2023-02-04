@@ -809,7 +809,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),

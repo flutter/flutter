@@ -120,7 +120,7 @@ void main() {
         children: <Widget>[
           Column(
             children: <Widget>[
-              Expanded(child: Container()),
+              Expanded(child: const Container()),
             ],
           ),
         ],

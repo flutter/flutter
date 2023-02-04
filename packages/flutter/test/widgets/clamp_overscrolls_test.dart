@@ -23,7 +23,7 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
         textDirection: TextDirection.ltr,
         children: <Widget>[
           SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
-          Expanded(child: Container()),
+          Expanded(child: const Container()),
           SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
         ],
       ),

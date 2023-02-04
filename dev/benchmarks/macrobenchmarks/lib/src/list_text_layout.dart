@@ -48,7 +48,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
         alignment: Alignment.topCenter,
         maxHeight: double.infinity,
         child: !_showText
-            ? Container()
+            ? const Container()
             : Column(
                 children: List<Widget>.generate(9, (int index) {
                   return ListTile(

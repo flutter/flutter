@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       CustomScrollView(
         slivers: <Widget>[
-          SliverToBoxAdapter(child: Container()),
+        const SliverToBoxAdapter(child: const Container()),
         ],
       )
     );
