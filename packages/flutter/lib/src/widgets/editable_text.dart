@@ -1776,6 +1776,24 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.
+  /// 
+  /// When running on the web, if [BrowserContextMenu.enabled] is true,
+  /// which is the default, the browser's context menu is shown.
+  /// If [BrowserContextMenu.enabled] is false,
+  /// then this builder is used to build the context menu.
+  /// 
+  /// {@tool dartpad}
+  /// 
+  /// This example shows how to disable the browser's context menu on the web,
+  /// so that a custom context menu can be shown.
+  /// 
+  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.3.dart **
+  /// 
+  /// {@end tool}
+  /// 
+  /// See also:
+  ///   * [BrowserContextMenu.enableContextMenu], to enable the browser's context menu.
+  ///   * [BrowserContextMenu.disableContextMenu], to disable the browser's context menu.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
