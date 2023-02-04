@@ -290,6 +290,8 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    enabled_branches:
+      - master
     recipe: flutter/flutter
     timeout: 60
     properties:
@@ -2617,6 +2619,8 @@ targets:
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
+    enabled_branches:
+      - master
     recipe: flutter/flutter
     timeout: 60
     properties:
@@ -4155,6 +4159,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows customer_testing
+    enabled_branches:
+      - master
     recipe: flutter/flutter
     timeout: 60
     properties:
