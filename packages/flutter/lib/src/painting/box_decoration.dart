@@ -43,8 +43,8 @@ import 'image_provider.dart';
 /// ```dart
 /// const Container(
 ///   decoration: BoxDecoration(
-///     color: const Color(0xff7c94b6),
-///     image: const DecorationImage(
+///     color: Color(0xff7c94b6),
+///     image: DecorationImage(
 ///       image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///       fit: BoxFit.cover,
 ///     ),

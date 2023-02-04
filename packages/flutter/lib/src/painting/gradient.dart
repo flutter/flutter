@@ -867,8 +867,8 @@ class RadialGradient extends Gradient {
 /// This sample draws a different color in each quadrant.
 ///
 /// ```dart
-/// Container(
-///   decoration: const BoxDecoration(
+/// const Container(
+///   decoration: BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       colors: <Color>[
@@ -891,8 +891,8 @@ class RadialGradient extends Gradient {
 /// i.e. 45 degrees.
 ///
 /// ```dart
-/// Container(
-///   decoration: const BoxDecoration(
+/// const Container(
+///   decoration: BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       colors: <Color>[

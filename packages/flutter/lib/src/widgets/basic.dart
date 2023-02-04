@@ -2552,7 +2552,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// be given.
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   constraints: BoxConstraints(minHeight: 40, maxHeight: 100),
 ///   alignment: Alignment.center,
 ///   child: ConstraintsTransformBox(
@@ -3744,8 +3744,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// ![The sample creates a blue box that overlaps a larger green box, which itself overlaps an even larger red box.](https://flutter.github.io/assets-for-api-docs/assets/widgets/stack.png)
 ///
 /// ```dart
-/// Stack(
-///   children: const <Widget>[
+/// const Stack(
+///   children: <Widget>[
 ///     Container(
 ///       width: 100,
 ///       height: 100,
@@ -3779,7 +3779,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///   height: 250,
 ///   child: Stack(
 ///     children: <Widget>[
-///       Container(
+///       const Container(
 ///         width: 250,
 ///         height: 250,
 ///         color: Colors.white,

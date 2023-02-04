@@ -113,7 +113,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// Each [ColorSwatch] constant is a color and can used directly. For example:
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   color: Colors.blue, // same as Colors.blue[500] or Colors.blue.shade500
 /// )
 /// ```

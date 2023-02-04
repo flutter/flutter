@@ -36,7 +36,7 @@ enum BorderStyle {
 /// it that is a darker shade of blue.
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   padding: const EdgeInsets.all(8.0),
 ///   decoration: BoxDecoration(
 ///     border: Border(

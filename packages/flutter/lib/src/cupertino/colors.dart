@@ -690,7 +690,7 @@ class CupertinoColors {
 /// [MediaQuery], etc.
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   // Container is not a Cupertino widget, but CupertinoTheme.of implicitly
 ///   // resolves colors used in the retrieved CupertinoThemeData.
 ///   color: CupertinoTheme.of(context).primaryColor,
@@ -725,7 +725,7 @@ class CupertinoColors {
 /// ```
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   // Container is not a Cupertino widget.
 ///   color: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
 /// )

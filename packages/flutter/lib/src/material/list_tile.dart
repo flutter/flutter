@@ -222,9 +222,9 @@ enum ListTileControlAffinity {
 ///     child: const Container(
 ///       width: 48,
 ///       height: 48,
-///       padding: const EdgeInsets.symmetric(vertical: 4.0),
+///       padding: EdgeInsets.symmetric(vertical: 4.0),
 ///       alignment: Alignment.center,
-///       child: const CircleAvatar(),
+///       child: CircleAvatar(),
 ///     ),
 ///   ),
 ///   title: const Text('title'),

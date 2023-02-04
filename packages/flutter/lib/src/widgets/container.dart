@@ -193,7 +193,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// ```dart
 /// Center(
-///   child: const Container(
+///   child: Container(
 ///     margin: EdgeInsets.all(10.0),
 ///     color: Colors.amber[600],
 ///     width: 48.0,
@@ -362,7 +362,7 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
+    if (decoration == null) {
       return padding;
     }
     final EdgeInsetsGeometry decorationPadding = decoration!.padding;

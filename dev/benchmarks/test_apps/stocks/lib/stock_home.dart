@@ -27,18 +27,18 @@ class _NotImplementedDialog extends StatelessWidget {
       title: const Text('Not Implemented'),
       content: const Text('This feature has not yet been implemented.'),
       actions: <Widget>[
-        TextButton(
+        const TextButton(
           onPressed: debugDumpApp,
           child: Row(
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.dvr,
                 size: 18.0,
               ),
               Container(
                 width: 8.0,
               ),
-              const Text('DUMP APP TO CONSOLE'),
+              Text('DUMP APP TO CONSOLE'),
             ],
           ),
         ),
