@@ -59,6 +59,7 @@ common_libs = [
   {
     name = "ld.so.1"
     path = rebase_path("$sysroot_dist_lib/$ld_so_path")
+    output_path = ld_so_path
   },
 ]
 
