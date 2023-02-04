@@ -754,7 +754,6 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
-    this.serveObservatory = true,
     this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
@@ -800,8 +799,7 @@ class DebuggingOptions {
       fastStart = false,
       webEnableExpressionEvaluation = false,
       nullAssertions = false,
-      nativeNullAssertions = false,
-      serveObservatory = false;
+      nativeNullAssertions = false;
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -846,7 +844,6 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
-    required this.serveObservatory,
     required this.enableDartProfiling,
   });
 
@@ -883,7 +880,6 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
-  final bool serveObservatory;
   final bool enableDartProfiling;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
@@ -1012,7 +1008,6 @@ class DebuggingOptions {
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
-    'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
   };
 
@@ -1060,7 +1055,6 @@ class DebuggingOptions {
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
-      serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     );
 }

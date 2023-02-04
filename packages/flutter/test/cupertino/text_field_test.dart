@@ -1702,9 +1702,9 @@ void main() {
 
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             CupertinoTextField(
               placeholder: 'field 1',
             ),

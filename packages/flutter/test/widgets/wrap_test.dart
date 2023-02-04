@@ -841,8 +841,8 @@ void main() {
 
   testWidgets('Object exactly matches container width', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Column(
-        children: const <Widget>[
+      const Column(
+        children: <Widget>[
           Wrap(
             textDirection: TextDirection.ltr,
             spacing: 10.0,
@@ -859,8 +859,8 @@ void main() {
     verify(tester, <Offset>[Offset.zero]);
 
     await tester.pumpWidget(
-      Column(
-        children: const <Widget>[
+      const Column(
+        children: <Widget>[
           Wrap(
             textDirection: TextDirection.ltr,
             spacing: 10.0,
@@ -893,7 +893,7 @@ void main() {
   testWidgets('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: IntrinsicHeight(
@@ -901,13 +901,13 @@ void main() {
               color: Colors.green,
               child: Wrap(
                 children: <Widget>[
-                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
                   Row(
-                    children: const <Widget>[
+                    children: <Widget>[
                       SizedBox(height: 40, width: 60),
                     ],
                   ),
-                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
                 ],
               ),
             ),
@@ -925,7 +925,7 @@ void main() {
   testWidgets('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: IntrinsicWidth(
@@ -934,13 +934,13 @@ void main() {
               child: Wrap(
                 direction: Axis.vertical,
                 children: <Widget>[
-                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
                   Column(
-                    children: const <Widget>[
+                    children: <Widget>[
                       SizedBox(height: 40, width: 60),
                     ],
                   ),
-                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
                 ],
               ),
             ),
