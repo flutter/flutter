@@ -233,15 +233,10 @@ abstract class FakeProcessManager implements ProcessManager {
   /// [FakeCommand.onRun] to set a flag, or specify a sentinel command as your
   /// last command and verify its execution is successful, to ensure that all
   /// the specified commands are actually called.
-  factory FakeProcessManager.list(
-    List<FakeCommand> commands, {
-    FakeProcessFactory? fakeProcessFactory,
-  }) = _SequenceProcessManager;
+  factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
   factory FakeProcessManager.empty() => _SequenceProcessManager(<FakeCommand>[]);
 
-  FakeProcessManager._({
-    this.fakeProcessFactory,
-  });
+  FakeProcessManager._();
 
   /// Adds a new [FakeCommand] to the current process manager.
   ///
@@ -257,7 +252,6 @@ abstract class FakeProcessManager implements ProcessManager {
   }
 
   final Map<int, FakeProcess> _fakeRunningProcesses = <int, FakeProcess>{};
-  final FakeProcessFactory? fakeProcessFactory;
 
   /// Whether this fake has more [FakeCommand]s that are expected to run.
   ///
@@ -291,9 +285,6 @@ abstract class FakeProcessManager implements ProcessManager {
     }
     if (fakeCommand.onRun != null) {
       fakeCommand.onRun!();
-    }
-    if (fakeProcessFactory != null) {
-      return fakeProcessFactory!(fakeCommand, _pid);
     }
     return FakeProcess(
       duration: fakeCommand.duration,
@@ -413,13 +404,8 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   List<FakeCommand> get _remainingExpectations => <FakeCommand>[];
 }
 
-typedef FakeProcessFactory = FakeProcess Function(FakeCommand command, int pid);
-
 class _SequenceProcessManager extends FakeProcessManager {
-  _SequenceProcessManager(
-    this._commands, {
-    super.fakeProcessFactory,
-  }) : super._();
+  _SequenceProcessManager(this._commands) : super._();
 
   final List<FakeCommand> _commands;
 
