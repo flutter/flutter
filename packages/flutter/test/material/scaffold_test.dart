@@ -299,7 +299,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: const Container(),
+        body: Container(),
         floatingActionButton: Placeholder(),
       ),
     );
@@ -342,7 +342,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
-            body: const Container(),
+            body: Container(),
             floatingActionButton: Placeholder(),
           ),
         ),
@@ -542,7 +542,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: const Container(),
+        body: Container(),
         bottomSheet: Placeholder(),
       ),
     );
@@ -716,7 +716,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: const Container(),
+        body: Container(),
         persistentFooterButtons: <Widget>[Placeholder()],
       ),
     );
@@ -2078,7 +2078,7 @@ void main() {
             home: Scaffold(
               key: key,
               body: const Center(
-                child: const Container(),
+                child: Container(),
               ),
               bottomSheet: const Text('Bottom sheet'),
             ),

@@ -435,7 +435,7 @@ void main() {
               case Orientation.portrait:
                 return const Scaffold(
                   drawer: Text('drawer'),
-                  body: const Container(),
+                  body: Container(),
                 );
               case Orientation.landscape:
                 return Scaffold(
@@ -476,7 +476,7 @@ void main() {
               case Orientation.portrait:
                 return const Scaffold(
                   endDrawer: Text('endDrawer'),
-                  body: const Container(),
+                  body: Container(),
                 );
               case Orientation.landscape:
                 return Scaffold(

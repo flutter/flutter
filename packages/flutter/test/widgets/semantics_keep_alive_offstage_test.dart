@@ -90,7 +90,7 @@ Widget _buildTestWidget({
       body: Column(
         children: <Widget>[
           const Expanded(
-            child: const Container(),
+            child: Container(),
           ),
           SizedBox(
             height: 500.0,
@@ -109,7 +109,7 @@ Widget _buildTestWidget({
             ),
           ),
           const Expanded(
-            child: const Container(),
+            child: Container(),
           ),
         ],
       ),

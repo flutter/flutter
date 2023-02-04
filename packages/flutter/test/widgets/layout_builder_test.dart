@@ -303,7 +303,7 @@ void main() {
           SliverLayoutBuilder(
             builder: (BuildContext context, SliverConstraints constraint) {
               built++;
-              return const SliverToBoxAdapter(child: const Container());
+              return const SliverToBoxAdapter(child: Container());
             },
           ),
         ],
@@ -337,7 +337,7 @@ void main() {
               builder: (BuildContext context, SliverConstraints constraint) {
                 built++;
                 MediaQuery.of(context);
-                return const SliverToBoxAdapter(child: const Container());
+                return const SliverToBoxAdapter(child: Container());
               },
             ),
           ],

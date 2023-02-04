@@ -51,7 +51,7 @@ void main() {
   testWidgets('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
     await tester.pumpWidget(
       const LookupBoundary(
-        child: const Container(),
+        child: Container(),
       ),
     );
 

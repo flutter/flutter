@@ -909,7 +909,7 @@ void main() {
         navigationBar: CupertinoNavigationBar(
           middle: Text('Fixed Title'),
         ),
-        child: const Container(),
+        child: Container(),
       ),
     ));
 

@@ -1130,7 +1130,7 @@ void main() {
       const Actions(
         actions: <Type, Action<Intent>>{},
         dispatcher: ActionDispatcher(),
-        child: const Container(),
+        child: Container(),
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties

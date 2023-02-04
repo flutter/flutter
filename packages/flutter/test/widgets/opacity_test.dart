@@ -186,7 +186,7 @@ void main() {
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const RepaintBoundary(child: Opacity(opacity: 0.5, child: const Container())),
+      const RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
     );
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an

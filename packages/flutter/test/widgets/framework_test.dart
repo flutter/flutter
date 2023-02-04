@@ -1173,7 +1173,7 @@ void main() {
     await tester.pumpWidget(
       const Column(
         children: <Widget>[
-          const Container(),
+          Container(),
           _EmptyWidget(),
         ],
       ),
@@ -1198,7 +1198,7 @@ void main() {
     await tester.pumpWidget(
       const Column(
         children: <Widget>[
-          const Container(),
+          Container(),
         ],
       ),
     );
@@ -1206,7 +1206,7 @@ void main() {
     await tester.pumpWidget(
       const Column(
         children: <Widget>[
-          const Container(),
+          Container(),
           _EmptyWidget(),
         ],
       ),
@@ -1234,7 +1234,7 @@ void main() {
       children: <Widget>[
         const Container(),
         Container(key: GlobalKey()),
-        const ColoredBox(color: Colors.green, child: const Container()),
+        const ColoredBox(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
         const Container(),
       ],

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Positioned constructors', (WidgetTester tester) async {
-    const Widget child = const Container();
+    const Widget child = Container();
     const Positioned a = Positioned(
       left: 101.0,
       right: 201.0,

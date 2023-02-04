@@ -2106,7 +2106,7 @@ void main() {
     testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
       final List<Object> events = <Object>[];
 
-      await tester.pumpWidget(const MaterialApp(home: const Container()));
+      await tester.pumpWidget(const MaterialApp(home: Container()));
 
       RawKeyboard.instance.addListener((RawKeyEvent event) {
         events.add(event);
@@ -2283,7 +2283,7 @@ void main() {
             children: <Widget>[
               const Focus(
                 autofocus: true,
-                child: const Container(),
+                child: Container(),
               ),
               FocusTraversalGroup(
                 descendantsAreFocusable: false,
@@ -2444,7 +2444,7 @@ void main() {
 
     testWidgets("Doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(const ExcludeFocusTraversal(child: const Container()));
+      await tester.pumpWidget(const ExcludeFocusTraversal(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });

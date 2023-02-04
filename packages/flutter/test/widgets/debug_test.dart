@@ -153,7 +153,7 @@ void main() {
   });
 
   test('debugWidgetBuilderValue control test', () {
-    const Widget widget = const Container();
+    const Widget widget = Container();
     FlutterError? error;
     try {
       debugWidgetBuilderValue(widget, null);

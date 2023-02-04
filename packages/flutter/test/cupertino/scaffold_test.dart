@@ -113,7 +113,7 @@ void main() {
             middle: Text('Opaque'),
             backgroundColor: Color(0xFFF8F8F8),
           ),
-          child: const Container(),
+          child: Container(),
         ),
       ),
     ));
@@ -153,7 +153,7 @@ void main() {
             middle: Text('Title'),
           ),
           resizeToAvoidBottomInset: false,
-          child: const Container(),
+          child: Container(),
         ),
       ),
     ));

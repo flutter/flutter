@@ -701,7 +701,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             late FlutterError error;
-            const Widget debugRequiredFor = const Container();
+            const Widget debugRequiredFor = Container();
             try {
               Overlay.of(context, debugRequiredFor: debugRequiredFor);
             } on FlutterError catch (e) {
@@ -1069,7 +1069,7 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => const Positioned(left: 2000, right: 2500, child: const Container()),
+              builder: (BuildContext context) => const Positioned(left: 2000, right: 2500, child: Container()),
             ),
           ],
         ),

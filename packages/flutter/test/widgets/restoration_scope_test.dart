@@ -300,7 +300,7 @@ void main() {
             children: <Widget>[
               const RestorationScope(
                 restorationId: 'fixed',
-                child: const Container(),
+                child: Container(),
               ),
               RestorationScope(
                 key: scopeKey,

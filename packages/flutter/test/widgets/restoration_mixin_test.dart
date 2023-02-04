@@ -327,7 +327,7 @@ void main() {
           children: <Widget>[
             const RestorationScope(
               restorationId: 'fixed',
-              child: const Container(),
+              child: Container(),
             ),
             _TestRestorableWidget(
               key: key,

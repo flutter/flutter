@@ -1748,7 +1748,7 @@ void main() {
 
     testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(const Focus(includeSemantics: false, child: const Container()));
+      await tester.pumpWidget(const Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });
@@ -1923,7 +1923,7 @@ void main() {
     testWidgets('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Focus(
-          child: const Container(),
+          child: Container(),
         ),
       );
     });
@@ -2040,7 +2040,7 @@ void main() {
 
     testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(const ExcludeFocus(child: const Container()));
+      await tester.pumpWidget(const ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });

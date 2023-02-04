@@ -1542,7 +1542,7 @@ void main() {
               appBar: AppBar(
                 bottom: const PreferredSize(
                   preferredSize: Size.fromHeight(200.0),
-                  child: const Container(),
+                  child: Container(),
                 ),
               ),
             ),
@@ -1568,7 +1568,7 @@ void main() {
               appBar: AppBar(
                 bottom: const PreferredSize(
                   preferredSize: Size.fromHeight(200.0),
-                  child: const Container(),
+                  child: Container(),
                 ),
               ),
             ),

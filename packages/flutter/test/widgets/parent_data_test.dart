@@ -398,7 +398,7 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <Widget>[
               Expanded(
-                child: const Container(),
+                child: Container(),
               ),
             ],
           ),
@@ -427,7 +427,7 @@ void main() {
   testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       const OneAncestorWidget(
-        child: const Container(),
+        child: Container(),
       ),
     );
     DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
@@ -437,7 +437,7 @@ void main() {
       const OneAncestorWidget(
         child: TestParentDataWidget(
           string: 'Foo',
-          child: const Container(),
+          child: Container(),
         ),
       ),
     );
@@ -448,7 +448,7 @@ void main() {
       const AnotherAncestorWidget(
         child: TestParentDataWidget(
           string: 'Bar',
-          child: const Container(),
+          child: Container(),
         ),
       ),
     );

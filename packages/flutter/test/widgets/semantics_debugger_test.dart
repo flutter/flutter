@@ -10,7 +10,7 @@ void main() {
   testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
     await tester.pumpWidget(
       const SemanticsDebugger(
-        child: const Container(),
+        child: Container(),
       ),
     );
 
