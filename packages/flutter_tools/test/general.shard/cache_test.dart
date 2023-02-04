@@ -319,7 +319,7 @@ void main() {
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
 
-    testWithoutContext('overridden storage base url prints warning to STDERR', () async {
+    testWithoutContext('overridden storage base url prints warning', () async {
       final BufferLogger logger = BufferLogger.test();
       const String baseUrl = 'https://storage.com';
       final Cache cache = Cache.test(
@@ -331,7 +331,7 @@ void main() {
       );
 
       expect(cache.storageBaseUrl, baseUrl);
-      expect(logger.errorText, contains('Flutter assets will be downloaded from $baseUrl'));
+      expect(logger.warningText, contains('Flutter assets will be downloaded from $baseUrl'));
       expect(logger.statusText, isEmpty);
     });
   });
@@ -396,6 +396,30 @@ void main() {
     await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
     expect(unzippedFramework, exists);
     expect(staleFile, isNot(exists));
+  });
+
+  testWithoutContext('Try to remove without a parent', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory parent = fileSystem.directory('dir');
+    parent.createSync();
+    final Directory child = parent.childDirectory('child');
+    child.createSync();
+    final Directory tempStorage = parent.childDirectory('temp');
+    tempStorage.createSync();
+    final FakeArtifactUpdaterDownload fakeArtifact = FakeArtifactUpdaterDownload(
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      tempStorage: tempStorage,
+      httpClient: HttpClient(),
+      platform: FakePlatform(),
+      allowedBaseUrls: <String>[]
+    );
+    final File file = child.childFile('file');
+    file.createSync();
+    fakeArtifact.addFiles(<File>[file]);
+    child.deleteSync(recursive: true);
+    fakeArtifact.removeDownloadedFiles();
   });
 
   testWithoutContext('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
@@ -1211,4 +1235,20 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
 
   @override
   void removeDownloadedFiles() { }
+}
+
+class FakeArtifactUpdaterDownload extends ArtifactUpdater {
+  FakeArtifactUpdaterDownload({
+    required super.operatingSystemUtils,
+    required super.logger,
+    required super.fileSystem,
+    required super.tempStorage,
+    required super.httpClient,
+    required super.platform,
+    required super.allowedBaseUrls
+  });
+
+  void addFiles(List<File> files) {
+    downloadedFiles.addAll(files);
+  }
 }

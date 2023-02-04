@@ -409,8 +409,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -449,8 +449,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 SelectionContainer.disabled(child: Text('Good, and you?')),
                 Text('Fine, thank you.'),
@@ -490,8 +490,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -529,8 +529,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -665,8 +665,8 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -813,8 +813,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('جيد وانت؟', textDirection: TextDirection.rtl),
                 Text('Fine, thank you.'),
@@ -842,7 +842,7 @@ void main() {
       // Add a little offset to cross the boundary between paragraph 2 and 3.
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6) + const Offset(0, 1));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();
@@ -854,8 +854,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -954,8 +954,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -995,8 +995,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1031,8 +1031,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1067,8 +1067,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1102,8 +1102,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1141,8 +1141,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1201,8 +1201,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1311,8 +1311,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1402,8 +1402,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1480,8 +1480,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),

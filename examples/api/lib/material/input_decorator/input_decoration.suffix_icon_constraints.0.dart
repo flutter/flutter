@@ -30,11 +30,11 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
+        children: <Widget>[
           TextField(
             decoration: InputDecoration(
               hintText: 'Normal Icon Constraints',

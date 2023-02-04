@@ -80,7 +80,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
     ),
@@ -579,8 +579,8 @@ void main() {
     const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Chip(label: Text('Test'), labelStyle: style),
           ],
         ),
@@ -590,8 +590,8 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Flexible(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
@@ -601,8 +601,8 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Expanded(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
@@ -615,8 +615,8 @@ void main() {
   testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Chip(
                 label: Text('X'),
                 materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -731,8 +731,8 @@ void main() {
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A'),
@@ -762,8 +762,8 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         textScaleFactor: 3.0,
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A'),
@@ -789,8 +789,8 @@ void main() {
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
       wrapForChip(
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A', textScaleFactor: 3.0),

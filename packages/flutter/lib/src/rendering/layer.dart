@@ -168,9 +168,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(delta != 0);
     _compositionCallbackCount += delta;
     assert(_compositionCallbackCount >= 0);
-    if (parent != null) {
-      parent!._updateSubtreeCompositionObserverCount(delta);
-    }
+    parent?._updateSubtreeCompositionObserverCount(delta);
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {

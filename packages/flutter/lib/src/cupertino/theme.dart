@@ -311,6 +311,35 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     properties.add(DiagnosticsProperty<bool>('applyThemeToAll', applyThemeToAll, defaultValue: defaultData.applyThemeToAll));
     textTheme.debugFillProperties(properties);
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CupertinoThemeData
+      && other.brightness == brightness
+      && other.primaryColor == primaryColor
+      && other.primaryContrastingColor == primaryContrastingColor
+      && other.textTheme == textTheme
+      && other.barBackgroundColor == barBackgroundColor
+      && other.scaffoldBackgroundColor == scaffoldBackgroundColor
+      && other.applyThemeToAll == applyThemeToAll;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    brightness,
+    primaryColor,
+    primaryContrastingColor,
+    textTheme,
+    barBackgroundColor,
+    scaffoldBackgroundColor,
+    applyThemeToAll,
+  );
 }
 
 /// Styling specifications for a cupertino theme without default values for

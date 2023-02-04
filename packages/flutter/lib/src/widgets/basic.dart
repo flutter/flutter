@@ -2304,7 +2304,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
   /// The [delegate] argument must not be null.
-  CustomMultiChildLayout({
+  const CustomMultiChildLayout({
     super.key,
     required this.delegate,
     super.children,
@@ -3666,7 +3666,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// given axis.
   ///
   /// By default, the [mainAxis] is [Axis.vertical].
-  ListBody({
+  const ListBody({
     super.key,
     this.mainAxis = Axis.vertical,
     this.reverse = false,
@@ -3825,7 +3825,7 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// By default, the non-positioned children of the stack are aligned by their
   /// top left corners.
-  Stack({
+  const Stack({
     super.key,
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
@@ -3941,7 +3941,7 @@ class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
-  IndexedStack({
+  const IndexedStack({
     super.key,
     super.alignment,
     super.textDirection,
@@ -4445,7 +4445,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Flex({
+  const Flex({
     super.key,
     required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -4456,7 +4456,8 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     super.children,
-  }) : assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
+  }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
+  // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
   ///
@@ -4647,8 +4648,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row.png)
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Expanded(
 ///       child: Text('Deliver features faster', textAlign: TextAlign.center),
 ///     ),
@@ -4682,8 +4683,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Suppose, for instance, that you had this code:
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     FlutterLogo(),
 ///     Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     Icon(Icons.sentiment_very_satisfied),
@@ -4709,8 +4710,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// row that the child should be given the remaining room:
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     FlutterLogo(),
 ///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
@@ -4738,9 +4739,9 @@ class Flex extends MultiChildRenderObjectWidget {
 /// [TextDirection.rtl]. This is shown in the example below
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   textDirection: TextDirection.rtl,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     FlutterLogo(),
 ///     Expanded(
 ///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
@@ -4812,7 +4813,7 @@ class Row extends Flex {
   /// unless the row has no children or only one child) or to disambiguate
   /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
   /// must not be null.
-  Row({
+  const Row({
     super.key,
     super.mainAxisAlignment,
     super.mainAxisSize,
@@ -4849,8 +4850,8 @@ class Row extends Flex {
 /// ![Using the Column in this way creates two short lines of text with a large Flutter underneath.](https://flutter.github.io/assets-for-api-docs/assets/widgets/column.png)
 ///
 /// ```dart
-/// Column(
-///   children: const <Widget>[
+/// const Column(
+///   children: <Widget>[
 ///     Text('Deliver features faster'),
 ///     Text('Craft beautiful UIs'),
 ///     Expanded(
@@ -5005,7 +5006,7 @@ class Column extends Flex {
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to disambiguate `start` or `end` values for the
   /// [crossAxisAlignment], the [textDirection] must not be null.
-  Column({
+  const Column({
     super.key,
     super.mainAxisAlignment,
     super.mainAxisSize,
@@ -5212,7 +5213,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Wrap({
+  const Wrap({
     super.key,
     this.direction = Axis.horizontal,
     this.alignment = WrapAlignment.start,
@@ -5474,7 +5475,7 @@ class Flow extends MultiChildRenderObjectWidget {
   /// a repaint boundary.
   ///
   /// The [delegate] argument must not be null.
-  Flow.unwrapped({
+  const Flow.unwrapped({
     super.key,
     required this.delegate,
     super.children,
