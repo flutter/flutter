@@ -344,9 +344,9 @@ class IOSDeployDebugger {
         _monitorIOSDeployFailure(line, _logger);
 
         // (lldb)    platform select remote-'ios' --sysroot
-        // Need to get the current lldb prompt and reassigns it to lldbRun to
-        // avoid lldbRun matching failure caused by the custom lldb prompt.
-        // Example: "(mylldb)    platform select remote-'ios' --sysroot"
+        // Use the configurable custom lldb prompt in the regex. The developer can set this prompt to anything. 
+        // For example `settings set prompt "(mylldb)"` in ~/.lldbinit results in:
+        // "(mylldb)    platform select remote-'ios' --sysroot"
         if (_lldbPlatformSelect.hasMatch(line)) {
           final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
           if (platformSelect.isEmpty) {
