@@ -274,8 +274,8 @@ abstract class BoxBorder extends ShapeBorder {
 /// A 1990s-era "OK" button:
 ///
 /// ```dart
-/// Container(
-///   decoration: const BoxDecoration(
+/// const Container(
+///   decoration: BoxDecoration(
 ///     border: Border(
 ///       top: BorderSide(color: Color(0xFFFFFFFF)),
 ///       left: BorderSide(color: Color(0xFFFFFFFF)),
@@ -284,8 +284,8 @@ abstract class BoxBorder extends ShapeBorder {
 ///     ),
 ///   ),
 ///   child: Container(
-///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
-///     decoration: const BoxDecoration(
+///     padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
+///     decoration: BoxDecoration(
 ///       border: Border(
 ///         top: BorderSide(color: Color(0xFFDFDFDF)),
 ///         left: BorderSide(color: Color(0xFFDFDFDF)),
@@ -294,7 +294,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///       ),
 ///       color: Color(0xFFBFBFBF),
 ///     ),
-///     child: const Text(
+///     child: Text(
 ///       'OK',
 ///       textAlign: TextAlign.center,
 ///       style: TextStyle(color: Color(0xFF000000))

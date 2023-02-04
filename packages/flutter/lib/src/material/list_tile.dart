@@ -219,7 +219,7 @@ enum ListTileControlAffinity {
 ///   leading: GestureDetector(
 ///     behavior: HitTestBehavior.translucent,
 ///     onTap: () {},
-///     child: Container(
+///     child: const Container(
 ///       width: 48,
 ///       height: 48,
 ///       padding: const EdgeInsets.symmetric(vertical: 4.0),

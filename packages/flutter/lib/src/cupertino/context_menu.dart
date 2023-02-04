@@ -210,7 +210,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       )
   ///     );
   ///
-  ///     return Container(
+  ///     return const Container(
   ///       decoration:
   ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
   ///       child: FittedBox(
@@ -317,7 +317,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       ),
   ///     );
   ///
-  ///     return Container(
+  ///     return const Container(
   ///       decoration:
   ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
   ///       child: FittedBox(

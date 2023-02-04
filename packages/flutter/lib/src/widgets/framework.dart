@@ -477,7 +477,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container(color: const Color(0xFF2DBD3A));
+///     return const Container(color: Color(0xFF2DBD3A));
 ///   }
 /// }
 /// ```
@@ -706,7 +706,7 @@ abstract class StatelessWidget extends Widget {
 /// class _YellowBirdState extends State<YellowBird> {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container(color: const Color(0xFFFFE306));
+///     return const Container(color: Color(0xFFFFE306));
 ///   }
 /// }
 /// ```

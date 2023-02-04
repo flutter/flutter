@@ -190,7 +190,7 @@ enum MaterialTapTargetSize {
 ///   ),
 ///   child: Builder(
 ///     builder: (BuildContext context) {
-///       return Container(
+///       return const Container(
 ///         width: 100,
 ///         height: 100,
 ///         color: Theme.of(context).colorScheme.primary,

@@ -637,7 +637,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final Widget localNavContent = _showRectangle
-  ///       ? Container(
+  ///       ? const Container(
   ///           width: 100.0,
   ///           height: 100.0,
   ///           color: Colors.red,

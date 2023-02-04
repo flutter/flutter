@@ -491,7 +491,7 @@ class AlertDialog extends StatelessWidget {
   /// ```dart
   /// AlertDialog(
   ///   title: const Text('Title'),
-  ///   content: Container(width: 200, height: 200, color: Colors.green),
+  ///   content: const Container(width: 200, height: 200, color: Colors.green),
   ///   actions: <Widget>[
   ///     ElevatedButton(onPressed: () {}, child: const Text('Button 1')),
   ///     ElevatedButton(onPressed: () {}, child: const Text('Button 2')),

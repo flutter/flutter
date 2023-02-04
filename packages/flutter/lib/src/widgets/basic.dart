@@ -260,8 +260,8 @@ class Directionality extends _UbiquitousInheritedWidget {
 /// between 0.0 and 1.0, it's much faster to directly use them without [Opacity]
 /// widgets.
 ///
-/// For example, `Container(color: Color.fromRGBO(255, 0, 0, 0.5))` is much
-/// faster than `Opacity(opacity: 0.5, child: Container(color: Colors.red))`.
+/// For example, `const Container(color: Color.fromRGBO(255, 0, 0, 0.5))` is much
+/// faster than `Opacity(opacity: 0.5, child: const Container(color: Colors.red))`.
 ///
 /// {@tool snippet}
 ///
@@ -470,11 +470,11 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///             sigmaX: 5.0,
 ///             sigmaY: 5.0,
 ///           ),
-///           child: Container(
+///           child: const Container(
 ///             alignment: Alignment.center,
 ///             width: 200.0,
 ///             height: 200.0,
-///             child: const Text('Hello World'),
+///             child: Text('Hello World'),
 ///           ),
 ///         ),
 ///       ),
@@ -1262,10 +1262,10 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///   child: Transform(
 ///     alignment: Alignment.topRight,
 ///     transform: Matrix4.skewY(0.3)..rotateZ(-math.pi / 12.0),
-///     child: Container(
-///       padding: const EdgeInsets.all(8.0),
-///       color: const Color(0xFFE8581C),
-///       child: const Text('Apartment for rent!'),
+///     child: const Container(
+///       padding: EdgeInsets.all(8.0),
+///       color: Color(0xFFE8581C),
+///       child: Text('Apartment for rent!'),
 ///     ),
 ///   ),
 /// )
@@ -1309,10 +1309,10 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.rotate(
   ///   angle: -math.pi / 12.0,
-  ///   child: Container(
-  ///     padding: const EdgeInsets.all(8.0),
-  ///     color: const Color(0xFFE8581C),
-  ///     child: const Text('Apartment for rent!'),
+  ///   child: const Container(
+  ///     padding: EdgeInsets.all(8.0),
+  ///     color: Color(0xFFE8581C),
+  ///     child: Text('Apartment for rent!'),
   ///   ),
   /// )
   /// ```
@@ -1343,10 +1343,10 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.translate(
   ///   offset: const Offset(0.0, 15.0),
-  ///   child: Container(
-  ///     padding: const EdgeInsets.all(8.0),
-  ///     color: const Color(0xFF7F7F7F),
-  ///     child: const Text('Quarter'),
+  ///   child: const Container(
+  ///     padding: EdgeInsets.all(8.0),
+  ///     color: Color(0xFF7F7F7F),
+  ///     child: Text('Quarter'),
   ///   ),
   /// )
   /// ```
@@ -1380,10 +1380,10 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.scale(
   ///   scale: 0.5,
-  ///   child: Container(
-  ///     padding: const EdgeInsets.all(8.0),
-  ///     color: const Color(0xFFE8581C),
-  ///     child: const Text('Bad Idea Bears'),
+  ///   child: const Container(
+  ///     padding: EdgeInsets.all(8.0),
+  ///     color: Color(0xFFE8581C),
+  ///     child: Text('Bad Idea Bears'),
   ///   ),
   /// )
   /// ```
@@ -2552,10 +2552,10 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// be given.
 ///
 /// ```dart
-/// Container(
-///   constraints: const BoxConstraints(minHeight: 40, maxHeight: 100),
+/// const Container(
+///   constraints: BoxConstraints(minHeight: 40, maxHeight: 100),
 ///   alignment: Alignment.center,
-///   child: const ConstraintsTransformBox(
+///   child: ConstraintsTransformBox(
 ///     constraintsTransform: ConstraintsTransformBox.maxHeightUnconstrained,
 ///     child: Card(child: Text('Hello World!')),
 ///   )
@@ -3745,7 +3745,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///
 /// ```dart
 /// Stack(
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Container(
 ///       width: 100,
 ///       height: 100,

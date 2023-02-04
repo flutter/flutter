@@ -765,11 +765,11 @@ abstract class BoxScrollView extends ScrollView {
 /// ```dart
 /// ListView(
 ///   padding: const EdgeInsets.all(8),
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[600],
-///       child: const Center(child: Text('Entry A')),
+///       child: Center(child: Text('Entry A')),
 ///     ),
 ///     Container(
 ///       height: 50,
@@ -1540,7 +1540,7 @@ class ListView extends BoxScrollView {
 ///   crossAxisSpacing: 10,
 ///   mainAxisSpacing: 10,
 ///   crossAxisCount: 2,
-///   children: <Widget>[
+///   children: const <Widget>[
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
 ///       color: Colors.teal[100],
@@ -1592,7 +1592,7 @@ class ListView extends BoxScrollView {
 ///         crossAxisSpacing: 10,
 ///         mainAxisSpacing: 10,
 ///         crossAxisCount: 2,
-///         children: <Widget>[
+///         children: const <Widget>[
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
 ///             color: Colors.green[100],
