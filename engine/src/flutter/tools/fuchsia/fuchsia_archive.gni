@@ -105,8 +105,14 @@ template("_fuchsia_archive") {
   }
 
   foreach(lib, pkg.libraries) {
+    output_path = ""
+
+    if (defined(lib.output_path)) {
+      output_path = lib.output_path
+    }
+
     copy_sources += [ "${lib.path}/${lib.name}" ]
-    copy_outputs += [ "$far_base_dir/lib/${lib.name}" ]
+    copy_outputs += [ "$far_base_dir/lib/${output_path}${lib.name}" ]
   }
 
   pkg_dir_deps = pkg.deps
