@@ -427,26 +427,23 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await _processManager.start(
-        //<String>[_androidSdk!.sdkManagerPath!, '--licenses'],
-        <String>['immediately-closes-stdin.dart'],
+        <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
         environment: _androidSdk!.sdkManagerEnv,
       );
 
-      print('[doctor] sleeping 1 second');
-      await Future<void>.delayed(const Duration(seconds: 1));
-
-      print('[doctor] attempting to attach tool stdin to sub-process stdin');
       // The real stdin will never finish streaming. Pipe until the child process
       // finishes.
       unawaited(process.stdin.addStream(_stdio.stdin)
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
-        .catchError((dynamic err, StackTrace stack) {
-          _logger.printError('Echoing stdin to the licenses subprocess failed:');
-          _logger.printError('$err\n$stack');
-        }
-      ));
-      print('added stream');
+        .then(
+          (Object? socket) => socket,
+          onError: (dynamic err, StackTrace stack) {
+            _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+            _logger.printTrace('$err\n$stack');
+          },
+        ),
+      );
 
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
