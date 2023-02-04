@@ -56,6 +56,19 @@ const Map<String, Object> macStudioInfoPlist2020_3 = <String, Object>{
   },
 };
 
+const Map<String, Object> macStudioInfoPlist2022_1 = <String, Object>{
+  'CFBundleGetInfoString': 'Android Studio 2022.1, build AI-221.6008.13.2211.9477386. Copyright JetBrains s.r.o., (c) 2000-2023',
+  'CFBundleShortVersionString': '2022.1',
+  'CFBundleVersion': 'AI-221.6008.13.2211.9477386',
+  'JVMOptions': <String, Object>{
+    'Properties': <String, Object>{
+      'idea.vendor.name' : 'Google',
+      'idea.paths.selector': 'AndroidStudio2022.1',
+      'idea.platform.prefix': 'AndroidStudio',
+    },
+  },
+};
+
 const Map<String, Object> macStudioInfoPlistEAP = <String, Object>{
   'CFBundleGetInfoString': 'Android Studio EAP AI-212.5712.43.2112.8233820, build AI-212.5712.43.2112.8233820. Copyright JetBrains s.r.o., (c) 2000-2022',
   'CFBundleShortVersionString': 'EAP AI-212.5712.43.2112.8233820',
@@ -486,6 +499,84 @@ void main() {
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
+
+    testUsingContext('Can find Android Studio 2020.3 bundled Java version on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+          '-version',
+        ],
+        stderr: '123',
+      )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+      )!;
+
+      expect(studio.javaPath, equals(globals.fs.path.join(
+        studioInApplicationPlistFolder,
+        'jre',
+        'Contents',
+        'Home',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('Can find Android Studio 2022.1 bundled Java version on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java'),
+          '-version',
+        ],
+        stderr: '123',
+      )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+      )!;
+
+      expect(studio.javaPath, equals(globals.fs.path.join(
+        studioInApplicationPlistFolder,
+        'jbr',
+        'Contents',
+        'Home',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
   });
 
   late FileSystem windowsFileSystem;
@@ -596,6 +687,38 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('Can find Android Studio 2020.3 bundled Java version on Windows', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
+        .createSync(recursive: true);
+
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+    expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('Can find Android Studio 2022.1 bundled Java version on Windows', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio')
+        .createSync(recursive: true);
+
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+    expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   group('Installation detection on Linux', () {
     late FileSystemUtils fsUtils;
 
@@ -680,6 +803,47 @@ void main() {
         studio.pluginsPath,
         pluginsInstallPath,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Can find Android Studio 2020.3 bundled Java version on Linux', () {
+      const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.javaPath, equals('$studioInstallPath/jre'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Can find Android Studio 2022.1 bundled Java version on Linux', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
