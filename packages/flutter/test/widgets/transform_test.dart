@@ -23,13 +23,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
             Positioned(
@@ -45,8 +45,8 @@ void main() {
                     onTap: () {
                       didReceiveTap = true;
                     },
-                    child: Container(
-                      color: const Color(0xFF00FFFF),
+                    child: const Container(
+                      color: Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -71,13 +71,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
             Positioned(
@@ -93,8 +93,8 @@ void main() {
                     onTap: () {
                       didReceiveTap = true;
                     },
-                    child: Container(
-                      color: const Color(0xFF00FFFF),
+                    child: const Container(
+                      color: Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -120,13 +120,13 @@ void main() {
         textDirection: textDirection,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
             Positioned(
@@ -142,8 +142,8 @@ void main() {
                     onTap: () {
                       didReceiveTap = true;
                     },
-                    child: Container(
-                      color: const Color(0xFF00FFFF),
+                    child: const Container(
+                      color: Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -190,13 +190,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
             Positioned(
@@ -213,8 +213,8 @@ void main() {
                     onTap: () {
                       didReceiveTap = true;
                     },
-                    child: Container(
-                      color: const Color(0xFF00FFFF),
+                    child: const Container(
+                      color: Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -241,9 +241,9 @@ void main() {
           child: ClipRect(
             child: Transform(
               transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              child: RepaintBoundary(
+              child: const RepaintBoundary(
                 child: Container(
-                  color: const Color(0xFF00FF00),
+                  color: Color(0xFF00FF00),
                 ),
               ),
             ),
@@ -265,7 +265,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -305,7 +305,7 @@ void main() {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -320,7 +320,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -344,7 +344,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.nan,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -356,7 +356,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.infinity,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -368,7 +368,7 @@ void main() {
       Transform(
         transform: Matrix4.identity()
           ..storage[0] = double.negativeInfinity,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -379,7 +379,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -390,7 +390,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -406,7 +406,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -422,7 +422,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: 3 * math.pi / 2,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -438,7 +438,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: 0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -451,7 +451,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -460,7 +460,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scaleX: 0.0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -469,7 +469,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scaleY: 0.0,
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -478,7 +478,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.01, // small but non-zero
-        child: RepaintBoundary(child: Container()),
+        child: const RepaintBoundary(child: Container()),
       ),
     );
 
@@ -666,30 +666,30 @@ void main() {
           children: <Widget>[
             Transform.rotate(
               angle: math.pi / 6,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xffffff00))),
             ),
             Transform.scale(
               scale: 1.5,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xffffff00))),
             ),
             Transform.translate(
               offset: const Offset(20.0, 60.0),
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xffffff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xffffff00))),
             ),
             Transform.rotate(
               angle: math.pi / 6,
               filterQuality: FilterQuality.low,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xff00ff00))),
             ),
             Transform.scale(
               scale: 1.5,
               filterQuality: FilterQuality.low,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xff00ff00))),
             ),
             Transform.translate(
               offset: const Offset(20.0, 60.0),
               filterQuality: FilterQuality.low,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
+              child: const Center(child: Container(width: 100, height: 20, color: Color(0xff00ff00))),
             ),
           ],
         ),
@@ -746,10 +746,10 @@ void main() {
           child: Center(
             child: Transform.scale(
               scale: scale,
-              child: Container(
+              child: const Container(
                 height: height,
                 width: width,
-                decoration: const BoxDecoration(),
+                decoration: BoxDecoration(),
               ),
             ),
           ),
@@ -774,10 +774,10 @@ void main() {
             child: Transform.scale(
               scaleX: scaleX,
               scaleY: scaleY,
-              child: Container(
+              child: const Container(
                 height: height,
                 width: width,
-                decoration: const BoxDecoration(),
+                decoration: BoxDecoration(),
               ),
             ),
           ),

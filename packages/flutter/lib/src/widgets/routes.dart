@@ -1524,7 +1524,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       // ask the user if they are sure
   ///       return true;
   ///     },
-  ///     child: Container(),
+  ///     child: const Container(),
   ///   );
   /// }
   /// ```
@@ -1832,7 +1832,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// void main() {
 ///   runApp(MaterialApp(
-///     home: Container(),
+///     home: const Container(),
 ///     navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
 ///   ));
 /// }
@@ -1870,7 +1870,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   }
 ///
 ///   @override
-///   Widget build(BuildContext context) => Container();
+///   Widget build(BuildContext context) => const Container();
 ///
 /// }
 /// ```

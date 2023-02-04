@@ -487,7 +487,7 @@ void main() {
             child: const Icon(Icons.home),
             onPressed: () {},
           ),
-          body: Stack(
+          body: const Stack(
             children: <Widget>[
               Container(
                 color: Colors.amber,
@@ -496,7 +496,7 @@ void main() {
                 alignment: Alignment.bottomCenter,
                 child: BottomAppBar(
                   color: Colors.green,
-                  shape: const CircularNotchedRectangle(),
+                  shape: CircularNotchedRectangle(),
                   child: Container(height: 50),
                 ),
               ),
@@ -577,9 +577,9 @@ void main() {
         home: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           floatingActionButton: fab,
-          bottomNavigationBar: BottomAppBar(
+          bottomNavigationBar: const BottomAppBar(
             color: Colors.green,
-            shape: const CircularNotchedRectangle(),
+            shape: CircularNotchedRectangle(),
             child: Container(height: 50),
           ),
         ),

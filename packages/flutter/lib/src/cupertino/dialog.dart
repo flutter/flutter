@@ -300,7 +300,7 @@ class CupertinoAlertDialog extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    Widget actionSection = Container(
+    Widget actionSection = const Container(
       height: 0.0,
     );
     if (actions.isNotEmpty) {
@@ -567,7 +567,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
   Widget _buildActions() {
     if (actions == null || actions!.isEmpty) {
-      return Container(
+      return const Container(
         height: 0.0,
       );
     }

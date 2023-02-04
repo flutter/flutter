@@ -120,12 +120,12 @@ void main() {
     const Key contentsKey = ValueKey<String>('contents');
 
     await tester.pumpWidget(
-      Container(
+      const Container(
         alignment: Alignment.topLeft,
         child: Card(
           child: Container(
             key: contentsKey,
-            color: const Color(0xFF00FF00),
+            color: Color(0xFF00FF00),
             width: 100.0,
             height: 100.0,
           ),
@@ -141,13 +141,13 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
 
     await tester.pumpWidget(
-      Container(
+      const Container(
         alignment: Alignment.topLeft,
         child: Card(
           margin: EdgeInsets.zero,
           child: Container(
             key: contentsKey,
-            color: const Color(0xFF00FF00),
+            color: Color(0xFF00FF00),
             width: 100.0,
             height: 100.0,
           ),

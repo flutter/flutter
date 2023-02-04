@@ -269,7 +269,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                   sigmaX: blurAmount,
                   sigmaY: blurAmount,
                 ),
-                child: Container(
+                child: const Container(
                   color: Colors.transparent,
                 ),
               ),

@@ -155,13 +155,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.white,
             width: 50,
             height: 50,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 3.0, blurStyle: BlurStyle.solid)],
                 ),
                 width: 10,
@@ -187,13 +187,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.white,
             width: 50,
             height: 50,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 8.0, blurStyle: BlurStyle.outer)],
                 ),
                 width: 20,
@@ -219,13 +219,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.white,
             width: 50,
             height: 50,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.inner)],
                 ),
                 width: 20,
@@ -251,13 +251,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.white,
             width: 50,
             height: 50,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0)],
                 ),
                 width: 20,
@@ -283,13 +283,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.amber,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black,
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), color: Colors.green, spreadRadius: 2)],
                 ),
@@ -316,13 +316,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.amber,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black,
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.outer, color: Colors.red, spreadRadius: 2)],
                 ),
@@ -349,13 +349,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.grey,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black,
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.solid, color: Colors.purple, spreadRadius: 2)],
                 ),
@@ -381,13 +381,13 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const Container(
             color: Colors.green,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black,
                   boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.inner, color: Colors.amber, spreadRadius: 2)],
                 ),

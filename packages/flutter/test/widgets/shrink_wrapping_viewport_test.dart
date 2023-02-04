@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(build(
       ShrinkWrappingViewport(
         offset: ViewportOffset.zero(),
-        slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
+        slivers: const <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
       ),
     ));
 
@@ -37,7 +37,7 @@ void main() {
     await tester.pumpWidget(build(
       ShrinkWrappingViewport(
         offset: ViewportOffset.zero(),
-        slivers: <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
+        slivers: const <Widget>[SliverToBoxAdapter(child: Container(height: 2000.0))],
         clipBehavior: Clip.antiAlias,
       ),
     ));

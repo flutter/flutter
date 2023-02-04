@@ -32,7 +32,7 @@ void main() {
       Semantics(
         label: 'test1',
         textDirection: TextDirection.ltr,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -100,7 +100,7 @@ void main() {
           key: key,
           container: true,
           label: 'test2a',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     ));
@@ -134,7 +134,7 @@ void main() {
             key: key,
             container: true,
             label: 'test2b',
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -174,7 +174,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Semantics(
           label: 'test1',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -191,7 +191,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           label: 'test1',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -218,7 +218,7 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.ltr,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -245,7 +245,7 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.rtl,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -264,7 +264,7 @@ void main() {
           label: 'label',
           hint: 'hint',
           value: 'value',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );

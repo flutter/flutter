@@ -335,7 +335,7 @@ Future<void> main() async {
                 builder: (BuildContext c) {
                   return Hero(
                     tag: 'hero',
-                    child: Container(),
+                    child: const Container(),
                     flightShuttleBuilder: (
                       BuildContext flightContext,
                       Animation<double> animation,
@@ -358,7 +358,7 @@ Future<void> main() async {
       builder: (BuildContext c) {
         return Hero(
           tag: 'hero',
-          child: Container(),
+          child: const Container(),
           flightShuttleBuilder: (
             BuildContext flightContext,
             Animation<double> animation,
@@ -389,7 +389,7 @@ Future<void> main() async {
                 builder: (BuildContext c) {
                   return Hero(
                     tag: 'hero',
-                    child: Container(),
+                    child: const Container(),
                     flightShuttleBuilder: (
                       BuildContext flightContext,
                       Animation<double> animation,
@@ -578,7 +578,7 @@ Future<void> main() async {
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => Hero(tag: 'test', child: Container()),
+          builder: (BuildContext context) => const Hero(tag: 'test', child: Container()),
         );
       },
     ));
@@ -599,7 +599,7 @@ Future<void> main() async {
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) => Hero(tag: 'test', child: Container()),
+          builder: (BuildContext context) => const Hero(tag: 'test', child: Container()),
         );
       },
     ));
@@ -936,9 +936,9 @@ Future<void> main() async {
             children: <Widget>[
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
-              Container(
+              const Container(
                 key: routeContainerKey,
-                child: const Hero(tag: 'H', child: SizedBox(key: routeHeroKey, height: 200.0, width: 200.0)),
+                child: Hero(tag: 'H', child: SizedBox(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               TextButton(
                 child: const Text('POP'),
@@ -1021,14 +1021,14 @@ Future<void> main() async {
         return Material(
           child: ListView(
             cacheExtent: 0.0,
-            children: <Widget>[
-              const SizedBox(height: 100.0),
+            children: const <Widget>[
+              SizedBox(height: 100.0),
               // This container will appear at Y=100
               Container(
                 key: routeContainerKey,
-                child: const Hero(tag: 'H', child: SizedBox(key: routeHeroKey, height: 200.0, width: 200.0)),
+                child: Hero(tag: 'H', child: SizedBox(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
-              const SizedBox(height: 800.0),
+              SizedBox(height: 800.0),
             ],
           ),
         );
@@ -2894,8 +2894,8 @@ Future<void> main() async {
             addAutomaticKeepAlives: false,
             addRepaintBoundaries: false,
             addSemanticIndexes: false,
-            children: <Widget>[
-              const KeepAlive(
+            children: const <Widget>[
+              KeepAlive(
                 keepAlive: true,
                 child: Hero(
                   tag: 'a',
@@ -2957,8 +2957,8 @@ Future<void> main() async {
             addAutomaticKeepAlives: false,
             addRepaintBoundaries: false,
             addSemanticIndexes: false,
-            children: <Widget>[
-              const KeepAlive(
+            children: const <Widget>[
+              KeepAlive(
                 keepAlive: true,
                 child: Hero(
                   tag: 'a',
@@ -3022,8 +3022,8 @@ Future<void> main() async {
             addAutomaticKeepAlives: false,
             addRepaintBoundaries: false,
             addSemanticIndexes: false,
-            children: <Widget>[
-              const KeepAlive(
+            children: const <Widget>[
+              KeepAlive(
                 keepAlive: true,
                 child: Hero(
                   tag: 'a',

@@ -35,7 +35,7 @@ class StateMarkerState extends State<StateMarker> {
     if (widget.child != null) {
       return widget.child!;
     }
-    return Container();
+    return const Container();
   }
 }
 
@@ -396,7 +396,7 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
 
     // Work-around for https://github.com/flutter/flutter/issues/65655.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.takeException(), isAssertionError);
   });
 
@@ -425,7 +425,7 @@ void main() {
             builder: (BuildContext context) {
               dependentBuildCount++;
               MediaQuery.of(context);
-              return Container();
+              return const Container();
             },
           );
         });
@@ -477,7 +477,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
         textScaleFactor = MediaQuery.textScaleFactorOf(context);
-        return Container();
+        return const Container();
       }),
     ));
     expect(textScaleFactor, isNotNull);
@@ -1217,7 +1217,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       builder: (BuildContext context, Widget? child) {
         builderChild = child;
-        return Container();
+        return const Container();
       },
     ));
     expect(builderChild, isNull);
@@ -1369,10 +1369,10 @@ void main() {
                   },
                 ),
               ),
-              Opacity(
+              const Opacity(
                 opacity: 0.5,
                 child: Container(
-                  color: const Color(0xD0FF0000),
+                  color: Color(0xD0FF0000),
                   height: 100,
                 ),
               ),

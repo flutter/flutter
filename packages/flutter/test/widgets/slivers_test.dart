@@ -422,7 +422,7 @@ void main() {
             ),
           ),
         )
-          : Container();
+          : const Container();
       }
       await tester.pumpWidget(
         MaterialApp(

@@ -23,7 +23,7 @@ void main() {
           onVerticalDragStart: (DragStartDetails _) {
             callCount += 1;
           },
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -57,7 +57,7 @@ void main() {
             onHorizontalDragStart: (DragStartDetails _) {
               callCount += 1;
             },
-            child: Container(),
+            child: const Container(),
           ),
         ),
     );
@@ -90,7 +90,7 @@ void main() {
           key: detectorKey,
           onHorizontalDragStart: (_) { logs.add('horizontal'); },
           onPanStart: (_) { logs.add('pan'); },
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -182,7 +182,7 @@ void main() {
         Center(
           child: RawGestureDetector(
             gestures: gestures,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -196,7 +196,7 @@ void main() {
           child: RawGestureDetector(
             gestures: gestures,
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -218,7 +218,7 @@ void main() {
           child: RawGestureDetector(
             gestures: gestures,
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -231,7 +231,7 @@ void main() {
         Center(
           child: RawGestureDetector(
             gestures: gestures,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -253,7 +253,7 @@ void main() {
           child: RawGestureDetector(
             gestures: gestures,
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -267,7 +267,7 @@ void main() {
           child: RawGestureDetector(
             gestures: gestures,
             semantics: _TestSemanticsGestureDelegate(onLongPress: () {}),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -293,7 +293,7 @@ void main() {
               onHorizontalDragUpdate: (_) { logs.add('horizontal'); },
               onVerticalDragUpdate: (_) { logs.add('vertical'); },
             ),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -327,7 +327,7 @@ void main() {
           Center(
             child: RawGestureDetector(
               gestures: _buildGestureMap(null, null),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -348,7 +348,7 @@ void main() {
                 () => TapGestureRecognizer(),
                 null,
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -380,7 +380,7 @@ void main() {
                     ..onTertiaryTapDown = (_) {logs.add('WRONG');};
                 },
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -400,7 +400,7 @@ void main() {
           Center(
             child: RawGestureDetector(
               gestures: _buildGestureMap(null, null),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -421,7 +421,7 @@ void main() {
                 () => LongPressGestureRecognizer(),
                 null,
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -452,7 +452,7 @@ void main() {
                     ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
                 },
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -472,7 +472,7 @@ void main() {
           Center(
             child: RawGestureDetector(
               gestures: _buildGestureMap(null, null),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -493,7 +493,7 @@ void main() {
                 () => HorizontalDragGestureRecognizer(),
                 null,
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -509,7 +509,7 @@ void main() {
                 () => PanGestureRecognizer(),
                 null,
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -556,7 +556,7 @@ void main() {
             child: RawGestureDetector(
               key: detectorKey,
               gestures: gestures,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -582,7 +582,7 @@ void main() {
           Center(
             child: RawGestureDetector(
               gestures: _buildGestureMap(null, null),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -603,7 +603,7 @@ void main() {
                 () => VerticalDragGestureRecognizer(),
                 null,
               ),
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -647,7 +647,7 @@ void main() {
             child: RawGestureDetector(
               key: detectorKey,
               gestures: gestures,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         );
@@ -672,7 +672,7 @@ void main() {
         Center(
           child: RawGestureDetector(
             gestures: _buildGestureMap(() => LongPressGestureRecognizer(), null),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -685,7 +685,7 @@ void main() {
         Center(
           child: RawGestureDetector(
             gestures: _buildGestureMap(() => TapGestureRecognizer(), null),
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );

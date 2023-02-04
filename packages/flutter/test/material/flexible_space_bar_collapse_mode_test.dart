@@ -29,7 +29,7 @@ void main() {
                   collapseMode: CollapseMode.none,
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 10000.0,
                 ),
@@ -67,7 +67,7 @@ void main() {
                   collapseMode: CollapseMode.pin,
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 10000.0,
                 ),
@@ -104,7 +104,7 @@ void main() {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 10000.0,
                 ),

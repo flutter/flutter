@@ -4028,7 +4028,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                         child: ColoredBox(
                           key: whiteContainerKey,
                           color: Colors.white,
-                          child: RepaintBoundary(
+                          child: const RepaintBoundary(
                             child: Center(
                               child: Container(
                                 color: Colors.black,
@@ -4727,7 +4727,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                       top: 456.0,
                       child: CompositedTransformTarget(
                         link: link,
-                        child: Container(height: 20.0, width: 20.0, color: const Color.fromARGB(128, 255, 0, 0)),
+                        child: const Container(height: 20.0, width: 20.0, color: Color.fromARGB(128, 255, 0, 0)),
                       ),
                     ),
                   ],
@@ -4740,7 +4740,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                     children: <Widget>[
                       // Container so we can see how the follower layer was
                       // transformed relative to its initial location.
-                      Container(height: 15.0, width: 15.0, color: const Color.fromARGB(128, 0, 0, 255)),
+                      const Container(height: 15.0, width: 15.0, color: Color.fromARGB(128, 0, 0, 255)),
                       CompositedTransformFollower(
                         link: link,
                         child: Container(key: key, height: 10.0, width: 10.0, color: const Color.fromARGB(128, 0, 255, 0)),
@@ -4824,7 +4824,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 child: Stack(
                   key: stackWithTransformFollower,
                   children: <Widget>[
-                    Container(height: 15.0, width: 15.0, color: const Color.fromARGB(128, 0, 0, 255)),
+                    const Container(height: 15.0, width: 15.0, color: Color.fromARGB(128, 0, 0, 255)),
                     Transform.rotate(
                       key: rotate2,
                       angle: -0.3, // radians

@@ -19,7 +19,7 @@ class NotifyMaterial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const LayoutChangedNotification().dispatch(context);
-    return Container();
+    return const Container();
   }
 }
 
@@ -152,10 +152,10 @@ void main() {
                   children: <Widget>[
                     Expanded(
                       child: ListView(
-                        children: <Widget>[
+                        children: const <Widget>[
                           Container(
                             height: 2000.0,
-                            color: const Color(0xFF00FF00),
+                            color: Color(0xFF00FF00),
                           ),
                         ],
                       ),
@@ -927,13 +927,13 @@ void main() {
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
-            child: Card(
+            child: const Card(
               child: SizedBox(
                 width: 200,
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  shape: const RoundedRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey, width: 6),
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -965,13 +965,13 @@ void main() {
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
-            child: Card(
+            child: const Card(
               child: SizedBox(
                 width: 200,
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  shape: const RoundedRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey, width: 6),
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -1046,7 +1046,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 material = Material.maybeOf(context);
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -1063,7 +1063,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 Material.of(context);
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -1095,7 +1095,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 debugCheckHasMaterial(context);
-                return Container();
+                return const Container();
               },
             ),
           ),

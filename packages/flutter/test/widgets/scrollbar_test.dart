@@ -2234,18 +2234,18 @@ void main() {
                   primary: true,
                   center: uniqueKey,
                   slivers: <Widget>[
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Container(
                         height: 600.0,
                       ),
                     ),
                     SliverToBoxAdapter(
                       key: uniqueKey,
-                      child: Container(
+                      child: const Container(
                         height: 600.0,
                       ),
                     ),
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Container(
                         height: 600.0,
                       ),
@@ -2315,18 +2315,18 @@ void main() {
                 child: CustomScrollView(
                   center: uniqueKey,
                   slivers: <Widget>[
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Container(
                         height: 600.0,
                       ),
                     ),
                     SliverToBoxAdapter(
                       key: uniqueKey,
-                      child: Container(
+                      child: const Container(
                         height: 600.0,
                       ),
                     ),
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Container(
                         height: 600.0,
                       ),

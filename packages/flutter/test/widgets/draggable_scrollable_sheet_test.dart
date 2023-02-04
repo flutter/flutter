@@ -785,7 +785,7 @@ void main() {
                             onPressed: () => setState(() => ++s),
                             child: const Text('Switch to 2'),
                           ),
-                          Container(
+                          const Container(
                             height: 400,
                             color: Colors.blue,
                           ),
@@ -798,7 +798,7 @@ void main() {
                               onPressed: () => setState(() => ++s),
                               child: const Text('Switch to 1'),
                             ),
-                            Container(
+                            const Container(
                               height: 400,
                               color: Colors.blue,
                             ),
@@ -1507,7 +1507,7 @@ void main() {
                     onPressed: () => setState(() {}),
                     child: const Text('Rebuild'),
                   ),
-                  Container(
+                  const Container(
                     height: 10000,
                     color: Colors.blue,
                   ),
@@ -1558,7 +1558,7 @@ void main() {
                     }),
                     child: const Text('Switch controller'),
                   ),
-                  Container(
+                  const Container(
                     height: 10000,
                     color: Colors.blue,
                   ),

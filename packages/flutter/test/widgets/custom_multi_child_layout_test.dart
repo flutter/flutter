@@ -362,7 +362,7 @@ void main() {
         widget: Center(
           child: CustomMultiChildLayout(
             delegate: PreferredSizeDelegate(preferredSize: const Size(10, 10)),
-            children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
+            children: const <Widget>[LayoutWithMissingId(child: Container(width: 100))],
           ),
         ),
         tester: tester,
@@ -388,9 +388,9 @@ void main() {
           child: CustomMultiChildLayout(
             delegate: ZeroAndOneIdLayoutDelegate(),
             children: <Widget>[
-              LayoutId(id: 0, child: Container(width: 100)),
-              LayoutId(id: 1, child: Container(width: 100)),
-              LayoutId(id: 2, child: Container(width: 100)),
+              LayoutId(id: 0, child: const Container(width: 100)),
+              LayoutId(id: 1, child: const Container(width: 100)),
+              LayoutId(id: 2, child: const Container(width: 100)),
             ],
           ),
         ),
@@ -410,10 +410,10 @@ void main() {
           child: CustomMultiChildLayout(
             delegate: ZeroAndOneIdLayoutDelegate(),
             children: <Widget>[
-              LayoutId(id: 0, child: Container(width: 100)),
-              LayoutId(id: 1, child: Container(width: 100)),
-              LayoutId(id: 2, child: Container(width: 100)),
-              LayoutId(id: 3, child: Container(width: 100)),
+              LayoutId(id: 0, child: const Container(width: 100)),
+              LayoutId(id: 1, child: const Container(width: 100)),
+              LayoutId(id: 2, child: const Container(width: 100)),
+              LayoutId(id: 3, child: const Container(width: 100)),
             ],
           ),
         ),

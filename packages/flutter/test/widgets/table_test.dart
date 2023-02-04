@@ -15,7 +15,7 @@ class TestStatefulWidget extends StatefulWidget {
 
 class TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 class TestChildWidget extends StatefulWidget {
@@ -81,7 +81,7 @@ void main() {
     }
 
     await run(TextDirection.ltr);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await run(TextDirection.rtl);
   });
 
@@ -290,7 +290,7 @@ void main() {
     }
 
     await run(TextDirection.ltr);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await run(TextDirection.rtl);
   });
 
@@ -749,9 +749,9 @@ void main() {
                 children: <TableRow>[
                   TableRow(
                     children: <Widget>[
-                      Container(key: const ValueKey<int>(1)),
+                      const Container(key: ValueKey<int>(1)),
                       TestStatefulWidget(key: key),
-                      Container(key: const ValueKey<int>(2)),
+                      const Container(key: ValueKey<int>(2)),
                     ],
                   ),
                 ],
@@ -774,11 +774,11 @@ void main() {
             Expanded(
               key: tableKey,
               child: Table(
-                children: <TableRow>[
+                children: const <TableRow>[
                   TableRow(
                     children: <Widget>[
-                      Container(key: const ValueKey<int>(1)),
-                      Container(key: const ValueKey<int>(2)),
+                      Container(key: ValueKey<int>(1)),
+                      Container(key: ValueKey<int>(2)),
                     ],
                   ),
                 ],
@@ -803,9 +803,9 @@ void main() {
                 children: <TableRow>[
                   TableRow(
                     children: <Widget>[
-                      Container(key: const ValueKey<int>(1)),
+                      const Container(key: ValueKey<int>(1)),
                       TestStatefulWidget(key: key),
-                      Container(key: const ValueKey<int>(2)),
+                      const Container(key: ValueKey<int>(2)),
                     ],
                   ),
                 ],
@@ -827,11 +827,11 @@ void main() {
             Expanded(
               key: tableKey,
               child: Table(
-                children: <TableRow>[
+                children: const <TableRow>[
                   TableRow(
                     children: <Widget>[
-                      Container(key: const ValueKey<int>(1)),
-                      Container(key: const ValueKey<int>(2)),
+                      Container(key: ValueKey<int>(1)),
+                      Container(key: ValueKey<int>(2)),
                     ],
                   ),
                 ],

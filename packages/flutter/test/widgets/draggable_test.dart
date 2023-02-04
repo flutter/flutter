@@ -663,7 +663,7 @@ void main() {
               events.add('details');
             },
           ),
-          Container(height: 400.0),
+          const Container(height: 400.0),
           const Draggable<int>(
             data: 1,
             feedback: Text('Dragging'),
@@ -676,10 +676,10 @@ void main() {
             affinity: Axis.vertical,
             child: Text('V'),
           ),
-          Container(height: 500.0),
-          Container(height: 500.0),
-          Container(height: 500.0),
-          Container(height: 500.0),
+          const Container(height: 500.0),
+          const Container(height: 500.0),
+          const Container(height: 500.0),
+          const Container(height: 500.0),
         ],
       ),
     ));
@@ -774,7 +774,7 @@ void main() {
               events.add('details');
             },
           ),
-          Container(width: 400.0),
+          const Container(width: 400.0),
           const Draggable<int>(
             data: 1,
             feedback: Text('Dragging'),
@@ -787,10 +787,10 @@ void main() {
             affinity: Axis.vertical,
             child: Text('V'),
           ),
-          Container(width: 500.0),
-          Container(width: 500.0),
-          Container(width: 500.0),
-          Container(width: 500.0),
+          const Container(width: 500.0),
+          const Container(width: 500.0),
+          const Container(width: 500.0),
+          const Container(width: 500.0),
         ],
       ),
     ));
@@ -884,7 +884,7 @@ void main() {
                 events.add('details');
               },
             ),
-            Container(width: 400.0),
+            const Container(width: 400.0),
             const Draggable<int>(
               data: 1,
               feedback: Text('H'),
@@ -905,10 +905,10 @@ void main() {
               childWhenDragging: SizedBox(),
               child: Text('N'),
             ),
-            Container(width: 500.0),
-            Container(width: 500.0),
-            Container(width: 500.0),
-            Container(width: 500.0),
+            const Container(width: 500.0),
+            const Container(width: 500.0),
+            const Container(width: 500.0),
+            const Container(width: 500.0),
           ],
         ),
       );
@@ -2179,14 +2179,14 @@ void main() {
                 onTap: () {
                   didTap = true;
                 },
-                child: Draggable<Object>(
+                child: const Draggable<Object>(
                   feedback: Container(
                     width: 100.0,
                     height: 100.0,
-                    color: const Color(0xFFFF0000),
+                    color: Color(0xFFFF0000),
                   ),
                   child: Container(
-                    color: const Color(0xFFFFFF00),
+                    color: Color(0xFFFFFF00),
                   ),
                 ),
               ),
@@ -2215,14 +2215,14 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) => GestureDetector(
                 onTap: () { /* registers a tap recognizer */ },
-                child: Draggable<Object>(
+                child: const Draggable<Object>(
                   feedback: Container(
                     width: 100.0,
                     height: 100.0,
-                    color: const Color(0xFFFF0000),
+                    color: Color(0xFFFF0000),
                   ),
                   child: Container(
-                    color: const Color(0xFFFFFF00),
+                    color: Color(0xFFFFFF00),
                   ),
                 ),
               ),
@@ -2879,7 +2879,7 @@ void main() {
                 return const Text('Target');
               },
             ),
-            Container(width: 400.0),
+            const Container(width: 400.0),
             const Draggable<int>(
               data: 1,
               feedback: Text('H'),

@@ -20,7 +20,7 @@ void main() {
           label: 'test1',
           textDirection: TextDirection.ltr,
           selected: true,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );

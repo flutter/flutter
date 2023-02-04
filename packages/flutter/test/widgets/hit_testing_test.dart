@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(
       _HitTestCounter(
         onHitTestCallback: () { hitCount += 1; },
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(
       _HitTestCounter(
         onHitTestCallback: () { hitCount += 1; },
-        child: Container(),
+        child: const Container(),
       ),
     );
 

@@ -67,11 +67,11 @@ void main() {
     showCupertinoDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog'),
+          child: Text('Dialog'),
         );
       },
     );
@@ -96,11 +96,11 @@ void main() {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog'),
+          child: Text('Dialog'),
         );
       },
     );

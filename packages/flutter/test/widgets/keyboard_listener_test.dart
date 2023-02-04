@@ -9,9 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: const Container()));
+    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: const Container()));
+    await tester.pumpWidget(const Container());
   });
 
   testWidgets('Fuchsia key event', (WidgetTester tester) async {
@@ -23,7 +23,7 @@ void main() {
       KeyboardListener(
         focusNode: focusNode,
         onKeyEvent: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -38,7 +38,7 @@ void main() {
     expect(events[0].physicalKey, PhysicalKeyboardKey.metaLeft);
     expect(events[0].logicalKey, LogicalKeyboardKey.metaLeft);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     focusNode.dispose();
   }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
@@ -51,7 +51,7 @@ void main() {
       KeyboardListener(
         focusNode: focusNode,
         onKeyEvent: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -66,7 +66,7 @@ void main() {
     expect(events[0].physicalKey, PhysicalKeyboardKey.metaLeft);
     expect(events[0].logicalKey, LogicalKeyboardKey.metaLeft);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     focusNode.dispose();
   });
 
@@ -79,7 +79,7 @@ void main() {
       KeyboardListener(
         focusNode: focusNode,
         onKeyEvent: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -92,7 +92,7 @@ void main() {
     expect(events.length, 2);
     events.clear();
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
 
@@ -100,7 +100,7 @@ void main() {
 
     expect(events.length, 0);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     focusNode.dispose();
   });
 }

@@ -23,10 +23,10 @@ void main() {
       child: TestDependencies(
         child: SnapshotWidget(
           controller: controller,
-          child: Container(
+          child: const Container(
             width: 100,
             height: 100,
-            color: const Color(0xFFAABB11),
+            color: Color(0xFFAABB11),
           ),
         ),
       ),
@@ -39,10 +39,10 @@ void main() {
       child: TestDependencies(
         child: SnapshotWidget(
           controller: controller,
-          child: Container(
+          child: const Container(
             width: 100,
             height: 100,
-            color: const Color(0xFFAA0000),
+            color: Color(0xFFAA0000),
           ),
         ),
       ),
@@ -133,10 +133,10 @@ void main() {
         child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
-            child: Container(
+            child: const Container(
               width: 100,
               height: 100,
-              color: const Color(0xFFAABB11),
+              color: Color(0xFFAABB11),
             ),
           ),
         ),
@@ -282,8 +282,8 @@ void main() {
           padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
           child: SnapshotWidget(
             controller: controller,
-            child: Container(
-              margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
+            child: const Container(
+              margin: EdgeInsets.only(right: 0.4, bottom: 0.4),
               color: Colors.blue,
             ),
           ),

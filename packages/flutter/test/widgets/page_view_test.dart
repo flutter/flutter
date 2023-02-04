@@ -954,7 +954,7 @@ void main() {
     await tester.pumpWidget(
       PageStorage(
         bucket: bucket,
-        child: Container(),
+        child: const Container(),
       ),
     );
     expect(
@@ -1124,7 +1124,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -1144,7 +1144,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: PageView(
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );

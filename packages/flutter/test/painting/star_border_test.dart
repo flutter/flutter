@@ -175,8 +175,8 @@ void main() {
               children: <Widget>[
                 Positioned.fromRelativeRect(
                   rect: const RelativeRect.fromLTRB(100, 100, 100, 100),
-                  child: Container(
-                    decoration: const ShapeDecoration(
+                  child: const Container(
+                    decoration: ShapeDecoration(
                       color: Colors.green,
                       shape: StarBorder(),
                     ),

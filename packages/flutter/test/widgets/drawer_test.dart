@@ -24,7 +24,7 @@ void main() {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Text('drawer'),
-              body: Container(),
+              body: const Container(),
             );
           },
         ),
@@ -51,7 +51,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('drawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -164,7 +164,7 @@ void main() {
               ],
             ),
           ),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -217,7 +217,7 @@ void main() {
                 ],
               ),
             ),
-            body: Container(),
+            body: const Container(),
           ),
         ),
       ),
@@ -337,7 +337,7 @@ void main() {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
-              body: Container(),
+              body: const Container(),
             );
           },
         ),
@@ -365,7 +365,7 @@ void main() {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
-              body: Container(),
+              body: const Container(),
             );
           },
         ),

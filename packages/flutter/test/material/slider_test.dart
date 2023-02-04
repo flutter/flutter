@@ -640,7 +640,7 @@ void main() {
                     value = newValue;
                   },
                 ),
-                Container(
+                const Container(
                   height: 2000.0,
                 ),
               ],
@@ -2561,7 +2561,7 @@ void main() {
     await gesture.moveBy(const Offset(-500.0, 0.0));
     await tester.pumpAndSettle();
     // Change the tree to dispose the original widget.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(await tester.pumpAndSettle(), equals(1));
     await gesture.up();
   });

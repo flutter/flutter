@@ -177,7 +177,7 @@ void main() {
     expect(buttonSize.width, customBigWidth);
 
     // reset test
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     const double customSmallWidth = 100.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customSmallWidth));
     box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
@@ -215,7 +215,7 @@ void main() {
     expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
     // Constrains the menu height.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
     await tester.pumpAndSettle();
 
@@ -248,7 +248,7 @@ void main() {
     expect(labelTopLeft.dx, equals(itemTextTopLeft.dx));
 
     // Test when the text field has a leading icon.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren,
       leadingIcon: const Icon(Icons.search),
       label: const Text('label'),
@@ -269,7 +269,7 @@ void main() {
     expect(updatedLabelTopLeft.dx, equals(iconWidth));
 
     // Test when then leading icon is a widget with a bigger size.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren,
       leadingIcon: const SizedBox(
         width: 75.0,
@@ -320,7 +320,7 @@ void main() {
     expect(labelTopRight.dx, equals(itemTextTopRight.dx));
 
     // Test when the text field has a leading icon.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
@@ -352,7 +352,7 @@ void main() {
     expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth));
 
     // Test when then leading icon is a widget with a bigger size.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
@@ -1016,7 +1016,7 @@ void main() {
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
 
     // Set requestFocusOnTap to false.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
     await tester.pumpAndSettle();
 

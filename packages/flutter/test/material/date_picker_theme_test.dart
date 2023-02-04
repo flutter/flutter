@@ -126,7 +126,7 @@ void main() {
             theme = Theme.of(context);
             colorScheme = theme.colorScheme;
             textTheme = theme.textTheme;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -196,7 +196,7 @@ void main() {
             theme = Theme.of(context);
             colorScheme = theme.colorScheme;
             textTheme = theme.textTheme;
-            return Container();
+            return const Container();
           },
         ),
       ),

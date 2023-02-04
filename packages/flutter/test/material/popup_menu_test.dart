@@ -685,7 +685,7 @@ void main() {
 
     Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
-        await tester.pumpWidget(Container()); // reset in case we had a menu up already
+        await tester.pumpWidget(const Container()); // reset in case we had a menu up already
         await tester.pumpWidget(TestApp(
           textDirection: textDirection,
           child: Align(
@@ -1849,7 +1849,7 @@ void main() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
         icon: const Icon(Icons.error),
-        child: Container(),
+        child: const Container(),
       );
     }, throwsAssertionError);
   });
@@ -2106,7 +2106,7 @@ void main() {
     const Key key = ValueKey<int>(1);
     // Test PopupMenuItem() constructor
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2135,7 +2135,7 @@ void main() {
 
     // Test default cursor
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2158,7 +2158,7 @@ void main() {
 
     // Test default cursor when disabled
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2185,7 +2185,7 @@ void main() {
     const Key key = ValueKey<int>(1);
     // Test CheckedPopupMenuItem() constructor
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2215,7 +2215,7 @@ void main() {
 
     // Test default cursor
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2238,7 +2238,7 @@ void main() {
 
     // Test default cursor when disabled
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
@@ -2400,7 +2400,7 @@ void main() {
               ),
             ],
           ),
-          body: Container(),
+          body: const Container(),
         ),
       );
     }
@@ -2541,7 +2541,7 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       // PopupMenuButton with disabled feedback.
       await tester.pumpWidget(buildFrame(widgetEnableFeedback: false));
@@ -2550,7 +2550,7 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       // PopupMenuButton with enabled feedback by default.
       await tester.pumpWidget(buildFrame());
@@ -2559,7 +2559,7 @@ void main() {
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       // PopupMenu with disabled feedback using PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(themeEnableFeedback: false));
@@ -2568,7 +2568,7 @@ void main() {
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       // PopupMenu enableFeedback property overrides PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(widgetEnableFeedback: false,themeEnableFeedback: true));
@@ -2632,7 +2632,7 @@ void main() {
                 child: Navigator(
                   key: navigator,
                   onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
-                    builder: (BuildContext context) => Container(color: Colors.red),
+                    builder: (BuildContext context) => const Container(color: Colors.red),
                   ),
                 ),
               ),

@@ -22,7 +22,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: <Widget>[Container()],
+          children: const <Widget>[Container()],
         ),
       ),
     );
@@ -43,7 +43,7 @@ void main() {
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container()],
+          children: const <Widget>[Container()],
         ),
       ),
     );
@@ -90,7 +90,7 @@ void main() {
             useMagnifier: true,
             magnification: -1.0,
             itemExtent: 20.0,
-            children: <Widget>[Container()],
+            children: const <Widget>[Container()],
           );
         },
         throwsAssertionError,
@@ -103,7 +103,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: -1,
             itemExtent: 20.0,
-            children: <Widget>[Container()],
+            children: const <Widget>[Container()],
           );
         },
         throwsAssertionError,
@@ -114,7 +114,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: 2,
             itemExtent: 20.0,
-            children: <Widget>[Container()],
+            children: const <Widget>[Container()],
           );
         },
         throwsAssertionError,
@@ -124,7 +124,7 @@ void main() {
         () {
           ListWheelScrollView(
             itemExtent: 20.0,
-            children: <Widget>[Container()],
+            children: const <Widget>[Container()],
           );
         },
         isNot(throwsAssertionError),
@@ -135,7 +135,7 @@ void main() {
           ListWheelScrollView(
             overAndUnderCenterOpacity: 0,
             itemExtent: 20.0,
-            children: <Widget>[Container()],
+            children: const <Widget>[Container()],
           );
         },
         isNot(throwsAssertionError),
@@ -429,10 +429,10 @@ void main() {
           child: ListWheelScrollView(
             // Inner children smaller than the outer window.
             itemExtent: 50.0,
-            children: <Widget>[
+            children: const <Widget>[
               Container(
                 height: 50.0,
-                color: const Color(0xFFFFFFFF),
+                color: Color(0xFFFFFFFF),
               ),
             ],
           ),
@@ -451,9 +451,9 @@ void main() {
             // Inner children 5000.0px.
             itemExtent: 50.0,
             children: List<Widget>.generate(100, (int index) {
-              return Container(
+              return const Container(
                 height: 50.0,
-                color: const Color(0xFFFFFFFF),
+                color: Color(0xFFFFFFFF),
               );
             }),
           ),
@@ -1417,7 +1417,7 @@ void main() {
 
   testWidgets('ListWheelScrollView getOffsetToReveal', (WidgetTester tester) async {
     List<Widget> outerChildren;
-    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
+    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => const Container());
 
     await tester.pumpWidget(
       Directionality(
@@ -1485,7 +1485,7 @@ void main() {
 
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {
     List<Widget> outerChildren;
-    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
+    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => const Container());
     ScrollController controller;
 
     await tester.pumpWidget(

@@ -1190,14 +1190,14 @@ void main() {
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
-      Container(
-        constraints: const BoxConstraints.tightFor(height: 100.0),
+      const Container(
+        constraints: BoxConstraints.tightFor(height: 100.0),
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(height: 400.0), // tallest widget
+      const Container(
+        constraints: BoxConstraints.tightFor(height: 400.0), // tallest widget
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(height: 200.0),
+      const Container(
+        constraints: BoxConstraints.tightFor(height: 200.0),
       ),
     ];
 
@@ -1224,20 +1224,20 @@ void main() {
 
   testWidgets('Sizes of toggle buttons rebuilds with the correct dimensions', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 100.0,
           height: 100.0,
         ),
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 100.0,
           height: 100.0,
         ),
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 100.0,
           height: 100.0,
         ),
@@ -1274,20 +1274,20 @@ void main() {
     }
 
     final List<Widget> childrenRebuilt = <Widget>[
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 200.0,
           height: 200.0,
         ),
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 200.0,
           height: 200.0,
         ),
       ),
-      Container(
-        constraints: const BoxConstraints.tightFor(
+      const Container(
+        constraints: BoxConstraints.tightFor(
           width: 200.0,
           height: 200.0,
         ),

@@ -11,11 +11,11 @@ void main() {
     testWidgets('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 stretch: true,
                 expandedHeight: 100.0,
               ),
@@ -46,11 +46,11 @@ void main() {
     testWidgets('fills overscroll after reverse direction input - scrolling header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 title: Text('Test'),
                 stretch: true,
                 expandedHeight: 100.0,
@@ -95,11 +95,11 @@ void main() {
     testWidgets('fills overscroll after reverse direction input - floating header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 title: Text('Test'),
                 stretch: true,
                 floating: true,
@@ -145,11 +145,11 @@ void main() {
     testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: ClampingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 stretch: true,
                 expandedHeight: 100.0,
               ),
@@ -192,13 +192,13 @@ void main() {
                   didTrigger = true;
                 },
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   key: anchor,
                   height: 800,
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 800,
                 ),
@@ -231,13 +231,13 @@ void main() {
                   didTrigger = true;
                 },
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   key: anchor,
                   height: 800,
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 800,
                 ),
@@ -270,13 +270,13 @@ void main() {
                   didTrigger = true;
                 },
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   key: anchor,
                   height: 800,
                 ),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 800,
                 ),
@@ -305,12 +305,12 @@ void main() {
                   expandedHeight: 100.0,
                   stretchTriggerOffset: -150.0,
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Container(
                     height: 800,
                   ),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Container(
                     height: 800,
                   ),
@@ -328,11 +328,11 @@ void main() {
     testWidgets('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 pinned: true,
                 stretch: true,
                 expandedHeight: 100.0,
@@ -363,11 +363,11 @@ void main() {
     testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: ClampingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 pinned: true,
                 stretch: true,
                 expandedHeight: 100.0,
@@ -400,11 +400,11 @@ void main() {
     testWidgets('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 floating: true,
                 stretch: true,
                 expandedHeight: 100.0,
@@ -435,11 +435,11 @@ void main() {
     testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: ClampingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 floating: true,
                 stretch: true,
                 expandedHeight: 100.0,
@@ -472,11 +472,11 @@ void main() {
     testWidgets('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 floating: true,
                 pinned: true,
                 stretch: true,
@@ -508,11 +508,11 @@ void main() {
     testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: CustomScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: ClampingScrollPhysics(),
             slivers: <Widget>[
-              const SliverAppBar(
+              SliverAppBar(
                 pinned: true,
                 floating: true,
                 stretch: true,

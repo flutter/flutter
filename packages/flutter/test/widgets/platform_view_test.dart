@@ -441,11 +441,11 @@ void main() {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: Container(
-            margin: const EdgeInsets.all(10.0),
-            child: const SizedBox(
+            margin: EdgeInsets.all(10.0),
+            child: SizedBox(
               width: 200.0,
               height: 100.0,
               child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
@@ -1950,12 +1950,12 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Stack(
+        const Stack(
           alignment: Alignment.topLeft,
           children: <Widget>[
-            const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
             Container(
-              color: const Color.fromARGB(255, 255, 255, 255),
+              color: Color.fromARGB(255, 255, 255, 255),
               width: 100,
               height: 100,
             ),
@@ -2001,8 +2001,8 @@ void main() {
                 ),
                 Transform.translate(
                   offset: const Offset(0, 500),
-                  child: Container(
-                    color: const Color.fromARGB(255, 255, 255, 255),
+                  child: const Container(
+                    color: Color.fromARGB(255, 255, 255, 255),
                     width: 300,
                     height: 100,
                   ),
@@ -2713,7 +2713,7 @@ void main() {
 
       await tester.pumpWidget(platformViewLink);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(disposedController.disposed, true);
     });
@@ -2853,7 +2853,7 @@ void main() {
           return FakePlatformViewController(params.id);
         },
         surfaceFactory: (BuildContext context, PlatformViewController controller) {
-          return Container();
+          return const Container();
         },
       );
 

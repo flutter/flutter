@@ -244,21 +244,21 @@ void main() {
       testWidgets('Vertical drag in progress golden image', (WidgetTester tester) async {
         debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
-          children: <Widget>[
+          children: const <Widget>[
             Container(
-              key: const Key('pink'),
+              key: Key('pink'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.pink,
             ),
             Container(
-              key: const Key('blue'),
+              key: Key('blue'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.blue,
             ),
             Container(
-              key: const Key('green'),
+              key: Key('green'),
               width: double.infinity,
               height: itemHeight,
               color: Colors.green,
@@ -877,21 +877,21 @@ void main() {
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
           onReorder: (int oldIndex, int newIndex) { },
-          children: <Widget>[
+          children: const <Widget>[
             Container(
-              key: const Key('pink'),
+              key: Key('pink'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.pink,
             ),
             Container(
-              key: const Key('blue'),
+              key: Key('blue'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.blue,
             ),
             Container(
-              key: const Key('green'),
+              key: Key('green'),
               height: double.infinity,
               width: itemHeight,
               color: Colors.green,

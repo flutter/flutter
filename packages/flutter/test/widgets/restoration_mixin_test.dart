@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(
       UnmanagedRestorationScope(
         bucket: root,
-        child: Container(),
+        child: const Container(),
       ),
     );
     manager.doSerialization();
@@ -325,7 +325,7 @@ void main() {
         child: Row(
           textDirection: TextDirection.ltr,
           children: <Widget>[
-            RestorationScope(
+            const RestorationScope(
               restorationId: 'fixed',
               child: Container(),
             ),
@@ -682,7 +682,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 
   void setProperties(VoidCallback fn) => setState(fn);

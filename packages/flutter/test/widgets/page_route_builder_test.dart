@@ -75,7 +75,7 @@ class ModalPage extends StatelessWidget {
               },
               child: const SizedBox.expand(),
             ),
-            Align(
+            const Align(
               alignment: Alignment.bottomCenter,
               child: Container(
                 height: 150,

@@ -22,7 +22,7 @@ class StateMarkerState extends State<StateMarker> {
     if (widget.child != null) {
       return widget.child!;
     }
-    return Container();
+    return const Container();
   }
 }
 
@@ -45,7 +45,7 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
   @override
   Widget build(BuildContext context) {
     widget.log.add('build');
-    return Container();
+    return const Container();
   }
 }
 
@@ -119,7 +119,7 @@ void main() {
           color: Colors.green,
           child: StateMarker(
             key: left,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -187,7 +187,7 @@ void main() {
           color: Colors.green,
           child: StateMarker(
             key: left,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -367,7 +367,7 @@ void main() {
               key: key2,
               child: StateMarker(
                 key: key3,
-                child: StateMarker(child: Container(width: 100.0)),
+                child: const StateMarker(child: Container(width: 100.0)),
               ),
             ),
           ),
@@ -381,13 +381,13 @@ void main() {
         children: <Widget>[
           StateMarker(
             key: key2,
-            child: StateMarker(child: Container(width: 100.0)),
+            child: const StateMarker(child: Container(width: 100.0)),
           ),
           StateMarker(
             key: key1,
             child: StateMarker(
               key: key3,
-              child: StateMarker(child: Container(width: 100.0)),
+              child: const StateMarker(child: Container(width: 100.0)),
             ),
           ),
         ],

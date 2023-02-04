@@ -702,7 +702,7 @@ void main() {
             });
           },
           optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-            return Container();
+            return const Container();
           },
           fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
             return TextField(

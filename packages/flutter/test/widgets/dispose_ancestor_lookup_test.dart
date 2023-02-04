@@ -36,7 +36,7 @@ void main() {
         context.dependOnInheritedWidgetOfExactType<InheritedWidget>();
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -49,7 +49,7 @@ void main() {
         context.getElementForInheritedWidgetOfExactType<InheritedWidget>();
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -62,7 +62,7 @@ void main() {
         context.findAncestorWidgetOfExactType<Container>();
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -75,7 +75,7 @@ void main() {
         context.findAncestorStateOfType<State>();
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -88,7 +88,7 @@ void main() {
         context.findAncestorRenderObjectOfType<RenderObject>();
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -101,7 +101,7 @@ void main() {
         context.visitAncestorElements((Element element) => true);
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -113,7 +113,7 @@ void main() {
         disposeCalled = true;
       }),
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(disposeCalled, isTrue);
   });
 

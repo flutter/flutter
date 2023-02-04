@@ -375,7 +375,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// exists.
   ///
   /// May result in an infinite loop or run out of memory if [childCount] is null
-  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// and the [builder] always provides a zero-size widget (such as `const Container()`
   /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
   /// return null from [builder], or set a [childCount].
   ///
@@ -389,7 +389,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// [builder] returns null.
   ///
   /// May result in an infinite loop or run out of memory if [childCount] is null
-  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// and the [builder] always provides a zero-size widget (such as `const Container()`
   /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
   /// return null from [builder], or set a [childCount].
   final int? childCount;

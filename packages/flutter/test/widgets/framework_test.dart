@@ -87,9 +87,9 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(
-          key: const ValueKey<int>(1),
-          child: const Placeholder(),
+        const Container(
+          key: ValueKey<int>(1),
+          child: Placeholder(),
         ),
         LayoutBuilder(
           key: const ValueKey<int>(2),
@@ -106,9 +106,9 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(
-          key: const ValueKey<int>(1),
-          child: const Placeholder(),
+        const Container(
+          key: ValueKey<int>(1),
+          child: Placeholder(),
         ),
         LayoutBuilder(
           key: const ValueKey<int>(2),
@@ -453,11 +453,11 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(
-          key: const ValueKey<int>(1),
+        const Container(
+          key: ValueKey<int>(1),
         ),
-        Container(
-          key: const ValueKey<int>(2),
+        const Container(
+          key: ValueKey<int>(2),
         ),
         Container(
           key: key,
@@ -589,7 +589,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
-        Container(key: const ValueKey<int>(2)),
+        const Container(key: ValueKey<int>(2)),
       ],
     ));
     await tester.pumpWidget(Stack(
@@ -607,7 +607,7 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(1)),
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
     ));
@@ -627,14 +627,14 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Container(key: const ValueKey<int>(0), child: Container(key: key)),
-        Container(key: const ValueKey<int>(1)),
-        Container(key: const ValueKey<int>(2)),
+        const Container(key: ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(2)),
       ],
     ));
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
       ],
@@ -647,8 +647,8 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(1)),
-        Container(key: const ValueKey<int>(2)),
+        const Container(key: ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(2)),
         Container(key: const ValueKey<int>(3), child: Container(key: key)),
       ],
     ));
@@ -657,7 +657,7 @@ void main() {
       children: <Widget>[
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
         Container(key: const ValueKey<int>(2), child: Container(key: key)),
-        Container(key: const ValueKey<int>(3)),
+        const Container(key: ValueKey<int>(3)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -776,14 +776,14 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Container(key: key),
-        Container(key: const ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(1)),
       ],
     ));
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
       ],
     ));
@@ -795,15 +795,15 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Container(key: key),
-        Container(key: const ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(1)),
       ],
     ));
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Container(key: key),
-        Container(key: const ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
       ],
     ));
@@ -815,15 +815,15 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(1)),
         Container(key: key),
       ],
     ));
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
       ],
     ));
@@ -834,8 +834,8 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(1)),
         Container(key: key),
       ],
     ));
@@ -848,7 +848,7 @@ void main() {
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        Container(key: const ValueKey<int>(0)),
+        const Container(key: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1), child: Container(key: key)),
         Container(key: key),
       ],
@@ -863,7 +863,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(1)),
         Container(key: key),
       ],
     );
@@ -900,7 +900,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
-        Container(key: const ValueKey<int>(1)),
+        const Container(key: ValueKey<int>(1)),
         ColoredBox(color: Colors.green, child: SizedBox(key: key)),
       ],
     );
@@ -1110,14 +1110,14 @@ void main() {
     await tester.pumpWidget(StatefulBuilder(
       builder: (BuildContext context, StateSetter setter) {
         setState = setter;
-        return Container();
+        return const Container();
       },
     ));
 
     // Control check that setState doesn't throw an exception.
     setState(() { });
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(() { setState(() { }); }, throwsFlutterError);
   });
@@ -1155,11 +1155,11 @@ void main() {
     await tester.pumpWidget(Column(
       key: key0 = GlobalKey(),
       children: <Widget>[
-        Container(),
+        const Container(),
         Container(key: key1 = GlobalKey()),
-        Container(),
+        const Container(),
         Container(key: key2 = GlobalKey()),
-        Container(),
+        const Container(),
       ],
     ));
     final MultiChildRenderObjectElement element = key0.currentContext! as MultiChildRenderObjectElement;
@@ -1171,10 +1171,10 @@ void main() {
 
   testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - mount', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Container(),
-          const _EmptyWidget(),
+          _EmptyWidget(),
         ],
       ),
     );
@@ -1196,7 +1196,7 @@ void main() {
 
   testWidgets('Can not attach a non-RenderObjectElement to the MultiChildRenderObjectElement - update', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Container(),
         ],
@@ -1204,10 +1204,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Container(),
-          const _EmptyWidget(),
+          _EmptyWidget(),
         ],
       ),
     );
@@ -1232,11 +1232,11 @@ void main() {
     await tester.pumpWidget(Column(
       key: key0 = GlobalKey(),
       children: <Widget>[
-        Container(),
+        const Container(),
         Container(key: GlobalKey()),
-        ColoredBox(color: Colors.green, child: Container()),
+        const ColoredBox(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
-        Container(),
+        const Container(),
       ],
     ));
     final MultiChildRenderObjectElement element = key0.currentContext! as MultiChildRenderObjectElement;
@@ -1273,7 +1273,7 @@ void main() {
     late FlutterError error;
     try {
       tester.binding.buildOwner!.scheduleBuildFor(
-        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container()),
+        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, const Container()),
       );
     } on FlutterError catch (e) {
       error = e;
@@ -1450,7 +1450,7 @@ void main() {
       expect(debugDoingBuildOnDeactivate, isNull);
       expect(debugDoingBuildOnDispose, isNull);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(context.debugDoingBuild, isFalse);
       expect(debugDoingBuildOnDispose, isFalse);
@@ -1509,7 +1509,7 @@ void main() {
       expect(debugDoingBuildOnUpdateRenderObject, isTrue);
       expect(debugDoingBuildOnDidUnmountRenderObject, isNull);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(spyContext.debugDoingBuild, isFalse);
       expect(debugDoingBuildOnDidUnmountRenderObject, isFalse);
@@ -1520,7 +1520,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(_WidgetWithNoVisitChildren(_StatefulLeaf(key: key)));
     (key.currentState! as _StatefulLeafState).markNeedsBuild();
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     final dynamic exception = tester.takeException();
     expect(
       // ignore: avoid_dynamic_calls
@@ -1607,11 +1607,11 @@ void main() {
     final GlobalKey key2 = GlobalKey();
     await tester.pumpWidget(Container(key: key1));
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
-    await tester.pumpWidget(Container(key: key1, child: Container()));
+    await tester.pumpWidget(Container(key: key1, child: const Container()));
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
     await tester.pumpWidget(Container(key: key1, child: Container(key: key2)));
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 2);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
   });
 
@@ -1621,7 +1621,7 @@ void main() {
     expect(element.state, isA<State<_StatefulLeaf>>());
     expect(element.widget, isA<_StatefulLeaf>());
     // Replace the widget tree to unmount the element.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     // Accessing state/widget now throws a CastError because they have been
     // nulled out to reduce severity of memory leaks when an Element (e.g. in
     // the form of a BuildContext) is retained past its useful life. See also
@@ -1675,7 +1675,7 @@ void main() {
     expect(states, <String>['initState', 'build']);
     await pumpWidget(Container(child: build()));
     expect(states, <String>['deactivate', 'initState', 'build', 'dispose']);
-    await pumpWidget(Container());
+    await pumpWidget(const Container());
     expect(states, <String>['deactivate', 'dispose']);
 
     final GlobalKey key = GlobalKey();
@@ -1683,7 +1683,7 @@ void main() {
     expect(states, <String>['initState', 'build']);
     await pumpWidget(Container(child: build(key)));
     expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
-    await pumpWidget(Container());
+    await pumpWidget(const Container());
     expect(states, <String>['deactivate', 'dispose']);
   });
 
@@ -1693,7 +1693,7 @@ void main() {
     final RenderObject renderObject = element.renderObject;
     expect(renderObject.debugDisposed, false);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(() => element.renderObject, throwsAssertionError);
     expect(renderObject.debugDisposed, true);
@@ -1705,7 +1705,7 @@ void main() {
     expect(element.state, isA<State<_StatefulLeaf>>());
     expect(element.widget, isA<_StatefulLeaf>());
     // Replace the widget tree to unmount the element.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
   expect(
     () => element.findRenderObject(),
@@ -1848,7 +1848,7 @@ class _DecorateState extends State<Decorate> {
   Widget build(covariant DecorateElement context) {
     context.dependOnInheritedWidgetOfExactType<Inherited>();
     widget.build.call(context.isDecorated);
-    return Container();
+    return const Container();
   }
 }
 
@@ -1979,7 +1979,7 @@ class StatelessWidgetSpy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     onBuild(context);
-    return Container();
+    return const Container();
   }
 }
 
@@ -2047,7 +2047,7 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   @override
   Widget build(BuildContext context) {
     widget.onBuild?.call(context);
-    return Container();
+    return const Container();
   }
 }
 

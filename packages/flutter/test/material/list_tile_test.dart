@@ -342,10 +342,10 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
-          child: Material(
+          child: const Material(
             child: Container(
               alignment: Alignment.topLeft,
-              child: const ListTile(
+              child: ListTile(
                 contentPadding: EdgeInsetsDirectional.only(
                   start: 10.0,
                   end: 20.0,
@@ -1621,10 +1621,10 @@ void main() {
         theme: ThemeData(useMaterial3: true),
         home: Directionality(
           textDirection: textDirection,
-          child: Material(
+          child: const Material(
             child: Container(
               alignment: Alignment.topLeft,
-              child: const ListTile(
+              child: ListTile(
                 leading: Text('L'),
                 title: Text('title'),
                 trailing: Text('T'),
@@ -3070,10 +3070,10 @@ void main() {
           theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: textDirection,
-            child: Material(
+            child: const Material(
               child: Container(
                 alignment: Alignment.topLeft,
-                child: const ListTile(
+                child: ListTile(
                   leading: Text('L'),
                   title: Text('title'),
                   trailing: Text('T'),

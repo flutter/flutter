@@ -3999,7 +3999,7 @@ void main() {
     const double subtextGap = 8.0;
     const double counterSpace = counterHeight + subtextGap;
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: counterHeight),
+      counter: const Container(height: counterHeight),
     ));
     expect(findEditableText(), equals(inputBox));
     expect(inputBox.size.height, height - padding - counterSpace);
@@ -4016,7 +4016,7 @@ void main() {
     // When both helperText and counter are present, EditableText shrinks by the
     // height of the taller of the two in order to fit both within the parent.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: counterHeight),
+      counter: const Container(height: counterHeight),
       helperText: 'I am helperText',
     ));
     expect(findEditableText(), equals(inputBox));
@@ -4034,7 +4034,7 @@ void main() {
     // When decoration is present on the top and bottom, EditableText shrinks to
     // fit both inside the parent independently.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: counterHeight),
+      counter: const Container(height: counterHeight),
       labelText: 'I am labelText',
     ));
     expect(findEditableText(), equals(inputBox));
@@ -4044,7 +4044,7 @@ void main() {
     // it is ignored and allowed to expand beyond the top of the input. Other
     // top and bottom decoration is still respected.
     await tester.pumpWidget(containedTextFieldBuilder(
-      counter: Container(height: counterHeight),
+      counter: const Container(height: counterHeight),
       labelText: 'I am labelText',
       prefix: const SizedBox(
         width: 10,
@@ -11570,9 +11570,9 @@ void main() {
         body: Center(
           child: ListView(
             controller: scrollController,
-            children: <Widget>[
+            children: const <Widget>[
               Container(height: 579), // Push field almost off screen.
-              const TextField(),
+              TextField(),
               Container(height: 1000),
             ],
           ),
@@ -11602,12 +11602,12 @@ void main() {
           child: ListView(
             controller: scrollController,
             children: <Widget>[
-              Container(height: 579), // Push field almost off screen.
+              const Container(height: 579), // Push field almost off screen.
               TextField(
                 scrollController: textFieldScrollController,
                 showCursor: false,
               ),
-              Container(height: 1000),
+              const Container(height: 1000),
             ],
           ),
         ),
@@ -11699,7 +11699,7 @@ void main() {
                           isDense: isDense,
                         ),
                       ),
-                      Container(
+                      const Container(
                         height: 1000,
                       ),
                     ],

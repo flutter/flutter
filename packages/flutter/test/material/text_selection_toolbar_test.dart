@@ -138,7 +138,7 @@ void main() {
               return TextSelectionToolbar(
                 anchorAbove: Offset(50.0, anchorAboveY),
                 anchorBelow: const Offset(50.0, anchorBelowY),
-                children: <Widget>[
+                children: const <Widget>[
                   Container(color: Colors.red, width: 50.0, height: height),
                   Container(color: Colors.green, width: 50.0, height: height),
                   Container(color: Colors.blue, width: 50.0, height: height),

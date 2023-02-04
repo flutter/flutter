@@ -16,13 +16,13 @@ void main() {
           DefaultWidgetsLocalizations.delegate,
           DefaultMaterialLocalizations.delegate,
         ],
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(),
+            data: MediaQueryData(),
             child: CustomScrollView(
               slivers: <Widget>[
-                const SliverAppBar(
+                SliverAppBar(
                   bottom: PreferredSize(
                     preferredSize: Size.fromHeight(28),
                     child: Text('Bottom'),
@@ -348,15 +348,15 @@ void main() {
   testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Container(
             height: 300,
             color: Colors.green,
             child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: BouncingScrollPhysics(),
               slivers: <Widget>[
-                const SliverAppBar(
+                SliverAppBar(
                   pinned: true,
                   floating: true,
                   expandedHeight: 100.0,
@@ -382,15 +382,15 @@ void main() {
   testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Container(
             height: 300,
             color: Colors.green,
             child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: BouncingScrollPhysics(),
               slivers: <Widget>[
-                const SliverAppBar(
+                SliverAppBar(
                   floating: true,
                   expandedHeight: 100.0,
                 ),
@@ -415,15 +415,15 @@ void main() {
   testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Container(
             height: 300,
             color: Colors.green,
             child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: BouncingScrollPhysics(),
               slivers: <Widget>[
-                const SliverAppBar(
+                SliverAppBar(
                   pinned: true,
                   expandedHeight: 100.0,
                 ),

@@ -2031,8 +2031,8 @@ class _DayHeaders extends StatelessWidget {
     final List<Widget> labels = _getDayHeaders(textStyle, localizations);
 
     // Add leading and trailing containers for edges of the custom grid layout.
-    labels.insert(0, Container());
-    labels.add(Container());
+    labels.insert(0, const Container());
+    labels.add(const Container());
 
     return Container(
       constraints: BoxConstraints(
@@ -2439,7 +2439,7 @@ class _MonthItemState extends State<_MonthItem> {
         break;
       }
       if (day < 1) {
-        dayItems.add(Container());
+        dayItems.add(const Container());
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
         final Widget dayItem = _buildDayItem(

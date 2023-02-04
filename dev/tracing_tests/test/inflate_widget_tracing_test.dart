@@ -65,8 +65,8 @@ class TestRootState extends State<TestRoot> {
   @override
   Widget build(BuildContext context) {
     return _showRow
-      ? const Row(
-          children: <Widget>[
+      ? Row(
+          children: const <Widget>[
             TestChildWidget(),
             TestChildWidget(),
           ],

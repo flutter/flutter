@@ -53,7 +53,7 @@ void main() {
         builder: (BuildContext context) {
           tested = true;
           MediaQuery.of(context); // should throw
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -99,7 +99,7 @@ void main() {
             final MediaQueryData data = MediaQuery.of(context);
             expect(data, isNotNull);
             tested = true;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -120,7 +120,7 @@ void main() {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -137,7 +137,7 @@ void main() {
             final MediaQueryData? data = MediaQuery.maybeOf(context);
             expect(data, isNotNull);
             tested = true;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -636,7 +636,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -703,7 +703,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -773,7 +773,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -840,7 +840,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -910,7 +910,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -977,7 +977,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -1017,7 +1017,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
-                return Container();
+                return const Container();
               },
             ),
           );
@@ -1044,7 +1044,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 insideBrightness = MediaQuery.platformBrightnessOf(context);
-                return Container();
+                return const Container();
               },
             ),
           );
@@ -1071,7 +1071,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 insideHighContrast = MediaQuery.highContrastOf(context);
-                return Container();
+                return const Container();
               },
             ),
           );
@@ -1098,7 +1098,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 insideBoldTextOverride = MediaQuery.boldTextOf(context);
-                return Container();
+                return const Container();
               },
             ),
           );
@@ -1219,7 +1219,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   subScreenMediaQuery = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -1292,7 +1292,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   subScreenMediaQuery = MediaQuery.of(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );

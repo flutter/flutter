@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group(ActionDispatcher, () {
     testWidgets('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       bool invoked = false;
       const ActionDispatcher dispatcher = ActionDispatcher();
       final Object? result = dispatcher.invokeAction(
@@ -402,7 +402,7 @@ void main() {
             mouseCursor: SystemMouseCursors.text,
             onShowHoverHighlight: (_) {},
             onShowFocusHighlight: (_) {},
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -419,7 +419,7 @@ void main() {
           child: FocusableActionDetector(
             onShowHoverHighlight: (_) {},
             onShowFocusHighlight: (_) {},
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -689,7 +689,7 @@ void main() {
       expect(action2.listeners.length, equals(1));
       expect(action3.listeners.length, equals(1));
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pump();
 
       expect(action1.listeners.length, equals(1));
@@ -1127,9 +1127,9 @@ void main() {
     testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-      Actions(
-        actions: const <Type, Action<Intent>>{},
-        dispatcher: const ActionDispatcher(),
+      const Actions(
+        actions: <Type, Action<Intent>>{},
+        dispatcher: ActionDispatcher(),
         child: Container(),
       ).debugFillProperties(builder);
 
@@ -1159,7 +1159,7 @@ void main() {
         actions: <Type, Action<Intent>>{
           TestIntent: TestAction(onInvoke: (Intent intent) => null),
         },
-        child: Container(key: const ValueKey<String>('baz')),
+        child: const Container(key: ValueKey<String>('baz')),
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties

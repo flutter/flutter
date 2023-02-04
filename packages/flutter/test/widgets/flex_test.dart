@@ -25,11 +25,11 @@ void main() {
                       onTap: () {
                         didReceiveTap = true;
                       },
-                      child: Container(
-                        color: const Color(0xFF0000FF),
+                      child: const Container(
+                        color: Color(0xFF0000FF),
                         width: 100.0,
                         height: 100.0,
-                        child: const Center(
+                        child: Center(
                           child: Text('X', textDirection: TextDirection.ltr),
                         ),
                       ),
@@ -116,7 +116,7 @@ void main() {
     // Turn off intrinsics checking, which also fails with the same exception.
     debugCheckIntrinsicSizes = false;
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Column(
             children: <Widget>[

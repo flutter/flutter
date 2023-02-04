@@ -1476,7 +1476,7 @@ void main() {
         'when Scaffold has no other elements',
         (WidgetTester tester) async {
           await tester.pumpWidget(
-            MaterialApp(
+            const MaterialApp(
               home: Scaffold(
                 body: Container(),
               ),
@@ -1508,7 +1508,7 @@ void main() {
           await tester.pumpWidget(
             MaterialApp(
               home: Scaffold(
-                body: Container(),
+                body: const Container(),
                 bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
               ),
             ),
@@ -1602,7 +1602,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: Container(),
+              body: const Container(),
               floatingActionButton: FloatingActionButton(onPressed: () {}),
             ),
           ),
@@ -1678,7 +1678,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: Container(),
+              body: const Container(),
               bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
               floatingActionButton: FloatingActionButton(onPressed: () {}),
             ),
@@ -1715,7 +1715,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: Container(),
+              body: const Container(),
               bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
               floatingActionButton: FloatingActionButton(onPressed: () {}),
             ),

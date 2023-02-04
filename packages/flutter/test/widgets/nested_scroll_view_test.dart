@@ -194,7 +194,7 @@ void main() {
     await tester.pumpWidget(build(
       NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
-        body: Container(height: 2000.0),
+        body: const Container(height: 2000.0),
       ),
     ));
 
@@ -211,7 +211,7 @@ void main() {
     await tester.pumpWidget(build(
         NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
-          body: Container(height: 2000.0),
+          body: const Container(height: 2000.0),
           clipBehavior: Clip.antiAlias,
         ),
     ));
@@ -514,7 +514,7 @@ void main() {
                 ),
               ];
             },
-            body: Container(),
+            body: const Container(),
           ),
         ),
       ),
@@ -2542,7 +2542,7 @@ void main() {
                   ),
                 ];
               },
-              body: Container(),
+              body: const Container(),
             ),
           ),
         ),
@@ -2863,11 +2863,11 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) {
-                return SliverToBoxAdapter(
+                return const SliverToBoxAdapter(
                   child: Container(
                     color: Colors.red,
                     height: 200,
-                    margin:const EdgeInsets.all(20),
+                    margin:EdgeInsets.all(20),
                   ),
                 );
               }),

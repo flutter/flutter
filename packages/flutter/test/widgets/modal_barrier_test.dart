@@ -981,7 +981,7 @@ class SecondWidgetWithCompetence extends StatelessWidget {
         GestureDetector(
           onVerticalDragStart: (_) {},
           behavior: HitTestBehavior.translucent,
-          child: Container(),
+          child: const Container(),
         ),
       ],
     );
@@ -1000,7 +1000,7 @@ class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
         GestureDetector(
           onVerticalDragStart: (_) {},
           behavior: HitTestBehavior.translucent,
-          child: Container(),
+          child: const Container(),
         ),
       ],
     );

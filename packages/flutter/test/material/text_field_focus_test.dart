@@ -65,7 +65,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -92,7 +92,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -114,7 +114,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -153,7 +153,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -169,7 +169,7 @@ void main() {
               TextField(
                 focusNode: focusNode,
               ),
-              Container(
+              const Container(
                 height: 1000.0,
               ),
             ],
@@ -212,7 +212,7 @@ void main() {
                   prefixText: prefix,
                 ),
               ),
-              Container(
+              const Container(
                 height: 1000.0,
               ),
             ],
@@ -316,7 +316,7 @@ void main() {
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
@@ -391,7 +391,7 @@ void main() {
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.testTextInput.isVisible, isFalse);
   });
 

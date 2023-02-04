@@ -389,7 +389,7 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.errorProperty),
         ErrorDescription('Build functions must never return null.'),
         ErrorHint(
-          'To return an empty space that causes the building widget to fill available room, return "Container()". '
+          'To return an empty space that causes the building widget to fill available room, return "const Container()". '
           'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".',
         ),
       ]);

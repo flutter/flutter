@@ -14,15 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Centered text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello',
+            child: Text('Hello',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -38,15 +38,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello world how are you today',
+            child: Text('Hello world how are you today',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -190,7 +190,7 @@ void main() {
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             backgroundColor: Colors.transparent,
             body: RepaintBoundary(
@@ -203,7 +203,7 @@ void main() {
                     child: Container(
                       width: 100.0,
                       color: Colors.blue,
-                      child: const Text(
+                      child: Text(
                         'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
                         style: TextStyle(color: Colors.black),
                         maxLines: 3,
@@ -226,15 +226,15 @@ void main() {
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: Text('Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(),
@@ -251,15 +251,15 @@ void main() {
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine2\nLine3',
+            child: Text('Hello\nLine2\nLine3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -278,15 +278,15 @@ void main() {
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: Text('Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -306,15 +306,15 @@ void main() {
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 150.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text.rich(
+            child: Text.rich(
               TextSpan(
                 text: 'Hello\n',
                 style: TextStyle(
@@ -358,15 +358,15 @@ void main() {
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: Text('Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -392,15 +392,15 @@ void main() {
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text.rich(
+            child: Text.rich(
               TextSpan(
                 text: 'Hello\n',
                 style: TextStyle(
@@ -1323,15 +1323,15 @@ void main() {
 
   testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: RepaintBoundary(
           child: Container(
             width: 200.0,
             height: 700.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Column(
+            child: Column(
               children: <Widget>[
                 Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,

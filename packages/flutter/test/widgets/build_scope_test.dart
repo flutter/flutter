@@ -32,7 +32,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
   Widget build(BuildContext context) {
     setState(() { });
     buildCount++;
-    return Container();
+    return const Container();
   }
 }
 
@@ -44,7 +44,7 @@ class BadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     parentState._markNeedsBuild();
-    return Container();
+    return const Container();
   }
 }
 
@@ -77,7 +77,7 @@ class BadDisposeWidget extends StatefulWidget {
 class BadDisposeWidgetState extends State<BadDisposeWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 
   @override
@@ -142,7 +142,7 @@ void main() {
     expect(ProbeWidgetState.buildCount, equals(2));
     await tester.pumpWidget(FlipWidget(
       key: flipKey,
-      left: Container(),
+      left: const Container(),
       right: const ProbeWidget(key: Key('c')),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
@@ -154,20 +154,20 @@ void main() {
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(ProbeWidgetState.buildCount, equals(3));
   });
 
   testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
     await tester.pumpWidget(const BadWidgetParent());
     expect(tester.takeException(), isFlutterError);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
     await tester.pumpWidget(const BadDisposeWidget());
     expect(tester.takeException(), isNull);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.takeException(), isNotNull);
   });
 
@@ -185,7 +185,7 @@ void main() {
       return Wrapper(
         child: Wrapper(
           child: StatefulWrapper(
-            child: returnMiddle ? middle : Container(),
+            child: returnMiddle ? middle : const Container(),
           ),
         ),
       );

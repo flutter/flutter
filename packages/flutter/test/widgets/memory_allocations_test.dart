@@ -96,7 +96,7 @@ class _TestStatefulWidget extends StatefulWidget {
 class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

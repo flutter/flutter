@@ -8,14 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Align smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Align(
-        alignment: const Alignment(0.50, 0.50),
+      const Align(
+        alignment: Alignment(0.50, 0.50),
         child: Container(),
       ),
     );
 
     await tester.pumpWidget(
-      Align(
+      const Align(
         child: Container(),
       ),
     );

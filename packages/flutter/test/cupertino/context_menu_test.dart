@@ -13,7 +13,7 @@ void main() {
   const double kOpenScale = 1.15;
 
   Widget getChild() {
-    return Container(
+    return const Container(
       width: 300.0,
       height: 100.0,
       color: CupertinoColors.activeOrange,

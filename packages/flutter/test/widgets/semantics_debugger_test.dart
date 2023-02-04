@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
     await tester.pumpWidget(
-      SemanticsDebugger(
+      const SemanticsDebugger(
         child: Container(),
       ),
     );

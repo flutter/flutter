@@ -370,7 +370,7 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: ClipRect(
+                  child: const ClipRect(
                     child: ColoredBox(
                       color: Colors.red,
                       child: ColoredBox(
@@ -406,7 +406,7 @@ void main() {
         child: Stack(
           textDirection: TextDirection.ltr,
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 0.0,
               left: 0.0,
               width: 100.0,
@@ -424,7 +424,7 @@ void main() {
               height: 100.0,
               child: Transform.rotate(
                 angle: 1.0,
-                child: Container(
+                child: const Container(
                   color: Colors.red,
                 ),
               ),
@@ -452,8 +452,8 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
+                  child: const ClipRRect(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.elliptical(10.0, 20.0),
                       topRight: Radius.elliptical(5.0, 30.0),
                       bottomLeft: Radius.elliptical(2.5, 12.0),
@@ -501,7 +501,7 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: ClipOval(
+                  child: const ClipOval(
                     child: ColoredBox(
                       color: Colors.red,
                       child: ColoredBox(
@@ -544,8 +544,8 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: ClipPath(
-                    clipper: const ShapeBorderClipper(
+                  child: const ClipPath(
+                    clipper: ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
@@ -595,7 +595,7 @@ void main() {
                   borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                   color: Colors.red,
                   clipBehavior: clipBehavior,
-                  child: ColoredBox(
+                  child: const ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -655,8 +655,8 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: PhysicalModel(
-                    borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                  child: const PhysicalModel(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
                     color: Colors.red,
                     child: ColoredBox(
                       color: Colors.white,
@@ -704,7 +704,7 @@ void main() {
                   ),
                   clipBehavior: clipBehavior,
                   color: Colors.red,
-                  child: ColoredBox(
+                  child: const ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -762,8 +762,8 @@ void main() {
                 width: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: PhysicalShape(
-                    clipper: const ShapeBorderClipper(
+                  child: const PhysicalShape(
+                    clipper: ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),

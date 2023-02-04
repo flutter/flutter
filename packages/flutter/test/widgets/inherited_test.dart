@@ -47,7 +47,7 @@ class ExpectFailState extends State<ExpectFail> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
@@ -61,7 +61,7 @@ void main() {
     final Builder builder = Builder(
       builder: (BuildContext context) {
         log.add(context.dependOnInheritedWidgetOfExactType<TestInherited>()!);
-        return Container();
+        return const Container();
       },
     );
 
@@ -93,7 +93,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               log.add(context.dependOnInheritedWidgetOfExactType<TestInherited>()!);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -345,7 +345,7 @@ void main() {
         builder: (BuildContext context) {
           final ValueInherited? widget = context.dependOnInheritedWidgetOfExactType<ValueInherited>();
           inheritedValue = widget?.value;
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -373,7 +373,7 @@ void main() {
       child: Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -403,7 +403,7 @@ void main() {
           builder: (BuildContext context) {
             context.dependOnInheritedWidgetOfExactType<TestInherited>();
             buildCount += 1;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -443,7 +443,7 @@ void main() {
       builder: (BuildContext context) {
         context.dependOnInheritedWidgetOfExactType<ChangeNotifierInherited>();
         buildCount += 1;
-        return Container();
+        return const Container();
       },
     );
 

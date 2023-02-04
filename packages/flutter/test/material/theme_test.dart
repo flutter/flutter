@@ -101,7 +101,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           capturedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     );

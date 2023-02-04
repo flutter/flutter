@@ -559,7 +559,7 @@ void main() {
               ),
             },
           ),
-          home: Container(key: containerKey),
+          home: const Container(key: containerKey),
         ),
       );
 
@@ -583,7 +583,7 @@ void main() {
               ).copyWith(color1: Colors.blue),
             },
           ),
-          home: Container(key: containerKey),
+          home: const Container(key: containerKey),
         ),
       );
 

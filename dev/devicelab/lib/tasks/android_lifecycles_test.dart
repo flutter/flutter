@@ -65,7 +65,7 @@ class LifecycleObserver extends WidgetsBindingObserver {
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addObserver(LifecycleObserver());
-  runApp(Container());
+  runApp(const Container());
 }
 ''', flush: true);
 

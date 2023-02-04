@@ -559,7 +559,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               widget.refreshIndicatorExtent,
             );
           }
-          return Container();
+          return const Container();
         },
       ),
     );

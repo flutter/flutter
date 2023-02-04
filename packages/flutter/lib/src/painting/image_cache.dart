@@ -72,7 +72,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container();
+///     return const Container();
 ///   }
 /// }
 /// ```

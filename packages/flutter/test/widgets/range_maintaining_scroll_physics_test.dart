@@ -58,7 +58,7 @@ void main() {
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-              : Container(height: 300, color: Colors.red),
+              : const Container(height: 300, color: Colors.red),
         itemCount: 2,
       ),
     ));
@@ -103,7 +103,7 @@ void main() {
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-              : Container(height: 300, color: Colors.red),
+              : const Container(height: 300, color: Colors.red),
         itemCount: 2,
       ),
     ));
@@ -165,7 +165,7 @@ void main() {
           physics: const RangeMaintainingScrollPhysics(parent: BouncingScrollPhysics()),
           itemBuilder: (BuildContext context, int index) => index == 0
                 ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-                : Container(height: 300, color: Colors.red),
+                : const Container(height: 300, color: Colors.red),
           itemCount: 2,
         ),
       ),

@@ -239,7 +239,7 @@ void main() {
               child: PageView(
                 controller: pageController,
                 children: <Widget>[
-                  Container(
+                  const Container(
                     color: Colors.red,
                   ),
                   ColoredBox(
@@ -248,7 +248,7 @@ void main() {
                       controller: textController,
                     ),
                   ),
-                  Container(
+                  const Container(
                     color: Colors.red,
                   ),
                 ],

@@ -98,9 +98,9 @@ void main() {
           builder: (BuildContext context) {
             showBottomSheet<void>(
               context: context,
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             );
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -258,7 +258,7 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
-              body: Container(),
+              body: const Container(),
             );
           },
         ),
@@ -278,7 +278,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         key: scaffoldKey,
-        body: Container(),
+        body: const Container(),
       ),
     ));
     // Tap SnackBarAction to dismiss.

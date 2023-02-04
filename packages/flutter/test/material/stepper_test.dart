@@ -494,7 +494,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       // For the purposes of testing, only render something for the active
       // step.
       if (!details.isActive) {
-        return Container();
+        return const Container();
       }
 
       return Container(

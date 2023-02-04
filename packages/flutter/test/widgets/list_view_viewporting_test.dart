@@ -306,7 +306,7 @@ void main() {
         child: ListView(
           addAutomaticKeepAlives: false,
           addSemanticIndexes: false,
-          children: <Widget>[
+          children: const <Widget>[
             Container(height: 100.0),
             Container(height: 100.0),
             Container(height: 100.0),

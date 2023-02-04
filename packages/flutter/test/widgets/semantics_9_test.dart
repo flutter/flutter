@@ -20,13 +20,13 @@ void main() {
           Semantics(
             label: 'layer#1',
             textDirection: TextDirection.ltr,
-            child: Container(),
+            child: const Container(),
           ),
           const BlockSemantics(),
           Semantics(
             label: 'layer#2',
             textDirection: TextDirection.ltr,
-            child: Container(),
+            child: const Container(),
           ),
         ],
       ));
@@ -39,7 +39,7 @@ void main() {
           Semantics(
             label: 'layer#1',
             textDirection: TextDirection.ltr,
-            child: Container(),
+            child: const Container(),
           ),
         ],
       ));
@@ -56,7 +56,7 @@ void main() {
         children: <Widget>[
           Semantics(
             label: '#1',
-            child: Container(),
+            child: const Container(),
           ),
           Semantics(
             label: '#2',
@@ -66,7 +66,7 @@ void main() {
               children: <Widget>[
                 Semantics(
                   label: 'NOT#2.1',
-                  child: Container(),
+                  child: const Container(),
                 ),
                 Semantics(
                   label: '#2.2',
@@ -74,20 +74,20 @@ void main() {
                     child: Semantics(
                       container: true,
                       label: '#2.2.1',
-                      child: Container(),
+                      child: const Container(),
                     ),
                   ),
                 ),
                 Semantics(
                   label: '#2.3',
-                  child: Container(),
+                  child: const Container(),
                 ),
               ],
             ),
           ),
           Semantics(
             label: '#3',
-            child: Container(),
+            child: const Container(),
           ),
         ],
       )));
@@ -112,17 +112,17 @@ void main() {
         children: <Widget>[
           Semantics(
             label: 'NOT#1',
-            child: Container(),
+            child: const Container(),
           ),
           BoundaryBlockSemantics(
             child: Semantics(
               label: '#2.1',
-              child: Container(),
+              child: const Container(),
             ),
           ),
           Semantics(
             label: '#3',
-            child: Container(),
+            child: const Container(),
           ),
         ],
       )));

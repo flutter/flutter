@@ -965,10 +965,10 @@ void main() {
                     scrollDirection: Axis.horizontal,
                     controller: controllerX,
                     children: slivers = <Widget>[
-                      Container(
+                      const Container(
                         width: 150.0,
                       ),
-                      Container(
+                      const Container(
                         width: 150.0,
                       ),
                     ],
@@ -1015,8 +1015,8 @@ void main() {
                     scrollDirection: Axis.horizontal,
                     controller: controllerX,
                     slivers: <Widget>[
-                      SliverPadding(
-                        padding: const EdgeInsets.all(25.0),
+                      const SliverPadding(
+                        padding: EdgeInsets.all(25.0),
                         sliver: SliverToBoxAdapter(
                           child: Container(
                             width: 100.0,
@@ -1025,7 +1025,7 @@ void main() {
                       ),
                       SliverPadding(
                         padding: const EdgeInsets.all(25.0),
-                        sliver: sliver = SliverToBoxAdapter(
+                        sliver: sliver = const SliverToBoxAdapter(
                           child: Container(
                             width: 100.0,
                           ),
@@ -1882,9 +1882,9 @@ void main() {
                 // Translucent boxes above and below the shrinkwrapped viewport
                 // make it easily discernible if the viewport is not being
                 // clipped properly.
-                Opacity(
+                const Opacity(
                   opacity: 0.5,
-                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
+                  child: Container(height: 100, color: Color(0xFF00B0FF)),
                 ),
                 Container(
                   height: constrain ? 150 : null,
@@ -1897,9 +1897,9 @@ void main() {
                     itemCount: 10,
                   ),
                 ),
-                Opacity(
+                const Opacity(
                   opacity: 0.5,
-                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
+                  child: Container(height: 100, color: Color(0xFF00B0FF)),
                 ),
               ],
             ),

@@ -75,7 +75,7 @@ class _MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<_MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

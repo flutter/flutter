@@ -1088,7 +1088,7 @@ void main() {
                         });
                       }
                     : null,
-                  deleteIcon: Container(width: 40.0, height: 40.0, color: Colors.blue, key: deleteButtonKey),
+                  deleteIcon: const Container(width: 40.0, height: 40.0, color: Colors.blue, key: deleteButtonKey),
                   label: const Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
                 );

@@ -976,7 +976,7 @@ void main() {
             controller: controller,
             tabBuilder: (BuildContext context, int index) {
               scopes[index] = FocusScope.of(context);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -998,7 +998,7 @@ void main() {
             controller: controller,
             tabBuilder: (BuildContext context, int index) {
               newScopes.add(FocusScope.of(context));
-              return Container();
+              return const Container();
             },
           ),
         ),

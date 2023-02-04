@@ -87,9 +87,9 @@ void main() {
 
   testWidgets("AnimatedSwitcher doesn't transition in a new child of the same type.", (WidgetTester tester) async {
     await tester.pumpWidget(
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
+      const AnimatedSwitcher(
+        duration: Duration(milliseconds: 100),
+        child: Container(color: Color(0x00000000)),
       ),
     );
 
@@ -98,9 +98,9 @@ void main() {
     expect(transition.opacity.value, equals(1.0));
 
     await tester.pumpWidget(
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0xff000000)),
+      const AnimatedSwitcher(
+        duration: Duration(milliseconds: 100),
+        child: Container(color: Color(0xff000000)),
       ),
     );
 
@@ -121,9 +121,9 @@ void main() {
     expect(find.byType(FadeTransition), findsNothing);
 
     await tester.pumpWidget(
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0xff000000)),
+      const AnimatedSwitcher(
+        duration: Duration(milliseconds: 100),
+        child: Container(color: Color(0xff000000)),
       ),
     );
 
@@ -133,9 +133,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
+      const AnimatedSwitcher(
+        duration: Duration(milliseconds: 100),
+        child: Container(color: Color(0x00000000)),
       ),
     );
 
@@ -167,14 +167,14 @@ void main() {
   });
 
   testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
-    await tester.pumpWidget(AnimatedSwitcher(
-      duration: const Duration(milliseconds: 100),
-      child: Container(color: const Color(0xff000000)),
+    await tester.pumpWidget(const AnimatedSwitcher(
+      duration: Duration(milliseconds: 100),
+      child: Container(color: Color(0xff000000)),
     ));
     await tester.pump(const Duration(milliseconds: 50));
 
     // Change the widget tree in the middle of the animation.
-    await tester.pumpWidget(Container(color: const Color(0xffff0000)));
+    await tester.pumpWidget(const Container(color: Color(0xffff0000)));
     expect(await tester.pumpAndSettle(), equals(1));
   });
 
@@ -192,7 +192,7 @@ void main() {
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
         layoutBuilder: newLayoutBuilder,
-        child: Container(color: const Color(0x00000000)),
+        child: const Container(color: Color(0x00000000)),
       ),
     );
 
@@ -223,7 +223,7 @@ void main() {
           duration: const Duration(milliseconds: 100),
           layoutBuilder: newLayoutBuilder,
           transitionBuilder: newTransitionBuilder,
-          child: Container(color: const Color(0x00000000)),
+          child: const Container(color: Color(0x00000000)),
         ),
       ),
     );
@@ -400,7 +400,7 @@ void main() {
         duration: const Duration(milliseconds: 100),
         layoutBuilder: newLayoutBuilder,
         transitionBuilder: newTransitionBuilder,
-        child: Container(color: const Color(0x00000000)),
+        child: const Container(color: Color(0x00000000)),
       ),
     );
 
@@ -454,5 +454,5 @@ class StatefulTestState extends State<StatefulTest> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }

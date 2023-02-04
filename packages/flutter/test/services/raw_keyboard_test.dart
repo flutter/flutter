@@ -958,7 +958,7 @@ void main() {
         RawKeyboardListener(
           autofocus: true,
           focusNode: focusNode,
-          child: Container(),
+          child: const Container(),
           onKey: (RawKeyEvent event) {
             logs.add(1);
           },
@@ -2113,7 +2113,7 @@ void main() {
       );
       await tester.pumpWidget(RawKeyboardListener(
         focusNode: node,
-        child: Container(),
+        child: const Container(),
       ));
       node.requestFocus();
       await tester.pumpAndSettle();

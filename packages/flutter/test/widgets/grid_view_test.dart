@@ -444,8 +444,8 @@ void main() {
   testWidgets('One-line GridView paints', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
 
-    final Container container = Container(
-      decoration: const BoxDecoration(
+    const Container container = Container(
+      decoration: BoxDecoration(
         color: green,
       ),
     );
@@ -459,7 +459,7 @@ void main() {
             child: GridView.count(
               cacheExtent: 0.0,
               crossAxisCount: 2,
-              children: <Widget>[ container, container, container, container ],
+              children: const <Widget>[ container, container, container, container ],
             ),
           ),
         ),
@@ -649,7 +649,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          children: <Widget>[
+          children: const <Widget>[
             Container(height: 200.0),
           ],
         ),
@@ -672,7 +672,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          children: <Widget>[
+          children: const <Widget>[
             Container(height: 2000.0),
             Container(height: 2000.0),
             Container(height: 2000.0),
@@ -707,7 +707,7 @@ void main() {
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[
+          children: const <Widget>[
             Container(height: 2000.0),
             Container(height: 2000.0),
             Container(height: 2000.0),
@@ -739,7 +739,7 @@ void main() {
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           itemCount: 10,
-          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          itemBuilder: (BuildContext _, int __) => const Container(height: 2000.0),
           clipBehavior: Clip.antiAlias,
         ),
       ),
@@ -755,7 +755,7 @@ void main() {
         child: GridView.custom(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           childrenDelegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(height: 2000.0),
+                (BuildContext context, int index) => const Container(height: 2000.0),
             childCount: 1,
           ),
           clipBehavior: Clip.antiAlias,
@@ -773,7 +773,7 @@ void main() {
         child: GridView.count(
           crossAxisCount: 3,
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -788,7 +788,7 @@ void main() {
         child: GridView.extent(
           maxCrossAxisExtent: 1000,
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );

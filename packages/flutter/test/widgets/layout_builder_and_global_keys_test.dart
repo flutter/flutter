@@ -46,14 +46,14 @@ void main() {
     await tester.pumpWidget(
       LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         return Wrapper(
-          child: StatefulWrapper(key: key, child: Container(height: 100.0)),
+          child: StatefulWrapper(key: key, child: const Container(height: 100.0)),
         );
       }),
     );
     await tester.pumpWidget(
       LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         key.currentState!.trigger();
-        return StatefulWrapper(key: key, child: Container(height: 100.0));
+        return StatefulWrapper(key: key, child: const Container(height: 100.0));
       }),
     );
 
@@ -71,7 +71,7 @@ void main() {
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
                 return SliverToBoxAdapter(
-                  child: Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0))),
+                  child: Wrapper(child: StatefulWrapper(key: key, child: const Container(height: 100.0))),
                 );
               },
             ),
@@ -89,7 +89,7 @@ void main() {
               builder: (BuildContext context, SliverConstraints constraint) {
                 key.currentState!.trigger();
                 return SliverToBoxAdapter(
-                  child: StatefulWrapper(key: key, child: Container(height: 100.0)),
+                  child: StatefulWrapper(key: key, child: const Container(height: 100.0)),
                 );
               },
             ),
