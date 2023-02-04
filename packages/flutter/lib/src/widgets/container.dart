@@ -392,7 +392,7 @@ class Container extends StatelessWidget {
     }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
-    if (effectivePadding != null) {
+    if (effectivePadding != null && effectivePadding != EdgeInsets.zero) {
       current = Padding(padding: effectivePadding, child: current);
     }
 
@@ -428,7 +428,7 @@ class Container extends StatelessWidget {
       current = ConstrainedBox(constraints: constraints!, child: current);
     }
 
-    if (margin != null) {
+    if (margin != null && margin != EdgeInsets.zero) {
       current = Padding(padding: margin!, child: current);
     }
 

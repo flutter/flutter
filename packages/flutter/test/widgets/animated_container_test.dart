@@ -80,24 +80,18 @@ void main() {
         ' │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
         ' │   android)\n'
         ' │\n'
-        ' └─child: RenderPadding#00000\n'
+        ' └─child: RenderLimitedBox#00000\n'
         '   │ parentData: <none> (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   │ size: Size(800.0, 600.0)\n'
-        '   │ padding: EdgeInsets.zero\n'
+        '   │ maxWidth: 0.0\n'
+        '   │ maxHeight: 0.0\n'
         '   │\n'
-        '   └─child: RenderLimitedBox#00000\n'
-        '     │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
-        '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        '     │ size: Size(800.0, 600.0)\n'
-        '     │ maxWidth: 0.0\n'
-        '     │ maxHeight: 0.0\n'
-        '     │\n'
-        '     └─child: RenderConstrainedBox#00000\n'
-        '         parentData: <none> (can use size)\n'
-        '         constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        '         size: Size(800.0, 600.0)\n'
-        '         additionalConstraints: BoxConstraints(biggest)\n',
+        '   └─child: RenderConstrainedBox#00000\n'
+        '       parentData: <none> (can use size)\n'
+        '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '       size: Size(800.0, 600.0)\n'
+        '       additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });
