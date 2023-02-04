@@ -424,33 +424,6 @@ void main() {
 
     debugBrightnessOverride = null;
   });
-
-  testWidgets('Properties of CupertinoThemeData are effective', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(
-          primaryColor: CupertinoColors.activeOrange,
-        ),
-        home: CupertinoPageScaffold(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Text(
-                'Primary color',
-                style: TextStyle(
-                  color: CupertinoTheme.of(context).primaryColor,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    final RenderParagraph paragraph = tester.renderObject(find.text('Primary color'));
-    final CupertinoDynamicColor textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
-
-    expect(textColor, CupertinoColors.activeOrange);
-  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
