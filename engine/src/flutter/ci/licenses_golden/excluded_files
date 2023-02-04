@@ -1595,6 +1595,7 @@
 ../../../third_party/dart/runtime/vm/compiler/backend/inliner_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/loops_test.cc
+../../../third_party/dart/runtime/vm/compiler/backend/memory_copy_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/range_analysis_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/reachability_fence_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination_test.cc
