@@ -43,9 +43,9 @@ import 'image_provider.dart';
 /// ```dart
 /// Container(
 ///   decoration: BoxDecoration(
-///     color: Color(0xff7c94b6),
-///     image: DecorationImage(
-///       image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///     color: const Color(0xff7c94b6),
+///     image: const DecorationImage(
+///       image: const NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///       fit: BoxFit.cover,
 ///     ),
 ///     border: Border.all(
