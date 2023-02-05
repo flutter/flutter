@@ -467,7 +467,7 @@ class Container extends StatelessWidget {
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 
-  /// Returns the [constraints.tighten] when [_height] or [_width] is not null
+  /// Returns the [constraints] tighten widget when [_height] or [_width] is not null
   /// otherwithe [constraints] will be returned
   BoxConstraints? get widgetContraints => (_height != null || _width != null)
       ? constraints?.tighten(width: _width, height: _height) ?? BoxConstraints.tightFor(width: _width, height: _height)
