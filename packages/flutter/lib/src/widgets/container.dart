@@ -272,6 +272,8 @@ class Container extends StatelessWidget {
 
   final double? _width;
   final double? _height;
+  /// The [constraints] are set to fit the font size plus ample headroom
+  /// vertically, while expanding horizontally to fit the parent.
   final BoxConstraints? constraints;
 
   /// The [child] contained by the container.
@@ -385,11 +387,11 @@ class Container extends StatelessWidget {
       'To provide both, use "decoration: BoxDecoration(color: color)".',
     );
 
-    final BoxConstraints? _constraints = widgetContraints;
+    final BoxConstraints? boxConstraints = widgetContraints;
 
     Widget? current = child;
 
-    if (child == null && (_constraints == null || !_constraints.isTight)) {
+    if (child == null && (boxConstraints == null || !boxConstraints.isTight)) {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
@@ -432,8 +434,8 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (_constraints != null) {
-      current = ConstrainedBox(constraints: _constraints, child: current);
+    if (boxConstraints != null) {
+      current = ConstrainedBox(constraints: boxConstraints, child: current);
     }
 
     if (margin != null) {
@@ -465,7 +467,9 @@ class Container extends StatelessWidget {
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 
-  BoxConstraints? get widgetContraints => (_height != null || _height != null)
+  /// Returns the [constraints.tighten] when [_height] or [_width] is not null
+  /// otherwithe [constraints] will be returned
+  BoxConstraints? get widgetContraints => (_height != null || _width != null)
       ? constraints?.tighten(width: _width, height: _height) ?? BoxConstraints.tightFor(width: _width, height: _height)
       : constraints;
 }
