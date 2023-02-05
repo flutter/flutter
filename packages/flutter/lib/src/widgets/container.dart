@@ -194,7 +194,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// Center(
 ///   child: Container(
-///     margin: EdgeInsets.all(10.0),
+///     margin: const EdgeInsets.all(10.0),
 ///     color: Colors.amber[600],
 ///     width: 48.0,
 ///     height: 48.0,

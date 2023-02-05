@@ -274,7 +274,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// A 1990s-era "OK" button:
 ///
 /// ```dart
-/// Container(
+/// const Container(
 ///   decoration: BoxDecoration(
 ///     border: Border(
 ///       top: BorderSide(color: Color(0xFFFFFFFF)),

@@ -43,12 +43,12 @@ class _StockSymbolView extends StatelessWidget {
           ),
           Text('Last Sale', style: headings),
           Text('$lastSale ($changeInPrice)'),
-          Container(
+          const Container(
             height: 8.0
           ),
           Text('Market Cap', style: headings),
           Text(stock.marketCap),
-          Container(
+          const Container(
             height: 8.0
           ),
           RichText(

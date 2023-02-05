@@ -41,7 +41,7 @@ import 'image_provider.dart';
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_decoration.png)
 ///
 /// ```dart
-/// const Container(
+/// Container(
 ///   decoration: BoxDecoration(
 ///     color: Color(0xff7c94b6),
 ///     image: DecorationImage(

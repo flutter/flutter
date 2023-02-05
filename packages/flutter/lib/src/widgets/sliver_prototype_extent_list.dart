@@ -73,7 +73,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// SliverPrototypeExtentList.builder(
   ///   prototypeItem: const Container(
   ///     alignment: Alignment.center,
-  ///     child: const Text('list item prototype'),
+  ///     child: Text('list item prototype'),
   ///   ),
   ///   itemBuilder: (BuildContext context, int index) {
   ///     return Container(
