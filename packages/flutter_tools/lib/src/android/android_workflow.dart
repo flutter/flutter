@@ -436,11 +436,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       unawaited(process.stdin.addStream(_stdio.stdin)
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
-        .catchError((dynamic err, StackTrace stack) {
-          _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
-          _logger.printTrace('$err\n$stack');
-        }
-      ));
+        .then(
+          (Object? socket) => socket,
+          onError: (dynamic err, StackTrace stack) {
+            _logger.printError('Echoing stdin to the licenses subprocess failed:');
+            _logger.printError('$err\n$stack');
+          },
+        ),
+      );
 
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
@@ -450,8 +453,8 @@ class AndroidLicenseValidator extends DoctorValidator {
           _stdio.addStderrStream(process.stderr),
         ]);
       } on Exception catch (err, stack) {
-        _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
-        _logger.printTrace('$err\n$stack');
+        _logger.printError('Echoing stdout or stderr from the license subprocess failed:');
+        _logger.printError('$err\n$stack');
       }
 
       final int exitCode = await process.exitCode;
