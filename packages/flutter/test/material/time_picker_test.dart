@@ -591,13 +591,13 @@ void main() {
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(281, 165)));
             break;
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(292.0, 143.0)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(144, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(298.0, 143.0)));
             break;
         }
-        expect(tester.getBottomRight(find.text(okString)).dx, 644);
-        expect(tester.getBottomLeft(find.text(okString)).dx, 616);
-        expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
+        expect(tester.getBottomRight(find.text(okString)).dx, 638);
+        expect(tester.getBottomLeft(find.text(okString)).dx, 610);
+        expect(tester.getBottomRight(find.text(cancelString)).dx, 576);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
@@ -612,13 +612,13 @@ void main() {
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
             break;
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(508, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 143)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(502, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(656, 143)));
             break;
         }
-        expect(tester.getBottomLeft(find.text(okString)).dx, 156);
-        expect(tester.getBottomRight(find.text(okString)).dx, 184);
-        expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
+        expect(tester.getBottomLeft(find.text(okString)).dx, 162);
+        expect(tester.getBottomRight(find.text(okString)).dx, 190);
+        expect(tester.getBottomLeft(find.text(cancelString)).dx, 224);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
