@@ -265,7 +265,7 @@ void main() {
   });
 
   testWidgets('Large Badge alignment', (WidgetTester tester) async {
-    const badgeRadius = const Radius.circular(8);
+    const Radius badgeRadius = Radius.circular(8);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
@@ -278,7 +278,7 @@ void main() {
             alignment: alignment,
             offset: offset,
             child: Container(
-              color: Color(0xFF00FF00),
+              color: const Color(0xFF00FF00),
               width: 200,
               height: 200,
             ),
@@ -340,7 +340,7 @@ void main() {
   });
 
   testWidgets('Small Badge alignment', (WidgetTester tester) async {
-    const badgeRadius = const Radius.circular(3);
+    const Radius badgeRadius = Radius.circular(3);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
@@ -352,7 +352,7 @@ void main() {
             alignment: alignment,
             offset: offset, // Not used for smallSize badges.
             child: Container(
-              color: Color(0xFF00FF00),
+              color: const Color(0xFF00FF00),
               width: 200,
               height: 200,
             ),
