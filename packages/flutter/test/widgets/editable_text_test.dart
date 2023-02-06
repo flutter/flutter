@@ -14953,7 +14953,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         ),
       );
     },
-      skip: !kIsWeb,
+      skip: !kIsWeb, // [intended]
     );
   });
 }
