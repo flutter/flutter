@@ -199,6 +199,14 @@ enum ListTileTitleAlignment {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [ListTile.titleAlignment] can be used to configure the
+/// [leading] and [trailing] widgets alignment relative to the [title] and
+/// [subtitle] widgets.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
@@ -832,7 +840,6 @@ class ListTile extends StatelessWidget {
       ?? tileTheme.titleAlignment
       ?? (theme.useMaterial3 ? ListTileTitleAlignment.threeLine : ListTileTitleAlignment.titleHeight);
 
-
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
@@ -920,6 +927,7 @@ class ListTile extends StatelessWidget {
     properties.add(DoubleProperty('horizontalTitleGap', horizontalTitleGap, defaultValue: null));
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
   }
 }
 

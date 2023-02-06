@@ -1998,6 +1998,7 @@ void main() {
       horizontalTitleGap: 4.0,
       minVerticalPadding: 2.0,
       minLeadingWidth: 6.0,
+      titleAlignment: ListTileTitleAlignment.bottom,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -2035,6 +2036,7 @@ void main() {
         'horizontalTitleGap: 4.0',
         'minVerticalPadding: 2.0',
         'minLeadingWidth: 6.0',
+        'titleAlignment: ListTileTitleAlignment.bottom',
       ]),
     );
   });
@@ -2220,6 +2222,150 @@ void main() {
 
     await tester.pumpWidget(buildFrame(useMaterial3: true));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('titleAlignment aligns leading & trailing widgets relative to title & subtitle widgets', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const String titleText = '\nHeadline Text\n';
+    const String subtitleText = '\nSupporting Text\n';
+
+    Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: titleAlignment,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+              title: const Text(titleText),
+              subtitle: const Text(subtitleText),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default titleAlignment value.
+    await tester.pumpWidget(buildFrame());
+    Offset titleOffset = tester.getTopLeft(find.text(titleText));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // By default, leading and trailing widgets should be centered vertically
+    // relative to the title and subtitle widgets.
+    expect(leadingOffset.dy - titleOffset.dy, 54.0);
+    expect(trailingOffset.dy - titleOffset.dy, 54.0);
+
+    // Test titleAlignment.threeLine.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    titleOffset = tester.getTopLeft(find.text(titleText));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets should be centered vertically relative
+    // to the title and subtitle widgets.
+    expect(leadingOffset.dy - titleOffset.dy, 54.0);
+    expect(trailingOffset.dy - titleOffset.dy, 54.0);
+
+    // Test titleAlignment.titleHeight.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    titleOffset = tester.getTopLeft(find.text(titleText));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets should be positioned 16.0 pixels below the
+    // top of the title widget.
+    expect(leadingOffset.dy - titleOffset.dy, 8.0);
+    expect(trailingOffset.dy - titleOffset.dy, 8.0);
+
+    // Test titleAlignment.top.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    titleOffset = tester.getTopLeft(find.text(titleText));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets should be placed minVerticalPadding below
+    // the top of the title widget.
+    expect(leadingOffset.dy - titleOffset.dy, 0.0);
+    expect(trailingOffset.dy - titleOffset.dy, 0.0);
+
+    // Test titleAlignment.center.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    titleOffset = tester.getTopLeft(find.text(titleText));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets should be centered vertically relative to the
+    // title and subtitle widgets.
+    expect(leadingOffset.dy - titleOffset.dy, 54.0);
+    expect(trailingOffset.dy - titleOffset.dy, 54.0);
+
+    // Test titleAlignment.bottom.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    titleOffset = tester.getTopLeft(find.text(titleText));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets should be placed minVerticalPadding above
+    // the bottom of the [ListTile]'s titles.
+    expect(leadingOffset.dy - titleOffset.dy, 108.0);
+    expect(trailingOffset.dy - titleOffset.dy, 108.0);
+  });
+
+  testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const double minVerticalPadding = 10.0;
+    const String titleText = '\nHeadline Text\n';
+    const String subtitleText = '\nSupporting Text\n';
+
+    Widget buildFrame({
+        ListTileTitleAlignment? titleAlignment,
+        bool isThreeLine = false,
+      }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: titleAlignment,
+              minVerticalPadding: minVerticalPadding,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+              title: const Text(titleText),
+              subtitle: const Text(subtitleText),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+              isThreeLine: isThreeLine,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, then [ListTile.ListTileTitleAlignment] should
+    // default to [ListTileTitleAlignment.threeLine].
+    await tester.pumpWidget(buildFrame());
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    final Offset titleOffset = tester.getTopLeft(find.text(titleText));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // By default, leading and trailing widgets should be centered vertically
+    // relative to the list tile's title and subtitle widgets.
+    expect(leadingOffset.dy - titleOffset.dy, 54.0);
+    expect(trailingOffset.dy - titleOffset.dy, 54.0);
+
+    // Set [ListTile.isThreeLine] to true to update the alignment.
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // The leading and trailing widgets should be placed minVerticalPadding
+    // to the top of the title widget.
+    expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
+    expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
   });
 
   group('Material 2', () {
@@ -3461,6 +3607,146 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Material), paints..rect(color: defaultColor));
+    });
+
+    testWidgets('titleAlignment aligns leading & trailing widgets relative to title & subtitle widgets', (WidgetTester tester) async {
+      final Key leadingKey = GlobalKey();
+      final Key trailingKey = GlobalKey();
+      const String titleText = '\nHeadline Text\n';
+      const String subtitleText = '\nSupporting Text\n';
+
+      Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: ListTile(
+                titleAlignment: titleAlignment,
+                leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+                title: const Text(titleText),
+                subtitle: const Text(subtitleText),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Test default titleAlignment value.
+      await tester.pumpWidget(buildFrame());
+      Offset titleOffset = tester.getTopLeft(find.text(titleText));
+      Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // By default, leading and trailing widgets should be positioned 16.0
+      // pixels below the top of the title widget.
+      expect(leadingOffset.dy - titleOffset.dy, 12.0);
+      expect(trailingOffset.dy - titleOffset.dy, 12.0);
+
+      // Test titleAlignment.threeLine.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+      titleOffset = tester.getTopLeft(find.text(titleText));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets should be centered vertically relative
+      // to the title and subtitle widgets.
+      expect(leadingOffset.dy - titleOffset.dy, 33.0);
+      expect(trailingOffset.dy - titleOffset.dy, 33.0);
+
+      // Test titleAlignment.titleHeight.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+      titleOffset = tester.getTopLeft(find.text(titleText));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets should be positioned 16.0 pixels below
+      // the top of the title widget.
+      expect(leadingOffset.dy - titleOffset.dy, 12.0);
+      expect(trailingOffset.dy - titleOffset.dy, 12.0);
+
+      // Test titleAlignment.top.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+      titleOffset = tester.getTopLeft(find.text(titleText));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets should be placed minVerticalPadding
+      // below the top of the title widget.
+      expect(leadingOffset.dy - titleOffset.dy, 0.0);
+      expect(trailingOffset.dy - titleOffset.dy, 0.0);
+
+      // Test titleAlignment.center.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+      titleOffset = tester.getTopLeft(find.text(titleText));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets should be centered vertically relative
+      // to the title and subtitle widgets.
+      expect(leadingOffset.dy - titleOffset.dy, 33.0);
+      expect(trailingOffset.dy - titleOffset.dy, 33.0);
+
+      // Test titleAlignment.bottom.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+      titleOffset = tester.getTopLeft(find.text(titleText));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets should be placed minVerticalPadding
+      // above the bottom of the [ListTile]'s titles.
+      expect(leadingOffset.dy - titleOffset.dy, 66.0);
+      expect(trailingOffset.dy - titleOffset.dy, 66.0);
+    });
+
+    testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+      final Key leadingKey = GlobalKey();
+      final Key trailingKey = GlobalKey();
+      const double minVerticalPadding = 10.0;
+      const String titleText = '\nHeadline Text\n';
+      const String subtitleText = '\nSupporting Text\n';
+
+      Widget buildFrame({ ListTileTitleAlignment? titleAlignment, bool isThreeLine = false }) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: ListTile(
+                titleAlignment: titleAlignment,
+                minVerticalPadding: minVerticalPadding,
+                leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+                title: const Text(titleText),
+                subtitle: const Text(subtitleText),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+                isThreeLine: isThreeLine,
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Set [ListTile.titleAlignment] to [ListTileTitleAlignment.threeLine.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+      Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+      final Offset titleOffset = tester.getTopLeft(find.text(titleText));
+      Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // By default, leading and trailing widgets should be aligned 16 pixels
+      // below the top of the [ListTile.title].
+      expect(leadingOffset.dy - titleOffset.dy, 33.0);
+      expect(trailingOffset.dy - titleOffset.dy, 33.0);
+
+      // Set [ListTile.isThreeLine] to true to update the alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine, isThreeLine: true));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // The leading and trailing widgets should be placed minVerticalPadding
+      // to the top of the title widget.
+      expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
+      expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
     });
   });
 }
