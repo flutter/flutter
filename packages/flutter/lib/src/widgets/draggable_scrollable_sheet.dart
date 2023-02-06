@@ -486,6 +486,7 @@ class _DraggableSheetExtent {
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
+    this.scrollingActivityCount = 0,
   })  : assert(minSize >= 0),
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
@@ -519,6 +520,8 @@ class _DraggableSheetExtent {
   //      sheet has not changed, either by drag or programmatic control. See
   //      docs for `initialChildSize`.
   bool hasChanged;
+
+  int scrollingActivityCount;
 
   bool get isAtMin => minSize >= _currentSize.value;
   bool get isAtMax => maxSize <= _currentSize.value;
@@ -612,6 +615,7 @@ class _DraggableSheetExtent {
           : initialSize),
       hasDragged: hasDragged,
       hasChanged: hasChanged,
+      scrollingActivityCount: scrollingActivityCount,
     );
   }
 }
@@ -815,10 +819,57 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     extent.updateSize(extent.initialSize, position.context.notificationContext!);
   }
 
+  final Map<ScrollPosition, void Function()> _isScrollingListeners =
+      <ScrollPosition, void Function()>{};
+
+  @override
+  void attach(ScrollPosition position) {
+    super.attach(position);
+
+    void listener() {
+      if (position.isScrollingNotifier.value) {
+        ++extent.scrollingActivityCount;
+      } else {
+        --extent.scrollingActivityCount;
+      }
+    }
+
+    if (position.isScrollingNotifier.value) {
+      ++extent.scrollingActivityCount;
+    }
+
+    position.isScrollingNotifier.addListener(listener);
+    _isScrollingListeners[position] = listener;
+  }
+
   @override
   void detach(ScrollPosition position) {
+    position.isScrollingNotifier
+        .removeListener(_isScrollingListeners.remove(position)!);
+    if (position.isScrollingNotifier.value) {
+      --extent.scrollingActivityCount;
+    }
+
     onPositionDetached?.call();
     super.detach(position);
+  }
+}
+
+class _SnapActivity extends BallisticScrollActivity {
+  _SnapActivity(_DraggableScrollableSheetScrollPosition scrollPosition,
+      Simulation simulation)
+      : super(scrollPosition, simulation, scrollPosition.context.vsync, false);
+
+  @override
+  _DraggableScrollableSheetScrollPosition get delegate =>
+      super.delegate as _DraggableScrollableSheetScrollPosition;
+
+  @override
+  bool applyMoveTo(double value){
+    final _DraggableSheetExtent extent = delegate.extent;
+    extent.updateSize(
+        extent.pixelsToSize(value), delegate.context.notificationContext!);
+    return true;
   }
 }
 
@@ -844,7 +895,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
-  final Set<AnimationController> _ballisticControllers = <AnimationController>{};
   bool get listShouldScroll => pixels > 0.0;
 
   _DraggableSheetExtent get extent => getExtent();
@@ -862,15 +912,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       _dragCancelCallback = other._dragCancelCallback;
       other._dragCancelCallback = null;
     }
-  }
-
-  @override
-  void beginActivity(ScrollActivity? newActivity) {
-    // Cancel the running ballistic simulations
-    for (final AnimationController ballisticController in _ballisticControllers) {
-      ballisticController.stop();
-    }
-    super.beginActivity(newActivity);
   }
 
   @override
@@ -892,16 +933,14 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       },
     );
   }
-  bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
-
-  @override
-  void dispose() {
-    for (final AnimationController ballisticController in _ballisticControllers) {
-      ballisticController.dispose();
-    }
-    _ballisticControllers.clear();
-    super.dispose();
-  }
+  bool get _shouldSnap =>
+      extent.snap &&
+      extent.hasDragged &&
+      !_isAtSnapSize &&
+      // Only allow `goBallistic(0)` to snap if there are no current scrolling
+      // activities on the extent or if this position's activity itself is
+      // scrolling.
+      (extent.scrollingActivityCount == 0 || isScrollingNotifier.value);
 
   @override
   void goBallistic(double velocity) {
@@ -936,39 +975,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       );
     }
 
-    final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
-      vsync: context.vsync,
-    );
-    _ballisticControllers.add(ballisticController);
-
-    double lastPosition = extent.currentPixels;
-    void tick() {
-      final double delta = ballisticController.value - lastPosition;
-      lastPosition = ballisticController.value;
-      extent.addPixelDelta(delta, context.notificationContext!);
-      if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
-        // Make sure we pass along enough velocity to keep scrolling - otherwise
-        // we just "bounce" off the top making it look like the list doesn't
-        // have more to scroll.
-        velocity = ballisticController.velocity + (physics.toleranceFor(this).velocity * ballisticController.velocity.sign);
-        super.goBallistic(velocity);
-        ballisticController.stop();
-      } else if (ballisticController.isCompleted) {
-        super.goBallistic(0);
-      }
-    }
-
-    ballisticController
-      ..addListener(tick)
-      ..animateWith(simulation).whenCompleteOrCancel(
-        () {
-          if (_ballisticControllers.contains(ballisticController)) {
-            _ballisticControllers.remove(ballisticController);
-            ballisticController.dispose();
-          }
-        },
-      );
+    beginActivity(_SnapActivity(this, simulation));
   }
 
   @override

@@ -1533,4 +1533,47 @@ void main() {
     controller2.jumpTo(1.0);
     expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
   });
+
+  testWidgets('Snaps smoothly with multiple scrollables', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DraggableScrollableSheet(
+          controller: controller,
+          snap: true,
+          builder: (BuildContext context, ScrollController controller) =>
+            Row(
+              children: <Widget>[
+                Expanded(child: SingleChildScrollView(
+                    controller: controller,
+                    child: const SizedBox(height: 100000),
+                )),
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller,
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) =>
+                      Text('Item $index'),
+                  ),
+                ),
+              ],
+            ),
+        ),
+      ),
+    );
+
+    await tester.fling(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -100),
+      1000);
+
+    double lastSize = controller.size;
+    while (tester.binding.hasScheduledFrame) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(controller.size, greaterThanOrEqualTo(lastSize));
+      lastSize = controller.size;
+    }
+    expect(lastSize, 1);
+  });
 }
