@@ -1103,8 +1103,8 @@ class LocalizationsGenerator {
 
       final String translationForMessage = message.messages[locale]!;
       final Node node = message.parsedMessages[locale]!;
-      // If parse tree is only a string, then return a getter method.
-      if (node.children.every((Node child) => child.type == ST.string)) {
+      // If the placeholders list is empty, then return a getter method.
+      if (message.placeholders.isEmpty) {
         // Use the parsed translation to handle escaping with the same behavior.
         return getterTemplate
           .replaceAll('@(name)', message.resourceId)

@@ -1733,6 +1733,48 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ).readAsStringSync();
         expect(localizationsFile, contains('String helloWorld(Object name) {'));
       });
+
+      testWithoutContext('placeholder parameter list should be consistent between languages', () {
+        const String messageEn = '''
+{
+  "helloWorld": "Hello {name}",
+  "@helloWorld": {
+    "placeholders": {
+      "name": {}
+    }
+  }
+}''';
+        const String messageEs = '''
+{
+  "helloWorld": "Hola"
+}
+''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(messageEn);
+        l10nDirectory.childFile('app_es.arb')
+          .writeAsStringSync(messageEs);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        final String localizationsFileEn = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        final String localizationsFileEs = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+        ).readAsStringSync();
+        expect(localizationsFileEn, contains('String helloWorld(Object name) {'));
+        expect(localizationsFileEs, contains('String helloWorld(Object name) {'));
+      });
+ 
     });
 
     group('DateTime tests', () {
