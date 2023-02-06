@@ -12,6 +12,8 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
@@ -692,6 +694,9 @@ class ListTile extends StatelessWidget {
       ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
       ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
+    final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: effectiveIconColor),
+    );
 
     TextStyle? leadingAndTrailingStyle;
     if (leading != null || trailing != null) {
@@ -791,21 +796,24 @@ class ListTile extends StatelessWidget {
             minimum: resolvedContentPadding,
             child: IconTheme.merge(
               data: iconThemeData,
-              child: _ListTile(
-                leading: leadingIcon,
-                title: titleText,
-                subtitle: subtitleText,
-                trailing: trailingIcon,
-                isDense: _isDenseLayout(theme, tileTheme),
-                visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                isThreeLine: isThreeLine,
-                textDirection: textDirection,
-                titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
-                subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
-                horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
-                minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
-                minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
-                material3: theme.useMaterial3,
+              child: IconButtonTheme(
+                data: iconButtonThemeData,
+                child: _ListTile(
+                  leading: leadingIcon,
+                  title: titleText,
+                  subtitle: subtitleText,
+                  trailing: trailingIcon,
+                  isDense: _isDenseLayout(theme, tileTheme),
+                  visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
+                  isThreeLine: isThreeLine,
+                  textDirection: textDirection,
+                  titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
+                  subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
+                  horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+                  minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
+                  minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  material3: theme.useMaterial3,
+                ),
               ),
             ),
           ),
