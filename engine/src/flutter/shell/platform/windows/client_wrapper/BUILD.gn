@@ -120,29 +120,44 @@ zip_bundle("client_wrapper_archive") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
   ]
   tmp_files = []
-  foreach(source, client_wrapper_file_archive_list) {
+  foreach(source_file, client_wrapper_file_archive_list) {
     tmp_files += [
       {
-        source = "//flutter/shell/platform/common/client_wrapper/$source"
-        destination = "cpp_client_wrapper/$source"
+        source = "//flutter/shell/platform/common/client_wrapper/$source_file"
+        destination = "cpp_client_wrapper/$source_file"
       },
     ]
   }
 
   # Windows specific source code files
-  foreach(source, win_client_wrapper_file_archive_list) {
+  foreach(source_file, win_client_wrapper_file_archive_list) {
     tmp_files += [
       {
-        source = "//flutter/shell/platform/windows/client_wrapper/$source"
-        destination = "cpp_client_wrapper/$source"
+        source = "//flutter/shell/platform/windows/client_wrapper/$source_file"
+        destination = "cpp_client_wrapper/$source_file"
       },
     ]
   }
+
+  # Headers
   headers = core_cpp_client_wrapper_includes +
             core_cpp_client_wrapper_internal_headers
   foreach(header, headers) {
     rebased_path =
         rebase_path(header, "//flutter/shell/platform/common/client_wrapper")
+    tmp_files += [
+      {
+        source = header
+        destination = "cpp_client_wrapper/$rebased_path"
+      },
+    ]
+  }
+
+  # Wrapper includes
+  foreach(header, _wrapper_includes) {
+    rebased_path =
+        rebase_path("//flutter/shell/platform/windows/client_wrapper/$header",
+                    "//flutter/shell/platform/windows/client_wrapper")
     tmp_files += [
       {
         source = header
