@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -186,8 +187,21 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.onActiveThumbImageError,
+    this.onInactiveThumbImageError,
+    this.thumbColor,
+    this.trackColor,
     this.trackOutlineColor,
+    this.thumbIcon,
+    this.materialTapTargetSize,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
+    this.splashRadius,
+    this.overlayColor,
   }) : _switchListTileType = _SwitchListTileType.material,
+       applyCupertinoTheme = false,
+       assert(activeThumbImage != null || onActiveThumbImageError == null),
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
        assert(!isThreeLine || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
@@ -229,9 +243,22 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.onActiveThumbImageError,
+    this.onInactiveThumbImageError,
+    this.materialTapTargetSize,
+    this.thumbColor,
+    this.trackColor,
     this.trackOutlineColor,
+    this.thumbIcon,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
+    this.splashRadius,
+    this.applyCupertinoTheme,
+    this.overlayColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(!isThreeLine || subtitle != null);
+       assert(!isThreeLine || subtitle != null),
+       assert(activeThumbImage != null || onActiveThumbImageError == null),
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Whether this switch is checked.
   ///
@@ -384,6 +411,30 @@ class SwitchListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// An optional error callback for errors emitted when loading
+  /// [activeThumbImage].
+  final ImageErrorListener? onActiveThumbImageError;
+
+  /// An optional error callback for errors emitted when loading
+  /// [inactiveThumbImage].
+  final ImageErrorListener? onInactiveThumbImageError;
+
+  /// The color of this switch's thumb.
+  ///
+  /// If null, then the value of [activeColor] is used in the selected state
+  /// and [inactiveThumbColor] in the default state. If that is also null, then
+  /// the value of [SwitchThemeData.thumbColor] is used. If that is also null,
+  /// The default value is used.
+  final MaterialStateProperty<Color?>? thumbColor;
+
+  /// The color of this switch's track.
+  ///
+  /// If null, then the value of [activeTrackColor] is used in the selected
+  /// state and [inactiveTrackColor] in the default state. If that is also null,
+  /// then the value of [SwitchThemeData.trackColor] is used. If that is also
+  /// null, then the default value is used.
+  final MaterialStateProperty<Color?>? trackColor;
+
   /// {@macro flutter.material.switch.trackOutlineColor}
   ///
   /// The [ListTile] will be focused when this [SwitchListTile] requests focus,
@@ -393,6 +444,49 @@ class SwitchListTile extends StatelessWidget {
   /// state and [ColorScheme.outline] in the unselected state. In Material 2,
   /// the [Switch] track has no outline.
   final MaterialStateProperty<Color?>? trackOutlineColor;
+
+  /// The icon to use on the thumb of this switch
+  ///
+  /// If null, then the value of [SwitchThemeData.thumbIcon] is used. If this is
+  /// also null, then the [Switch] does not have any icons on the thumb.
+  final MaterialStateProperty<Icon?>? thumbIcon;
+
+  /// {@macro flutter.material.switch.materialTapTargetSize}
+  ///
+  /// defaults to [MaterialTapTargetSize.shrinkWrap].
+  final MaterialTapTargetSize? materialTapTargetSize;
+
+  /// {@macro flutter.cupertino.CupertinoSwitch.applyTheme}
+  final bool? applyCupertinoTheme;
+
+  /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
+  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  final MouseCursor? mouseCursor;
+
+  /// The splash radius of the circular [Material] ink response.
+  ///
+  /// If null, then the value of [SwitchThemeData.splashRadius] is used. If that
+  /// is also null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
+
+  /// The color for the switch's [Material].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///
+  /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
+  /// and [hoverColor] is used in the pressed and hovered state. If that is also
+  /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
+  /// also null, then the default value is used in the pressed and hovered state.
+  final MaterialStateProperty<Color?>? overlayColor;
 
   @override
   Widget build(BuildContext context) {
@@ -405,13 +499,23 @@ class SwitchListTile extends StatelessWidget {
           activeColor: activeColor,
           activeThumbImage: activeThumbImage,
           inactiveThumbImage: inactiveThumbImage,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          onActiveThumbImageError: onActiveThumbImageError,
+          onInactiveThumbImageError: onInactiveThumbImageError,
+          thumbColor: thumbColor,
+          trackColor: trackColor,
           trackOutlineColor: trackOutlineColor,
+          thumbIcon: thumbIcon,
+          applyCupertinoTheme: applyCupertinoTheme,
+          dragStartBehavior: dragStartBehavior,
+          mouseCursor: mouseCursor,
+          splashRadius: splashRadius,
+          overlayColor: overlayColor,
         );
         break;
 
@@ -422,13 +526,22 @@ class SwitchListTile extends StatelessWidget {
           activeColor: activeColor,
           activeThumbImage: activeThumbImage,
           inactiveThumbImage: inactiveThumbImage,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          onActiveThumbImageError: onActiveThumbImageError,
+          onInactiveThumbImageError: onInactiveThumbImageError,
+          thumbColor: thumbColor,
+          trackColor: trackColor,
           trackOutlineColor: trackOutlineColor,
+          thumbIcon: thumbIcon,
+          dragStartBehavior: dragStartBehavior,
+          mouseCursor: mouseCursor,
+          splashRadius: splashRadius,
+          overlayColor: overlayColor,
         );
     }
 
