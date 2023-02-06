@@ -721,11 +721,9 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);
-
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final ColorScheme _colors = _theme.colorScheme;
-
   @override ButtonStyle? get style {
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge),
@@ -763,7 +761,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
           if (states.contains(MaterialState.focused)) {
             return _colors.onSurface;
           }
-          return null;
+          return _colors.onSurface;
         }
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -779,7 +777,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
           }
         } else {
           if (states.contains(MaterialState.hovered)) {
-            return _colors.onSurface.withOpacity(0.08);
+            return _colors.onSurface.withOpacity(0.12);
           }
           if (states.contains(MaterialState.focused)) {
             return _colors.onSurface.withOpacity(0.12);
@@ -800,10 +798,9 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
         return BorderSide(color: _colors.outline);
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
-      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
+      size: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),    
     );
   }
-
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 }
