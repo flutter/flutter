@@ -24,6 +24,9 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get surfaceTintColor => ${componentColor("md.comp.sheet.bottom.docked.container.surface-tint-layer")};
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
 }
 ''';
 }
