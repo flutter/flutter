@@ -24,6 +24,8 @@ import 'theme_data.dart';
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
+const BoxConstraints _dialogConstraints = BoxConstraints(minWidth: 280.0, maxWidth: 560.0, maxHeight: 560.0);
+
 /// A Material Design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -232,7 +234,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
+          constraints: Theme.of(context).useMaterial3 ? _dialogConstraints : const BoxConstraints(minWidth: 280.0),
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -1118,7 +1120,7 @@ class SimpleDialog extends StatelessWidget {
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 280.0),
+        constraints: Theme.of(context).useMaterial3 ? _dialogConstraints : const BoxConstraints(minWidth: 280.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
