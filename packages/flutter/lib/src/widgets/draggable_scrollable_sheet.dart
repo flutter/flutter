@@ -855,8 +855,9 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   }
 }
 
-class _SnapActivity extends BallisticScrollActivity {
-  _SnapActivity(_DraggableScrollableSheetScrollPosition scrollPosition,
+class _SheetBallisticScrollActivity extends BallisticScrollActivity {
+  _SheetBallisticScrollActivity(
+      _DraggableScrollableSheetScrollPosition scrollPosition,
       Simulation simulation)
       : super(scrollPosition, simulation, scrollPosition.context.vsync, false);
 
@@ -865,10 +866,25 @@ class _SnapActivity extends BallisticScrollActivity {
       super.delegate as _DraggableScrollableSheetScrollPosition;
 
   @override
+  void applyNewDimensions() {
+    // This is expected to happen continuously while scrolling the outer sheet.
+  }
+
+  @override
   bool applyMoveTo(double value){
     final _DraggableSheetExtent extent = delegate.extent;
     extent.updateSize(
         extent.pixelsToSize(value), delegate.context.notificationContext!);
+
+    if ((velocity < 0.0 && extent.isAtMin) ||
+        (velocity > 0.0 && extent.isAtMax)) {
+      // Make sure we pass along enough velocity to keep scrolling - otherwise
+      // we just "bounce" off the top making it look like the list doesn't have
+      // more to scroll.
+      delegate.goBallistic(velocity +
+          delegate.physics.toleranceFor(delegate).velocity * velocity.sign);
+    }
+
     return true;
   }
 }
@@ -950,6 +966,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       super.goBallistic(velocity);
       return;
     }
+
     // Scrollable expects that we will dispose of its current _dragCancelCallback
     _dragCancelCallback?.call();
     _dragCancelCallback = null;
@@ -975,7 +992,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       );
     }
 
-    beginActivity(_SnapActivity(this, simulation));
+    beginActivity(_SheetBallisticScrollActivity(this, simulation));
   }
 
   @override
