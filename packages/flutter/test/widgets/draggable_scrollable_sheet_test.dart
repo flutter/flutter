@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  late ScrollController innerController;
+
   Widget boilerplateWidget({
     VoidCallback? onButtonPressed,
     DraggableScrollableController? controller,
@@ -21,7 +23,7 @@ void main() {
     Key? containerKey,
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
-    bool ignoreController = false,
+    ScrollController? innerControllerOverride,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -44,13 +46,14 @@ void main() {
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
                 builder: (BuildContext context, ScrollController scrollController) {
+                  innerController = innerControllerOverride ?? scrollController;
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
                     child: ColoredBox(
                       key: containerKey,
                       color: const Color(0xFFABCDEF),
                       child: ListView.builder(
-                        controller: ignoreController ? null : scrollController,
+                        controller: innerController,
                         itemExtent: itemExtent,
                         itemCount: itemCount,
                         itemBuilder: (BuildContext context, int index) => Text('Item $index'),
@@ -430,6 +433,43 @@ void main() {
 
       // When a Ticker leaks an exception is thrown
     });
+
+    group('While content is scrolled and sheet is snapped somewhere other than min/max', () {
+      Widget buildWidget([ScrollController? innerControllerOverride]) =>
+        boilerplateWidget(
+          snap: true,
+          snapSizes: const <double>[0.5],
+          innerControllerOverride: innerControllerOverride,
+        );
+
+      testWidgets('Can be flung up', (WidgetTester tester) async {
+        // Set the initial scroll position.
+        await tester.pumpWidget(buildWidget(
+          ScrollController(initialScrollOffset: 500.0)));
+        // Rebuild with the DraggableScrollableSheet scroll controller to
+        // connect the scrollables.
+        await tester.pumpWidget(buildWidget());
+
+        await tester.fling(find.byType(ListView), const Offset(0, -100), 1000);
+        final double oldOffset = innerController.offset;
+        await tester.pumpAndSettle();
+        expect(innerController.offset, greaterThan(oldOffset));
+      }, variant: TargetPlatformVariant.all());
+
+      testWidgets('Can be flung down', (WidgetTester tester) async {
+        // Set the initial scroll position.
+        await tester.pumpWidget(buildWidget(
+          ScrollController(initialScrollOffset: 500.0)));
+        // Rebuild with the DraggableScrollableSheet scroll controller to
+        // connect the scrollables.
+        await tester.pumpWidget(buildWidget());
+
+        await tester.fling(find.byType(ListView), const Offset(0, 100), 1000);
+        final double oldOffset = innerController.offset;
+        await tester.pumpAndSettle();
+        expect(innerController.offset, lessThan(oldOffset));
+      }, variant: TargetPlatformVariant.all());
+    });
   });
 
   testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
@@ -734,7 +774,7 @@ void main() {
     await tester.pumpWidget(boilerplateWidget(
       snap: true,
       // Will prevent the sheet's child from listening to the controller.
-      ignoreController: true,
+      innerControllerOverride: ScrollController(),
     ));
     await tester.pumpAndSettle();
     await tester.pumpWidget(boilerplateWidget(snap: true));
@@ -1534,14 +1574,21 @@ void main() {
     expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
   });
 
-  testWidgets('Snaps smoothly with multiple scrollables', (WidgetTester tester) async {
-    final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+  group('Multiple Scrollables', () {
+    Widget buildWidget({
+      DraggableScrollableController? controller,
+      bool snap = false,
+      double initialChildSize = 0.5,
+    }) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: ScrollConfiguration(
+        // Turn scrollbars off so we don't have to wrap our scroll controllers
+        // on platforms that would normally show scrollbars.
+        behavior: const ScrollBehavior().copyWith(scrollbars: false),
         child: DraggableScrollableSheet(
           controller: controller,
-          snap: true,
+          snap: snap,
+          initialChildSize: initialChildSize,
           builder: (BuildContext context, ScrollController controller) =>
             Row(
               children: <Widget>[
@@ -1563,17 +1610,49 @@ void main() {
       ),
     );
 
-    await tester.fling(
-      find.byType(SingleChildScrollView),
-      const Offset(0, -100),
-      1000);
+    testWidgets('Snaps smoothly', (WidgetTester tester) async {
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(buildWidget(controller: controller, snap: true));
 
-    double lastSize = controller.size;
-    while (tester.binding.hasScheduledFrame) {
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(controller.size, greaterThanOrEqualTo(lastSize));
-      lastSize = controller.size;
-    }
-    expect(lastSize, 1);
+      await tester.fling(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -100),
+        1000);
+
+      double lastSize = controller.size;
+      while (tester.binding.hasScheduledFrame) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(controller.size, greaterThanOrEqualTo(lastSize));
+        lastSize = controller.size;
+      }
+      expect(lastSize, 1);
+    });
+
+    testWidgets('Drags smoothly while another child is ballistic', (WidgetTester tester) async {
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(buildWidget(
+        controller: controller,
+        initialChildSize: 1.0,
+      ));
+
+      await tester.fling(
+        find.byType(ListView),
+        const Offset(0, -100),
+        1000,
+      );
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(SingleChildScrollView)));
+
+      double lastSize = controller.size;
+
+      for (int i = 0; i < 10; ++i) {
+        await gesture.moveBy(const Offset(0, 10));
+        // Advance time during the drag so that the fling simulation continues.
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(controller.size, lessThan(lastSize));
+        lastSize = controller.size;
+      }
+    }, variant: TargetPlatformVariant.all());
   });
 }

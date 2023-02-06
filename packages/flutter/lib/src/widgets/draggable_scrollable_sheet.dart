@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -486,7 +485,7 @@ class _DraggableSheetExtent {
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
-    this.scrollingActivityCount = 0,
+    this.activePositionCount = 0,
   })  : assert(minSize >= 0),
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
@@ -521,7 +520,7 @@ class _DraggableSheetExtent {
   //      docs for `initialChildSize`.
   bool hasChanged;
 
-  int scrollingActivityCount;
+  int activePositionCount;
 
   bool get isAtMin => minSize >= _currentSize.value;
   bool get isAtMax => maxSize <= _currentSize.value;
@@ -615,7 +614,7 @@ class _DraggableSheetExtent {
           : initialSize),
       hasDragged: hasDragged,
       hasChanged: hasChanged,
-      scrollingActivityCount: scrollingActivityCount,
+      activePositionCount: activePositionCount,
     );
   }
 }
@@ -819,37 +818,8 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     extent.updateSize(extent.initialSize, position.context.notificationContext!);
   }
 
-  final Map<ScrollPosition, void Function()> _isScrollingListeners =
-      <ScrollPosition, void Function()>{};
-
-  @override
-  void attach(ScrollPosition position) {
-    super.attach(position);
-
-    void listener() {
-      if (position.isScrollingNotifier.value) {
-        ++extent.scrollingActivityCount;
-      } else {
-        --extent.scrollingActivityCount;
-      }
-    }
-
-    if (position.isScrollingNotifier.value) {
-      ++extent.scrollingActivityCount;
-    }
-
-    position.isScrollingNotifier.addListener(listener);
-    _isScrollingListeners[position] = listener;
-  }
-
   @override
   void detach(ScrollPosition position) {
-    position.isScrollingNotifier
-        .removeListener(_isScrollingListeners.remove(position)!);
-    if (position.isScrollingNotifier.value) {
-      --extent.scrollingActivityCount;
-    }
-
     onPositionDetached?.call();
     super.detach(position);
   }
@@ -858,8 +828,11 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 class _SheetBallisticScrollActivity extends BallisticScrollActivity {
   _SheetBallisticScrollActivity(
       _DraggableScrollableSheetScrollPosition scrollPosition,
-      Simulation simulation)
+      Simulation simulation,
+      {required this.isScrolling})
       : super(scrollPosition, simulation, scrollPosition.context.vsync, false);
+  @override
+  final bool isScrolling;
 
   @override
   _DraggableScrollableSheetScrollPosition get delegate =>
@@ -909,25 +882,22 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     required this.getExtent,
   });
 
-  VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
   bool get listShouldScroll => pixels > 0.0;
+  bool get isActive => activity != null && activity is! IdleScrollActivity;
 
   _DraggableSheetExtent get extent => getExtent();
 
   @override
-  void absorb(ScrollPosition other) {
-    super.absorb(other);
-    assert(_dragCancelCallback == null);
-
-    if (other is! _DraggableScrollableSheetScrollPosition) {
-      return;
+  void dispose() {
+    if (isActive) {
+      --extent.activePositionCount;
+      assert(extent.activePositionCount >= 0);
+      // If this position was absorbed into another, the activity was
+      // transferred and is null here so we don't need to worry about it.
+      // Otherwise all scroll positions start with null activity.
     }
-
-    if (other._dragCancelCallback != null) {
-      _dragCancelCallback = other._dragCancelCallback;
-      other._dragCancelCallback = null;
-    }
+    super.dispose();
   }
 
   @override
@@ -953,53 +923,88 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       extent.snap &&
       extent.hasDragged &&
       !_isAtSnapSize &&
-      // Only allow `goBallistic(0)` to snap if there are no current scrolling
-      // activities on the extent or if this position's activity itself is
-      // scrolling.
-      (extent.scrollingActivityCount == 0 || isScrollingNotifier.value);
+      // Only allow `goBallistic(0)` to snap if there are no active positions on
+      // the extent or if this position itself is active.
+      (extent.activePositionCount == 0 || isActive);
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    final bool wasActive = isActive;
+    super.beginActivity(newActivity);
+    if (newActivity == null) {
+      return;
+    }
+
+    if (isActive != wasActive) {
+      if (isActive) {
+        ++extent.activePositionCount;
+      } else {
+        --extent.activePositionCount;
+        assert(extent.activePositionCount >= 0);
+      }
+    }
+  }
 
   @override
   void goBallistic(double velocity) {
     if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||
-        (velocity > 0.0 && extent.isAtMax)) {
+        (velocity > 0.0 && (extent.isAtMax ||
+          // Go ballistic on inner scrollable if we're snapped and it's
+          // scrolled. Otherwise, we'd try to use a snapping simulation that
+          // would no-op and kill the momentum, inconsistent with the
+          // velocity < 0.0 case.
+          //
+          // This differs from applyUserOffset, which always defers to
+          // listShouldScroll. This means that dragging a scrolled inner list
+          // upwards will first scroll the list, but upon release (when it goes
+          // ballistic) will scroll the sheet.
+          (extent.snap && _isAtSnapSize && listShouldScroll))) ||
+        // If we've already deferred to the inner scrollable, stick with it.
+        // This can also prevent conflicts with activities on other scroll
+        // positions, which could otherwise, if they resize the sheet, cause
+        // this BallisticScrollActivity to goBalistic(velocity) and try to take
+        // back control of the sheet (e.g. if we're no longer at max and the
+        // inner list is ballistic with velocity > 0.0).
+        //
+        // It might be better to do this by splitting out a separate delegate
+        // for the sheet vs. the inner scrollable, rather than testing
+        // activity.runtimeType, but it's unclear whether it's worth the
+        // complexity.
+        (activity.runtimeType == BallisticScrollActivity)) {
       super.goBallistic(velocity);
       return;
     }
 
-    // Scrollable expects that we will dispose of its current _dragCancelCallback
-    _dragCancelCallback?.call();
-    _dragCancelCallback = null;
-
-    late final Simulation simulation;
     if (extent.snap) {
       // Snap is enabled, simulate snapping instead of clamping scroll.
-      simulation = _SnappingSimulation(
+      final Simulation simulation = _SnappingSimulation(
         position: extent.currentPixels,
         initialVelocity: velocity,
         pixelSnapSize: extent.pixelSnapSizes,
         snapAnimationDuration: extent.snapAnimationDuration,
         tolerance: physics.toleranceFor(this),
       );
+      beginActivity(_SheetBallisticScrollActivity(
+        this,
+        simulation,
+        isScrolling: velocity != 0,
+      ));
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
       // the ballistic back to the ScrollView, it will use the right simulation.
-      simulation = ClampingScrollSimulation(
+      final Simulation simulation = ClampingScrollSimulation(
         // Run the simulation in terms of pixels, not extent.
         position: extent.currentPixels,
         velocity: velocity,
         tolerance: physics.toleranceFor(this),
       );
+      beginActivity(_SheetBallisticScrollActivity(
+        this,
+        simulation,
+        isScrolling: true,
+      ));
     }
-
-    beginActivity(_SheetBallisticScrollActivity(this, simulation));
-  }
-
-  @override
-  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    // Save this so we can call it later if we have to [goBallistic] on our own.
-    _dragCancelCallback = dragCancelCallback;
-    return super.drag(details, dragCancelCallback);
   }
 }
 
