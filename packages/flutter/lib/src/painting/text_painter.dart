@@ -335,8 +335,14 @@ class _TextPainterLayoutCacheWithOffset {
   // The content width the text painter should report in TextPainter.width.
   // This is also used to compute `paintOffset`
   double contentWidth;
+
+  // The effective text alignment in the TextPainter's canvas. The value is
+  // within the [0, 1] interval: 0 for left aligned and 1 for right aligned.
   final double textAlignment;
-  // It's guaranteed that the Offset does not contain NaN.
+
+  // The paintOffset of the `paragraph` in the TextPainter's canvas.
+  //
+  // It's coordinate values are guaranteed to not be NaN.
   Offset get paintOffset {
     if (textAlignment == 0) {
       return Offset.zero;
@@ -1458,7 +1464,7 @@ class TextPainter {
   /// The newline (if any) is not returned as part of the range.
   TextRange getLineBoundary(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
-    return _layoutCache!.layout. _paragraph.getLineBoundary(position);
+    return _layoutCache!.paragraph.getLineBoundary(position);
   }
 
   static ui.LineMetrics _shiftLineMetrics(ui.LineMetrics metrics, Offset offset) {
