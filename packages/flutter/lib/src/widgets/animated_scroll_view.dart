@@ -521,12 +521,11 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// `builder` when the items are visible.
   ///
   /// Items are removed immediately. However, the
-  /// items will still appear for `duration` and during that time
+  /// items will still appear for `duration`, and during that time
   /// `builder` must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list
-  ///
+  /// removes all the items in the list.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
   }
@@ -1137,8 +1136,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// `builder` must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list
-  ///
+  /// removes all the items in the list.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     for(int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
