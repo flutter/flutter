@@ -153,7 +153,7 @@ void main() {
     expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
-    expect(_getDialogSize(tester), const Size(280.0, 140.0));;
+    expect(_getDialogSize(tester), const Size(280.0, 140.0));
   });
 
   testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
@@ -364,7 +364,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    expect(_getDialogSize(tester), const Size(560.0, 560.0));;
+    expect(_getDialogSize(tester), const Size(560.0, 560.0));
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
