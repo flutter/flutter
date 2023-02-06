@@ -117,7 +117,6 @@ void main() {
     expect(tapCount, 6);
   });
 
-
   testWidgets('in a series of rapid taps, onTapDown, onDoubleTapDown, and onTripleTapDown alternate', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));

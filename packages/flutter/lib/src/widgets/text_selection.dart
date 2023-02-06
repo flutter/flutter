@@ -2541,7 +2541,7 @@ class TextSelectionGestureDetectorBuilder {
         _scrollPosition - _dragStartScrollOffset,
       );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
-      // From observation, Windows alternates between double tap and triple tap actions when going past
+      // From observation, Windows 11 alternates between double tap and triple tap actions when going past
       // a consecutive tap count of 3.
       final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
 
@@ -2859,20 +2859,20 @@ class TextSelectionGestureDetector extends StatefulWidget {
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
   static int? _getDefaultMaxConsecutiveTap() {
     switch(defaultTargetPlatform) {
-      // From observation, these platforms reset their tap count to 0 when the number of consecutive taps
-      // exceeds 3. For example on Linux, when going past a triple click, on the fourth click the selection
+      // From observation, these platform's reset their tap count to 0 when the number of consecutive taps
+      // exceeds 3. For example on Debian Linux with GTK, when going past a triple click, on the fourth click the selection
       // is moved to the precise click position, on the fifth click the word at the position is selected, and
       // on the sixth click the paragraph at the position is selected.
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
         return 3;
-      // From observation, these platforms either hold their tap count at 3 or they
+      // From observation, these platform's either hold their tap count at 3 or they
       // allow it to grow infinitely. For example on macOS, when going past a triple click,
       // the selection should be retained at the paragraph that was first selected on triple click.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-      // From observation, this platforms consecutive tap count grows infinitely, alternating
+      // From observation, this platform's consecutive tap count grows infinitely, alternating
       // between double click and triple click actions. For example, after a triple click has
       // selected a paragraph, on the next click the word at the clicked position will be selected,
       // and on the next click the paragraph at the position.
@@ -2895,17 +2895,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
 
-    // From observation, Windows alternates between double tap and triple tap actions when going past
+    // From observation, Windows 11 alternates between double tap and triple tap actions when going past
     // a consecutive tap count of 3.
     final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
-    if (alternateBetweenEvenOdd ? details.consecutiveTapCount.isEven : details.consecutiveTapCount == 2) {
+    if (alternateBetweenEvenOdd && details.consecutiveTapCount.isEven || details.consecutiveTapCount == 2) {
       return widget.onDoubleTapDown?.call(details);
     }
 
-    if (alternateBetweenEvenOdd ?
-          (details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd)
-          : details.consecutiveTapCount >= 3)
-    {
+    if (alternateBetweenEvenOdd && details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd
+        || !alternateBetweenEvenOdd && details.consecutiveTapCount >= 3) {
       return widget.onTripleTapDown?.call(details);
     }
   }
