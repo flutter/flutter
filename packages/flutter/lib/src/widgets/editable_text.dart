@@ -1773,6 +1773,8 @@ class EditableText extends StatefulWidget {
   ///   * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
   ///     button Widgets for the current platform given
   ///     [ContextMenuButtonItem]s.
+  ///   * [BrowserContextMenu], which allows the browser's context menu on web
+  ///     to be disabled and Flutter-rendered context menus to appear.
   /// {@endtemplate}
   ///
   /// If not provided, no context menu will be shown.

@@ -18,6 +18,11 @@ import 'overlay.dart';
 ///
 /// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///   * [BrowserContextMenu], which allows the browser's context menu on web to
+///     be disabled and Flutter-rendered context menus to appear.
 class ContextMenuController {
   /// Creates a context menu that can be shown with [show].
   ContextMenuController({
