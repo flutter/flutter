@@ -7,15 +7,23 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
 /// A builder that includes an Offset to draw the context menu at.
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({
+    super.key,
+  });
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   void _showDialog (BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
@@ -24,6 +32,24 @@ class MyApp extends StatelessWidget {
           const AlertDialog(title: Text('You clicked print!')),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // On web, disable the browser's context menu since this example uses a custom
+    // Flutter-rendered context menu.
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
+    super.dispose();
   }
 
   @override
