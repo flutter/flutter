@@ -701,11 +701,11 @@ void main() {
           }
 
           @override
-          void rebuild() {
+          void rebuild({bool force = false}) {
             if (_throwOnRebuild) {
               throw 'rebuild';
             }
-            super.rebuild();
+            super.rebuild(force: force);
           }
         }
       ''',

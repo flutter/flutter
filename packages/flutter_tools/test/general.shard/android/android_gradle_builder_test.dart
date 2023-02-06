@@ -5,6 +5,7 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -124,6 +125,8 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Verbose mode for APKs includes Gradle stacktrace and sets debug log level', () async {
@@ -187,6 +190,8 @@ void main() {
         localGradleErrors: <GradleHandledError>[],
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
@@ -288,6 +293,8 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
@@ -376,6 +383,8 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
@@ -436,6 +445,8 @@ void main() {
         );
       }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('logs success event after a successful retry', () async {
@@ -535,6 +546,8 @@ void main() {
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('performs code size analysis and sends analytics', () async {
@@ -632,6 +645,8 @@ void main() {
           'apk',
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
@@ -697,6 +712,8 @@ void main() {
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
@@ -759,6 +776,8 @@ void main() {
         isFalse,
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {
@@ -814,6 +833,8 @@ void main() {
         buildNumber: '1.0',
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
@@ -870,6 +891,8 @@ void main() {
           buildNumber: '1.0',
         ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
@@ -944,6 +967,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
@@ -1018,6 +1043,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
@@ -1092,6 +1119,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
@@ -1167,6 +1196,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
@@ -1223,6 +1254,8 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
@@ -1307,6 +1340,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
@@ -1391,6 +1426,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
@@ -1475,6 +1512,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
@@ -1559,6 +1598,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
   });
 }
@@ -1568,4 +1609,9 @@ class FakeGradleUtils extends Fake implements GradleUtils {
   String getExecutable(FlutterProject project) {
     return 'gradlew';
   }
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }

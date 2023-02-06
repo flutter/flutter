@@ -32,12 +32,6 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
     required super.builder,
   });
 
-  /// Called at layout time to construct the widget tree.
-  ///
-  /// The builder must return a non-null sliver widget.
-  @override
-  SliverLayoutWidgetBuilder get builder => super.builder;
-
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }

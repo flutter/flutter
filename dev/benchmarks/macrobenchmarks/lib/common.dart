@@ -17,6 +17,7 @@ const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
 const String kClipperCacheRouteName = '/clipper_cache';
 const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
 const String kColorFilterCacheRouteName = '/color_filter_cache';
+const String kColorFilterWithUnstableChildName = '/color_filter_with_unstable_child';
 const String kFadingChildAnimationRouteName = '/fading_child_animation';
 const String kImageFilteredTransformAnimationRouteName = '/imagefiltered_transform_animation';
 const String kMultiWidgetConstructionRouteName = '/multi_widget_construction';
@@ -30,6 +31,7 @@ const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
 const String kGradientPerfRouteName = '/gradient_perf';
 const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
+const String kAnimatedComplexImageFilteredPerfRouteName = '/animated_complex_image_filtered';
 const String kListTextLayoutRouteName = '/list_text_layout';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';

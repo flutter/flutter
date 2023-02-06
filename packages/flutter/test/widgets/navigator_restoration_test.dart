@@ -1042,9 +1042,12 @@ class PagedTestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: restorationId,
-      child: const Directionality(
+      child: Directionality(
         textDirection: TextDirection.ltr,
-        child: PagedTestNavigator(),
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          child: const PagedTestNavigator(),
+        ),
       ),
     );
   }
@@ -1167,20 +1170,23 @@ class TestWidget extends StatelessWidget {
       restorationId: restorationId,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: 'home',
-          restorationScopeId: 'app',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<int>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return RouteWidget(
-                  name: settings.name!,
-                  arguments: settings.arguments,
-                );
-              },
-            );
-          },
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          child: Navigator(
+            initialRoute: 'home',
+            restorationScopeId: 'app',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<int>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return RouteWidget(
+                    name: settings.name!,
+                    arguments: settings.arguments,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

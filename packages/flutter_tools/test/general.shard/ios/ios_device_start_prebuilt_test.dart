@@ -38,7 +38,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
     '--justlaunch',
     // These args are the default on DebuggingOptions.
     '--args',
-    '--enable-dart-profiling --disable-service-auth-codes',
+    '--enable-dart-profiling',
   ],
   environment: <String, String>{
     'PATH': '/usr/bin:null',
@@ -56,7 +56,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
   '--no-wifi',
   '--justlaunch',
   '--args',
-  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
+  '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -81,7 +81,7 @@ FakeCommand attachDebuggerCommand({
       '--debug',
       '--no-wifi',
       '--args',
-      '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
+      '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
     ],
     completer: completer,
     environment: const <String, String>{
@@ -285,12 +285,15 @@ void main() {
             '--disable-observatory-publication',
             '--start-paused',
             '--dart-flags="--foo,--null_assertions"',
+            '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-software-rendering',
             '--trace-systrace',
             '--skia-deterministic-rendering',
             '--trace-skia',
+            '--trace-allowlist="foo"',
+            '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
             '--dump-skp-on-shader-compilation',
             '--verbose-logging',
@@ -335,9 +338,12 @@ void main() {
         disableServiceAuthCodes: true,
         disablePortPublication: true,
         dartFlags: '--foo',
+        useTestFonts: true,
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
         traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
@@ -348,6 +354,143 @@ void main() {
         enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
+    );
+
+    expect(launchResult.started, true);
+    expect(await device.stopApp(iosApp), false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('startApp using route', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          'HostArtifact.iosDeploy',
+          '--id',
+          '123',
+          '--bundle',
+          '/',
+          '--debug',
+          '--no-wifi',
+          '--args',
+          <String>[
+            '--enable-dart-profiling',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            // The --route argument below is determined by what is passed into
+            // route argument to startApp.
+            '--route=/animation',
+          ].join(' '),
+        ],
+        environment: const <String, String>{
+          'PATH': '/usr/bin:null',
+          'DYLD_LIBRARY_PATH': '/path/to/libraries',
+        },
+        stdout: '(lldb)     run\nsuccess',
+      ),
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      sdkVersion: '13.3',
+      processManager: processManager,
+      fileSystem: fileSystem,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, deviceLogReader);
+
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
+    });
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      platformArgs: <String, dynamic>{},
+      route: '/animation',
+    );
+
+    expect(launchResult.started, true);
+    expect(await device.stopApp(iosApp), false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('startApp using trace-startup', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          'HostArtifact.iosDeploy',
+          '--id',
+          '123',
+          '--bundle',
+          '/',
+          '--debug',
+          '--no-wifi',
+          '--args',
+          <String>[
+            '--enable-dart-profiling',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            // The --trace-startup argument below is determined by what is passed into
+            // platformArgs argument to startApp.
+            '--trace-startup',
+          ].join(' '),
+        ],
+        environment: const <String, String>{
+          'PATH': '/usr/bin:null',
+          'DYLD_LIBRARY_PATH': '/path/to/libraries',
+        },
+        stdout: '(lldb)     run\nsuccess',
+      ),
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      sdkVersion: '13.3',
+      processManager: processManager,
+      fileSystem: fileSystem,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.setLogReader(iosApp, deviceLogReader);
+
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
+    });
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      platformArgs: <String, dynamic>{
+        'trace-startup': true,
+      },
     );
 
     expect(launchResult.started, true);

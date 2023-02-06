@@ -48,6 +48,11 @@ void main() {
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
 
+  testWithoutContext('create accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
+  });
+
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
     final File file = FakeExistsFile()
       ..error = const FileSystemException('', '', OSError('', 2));
@@ -1046,6 +1051,7 @@ void main() {
   group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
+    const int ebadarch = 86;
 
     testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
@@ -1103,6 +1109,28 @@ void main() {
       r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when bad CPU type', () async {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter requires the Rosetta translation environment';
+
+      expect(() async => processManager.start(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.run(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1162,7 +1190,7 @@ void main() {
       );
 
       const String expectedMessage =
-          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Flutter failed to create file at "dest".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });

@@ -377,7 +377,7 @@ class _MacOSUtils extends _PosixUtils {
       if (results.every((RunResult result) => result.exitCode == 0)) {
         String osName = getNameForHostPlatform(hostPlatform);
         // If the script is running in Rosetta, "uname -m" will return x86_64.
-        if (hostPlatform == HostPlatform.darwin_arm && results[3].stdout.contains('x86_64')) {
+        if (hostPlatform == HostPlatform.darwin_arm64 && results[3].stdout.contains('x86_64')) {
           osName = '$osName (Rosetta)';
         }
         _name =
@@ -415,7 +415,7 @@ class _MacOSUtils extends _PosixUtils {
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
-        _hostPlatform = HostPlatform.darwin_arm;
+        _hostPlatform = HostPlatform.darwin_arm64;
       } else {
         _hostPlatform = HostPlatform.darwin_x64;
       }
@@ -590,21 +590,21 @@ class _WindowsUtils extends OperatingSystemUtils {
 String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
+  Directory currentDirectory = fileSystem.directory(directory).absolute;
   while (true) {
-    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
-      return directory;
+    if (currentDirectory.childFile(kProjectRootSentinel).existsSync()) {
+      return currentDirectory.path;
     }
-    final String parent = fileSystem.path.dirname(directory);
-    if (directory == parent) {
+    if (!currentDirectory.existsSync() || currentDirectory.parent.path == currentDirectory.path) {
       return null;
     }
-    directory = parent;
+    currentDirectory = currentDirectory.parent;
   }
 }
 
 enum HostPlatform {
   darwin_x64,
-  darwin_arm,
+  darwin_arm64,
   linux_x64,
   linux_arm64,
   windows_x64,
@@ -614,8 +614,8 @@ String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'darwin-x64';
-    case HostPlatform.darwin_arm:
-      return 'darwin-arm';
+    case HostPlatform.darwin_arm64:
+      return 'darwin-arm64';
     case HostPlatform.linux_x64:
       return 'linux-x64';
     case HostPlatform.linux_arm64:

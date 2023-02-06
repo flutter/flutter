@@ -52,7 +52,7 @@ class MaterialSlice extends MergeableMaterialItem {
 
   /// Defines the color for the slice.
   ///
-  /// By default, the value of `color` is [ThemeData.cardColor].
+  /// By default, the value of [color] is [ThemeData.cardColor].
   final Color? color;
 
   @override
@@ -130,7 +130,7 @@ class MergeableMaterial extends StatefulWidget {
 
   /// Defines color used for dividers if [hasDividers] is true.
   ///
-  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 

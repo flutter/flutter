@@ -645,7 +645,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
         }());
 
       });
-      _snapshot = _snapshot.inState(ConnectionState.waiting);
+      // An implementation like `SynchronousFuture` may have already called the
+      // .then closure. Do not overwrite it in that case.
+      if (_snapshot.connectionState != ConnectionState.done) {
+        _snapshot = _snapshot.inState(ConnectionState.waiting);
+      }
     }
   }
 

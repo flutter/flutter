@@ -11,7 +11,7 @@ import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
 
-export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -108,10 +108,11 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.decoration,
     this.backgroundColor,
     this.borderRadius,
-    this.padding = const EdgeInsetsDirectional.fromSTEB(3.8, 8, 5, 8),
+    this.keyboardType = TextInputType.text,
+    this.padding = const EdgeInsetsDirectional.fromSTEB(5.5, 8, 5.5, 8),
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
-    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 3),
     this.prefixIcon = const Icon(CupertinoIcons.search),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
@@ -194,6 +195,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
+
+  /// The keyboard type for this search field.
+  ///
+  /// Defaults to [TextInputType.text].
+  final TextInputType? keyboardType;
 
   /// Sets the padding insets for the text and placeholder.
   ///
@@ -440,6 +446,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      keyboardType: widget.keyboardType,
       onTap: widget.onTap,
       enabled: widget.enabled,
       suffixMode: widget.suffixMode,

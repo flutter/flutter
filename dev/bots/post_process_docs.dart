@@ -65,7 +65,11 @@ Future<void> postProcess() async {
   final File versionFile = File('version');
   final String version = versionFile.readAsStringSync();
   // Recreate footer
+<<<<<<< HEAD
   final String publishPath = path.join(docsPath, 'doc', 'api', 'footer.js');
+=======
+  final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
+>>>>>>> 7048ed95a5ad3e43d697e0c397464193991fc230
   final File footerFile = File(publishPath)..createSync(recursive: true);
   createFooter(footerFile, version);
 }

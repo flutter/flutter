@@ -234,14 +234,11 @@ void main() {
 
 KeyboardEvent dispatchKeyboardEvent(
     EventTarget target, String type, Map<String, dynamic> args) {
-  // ignore: implicit_dynamic_function
   final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     args,
   ];
-
-  // ignore: implicit_dynamic_function
   final KeyboardEvent event = js_util.callConstructor(
           jsKeyboardEvent, js_util.jsify(eventArgs) as List<dynamic>)
       as KeyboardEvent;

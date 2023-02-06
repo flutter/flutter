@@ -9,14 +9,19 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget renders a Container by default', (WidgetTester tester) async {
+  testWidgets('The Ink widget renders a SizedBox by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
       ),
     );
-    expect(tester.getSize(find.byType(Container)).height, 600.0);
-    expect(tester.getSize(find.byType(Container)).width, 800.0);
+    Finder sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
+    );
+    expect(sizedBox, findsOneWidget);
+    expect(tester.getSize(sizedBox).height, 600.0);
+    expect(tester.getSize(sizedBox).width, 800.0);
 
     const double height = 150.0;
     const double width = 200.0;
@@ -31,8 +36,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(Container)).height, height);
-    expect(tester.getSize(find.byType(Container)).width, width);
+    sizedBox = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(SizedBox),
+    );
+    expect(sizedBox, findsNWidgets(2));
+    expect(tester.getSize(sizedBox.at(0)).height, height);
+    expect(tester.getSize(sizedBox.at(0)).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
@@ -65,7 +75,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(
       box,
       paints
@@ -117,7 +127,7 @@ void main() {
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start gesture
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -195,7 +205,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(
       box,
       paints
@@ -327,7 +337,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));
@@ -423,7 +433,7 @@ void main() {
     await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle) {
         return true;
@@ -435,4 +445,90 @@ void main() {
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });
+
+  testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
+    const Color splashColor = Color(0xff00ff00);
+
+    Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 200.0,
+              child: InkResponse(
+                splashColor: splashColor,
+                containedInkWell: true,
+                highlightShape: BoxShape.rectangle,
+                splashFactory: splashFactory,
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final Offset center = tester.getCenter(find.byType(SizedBox));
+    TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    RenderBox box = Material.of(tester.element(find.byType(InkResponse))) as RenderBox;
+    expect(
+      box,
+      paints
+        ..circle(x: 50.0, y: 100.0, color: splashColor)
+    );
+
+    await gesture.up();
+
+    await tester.pumpWidget(buildWidget(splashFactory: _InkRippleFactory()));
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    box = Material.of(tester.element(find.byType(InkResponse))) as RenderBox;
+    expect(
+      box,
+      paints
+        ..circle(x: 50.0, y: 50.0, color: splashColor)
+    );
+  });
+}
+
+class _InkRippleFactory extends InteractiveInkFeatureFactory {
+  @override
+  InteractiveInkFeature create({
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    required Offset position,
+    required Color color,
+    required TextDirection textDirection,
+    bool containedInkWell = false,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+  }) {
+    return InkRipple(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: containedInkWell,
+      rectCallback: () => Offset.zero & const Size(100, 100),
+      borderRadius: borderRadius,
+      customBorder: customBorder,
+      radius: radius,
+      onRemoved: onRemoved,
+      textDirection: textDirection,
+    );
+  }
 }

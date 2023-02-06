@@ -21,6 +21,11 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late List<DataColumn> _columns;
+// late List<DataRow> _rows;
+
 /// Signature for [DataColumn.onSort] callback.
 typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 
@@ -183,10 +188,14 @@ class DataRow {
   /// ```dart
   /// DataRow(
   ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   cells: const <DataCell>[
+  ///     // ...
+  ///   ],
   /// )
   /// ```
   ///
@@ -228,7 +237,7 @@ class DataCell {
   }) : assert(child != null);
 
   /// A cell that has no content and has zero width and height.
-  static const DataCell empty = DataCell(SizedBox(width: 0.0, height: 0.0));
+  static const DataCell empty = DataCell(SizedBox.shrink());
 
   /// The data for the row.
   ///
@@ -291,7 +300,7 @@ class DataCell {
 
   /// Called if the user cancels a tap was started on cell.
   ///
-  /// If non-null, cancelling the tap gesture will invoke this callback.
+  /// If non-null, canceling the tap gesture will invoke this callback.
   /// If null (including [onTap], [onDoubleTap] and [onLongPress]),
   /// tapping the cell will attempt to select the
   /// row (if [DataRow.onSelectChanged] is provided).
@@ -397,6 +406,7 @@ class DataTable extends StatelessWidget {
     required this.rows,
     this.checkboxHorizontalMargin,
     this.border,
+    this.clipBehavior = Clip.none,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -405,6 +415,7 @@ class DataTable extends StatelessWidget {
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
+       assert(clipBehavior != null),
        _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
@@ -474,10 +485,13 @@ class DataTable extends StatelessWidget {
   /// ```dart
   /// DataTable(
   ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected))
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
+  ///   columns: _columns,
+  ///   rows: _rows,
   /// )
   /// ```
   ///
@@ -503,7 +517,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataTextStyle] is used. By default, the text
-  /// style is [TextTheme.bodyText2].
+  /// style is [TextTheme.bodyMedium].
   final TextStyle? dataTextStyle;
 
   /// {@template flutter.material.dataTable.headingRowColor}
@@ -521,9 +535,12 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.headingRowColor}
   /// ```dart
   /// DataTable(
+  ///   columns: _columns,
+  ///   rows: _rows,
   ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered))
+  ///     if (states.contains(MaterialState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
   ///     return null;  // Use the default value.
   ///   }),
   /// )
@@ -550,7 +567,7 @@ class DataTable extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.headingTextStyle] is used. By default, the
-  /// text style is [TextTheme.subtitle2].
+  /// text style is [TextTheme.titleSmall].
   final TextStyle? headingTextStyle;
 
   /// {@template flutter.material.dataTable.horizontalMargin}
@@ -622,6 +639,13 @@ class DataTable extends StatelessWidget {
 
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// This can be used to clip the content within the border of the [DataTable].
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -759,7 +783,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveHeadingTextStyle = headingTextStyle
       ?? dataTableTheme.headingTextStyle
       ?? themeData.dataTableTheme.headingTextStyle
-      ?? themeData.textTheme.subtitle2!;
+      ?? themeData.textTheme.titleSmall!;
     final double effectiveHeadingRowHeight = headingRowHeight
       ?? dataTableTheme.headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
@@ -822,7 +846,7 @@ class DataTable extends StatelessWidget {
     final TextStyle effectiveDataTextStyle = dataTextStyle
       ?? dataTableTheme.dataTextStyle
       ?? themeData.dataTableTheme.dataTextStyle
-      ?? themeData.textTheme.bodyText2!;
+      ?? themeData.textTheme.bodyMedium!;
     final double effectiveDataRowHeight = dataRowHeight
       ?? dataTableTheme.dataRowHeight
       ?? themeData.dataTableTheme.dataRowHeight
@@ -1041,6 +1065,8 @@ class DataTable extends StatelessWidget {
       decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
       child: Material(
         type: MaterialType.transparency,
+        borderRadius: border?.borderRadius,
+        clipBehavior: clipBehavior,
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,

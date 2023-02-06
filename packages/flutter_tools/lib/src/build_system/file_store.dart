@@ -84,7 +84,7 @@ enum FileStoreStrategy {
 /// through this class.
 ///
 /// This class uses either timestamps or file hashes depending on the
-/// provided [FileStoreStrategy]. All information  is held in memory during
+/// provided [FileStoreStrategy]. All information is held in memory during
 /// a build operation, and may be persisted to cache in the root build
 /// directory.
 ///

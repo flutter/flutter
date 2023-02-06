@@ -9,68 +9,13 @@ import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 // ADDING A NEW STRING
 //
-// If you (someone contributing to the Flutter framework) want to add a new
-// string to the MaterialLocalizations object (e.g. because you've added a new
-// widget and it has a tooltip), follow these steps:
-//
-// 1. Add the new getter to MaterialLocalizations below.
-//
-// 2. Implement a default value in DefaultMaterialLocalizations below.
-//
-// 3. Add a test to test/material/localizations_test.dart that verifies that
-//    this new value is implemented.
-//
-// 4. Update the flutter_localizations package. To add a new string to the
-//    flutter_localizations package, you must first add it to the English
-//    translations (lib/src/l10n/material_en.arb), including a description.
-//
-//    Then you need to add new entries for the string to all of the other
-//    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
-//    Which will copy the english strings into the other locales as placeholders
-//    until they can be translated.
-//
-//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
-//
-//    There is a README file with further information in the lib/src/l10n/
-//    directory.
-//
-// 5. If you are a Google employee, you should then also follow the instructions
-//    at go/flutter-l10n. If you're not, don't worry about it.
-//
-// UPDATING AN EXISTING STRING
-//
-// If you (someone contributing to the Flutter framework) want to modify an
-// existing string in the MaterialLocalizations objects, follow these steps:
-//
-// 1. Modify the default value of the relevant getter(s) in
-//    DefaultMaterialLocalizations below.
-//
-// 2. Update the flutter_localizations package. Modify the out-of-date English
-//    strings in lib/src/l10n/material_en.arb.
-//
-//    You also need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
-//
-//    This script may result in your updated getters being created in newer
-//    locales and set to the old value of the strings. This is to be expected.
-//    Leave them as they were generated, and they will be picked up for
-//    translation.
-//
-//    There is a README file with further information in the lib/src/l10n/
-//    directory.
-//
-// 3. If you are a Google employee, you should then also follow the instructions
-//    at go/flutter-l10n. If you're not, don't worry about it.
+// Please refer to instructions in this markdown file
+// (packages/flutter_localizations/README.md)
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -348,9 +293,9 @@ abstract class MaterialLocalizations {
   /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
-  /// var localizations = MaterialLocalizations.of(context);
+  ///  MaterialLocalizations localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
+  /// String firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -924,13 +869,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateOutOfRangeLabel => 'Out of range.';
 
   @override
-  String get saveButtonLabel => 'SAVE';
+  String get saveButtonLabel => 'Save';
 
   @override
-  String get datePickerHelpText => 'SELECT DATE';
+  String get datePickerHelpText => 'Select date';
 
   @override
-  String get dateRangePickerHelpText => 'SELECT RANGE';
+  String get dateRangePickerHelpText => 'Select range';
 
   @override
   String get calendarModeButtonLabel => 'Switch to calendar';
@@ -939,10 +884,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get inputDateModeButtonLabel => 'Switch to input';
 
   @override
-  String get timePickerDialHelpText => 'SELECT TIME';
+  String get timePickerDialHelpText => 'Select time';
 
   @override
-  String get timePickerInputHelpText => 'ENTER TIME';
+  String get timePickerInputHelpText => 'Enter time';
 
   @override
   String get timePickerHourLabel => 'Hour';
@@ -1119,13 +1064,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get cancelButtonLabel => 'CANCEL';
+  String get cancelButtonLabel => 'Cancel';
 
   @override
-  String get closeButtonLabel => 'CLOSE';
+  String get closeButtonLabel => 'Close';
 
   @override
-  String get continueButtonLabel => 'CONTINUE';
+  String get continueButtonLabel => 'Continue';
 
   @override
   String get copyButtonLabel => 'Copy';
@@ -1143,7 +1088,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get selectAllButtonLabel => 'Select all';
 
   @override
-  String get viewLicensesButtonLabel => 'VIEW LICENSES';
+  String get viewLicensesButtonLabel => 'View licenses';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';

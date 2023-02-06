@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/src/interface/file_system.dart';
@@ -282,7 +280,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String target, bool stayResident, FlutterProject flutterProject, bool ipv6, DebuggingOptions debuggingOptions, UrlTunneller urlTunneller, Logger logger, FileSystem fileSystem, SystemClock systemClock, Usage usage, bool machine = false}) {
+  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -292,12 +290,12 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
   FakeResidentRunner({
-    this.doResolveToError,
+    required this.doResolveToError,
   }) {
     instance = this;
   }
 
-  static FakeResidentRunner instance;
+  static late FakeResidentRunner instance;
 
   final bool doResolveToError;
   final Completer<int> _exitCompleter = Completer<int>();
@@ -308,10 +306,10 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<void> appStartedCompleter,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
     bool enableDevTools = false,
-    String route,
+    String? route,
   }) async {
     callLog.add('run');
 
@@ -319,7 +317,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
       return Future<int>.error('This is a test error');
     }
 
-    appStartedCompleter.complete();
+    appStartedCompleter?.complete();
     // Emulate stayResident by completing after exitApp is called.
     return _exitCompleter.future;
   }
@@ -327,7 +325,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
   Future<void> exitApp() async {
     callLog.add('exitApp');
-    _exitCompleter.complete();
+    _exitCompleter.complete(0);
   }
 
   @override

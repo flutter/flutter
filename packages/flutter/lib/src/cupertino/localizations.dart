@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
 enum DatePickerDateTimeOrder {

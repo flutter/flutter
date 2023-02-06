@@ -10,6 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
@@ -160,6 +161,21 @@ void main() {
     setUp(() {
       fakeSignal = FakeProcessSignal();
       signalUnderTest = ProcessSignal(fakeSignal);
+    });
+
+    testWithoutContext('runs shutdown hooks', () async {
+      final Signals signals = Signals.test();
+      final LocalFileSystem localFileSystem = LocalFileSystem.test(
+        signals: signals,
+      );
+      final Directory temp = localFileSystem.systemTempDirectory;
+
+      expect(temp.existsSync(), isTrue);
+      expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
+      final BufferLogger logger = BufferLogger.test();
+      await localFileSystem.shutdownHooks.runShutdownHooks(logger);
+      expect(temp.existsSync(), isFalse);
+      expect(logger.traceText, contains('Running 1 shutdown hook'));
     });
 
     testWithoutContext('deletes system temp entry on a fatal signal', () async {

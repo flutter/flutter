@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [ButtonBar] widgets.
 ///
 /// Used by [ButtonBarTheme] to control the visual properties of [ButtonBar]

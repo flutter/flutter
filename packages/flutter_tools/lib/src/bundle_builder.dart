@@ -65,6 +65,7 @@ class BundleBuilder {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -120,7 +121,6 @@ Future<AssetBundle?> buildAssets({
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
   );
@@ -134,9 +134,10 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds,
-  { Logger? loggerOverride }
-) async {
+  Map<String, AssetKind> entryKinds, {
+  Logger? loggerOverride,
+  required TargetPlatform targetPlatform,
+}) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
@@ -165,7 +166,7 @@ Future<void> writeBundle(
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`.  However, we have to keep it this way since the
+        // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
@@ -184,6 +185,8 @@ Future<void> writeBundle(
               doCopy = !await shaderCompiler.compileShader(
                 input: input,
                 outputPath: file.path,
+                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                json: targetPlatform == TargetPlatform.web_javascript,
               );
               break;
           }

@@ -46,7 +46,7 @@ void main() {
     expect(description[1], 'backgroundColor: Color(0x00000099)');
     expect(description[2], 'elevation: 20.0');
     expect(description[3], 'indicatorColor: Color(0x00000098)');
-    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
+    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
     expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.

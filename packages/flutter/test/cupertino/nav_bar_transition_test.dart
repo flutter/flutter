@@ -9,8 +9,11 @@
 // Fails with "flutter test --test-randomize-ordering-seed=456"
 @Tags(<String>['no-shuffle'])
 
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> startTransitionBetween(
@@ -441,6 +444,26 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  testWidgets('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
+    DartPerformanceMode? mode;
+
+    // before the animation starts, no requests are active.
+    mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
+    expect(mode, isNull);
+
+    await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+    // mid-transition, latency mode is expected.
+    await tester.pump(const Duration(milliseconds: 50));
+    mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
+    expect(mode, equals(DartPerformanceMode.latency));
+
+    // end of transitio, go back to no requests active.
+    await tester.pump(const Duration(milliseconds: 500));
+    mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
+    expect(mode, isNull);
   });
 
   testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {

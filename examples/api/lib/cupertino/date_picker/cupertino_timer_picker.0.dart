@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoTimerPicker
+/// Flutter code sample for [CupertinoTimerPicker].
 
 import 'package:flutter/cupertino.dart';
 
@@ -30,14 +30,16 @@ class TimerPickerExample extends StatefulWidget {
 class _TimerPickerExampleState extends State<TimerPickerExample> {
   Duration duration = const Duration(hours: 1, minutes: 23);
 
-  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoTimerPicker.
+  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts
+  // a CupertinoTimerPicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
-        // The Bottom margin is provided to align the popup above the system navigation bar.
+        // The bottom margin is provided to align the popup above the system
+        // navigation bar.
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -76,14 +78,16 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
                       CupertinoTimerPicker(
                         mode: CupertinoTimerPickerMode.hm,
                         initialTimerDuration: duration,
-                        // This is called when the user changes the timer duration.
+                        // This is called when the user changes the timer's
+                        // duration.
                         onTimerDurationChanged: (Duration newDuration) {
                           setState(() => duration = newDuration);
                         },
                       ),
                     ),
-                    // In this example, the timer value is formatted manually. You can use intl package
-                    // to format the value based on user's locale settings.
+                    // In this example, the timer's value is formatted manually.
+                    // You can use the intl package to format the value based on
+                    // the user's locale settings.
                     child: Text('$duration',
                       style: const TextStyle(
                         fontSize: 22.0,

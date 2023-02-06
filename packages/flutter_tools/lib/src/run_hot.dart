@@ -141,7 +141,7 @@ class HotRunner extends ResidentRunner {
     }
 
     if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first!.device!;
+      final Device device = flutterDevices.first.device!;
       _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
       _sdkName = await device.sdkNameAndVersion;
       _emulator = await device.isLocalEmulator;
@@ -247,6 +247,9 @@ class HotRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       await device!.initLogReader();
+      device
+        .developmentShaderCompiler
+        .configureCompiler(device.targetPlatform, enableImpeller: debuggingOptions.enableImpeller);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -254,8 +257,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first!.vmService!.httpAddress,
-            wsUri: flutterDevices.first!.vmService!.wsAddress,
+            httpUri: flutterDevices.first.vmService!.httpAddress,
+            wsUri: flutterDevices.first.vmService!.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -373,6 +376,7 @@ class HotRunner extends ResidentRunner {
             // should only be displayed once.
             suppressErrors: applicationBinary == null,
             checkDartPluginRegistry: true,
+            dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
             outputPath: dillOutputPath,
             packageConfig: debuggingOptions.buildInfo.packageConfig,
             projectRootPath: FlutterProject.current().directory.absolute.path,
@@ -450,12 +454,13 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch findInvalidationTimer = _stopwatchFactory.createStopwatch('updateDevFS')..start();
+    final DevFS devFS = flutterDevices[0].devFS!;
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
-      lastCompiled: flutterDevices[0]!.devFS!.lastCompiled,
-      urisToMonitor: flutterDevices[0]!.devFS!.sources,
+      lastCompiled: devFS.lastCompiled,
+      urisToMonitor: devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig!.asyncScanning,
-      packageConfig: flutterDevices[0]!.devFS!.lastPackageConfig
+      packageConfig: devFS.lastPackageConfig
           ?? debuggingOptions.buildInfo.packageConfig,
     );
     findInvalidationTimer.stop();
@@ -470,7 +475,7 @@ class HotRunner extends ResidentRunner {
     }
     final UpdateFSReport results = UpdateFSReport(
       success: true,
-      scannedSourcesCount: flutterDevices[0]!.devFS!.sources.length,
+      scannedSourcesCount: devFS.sources.length,
       findInvalidatedDuration: findInvalidationTimer.elapsed,
     );
     for (final FlutterDevice? device in flutterDevices) {
@@ -493,20 +498,27 @@ class HotRunner extends ResidentRunner {
   }
 
   void _resetDirtyAssets() {
-    for (final FlutterDevice? device in flutterDevices) {
-      device!.devFS!.assetPathsToEvict.clear();
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
+        // This is sometimes null, however we don't know why and have not been
+        // able to reproduce, https://github.com/flutter/flutter/issues/108653
+        continue;
+      }
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
     }
   }
 
   Future<void> _cleanupDevFS() async {
     final List<Future<void>> futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS != null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.devFS != null) {
         // Cleanup the devFS, but don't wait indefinitely.
         // We ignore any errors, because it's not clear what we would do anyway.
         futures.add(device.devFS!.destroy()
           .timeout(const Duration(milliseconds: 250))
-          .catchError((dynamic error) {
+          .catchError((Object? error) {
             globals.printTrace('Ignored error while cleaning up DevFS: $error');
           }));
       }
@@ -617,13 +629,19 @@ class HotRunner extends ResidentRunner {
         if (uiIsolatesIds.contains(isolateRef.id)) {
           continue;
         }
-        operations.add(device.vmService!.service.kill(isolateRef.id!)
+        operations.add(
+          device.vmService!.service.kill(isolateRef.id!)
+          // Since we never check the value of this Future, only await its
+          // completion, make its type nullable so we can return null when
+          // catching errors.
+          .then<vm_service.Success?>((vm_service.Success success) => success)
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
             // Error code 105 indicates the isolate is not yet runnable, and might
             // be triggered if the tool is attempting to kill the asset parsing
             // isolate before it has finished starting up.
+            return null;
           }, test: (dynamic error) => error is vm_service.SentinelException
             || (error is vm_service.RPCError && error.code == 105)));
       }
@@ -748,7 +766,7 @@ class HotRunner extends ResidentRunner {
     String? restartEvent;
     try {
       final Stopwatch restartTimer = _stopwatchFactory.createStopwatch('fullRestartHelper')..start();
-      if (!(await (hotRunnerConfig!.setupHotRestart() as FutureOr<bool>))) {
+      if ((await hotRunnerConfig!.setupHotRestart()) != true) {
         return OperationResult(1, 'setupHotRestart failed');
       }
       result = await _restartFromSources(reason: reason);
@@ -877,7 +895,7 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = _stopwatchFactory.createStopwatch('reloadSources:reload')..start();
-    if (!(await (hotRunnerConfig!.setupHotReload() as FutureOr<bool>))) {
+    if ((await hotRunnerConfig!.setupHotReload()) != true) {
       return OperationResult(1, 'setupHotReload failed');
     }
     final Stopwatch devFSTimer = Stopwatch()..start();
@@ -1011,11 +1029,11 @@ class HotRunner extends ResidentRunner {
       globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
     } else {
       globals.printStatus(
-        'Running with unsound null safety',
+        'Running without sound null safety ⚠️',
         emphasis: true,
       );
       globals.printStatus(
-        'For more information see https://dart.dev/null-safety/unsound-null-safety',
+        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
       );
     }
     globals.printStatus('');
@@ -1024,9 +1042,9 @@ class HotRunner extends ResidentRunner {
 
   @visibleForTesting
   Future<void> evictDirtyAssets() async {
-    final List<Future<Map<String, dynamic>?>> futures = <Future<Map<String, dynamic>>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1039,6 +1057,7 @@ class HotRunner extends ResidentRunner {
             assetsDirectory: deviceAssetsDirectoryUri,
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
+            windows: device.targetPlatform == TargetPlatform.windows_x64,
           )
         ));
         for (final FlutterView view in views) {
@@ -1051,6 +1070,14 @@ class HotRunner extends ResidentRunner {
         globals.printError('Application isolate not found for $device');
         continue;
       }
+
+      if (device.devFS!.didUpdateFontManifest) {
+        futures.add(device.vmService!.reloadAssetFonts(
+            isolateId: views.first.uiIsolate!.id!,
+            viewId: views.first.id,
+        ));
+      }
+
       for (final String assetPath in device.devFS!.assetPathsToEvict) {
         futures.add(
           device.vmService!
@@ -1060,9 +1087,19 @@ class HotRunner extends ResidentRunner {
             )
         );
       }
+      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
+        futures.add(
+          device.vmService!
+            .flutterEvictShader(
+              assetPath,
+              isolateId: views.first.uiIsolate!.id!,
+            )
+        );
+      }
       device.devFS!.assetPathsToEvict.clear();
+      device.devFS!.shaderPathsToEvict.clear();
     }
-    await Future.wait<Map<String, Object?>?>(futures);
+    await Future.wait<void>(futures);
   }
 
   @override
