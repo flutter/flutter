@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show SuggestionSpan;
-import 'package:flutter/widgets.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
@@ -142,16 +142,16 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         anchor + const Offset(0.0, kToolbarContentDistanceBelow);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
-    final double paddingAbove = mediaQueryData.padding.top + TextSelectionToolbar.kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryData.padding.top + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
-    final Offset localAdjustment = Offset(TextSelectionToolbar.kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(CupertinoTextSelectionToolbar.kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        TextSelectionToolbar.kToolbarScreenPadding,
+        CupertinoTextSelectionToolbar.kToolbarScreenPadding,
         kToolbarContentDistanceBelow,
-        TextSelectionToolbar.kToolbarScreenPadding,
-        TextSelectionToolbar.kToolbarScreenPadding + softKeyboardViewInsetsBottom,
+        CupertinoTextSelectionToolbar.kToolbarScreenPadding,
+        CupertinoTextSelectionToolbar.kToolbarScreenPadding + softKeyboardViewInsetsBottom,
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
