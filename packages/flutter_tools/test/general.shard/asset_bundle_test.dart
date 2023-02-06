@@ -92,7 +92,6 @@ flutter:
 '''
       );
 
-
       final List<String> assets = <String>[
         'assets/foo/dog.png',
         'assets/foo/sub/cat.png',
