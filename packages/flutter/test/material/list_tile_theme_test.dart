@@ -700,6 +700,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(iconColor(leadingKey), selectedColor);
   });
+
+  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/119734
+
+    const ListTileThemeData original = ListTileThemeData(
+      dense: true,
+      shape: StadiumBorder(),
+      style: ListTileStyle.drawer,
+      selectedColor: Color(0x00000001),
+      iconColor: Color(0x00000002),
+      textColor: Color(0x00000003),
+      titleTextStyle: TextStyle(color: Color(0x00000004)),
+      subtitleTextStyle: TextStyle(color: Color(0x00000005)),
+      leadingAndTrailingTextStyle: TextStyle(color: Color(0x00000006)),
+      contentPadding: EdgeInsets.all(100),
+      tileColor: Color(0x00000007),
+      selectedTileColor: Color(0x00000008),
+      horizontalTitleGap: 200,
+      minVerticalPadding: 300,
+      minLeadingWidth: 400,
+      enableFeedback: true,
+    );
+
+    final ListTileThemeData copy = original.copyWith(
+      dense: false,
+      shape: const RoundedRectangleBorder(),
+      style: ListTileStyle.list,
+      selectedColor: const Color(0x00000009),
+      iconColor: const Color(0x0000000A),
+      textColor: const Color(0x0000000B),
+      titleTextStyle: const TextStyle(color: Color(0x0000000C)),
+      subtitleTextStyle: const TextStyle(color: Color(0x0000000D)),
+      leadingAndTrailingTextStyle: const TextStyle(color: Color(0x0000000E)),
+      contentPadding: const EdgeInsets.all(500),
+      tileColor: const Color(0x0000000F),
+      selectedTileColor: const Color(0x00000010),
+      horizontalTitleGap: 600,
+      minVerticalPadding: 700,
+      minLeadingWidth: 800,
+      enableFeedback: false,
+    );
+
+    expect(copy.dense, false);
+    expect(copy.shape, const RoundedRectangleBorder());
+    expect(copy.style, ListTileStyle.list);
+    expect(copy.selectedColor, const Color(0x00000009));
+    expect(copy.iconColor, const Color(0x0000000A));
+    expect(copy.textColor, const Color(0x0000000B));
+    expect(copy.titleTextStyle, const TextStyle(color: Color(0x0000000C)));
+    expect(copy.subtitleTextStyle, const TextStyle(color: Color(0x0000000D)));
+    expect(copy.leadingAndTrailingTextStyle, const TextStyle(color: Color(0x0000000E)));
+    expect(copy.contentPadding, const EdgeInsets.all(500));
+    expect(copy.tileColor, const Color(0x0000000F));
+    expect(copy.selectedTileColor, const Color(0x00000010));
+    expect(copy.horizontalTitleGap, 600);
+    expect(copy.minVerticalPadding, 700);
+    expect(copy.minLeadingWidth, 800);
+    expect(copy.enableFeedback, false);
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {

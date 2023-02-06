@@ -17,8 +17,8 @@ class TextFieldExamplesApp extends StatelessWidget {
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('TextField Examples')),
-        body: Column(
-          children: const <Widget>[
+        body: const Column(
+          children: <Widget>[
             Spacer(),
             FilledTextFieldExample(),
             OutlinedTextFieldExample(),

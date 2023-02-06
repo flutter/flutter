@@ -82,8 +82,7 @@ VoidCallback? onError;
 bool get hasError => _hasError;
 bool _hasError = false;
 
-Iterable<String> get errorMessages => _errorMessages;
-List<String> _errorMessages = <String>[];
+List<List<String>> _errorMessages = <List<String>>[];
 
 final List<String> _pendingLogs = <String>[];
 Timer? _hideTimer; // When this is null, the output is verbose.
@@ -104,7 +103,7 @@ void foundError(List<String> messages) {
   // another error.
   _pendingLogs.forEach(_printLoudly);
   _pendingLogs.clear();
-  _errorMessages.addAll(messages);
+  _errorMessages.add(messages);
   _hasError = true;
   if (onError != null) {
     onError!();
@@ -124,8 +123,18 @@ Never reportErrorsAndExit() {
   _hideTimer?.cancel();
   _hideTimer = null;
   print(redLine);
-  print('For your convenience, the error messages reported above are repeated here:');
-  _errorMessages.forEach(print);
+  print('${red}For your convenience, the error messages reported above are repeated here:$reset');
+  final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
+  if (printSeparators) {
+    print('  🙙  🙛  ');
+  }
+  for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
+    if (index.isEven) {
+      _errorMessages[index ~/ 2].forEach(print);
+    } else if (printSeparators) {
+      print('  🙙  🙛  ');
+    }
+  }
   print(redLine);
   system.exit(1);
 }
