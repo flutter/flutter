@@ -15,9 +15,7 @@ void main() => runApp(const MyApp());
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
 class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-  });
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();

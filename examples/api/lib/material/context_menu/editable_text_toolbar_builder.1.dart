@@ -15,9 +15,7 @@ const String emailAddress = 'me@example.com';
 const String text = 'Select the email address and open the menu: $emailAddress';
 
 class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-  });
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
