@@ -83,23 +83,23 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.hovered)) {
-            return ${_stateColor($tokenGroup, 'selected', 'hover')};
+            return ${_stateColor(tokenGroup, 'selected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${_stateColor($tokenGroup, 'selected', 'focus')};
+            return ${_stateColor(tokenGroup, 'selected', 'focus')};
           }
           if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor($tokenGroup, 'selected', 'pressed')};
+            return ${_stateColor(tokenGroup, 'selected', 'pressed')};
           }
         } else {
           if (states.contains(MaterialState.hovered)) {
-            return ${_stateColor($tokenGroup, 'unselected', 'hover')};
+            return ${_stateColor(tokenGroup, 'unselected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${_stateColor($tokenGroup, 'unselected', 'focus')};
+            return ${_stateColor(tokenGroup, 'unselected', 'focus')};
           }
           if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor($tokenGroup, 'unselected', 'pressed')};
+            return ${_stateColor(tokenGroup, 'unselected', 'pressed')};
           }
         }
         return null;
@@ -113,7 +113,7 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
         }
         return ${border("$tokenGroup.outline")};
       }),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape($tokenGroup, '')}),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape(tokenGroup, '')}),
       minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${tokens['$tokenGroup.container.height']})),
     );
   }
