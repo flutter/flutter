@@ -2159,7 +2159,7 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(
-          useMaterial3: true, 
+          useMaterial3: true,
           iconButtonTheme: IconButtonThemeData(
             style:  IconButton.styleFrom(
               foregroundColor: iconButtonThemeColor,
@@ -2184,7 +2184,7 @@ void main() {
 
     TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
       tester.widget<RichText>(find.descendant(
-        of: find.byIcon(icon), 
+        of: find.byIcon(icon),
         matching: find.byType(RichText),
       ),
     ).text.style;
