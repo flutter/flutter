@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
           child: ListView(
             children: <Widget>[
               Container(height: 20.0),
-              const Text('Right click or long press anywhere (not just on this text!) to show the custom menu.'),
+              const Text('Right click (desktop) or long press (mobile) anywhere, not just on this text, to show the custom menu.'),
             ],
           ),
         ),

@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
-const String text = 'I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.';
+const String text = 'I am some text inside of SelectionArea. Right click (desktop) or long press (mobile) me to show the customized context menu.';
 
 class MyApp extends StatefulWidget {
   const MyApp({

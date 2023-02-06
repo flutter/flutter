@@ -23,7 +23,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final TextEditingController _controller = TextEditingController(
-    text: 'Right click or long press to see the menu with custom buttons.',
+    text: 'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
   );
 
   @override
