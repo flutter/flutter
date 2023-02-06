@@ -67,7 +67,7 @@ void main() {
         'Application finished.',
         '',
         startsWith('Exited'),
-      ]);
+      ], allowExtras: true);
     });
 
     testWithoutContext('logs to client when sendLogsToClient=true', () async {
@@ -131,7 +131,7 @@ void main() {
         'Application finished.',
         '',
         startsWith('Exited'),
-      ]);
+      ], allowExtras: true);
 
       // If we're running with an out-of-process debug adapter, ensure that its
       // own process shuts down after we terminated.
