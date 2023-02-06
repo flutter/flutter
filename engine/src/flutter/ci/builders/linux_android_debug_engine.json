@@ -33,7 +33,7 @@
             },
             "tests": [
                 {
-                    "language": "python",
+                    "language": "python3",
                     "name": "Host Tests for android_jit_release_x86",
                     "parameters": [
                         "--variant",
@@ -115,7 +115,7 @@
             },
             "tests": [
                 {
-                    "language": "python",
+                    "language": "python3",
                     "name": "Host Tests for android_debug",
                     "parameters": [
                         "--variant",

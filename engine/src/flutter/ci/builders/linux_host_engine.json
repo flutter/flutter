@@ -52,7 +52,7 @@
           },
           "tests": [
             {
-                "language": "python",
+                "language": "python3",
                 "name": "Host Tests for host_debug_impeller_vulkan",
                 "parameters": [
                     "--variant",
@@ -144,7 +144,7 @@
             },
             "tests": [
                 {
-                    "language": "python",
+                    "language": "python3",
                     "name": "Host Tests for host_profile",
                     "parameters": [
                         "--variant",
@@ -194,7 +194,7 @@
             },
             "tests": [
                 {
-                    "language": "python",
+                    "language": "python3",
                     "name": "Host Tests for host_release",
                     "parameters": [
                         "--variant",

@@ -85,7 +85,7 @@
                     "--strip"
                 ],
                 "script": "flutter/sky/tools/create_full_ios_framework.py",
-                "language": "python"
+                "language": "python3"
             },
             {
                 "name": "release-nobitcode-FlutterMacOS.framework",
@@ -102,7 +102,7 @@
                     "--strip"
                 ],
                 "script": "flutter/sky/tools/create_full_ios_framework.py",
-                "language": "python"
+                "language": "python3"
             },
             {
                 "name": "Release-macos-gen-snapshots",
@@ -113,7 +113,7 @@
                     "out/ios_release"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py",
-                "language": "python"
+                "language": "python3"
             }
         ]
     },
