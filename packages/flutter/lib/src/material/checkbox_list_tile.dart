@@ -163,8 +163,14 @@ class CheckboxListTile extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    this.mouseCursor,
     this.activeColor,
+    this.fillColor,
     this.checkColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
     this.enabled,
     this.tileColor,
     this.title,
@@ -185,6 +191,7 @@ class CheckboxListTile extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.isError = false,
   }) : assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
 
@@ -219,10 +226,59 @@ class CheckboxListTile extends StatelessWidget {
   /// {@end-tool}
   final ValueChanged<bool?>? onChanged;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  final MouseCursor? mouseCursor;
+
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
+
+  /// The color that fills the checkbox.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If null, then the value of [activeColor] is used in the selected
+  /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
+  /// is used. If that is also null, then the default value is used.
+  final MaterialStateProperty<Color?>? fillColor;
+
+  /// The color for the checkbox's [Material] when a pointer is hovering over it.
+  ///
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
+  /// state, it will be used instead.
+  final Color? hoverColor;
+
+  /// The color for the checkbox's [Material].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///
+  /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
+  /// and [hoverColor] is used in the pressed and hovered state. If that is also null,
+  /// the value of [CheckboxThemeData.overlayColor] is used. If that is also null,
+  /// then the the default value is used in the pressed and hovered state.
+  final MaterialStateProperty<Color?>? overlayColor;
+
+  /// {@macro flutter.material.checkbox.splashRadius}
+  ///
+  /// If null, then the value of [CheckboxThemeData.splashRadius] is used. If
+  /// that is also null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
+
+  /// {@macro flutter.material.checkbox.materialTapTargetSize}
+  ///
+  /// Defaults to [MaterialTapTargetSize.shrinkWrap].
+  final MaterialTapTargetSize? materialTapTargetSize;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
@@ -340,6 +396,11 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// {@macro flutter.material.checkbox.isError}
+  ///
+  /// defaults to false.
+  final bool isError;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -359,14 +420,20 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: enabled ?? true ? onChanged : null ,
+      onChanged: enabled ?? true ? onChanged : null,
+      mouseCursor: mouseCursor,
       activeColor: activeColor,
+      fillColor: fillColor,
       checkColor: checkColor,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      hoverColor: hoverColor,
+      overlayColor: overlayColor,
+      splashRadius: splashRadius,
+      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
       tristate: tristate,
       shape: checkboxShape,
       side: side,
+      isError: isError,
     );
     Widget? leading, trailing;
     switch (controlAffinity) {
