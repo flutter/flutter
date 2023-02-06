@@ -950,16 +950,20 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && (extent.isAtMax ||
-          // Go ballistic on inner scrollable if we're snapped and it's
-          // scrolled. Otherwise, we'd try to use a snapping simulation that
-          // would no-op and kill the momentum, inconsistent with the
-          // velocity < 0.0 case.
+          // Go ballistic on inner scrollable if we're snapped, it's scrolled,
+          // and it can be scrolled further. Otherwise, we'd try to use a
+          // snapping simulation that would no-op and kill the momentum,
+          // inconsistent with the velocity < 0.0 case.
           //
           // This differs from applyUserOffset, which always defers to
-          // listShouldScroll. This means that dragging a scrolled inner list
-          // upwards will first scroll the list, but upon release (when it goes
-          // ballistic) will scroll the sheet.
-          (extent.snap && _isAtSnapSize && listShouldScroll))) ||
+          // listShouldScroll. This means that in the non-snap case, dragging a
+          // scrolled inner list upwards will first scroll the list, but upon
+          // release (when it goes ballistic) will scroll the sheet. In the snap
+          // case, this means that dragging an inner list scrolled to its end
+          // upwards will first do nothing, but upon release with velocity will
+          // scroll the sheet to the next snap point.
+          (extent.snap && _isAtSnapSize &&
+           listShouldScroll && pixels < maxScrollExtent))) ||
         // If we've already deferred to the inner scrollable, stick with it.
         // This can also prevent conflicts with activities on other scroll
         // positions, which could otherwise, if they resize the sheet, cause
@@ -1165,9 +1169,9 @@ class _SnappingSimulation extends Simulation {
     return newPosition;
   }
 
-  // Find the two closest snap sizes to the position. If the velocity is
-  // non-zero, select the size in the velocity's direction. Otherwise,
-  // the nearest snap size.
+  // Find the closest snap sizes to the position. If the velocity is non-zero,
+  // select the next size in the velocity's direction. Otherwise, the nearest
+  // snap size.
   double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
     final int indexOfNextSize = pixelSnapSizes
         .indexWhere((double size) => size >= position);
@@ -1186,8 +1190,13 @@ class _SnappingSimulation extends Simulation {
     }
     // Snap forward or backward depending on current velocity.
     if (initialVelocity < 0.0) {
-      return pixelSnapSizes[indexOfNextSize - 1];
+      return previousSize;
     }
-    return pixelSnapSizes[indexOfNextSize];
+    if (initialVelocity > 0.0 &&
+        position == nextSize &&
+        indexOfNextSize + 1 < pixelSnapSizes.length) {
+      return pixelSnapSizes[indexOfNextSize + 1];
+    }
+    return nextSize;
   }
 }

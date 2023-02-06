@@ -435,8 +435,12 @@ void main() {
     });
 
     group('While content is scrolled and sheet is snapped somewhere other than min/max', () {
-      Widget buildWidget([ScrollController? innerControllerOverride]) =>
+      Widget buildWidget({
+        DraggableScrollableController? controller,
+        ScrollController? innerControllerOverride,
+      }) =>
         boilerplateWidget(
+          controller: controller,
           snap: true,
           snapSizes: const <double>[0.5],
           innerControllerOverride: innerControllerOverride,
@@ -445,7 +449,7 @@ void main() {
       testWidgets('Can be flung up', (WidgetTester tester) async {
         // Set the initial scroll position.
         await tester.pumpWidget(buildWidget(
-          ScrollController(initialScrollOffset: 500.0)));
+          innerControllerOverride: ScrollController(initialScrollOffset: 500.0)));
         // Rebuild with the DraggableScrollableSheet scroll controller to
         // connect the scrollables.
         await tester.pumpWidget(buildWidget());
@@ -459,7 +463,7 @@ void main() {
       testWidgets('Can be flung down', (WidgetTester tester) async {
         // Set the initial scroll position.
         await tester.pumpWidget(buildWidget(
-          ScrollController(initialScrollOffset: 500.0)));
+          innerControllerOverride: ScrollController(initialScrollOffset: 500.0)));
         // Rebuild with the DraggableScrollableSheet scroll controller to
         // connect the scrollables.
         await tester.pumpWidget(buildWidget());
@@ -468,6 +472,25 @@ void main() {
         final double oldOffset = innerController.offset;
         await tester.pumpAndSettle();
         expect(innerController.offset, lessThan(oldOffset));
+      }, variant: TargetPlatformVariant.all());
+
+      testWidgets('While content is scrolled to end can be flung up', (WidgetTester tester) async {
+        final DraggableScrollableController outerController = DraggableScrollableController();
+        await tester.pumpWidget(buildWidget(
+          controller: outerController,
+          innerControllerOverride: ScrollController(),
+        ));
+        innerController.jumpTo(innerController.position.maxScrollExtent);
+        // Rebuild with the DraggableScrollableSheet scroll controller to
+        // connect the scrollables.
+        await tester.pumpWidget(buildWidget(controller: outerController));
+
+        await tester.fling(find.byType(ListView), const Offset(0, -100), 1000);
+        // TODO(AsturaPhoenix): This should really be in exclusive range
+        // (0.5, 1.0) and will be fixed in a later commit.
+        expect(outerController.size, 0.5);
+        await tester.pumpAndSettle();
+        expect(outerController.size, 1.0);
       }, variant: TargetPlatformVariant.all());
     });
   });
