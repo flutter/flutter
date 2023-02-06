@@ -109,7 +109,7 @@ void main() {
     expect(find.text('item 2'), findsOneWidget);
     expect(find.text('item 3'), findsOneWidget);
 
-    // Test for removeAllItems
+    // Test for removeAllItems.
     listKey.currentState!.removeAllItems(
           (BuildContext context, Animation<double> animation) {
         return const SizedBox(
