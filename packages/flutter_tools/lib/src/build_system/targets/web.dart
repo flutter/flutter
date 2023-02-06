@@ -17,6 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../html_utils.dart';
 import '../../project.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
@@ -49,9 +50,6 @@ const String kCspMode = 'cspMode';
 
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
-
-/// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -442,25 +440,12 @@ class WebReleaseBundle extends Target {
       // because it would need to be the hash for the entire bundle and not just the resource
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final String randomHash = Random().nextInt(4294967296).toString();
-        String resultString = inputFile.readAsStringSync()
-          .replaceFirst(
-            'var serviceWorkerVersion = null',
-            "var serviceWorkerVersion = '$randomHash'",
-          )
-          // This is for legacy index.html that still use the old service
-          // worker loading mechanism.
-          .replaceFirst(
-            "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
-          );
-        final String? baseHref = environment.defines[kBaseHref];
-        if (resultString.contains(kBaseHrefPlaceholder) && baseHref == null) {
-          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
-        } else if (resultString.contains(kBaseHrefPlaceholder) && baseHref != null) {
-          resultString = resultString.replaceAll(kBaseHrefPlaceholder, baseHref);
-        }
-        outputFile.writeAsStringSync(resultString);
+        final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
+        indexHtml.applySubstitutions(
+          baseHref: environment.defines[kBaseHref] ?? '/',
+          serviceWorkerVersion: Random().nextInt(4294967296).toString(),
+        );
+        outputFile.writeAsStringSync(indexHtml.content);
         continue;
       }
       inputFile.copySync(outputFile.path);

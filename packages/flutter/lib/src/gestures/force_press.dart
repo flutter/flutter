@@ -125,11 +125,6 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     this.peakPressure = 0.85,
     this.interpolation = _inverseLerp,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : assert(peakPressure > startPressure);

@@ -12016,8 +12016,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     EditableText.debugDeterministicCursor = true;
     final FocusNode focusNode = FocusNode();
     final GlobalKey key = GlobalKey();
-    // Set it up so that there will be word-wrap.
-    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+
+    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890');
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pumpWidget(
       MaterialApp(
@@ -12030,6 +12030,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
           cursorOpacityAnimates: true,
+          maxLines: 2,
         ),
       ),
     );
@@ -12040,7 +12041,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
 
-    // The floating cursor should be drawn at the start of the line.
+    // The cursor should be drawn at the start of the line.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(0.5, 1, 3, 12),
@@ -12051,7 +12052,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(50, 0)));
     await tester.pump();
 
-    // The floating cursor should be drawn somewhere in the middle of the line
+    // The cursor should be drawn somewhere in the middle of the line
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(50.5, 1, 3, 12),
@@ -12069,7 +12070,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
 
-    // The floating cursor should be drawn near to the previous position.
+    // The cursor should be drawn near to the previous position.
     // It's different because it's snapped to exactly between characters.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
@@ -12081,7 +12082,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(-56, 0)));
     await tester.pump();
 
-    // The floating cursor should be drawn at the start of the line.
+    // The cursor should be drawn at the start of the line.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(0.5, 1, 3, 12),
@@ -12096,10 +12097,86 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
     await tester.pump();
 
-    // Selection should not be updated as the new position is within the selection range.
+    // Selection should not be changed since it wasn't previously collapsed.
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
+
+    // Now test using keyboard selection in a forwards direction.
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The cursor should be drawn in the same (start) position.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(56, 0)));
+    await tester.pump();
+
+    // The cursor should be drawn somewhere in the middle of the line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(56.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Simulate UIKit setting the selection using keyboard selection.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pump();
+
+    // Selection should not be changed since it wasn't previously collapsed.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 4);
+
+    // Test that the affinity is updated in case the floating cursor ends at the same offset.
+
+    // Put the selection at the beginning of the second line.
+    controller.selection = const TextSelection.collapsed(offset: 27);
+    await tester.pump();
+
+    // Now test using keyboard selection in a forwards direction.
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The cursor should be drawn at the start of the second line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 15, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Move the cursor to the end of the first line.
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(9999, -14)));
+    await tester.pump();
+
+    // The cursor should be drawn at the end of the first line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(800.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pump();
+
+    // Selection should be changed as it was previously collapsed.
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 27);
+    expect(controller.selection.extentOffset, 27);
 
     EditableText.debugDeterministicCursor = false;
   });
