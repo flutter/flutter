@@ -93,7 +93,7 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
           }
         } else {
           if (states.contains(MaterialState.hovered)) {
-            return ${_stateColor('$tokenGroup', 'unselected', 'pressed')};
+            return ${_stateColor('$tokenGroup', 'unselected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
             return ${_stateColor('$tokenGroup', 'unselected', 'focus')};

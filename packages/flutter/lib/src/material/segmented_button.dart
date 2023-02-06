@@ -777,7 +777,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
           }
         } else {
           if (states.contains(MaterialState.hovered)) {
-            return _colors.onSurface.withOpacity(0.12);
+            return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
             return _colors.onSurface.withOpacity(0.12);
