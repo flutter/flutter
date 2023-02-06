@@ -3119,7 +3119,7 @@ class TestApp extends StatelessWidget {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(View.of(context)),
         child: Directionality(
           textDirection: textDirection,
           child: Navigator(

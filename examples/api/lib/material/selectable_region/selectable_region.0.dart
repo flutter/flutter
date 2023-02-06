@@ -21,10 +21,10 @@ class MyApp extends StatelessWidget {
       home: SelectionArea(
         child: Scaffold(
           appBar: AppBar(title: const Text(_title)),
-          body: Center(
+          body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Select this icon', style: TextStyle(fontSize: 30)),
                 SizedBox(height: 10),
                 MySelectableAdapter(child: Icon(Icons.key, size: 30)),

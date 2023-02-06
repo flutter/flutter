@@ -94,6 +94,32 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext("pub get doesn't treat unknown flag as directory", () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
+    await commandRunner.run(<String>['get', '--unknown-flag']);
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
+    testUsingContext("pub get doesn't treat -v as directory", () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
+    await commandRunner.run(<String>['get', '-v']);
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
@@ -181,6 +207,7 @@ class FakePub extends Fake implements Pub {
   FakePub(this.fileSystem);
 
   final FileSystem fileSystem;
+  List<String>? expectedArguments;
 
   @override
   Future<void> interactively(
@@ -192,6 +219,9 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
+    if (expectedArguments != null) {
+      expect(arguments, expectedArguments);
+    }
     if (project != null) {
       fileSystem.directory(project.directory)
         .childDirectory('.dart_tool')
