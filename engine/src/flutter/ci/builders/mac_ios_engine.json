@@ -87,7 +87,7 @@
                     "out/ios_debug_sim_arm64"
                 ],
                 "script": "flutter/sky/tools/create_full_ios_framework.py",
-                "language": "python"
+                "language": "python3"
             },
             {
                 "name": "obj-c-doc",
