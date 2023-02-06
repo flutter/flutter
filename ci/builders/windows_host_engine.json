@@ -43,7 +43,7 @@
             },
             "tests": [
                 {
-                    "language": "python",
+                    "language": "python3",
                     "name": "Host Tests for host_debug",
                     "parameters": [
                         "--variant",
