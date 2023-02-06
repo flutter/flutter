@@ -877,6 +877,7 @@ class LocalizationsGenerator {
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
        _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
     )).toList();
+    hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
       _inputFileList.addAll(_allBundles.bundles.map((AppResourceBundle bundle) {
         return bundle.file.absolute.path;
@@ -912,15 +913,17 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    final LocaleInfo locale,
+    LocaleInfo locale,
   ) {
     final Iterable<String> methods = _allMessages.map((Message message) {
       if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
-        return _generateMethod(
-          message,
-          _templateArbLocale,
-        );
+        locale = _templateArbLocale;
+      }
+      if (message.parsedMessages[locale] == null) {
+        // The message exists, but parsedMessages[locale] is null due to a syntax error.
+        // This means that we have already set hadErrors = true while constructing the Message.
+        return '';
       }
       return _generateMethod(
         message,
@@ -953,7 +956,7 @@ class LocalizationsGenerator {
       });
 
     final Iterable<String> methods = _allMessages
-      .where((Message message) => message.messages[locale] != null)
+      .where((Message message) => message.parsedMessages[locale] != null)
       .map((Message message) => _generateMethod(message, locale));
 
     return subclassTemplate
