@@ -275,7 +275,7 @@ class Radio<T> extends StatefulWidget {
   final Color? hoverColor;
 
   /// {@template flutter.material.radio.overlayColor}
-  /// The color for the checkbox's [Material].
+  /// The color for the radio's [Material].
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.pressed].
