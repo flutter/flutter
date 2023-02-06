@@ -801,7 +801,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
         return BorderSide(color: _colors.outline);
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
-      size: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
     );
   }
 
