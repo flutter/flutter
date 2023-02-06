@@ -2,28 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for custom labeled checkbox.
+// Flutter code sample for custom labeled switch.
 
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const LabeledCheckboxApp());
+void main() => runApp(const LabeledSwitchApp());
 
-class LabeledCheckboxApp extends StatelessWidget {
-  const LabeledCheckboxApp({super.key});
+class LabeledSwitchApp extends StatelessWidget {
+  const LabeledSwitchApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const LabeledCheckboxExample(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Custom Labeled Switch Sample')),
+        body: const Center(
+          child: LabeledSwitchExample(),
+        ),
+      ),
     );
   }
 }
 
-class LinkedLabelCheckbox extends StatelessWidget {
-  const LinkedLabelCheckbox({
+class LinkedLabelSwitch extends StatelessWidget {
+  const LinkedLabelSwitch({
     super.key,
     required this.label,
     required this.padding,
@@ -46,8 +51,8 @@ class LinkedLabelCheckbox extends StatelessWidget {
             child: RichText(
               text: TextSpan(
                 text: label,
-                style: const TextStyle(
-                  color: Colors.blueAccent,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   decoration: TextDecoration.underline,
                 ),
                 recognizer: TapGestureRecognizer()
@@ -57,10 +62,10 @@ class LinkedLabelCheckbox extends StatelessWidget {
               ),
             ),
           ),
-          Checkbox(
+          Switch(
             value: value,
-            onChanged: (bool? newValue) {
-              onChanged(newValue!);
+            onChanged: (bool newValue) {
+              onChanged(newValue);
             },
           ),
         ],
@@ -69,32 +74,27 @@ class LinkedLabelCheckbox extends StatelessWidget {
   }
 }
 
-class LabeledCheckboxExample extends StatefulWidget {
-  const LabeledCheckboxExample({super.key});
+class LabeledSwitchExample extends StatefulWidget {
+  const LabeledSwitchExample({super.key});
 
   @override
-  State<LabeledCheckboxExample> createState() => _LabeledCheckboxExampleState();
+  State<LabeledSwitchExample> createState() => _LabeledSwitchExampleState();
 }
 
-class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
+class _LabeledSwitchExampleState extends State<LabeledSwitchExample> {
   bool _isSelected = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Custom Labeled Checkbox Sample')),
-      body: Center(
-        child: LinkedLabelCheckbox(
-          label: 'Linked, tappable label text',
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          value: _isSelected,
-          onChanged: (bool newValue) {
-            setState(() {
-              _isSelected = newValue;
-            });
-          },
-        ),
-      ),
+    return LinkedLabelSwitch(
+      label: 'Linked, tappable label text',
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      value: _isSelected,
+      onChanged: (bool newValue) {
+        setState(() {
+          _isSelected = newValue;
+        });
+      },
     );
   }
 }

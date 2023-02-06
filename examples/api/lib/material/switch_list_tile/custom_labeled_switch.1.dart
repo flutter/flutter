@@ -2,25 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SwitchListTile].
+// Flutter code sample for custom labeled switch.
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const LabeledSwitchApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class LabeledSwitchApp extends StatelessWidget {
+  const LabeledSwitchApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Custom Labeled Switch Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: LabeledSwitchExample(),
         ),
       ),
     );
@@ -65,14 +63,14 @@ class LabeledSwitch extends StatelessWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class LabeledSwitchExample extends StatefulWidget {
+  const LabeledSwitchExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<LabeledSwitchExample> createState() => _LabeledSwitchExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _LabeledSwitchExampleState extends State<LabeledSwitchExample> {
   bool _isSelected = false;
 
   @override

@@ -89,6 +89,13 @@ enum _SwitchListTileType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how [SwitchListTile] positions the switch widget
+/// relative to the text in different configurations.
+///
+/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
+/// {@end-tool}
+///
 /// ## Semantics in SwitchListTile
 ///
 /// Since the entirety of the SwitchListTile is interactive, it should represent
@@ -113,7 +120,7 @@ enum _SwitchListTileType { material, adaptive }
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
+/// ** See code in examples/api/lib/material/switch_list_tile/custom_labeled_switch.0.dart **
 /// {@end-tool}
 ///
 /// ## SwitchListTile isn't exactly what I want
@@ -129,7 +136,7 @@ enum _SwitchListTileType { material, adaptive }
 /// Here is an example of a custom LabeledSwitch widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.2.dart **
+/// ** See code in examples/api/lib/material/switch_list_tile/custom_labeled_switch.1.dart **
 /// {@end-tool}
 ///
 /// See also:
