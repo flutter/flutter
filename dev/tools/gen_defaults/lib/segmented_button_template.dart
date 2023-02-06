@@ -114,7 +114,7 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
         return ${border("$tokenGroup.outline")};
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup", '')}),
-      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${tokens['$tokenGroup.container.height']})),    
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${tokens['$tokenGroup.container.height']})),
     );
   }
   @override
