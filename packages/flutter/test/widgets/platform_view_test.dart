@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
 
 import 'dart:async';
 import 'dart:ui';
@@ -96,9 +97,7 @@ void main() {
 
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
@@ -2495,7 +2494,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2592,7 +2591,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2687,7 +2686,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);

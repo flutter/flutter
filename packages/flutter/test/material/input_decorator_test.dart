@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 
@@ -145,6 +146,13 @@ double getOpacity(WidgetTester tester, String textValue) {
     ).first,
   );
   return opacityWidget.opacity.value;
+}
+
+TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }
 
 void main() {
@@ -1729,6 +1737,33 @@ void main() {
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+  });
+
+  testWidgets('InputDecorator suffixIconColor in M3 error state', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+          useMaterial3: true,
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              foregroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+            ),
+          ),
+        );
+    await tester.pumpWidget(
+       MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
+              errorText: 'error state',
+              filled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
 
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
@@ -5337,11 +5372,40 @@ void main() {
       gapPadding: 32.0,
     ));
     expect(outlineInputBorder, isNot(const OutlineInputBorder()));
+    expect(outlineInputBorder, isNot(const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    )));
+    expect(outlineInputBorder, isNot(const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      gapPadding: 32.0,
+    )));
+    expect(outlineInputBorder, isNot(const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 33.0,
+    )));
 
-    // UnderlineInputBorder's equality is defined only by the borderSide
-    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
-    expect(underlineInputBorder, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)));
+    // UnderlineInputBorder's equality is defined by the borderSide and borderRadius
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    );
+    expect(underlineInputBorder, const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    ));
     expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.red),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    )));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
+    )));
   });
 
   test('InputBorder hashCodes', () {
@@ -5357,11 +5421,39 @@ void main() {
       gapPadding: 32.0,
     ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
+    expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.red),
+      gapPadding: 32.0,
+    ).hashCode));
+    expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    ).hashCode));
+    expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 33.0,
+    ).hashCode));
 
-    // UnderlineInputBorder's hashCode is defined only by the borderSide
-    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
-    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
-    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
+    // UnderlineInputBorder's hashCode is defined by the borderSide and borderRadius
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    );
+    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    ).hashCode);
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.red),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    ).hashCode));
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
+    ).hashCode));
   });
 
   testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
@@ -5845,14 +5937,14 @@ void main() {
     };
     try {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: InputDecorator(
-                decoration: const InputDecoration(),
+                decoration: InputDecoration(),
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(height: 0),
                     Positioned(
                       bottom: 5,
@@ -5877,12 +5969,12 @@ void main() {
 
   testWidgets('min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/75509
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
           child: IntrinsicHeight(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 TextField(
                   decoration: InputDecoration(
                     labelText: 'Label Text',

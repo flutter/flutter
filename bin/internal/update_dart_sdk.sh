@@ -102,7 +102,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       DART_ZIP_NAME="dart-sdk-linux-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;
-    MINGW*)
+    MINGW* | MSYS* )
       DART_ZIP_NAME="dart-sdk-windows-x64.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;

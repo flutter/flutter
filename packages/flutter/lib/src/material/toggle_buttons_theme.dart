@@ -150,7 +150,6 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
-    assert (t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -253,7 +252,7 @@ class ToggleButtonsTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;

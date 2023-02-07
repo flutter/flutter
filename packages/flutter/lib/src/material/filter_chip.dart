@@ -88,11 +88,7 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -199,7 +195,7 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
   const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
@@ -220,7 +216,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;

@@ -5,18 +5,29 @@
 import 'template.dart';
 
 class ListTileTemplate extends TokenTemplate {
-  const ListTileTemplate(super.blockName, super.fileName, super.tokens);
+  const ListTileTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.',
+  });
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ListTileThemeData {
-  const _${blockName}DefaultsM3(this.context)
-    : super(shape: ${shape("md.comp.list.list-item.container")});
+  _${blockName}DefaultsM3(this.context)
+    : super(
+        contentPadding: const EdgeInsetsDirectional.only(start: 16.0, end: 24.0),
+        minLeadingWidth: 24,
+        minVerticalPadding: 8,
+        shape: ${shape("md.comp.list.list-item.container")},
+      );
 
   final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+  late final TextTheme _textTheme = _theme.textTheme;
 
   @override
-  Color? get tileColor => ${componentColor("md.comp.list.list-item.container")};
+  Color? get tileColor =>  Colors.transparent;
 
   @override
   TextStyle? get titleTextStyle => ${textStyle("md.comp.list.list-item.label-text")};

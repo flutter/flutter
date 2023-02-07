@@ -142,7 +142,7 @@ class LocalEngineLocator {
         .parent
         .parent
         .path;
-      if (engineSourcePath != null && (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
+      if (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty) {
         engineSourcePath = null;
         throwToolExit(
           _userMessages.runnerNoEngineSrcDir(

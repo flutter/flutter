@@ -53,7 +53,7 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: RadioListTile<Meridiem>(
@@ -86,6 +86,13 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how [RadioListTile] positions the radio widget
+/// relative to the text in different configurations.
+///
+/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.1.dart **
+/// {@end-tool}
+///
 /// ## Semantics in RadioListTile
 ///
 /// Since the entirety of the RadioListTile is interactive, it should represent
@@ -110,7 +117,7 @@ import 'theme_data.dart';
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.1.dart **
+/// ** See code in examples/api/lib/material/radio_list_tile/custom_labeled_radio.0.dart **
 /// {@end-tool}
 ///
 /// ## RadioListTile isn't exactly what I want
@@ -126,7 +133,7 @@ import 'theme_data.dart';
 /// Here is an example of a custom LabeledRadio widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.2.dart **
+/// ** See code in examples/api/lib/material/radio_list_tile/custom_labeled_radio.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -173,12 +180,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -245,7 +247,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The primary content of the list tile.

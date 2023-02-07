@@ -67,10 +67,9 @@ Future<void> buildWeb(
             kBaseHref : baseHref,
           kSourceMapsEnabled: sourceMaps.toString(),
           kNativeNullAssertions: nativeNullAssertions.toString(),
-          if (serviceWorkerStrategy != null)
           kServiceWorkerStrategy: serviceWorkerStrategy,
           if (dart2jsOptimization != null)
-          kDart2jsOptimization: dart2jsOptimization,
+            kDart2jsOptimization: dart2jsOptimization,
           kDart2jsDumpInfo: dumpInfo.toString(),
           kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
           ...buildInfo.toBuildSystemEnvironment(),

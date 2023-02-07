@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -458,7 +459,7 @@ void main() {
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
-      // Tapping Select all changes the menu items so that there is no no longer
+      // Tapping Select all changes the menu items so that there is no longer
       // any overflow.
       await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();

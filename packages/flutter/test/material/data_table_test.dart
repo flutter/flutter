@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';

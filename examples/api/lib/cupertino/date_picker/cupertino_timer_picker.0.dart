@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoTimerPicker].
+// Flutter code sample for [CupertinoTimerPicker].
 
 import 'package:flutter/cupertino.dart';
 

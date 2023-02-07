@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math';
 import 'dart:ui';
@@ -1565,6 +1566,7 @@ Widget createAppWithCenteredButton(Widget child) {
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

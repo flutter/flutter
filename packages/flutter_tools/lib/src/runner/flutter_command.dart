@@ -569,7 +569,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -1093,7 +1093,11 @@ abstract class FlutterCommand extends Command<void> {
             (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
-          nullSafetyMode = NullSafetyMode.unsound;
+          throwToolExit(
+            'This application does not support sound null-safety (its language version is $languageVersion).\n'
+            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
+            'support sound null safety, see https://dart.dev/null-safety.',
+          );
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
@@ -1340,17 +1344,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1748,4 +1747,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

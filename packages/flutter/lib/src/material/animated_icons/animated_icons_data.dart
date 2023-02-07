@@ -8,7 +8,7 @@
 // while the _AnimatedIconData interface which used to deliver the icon data is
 // kept private.
 
-part of material_animated_icons;
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 /// Identifier for the supported Material Design animated icons.
 ///

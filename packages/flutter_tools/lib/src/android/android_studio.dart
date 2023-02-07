@@ -110,7 +110,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // and <base dir>/system/.home for Android Studio < 4.1
     String dotHomeFilePath;
 
-    if (major != null && major >= 4 && minor != null && minor >= 1) {
+    if (major >= 4 && minor >= 1) {
       dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
     } else {
       dotHomeFilePath =
@@ -161,7 +161,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     if (globals.platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
-      if (major != null && major >= 4 && minor != null && minor >= 1) {
+      if (major >= 4 && minor >= 1) {
         return globals.fs.path.join(
           homeDirPath,
           'Library',
@@ -185,7 +185,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         return toolboxPluginsPath;
       }
 
-      if (major != null && major >= 4 && minor != null && minor >= 1 &&
+      if (major >= 4 && minor >= 1 &&
           globals.platform.isLinux) {
         return globals.fs.path.join(
           homeDirPath,
@@ -394,7 +394,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
                 version: Version.parse(version),
                 studioAppName: title,
               );
-              if (studio != null && !hasStudioAt(studio.directory, newerThan: studio.version)) {
+              if (!hasStudioAt(studio.directory, newerThan: studio.version)) {
                 studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
                 studios.add(studio);
               }
@@ -425,9 +425,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
-    if (plistValue == null || keyMatcher == null) {
-      return null;
-    }
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 

@@ -64,7 +64,6 @@ void main() {
     String stderr = '',
     required CompleterIOSink stdinSink,
   }) {
-    assert(stdinSink != null);
     stdinSink.clear();
     processManager.addCommand(FakeCommand(
       command: fontSubsetArgs,

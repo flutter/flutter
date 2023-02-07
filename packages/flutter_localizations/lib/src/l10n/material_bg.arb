@@ -131,5 +131,8 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Меню на лентата с менюта",
   "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
   "keyboardKeyShift": "Shift"
 }

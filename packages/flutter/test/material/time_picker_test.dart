@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -1621,6 +1623,7 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
     },
   );
 
+  @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(
     BuildContext context,
     Object? arguments,

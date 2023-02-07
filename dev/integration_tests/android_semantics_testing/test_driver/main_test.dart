@@ -20,7 +20,7 @@ const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSe
 ];
 
 String adbPath() {
-  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT']!;
+  final String? androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
     return 'adb';
   } else {

@@ -138,7 +138,6 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
 }) {
-  assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -573,7 +572,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Future<List<Duration>> handlePointerEventRecord(Iterable<PointerEventRecord> records) {
-    assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];
@@ -664,9 +662,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
     Duration timeout = const Duration(minutes: 10),
   ]) {
-    assert(duration != null);
     assert(duration > Duration.zero);
-    assert(timeout != null);
     assert(timeout > Duration.zero);
     assert(() {
       final WidgetsBinding binding = this.binding;
@@ -705,7 +701,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration maxDuration, [
     Duration interval = const Duration(milliseconds: 16, microseconds: 683),
   ]) {
-    assert(maxDuration != null);
     // The interval following the last frame doesn't have to be within the fullDuration.
     Duration elapsed = Duration.zero;
     return TestAsyncUtils.guard<void>(() async {
@@ -822,7 +817,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
-    assert(location != null);
     location = binding.localToGlobal(location);
     return super.hitTestOnBinding(location);
   }
@@ -1003,7 +997,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// error message. It should be an adverbial phrase describing the current
   /// situation, such as "at the end of the test".
   void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
-    assert(when != null);
     if (_tickers != null) {
       for (final Ticker ticker in _tickers!) {
         if (ticker.isActive) {
@@ -1107,7 +1100,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// To enter text into other widgets (e.g. a custom widget that maintains a
   /// TextInputConnection the way that a [EditableText] does), first ensure that
-  /// that widget has an open connection (e.g. by using [tap] to to focus it),
+  /// that widget has an open connection (e.g. by using [tap] to focus it),
   /// then call `testTextInput.enterText` directly (see
   /// [TestTextInput.enterText]).
   Future<void> enterText(Finder finder, String text) async {

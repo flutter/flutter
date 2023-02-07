@@ -810,7 +810,7 @@ void main() {
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
       TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      const WidgetSpan(child: SizedBox.shrink()),
       TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[
@@ -1075,8 +1075,13 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 0); // [how ]are you
-      expect(selection.end, 4);
+      if (isBrowser && !isCanvasKit) {
+        // how [are you\n]
+        expect(selection, const TextRange(start: 4, end: 12));
+      } else {
+        // [how ]are you
+        expect(selection, const TextRange(start: 0, end: 4));
+      }
     });
 
     test('can granularly extend selection - document', () async {

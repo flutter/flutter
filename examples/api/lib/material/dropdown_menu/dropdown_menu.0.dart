@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border
-/// which is the default configuration, and the second one has a filled input decoration.
+// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border
+// which is the default configuration, and the second one has a filled input decoration.
 
 import 'package:flutter/material.dart';
 
@@ -67,7 +67,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       leadingIcon: const Icon(Icons.search),
                       label: const Text('Icon'),
                       dropdownMenuEntries: iconEntries,
-                      inputDecorationTheme: const InputDecorationTheme(filled: true),
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 5.0)),
                       onSelected: (IconLabel? icon) {
                         setState(() {
                           selectedIcon = icon;

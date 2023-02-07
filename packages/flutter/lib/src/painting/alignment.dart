@@ -87,7 +87,6 @@ abstract class AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -188,9 +187,7 @@ class Alignment extends AlignmentGeometry {
   /// Creates an alignment.
   ///
   /// The [x] and [y] arguments must not be null.
-  const Alignment(this.x, this.y)
-    : assert(x != null),
-      assert(y != null);
+  const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -340,7 +337,6 @@ class Alignment extends AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Alignment? lerp(Alignment? a, Alignment? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -407,9 +403,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// Creates a directional alignment.
   ///
   /// The [start] and [y] arguments must not be null.
-  const AlignmentDirectional(this.start, this.y)
-    : assert(start != null),
-      assert(y != null);
+  const AlignmentDirectional(this.start, this.y);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -534,7 +528,6 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -682,8 +675,7 @@ class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
     required this.y,
-  }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0);
+  }) : assert(y >= -1.0 && y <= 1.0);
 
   /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
   /// locations of the top and bottom of the input box.

@@ -232,7 +232,7 @@ void main() {
     testWidgets('Top AnnotatedRegion provides status bar overlay style and bottom AnnotatedRegion provides navigation bar overlay style', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: Colors.blue,
@@ -258,7 +258,7 @@ void main() {
     testWidgets('Top only AnnotatedRegion provides status bar and navigation bar style properties', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: Colors.blue,
@@ -278,7 +278,7 @@ void main() {
     testWidgets('Bottom only AnnotatedRegion provides status bar and navigation bar style properties', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: SizedBox.expand()),
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(

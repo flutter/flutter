@@ -48,8 +48,7 @@ class SelectionContainer extends StatefulWidget {
     this.registrar,
     required SelectionContainerDelegate this.delegate,
     required this.child,
-  }) : assert(delegate != null),
-       assert(child != null);
+  });
 
   /// Creates a selection container that disables selection for the
   /// subtree.
@@ -240,7 +239,7 @@ class SelectionRegistrarScope extends InheritedWidget {
     super.key,
     required SelectionRegistrar this.registrar,
     required super.child,
-  }) : assert(registrar != null);
+  });
 
   /// Creates a selection registrar scope that disables selection for the
   /// subtree.
