@@ -73,7 +73,7 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
-    testWidgets('Do not crash when work with Navigator pages', (WidgetTester tester) async {
+    testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
       await tester.pumpWidget(
         MaterialApp(

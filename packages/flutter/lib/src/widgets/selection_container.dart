@@ -299,6 +299,10 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
   }
 
   /// Whether the [SelectionContainer] has undergone layout and has a size.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.hasSize], which is used internally by this method.
   bool get hasSize {
     assert(
     _selectionContainerContext?.findRenderObject() != null,
