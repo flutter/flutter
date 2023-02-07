@@ -31,6 +31,7 @@ import 'package:gen_defaults/date_picker_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/divider_template.dart';
 import 'package:gen_defaults/drawer_template.dart';
+import 'package:gen_defaults/expansion_tile_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
@@ -153,6 +154,7 @@ Future<void> main(List<String> args) async {
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();
   DrawerTemplate('Drawer', '$materialLib/drawer.dart', tokens).updateFile();
+  ExpansionTileTemplate('ExpansionTile', '$materialLib/expansion_tile.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
   FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
@@ -167,7 +169,7 @@ Future<void> main(List<String> args) async {
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
-  SegmentedButtonTemplate('SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
+  SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
   SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
