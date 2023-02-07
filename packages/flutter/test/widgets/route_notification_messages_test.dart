@@ -269,14 +269,14 @@ void main() {
     });
 
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location);
+        return Text(information.uri.toString());
       },
     );
 
@@ -298,8 +298,8 @@ void main() {
 
     // Triggers a router rebuild and verify the route information is reported
     // to the web engine.
-    delegate.routeInformation = const RouteInformation(
-      location: 'update',
+    delegate.routeInformation = RouteInformation(
+      uri: Uri.parse('update'),
       state: 'state',
     );
     await tester.pump();

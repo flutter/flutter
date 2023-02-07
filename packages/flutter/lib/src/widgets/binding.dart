@@ -85,9 +85,16 @@ abstract mixin class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   ///
   /// The default implementation is to call the [didPushRoute] directly with the
-  /// [RouteInformation.location].
+  /// string constructed from [RouteInformation.uri]'s path and query parameters.
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    return didPushRoute(routeInformation.location);
+    final Uri uri = routeInformation.uri;
+    return didPushRoute(
+      Uri(
+        path: uri.path.isEmpty ? '/' : uri.path,
+        queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+        fragment: uri.fragment.isEmpty ? null : uri.fragment,
+      ).toString(),
+    );
   }
 
   /// Called when the application's dimensions change. For example,

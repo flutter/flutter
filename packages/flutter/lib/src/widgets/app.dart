@@ -1362,7 +1362,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
-            location: _initialRouteName,
+            uri: Uri.parse(_initialRouteName),
           ),
         );
       } else {
