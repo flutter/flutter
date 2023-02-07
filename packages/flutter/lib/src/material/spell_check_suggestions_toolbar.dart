@@ -81,7 +81,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           editableTextState
-            .replaceComposingRegion(
+            .replaceText(
               cause: SelectionChangedCause.toolbar,
               text: suggestion,
               replacementRange: spanAtCursorIndex.range,
@@ -95,7 +95,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
-          editableTextState.replaceComposingRegion(
+          editableTextState.replaceText(
             cause: SelectionChangedCause.toolbar,
             text: '',
           );

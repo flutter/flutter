@@ -14974,7 +14974,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(state.currentTextEditingValue.text, equals(' test test'));
     });
 
-    testWidgets('replaceComposingRegion succeeds when composing region is valid', (WidgetTester tester) async {
+    testWidgets('replaceText succeeds when composing region is valid', (WidgetTester tester) async {
       const TextEditingValue value = TextEditingValue(
         text: 'test tset test',
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
@@ -14996,7 +14996,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
-      state.replaceComposingRegion(
+      state.replaceText(
         cause: SelectionChangedCause.toolbar,
         text: 'test',
       );
@@ -15005,7 +15005,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(state.currentTextEditingValue.text, equals('test test test'));
     });
 
-    testWidgets('replaceComposingRegion succeeds appropriately when composing region is invalid', (WidgetTester tester) async {
+    testWidgets('replaceText succeeds appropriately when composing region is invalid', (WidgetTester tester) async {
       const TextEditingValue value = TextEditingValue(
         text: 'test tset test',
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
@@ -15029,14 +15029,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       // Operation should fail if composing region is invalid and no composing region is specified.
       expect(() {
-        state.replaceComposingRegion(
+        state.replaceText(
           cause: SelectionChangedCause.toolbar,
           text: 'test',
         );
       }, throwsAssertionError);
 
       // Operation should succeed if composing region is invalid, but composing region is specified.
-      state.replaceComposingRegion(
+      state.replaceText(
         cause: SelectionChangedCause.toolbar,
         text: 'test',
         composingRegionRange: const TextRange(start: 5, end: 9),
