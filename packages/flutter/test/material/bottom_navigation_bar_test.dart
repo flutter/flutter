@@ -2488,6 +2488,55 @@ void main() {
     expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(104.0, 562.0, 204.0, 582.0));
     expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(504.0, 562.0, 604.0, 582.0));
   });
+
+  testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
+
+    tester.binding.window.physicalSizeTestValue = const Size(540, 340);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+                bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_rounded),
+                  label: 'Home Challenges',
+                  backgroundColor: Colors.grey,
+                  tooltip: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.date_range_rounded),
+                  label: 'Daily Challenges',
+                  backgroundColor: Colors.grey,
+                  tooltip: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.wind_power),
+                  label: 'Awards Challenges',
+                  backgroundColor: Colors.grey,
+                  tooltip: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.bar_chart_rounded),
+                  label: 'Statistics Challenges',
+                  backgroundColor: Colors.grey,
+                  tooltip: '',
+                ),
+              ],
+            ));
+          },
+        ),
+      ),
+    );
+
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    
+  });
+
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
