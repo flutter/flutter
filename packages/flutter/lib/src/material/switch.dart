@@ -357,7 +357,7 @@ class Switch extends StatelessWidget {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
-  ///     return Colors.orange;
+  ///     return null; // Use the default color.
   ///   }),
   /// )
   /// ```

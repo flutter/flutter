@@ -405,20 +405,16 @@ void main() {
 
   testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: false,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
-        ),
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: false,
+              onChanged: null,
+            ),
+          ),
+        )
       ),
     );
 
@@ -437,19 +433,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: true,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: true,
+              onChanged: null,
+            ),
+          ),
         ),
       ),
     );
@@ -891,15 +883,13 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Switch(
-                value: true,
-                onChanged: (bool newValue) {},
-                focusColor: Colors.orange[500],
-                autofocus: true,
-                splashRadius: splashRadius,
-              );
-            }),
+            child: Switch(
+              value: true,
+              onChanged: (bool newValue) {},
+              focusColor: Colors.orange[500],
+              autofocus: true,
+              splashRadius: splashRadius,
+            ),
           ),
         ),
       );
@@ -1204,18 +1194,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  thumbColor: thumbColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              thumbColor: thumbColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1310,20 +1296,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  thumbColor: thumbColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              thumbColor: thumbColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1393,18 +1375,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  trackColor: trackColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              trackColor: trackColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1483,20 +1461,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  trackColor: trackColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              trackColor: trackColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1548,21 +1522,17 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Theme(
-              data: theme,
-              child: Material(
-                child: Center(
-                  child: Switch(
-                    thumbColor: thumbColor,
-                    value: active,
-                    onChanged: enabled ? (_) { } : null,
-                  ),
-                ),
+        child: Theme(
+          data: theme,
+          child: Material(
+            child: Center(
+              child: Switch(
+                thumbColor: thumbColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }
@@ -2140,19 +2110,15 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: false,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: false,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2183,19 +2149,15 @@ void main() {
       final ColorScheme colors = themeData.colorScheme;
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: true,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2550,18 +2512,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2660,20 +2618,16 @@ void main() {
           theme: themeData,
           home: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      thumbColor: thumbColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  thumbColor: thumbColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2743,18 +2697,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      trackColor: trackColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  trackColor: trackColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2837,20 +2787,16 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      trackColor: trackColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  trackColor: trackColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2910,18 +2856,14 @@ void main() {
       Widget buildSwitch({required bool enabled, required bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: Switch(
-                    trackOutlineColor: trackOutlineColor,
-                    value: active,
-                    onChanged: enabled ? (_) { } : null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                trackOutlineColor: trackOutlineColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
+              ),
+            ),
           ),
         );
       }
@@ -2987,20 +2929,16 @@ void main() {
       Widget buildSwitch() {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: Switch(
-                    focusNode: focusNode,
-                    autofocus: true,
-                    value: true,
-                    trackOutlineColor: trackOutlineColor,
-                    onChanged: (_) { },
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                focusNode: focusNode,
+                autofocus: true,
+                value: true,
+                trackOutlineColor: trackOutlineColor,
+                onChanged: (_) { },
+              ),
+            ),
           ),
         );
       }
@@ -3047,21 +2985,17 @@ void main() {
       Widget buildSwitch({required bool enabled, required bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Theme(
-                data: theme,
-                child: Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
+          child: Theme(
+            data: theme,
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
       }
@@ -3102,18 +3036,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbIcon: thumbIcon(activeIcon, inactiveIcon),
-                      value: active,
-                      onChanged: enabled ? (_) {} : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbIcon: thumbIcon(activeIcon, inactiveIcon),
+                  value: active,
+                  onChanged: enabled ? (_) {} : null,
+                ),
+              ),
             ),
           ),
         );
