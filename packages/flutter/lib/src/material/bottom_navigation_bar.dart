@@ -605,7 +605,11 @@ class _Tile extends StatelessWidget {
         heightFactor: 1,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[icon, const SizedBox(width: 8), label],
+          children: <Widget>[
+            icon,
+            const SizedBox(width: 8),
+            Flexible(child: IntrinsicWidth(child: label))
+          ],
         ),
       );
     }
