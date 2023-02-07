@@ -2490,7 +2490,6 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
-
     tester.binding.window.physicalSizeTestValue = const Size(540, 340);
 
     await tester.pumpWidget(
@@ -2534,9 +2533,7 @@ void main() {
     );
 
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    
   });
-
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
