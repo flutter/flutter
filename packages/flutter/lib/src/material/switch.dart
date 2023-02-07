@@ -353,7 +353,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   thumbOutlineColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///   trackOutlineColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
