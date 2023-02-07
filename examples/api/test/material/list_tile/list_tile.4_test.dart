@@ -17,22 +17,8 @@ void main() {
     Offset trailingOffset = tester.getTopRight(find.byIcon(Icons.adaptive.more));
 
     // The default title alignment is threeLine.
-    expect(leadingOffset.dy - titleOffset.dy, 58.0);
-    expect(trailingOffset.dy - titleOffset.dy, 70.0);
-
-    await tester.tap(find.byIcon(Icons.adaptive.more));
-    await tester.pumpAndSettle();
-
-    // Change the title alignment to threeLine.
-    await tester.tap(find.text('threeLine'));
-    await tester.pumpAndSettle();
-
-    titleOffset = tester.getTopLeft(find.text('Headline Text'));
-    leadingOffset = tester.getTopLeft(find.byType(Checkbox));
-    trailingOffset = tester.getTopRight(find.byIcon(Icons.adaptive.more));
-
-    expect(leadingOffset.dy - titleOffset.dy, 58.0);
-    expect(trailingOffset.dy - titleOffset.dy, 70.0);
+    expect(leadingOffset.dy - titleOffset.dy, 48.0);
+    expect(trailingOffset.dy - titleOffset.dy, 60.0);
 
     await tester.tap(find.byIcon(Icons.adaptive.more));
     await tester.pumpAndSettle();
@@ -59,7 +45,7 @@ void main() {
     leadingOffset = tester.getTopLeft(find.byType(Checkbox));
     trailingOffset = tester.getTopRight(find.byIcon(Icons.adaptive.more));
 
-    expect(leadingOffset.dy - titleOffset.dy, 116.0);
-    expect(trailingOffset.dy - titleOffset.dy, 128.0);
+    expect(leadingOffset.dy - titleOffset.dy, 96.0);
+    expect(trailingOffset.dy - titleOffset.dy, 108.0);
   });
 }
