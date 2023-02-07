@@ -2000,7 +2000,9 @@ void main() {
     );
     expect(
       tester.takeException().toString(),
-      equals('Invalid argument(s): Asset key "missing-asset" was not found within the asset manifest.'),
+      equals('Unable to load asset with key "missing-asset".\n'
+            'The key was not found in the asset manifest.\n'
+            'Make sure the key is correct and the appropriate file or folder is specified in pubspec.yaml.'),
     );
     await tester.pump();
     await expectLater(
