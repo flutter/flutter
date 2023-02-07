@@ -24,7 +24,8 @@ void main() {
   vec2 uv_position = v_source_position / frag_info.atlas_size;
   if (v_has_color == 1.0) {
     frag_color =
-        texture(glyph_atlas_sampler, v_unit_position * uv_size + uv_position);
+        texture(glyph_atlas_sampler, v_unit_position * uv_size + uv_position) *
+        frag_info.text_color.a;
   } else {
     frag_color =
         texture(glyph_atlas_sampler, v_unit_position * uv_size + uv_position)
