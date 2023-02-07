@@ -1001,14 +1001,14 @@ void main() {
       },
     );
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            const Text('Label 1'),
-            const Text('Label 2'),
+            Text('Label 1'),
+            Text('Label 2'),
             Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Label 3'),
                 Text('Label 4'),
                 Text('Label 5'),
@@ -1070,8 +1070,8 @@ void main() {
             const Text('Label 2'),
             Transform.rotate(
               angle: pi / 2.0,
-              child: Row(
-                children: const <Widget>[
+              child: const Row(
+                children: <Widget>[
                   Text('Label 3'),
                   Text('Label 4'),
                   Text('Label 5'),
@@ -1638,7 +1638,7 @@ void main() {
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
     // Assert that this subtree gets dropped (the root node has no children).
-    await tester.pumpWidget(Column(
+    await tester.pumpWidget(const Column(
       children: <Widget>[
         SizedBox(
           height: 0,

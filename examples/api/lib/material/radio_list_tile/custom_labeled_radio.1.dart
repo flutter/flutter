@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RadioListTile].
+// Flutter code sample for custom labeled radio.
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const LabeledRadioApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class LabeledRadioApp extends StatelessWidget {
+  const LabeledRadioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Custom Labeled Radio Sample')),
+        body: const LabeledRadioExample(),
       ),
     );
   }
@@ -68,14 +66,14 @@ class LabeledRadio extends StatelessWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class LabeledRadioExample extends StatefulWidget {
+  const LabeledRadioExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<LabeledRadioExample> createState() => _LabeledRadioExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   bool _isRadioSelected = false;
 
   @override

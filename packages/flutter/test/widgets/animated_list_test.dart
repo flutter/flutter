@@ -96,6 +96,33 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('removing item'), findsNothing);
+
+    // Test for insertAllItems
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+
+    // Test for removeAllItems
+    listKey.currentState!.removeAllItems(
+      (BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      },
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsWidgets);
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+    expect(find.text('item 3'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('removing item'), findsNothing);
   });
 
   group('SliverAnimatedList', () {
@@ -217,6 +244,64 @@ void main() {
       expect(itemBottom(2), 300.0);
     });
 
+    // Test for insertAllItems with SliverAnimatedList
+    testWidgets('insertAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return SizeTransition(
+                    key: ValueKey<int>(index),
+                    sizeFactor: animation,
+                    child: SizedBox(
+                      height: 100.0,
+                      child: Center(child: Text('item $index')),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+
+      listKey.currentState!.insertAllItems(
+        0,
+        2,
+        duration: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+
+      // Newly inserted item 0 & 1's height should animate from 0 to 100
+      expect(itemHeight(0), 0.0);
+      expect(itemHeight(1), 0.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemHeight(0), 50.0);
+      expect(itemHeight(1), 50.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemHeight(0), 100.0);
+      expect(itemHeight(1), 100.0);
+
+      // The list now contains two fully expanded items at the top:
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(itemTop(0), 0.0);
+      expect(itemBottom(0), 100.0);
+      expect(itemTop(1), 100.0);
+      expect(itemBottom(1), 200.0);
+    });
+
+    // Test for removeAllItems with SliverAnimatedList
     testWidgets('remove', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
@@ -291,6 +376,57 @@ void main() {
       expect(itemBottom(1), 100.0);
       expect(itemTop(2), 100.0);
       expect(itemBottom(2), 200.0);
+    });
+
+    // Test for removeAllItems with SliverAnimatedList
+    testWidgets('removeAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final List<int> items = <int>[0, 1, 2];
+
+      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
+        return SizeTransition(
+          key: ValueKey<int>(item),
+          sizeFactor: animation,
+          child: SizedBox(
+            height: 100.0,
+            child: Center(
+              child: Text('item $item', textDirection: TextDirection.ltr),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: 3,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return buildItem(context, items[index], animation);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('item 2'), findsOneWidget);
+
+      items.clear();
+      listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('item 0'), findsNothing);
+      expect(find.text('item 1'), findsNothing);
+      expect(find.text('item 2'), findsNothing);
     });
 
     testWidgets('works in combination with other slivers', (WidgetTester tester) async {

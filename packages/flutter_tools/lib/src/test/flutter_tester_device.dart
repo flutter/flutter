@@ -11,6 +11,7 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -180,8 +181,15 @@ class FlutterTesterTestDevice extends TestDevice {
           compileExpression: compileExpression,
           logger: logger,
         );
-        unawaited(localVmService.then((FlutterVmService vmservice) {
+        unawaited(localVmService.then((FlutterVmService vmservice) async {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
+          if (debuggingOptions.serveObservatory) {
+            try {
+              await vmservice.callMethodWrapper('_serveObservatory');
+            } on vm_service.RPCError {
+              logger.printWarning('Unable to enable Observatory');
+            }
+          }
         }));
 
         if (debuggingOptions.startPaused && !machine!) {

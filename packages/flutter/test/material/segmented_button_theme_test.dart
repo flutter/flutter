@@ -64,7 +64,7 @@ void main() {
       final Material material = tester.widget<Material>(parent);
       expect(material.color, Colors.transparent);
       expect(material.shape, const RoundedRectangleBorder());
-      expect(material.textStyle!.color, theme.colorScheme.primary);
+      expect(material.textStyle!.color, theme.colorScheme.onSurface);
       expect(material.textStyle!.fontFamily, 'Roboto');
       expect(material.textStyle!.fontSize, 14);
       expect(material.textStyle!.fontWeight, FontWeight.w500);
