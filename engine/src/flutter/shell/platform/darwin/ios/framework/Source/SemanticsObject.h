@@ -66,6 +66,12 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @property(nonatomic, strong) NSArray<SemanticsObject*>* children;
 
 /**
+ * Direct children of this semantics object in hit test order. Each child's `parent` property
+ * must be equal to this object.
+ */
+@property(nonatomic, strong) NSArray<SemanticsObject*>* childrenInHitTestOrder;
+
+/**
  * The UIAccessibility that represents this object.
  *
  * By default, this return self. Subclasses can override to return different

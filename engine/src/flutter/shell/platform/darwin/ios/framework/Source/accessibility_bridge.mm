@@ -107,7 +107,14 @@ void AccessibilityBridge::UpdateSemantics(
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
       [newChildren addObject:child];
     }
+    NSMutableArray* newChildrenInHitTestOrder =
+        [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
+    for (NSUInteger i = 0; i < newChildCount; ++i) {
+      SemanticsObject* child = GetOrCreateObject(node.childrenInHitTestOrder[i], nodes);
+      [newChildrenInHitTestOrder addObject:child];
+    }
     object.children = newChildren;
+    object.childrenInHitTestOrder = newChildrenInHitTestOrder;
     if (!node.customAccessibilityActions.empty()) {
       NSMutableArray<FlutterCustomAccessibilityAction*>* accessibilityCustomActions =
           [[[NSMutableArray alloc] init] autorelease];

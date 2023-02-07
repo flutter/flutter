@@ -399,6 +399,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     node.scrollExtentMax = 100.0;
     node.scrollPosition = 0.0;
     parent.childrenInTraversalOrder.push_back(1);
+    parent.childrenInHitTestOrder.push_back(1);
 
     flutter::SemanticsNode child;
     child.id = 2;
@@ -407,6 +408,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     child.value = "value";
     child.hint = "hint";
     node.childrenInTraversalOrder.push_back(2);
+    node.childrenInHitTestOrder.push_back(2);
 
     nodes[0] = parent;
     nodes[1] = node;
@@ -427,6 +429,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     new_node.scrollExtentMax = 100.0;
     new_node.scrollPosition = 0.0;
     new_node.childrenInTraversalOrder.push_back(2);
+    new_node.childrenInHitTestOrder.push_back(2);
 
     new_nodes[1] = new_node;
     bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/actions);
@@ -489,6 +492,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     node.scrollExtentMax = 100.0;
     node.scrollPosition = 0.0;
     parent.childrenInTraversalOrder.push_back(1);
+    parent.childrenInHitTestOrder.push_back(1);
     nodes[0] = parent;
     nodes[1] = node;
     flutter::CustomAccessibilityActionUpdates actions;
@@ -556,6 +560,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     node.scrollExtentMax = 100.0;
     node.scrollPosition = 0.0;
     parent.childrenInTraversalOrder.push_back(1);
+    parent.childrenInHitTestOrder.push_back(1);
     nodes[0] = parent;
     nodes[1] = node;
     flutter::CustomAccessibilityActionUpdates actions;
