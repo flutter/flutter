@@ -369,7 +369,7 @@ class _TextPainterLayoutCacheWithOffset {
         return clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth);
     }
   }
-  // Try to resize the contentWidth to fit the new input constriants, by just
+  // Try to resize the contentWidth to fit the new input constraints, by just
   // adjusting the paint offset (so no line-breaking changes needed).
   //
   // Returns false if the new constraints require re-computing the line breaks,
@@ -414,10 +414,6 @@ class _TextPainterLayoutCacheWithOffset {
   // Holds the TextPosition the last caret metrics were computed with. When new
   // values are passed in, we recompute the caret metrics only as necessary.
   TextPosition? _previousCaretPosition;
-
-  void dispose() {
-    paragraph.dispose();
-  }
 }
 
 /// This is used to cache and pass the computed metrics regarding the
@@ -635,7 +631,7 @@ class TextPainter {
       }
       return true;
     }());
-    _layoutCache?.dispose();
+    _layoutCache?.paragraph.dispose();
     _layoutCache = null;
   }
 
@@ -1110,22 +1106,15 @@ class TextPainter {
     final double? adjustedMaxWidth = !adjustMaxWidth ? maxWidth : cachedLayout?.layout.maxIntrinsicLineExtent;
     _inputWidth = adjustedMaxWidth ?? maxWidth;
 
-    final ui.Paragraph? cachedParagraph = cachedLayout?.paragraph;
-    final ui.Paragraph paragraph;
-    if (cachedParagraph != null) {
-      paragraph = cachedParagraph..layout(ui.ParagraphConstraints(width: _inputWidth));
-    } else {
-      paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: _inputWidth));
-      // Only rebuild the paragraph when there're layout changes, even when
-      // `_rebuildParagraphForPaint` is true. It's best to not eagerly rebuild
-      // the paragraph to avoid the extra work, because:
-      // 1. the text color could change again before `paint` is called (so one of
-      //    the paragraph rebuilds is unnecessary)
-      // 2. the user could be measuring the text layout so `paint` will never be
-      //    called.
-      cachedLayout?.dispose();
-    }
-
+    // Only rebuild the paragraph when there're layout changes, even when
+    // `_rebuildParagraphForPaint` is true. It's best to not eagerly rebuild
+    // the paragraph to avoid the extra work, because:
+    // 1. the text color could change again before `paint` is called (so one of
+    //    the paragraph rebuilds is unnecessary)
+    // 2. the user could be measuring the text layout so `paint` will never be
+    //    called.
+    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
+      ..layout(ui.ParagraphConstraints(width: _inputWidth));
     final _TextPainterLayoutCacheWithOffset newLayoutCache = _TextPainterLayoutCacheWithOffset(
       _TextLayout._(paragraph), paintOffsetAlignment, minWidth, maxWidth, textWidthBasis,
     );
