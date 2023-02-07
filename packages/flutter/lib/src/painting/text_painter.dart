@@ -1067,6 +1067,7 @@ class TextPainter {
       _debugMarkNeedsLayoutCallStack = null;
       return true;
     }());
+    _rebuildParagraphForPaint = false;
     return builder.build();
   }
 
@@ -1122,7 +1123,6 @@ class TextPainter {
       //    the paragraph rebuilds is unnecessary)
       // 2. the user could be measuring the text layout so `paint` will never be
       //    called.
-      _rebuildParagraphForPaint = false;
       cachedLayout?.dispose();
     }
 
@@ -1167,7 +1167,6 @@ class TextPainter {
     }
 
     if (_rebuildParagraphForPaint) {
-      _rebuildParagraphForPaint = false;
       Size? debugSize;
       assert(() {
         debugSize = size;
@@ -1184,6 +1183,7 @@ class TextPainter {
       paragraph.dispose();
       assert(debugSize == size);
     }
+    assert(!_rebuildParagraphForPaint);
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
   }
 
