@@ -3443,11 +3443,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        if (_value.selection.isCollapsed) {
-          renderEditable.showOnScreen(
-            rect: caretPadding.inflateRect(rectToReveal),
-          );
-        }
+        renderEditable.showOnScreen(
+          rect: caretPadding.inflateRect(rectToReveal),
+        );
       }
     });
   }
