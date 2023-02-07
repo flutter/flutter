@@ -421,7 +421,7 @@ class _TextPainterLayoutCacheWithOffset {
 /// nature of the calculation.
 // This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
 // or an _EmptyLineCaretMetrics.
-class _CaretMetrics { }
+abstract class _CaretMetrics { }
 
 // The _CaretMetrics for carets located in a non-empty line. Carets located in a
 // non-empty line are associated with a glyph within the same line.
@@ -1322,7 +1322,7 @@ class TextPainter {
       final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
       // The full width is not (layoutCache.contentWidth - caretPrototype.width)
       // because RenderEditable reserves cursor width on the right. Ideally this
-      // should be handled by
+      // should be handled by RenderEditable instead.
       final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
       return Offset(dx, caretMetrics.lineVerticalOffset);
     }
