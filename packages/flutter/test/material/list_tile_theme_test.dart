@@ -218,6 +218,7 @@ void main() {
                 selectedColor: selectedColor,
                 iconColor: iconColor,
                 textColor: textColor,
+                minVerticalPadding: 25.0,
                 mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
@@ -315,14 +316,14 @@ void main() {
 
     // VisualDensity is respected
     final RenderBox box = tester.renderObject(find.byKey(listTileKey));
-    expect(box.size, equals(const Size(800, 64.0)));
+    expect(box.size, equals(const Size(800, 80.0)));
 
     // titleAlignment is respected.
     final Offset titleOffset = tester.getTopLeft(find.text('title'));
     final Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
     final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
-    expect(leadingOffset.dy - titleOffset.dy, closeTo(16.8, 0.1));
-    expect(trailingOffset.dy - titleOffset.dy, closeTo(16.8, 0.1));
+    expect(leadingOffset.dy - titleOffset.dy, 6);
+    expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
   testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
