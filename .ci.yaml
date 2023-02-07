@@ -3098,7 +3098,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac verify_binaries_codesigned
+  - name: Mac_x64 verify_binaries_codesigned
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
@@ -3111,7 +3111,22 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       validation: verify_binaries_codesigned
-      validation_name: Verify binaries codesigned
+      validation_name: Verify x64 binaries codesigned
+
+  - name: Mac_arm64 verify_binaries_codesigned
+    enabled_branches:
+      - flutter-\d+\.\d+-candidate\.\d+
+    recipe: flutter/flutter
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+      validation: verify_binaries_codesigned
+      validation_name: Verify arm64 binaries codesigned
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
