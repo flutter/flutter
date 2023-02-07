@@ -4298,9 +4298,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// An fragment that only carries partial information that must not form a
-/// explicit semantics node without merging into another
-/// _SwitchableSemanticsFragment.
+/// A fragment with only partial information that must not form a explicit
+/// semantics node without merging into another _SwitchableSemanticsFragment.
 ///
 /// This fragment is generated from synthetic SemanticsConfiguration returned from
 /// [SemanticsConfiguration.childConfigurationsDelegate].
@@ -4310,10 +4309,9 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
     required super.owner,
   }) : super(dropsSemanticsOfPreviousSiblings: false);
 
-
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    throw FlutterError('This fragment must be a leaf node');
+    assert(false, 'This fragment must be a leaf node');
   }
 
   @override
@@ -4322,7 +4320,8 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
     required Rect? parentPaintClipRect,
     required double elevationAdjustment,
     required List<SemanticsNode> result,
-    required List<SemanticsNode> siblingNodes}) {
+    required List<SemanticsNode> siblingNodes,
+  }) {
     // There is nothing to do because this fragment must be a leaf node and
     // must not be explicit.
   }
@@ -4334,7 +4333,8 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
   void markAsExplicit() {
     assert((){
       throw FlutterError(
-        'SemanticsConfiguration created in SemanticsConfiguration.merger must be not be explicit',
+        'SemanticsConfiguration created in SemanticsConfiguration.merger must '
+        'be not be explicit',
       );
     }());
   }

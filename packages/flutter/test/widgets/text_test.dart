@@ -329,16 +329,20 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(Text)),
-        matchesSemantics(label: 'before \nfoo\n after'));
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
 
     // If the Paragraph is not dirty it should use the cache correctly.
     final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
-    expect(tester.getSemantics(find.byType(Text)),
-        matchesSemantics(label: 'before \nfoo\n after'));
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
   });
 
   testWidgets('semantics can handle some widget spans without semantics', (WidgetTester tester) async {
