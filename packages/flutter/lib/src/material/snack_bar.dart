@@ -140,6 +140,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
     MaterialStateColor resolveForegroundColor() {
+      if (widget.textColor != null) {
+        if (widget.textColor is MaterialStateColor) {
+          return widget.textColor! as MaterialStateColor;
+        }
+      } else if (snackBarTheme.actionTextColor != null) {
+        if (snackBarTheme.actionTextColor is MaterialStateColor) {
+          return snackBarTheme.actionTextColor! as MaterialStateColor;
+        }
+      } else if (defaults.actionTextColor != null) {
+        if (defaults.actionTextColor is MaterialStateColor) {
+          return defaults.actionTextColor! as MaterialStateColor;
+        }
+      }
+
       return MaterialStateColor.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return widget.disabledTextColor ??
@@ -233,10 +247,10 @@ class SnackBar extends StatefulWidget {
     this.dismissDirection = DismissDirection.down,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(
-         width == null || margin == null,
-         'Width and margin can not be used together',
-       );
+        assert(
+        width == null || margin == null,
+        'Width and margin can not be used together',
+        );
 
   /// The primary content of the snack bar.
   ///
@@ -491,22 +505,22 @@ class _SnackBarState extends State<SnackBar> {
     final ThemeData effectiveTheme = theme.useMaterial3
         ? theme
         : theme.copyWith(
-            colorScheme: ColorScheme(
-              primary: colorScheme.onPrimary,
-              primaryVariant: colorScheme.onPrimary,
-              secondary: buttonColor,
-              secondaryVariant: colorScheme.onSecondary,
-              surface: colorScheme.onSurface,
-              background: defaults.backgroundColor!,
-              error: colorScheme.onError,
-              onPrimary: colorScheme.primary,
-              onSecondary: colorScheme.secondary,
-              onSurface: colorScheme.surface,
-              onBackground: colorScheme.background,
-              onError: colorScheme.error,
-              brightness: brightness,
-            ),
-          );
+      colorScheme: ColorScheme(
+        primary: colorScheme.onPrimary,
+        primaryVariant: colorScheme.onPrimary,
+        secondary: buttonColor,
+        secondaryVariant: colorScheme.onSecondary,
+        surface: colorScheme.onSurface,
+        background: defaults.backgroundColor!,
+        error: colorScheme.onError,
+        onPrimary: colorScheme.primary,
+        onSecondary: colorScheme.secondary,
+        onSurface: colorScheme.surface,
+        onBackground: colorScheme.background,
+        onError: colorScheme.error,
+        brightness: brightness,
+      ),
+    );
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? defaults.behavior!;
@@ -564,11 +578,11 @@ class _SnackBarState extends State<SnackBar> {
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
-            icon: const Icon(Icons.close),
-            iconSize: 24.0,
-            color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
-            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
-          )
+      icon: const Icon(Icons.close),
+      iconSize: 24.0,
+      color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
+      onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+    )
         : null;
 
     // Calculate combined width of Action, Icon, and their padding, if they are present.
@@ -615,32 +629,32 @@ class _SnackBarState extends State<SnackBar> {
 
     Widget snackBar = Padding(
       padding: padding,
-        child: Wrap(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    padding: widget.padding == null
-                        ? const EdgeInsets.symmetric(
-                            vertical: _singleLineVerticalPadding)
-                        : null,
-                    child: DefaultTextStyle(
-                      style: contentTextStyle!,
-                      child: widget.content,
-                    ),
+      child: Wrap(
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: widget.padding == null
+                      ? const EdgeInsets.symmetric(
+                      vertical: _singleLineVerticalPadding)
+                      : null,
+                  child: DefaultTextStyle(
+                    style: contentTextStyle!,
+                    child: widget.content,
                   ),
                 ),
-                if(!actionLineOverflow) ...maybeActionAndIcon,
-                if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
-              ],
-            ),
-            if(actionLineOverflow) Padding(
-              padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end,
-              children: maybeActionAndIcon),
-            ),
-          ],
+              ),
+              if(!actionLineOverflow) ...maybeActionAndIcon,
+              if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
+            ],
+          ),
+          if(actionLineOverflow) Padding(
+            padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
+            child: Row(mainAxisAlignment: MainAxisAlignment.end,
+                children: maybeActionAndIcon),
+          ),
+        ],
 
       ),
     );
@@ -665,9 +679,9 @@ class _SnackBarState extends State<SnackBar> {
         child: accessibleNavigation || theme.useMaterial3
             ? snackBar
             : FadeTransition(
-                opacity: fadeOutAnimation,
-                child: snackBar,
-              ),
+          opacity: fadeOutAnimation,
+          child: snackBar,
+        ),
       ),
     );
 
@@ -717,7 +731,7 @@ class _SnackBarState extends State<SnackBar> {
         opacity: fadeInAnimation,
         child: snackBar,
       );
-     // Is Material 3 Floating Snack Bar.
+      // Is Material 3 Floating Snack Bar.
     } else if (isFloatingSnackBar && theme.useMaterial3) {
       snackBarTransition = FadeTransition(
         opacity: fadeInM3Animation,
@@ -775,9 +789,9 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
+      brightness: _theme.brightness == Brightness.light
+          ? Brightness.dark
+          : Brightness.light)
       .textTheme
       .titleMedium;
 
@@ -793,10 +807,10 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   ShapeBorder get shape => const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(4.0),
-        ),
-      );
+    borderRadius: BorderRadius.all(
+      Radius.circular(4.0),
+    ),
+  );
 
   @override
   EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
@@ -818,7 +832,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Token database version: v0_152
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
-    _SnackbarDefaultsM3(this.context);
+  _SnackbarDefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
@@ -847,14 +861,14 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   Color get disabledActionTextColor =>
-    _colors.inversePrimary;
+      _colors.inversePrimary;
 
 
   @override
   TextStyle get contentTextStyle =>
-    Theme.of(context).textTheme.bodyMedium!.copyWith
-      (color:  _colors.onInverseSurface,
-    );
+      Theme.of(context).textTheme.bodyMedium!.copyWith
+        (color:  _colors.onInverseSurface,
+      );
 
   @override
   double get elevation => 6.0;
