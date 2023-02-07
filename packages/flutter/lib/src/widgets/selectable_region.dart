@@ -888,6 +888,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  void _selectAll() {
+     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
+    _updateSelectedContentIfNeeded();
+  }
+
   /// {@macro flutter.widgets.EditableText.getAnchors}
   ///
   /// See also:
@@ -990,7 +995,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _clearSelection();
       },
       onSelectAll: () {
-        selectAll();
+        _selectAll();
       },
     );
   }
@@ -1055,6 +1060,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @override
   void selectAll([SelectionChangedCause? cause]) {
+    _clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
       _showToolbar();
