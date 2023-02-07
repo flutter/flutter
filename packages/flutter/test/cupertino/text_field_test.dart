@@ -3642,6 +3642,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
         expect(controller.selection.isCollapsed, true);
         expect(controller.selection.baseOffset, 7);
+
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
         await tester.pump();
         expect(
@@ -3651,11 +3652,12 @@ void main() {
         expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
         expect(
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
         );
+
         // Triple tap selecting the same paragraph somewhere else is fine.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
         await tester.pump(const Duration(milliseconds: 50));
@@ -3665,6 +3667,7 @@ void main() {
           const TextSelection(baseOffset: 0, extentOffset: 36),
         );
         expect(find.byType(CupertinoButton), findsNothing);
+
         // Second tap shows the toolbar and selects the word.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
         await tester.pump();
@@ -3676,7 +3679,7 @@ void main() {
 
         // Third tap shows the toolbar and selects the paragraph.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
         expect(
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
@@ -3691,6 +3694,7 @@ void main() {
           const TextSelection.collapsed(offset: 50, affinity: TextAffinity.upstream),
         );
         expect(find.byType(CupertinoButton), findsNothing);
+
         // Second tap selects the word.
         await tester.tapAt(textfieldStart + const Offset(150.0, 25.0));
         await tester.pump();
