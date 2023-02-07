@@ -95,7 +95,6 @@ void main() {
     const Icon icon2 = Icon(Icons.close);
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
@@ -167,6 +166,7 @@ void main() {
         ..rrect(color: defaultTrackOutlineColor)
         ..rrect()
         ..rrect()
+        ..rrect()
         ..rrect(color: defaultThumbColor)
       )
     );
@@ -186,6 +186,7 @@ void main() {
       : (paints
         ..rrect(color: selectedTrackColor)
         ..rrect(color: selectedTrackOutlineColor)
+        ..rrect()
         ..rrect()
         ..rrect()
         ..rrect(color: selectedThumbColor))
