@@ -396,20 +396,6 @@ class ThemeData with Diagnosticable {
     )
     Brightness? accentColorBrightness,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    TextTheme? accentTextTheme,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    IconThemeData? accentIconTheme,
-    @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
@@ -521,7 +507,6 @@ class ThemeData with Diagnosticable {
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
-    final bool accentIsDark = accentColorBrightness == Brightness.dark;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
     shadowColor ??= Colors.black;
@@ -569,21 +554,17 @@ class ThemeData with Diagnosticable {
       : Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
-    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     if (fontFamily != null) {
       defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
-      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
     }
     if (fontFamilyFallback != null) {
       defaultTextTheme = defaultTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
-      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamilyFallback: fontFamilyFallback);
     }
     if (package != null) {
       defaultTextTheme = defaultTextTheme.apply(package: package);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(package: package);
-      defaultAccentTextTheme = defaultAccentTextTheme.apply(package: package);
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
@@ -635,8 +616,6 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
 
     // DEPRECATED (newest deprecations at the bottom)
-    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
-    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     fixTextFieldOutlineLabel ??= true;
     primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
@@ -734,8 +713,6 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
-      accentTextTheme: accentTextTheme,
-      accentIconTheme: accentIconTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
@@ -861,20 +838,6 @@ class ThemeData with Diagnosticable {
     )
     Brightness? accentColorBrightness,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    TextTheme? accentTextTheme,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    IconThemeData? accentIconTheme,
-    @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
@@ -921,8 +884,6 @@ class ThemeData with Diagnosticable {
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
        _accentColorBrightness = accentColorBrightness,
-       _accentTextTheme = accentTextTheme,
-       _accentIconTheme = accentIconTheme,
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
@@ -934,8 +895,6 @@ class ThemeData with Diagnosticable {
         // DEPRECATED (newest deprecations at the bottom)
        assert(accentColor != null),
        assert(accentColorBrightness != null),
-       assert(accentTextTheme != null),
-       assert(accentIconTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(primaryColorBrightness != null),
        assert(errorColor != null),
@@ -1630,46 +1589,6 @@ class ThemeData with Diagnosticable {
   Brightness get accentColorBrightness => _accentColorBrightness!;
   final Brightness? _accentColorBrightness;
 
-  /// Obsolete property that was originally used when a [TextTheme]
-  /// that contrasted well with the [accentColor] was needed.
-  ///
-  /// The material library no longer uses this property and most uses
-  /// of [accentColor] have been replaced with
-  /// the theme's [colorScheme] [ColorScheme.secondary].
-  /// You can configure the color of a [textTheme] [TextStyle] so that it
-  /// contrasts well with the [ColorScheme.secondary] like this:
-  ///
-  /// ```dart
-  /// final ThemeData theme = Theme.of(context);
-  /// final TextStyle style = theme.textTheme.displayLarge!.copyWith(
-  ///   color: theme.colorScheme.onSecondary,
-  /// );
-  /// // ...use style...
-  /// ```
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'For more information, consult the migration guide at '
-    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-    'This feature was deprecated after v2.3.0-0.1.pre.',
-  )
-  TextTheme get accentTextTheme => _accentTextTheme!;
-  final TextTheme? _accentTextTheme;
-
-  /// Obsolete property that was originally used when an [IconTheme]
-  /// that contrasted well with the [accentColor] was needed.
-  ///
-  /// The material library no longer uses this property and most uses
-  /// of [accentColor] have been replaced with
-  /// the theme's [colorScheme] [ColorScheme.secondary].
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'For more information, consult the migration guide at '
-    'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-    'This feature was deprecated after v2.3.0-0.1.pre.',
-  )
-  IconThemeData get accentIconTheme => _accentIconTheme!;
-  final IconThemeData? _accentIconTheme;
-
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1869,20 +1788,6 @@ class ThemeData with Diagnosticable {
     )
     Brightness? accentColorBrightness,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    TextTheme? accentTextTheme,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
-      'This feature was deprecated after v2.3.0-0.1.pre.',
-    )
-    IconThemeData? accentIconTheme,
-    @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
@@ -2017,8 +1922,6 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor ?? _accentColor,
       accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
-      accentTextTheme: accentTextTheme ?? _accentTextTheme,
-      accentIconTheme: accentIconTheme ?? _accentIconTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? _fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
@@ -2059,7 +1962,6 @@ class ThemeData with Diagnosticable {
       () {
         return baseTheme.copyWith(
           primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
-          accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
           textTheme: localTextGeometry.merge(baseTheme.textTheme),
         );
       },
@@ -2212,8 +2114,6 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Color.lerp(a.accentColor, b.accentColor, t),
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
-      accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
-      accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
@@ -2321,8 +2221,6 @@ class ThemeData with Diagnosticable {
         // DEPRECATED (newest deprecations at the bottom)
         other.accentColor == accentColor &&
         other.accentColorBrightness == accentColorBrightness &&
-        other.accentTextTheme == accentTextTheme &&
-        other.accentIconTheme == accentIconTheme &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
@@ -2427,8 +2325,6 @@ class ThemeData with Diagnosticable {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor,
       accentColorBrightness,
-      accentTextTheme,
-      accentIconTheme,
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
       androidOverscrollIndicator,
@@ -2535,8 +2431,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
