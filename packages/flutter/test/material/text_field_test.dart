@@ -9390,7 +9390,7 @@ void main() {
         expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
 
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
         expect(
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
@@ -9415,7 +9415,7 @@ void main() {
 
         // Third tap shows the toolbar and selects the paragraph.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
         expect(
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
