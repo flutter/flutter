@@ -240,8 +240,10 @@ class Switch extends StatelessWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? activeThumbImage;
 
+  /// {@template flutter.material.switch.onActiveThumbImageError}
   /// An optional error callback for errors emitted when loading
   /// [activeThumbImage].
+  /// {@endtemplate}
   final ImageErrorListener? onActiveThumbImageError;
 
   /// An image to use on the thumb of this switch when the switch is off.
@@ -249,8 +251,10 @@ class Switch extends StatelessWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? inactiveThumbImage;
 
+  /// {@template flutter.material.switch.onInactiveThumbImageError}
   /// An optional error callback for errors emitted when loading
   /// [inactiveThumbImage].
+  /// {@endtemplate}
   final ImageErrorListener? onInactiveThumbImageError;
 
   /// {@template flutter.material.switch.thumbColor}
