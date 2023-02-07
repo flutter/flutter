@@ -6738,7 +6738,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 20,
         ),
@@ -6760,7 +6760,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 36,
         ),
@@ -6782,7 +6782,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 55,
         ),
@@ -6804,7 +6804,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 36,
         ),
@@ -6826,7 +6826,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 20,
         ),
@@ -6873,7 +6873,7 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
           extentOffset: 0,
         ),
