@@ -50,7 +50,9 @@ class AccessibilityBridge
 
   //-----------------------------------------------------------------------------
   /// @brief      The ID of the root node in the accessibility tree. In Flutter,
-  //              this is always 0.
+  ///             this is always 0.
+  //  TODO(loicsharma): Remove this as it is incorrect in a multi-view world.
+  //  See: https://github.com/flutter/flutter/issues/119391
   static constexpr int32_t kRootNodeId = 0;
 
   //------------------------------------------------------------------------------
