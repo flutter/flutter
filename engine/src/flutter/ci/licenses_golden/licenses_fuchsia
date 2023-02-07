@@ -1,4 +1,4 @@
-Signature: 250b1e0721715797c3f7969fe6b84a8e
+Signature: 1b5f846ded459de2d595401db1f3ca25
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -2877,7 +2877,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart + ../../../fuch
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/feedback_data_provider.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/proxy.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/time.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/gpu_metrics.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/total_trace_wall_time.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -3043,7 +3042,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/feedback_data_provider.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/proxy.dart
-FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/time.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/gpu_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/total_trace_wall_time.dart
