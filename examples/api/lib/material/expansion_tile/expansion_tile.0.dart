@@ -6,33 +6,31 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ExpansionTileApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class ExpansionTileApp extends StatelessWidget {
+  const ExpansionTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ExpansionTile Sample')),
+        body: const ExpansionTileExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ExpansionTileExample extends StatefulWidget {
+  const ExpansionTileExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionTileExample> createState() => _ExpansionTileExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   bool _customTileExpanded = false;
 
   @override
@@ -58,7 +56,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             ListTile(title: Text('This is tile number 2')),
           ],
           onExpansionChanged: (bool expanded) {
-            setState(() => _customTileExpanded = expanded);
+            setState(() {
+              _customTileExpanded = expanded;
+            });
           },
         ),
         const ExpansionTile(

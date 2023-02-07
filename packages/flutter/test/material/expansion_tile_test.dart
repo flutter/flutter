@@ -522,6 +522,35 @@ void main() {
     expect(shapeDecoration.color, backgroundColor);
   });
 
+  testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Material(
+        child: ExpansionTile(
+          title: TestText('title'),
+          trailing: TestIcon(),
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    expect(getIconColor(), theme.colorScheme.onSurface);
+    expect(getTextColor(), theme.textTheme.bodyLarge!.color);
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    expect(getIconColor(), theme.colorScheme.primary);
+    expect(getTextColor(), theme.textTheme.bodyLarge!.color);
+  });
+
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
@@ -665,5 +694,39 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: ExpansionTile(
+            title: TestText('title'),
+            trailing: TestIcon(),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ));
+
+      Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+      Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+      expect(getIconColor(), theme.unselectedWidgetColor);
+      expect(getTextColor(), theme.textTheme.titleMedium!.color);
+
+      await tester.tap(find.text('title'));
+      await tester.pumpAndSettle();
+
+      expect(getIconColor(), theme.colorScheme.primary);
+      expect(getTextColor(), theme.colorScheme.primary);
+    });
   });
 }
