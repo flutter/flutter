@@ -46,7 +46,7 @@ class RouteInformation {
     @Deprecated(
       'Pass Uri.parse(location) to uri parameter instead. '
       'This parameter is superseded by the uri parameter. '
-      'This feature was deprecated after v3.8.0-3.0.pre-32-g6fd57c971a'
+      'This feature was deprecated after v3.8.0-3.0.pre'
     )
     String? location,
     Uri? uri,
@@ -62,7 +62,7 @@ class RouteInformation {
   @Deprecated(
     'Use uri instead. '
     'This getter is superseded by the uri getter. '
-    'This feature was deprecated after v3.8.0-3.0.pre-32-g6fd57c971a'
+    'This feature was deprecated after v3.8.0-3.0.pre'
   )
   String get location {
     if (_location != null) {
