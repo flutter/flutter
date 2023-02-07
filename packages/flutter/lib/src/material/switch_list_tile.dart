@@ -292,39 +292,39 @@ class SwitchListTile extends StatelessWidget {
   /// {@end-tool}
   final ValueChanged<bool>? onChanged;
 
-  /// The color to use when this switch is on.
+  /// {@macros flutter.material.switch.activeColor}
   ///
   /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
-  /// The color to use on the track when this switch is on.
+  /// {@macro flutter.material.switch.activeTrackColor}
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? activeTrackColor;
 
-  /// The color to use on the thumb when this switch is off.
+  /// {@macro flutter.material.switch.inactiveThumbColor}
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? inactiveThumbColor;
 
-  /// The color to use on the track when this switch is off.
+  /// {@macro flutter.material.switch.inactiveTrackColor}
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? inactiveTrackColor;
 
-  /// An image to use on the thumb of this switch when the switch is on.
+  /// {@macro flutter.material.switch.activeThumbImage}
   final ImageProvider? activeThumbImage;
 
   /// {@macro flutter.material.switch.onActiveThumbImageError}
   final ImageErrorListener? onActiveThumbImageError;
 
-  /// An image to use on the thumb of this switch when the switch is off.
+  /// {@macro flutter.material.switch.inactiveThumbImage}
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final ImageProvider? inactiveThumbImage;
@@ -389,6 +389,13 @@ class SwitchListTile extends StatelessWidget {
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
   ///
   /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
   /// is also null, then [MaterialStateMouseCursor.clickable] is used.
