@@ -815,8 +815,6 @@ void main() {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.black,
       accentColorBrightness: Brightness.dark,
-      accentTextTheme: ThemeData.dark().textTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
@@ -937,8 +935,6 @@ void main() {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.white,
       accentColorBrightness: Brightness.light,
-      accentIconTheme: ThemeData.light().iconTheme,
-      accentTextTheme: ThemeData.light().textTheme,
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -1042,8 +1038,6 @@ void main() {
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: otherTheme.accentColor,
       accentColorBrightness: otherTheme.accentColorBrightness,
-      accentIconTheme: otherTheme.accentIconTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
@@ -1148,8 +1142,6 @@ void main() {
     // DEPRECATED (newest deprecations at the bottom)
     expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
     expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
-    expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
@@ -1286,8 +1278,6 @@ void main() {
       // DEPRECATED (newest deprecations at the bottom)
       'accentColor',
       'accentColorBrightness',
-      'accentTextTheme',
-      'accentIconTheme',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',
