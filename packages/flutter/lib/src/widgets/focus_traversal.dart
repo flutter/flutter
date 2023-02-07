@@ -38,10 +38,23 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
 void _focusAndEnsureVisible(
   FocusNode node, {
   ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+  double alignment = 1.0,
+  Duration duration = Duration.zero,
+  Curve curve = Curves.ease,
 }) {
   node.requestFocus();
-  Scrollable.ensureVisible(node.context!, alignment: 1.0, alignmentPolicy: alignmentPolicy);
+  Scrollable.ensureVisible(node.context!, alignment: alignment, alignmentPolicy: alignmentPolicy, duration: duration, curve: curve);
 }
+
+/// Signature for the callback that's called when a traversal policy is
+/// requesting focus.
+typedef RequestFocusCallback = void Function(
+    FocusNode node, {
+    ScrollPositionAlignmentPolicy alignmentPolicy,
+    double alignment,
+    Duration duration,
+    Curve curve,
+});
 
 // A class to temporarily hold information about FocusTraversalGroups when
 // sorting their contents.
@@ -150,7 +163,13 @@ enum TraversalEdgeBehavior {
 abstract class FocusTraversalPolicy with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const FocusTraversalPolicy();
+  const FocusTraversalPolicy({
+    RequestFocusCallback? requestFocusCallback
+  }) : requestFocusCallback = requestFocusCallback ?? _focusAndEnsureVisible as RequestFocusCallback;
+
+  /// The callback used to move the focus from one focus node to another when
+  /// traversing them using a keyboard.
+  final RequestFocusCallback requestFocusCallback;
 
   /// Returns the node that should receive focus if focus is traversing
   /// forwards, and there is no current focus.
@@ -962,6 +981,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
 class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  /// Constructs a traversal policy that orders widgets for keyboard traversal
+  /// based on the widget hierarchy order.
+  WidgetOrderTraversalPolicy({super.requestFocusCallback});
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) => descendants;
 }
@@ -1129,6 +1151,9 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  /// Constructs a traversal policy that orders the widgets in "reading order".
+  ReadingOrderTraversalPolicy({super.requestFocusCallback});
+
   // Collects the given candidates into groups by directionality. The candidates
   // have already been sorted as if they all had the directionality of the
   // nearest Directionality ancestor.
@@ -1418,7 +1443,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
   /// based on an explicit order.
   ///
   /// If [secondary] is null, it will default to [ReadingOrderTraversalPolicy].
-  OrderedTraversalPolicy({this.secondary});
+  OrderedTraversalPolicy({this.secondary, super.requestFocusCallback});
 
   /// This is the policy that is used when a node doesn't have an order
   /// assigned, or when multiple nodes have orders which are identical.
