@@ -73,7 +73,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testWithoutContext('wildcard directories does not include subdirectories', () async {
+    testWithoutContext('wildcard directories do not include subdirectories', () async {
       final Platform platform = FakePlatform();
       final FileSystem fs = MemoryFileSystem.test();
       Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: fs, userMessages: UserMessages());
