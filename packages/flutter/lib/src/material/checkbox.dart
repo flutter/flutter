@@ -829,7 +829,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
           return _colors.error.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.12).withOpacity(0.12);
+          return _colors.error.withOpacity(0.12);
         }
       }
       if (states.contains(MaterialState.selected)) {
