@@ -172,7 +172,7 @@ void main() {
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
-    expect(observer.pushedRouteInformation.uri.toString(), '/abc?def=123&def=456#789');
+    expect(observer.pushedRouteInformation.location, '/abc?def=123&def=456#789');
     expect(observer.pushedRouteInformation.uri.toString(), 'http://hostname/abc?def=123&def=456#789');
     expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
