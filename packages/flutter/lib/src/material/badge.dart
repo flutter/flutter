@@ -275,7 +275,7 @@ class _RenderBadge extends RenderAligningShiftedBox {
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = offset + resolvedAlignment.alongOffset(size - Size(badgeSize, badgeSize) as Offset);
+    childParentData.offset = offset + resolvedAlignment.alongOffset(Offset(size.width - badgeSize, size.height - badgeSize));
   }
 }
 
