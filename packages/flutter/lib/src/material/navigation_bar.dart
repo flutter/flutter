@@ -17,8 +17,8 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
-const double _kIndicatorHeight = 64;
-const double _kIndicatorWidth = 32;
+const double _kIndicatorHeight = 32;
+const double _kIndicatorWidth = 64;
 
 // Examples can assume:
 // late BuildContext context;
@@ -212,6 +212,7 @@ class NavigationBar extends StatelessWidget {
                     builder: (BuildContext context, Animation<double> animation) {
                       return _NavigationDestinationInfo(
                         index: i,
+                        selectedIndex: selectedIndex,
                         totalNumberOfDestinations: destinations.length,
                         selectedAnimation: animation,
                         labelBehavior: effectiveLabelBehavior,
@@ -434,11 +435,17 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
+    final GlobalKey labelKey = GlobalKey();
 
+    final bool selected = info.selectedIndex == info.index;
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
         message: tooltip ?? label,
         child: _IndicatorInkWell(
+          key: UniqueKey(),
+          labelKey: labelKey,
+          labelBehavior: info.labelBehavior,
+          selected: selected,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
@@ -446,6 +453,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
               Expanded(
                 child: _NavigationBarDestinationLayout(
                   icon: buildIcon(context),
+                  labelKey: labelKey,
                   label: buildLabel(context),
                 ),
               ),
@@ -459,24 +467,46 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
-    super.child,
-    super.onTap,
+    super.key,
+    required this.labelKey,
+    required this.labelBehavior,
+    required this.selected,
     super.customBorder,
+    super.onTap,
+    super.child,
   }) : super(
     containedInkWell: true,
     highlightColor: Colors.transparent,
   );
 
+  final GlobalKey labelKey;
+  final NavigationDestinationLabelBehavior labelBehavior;
+  final bool selected;
+
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
+    final RenderBox labelBox = labelKey.currentContext!.findRenderObject()! as RenderBox;
+    final Rect labelRect = labelBox.localToGlobal(Offset.zero) & labelBox.size;
+    final double labelPadding;
+    switch (labelBehavior) {
+      case NavigationDestinationLabelBehavior.alwaysShow:
+        labelPadding = labelRect.height / 2;
+        break;
+      case NavigationDestinationLabelBehavior.onlyShowSelected:
+        labelPadding = selected ? labelRect.height / 2 : 0;
+        break;
+      case NavigationDestinationLabelBehavior.alwaysHide:
+        labelPadding = 0;
+        break;
+    }
     final double indicatorOffsetX = referenceBox.size.width / 2;
-    const double indicatorOffsetY = 30.0;
+    final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
 
     return () {
       return Rect.fromCenter(
         center: Offset(indicatorOffsetX, indicatorOffsetY),
-        width: _kIndicatorHeight,
-        height: _kIndicatorWidth,
+        width: _kIndicatorWidth,
+        height: _kIndicatorHeight,
       );
     };
   }
@@ -492,6 +522,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// [child] and descendants.
   const _NavigationDestinationInfo({
     required this.index,
+    required this.selectedIndex,
     required this.totalNumberOfDestinations,
     required this.selectedAnimation,
     required this.labelBehavior,
@@ -528,6 +559,12 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 3", for example.
   final int index;
+
+  /// This is the index of the currently selected destination.
+  ///
+  /// This is required for `_IndicatorInkWell` to apply label padding to ripple animations
+  /// when label behavior is [NavigationDestinationLabelBehavior.onlyShowSelected].
+  final int selectedIndex;
 
   /// How many total destinations are are in this navigation bar.
   ///
@@ -593,8 +630,8 @@ class NavigationIndicator extends StatelessWidget {
     super.key,
     required this.animation,
     this.color,
-    this.width = _kIndicatorHeight,
-    this.height = _kIndicatorWidth,
+    this.width = _kIndicatorWidth,
+    this.height = _kIndicatorHeight,
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.shape,
   });
@@ -699,6 +736,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
     required this.icon,
+    required this.labelKey,
     required this.label,
   });
 
@@ -706,6 +744,11 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   ///
   /// See [NavigationDestination.icon].
   final Widget icon;
+
+  /// The global key for the label of this destination.
+  ///
+  /// This is used to determine the position of the label relative to the icon.
+  final GlobalKey labelKey;
 
   /// The label widget that sits below the icon.
   ///
@@ -716,7 +759,6 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   final Widget label;
 
   static final Key _iconKey = UniqueKey();
-  static final Key _labelKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -740,7 +782,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
                 alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: RepaintBoundary(
-                  key: _labelKey,
+                  key: labelKey,
                   child: label,
                 ),
               ),
