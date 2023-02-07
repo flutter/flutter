@@ -1006,6 +1006,157 @@ void main() {
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
+
+  Future<void> prepareBigLayout(
+      WidgetTester tester,
+      TextDirection textDirection,
+      ) async {
+    // Sizes based on a macOS screen
+    await tester.binding.setSurfaceSize(const Size(1011.0, 628.0));
+
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Package '], 'LicenseEntry'),
+      ]);
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'License ABC',
+        home: Scaffold(
+          body: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(1011.0, 628.0),
+            ),
+            child: Directionality(
+              textDirection: textDirection,
+              child: const LicensePage(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
+  }
+
+  testWidgets(
+    'LicensePage lateralUI layout (ltr)',
+        (WidgetTester tester) async {
+      // Set big screen
+      await prepareBigLayout(tester, TextDirection.ltr);
+
+      expect(find.text('License ABC'), findsOneWidget);
+      final Finder packagesViewTitle = find.text('License ABC');
+      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
+      expect(titleLeftPadding, 28.0);
+
+      // Check for the PackageListTile position
+      final Finder packageListTile = find.byType(ListTile);
+      final double listTileLeftPadding1 = tester.getTopLeft(packageListTile).dx;
+      expect(listTileLeftPadding1, 0);
+
+      // Check for the position of the detail view card
+      final Finder packageDetailCard = find.byType(Card);
+      final double cardLeftPadding = tester.getTopLeft(packageDetailCard).dx;
+      expect(cardLeftPadding, 316.0);
+
+      tester.binding.setSurfaceSize(null);
+    },
+  );
+
+  testWidgets(
+    'LicensePage lateralUI layout (rtl)',
+        (WidgetTester tester) async {
+      // Set big screen
+      await prepareBigLayout(tester, TextDirection.rtl);
+
+      expect(find.text('License ABC'), findsOneWidget);
+      final Finder packagesViewTitle = find.text('License ABC');
+      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
+      expect(titleLeftPadding, 719.0);
+
+      // Check for the PackageListTile position
+      final Finder packageListTile = find.byType(ListTile);
+      final double listTileLeftPadding = tester.getTopLeft(packageListTile).dx;
+      expect(listTileLeftPadding, 691.0);
+
+      // Check for the position of the detail view card
+      final Finder packageDetailCard = find.byType(Card);
+      final double cardRightPadding = tester.getTopLeft(packageDetailCard).dx;
+      expect(cardRightPadding, 24.0);
+
+      tester.binding.setSurfaceSize(null);
+    },
+  );
+
+  testWidgets(
+    'LicensePage nestedUI layout (ltr)',
+        (WidgetTester tester) async {
+      LicenseRegistry.addLicense(() {
+        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+          const LicenseEntryWithLineBreaks(
+              <String>['NestedUI '], 'LicenseEntry'),
+        ]);
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          title: 'License Nested',
+          home: Scaffold(
+            body: Directionality(
+              textDirection: TextDirection.ltr,
+              child: LicensePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      expect(find.text('License Nested'), findsOneWidget);
+      final Finder packagesViewTitle = find.text('License Nested');
+      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
+      expect(titleLeftPadding, 232.0);
+
+      final Finder packageName = find.text('NestedUI ');
+      expect(packageName, findsOneWidget);
+      final double packageNameLeftPadding = tester.getTopLeft(packageName).dx;
+      expect(packageNameLeftPadding, 116);
+    },
+  );
+
+  testWidgets(
+    'LicensePage nestedUI layout (rtl)',
+        (WidgetTester tester) async {
+      LicenseRegistry.addLicense(() {
+        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+          const LicenseEntryWithLineBreaks(
+              <String>['NestedUI '], 'LicenseEntry'),
+        ]);
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          title: 'License Nested',
+          home: Scaffold(
+            body: Directionality(
+              textDirection: TextDirection.rtl,
+              child: LicensePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+
+      expect(find.text('License Nested'), findsOneWidget);
+      final Finder packagesViewTitle = find.text('License Nested');
+      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
+      expect(titleLeftPadding, 232.0);
+
+      final Finder packageName = find.text('NestedUI ');
+      expect(packageName, findsOneWidget);
+      final double packageNameRightPadding = tester.getTopRight(packageName).dx;
+      expect(packageNameRightPadding, 684);
+    },
+  );
 }
 
 class FakeLicenseEntry extends LicenseEntry {

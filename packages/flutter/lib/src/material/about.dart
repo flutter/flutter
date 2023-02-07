@@ -1365,6 +1365,8 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
   @override
   Widget build(BuildContext context) {
+    final TextDirection directionality = Directionality.of(context);
+
     return Stack(
       children: <Widget>[
         Scaffold(
@@ -1396,7 +1398,11 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _masterPanel(context),
+          body: Align(
+              alignment: directionality == TextDirection.ltr
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: _masterPanel(context)),
         ),
         // Detail view stacked above main scaffold and master view.
         SafeArea(
