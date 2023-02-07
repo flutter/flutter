@@ -2340,7 +2340,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Replace composing region with specified text.
-  void replaceText({required SelectionChangedCause cause, required String text, TextRange replacementRange, bool shouldSelectWordEdgeAfterReplacement = false}) {
+  void replaceText({required SelectionChangedCause cause, required String text, required TextRange replacementRange, bool shouldSelectWordEdgeAfterReplacement = false}) {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!widget.readOnly && !widget.obscureText);
 
