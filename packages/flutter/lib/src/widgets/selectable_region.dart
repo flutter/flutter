@@ -1771,11 +1771,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect drawableArea = Rect
+      final Rect? drawableArea = hasSize ? Rect
         .fromLTWH(0, 0, containerSize.width, containerSize.height)
-        .inflate(_kSelectionHandleDrawableAreaPadding);
-      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
+        .inflate(_kSelectionHandleDrawableAreaPadding) : null;
+      final bool hideStartHandle = value.startSelectionPoint == null || drawableArea ==  null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle = value.endSelectionPoint == null || drawableArea ==  null|| !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }
