@@ -365,7 +365,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('BOTTOM'));
     });
 
-
     testWidgets('WidgetInspector non-invertible transform regression test', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -3616,7 +3615,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
-
 
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
