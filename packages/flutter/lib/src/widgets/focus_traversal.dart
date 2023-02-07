@@ -165,7 +165,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// const constructors so that they can be used in const expressions.
   const FocusTraversalPolicy({
     RequestFocusCallback? requestFocusCallback
-  }) : requestFocusCallback = requestFocusCallback ?? _focusAndEnsureVisible as RequestFocusCallback;
+  }) : requestFocusCallback = requestFocusCallback ?? _focusAndEnsureVisible;
 
   /// The callback used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
