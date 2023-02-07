@@ -92,16 +92,10 @@ template("wasm_lib") {
 
   _lib_name = target_name
 
-  executable("${_lib_name}.js") {
+  executable("$_lib_name") {
     forward_variables_from(invoker, _vars_to_forward)
     cflags = _target_cflags
     ldflags = _target_ldflags
-    output_extension = ""
-  }
-
-  group("$_lib_name") {
-    public_deps = [
-      ":${_lib_name}.js",
-    ]
+    output_extension = "js"
   }
 }
