@@ -1224,7 +1224,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               ?? TextField.materialMisspelledTextStyle,
             spellCheckSuggestionsToolbarBuilder:
               widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
+                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder,
           )
         : const SpellCheckConfiguration.disabled();
 

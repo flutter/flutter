@@ -674,7 +674,7 @@ void main() {
     // Reset and test text selection toolbar is toggled for additional taps.
     state.showSpellCheckSuggestionsToolbarCalled = false;
     renderEditable.selection = selection;
-    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Test first tap.
     await tester.tapAt(position);
@@ -685,7 +685,7 @@ void main() {
 
     // Reset and test second tap.
     state.toggleToolbarCalled = false;
-    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(milliseconds: 500));
 
     await tester.tapAt(position);
     await tester.pumpAndSettle();

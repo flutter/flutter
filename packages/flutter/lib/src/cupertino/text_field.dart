@@ -1297,7 +1297,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
               ?? CupertinoTextField.cupertinoMisspelledTextStyle,
             spellCheckSuggestionsToolbarBuilder:
               widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder
+                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
           )
         : const SpellCheckConfiguration.disabled();
 

@@ -460,6 +460,7 @@ class TextSelectionOverlay {
   ) {
     _updateSelectionOverlay();
     assert(context.mounted);
+    print('hey boo x10');
     _selectionOverlay
       .showSpellCheckSuggestionsToolbar(
         context: context,
@@ -1365,6 +1366,8 @@ class SelectionOverlay {
         );
       },
     );
+
+    print(_contextMenuController.isShown);
   }
 
   bool _buildScheduled = false;
@@ -2191,12 +2194,18 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
-              // TODO(camsim99): Determine spell check toolbar behavior in these cases: https://github.com/flutter/flutter/issues/119573.
-              // Precise devices should place the cursor at a precise position if the word at the text position is not misspelled.
+              // TODO(camsim99): Determine spell check toolbar behavior in these cases:
+              // https://github.com/flutter/flutter/issues/119573.
+              // Precise devices should place the cursor at a precise position if the
+              // word at the text position is not misspelled.
               renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
+              // If the word that was tapped is misspelled, select the word and show the spell check suggestions
+              // toolbar once. If additional taps are made on a misspelled word, toggle the toolbar. If the word
+              // is not misspelled, default to the following behavior:
+              //
               // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
               // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the
               // cursor is on the boundary of a line wrap, if the affinity is different (i.e. it is downstream), the

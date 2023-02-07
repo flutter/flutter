@@ -14515,7 +14515,53 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(find.text('DELETE'), findsOneWidget);
     });
 
-    testWidgets('spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+    testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        // composing: TextRange(start: 0, end: 4),
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: cupertinoTextSelectionControls,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                  spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                ),
+            ),
+          ),
+        );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      // state.renderEditable.selectWordsInRange(
+      //   from: Offset.zero,
+      //   cause: SelectionChangedCause.tap,
+      // );
+      await tester.pumpAndSettle();
+
+      // Test misspelled word replacement buttons.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+      // debugDumpApp();
+      expect(find.text('sets'), findsOneWidget);
+      await tester.tap(find.text('sets'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals('sets test test'));
+    });
+
+    testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(

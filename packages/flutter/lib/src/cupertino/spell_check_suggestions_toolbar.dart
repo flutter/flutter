@@ -9,14 +9,14 @@ import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';
 
 /// iOS only shows 3 spell check suggestions in the toolbar.
-const int maxSuggestions = 3;
+const int _maxSuggestions = 3;
 
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchors], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
 class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
-  /// Constructs a [SpellCheckSuggestionsToolbar].
+  /// Constructs a [CupertinoSpellCheckSuggestionsToolbar].
   const CupertinoSpellCheckSuggestionsToolbar({
     super.key,
     required this.anchors,
@@ -68,20 +68,21 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     // Build suggestion buttons.
     int suggestionCount = 0;
     for (final String suggestion in spanAtCursorIndex.suggestions) {
-      if (suggestionCount < maxSuggestions) {
+      if (suggestionCount >= _maxSuggestions) {
+        break;
+      }
         buttonItems.add(ContextMenuButtonItem(
           onPressed: () {
             editableTextState
-              .replaceComposingRegion(
+              .replaceText(
                 cause: SelectionChangedCause.toolbar,
                 text: suggestion,
-                composingRegionRange: spanAtCursorIndex.range,
+                replacementRange: spanAtCursorIndex.range,
                 shouldSelectWordEdgeAfterReplacement: true,
             );
           },
           label: suggestion,
         ));
-      }
       suggestionCount += 1;
     }
     return buttonItems;
@@ -91,7 +92,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   List<Widget> _buildToolbarButtons(BuildContext context) {
     return buttonItems.map((ContextMenuButtonItem buttonItem) {
       return CupertinoTextSelectionToolbarButton.buttonItem(
-          buttonItem: buttonItem,
+        buttonItem: buttonItem,
       );
     }).toList();
   }

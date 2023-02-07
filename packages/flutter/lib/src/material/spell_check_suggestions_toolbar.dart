@@ -84,6 +84,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
             .replaceComposingRegion(
               cause: SelectionChangedCause.toolbar,
               text: suggestion,
+              replacementRange: spanAtCursorIndex.range,
           );
         },
         label: suggestion,
