@@ -66,14 +66,19 @@ class RouteInformation {
     if (_location != null) {
       return _location!;
     }
-    final Uri uri = _uri!;
-    return Uri(
-      path: uri.path.isEmpty ? '/' : uri.path,
-      queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-      fragment: uri.fragment.isEmpty ? null : uri.fragment,
-    ).toString();
+    return _getLocationFromUri(_uri!);
   }
   final String? _location;
+
+  static String _getLocationFromUri(Uri uri) {
+    return Uri.decodeComponent(
+      Uri(
+        path: uri.path.isEmpty ? '/' : uri.path,
+        queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+        fragment: uri.fragment.isEmpty ? null : uri.fragment,
+      ).toString(),
+    );
+  }
 
   /// The uri location of the application.
   ///
@@ -1467,11 +1472,11 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final String newLocation = _getLocationFromUri(routeInformation.uri);
+    final String newLocation = RouteInformation._getLocationFromUri(routeInformation.uri);
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-          _getLocationFromUri(_valueInEngine.uri) == newLocation);
+       RouteInformation._getLocationFromUri(_valueInEngine.uri) == newLocation);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: newLocation,
@@ -1487,14 +1492,6 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation _value;
 
   RouteInformation _valueInEngine = RouteInformation(uri: Uri.parse(WidgetsBinding.instance.platformDispatcher.defaultRouteName));
-
-  static String _getLocationFromUri(Uri uri) {
-    return Uri(
-      path: uri.path.isEmpty ? '/' : uri.path,
-      queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-      fragment: uri.fragment.isEmpty ? null : uri.fragment,
-    ).toString();
-  }
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation) {

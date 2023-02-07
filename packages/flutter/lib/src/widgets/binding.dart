@@ -89,11 +89,13 @@ abstract mixin class WidgetsBindingObserver {
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
     final Uri uri = routeInformation.uri;
     return didPushRoute(
-      Uri(
-        path: uri.path.isEmpty ? '/' : uri.path,
-        queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-        fragment: uri.fragment.isEmpty ? null : uri.fragment,
-      ).toString(),
+        Uri.decodeComponent(
+          Uri(
+            path: uri.path.isEmpty ? '/' : uri.path,
+            queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+            fragment: uri.fragment.isEmpty ? null : uri.fragment,
+          ).toString(),
+        ),
     );
   }
 
