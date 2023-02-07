@@ -3220,7 +3220,6 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 verify_binaries_codesigned
-    bringup: true
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
@@ -3236,7 +3235,6 @@ targets:
       validation_name: Verify x64 binaries codesigned
 
   - name: Mac_arm64 verify_binaries_codesigned
-    bringup: true
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
