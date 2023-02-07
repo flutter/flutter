@@ -1124,6 +1124,14 @@ class TextPainter {
       paragraph.layout(ui.ParagraphConstraints(width: newInputWidth));
       _inputWidth = newInputWidth;
     }
+    // It's possible to have `_rebuildParagraphForPaint == true` when the layout
+    // is still valid (notably, when there're only text color changes), in which
+    // case the paragraph will be rebuilt in the `paint` method. It's best to
+    // not eagerly rebuild the paragraph to avoid the extra work:
+    // 1. the text color could change again before `paint` is called (so one of
+    //    the rebuilds is unnecessary)
+    // 2. the user could be measuring the text layout so `paint` will never be
+    //    called.
     if (paragraph != cachedLayout?.paragraph) {
       _rebuildParagraphForPaint = false;
       cachedLayout?.dispose();
