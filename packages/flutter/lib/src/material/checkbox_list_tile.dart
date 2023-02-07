@@ -229,6 +229,13 @@ class CheckboxListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
+  ///
   /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
   /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
@@ -250,10 +257,7 @@ class CheckboxListTile extends StatelessWidget {
   /// is used. If that is also null, then the default value is used.
   final MaterialStateProperty<Color?>? fillColor;
 
-  /// The color for the checkbox's [Material] when a pointer is hovering over it.
-  ///
-  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
-  /// state, it will be used instead.
+  /// {@macro flutter.material.checkbox.hoverColor}
   final Color? hoverColor;
 
   /// The color for the checkbox's [Material].

@@ -502,7 +502,7 @@ void main() {
       expect(tester.widget<Checkbox>(checkbox).value, true);
     });
 
-  testWidgets('The checkbox on CheckboxListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects mouseCursor when hovered', (WidgetTester tester) async {
     // Test Checkbox() constructor
     await tester.pumpWidget(
       wrap(
@@ -573,7 +573,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
@@ -609,7 +609,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
   });
 
-  testWidgets('Checkbox fill color resolves in hovered state', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects fillColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
@@ -653,7 +653,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
   });
 
-  testWidgets('Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects hoverColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -705,7 +705,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox overlay color resolves in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -818,7 +818,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox with splash radius set', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects splashRadius', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -847,7 +847,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox size is configurable by materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CheckboxListTile(
@@ -873,7 +873,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
   });
 
-  testWidgets('CheckboxListTile can show error state - M3', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile respects isError - M3', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
