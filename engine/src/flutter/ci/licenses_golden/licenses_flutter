@@ -4178,6 +4178,7 @@ FILE: ../../../flutter/impeller/toolkit/egl/egl.cc
 FILE: ../../../flutter/impeller/toolkit/egl/egl.h
 FILE: ../../../flutter/impeller/toolkit/egl/surface.cc
 FILE: ../../../flutter/impeller/toolkit/egl/surface.h
+FILE: ../../../flutter/impeller/tools/malioc.json
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.cc
