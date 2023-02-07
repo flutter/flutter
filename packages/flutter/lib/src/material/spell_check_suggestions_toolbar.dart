@@ -98,6 +98,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
           editableTextState.replaceText(
             cause: SelectionChangedCause.toolbar,
             text: '',
+            replacementRange: editableTextState.currentTextEditingValue.composing,
           );
         },
         type: ContextMenuButtonType.delete,
