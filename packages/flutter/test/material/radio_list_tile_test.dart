@@ -875,7 +875,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Radio button fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
     const Color inactiveEnabledFillColor = Color(0xFF000003);
@@ -962,7 +962,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio fill color resolves in hovered state', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects fillColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
@@ -1011,7 +1011,7 @@ void main() {
     );
   });
 
-  testWidgets('The radio button on RadioListTile can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects hoverColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     final Color? hoverColor = Colors.orange[500];
@@ -1073,7 +1073,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio overlay color resolves in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -1185,7 +1185,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio with splash radius set', (WidgetTester tester) async {
+  testWidgets('RadioListTile respects splashRadius', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -1217,7 +1217,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio size is configurable by materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Radio respects materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(child: RadioListTile<bool>(
         groupValue: true,

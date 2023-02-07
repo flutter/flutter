@@ -264,10 +264,12 @@ class Radio<T> extends StatefulWidget {
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.radio.hoverColor}
   /// The color for the radio's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
+  /// {@endtemplate}
   ///
   /// If null, then the value of [RadioThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of

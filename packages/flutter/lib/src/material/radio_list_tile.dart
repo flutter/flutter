@@ -229,6 +229,13 @@ class RadioListTile<T> extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
+  ///
   /// If null, then the value of [RadioThemeData.mouseCursor] is used.
   /// If that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
@@ -280,10 +287,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// Defaults to [MaterialTapTargetSize.shrinkWrap].
   final MaterialTapTargetSize? materialTapTargetSize;
 
-  /// The color for the radio's [Material] when a pointer is hovering over it.
-  ///
-  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
-  /// state, it will be used instead.
+  /// {@macro flutter.material.radio.hoverColor}
   final Color? hoverColor;
 
   /// The color for the radio's [Material].
@@ -299,7 +303,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// also null, then the default value is used in the pressed and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
 
-  /// The splash radius of the circular [Material] ink response.
+  /// {@macro flutter.material.radio.splashRadius}
   ///
   /// If null, then the value of [RadioThemeData.splashRadius] is used. If that
   /// is also null, then [kRadialReactionRadius] is used.
