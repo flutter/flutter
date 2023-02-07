@@ -2150,6 +2150,50 @@ void main() {
     expect(iconColor(leadingKey), selectedColor);
   });
 
+  testWidgets('ListTile.iconColor respects iconColor property with icon buttons Material 3 in presence of IconButtonTheme override', (WidgetTester tester) async {
+    const Color iconButtonThemeColor = Colors.blue;
+    const Color listTileIconColor = Colors.green;
+    const Icon leadingIcon = Icon(Icons.favorite);
+    const Icon trailingIcon = Icon(Icons.close);
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          iconButtonTheme: IconButtonThemeData(
+            style:  IconButton.styleFrom(
+              foregroundColor: iconButtonThemeColor,
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  iconColor: listTileIconColor,
+                  leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                  trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
+      tester.widget<RichText>(find.descendant(
+        of: find.byIcon(icon),
+        matching: find.byType(RichText),
+      ),
+    ).text.style;
+
+    await tester.pumpWidget(buildFrame());
+    expect(getIconStyle(tester, leadingIcon.icon!)?.color, listTileIconColor);
+    expect(getIconStyle(tester, trailingIcon.icon!)?.color, listTileIconColor);
+  });
+
   testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
 
