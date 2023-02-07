@@ -1109,8 +1109,22 @@ class TextPainter {
     final double? adjustedMaxWidth = !adjustMaxWidth ? maxWidth : cachedLayout?.layout.maxIntrinsicLineExtent;
     _inputWidth = adjustedMaxWidth ?? maxWidth;
 
-    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
-      ..layout(ui.ParagraphConstraints(width: _inputWidth));
+    final ui.Paragraph? cachedParagraph = cachedLayout?.paragraph;
+    final ui.Paragraph paragraph;
+    if (cachedParagraph != null) {
+      paragraph = cachedParagraph..layout(ui.ParagraphConstraints(width: _inputWidth));
+    } else {
+      paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: _inputWidth));
+      // Only rebuild the paragraph when there're layout changes, even when
+      // `_rebuildParagraphForPaint` is true. It's best to not eagerly rebuild
+      // the paragraph to avoid the extra work, because:
+      // 1. the text color could change again before `paint` is called (so one of
+      //    the paragraph rebuilds is unnecessary)
+      // 2. the user could be measuring the text layout so `paint` will never be
+      //    called.
+      _rebuildParagraphForPaint = false;
+      cachedLayout?.dispose();
+    }
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache = _TextPainterLayoutCacheWithOffset(
       _TextLayout._(paragraph), paintOffsetAlignment, minWidth, maxWidth, textWidthBasis,
@@ -1123,18 +1137,6 @@ class TextPainter {
       final double newInputWidth = newLayoutCache.layout.maxIntrinsicLineExtent;
       paragraph.layout(ui.ParagraphConstraints(width: newInputWidth));
       _inputWidth = newInputWidth;
-    }
-    // It's possible to have `_rebuildParagraphForPaint == true` when the layout
-    // is still valid (notably, when there're only text color changes), in which
-    // case the paragraph will be rebuilt in the `paint` method. It's best to
-    // not eagerly rebuild the paragraph to avoid the extra work:
-    // 1. the text color could change again before `paint` is called (so one of
-    //    the rebuilds is unnecessary)
-    // 2. the user could be measuring the text layout so `paint` will never be
-    //    called.
-    if (paragraph != cachedLayout?.paragraph) {
-      _rebuildParagraphForPaint = false;
-      cachedLayout?.dispose();
     }
     _layoutCache = newLayoutCache;
   }
