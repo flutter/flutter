@@ -764,7 +764,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
@@ -829,7 +829,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
           return _colors.error.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.12);
+          return _colors.error.withOpacity(0.12).withOpacity(0.12);
         }
       }
       if (states.contains(MaterialState.selected)) {
