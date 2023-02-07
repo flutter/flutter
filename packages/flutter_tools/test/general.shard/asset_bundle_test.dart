@@ -75,10 +75,11 @@ void main() {
 
     testWithoutContext('wildcard directories does not include subdirectories', () async {
       final Platform platform = FakePlatform();
-      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
+      final FileSystem fs = MemoryFileSystem.test();
+      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: fs, userMessages: UserMessages());
 
-      testFileSystem.file('.packages').createSync();
-      testFileSystem.file('pubspec.yaml').writeAsStringSync(
+      fs.file('.packages').createSync();
+      fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
 dependencies:
@@ -99,20 +100,20 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = testFileSystem.file(asset);
+        final File assetFile = fs.file(asset);
         assetFile.createSync(recursive: true);
         assetFile.writeAsStringSync(asset);
       }
 
       final ManifestAssetBundle bundle = ManifestAssetBundle(
         logger: BufferLogger.test(),
-        fileSystem: testFileSystem,
+        fileSystem: fs,
         platform: platform,
       );
 
       await bundle.build(
         packagesPath: '.packages',
-        flutterProject:  FlutterProject.fromDirectoryTest(testFileSystem.currentDirectory),
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
       expect(bundle.entries.keys, unorderedEquals(<String>[
