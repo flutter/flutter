@@ -953,6 +953,66 @@ TEST_F(KeyboardTest, MetaRightUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
+// Press and hold A. This should generate a repeat event.
+TEST_F(KeyboardTest, RepeatA) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  // Press A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  // Hold A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasDown}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasDown}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeRepeat, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
+// Press A, hot restart the engine, and hold A.
+// This should reset the keyboard's state and generate
+// two separate key down events.
+TEST_F(KeyboardTest, RestartClearsKeyboardState) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  // Press A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  // Send the "hot restart" signal. This should reset the keyboard's state.
+  tester.GetView().OnPreEngineRestart();
+
+  // Hold A. Notice the message declares the key is already down, however, the
+  // the keyboard does not send a repeat event as its state was reset.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasDown}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasDown}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
 // Press Shift-A. This is special because Win32 gives 'A' as character for the
 // KeyA press.
 TEST_F(KeyboardTest, ShiftLeftKeyA) {
