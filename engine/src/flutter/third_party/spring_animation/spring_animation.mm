@@ -18,7 +18,6 @@
 @property(nonatomic, assign) double omega0;
 @property(nonatomic, assign) double omega1;
 @property(nonatomic, assign) double v0;
-@property(nonatomic, assign) double x0;
 
 @end
 
@@ -44,22 +43,23 @@
     _omega0 = sqrt(_stiffness / _mass);             // Undamped angular frequency of the oscillator.
     _omega1 = _omega0 * sqrt(1.0 - _zeta * _zeta);  // Exponential decay.
     _v0 = -_initialVelocity;
-    _x0 = _toValue - _fromValue;
   }
   return self;
 }
 
 - (double)curveFunction:(double)t {
+  const double x0 = _toValue - _fromValue;
+
   double y;
   if (_zeta < 1) {
     // Under damped.
     const double envelope = exp(-_zeta * _omega0 * t);
-    y = _toValue - envelope * (((_v0 + _zeta * _omega0 * _x0) / _omega1) * sin(_omega1 * t) +
-                               _x0 * cos(_omega1 * t));
+    y = _toValue - envelope * (((_v0 + _zeta * _omega0 * x0) / _omega1) * sin(_omega1 * t) +
+                               x0 * cos(_omega1 * t));
   } else {
     // Critically damped.
     const double envelope = exp(-_omega0 * t);
-    y = _toValue - envelope * (_x0 + (_v0 + _omega0 * _x0) * t);
+    y = _toValue - envelope * (x0 + (_v0 + _omega0 * x0) * t);
   }
 
   return y;
