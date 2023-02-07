@@ -187,6 +187,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/profiling:profiling",
+    "//flutter/third_party/spring_animation",
     "//third_party/skia",
   ]
 
@@ -301,6 +302,7 @@ shared_library("ios_test_flutter") {
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
+    "//flutter/third_party/spring_animation",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/ocmock:ocmock_shared",

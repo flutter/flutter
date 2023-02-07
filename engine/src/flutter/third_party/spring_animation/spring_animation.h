@@ -35,8 +35,8 @@
 @property(nonatomic, assign, readonly) double damping;
 @property(nonatomic, assign, readonly) double mass;
 @property(nonatomic, assign, readonly) double initialVelocity;
-@property(nonatomic, assign, readonly) double fromValue;
-@property(nonatomic, assign, readonly) double toValue;
+@property(nonatomic, assign) double fromValue;
+@property(nonatomic, assign) double toValue;
 
 @end
 
