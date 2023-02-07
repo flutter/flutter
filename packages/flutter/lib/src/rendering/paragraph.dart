@@ -1063,8 +1063,10 @@ class RenderParagraph extends RenderBox
             final TextRange originalRange = infoAttribute.range;
             attributes.add(
               infoAttribute.copy(
-                  range: TextRange(start: offset + originalRange.start,
-                      end: offset + originalRange.end)
+                range: TextRange(
+                  start: offset + originalRange.start,
+                  end: offset + originalRange.end,
+                ),
               ),
             );
           }
@@ -1096,6 +1098,8 @@ class RenderParagraph extends RenderBox
     List<StringAttribute>? attributes;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.isPlaceholder) {
+        // buffer will not be null if there are TextSpans before this
+        // PlaceholderSpan.
         if (buffer != null) {
           final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
           textSpanConfig.textDirection = textDirection;
@@ -1124,8 +1128,10 @@ class RenderParagraph extends RenderBox
         final TextRange originalRange = infoAttribute.range;
         attributes.add(
           infoAttribute.copy(
-            range: TextRange(start: offset + originalRange.start,
-                end: offset + originalRange.end),
+            range: TextRange(
+              start: offset + originalRange.start,
+              end: offset + originalRange.end,
+            ),
           ),
         );
       }
