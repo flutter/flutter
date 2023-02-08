@@ -14998,48 +14998,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           tester.state<EditableTextState>(find.byType(EditableText));
       state.replaceText(
         cause: SelectionChangedCause.toolbar,
+        replacementRange: value.composing,
         text: 'test',
-      );
-
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals('test test test'));
-    });
-
-    testWidgets('replaceText succeeds appropriately when composing region is invalid', (WidgetTester tester) async {
-      const TextEditingValue value = TextEditingValue(
-        text: 'test tset test',
-        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
-      );
-      controller.value = value;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      final EditableTextState state =
-          tester.state<EditableTextState>(find.byType(EditableText));
-
-      // Operation should fail if composing region is invalid and no composing region is specified.
-      expect(() {
-        state.replaceText(
-          cause: SelectionChangedCause.toolbar,
-          text: 'test',
-        );
-      }, throwsAssertionError);
-
-      // Operation should succeed if composing region is invalid, but composing region is specified.
-      state.replaceText(
-        cause: SelectionChangedCause.toolbar,
-        text: 'test',
-        composingRegionRange: const TextRange(start: 5, end: 9),
       );
 
       await tester.pumpAndSettle();

@@ -460,7 +460,6 @@ class TextSelectionOverlay {
   ) {
     _updateSelectionOverlay();
     assert(context.mounted);
-    print('hey boo x10');
     _selectionOverlay
       .showSpellCheckSuggestionsToolbar(
         context: context,
@@ -1366,8 +1365,6 @@ class SelectionOverlay {
         );
       },
     );
-
-    print(_contextMenuController.isShown);
   }
 
   bool _buildScheduled = false;
