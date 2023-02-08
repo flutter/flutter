@@ -132,6 +132,52 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/119628
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController textController = TextEditingController.fromValue(
+      const TextEditingValue(text: 'I love flutter'),
+    );
+
+    final Widget widget = MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            children: <Widget>[
+              const SizedBox(height: 1000.0),
+              SizedBox(
+                height: 20.0,
+                child: EditableText(
+                  controller: textController,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
+    textController.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: textController.text.length,
+    );
+
+    await tester.pump();
+
+    // The offset of the scrollController should change immediately after window changes its metrics.
+    final double offsetAfter = scrollController.offset;
+    expect(offsetAfter, isNot(0.0));
+  });
+
   // Related issue: https://github.com/flutter/flutter/issues/98115
   testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -170,6 +216,7 @@ void main() {
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
     TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
     await tester.pump();
 
     // The offset of the scrollController should change immediately after window changes its metrics.
