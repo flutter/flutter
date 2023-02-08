@@ -3603,15 +3603,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      expect(
+      try {
+        expect(
+          await service.testBoolExtension(
+            WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+            <String, String>{'enabled': 'true'},
+          ),
+          equals('true'),
+        );
+
+        await tester.pumpWidget(widget);
+      } finally {
+        // If we don't disable this, later tests may fail
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
-          <String, String>{'enabled': 'true'},
-        ),
-        equals('true'),
-      );
-
-      await tester.pumpWidget(widget);
+          <String, String>{'enabled': 'false'},
+        );
+      }
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
