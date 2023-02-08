@@ -157,8 +157,11 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                        if ([url.fragment length] != 0) {
                          fullRoute = [NSString stringWithFormat:@"%@#%@", fullRoute, url.fragment];
                        }
-                       [flutterViewController.engine.navigationChannel invokeMethod:@"pushRoute"
-                                                                          arguments:fullRoute];
+                       [flutterViewController.engine.navigationChannel
+                           invokeMethod:@"pushRouteInformation"
+                              arguments:@{
+                                @"location" : fullRoute,
+                              }];
                      }
                    }];
       return YES;
