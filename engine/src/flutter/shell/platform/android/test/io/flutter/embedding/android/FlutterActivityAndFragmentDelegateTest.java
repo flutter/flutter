@@ -726,7 +726,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
-  public void itSendsPushRouteMessageWhenOnNewIntent() {
+  public void itSendsPushRouteInformationMessageWhenOnNewIntent() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -742,11 +742,11 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the navigation channel was given the push route message.
     verify(mockFlutterEngine.getNavigationChannel(), times(1))
-        .pushRoute("/custom/route?query=test");
+        .pushRouteInformation("/custom/route?query=test");
   }
 
   @Test
-  public void itDoesNotSendPushRouteMessageWhenOnNewIntentIsNonHierarchicalUri() {
+  public void itDoesNotSendPushRouteInformationMessageWhenOnNewIntentIsNonHierarchicalUri() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -764,11 +764,12 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onNewIntent(mockIntent);
 
     // Verify that the navigation channel was not given a push route message.
-    verify(mockFlutterEngine.getNavigationChannel(), times(0)).pushRoute("mailto:test@test.com");
+    verify(mockFlutterEngine.getNavigationChannel(), times(0))
+        .pushRouteInformation("mailto:test@test.com");
   }
 
   @Test
-  public void itSendsPushRouteMessageWhenOnNewIntentWithQueryParameterAndFragment() {
+  public void itSendsPushRouteInformationMessageWhenOnNewIntentWithQueryParameterAndFragment() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -785,11 +786,11 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the navigation channel was given the push route message.
     verify(mockFlutterEngine.getNavigationChannel(), times(1))
-        .pushRoute("/custom/route?query=test#fragment");
+        .pushRouteInformation("/custom/route?query=test#fragment");
   }
 
   @Test
-  public void itSendsPushRouteMessageWhenOnNewIntentWithFragmentNoQueryParameter() {
+  public void itSendsPushRouteInformationMessageWhenOnNewIntentWithFragmentNoQueryParameter() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -804,11 +805,12 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onNewIntent(mockIntent);
 
     // Verify that the navigation channel was given the push route message.
-    verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRoute("/custom/route#fragment");
+    verify(mockFlutterEngine.getNavigationChannel(), times(1))
+        .pushRouteInformation("/custom/route#fragment");
   }
 
   @Test
-  public void itSendsPushRouteMessageWhenOnNewIntentNoQueryParameter() {
+  public void itSendsPushRouteInformationMessageWhenOnNewIntentNoQueryParameter() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -823,7 +825,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onNewIntent(mockIntent);
 
     // Verify that the navigation channel was given the push route message.
-    verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRoute("/custom/route");
+    verify(mockFlutterEngine.getNavigationChannel(), times(1))
+        .pushRouteInformation("/custom/route");
   }
 
   @Test
