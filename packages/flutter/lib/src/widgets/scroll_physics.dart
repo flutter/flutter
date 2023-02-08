@@ -354,7 +354,19 @@ class ScrollPhysics {
   }
 
   /// Returns a simulation for ballistic scrolling starting from the given
-  /// position with the given velocity.
+  /// position and continuing the motion of the given previous simulation.
+  ///
+  /// The new simulation should pick up at time 0.0 where the old simulation
+  /// left off at time [time].  At a minimum, this means that the velocity
+  /// should agree: to within tolerance, `result.dx(0)` should equal
+  /// `oldSimulation.dx(time)`, while `result.x(0)` should equal
+  /// `position.pixels`.
+  ///
+  /// If this scroll physics adheres to a strict physical metaphor, where the
+  /// forces that apply to the motion depend only on its position and velocity,
+  /// then the only information needed from [oldSimulation] is its velocity at
+  /// [time].  Other scroll physics (like [ClampingScrollPhysics]) need to
+  /// preserve more information.
   ///
   /// This is used by [ScrollPositionWithSingleContext] in the
   /// [ScrollPositionWithSingleContext.goBallistic] method. If the result
@@ -365,11 +377,16 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  ///
+  /// This may be called repeatedly even in the middle of what the user
+  /// perceives as a single ballistic scroll, for example because
+  /// [ScrollMetrics.maxScrollExtent] changes as previously off-screen items in
+  /// a [ListView] come into view and are laid out.
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, { double time = 0.0 }) {
     if (parent == null) {
       return null;
     }
-    return parent!.createBallisticSimulation(position, velocity);
+    return parent!.createBallisticSimulation(position, oldSimulation, time: time);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -706,7 +723,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, { double time = 0.0 }) {
+    final double velocity = oldSimulation.dx(time);
     final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       double constantDeceleration;
@@ -718,6 +736,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
           constantDeceleration = 0;
           break;
       }
+      // TODO(gnprice): This isn't quite accurate, because FrictionSimulation
+      //   isn't quite ballistic: restarting it will prolong it slightly.
+      //   https://github.com/flutter/flutter/issues/120340
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
@@ -850,7 +871,8 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, { double time = 0.0 }) {
+    final double velocity = oldSimulation.dx(time);
     final Tolerance tolerance = toleranceFor(position);
     if (position.outOfRange) {
       double? end;
@@ -878,6 +900,8 @@ class ClampingScrollPhysics extends ScrollPhysics {
     if (velocity < 0.0 && position.pixels <= position.minScrollExtent) {
       return null;
     }
+    // TODO(gnprice): This is inaccurate, because ClampingScrollSimulation isn't ballistic.
+    //   https://github.com/flutter/flutter/issues/120338
     return ClampingScrollSimulation(
       position: position.pixels,
       velocity: velocity,

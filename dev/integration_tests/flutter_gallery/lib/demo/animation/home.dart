@@ -382,10 +382,11 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
-    final Simulation? simulation = super.createBallisticSimulation(position, dragVelocity);
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, {double time = 0.0}) {
+    final Simulation? simulation = super.createBallisticSimulation(position, oldSimulation, time: time);
     final double offset = position.pixels;
 
+    final double dragVelocity = oldSimulation.dx(time);
     if (simulation != null) {
       // The drag ended with sufficient velocity to trigger creating a simulation.
       // If the simulation is headed up towards midScrollOffset but will not reach it,

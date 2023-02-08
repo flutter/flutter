@@ -464,13 +464,14 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, {double time = 0.0}) {
     assert(
       position is _FixedExtentScrollPosition,
       'FixedExtentScrollPhysics can only be used with Scrollables that uses '
       'the FixedExtentScrollController',
     );
 
+    final double velocity = oldSimulation.dx(time);
     final _FixedExtentScrollPosition metrics = position as _FixedExtentScrollPosition;
 
     // Scenario 1:
@@ -478,13 +479,13 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     // ballistics, which should put us back in range at the scrollable's boundary.
     if ((velocity <= 0.0 && metrics.pixels <= metrics.minScrollExtent) ||
         (velocity >= 0.0 && metrics.pixels >= metrics.maxScrollExtent)) {
-      return super.createBallisticSimulation(metrics, velocity);
+      return super.createBallisticSimulation(metrics, oldSimulation, time: time);
     }
 
     // Create a test simulation to see where it would have ballistically fallen
     // naturally without settling onto items.
     final Simulation? testFrictionSimulation =
-        super.createBallisticSimulation(metrics, velocity);
+        super.createBallisticSimulation(metrics, oldSimulation, time: time);
 
     // Scenario 2:
     // If it was going to end up past the scroll extent, defer back to the
@@ -493,7 +494,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     if (testFrictionSimulation != null
         && (testFrictionSimulation.x(double.infinity) == metrics.minScrollExtent
             || testFrictionSimulation.x(double.infinity) == metrics.maxScrollExtent)) {
-      return super.createBallisticSimulation(metrics, velocity);
+      return super.createBallisticSimulation(metrics, oldSimulation, time: time);
     }
 
     // From the natural final position, find the nearest item it should have

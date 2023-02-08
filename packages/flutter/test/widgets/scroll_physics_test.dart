@@ -116,9 +116,9 @@ void main() {
 
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
     // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(bounce.createBallisticSimulation(position, InertialSimulation(velocity: 1000))!.dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, InertialSimulation(velocity: 1000))!.dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, InertialSimulation(velocity: 1000))!.dx(0), moreOrLessEquals(1000));
   });
 
   group('BouncingScrollPhysics test', () {

@@ -563,12 +563,14 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, Simulation oldSimulation, {double time = 0.0}) {
+    final double velocity = oldSimulation.dx(time);
+
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
-      return super.createBallisticSimulation(position, velocity);
+      return super.createBallisticSimulation(position, oldSimulation, time: time);
     }
     final Tolerance tolerance = toleranceFor(position);
     final double target = _getTargetPixels(position, tolerance, velocity);
@@ -577,6 +579,7 @@ class PageScrollPhysics extends ScrollPhysics {
     }
     return null;
   }
+
 
   @override
   bool get allowImplicitScrolling => false;

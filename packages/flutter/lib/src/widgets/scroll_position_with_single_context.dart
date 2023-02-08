@@ -137,9 +137,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// The velocity should be in logical pixels per second.
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(Simulation oldSimulation, {double time = 0.0}) {
     assert(hasPixels);
-    final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
+    final Simulation? simulation = physics.createBallisticSimulation(this, oldSimulation, time: time);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(
         this,
@@ -203,7 +203,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
     }
-    goBallistic(0.0);
+    goBallistic(InertialSimulation.zero);
   }
 
   @override
@@ -212,7 +212,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
     if (delta == 0.0) {
-      goBallistic(0.0);
+      goBallistic(InertialSimulation.zero);
       return;
     }
 
@@ -231,7 +231,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
-      goBallistic(0.0);
+      goBallistic(InertialSimulation.zero);
     }
   }
 

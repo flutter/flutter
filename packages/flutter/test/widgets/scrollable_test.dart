@@ -1061,7 +1061,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate.goBallistic(InertialSimulation(velocity: 4000));
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -1103,7 +1103,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity!.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(InertialSimulation(velocity: 4000));
 
     await tester.pumpAndSettle();
 
@@ -1145,7 +1145,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    position.activity!.delegate.goBallistic(4000);
+    position.activity!.delegate.goBallistic(InertialSimulation(velocity: 4000));
 
     await tester.pumpAndSettle();
 

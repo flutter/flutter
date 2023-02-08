@@ -670,24 +670,27 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(Simulation oldSimulation, {double time = 0.0}) {
     beginActivity(
-      createOuterBallisticScrollActivity(velocity),
+      createOuterBallisticScrollActivity(oldSimulation, time: time),
       (_NestedScrollPosition position) {
         return createInnerBallisticScrollActivity(
           position,
-          velocity,
+          oldSimulation,
+          time: time,
         );
       },
     );
   }
 
-  ScrollActivity createOuterBallisticScrollActivity(double velocity) {
+  ScrollActivity createOuterBallisticScrollActivity(Simulation oldSimulation, {double time = 0.0}) {
     // This function creates a ballistic scroll for the outer scrollable.
     //
     // It assumes that the outer scrollable can't be overscrolled, and sets up a
     // ballistic scroll over the combined space of the innerPositions and the
     // outerPosition.
+
+    final double velocity = oldSimulation.dx(time);
 
     // First we must pick a representative inner position that we will care
     // about. This is somewhat arbitrary. Ideally we'd pick the one that is "in
@@ -718,7 +721,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       return _outerPosition!.createBallisticScrollActivity(
         _outerPosition!.physics.createBallisticSimulation(
           _outerPosition!,
-          velocity,
+          oldSimulation,
+          time: time,
         ),
         mode: _NestedBallisticScrollActivityMode.independent,
       );
@@ -727,18 +731,20 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     final _NestedScrollMetrics metrics = _getMetrics(innerPosition, velocity);
 
     return _outerPosition!.createBallisticScrollActivity(
-      _outerPosition!.physics.createBallisticSimulation(metrics, velocity),
+      _outerPosition!.physics.createBallisticSimulation(metrics, oldSimulation, time: time),
       mode: _NestedBallisticScrollActivityMode.outer,
       metrics: metrics,
     );
   }
 
   @protected
-  ScrollActivity createInnerBallisticScrollActivity(_NestedScrollPosition position, double velocity) {
+  ScrollActivity createInnerBallisticScrollActivity(_NestedScrollPosition position, Simulation oldSimulation, {double time = 0.0}) {
+    final double velocity = oldSimulation.dx(time);
     return position.createBallisticScrollActivity(
       position.physics.createBallisticSimulation(
         _getMetrics(position, velocity),
-        velocity,
+        oldSimulation,
+        time: time,
       ),
       mode: _NestedBallisticScrollActivityMode.inner,
     );
@@ -892,7 +898,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     for (final _NestedScrollPosition position in _innerPositions) {
       position.localJumpTo(nestOffset(to, position));
     }
-    goBallistic(0.0);
+    goBallistic(InertialSimulation.zero);
   }
 
   void pointerScroll(double delta) {
@@ -900,7 +906,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
     if (delta == 0.0) {
-      goBallistic(0.0);
+      goBallistic(InertialSimulation.zero);
       return;
     }
 
@@ -973,7 +979,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     for (final _NestedScrollPosition position in _innerPositions) {
       position.didEndScroll();
     }
-    goBallistic(0.0);
+    goBallistic(InertialSimulation.zero);
   }
 
   @override
@@ -995,7 +1001,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @override
   void cancel() {
-    goBallistic(0.0);
+    goBallistic(InertialSimulation.zero);
   }
 
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
@@ -1349,10 +1355,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   // This is called by activities when they finish their work and want to go
   // ballistic.
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(Simulation oldSimulation, {double time = 0.0}) {
+    final double velocity = oldSimulation.dx(time);
     Simulation? simulation;
     if (velocity != 0.0 || outOfRange) {
-      simulation = physics.createBallisticSimulation(this, velocity);
+      simulation = physics.createBallisticSimulation(this, oldSimulation, time: time);
     }
     beginActivity(createBallisticScrollActivity(
       simulation,
@@ -1475,7 +1482,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   void resetActivity() {
     delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(
       delegate,
-      velocity,
+      simulation,
+      time: time,
     ));
   }
 
@@ -1483,7 +1491,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   void applyNewDimensions() {
     delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(
       delegate,
-      velocity,
+      simulation,
+      time: time,
     ));
   }
 
@@ -1514,14 +1523,14 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   @override
   void resetActivity() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity),
+      coordinator.createOuterBallisticScrollActivity(simulation, time: time),
     );
   }
 
   @override
   void applyNewDimensions() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity),
+      coordinator.createOuterBallisticScrollActivity(simulation, time: time),
     );
   }
 

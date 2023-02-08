@@ -7,12 +7,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+
+export 'package:flutter/physics.dart' show InertialSimulation, Simulation;
 
 /// A backend for a [ScrollActivity].
 ///
@@ -44,9 +47,9 @@ abstract class ScrollActivityDelegate {
   /// Terminate the current activity and start an idle activity.
   void goIdle();
 
-  /// Terminate the current activity and start a ballistic activity with the
-  /// given velocity.
-  void goBallistic(double velocity);
+  /// Terminate the current activity and start a ballistic activity that
+  /// continues from where the given simulation left off at the given time.
+  void goBallistic(Simulation oldSimulation, {double time = 0.0});
 }
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -152,7 +155,7 @@ class IdleScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    delegate.goBallistic(0.0);
+    delegate.goBallistic(InertialSimulation.zero);
   }
 
   @override
@@ -207,7 +210,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void cancel() {
-    delegate.goBallistic(0.0);
+    delegate.goBallistic(InertialSimulation.zero);
   }
 
   @override
@@ -408,12 +411,12 @@ class ScrollDragController implements Drag {
         velocity += carriedVelocity!;
       }
     }
-    delegate.goBallistic(velocity);
+    delegate.goBallistic(InertialSimulation(velocity: velocity));
   }
 
   @override
   void cancel() {
-    delegate.goBallistic(0.0);
+    delegate.goBallistic(InertialSimulation.zero);
   }
 
   /// Called by the delegate when it is no longer sending events to this object.
@@ -525,7 +528,7 @@ class BallisticScrollActivity extends ScrollActivity {
   /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     super.delegate,
-    Simulation simulation,
+    this.simulation,
     TickerProvider vsync,
     this.shouldIgnorePointer,
   ) {
@@ -538,16 +541,20 @@ class BallisticScrollActivity extends ScrollActivity {
        .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
+  /// The simulation that drives this activity's animation of the scroll view.
+  @protected
+  final Simulation simulation;
+
   late AnimationController _controller;
 
   @override
   void resetActivity() {
-    delegate.goBallistic(velocity);
+    delegate.goBallistic(simulation, time: time);
   }
 
   @override
   void applyNewDimensions() {
-    delegate.goBallistic(velocity);
+    delegate.goBallistic(simulation, time: time);
   }
 
   void _tick() {
@@ -569,7 +576,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(0.0);
+    delegate.goBallistic(InertialSimulation.zero);
   }
 
   @override
@@ -582,6 +589,10 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => true;
+
+  /// The current time in the timeline of [simulation].
+  @protected
+  double get time => _controller.lastElapsedDuration!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
 
   @override
   double get velocity => _controller.velocity;
@@ -648,7 +659,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(velocity);
+    delegate.goBallistic(InertialSimulation(velocity: velocity));
   }
 
   @override

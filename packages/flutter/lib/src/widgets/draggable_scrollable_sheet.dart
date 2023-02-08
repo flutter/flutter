@@ -731,7 +731,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
         for (int index = 0; index < _scrollController.positions.length; index++) {
           final _DraggableScrollableSheetScrollPosition position =
             _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
-          position.goBallistic(0);
+          position.goBallistic(InertialSimulation.zero);
         }
       });
     }
@@ -904,11 +904,12 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   }
 
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(Simulation oldSimulation, {double time = 0.0}) {
+    final double velocity = oldSimulation.dx(time);
     if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
-      super.goBallistic(velocity);
+      super.goBallistic(oldSimulation, time: time);
       return;
     }
     // Scrollable expects that we will dispose of its current _dragCancelCallback
@@ -948,14 +949,15 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       lastPosition = ballisticController.value;
       extent.addPixelDelta(delta, context.notificationContext!);
       if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
-        // Make sure we pass along enough velocity to keep scrolling - otherwise
-        // we just "bounce" off the top making it look like the list doesn't
-        // have more to scroll.
-        velocity = ballisticController.velocity + (physics.toleranceFor(this).velocity * ballisticController.velocity.sign);
-        super.goBallistic(velocity);
+        super.goBallistic(InertialSimulation(
+            // Make sure we pass along enough velocity to keep scrolling - otherwise
+            // we just "bounce" off the top making it look like the list doesn't
+            // have more to scroll.
+            velocity: ballisticController.velocity + (physics.toleranceFor(this).velocity * ballisticController.velocity.sign),
+        ));
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
-        super.goBallistic(0);
+        super.goBallistic(InertialSimulation.zero);
       }
     }
 
