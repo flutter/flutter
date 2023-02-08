@@ -59,6 +59,50 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('wildcard directories do not include subdirectories', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/foo/
+    - assets/bar/lizard.png
+'''
+      );
+
+      final List<String> assets = <String>[
+        'assets/foo/dog.png',
+        'assets/foo/sub/cat.png',
+        'assets/bar/lizard.png',
+        'assets/bar/sheep.png'
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = globals.fs.file(
+          globals.fs.path.joinAll(asset.split('/'))
+        );
+        assetFile.createSync(recursive: true);
+      }
+
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages');
+
+      expect(bundle.entries.keys, unorderedEquals(<String>[
+        'AssetManifest.json',
+        'FontManifest.json',
+        'NOTICES.Z',
+        'assets/foo/dog.png',
+        'assets/bar/lizard.png'
+      ]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
       final File packageFile = globals.fs.file('.packages')..createSync();
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
