@@ -186,6 +186,7 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.trackOutlineColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(!isThreeLine || subtitle != null);
 
@@ -228,6 +229,7 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.trackOutlineColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -382,6 +384,16 @@ class SwitchListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// {@macro flutter.material.switch.trackOutlineColor}
+  ///
+  /// The [ListTile] will be focused when this [SwitchListTile] requests focus,
+  /// so the focused outline color of the switch will be ignored.
+  ///
+  /// In Material 3, the outline color defaults to transparent in the selected
+  /// state and [ColorScheme.outline] in the unselected state. In Material 2,
+  /// the [Switch] track has no outline.
+  final MaterialStateProperty<Color?>? trackOutlineColor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -399,6 +411,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          trackOutlineColor: trackOutlineColor,
         );
         break;
 
@@ -415,6 +428,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          trackOutlineColor: trackOutlineColor,
         );
     }
 

@@ -618,4 +618,117 @@ void main() {
           )
     );
   });
+
+  testWidgets('SwitchListTile respects trackOutlineColor in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
+    const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
+    const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+    const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+
+    Color getOutlineColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledTrackOutlineColor;
+        }
+        return inactiveDisabledTrackOutlineColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledTrackOutlineColor;
+      }
+      return inactiveEnabledTrackOutlineColor;
+    }
+
+    final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getOutlineColor);
+
+    Widget buildSwitchListTile({required bool enabled, required bool selected}) {
+      return wrap(
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                value: selected,
+                trackOutlineColor: trackOutlineColor,
+                onChanged: enabled ? (_) { } : null,
+              );
+            }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: inactiveDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: activeDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: inactiveEnabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: activeEnabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+  });
+
+  testWidgets('SwitchListTile respects trackOutlineColor in hovered state', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredTrackColor = Color(0xFF4caf50);
+
+    Color getTrackOutlineColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredTrackColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+    Widget buildSwitchListTile() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: wrap(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return SwitchListTile(
+                  value: false,
+                  trackOutlineColor: outlineColor,
+                  onChanged: (_) { },
+                );
+              }),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect()..rrect(color: hoveredTrackColor, style: PaintingStyle.stroke)
+    );
+  });
 }
