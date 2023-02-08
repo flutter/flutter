@@ -54,9 +54,6 @@ dependencies:
 flutter:
   assets:
     - assets/
-    - assets/notAVariant/
-    - assets/folder/
-    - assets/normalFolder/
 '''
       );
     });
@@ -187,7 +184,6 @@ dependencies:
 flutter:
   assets:
     - assets/
-    - assets/somewhereElse/
 '''
       );
     });

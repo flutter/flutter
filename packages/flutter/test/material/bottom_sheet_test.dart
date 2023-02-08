@@ -841,7 +841,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgets('BottomSheet uses fallback values in maretial3',
+  testWidgets('BottomSheet uses fallback values in material 3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -878,6 +878,30 @@ void main() {
     expect(material.surfaceTintColor, surfaceTintColor);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
+  });
+
+  testWidgets('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      ),
+    ));
+
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.shadowColor, Colors.transparent);
   });
 
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
