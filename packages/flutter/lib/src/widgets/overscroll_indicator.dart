@@ -885,7 +885,7 @@ class _StretchController extends ChangeNotifier {
   void pull(double normalizedOverscroll, double totalOverscroll) {
     assert(normalizedOverscroll >= 0.0);
 
-    final _StretchDirection newStretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading; 
+    final _StretchDirection newStretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
     if (_stretchDirection != newStretchDirection && _state == _StretchState.recede) {
       // When the stretch direction changes while we are in the recede state, we need to ignore the change.
       // If we don't, the stretch will instantly jump to the new direction with the recede animation still playing, which causes
