@@ -165,17 +165,17 @@ class AndroidRunOutputTest extends RunOutputTask {
 }
 
 class WindowsRunOutputTest extends DesktopRunOutputTest {
-  static final RegExp _buildOutput = RegExp(
-    r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
-    multiLine: true,
-  );
-
   WindowsRunOutputTest(
     super.testDirectory,
     super.testTarget, {
       required super.release,
       super.allowStderr = false,
     }
+  );
+
+  static final RegExp _buildOutput = RegExp(
+    r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
+    multiLine: true,
   );
 
   @override
