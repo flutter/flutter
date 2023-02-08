@@ -119,6 +119,7 @@ class FilterContents : public Contents {
   std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
+      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true) const override;
 
   virtual Matrix GetLocalTransform(const Matrix& parent_transform) const;

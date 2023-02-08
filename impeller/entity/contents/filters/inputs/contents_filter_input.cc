@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/filters/inputs/contents_filter_input.h"
 
+#include <optional>
 #include <utility>
 
 namespace impeller {
@@ -22,7 +23,8 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
   if (!snapshot_.has_value()) {
-    snapshot_ = contents_->RenderToSnapshot(renderer, entity, msaa_enabled_);
+    snapshot_ = contents_->RenderToSnapshot(renderer, entity, std::nullopt,
+                                            msaa_enabled_);
   }
   return snapshot_;
 }

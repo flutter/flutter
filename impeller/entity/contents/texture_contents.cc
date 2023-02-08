@@ -67,6 +67,7 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled) const {
   auto bounds = path_.GetBoundingBox();
   if (!bounds.has_value()) {
@@ -78,14 +79,16 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
   if (is_rect_ && source_rect_ == Rect::MakeSize(texture_->GetSize()) &&
       (opacity_ >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
     auto scale = Vector2(bounds->size / Size(texture_->GetSize()));
-    return Snapshot{.texture = texture_,
-                    .transform = entity.GetTransformation() *
-                                 Matrix::MakeTranslation(bounds->origin) *
-                                 Matrix::MakeScale(scale),
-                    .sampler_descriptor = sampler_descriptor_,
-                    .opacity = opacity_};
+    return Snapshot{
+        .texture = texture_,
+        .transform = entity.GetTransformation() *
+                     Matrix::MakeTranslation(bounds->origin) *
+                     Matrix::MakeScale(scale),
+        .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
+        .opacity = opacity_};
   }
-  return Contents::RenderToSnapshot(renderer, entity);
+  return Contents::RenderToSnapshot(
+      renderer, entity, sampler_descriptor.value_or(sampler_descriptor_));
 }
 
 bool TextureContents::Render(const ContentContext& renderer,
