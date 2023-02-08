@@ -780,13 +780,28 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    expect(controller.value, value);
+    // On web, focusing a single-line input selects the entire field.
+    final TextEditingValue webValue = value.copyWith(
+      selection: TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.value.text.length,
+      ),
+    );
+    if (kIsWeb) {
+      expect(controller.value, webValue);
+    } else {
+      expect(controller.value, value);
+    }
     expect(focusNode.hasFocus, isTrue);
 
     focusNode.unfocus();
     await tester.pump();
 
-    expect(controller.value, value);
+    if (kIsWeb) {
+      expect(controller.value, webValue);
+    } else {
+      expect(controller.value, value);
+    }
     expect(focusNode.hasFocus, isFalse);
   });
 
@@ -2155,6 +2170,290 @@ void main() {
     state.selectAll(SelectionChangedCause.toolbar);
     expect(state.selectAllEnabled, isFalse);
     expect(state.textEditingValue.selection.isCollapsed, isTrue);
+  });
+
+  group('buttonItemsForToolbarOptions', () {
+    testWidgets('returns null when toolbarOptions are empty', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'TEXT'),
+            toolbarOptions: ToolbarOptions.empty,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      expect(state.buttonItemsForToolbarOptions(), isNull);
+    });
+
+    testWidgets('returns empty array when only cut is selected in toolbarOptions but cut is not enabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'TEXT'),
+            toolbarOptions: const ToolbarOptions(cut: true),
+            readOnly: true,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      expect(state.cutEnabled, isFalse);
+      expect(state.buttonItemsForToolbarOptions(), isEmpty);
+    });
+
+    testWidgets('returns only cut button when only cut is selected in toolbarOptions and cut is enabled', (WidgetTester tester) async {
+      const String text = 'TEXT';
+      final TextEditingController controller = TextEditingController(text: text);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            toolbarOptions: const ToolbarOptions(cut: true),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      // Selecting all.
+      controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+      expect(state.cutEnabled, isTrue);
+
+      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
+
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
+
+      final ContextMenuButtonItem cutButton = items!.first;
+      expect(cutButton.type, ContextMenuButtonType.cut);
+
+      cutButton.onPressed();
+      await tester.pump();
+
+      expect(controller.text, isEmpty);
+      final ClipboardData? data = await Clipboard.getData('text/plain');
+      expect(data, isNotNull);
+      expect(data!.text, equals(text));
+    });
+
+    testWidgets('returns empty array when only copy is selected in toolbarOptions but copy is not enabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'TEXT'),
+            toolbarOptions: const ToolbarOptions(copy: true),
+            obscureText: true,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      expect(state.copyEnabled, isFalse);
+      expect(state.buttonItemsForToolbarOptions(), isEmpty);
+    });
+
+    testWidgets('returns only copy button when only copy is selected in toolbarOptions and copy is enabled', (WidgetTester tester) async {
+      const String text = 'TEXT';
+      final TextEditingController controller = TextEditingController(text: text);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            toolbarOptions: const ToolbarOptions(copy: true),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      // Selecting all.
+      controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+      expect(state.copyEnabled, isTrue);
+
+      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
+
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
+
+      final ContextMenuButtonItem copyButton = items!.first;
+      expect(copyButton.type, ContextMenuButtonType.copy);
+
+      copyButton.onPressed();
+      await tester.pump();
+
+      expect(controller.text, equals(text));
+      final ClipboardData? data = await Clipboard.getData('text/plain');
+      expect(data, isNotNull);
+      expect(data!.text, equals(text));
+    });
+
+    testWidgets('returns empty array when only paste is selected in toolbarOptions but paste is not enabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'TEXT'),
+            toolbarOptions: const ToolbarOptions(paste: true),
+            readOnly: true,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      expect(state.pasteEnabled, isFalse);
+      expect(state.buttonItemsForToolbarOptions(), isEmpty);
+    });
+
+    testWidgets('returns only paste button when only paste is selected in toolbarOptions and paste is enabled', (WidgetTester tester) async {
+      const String text = 'TEXT';
+      final TextEditingController controller = TextEditingController(text: text);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            toolbarOptions: const ToolbarOptions(paste: true),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      // Moving caret to the end.
+      controller.selection = TextSelection.collapsed(offset: controller.text.length);
+      expect(state.pasteEnabled, isTrue);
+
+      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
+
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
+
+      final ContextMenuButtonItem pasteButton = items!.first;
+      expect(pasteButton.type, ContextMenuButtonType.paste);
+
+      // Setting data which will be pasted into the clipboard.
+      await Clipboard.setData(const ClipboardData(text: text));
+
+      pasteButton.onPressed();
+      await tester.pump();
+
+      expect(controller.text, equals(text + text));
+    });
+
+    testWidgets('returns empty array when only selectAll is selected in toolbarOptions but selectAll is not enabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'TEXT'),
+            toolbarOptions: const ToolbarOptions(selectAll: true),
+            readOnly: true,
+            obscureText: true,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      expect(state.selectAllEnabled, isFalse);
+      expect(state.buttonItemsForToolbarOptions(), isEmpty);
+    });
+
+    testWidgets('returns only selectAll button when only selectAll is selected in toolbarOptions and selectAll is enabled', (WidgetTester tester) async {
+      const String text = 'TEXT';
+      final TextEditingController controller = TextEditingController(text: text);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            toolbarOptions: const ToolbarOptions(selectAll: true),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+
+      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
+
+      expect(items, isNotNull);
+      expect(items, hasLength(1));
+
+      final ContextMenuButtonItem selectAllButton = items!.first;
+      expect(selectAllButton.type, ContextMenuButtonType.selectAll);
+
+      selectAllButton.onPressed();
+      await tester.pump();
+
+      expect(controller.text, equals(text));
+      expect(state.textEditingValue.selection.textInside(text), equals(text));
+    });
   });
 
   testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
@@ -4065,7 +4364,10 @@ void main() {
                           ],
                           value: expectedValue,
                           textDirection: TextDirection.ltr,
-                          textSelection: const TextSelection.collapsed(offset: 24),
+                          // Focusing a single-line field on web selects it.
+                          textSelection: kIsWeb
+                              ? const TextSelection(baseOffset: 0, extentOffset: 24)
+                              : const TextSelection.collapsed(offset: 24),
                         ),
                       ],
                     ),
@@ -6421,7 +6723,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
 
-    final bool platformCanSelectByParagraph = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
+    final bool platformIsApple = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
     // Move down one paragraph.
     await sendKeys(
       tester,
@@ -6436,9 +6738,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+          extentOffset: 20,
         ),
       ),
       reason: 'on $platform',
@@ -6458,9 +6760,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+          extentOffset: 36,
         ),
       ),
       reason: 'on $platform',
@@ -6480,9 +6782,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 55 : 10,
+          extentOffset: 55,
         ),
       ),
       reason: 'on $platform',
@@ -6502,9 +6804,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+          extentOffset: 36,
         ),
       ),
       reason: 'on $platform',
@@ -6524,15 +6826,16 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+          extentOffset: 20,
         ),
       ),
       reason: 'on $platform',
     );
 
-    // Move up back to the origin.
+    // Move up. This will collapse the selection to the origin on Apple platforms, and
+    // extend to the previous paragraph boundary on other platforms.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -6548,13 +6851,15 @@ void main() {
       equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 10 : 10,
+          extentOffset: platformIsApple ? 10 : 0,
         ),
       ),
       reason: 'on $platform',
     );
 
-    // Move up, extending the selection backwards to the next paragraph.
+    // Move up, extending the selection backwards to the previous paragraph on Apple platforms.
+    // On other platforms this does nothing since our extent is already at 0 from the previous
+    // set of keys sent.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -6568,9 +6873,33 @@ void main() {
     expect(
       selection,
       equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down, collapsing the selection to the origin on Apple platforms.
+    // On other platforms this moves the selection's extent to the next paragraph boundary.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 0 : 10,
+          extentOffset: platformIsApple ? 10 : 20,
+          affinity: platformIsApple ? TextAffinity.upstream : TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -14778,7 +15107,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
                 ),
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -14803,6 +15132,217 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     );
 
     EditableText.debugDeterministicCursor = false;
+  });
+
+  group('selection behavior when receiving focus', () {
+    testWidgets('tabbing between fields', (WidgetTester tester) async {
+      final TextEditingController controller1 = TextEditingController();
+      final TextEditingController controller2 = TextEditingController();
+      controller1.text = 'Text1';
+      controller2.text = 'Text2\nLine2';
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: ValueKey<String>(controller1.text),
+                controller: controller1,
+                focusNode: focusNode1,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+              const SizedBox(height: 200.0),
+              EditableText(
+                key: ValueKey<String>(controller2.text),
+                controller: controller2,
+                focusNode: focusNode2,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                minLines: 10,
+                maxLines: 20,
+              ),
+              const SizedBox(height: 100.0),
+            ],
+          ),
+        ),
+      );
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(
+        controller1.selection,
+        const TextSelection.collapsed(offset: -1),
+      );
+      expect(
+        controller2.selection,
+        const TextSelection.collapsed(offset: -1),
+      );
+
+      // Tab to the first field (single line).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(
+        controller1.selection,
+        kIsWeb
+          ? TextSelection(
+              baseOffset: 0,
+              extentOffset: controller1.text.length,
+            )
+          : TextSelection.collapsed(
+              offset: controller1.text.length,
+            ),
+      );
+
+      // Move the cursor to another position in the first field.
+      await tester.tapAt(textOffsetToPosition(tester, controller1.text.length - 1));
+      await tester.pumpAndSettle();
+      expect(
+        controller1.selection,
+        TextSelection.collapsed(
+          offset: controller1.text.length - 1,
+        ),
+      );
+
+      // Tab to the second field (multiline).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+      expect(
+        controller2.selection,
+        TextSelection.collapsed(
+          offset: controller2.text.length,
+        ),
+      );
+
+      // Move the cursor to another position in the second field.
+      await tester.tapAt(textOffsetToPosition(tester, controller2.text.length - 1, index: 1));
+      await tester.pumpAndSettle();
+      expect(
+        controller2.selection,
+        TextSelection.collapsed(
+          offset: controller2.text.length - 1,
+        ),
+      );
+
+      // On web, the document root is also focusable.
+      if (kIsWeb) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        expect(focusNode1.hasFocus, isFalse);
+        expect(focusNode2.hasFocus, isFalse);
+      }
+
+      // Tabbing again goes back to the first field and reselects the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(
+        controller1.selection,
+        kIsWeb
+          ? TextSelection(
+              baseOffset: 0,
+              extentOffset: controller1.text.length,
+            )
+          : TextSelection.collapsed(
+              offset: controller1.text.length - 1,
+            ),
+      );
+
+      // Tabbing to the second field again retains the moved selection.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+      expect(
+        controller2.selection,
+        TextSelection.collapsed(
+          offset: controller2.text.length - 1,
+        ),
+      );
+    });
+
+    testWidgets('when having focus stolen between frames on web', (WidgetTester tester) async {
+      final TextEditingController controller1 = TextEditingController();
+      controller1.text = 'Text1';
+      final FocusNode focusNode1 = FocusNode();
+      final FocusNode focusNode2 = FocusNode();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: ValueKey<String>(controller1.text),
+                controller: controller1,
+                focusNode: focusNode1,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+              const SizedBox(height: 200.0),
+              Focus(
+                focusNode: focusNode2,
+                child: const SizedBox.shrink(),
+              ),
+              const SizedBox(height: 100.0),
+            ],
+          ),
+        ),
+      );
+
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(
+        controller1.selection,
+        const TextSelection.collapsed(offset: -1),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText).first);
+
+      // Set the text editing value in order to trigger an internal call to
+      // requestFocus.
+      state.userUpdateTextEditingValue(
+        controller1.value,
+        SelectionChangedCause.keyboard,
+      );
+      // Focus takes a frame to update, so it hasn't changed yet.
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isFalse);
+
+      // Before EditableText's listener on widget.focusNode can be called, change
+      // the focus again
+      focusNode2.requestFocus();
+      await tester.pump();
+      expect(focusNode1.hasFocus, isFalse);
+      expect(focusNode2.hasFocus, isTrue);
+
+      // Focus the EditableText again, which should cause the field to be selected
+      // on web.
+      focusNode1.requestFocus();
+      await tester.pumpAndSettle();
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+      expect(
+        controller1.selection,
+        TextSelection(
+          baseOffset: 0,
+          extentOffset: controller1.text.length,
+        ),
+      );
+    },
+      skip: !kIsWeb, // [intended]
+    );
   });
 }
 

@@ -271,11 +271,9 @@ Future<void> main(List<String> args) async {
     system.exit(255);
   }
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Test failed.$reset');
   }
-  printProgress('${bold}Test successful.$reset');
-  system.exit(0);
+  reportSuccessAndExit('${bold}Test successful.$reset');
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
