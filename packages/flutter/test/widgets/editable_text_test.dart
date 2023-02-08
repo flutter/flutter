@@ -132,7 +132,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  testWidgets('Text with selection can be show on the screen when the keyboard shown', (WidgetTester tester) async {
+  testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
     final ScrollController scrollController = ScrollController();
     final TextEditingController textController = TextEditingController.fromValue(
