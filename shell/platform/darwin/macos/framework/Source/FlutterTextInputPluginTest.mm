@@ -387,6 +387,227 @@
   return true;
 }
 
+- (bool)testAutocompleteDisabledWhenAutofillNotSet {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testAutocompleteEnabledWhenAutofillSet {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[ @"name" ],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is enabled.
+  EXPECT_TRUE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testAutocompleteEnabledWhenAutofillSetNoHint {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is enabled.
+  EXPECT_TRUE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testAutocompleteDisabledWhenObscureTextSet {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"obscureText" : @YES,
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[ @"name" ],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testAutocompleteDisabledWhenPasswordAutofillSet {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[ @"password" ],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testAutocompleteDisabledWhenAutofillGroupIncludesPassword {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"fields" : @[
+                                                    @{
+                                                      @"inputAction" : @"action",
+                                                      @"inputType" : @{@"name" : @"inputName"},
+                                                      @"autofill" : @{
+                                                        @"uniqueIdentifier" : @"field1",
+                                                        @"hints" : @[ @"password" ],
+                                                        @"editingValue" : @{@"text" : @""},
+                                                      }
+                                                    },
+                                                    @{
+                                                      @"inputAction" : @"action",
+                                                      @"inputType" : @{@"name" : @"inputName"},
+                                                      @"autofill" : @{
+                                                        @"uniqueIdentifier" : @"field2",
+                                                        @"hints" : @[ @"name" ],
+                                                        @"editingValue" : @{@"text" : @""},
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
 - (bool)testFirstRectForCharacterRange {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
@@ -1352,6 +1573,31 @@ TEST(FlutterTextInputPluginTest, TestComposingRegionRemovedByFramework) {
 
 TEST(FlutterTextInputPluginTest, TestClearClientDuringComposing) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testClearClientDuringComposing]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteDisabledWhenAutofillNotSet) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testAutocompleteDisabledWhenAutofillNotSet]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteEnabledWhenAutofillSet) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testAutocompleteEnabledWhenAutofillSet]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteEnabledWhenAutofillSetNoHint) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testAutocompleteEnabledWhenAutofillSetNoHint]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteDisabledWhenObscureTextSet) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testAutocompleteDisabledWhenObscureTextSet]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteDisabledWhenPasswordAutofillSet) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testAutocompleteDisabledWhenPasswordAutofillSet]);
+}
+
+TEST(FlutterTextInputPluginTest, TestAutocompleteDisabledWhenAutofillGroupIncludesPassword) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc]
+      testAutocompleteDisabledWhenAutofillGroupIncludesPassword]);
 }
 
 TEST(FlutterTextInputPluginTest, TestFirstRectForCharacterRange) {
