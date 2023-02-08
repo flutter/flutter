@@ -171,6 +171,12 @@ class CheckboxListTile extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+    this.shape,
+    this.side,
+    this.isError = false,
     this.enabled,
     this.tileColor,
     this.title,
@@ -180,18 +186,12 @@ class CheckboxListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
-    this.autofocus = false,
     this.contentPadding,
     this.tristate = false,
-    this.shape,
     this.checkboxShape,
     this.selectedTileColor,
-    this.side,
-    this.visualDensity,
-    this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-    this.isError = false,
   }) : assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
 
@@ -257,6 +257,11 @@ class CheckboxListTile extends StatelessWidget {
   /// is used. If that is also null, then the default value is used.
   final MaterialStateProperty<Color?>? fillColor;
 
+  /// The color to use for the check icon when this checkbox is checked.
+  ///
+  /// Defaults to Color(0xFFFFFFFF).
+  final Color? checkColor;
+
   /// {@macro flutter.material.checkbox.hoverColor}
   final Color? hoverColor;
 
@@ -284,10 +289,34 @@ class CheckboxListTile extends StatelessWidget {
   /// Defaults to [MaterialTapTargetSize.shrinkWrap].
   final MaterialTapTargetSize? materialTapTargetSize;
 
-  /// The color to use for the check icon when this checkbox is checked.
+  /// Defines how compact the list tile's layout will be.
   ///
-  /// Defaults to Color(0xFFFFFFFF).
-  final Color? checkColor;
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  /// {@macro flutter.material.ListTile.shape}
+  final ShapeBorder? shape;
+
+  /// {@macro flutter.material.checkbox.side}
+  ///
+  /// The given value is passed directly to [Checkbox.side].
+  ///
+  /// If this property is null, then [CheckboxThemeData.side] of
+  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
+  /// will be width 2.
+  final BorderSide? side;
+
+  /// {@macro flutter.material.checkbox.isError}
+  ///
+  /// Defaults to false.
+  final bool isError;
 
   /// {@macro flutter.material.ListTile.tileColor}
   final Color? tileColor;
@@ -330,9 +359,6 @@ class CheckboxListTile extends StatelessWidget {
   /// Where to place the control relative to the text.
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.widgets.Focus.autofocus}
-  final bool autofocus;
-
   /// Defines insets surrounding the tile's contents.
   ///
   /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
@@ -353,9 +379,6 @@ class CheckboxListTile extends StatelessWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
-  /// {@macro flutter.material.ListTile.shape}
-  final ShapeBorder? shape;
-
   /// {@macro flutter.material.checkbox.shape}
   ///
   /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
@@ -365,23 +388,6 @@ class CheckboxListTile extends StatelessWidget {
 
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
-
-  /// {@macro flutter.material.checkbox.side}
-  ///
-  /// The given value is passed directly to [Checkbox.side].
-  ///
-  /// If this property is null, then [CheckboxThemeData.side] of
-  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
-  /// will be width 2.
-  final BorderSide? side;
-
-  /// Defines how compact the list tile's layout will be.
-  ///
-  /// {@macro flutter.material.themedata.visualDensity}
-  final VisualDensity? visualDensity;
-
-  /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode? focusNode;
 
   /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
@@ -399,11 +405,6 @@ class CheckboxListTile extends StatelessWidget {
   /// current [Theme] and the [ListTile.onTap] callback is
   /// inoperative.
   final bool? enabled;
-
-  /// {@macro flutter.material.checkbox.isError}
-  ///
-  /// defaults to false.
-  final bool isError;
 
   void _handleValueChange() {
     assert(onChanged != null);
