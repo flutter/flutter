@@ -41,6 +41,7 @@ Contents::StencilCoverage Contents::GetStencilCoverage(
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled) const {
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {
@@ -64,8 +65,15 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     return std::nullopt;
   }
 
-  return Snapshot{.texture = texture,
-                  .transform = Matrix::MakeTranslation(coverage->origin)};
+  auto snapshot = Snapshot{
+      .texture = texture,
+      .transform = Matrix::MakeTranslation(coverage->origin),
+  };
+  if (sampler_descriptor.has_value()) {
+    snapshot.sampler_descriptor = sampler_descriptor.value();
+  }
+
+  return snapshot;
 }
 
 bool Contents::ShouldRender(const Entity& entity,

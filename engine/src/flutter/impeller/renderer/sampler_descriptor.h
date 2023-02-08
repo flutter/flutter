@@ -26,6 +26,13 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
 
   std::string label = "NN Clamp Sampler";
 
+  SamplerDescriptor();
+
+  SamplerDescriptor(std::string label,
+                    MinMagFilter min_filter,
+                    MinMagFilter mag_filter,
+                    MipFilter mip_filter);
+
   // Comparable<SamplerDescriptor>
   std::size_t GetHash() const override {
     return fml::HashCombine(min_filter, mag_filter, mip_filter,

@@ -14,6 +14,7 @@
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -107,8 +108,9 @@ static std::optional<Snapshot> AdvancedBlend(
 
     typename FS::BlendInfo blend_info;
 
-    auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-    FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, sampler);
+    auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+        dst_snapshot->sampler_descriptor);
+    FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
     blend_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha = absorb_opacity ? dst_snapshot->opacity : 1.0;
 
@@ -118,10 +120,12 @@ static std::optional<Snapshot> AdvancedBlend(
       // This texture will not be sampled from due to the color factor. But
       // this is present so that validation doesn't trip on a missing
       // binding.
-      FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, sampler);
+      FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, dst_sampler);
     } else {
+      auto src_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+          src_snapshot->sampler_descriptor);
       blend_info.color_factor = 0;
-      FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, sampler);
+      FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, src_sampler);
       blend_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
     }
     auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
@@ -145,7 +149,10 @@ static std::optional<Snapshot> AdvancedBlend(
 
   return Snapshot{.texture = out_texture,
                   .transform = Matrix::MakeTranslation(coverage.origin),
-                  .sampler_descriptor = dst_snapshot->sampler_descriptor,
+                  // Since we absorbed the transform of the inputs and used the
+                  // respective snapshot sampling modes when blending, pass on
+                  // the default NN clamp sampler.
+                  .sampler_descriptor = {},
                   .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
                              alpha.value_or(1.0)};
 }
@@ -168,8 +175,6 @@ static std::optional<Snapshot> PipelineBlend(
                                                  RenderPass& pass) {
     auto& host_buffer = pass.GetTransientsBuffer();
 
-    auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-
     Command cmd;
     cmd.label = "Pipeline Blend Filter";
     auto options = OptionsFromPass(pass);
@@ -183,6 +188,8 @@ static std::optional<Snapshot> PipelineBlend(
         return false;
       }
 
+      auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+          input->sampler_descriptor);
       FS::BindTextureSamplerSrc(cmd, input->texture, sampler);
 
       auto size = input->texture->GetSize();
@@ -262,13 +269,14 @@ static std::optional<Snapshot> PipelineBlend(
   }
   out_texture->SetLabel("Pipeline Blend Filter Texture");
 
-  return Snapshot{
-      .texture = out_texture,
-      .transform = Matrix::MakeTranslation(coverage.origin),
-      .sampler_descriptor =
-          inputs[0]->GetSnapshot(renderer, entity)->sampler_descriptor,
-      .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
-                 alpha.value_or(1.0)};
+  return Snapshot{.texture = out_texture,
+                  .transform = Matrix::MakeTranslation(coverage.origin),
+                  // Since we absorbed the transform of the inputs and used the
+                  // respective snapshot sampling modes when blending, pass on
+                  // the default NN clamp sampler.
+                  .sampler_descriptor = {},
+                  .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
+                             alpha.value_or(1.0)};
 }
 
 #define BLEND_CASE(mode)                                                       \
@@ -346,6 +354,7 @@ std::optional<Snapshot> BlendFilterContents::RenderFilter(
                                 foreground_color_, GetAbsorbOpacity(),
                                 GetAlpha());
   }
+
   FML_UNREACHABLE();
 }
 

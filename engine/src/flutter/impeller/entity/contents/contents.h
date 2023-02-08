@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/snapshot.h"
 #include "impeller/renderer/texture.h"
 
@@ -61,6 +62,7 @@ class Contents {
   virtual std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
+      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true) const;
 
   virtual bool ShouldRender(const Entity& entity,

@@ -237,6 +237,7 @@ std::optional<Rect> FilterContents::GetFilterCoverage(
 std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled) const {
   Entity entity_with_local_transform = entity;
   entity_with_local_transform.SetTransformation(
