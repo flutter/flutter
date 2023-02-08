@@ -60,7 +60,7 @@ void main() {
     });
 
     testUsingContext('wildcard directories do not include subdirectories', () async {
-      globals.fs.file('.packages')..createSync();
+      globals.fs.file('.packages').createSync();
       globals.fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
