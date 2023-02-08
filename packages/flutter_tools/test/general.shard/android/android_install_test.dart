@@ -310,6 +310,12 @@ void main() {
     expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), false);
     expect(processManager, hasNoRemainingExpectations);
   });
+  testWithoutContext('First test', (){
+    expect(true, false);
+  });
+  testWithoutContext('Second test', (){
+    expect(false, true);
+  });
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
