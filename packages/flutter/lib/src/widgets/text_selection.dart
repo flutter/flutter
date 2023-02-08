@@ -2452,7 +2452,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onTripleTapDown].
   ///
-  /// By default, it selects a paragraph if [TextSelectionGestureDetectorBuilderDelegate.selectionEnabled] is true 
+  /// By default, it selects a paragraph if [TextSelectionGestureDetectorBuilderDelegate.selectionEnabled] is true
   /// and shows the toolbar if necessary.
   ///
   /// See also:
