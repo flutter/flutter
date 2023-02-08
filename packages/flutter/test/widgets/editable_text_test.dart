@@ -6723,7 +6723,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
 
-    final bool platformCanSelectByParagraph = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
+    final bool platformIsApple = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
     // Move down one paragraph.
     await sendKeys(
       tester,
@@ -6738,9 +6738,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+          extentOffset: 20,
         ),
       ),
       reason: 'on $platform',
@@ -6760,9 +6760,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+          extentOffset: 36,
         ),
       ),
       reason: 'on $platform',
@@ -6782,9 +6782,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 55 : 10,
+          extentOffset: 55,
         ),
       ),
       reason: 'on $platform',
@@ -6804,9 +6804,9 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+          extentOffset: 36,
         ),
       ),
       reason: 'on $platform',
@@ -6826,15 +6826,16 @@ void main() {
     expect(
       selection,
       equals(
-        TextSelection(
+        const TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+          extentOffset: 20,
         ),
       ),
       reason: 'on $platform',
     );
 
-    // Move up back to the origin.
+    // Move up. This will collapse the selection to the origin on Apple platforms, and
+    // extend to the previous paragraph boundary on other platforms.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -6850,13 +6851,15 @@ void main() {
       equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 10 : 10,
+          extentOffset: platformIsApple ? 10 : 0,
         ),
       ),
       reason: 'on $platform',
     );
 
-    // Move up, extending the selection backwards to the next paragraph.
+    // Move up, extending the selection backwards to the previous paragraph on Apple platforms.
+    // On other platforms this does nothing since our extent is already at 0 from the previous
+    // set of keys sent.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -6870,9 +6873,33 @@ void main() {
     expect(
       selection,
       equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down, collapsing the selection to the origin on Apple platforms.
+    // On other platforms this moves the selection's extent to the next paragraph boundary.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 0 : 10,
+          extentOffset: platformIsApple ? 10 : 20,
+          affinity: platformIsApple ? TextAffinity.upstream : TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
