@@ -493,14 +493,12 @@ flutter:
       fileSystem.file('.packages').createSync();
 
       final String materialIconsPath = fileSystem.path.join(
-        getFlutterRoot(),
         'bin', 'cache', 'artifacts', 'material_fonts',
         'MaterialIcons-Regular.otf',
       );
       fileSystem.file(materialIconsPath).createSync(recursive: true);
 
       final String materialPath = fileSystem.path.join(
-        getFlutterRoot(),
         'packages', 'flutter', 'lib', 'src', 'material',
       );
       final Directory materialDir = fileSystem.directory(materialPath)..createSync(recursive: true);
