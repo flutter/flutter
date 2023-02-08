@@ -270,7 +270,7 @@ abstract class DesktopDevice extends Device {
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.deviceVmServicePort != null) {
-        addFlag('vmService-port=${debuggingOptions.deviceVmServicePort}');
+        addFlag('vm-service-port=${debuggingOptions.deviceVmServicePort}');
       }
       if (debuggingOptions.buildInfo.isDebug) {
         addFlag('enable-checked-mode=true');
