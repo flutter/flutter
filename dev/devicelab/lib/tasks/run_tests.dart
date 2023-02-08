@@ -229,7 +229,7 @@ class DesktopRunOutputTest extends RunOutputTask {
     return TaskResult.success(null);
   }
 
-  /// Verify that the build output of `flutter run`.
+  /// Verify the output from `flutter run`'s build step.
   void verifyBuildOutput(List<String> stdout) {}
 }
 
