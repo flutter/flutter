@@ -900,13 +900,28 @@ class ClampingScrollPhysics extends ScrollPhysics {
     if (velocity < 0.0 && position.pixels <= position.minScrollExtent) {
       return null;
     }
-    // TODO(gnprice): This is inaccurate, because ClampingScrollSimulation isn't ballistic.
-    //   https://github.com/flutter/flutter/issues/120338
-    return ClampingScrollSimulation(
-      position: position.pixels,
-      velocity: velocity,
-      tolerance: tolerance,
-    );
+
+    if (oldSimulation is ClampingScrollSimulation) {
+      // We're updating a [ClampingScrollSimulation], and we're still in the
+      // conditions where we want one.  So continue the old simulation, just with
+      // the time axis relabeled.
+      //
+      // Because [ClampingScrollSimulation] is not ballistic, this behaves very
+      // differently from a fresh simulation: a fresh simulation would decelerate
+      // much more rapidly and go less far before stopping.
+      return ClampingScrollSimulation(
+        position: oldSimulation.position,
+        velocity: oldSimulation.velocity,
+        tolerance: oldSimulation.tolerance,
+        offsetTime: time + oldSimulation.offsetTime,
+      );
+    } else {
+      return ClampingScrollSimulation(
+        position: position.pixels,
+        velocity: velocity,
+        tolerance: tolerance,
+      );
+    }
   }
 }
 

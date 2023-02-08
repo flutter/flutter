@@ -305,6 +305,61 @@ FlutterError
     }
   });
 
+  test('ClampingScrollPhysics correctly handles restarts', () {
+    // Regression test for https://github.com/flutter/flutter/issues/120338
+    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    ScrollMetrics metrics(double pixels) {
+      return FixedScrollMetrics(
+        pixels: pixels,
+        minScrollExtent: 0,
+        maxScrollExtent: pixels + 1000,
+        viewportDimension: 800,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 3.0,
+      );
+    }
+
+    const double initialVelocity = 8000.0;
+    const double delta = 1 / 90;
+
+    final Simulation undisturbed = physics.createBallisticSimulation(
+        metrics(0), InertialSimulation(velocity: initialVelocity))!;
+
+    double time = 0.0;
+    Simulation restarted = undisturbed;
+    final List<double> xsRestarted = <double>[];
+    final List<double> xsUndisturbed = <double>[];
+    final List<double> dxsRestarted = <double>[];
+    final List<double> dxsUndisturbed = <double>[];
+    while (true) {
+      expect(time, lessThan(3.0));
+
+      time += delta;
+      final Simulation? next = physics.createBallisticSimulation(
+          metrics(restarted.x(delta)), restarted, time: delta);
+      restarted = next ?? InertialSimulation(position: restarted.x(delta));
+
+      xsRestarted.add(restarted.x(0));
+      dxsRestarted.add(restarted.dx(0));
+      xsUndisturbed.add(undisturbed.x(time));
+      dxsUndisturbed.add(undisturbed.dx(time));
+      if (restarted.isDone(0) && undisturbed.isDone(time)) {
+        break;
+      }
+    }
+
+    // Compare the headline number first: the total distances traveled.
+    // This way, if the test fails, it shows the big final difference
+    // instead of the tiny difference that's in the very first frame.
+    expect(xsRestarted.last, moreOrLessEquals(xsUndisturbed.last));
+
+    // The whole trajectories along the way should match too.
+    for (int i = 0; i < xsRestarted.length; i++) {
+      expect(xsRestarted[i],  moreOrLessEquals(xsUndisturbed[i]));
+      expect(dxsRestarted[i], moreOrLessEquals(dxsUndisturbed[i]));
+    }
+  });
+
   testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(

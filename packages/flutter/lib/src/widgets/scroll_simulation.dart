@@ -139,6 +139,7 @@ class ClampingScrollSimulation extends Simulation {
   ClampingScrollSimulation({
     required this.position,
     required this.velocity,
+    this.offsetTime = 0.0,
     this.friction = 0.015,
     super.tolerance,
   }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration) {
@@ -146,12 +147,23 @@ class ClampingScrollSimulation extends Simulation {
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
   }
 
-  /// The position of the particle at the beginning of the simulation.
+  /// The position of the particle at the beginning of the base simulation.
+  ///
+  /// This will equal [x(-offsetTime)].
   final double position;
 
   /// The velocity at which the particle is traveling at the beginning of the
-  /// simulation.
+  /// base simulation.
+  ///
+  /// This will equal [dx(-offsetTime)].
   final double velocity;
+
+  /// The time this simulation starts at in the underlying base simulation.
+  ///
+  /// For any given time `t`, this simulation will return the same answers from
+  /// [x], [dx], and [isDone] at time `t` as a simulation with zero [offsetTime]
+  /// would give at time `t + offsetTime`.
+  final double offsetTime;
 
   /// The amount of friction the particle experiences as it travels.
   ///
@@ -207,18 +219,18 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = clampDouble(time / _duration, 0.0, 1.0);
+    final double t = clampDouble((time + offsetTime) / _duration, 0.0, 1.0);
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = clampDouble(time / _duration, 0.0, 1.0);
+    final double t = clampDouble((time + offsetTime) / _duration, 0.0, 1.0);
     return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 
   @override
   bool isDone(double time) {
-    return time >= _duration;
+    return (time + offsetTime) >= _duration;
   }
 }
