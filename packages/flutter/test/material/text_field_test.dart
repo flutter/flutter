@@ -9145,6 +9145,14 @@ void main() {
   );
 
   group('Triple tap/click', () {
+    const String testValueA = 'Now is the time for\n' // 20
+        'all good people\n'                         // 20 + 16 => 36
+        'to come to the aid\n'                      // 36 + 19 => 55
+        'of their country.';                        // 55 + 17 => 72
+    const String testValueB = 'Today is the time for\n' // 22
+        'all good people\n'                         // 22 + 16 => 38
+        'to come to the aid\n'                      // 38 + 19 => 57
+        'of their country.';                        // 57 + 17 => 74
     testWidgets(
       'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge',
       (WidgetTester tester) async {
@@ -9164,13 +9172,9 @@ void main() {
           ),
         );
 
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
-        await tester.enterText(find.byType(TextField), testValue);
+        await tester.enterText(find.byType(TextField), testValueA);
         await skipPastScrollingAnimation(tester);
-        expect(controller.value.text, testValue);
+        expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 6);
 
@@ -9224,13 +9228,9 @@ void main() {
           ),
         );
 
-        const String testValue = 'Today is the time for\n' // 22
-            'all good people\n'                         // 22 + 16 => 38
-            'to come to the aid\n'                      // 38 + 19 => 57
-            'of their country.';                        // 57 + 17 => 74
-        await tester.enterText(find.byType(TextField), testValue);
+        await tester.enterText(find.byType(TextField), testValueB);
         await skipPastScrollingAnimation(tester);
-        expect(controller.value.text, testValue);
+        expect(controller.value.text, testValueB);
 
         final Offset firstLinePos = tester.getTopLeft(find.byType(TextField)) + const Offset(50.0, 9.0);
 
@@ -9454,12 +9454,8 @@ void main() {
     testWidgets(
       'triple click chains work',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
         await tester.pumpWidget(
           MaterialApp(
@@ -9578,12 +9574,8 @@ void main() {
     testWidgets(
       'triple click after a click on desktop platforms',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
         await tester.pumpWidget(
           MaterialApp(
@@ -9649,12 +9641,8 @@ void main() {
     testWidgets(
       'Can triple tap to select all on a single-line textfield on mobile platforms',
       (WidgetTester tester) async {
-        const String testValue = 'Today is the time for\n' // 22
-            'all good people\n'                         // 22 + 16 => 38
-            'to come to the aid\n'                      // 38 + 19 => 57
-            'of their country.';                        // 57 + 17 => 74
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueB,
         );
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -9708,12 +9696,8 @@ void main() {
     testWidgets(
       'Can triple click to select all on a single-line textfield on desktop platforms',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
 
         await tester.pumpWidget(
@@ -9782,13 +9766,9 @@ void main() {
           ),
         );
 
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
-        await tester.enterText(find.byType(TextField), testValue);
+        await tester.enterText(find.byType(TextField), testValueA);
         await skipPastScrollingAnimation(tester);
-        expect(controller.value.text, testValue);
+        expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
 
@@ -9845,13 +9825,9 @@ void main() {
           ),
         );
 
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
-        await tester.enterText(find.byType(TextField), testValue);
+        await tester.enterText(find.byType(TextField), testValueA);
         await skipPastScrollingAnimation(tester);
-        expect(controller.value.text, testValue);
+        expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
 
@@ -9935,12 +9911,8 @@ void main() {
     testWidgets(
       'Going past triple click retains the selection on Apple platforms',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
         await tester.pumpWidget(
           MaterialApp(
@@ -10026,12 +9998,8 @@ void main() {
     testWidgets(
       'Tap count resets when going past a triple tap on Android, Fuchsia, and Linux',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
         await tester.pumpWidget(
           MaterialApp(
@@ -10143,12 +10111,8 @@ void main() {
     testWidgets(
       'Double click and triple click alternate on Windows',
       (WidgetTester tester) async {
-        const String testValue = 'Now is the time for\n' // 20
-            'all good people\n'                         // 20 + 16 => 36
-            'to come to the aid\n'                      // 36 + 19 => 55
-            'of their country.';                        // 55 + 17 => 72
         final TextEditingController controller = TextEditingController(
-          text: testValue,
+          text: testValueA,
         );
         await tester.pumpWidget(
           MaterialApp(
