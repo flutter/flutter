@@ -162,8 +162,14 @@ class RadioListTile<T> extends StatelessWidget {
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
+    this.fillColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -220,6 +226,20 @@ class RadioListTile<T> extends StatelessWidget {
   /// ```
   final ValueChanged<T?>? onChanged;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
+  /// If that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  final MouseCursor? mouseCursor;
+
   /// Set to true if this radio list tile is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
   ///
@@ -249,6 +269,45 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
+
+  /// The color that fills the radio button.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If null, then the value of [activeColor] is used in the selected state. If
+  /// that is also null, then the value of [RadioThemeData.fillColor] is used.
+  /// If that is also null, then the default value is used.
+  final MaterialStateProperty<Color?>? fillColor;
+
+  /// {@macro flutter.material.radio.materialTapTargetSize}
+  ///
+  /// Defaults to [MaterialTapTargetSize.shrinkWrap].
+  final MaterialTapTargetSize? materialTapTargetSize;
+
+  /// {@macro flutter.material.radio.hoverColor}
+  final Color? hoverColor;
+
+  /// The color for the radio's [Material].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///
+  /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
+  /// and [hoverColor] is used in the pressed and hovered state. If that is also
+  /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
+  /// also null, then the default value is used in the pressed and hovered state.
+  final MaterialStateProperty<Color?>? overlayColor;
+
+  /// {@macro flutter.material.radio.splashRadius}
+  ///
+  /// If null, then the value of [RadioThemeData.splashRadius] is used. If that
+  /// is also null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
 
   /// The primary content of the list tile.
   ///
@@ -341,8 +400,13 @@ class RadioListTile<T> extends StatelessWidget {
       onChanged: onChanged,
       toggleable: toggleable,
       activeColor: activeColor,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
+      fillColor: fillColor,
+      mouseCursor: mouseCursor,
+      hoverColor: hoverColor,
+      overlayColor: overlayColor,
+      splashRadius: splashRadius,
     );
     Widget? leading, trailing;
     switch (controlAffinity) {
