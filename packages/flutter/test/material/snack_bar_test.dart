@@ -812,7 +812,7 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + widgetWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('Snackbar labels can be colored (M2 / MaterialColor)', (WidgetTester tester) async {
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 2)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -856,7 +856,7 @@ void main() {
     }
   });
 
-  testWidgets('Snackbar labels can be colored (M3 / MaterialColor)',
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 3)',
       (WidgetTester tester) async {
     const MaterialColor usedColor = Colors.teal;
 
@@ -908,7 +908,7 @@ void main() {
     }
   });
 
-  testWidgets('Snackbar labels can be colored (M3 / MaterialStateColor)',
+  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)',
       (WidgetTester tester) async {
     const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
 
