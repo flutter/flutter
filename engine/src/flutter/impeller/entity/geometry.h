@@ -164,6 +164,7 @@ class StrokePathGeometry : public Geometry {
                                                 HostBuffer& buffer,
                                                 Scalar stroke_width,
                                                 Scalar scaled_miter_limit,
+                                                Cap cap,
                                                 const JoinProc& join_proc,
                                                 const CapProc& cap_proc,
                                                 Scalar tolerance);
