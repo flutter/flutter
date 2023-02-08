@@ -1774,7 +1774,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(localizationsFileEn, contains('String helloWorld(Object name) {'));
         expect(localizationsFileEs, contains('String helloWorld(Object name) {'));
       });
- 
     });
 
     group('DateTime tests', () {
