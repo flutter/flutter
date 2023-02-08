@@ -248,8 +248,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    tearDown(() {
+    tearDown(() async {
       service.resetAllState();
+
+      await service.testBoolExtension(
+        WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+        <String, String>{'enabled': 'false'},
+      );
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
@@ -3603,23 +3608,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      try {
-        expect(
-          await service.testBoolExtension(
-            WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
-            <String, String>{'enabled': 'true'},
-          ),
-          equals('true'),
-        );
-
-        await tester.pumpWidget(widget);
-      } finally {
-        // If we don't disable this, later tests may fail
+      expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
-          <String, String>{'enabled': 'false'},
-        );
-      }
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+
+      await tester.pumpWidget(widget);
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
