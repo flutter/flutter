@@ -121,12 +121,33 @@ TEST_P(DisplayListTest, CanDrawArc) {
     static float stroke_width = 10;
     static bool use_center = true;
 
+    static int selected_cap = 0;
+    const char* cap_names[] = {"Butt", "Round", "Square"};
+    flutter::DlStrokeCap cap;
+
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
     ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
     ImGui::SliderFloat("Stroke width", &stroke_width, 0, 100);
+    ImGui::Combo("Cap", &selected_cap, cap_names,
+                 sizeof(cap_names) / sizeof(char*));
     ImGui::Checkbox("Use center", &use_center);
     ImGui::End();
+
+    switch (selected_cap) {
+      case 0:
+        cap = flutter::DlStrokeCap::kButt;
+        break;
+      case 1:
+        cap = flutter::DlStrokeCap::kRound;
+        break;
+      case 2:
+        cap = flutter::DlStrokeCap::kSquare;
+        break;
+      default:
+        cap = flutter::DlStrokeCap::kButt;
+        break;
+    }
 
     auto [p1, p2] = IMPELLER_PLAYGROUND_LINE(
         Point(200, 200), Point(400, 400), 20, Color::White(), Color::White());
@@ -136,7 +157,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
     Vector2 scale = GetContentScale();
     builder.scale(scale.x, scale.y);
     builder.setStyle(flutter::DlDrawStyle::kStroke);
-    builder.setStrokeCap(flutter::DlStrokeCap::kButt);
+    builder.setStrokeCap(cap);
     builder.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
     builder.setStrokeMiter(10);
     auto rect = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);

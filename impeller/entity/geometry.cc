@@ -302,6 +302,7 @@ VertexBuffer StrokePathGeometry::CreateSolidStrokeVertices(
     HostBuffer& buffer,
     Scalar stroke_width,
     Scalar scaled_miter_limit,
+    Cap cap,
     const StrokePathGeometry::JoinProc& join_proc,
     const StrokePathGeometry::CapProc& cap_proc,
     Scalar tolerance) {
@@ -370,9 +371,15 @@ VertexBuffer StrokePathGeometry::CreateSolidStrokeVertices(
 
     // Generate start cap.
     if (!polyline.contours[contour_i].is_closed) {
-      auto cap_offset =
-          Vector2(contour.start_direction.y, -contour.start_direction.x) *
-          stroke_width * 0.5;
+      Vector2 direction;
+      if (cap == Cap::kButt) {
+        direction =
+            Vector2(contour.start_direction.y, -contour.start_direction.x);
+      } else {
+        direction =
+            Vector2(-contour.start_direction.y, contour.start_direction.x);
+      }
+      auto cap_offset = direction * stroke_width * 0.5;
       cap_proc(vtx_builder, polyline.points[contour_start_point_i], cap_offset,
                tolerance);
     }
@@ -439,7 +446,8 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   auto& host_buffer = pass.GetTransientsBuffer();
   auto vertex_buffer = CreateSolidStrokeVertices(
       path_, host_buffer, stroke_width, miter_limit_ * stroke_width_ * 0.5,
-      GetJoinProc(stroke_join_), GetCapProc(stroke_cap_), tolerance);
+      stroke_cap_, GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
+      tolerance);
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
