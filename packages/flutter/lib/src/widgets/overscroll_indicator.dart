@@ -700,7 +700,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   OverscrollNotification? _lastOverscrollNotification;
 
   double _totalOverscroll = 0.0;
-  _StretchDirection _stretchDirection = _StretchDirection.trailing;
 
   bool _accepted = true;
 
@@ -720,11 +719,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       assert(notification.metrics.axis == widget.axis);
       if (_accepted) {
         _totalOverscroll += notification.overscroll;
-        _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
 
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
-          _stretchController.absorbImpact(notification.velocity.abs());
+          _stretchController.absorbImpact(notification.velocity.abs(), _totalOverscroll);
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
@@ -736,7 +734,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             final double viewportDimension = notification.metrics.viewportDimension;
             final double distanceForPull = _totalOverscroll.abs() / viewportDimension;
             final double clampedOverscroll = clampDouble(distanceForPull, 0, 1.0);
-            _stretchController.pull(clampedOverscroll);
+            _stretchController.pull(clampedOverscroll, _totalOverscroll);
           }
         }
       }
@@ -802,7 +800,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           }
 
           final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _stretchDirection
+            _stretchController.stretchDirection,
           );
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
@@ -854,6 +852,9 @@ class _StretchController extends ChangeNotifier {
   double get pullDistance => _pullDistance;
   double _pullDistance = 0.0;
 
+  _StretchDirection get stretchDirection => _stretchDirection;
+  _StretchDirection _stretchDirection = _StretchDirection.trailing;
+
   // Constants from Android.
   static const double _exponentialScalar = math.e / 0.33;
   static const double _stretchIntensity = 0.016;
@@ -865,7 +866,7 @@ class _StretchController extends ChangeNotifier {
   /// Handle a fling to the edge of the viewport at a particular velocity.
   ///
   /// The velocity must be positive.
-  void absorbImpact(double velocity) {
+  void absorbImpact(double velocity, double totalOverscroll) {
     assert(velocity >= 0.0);
     velocity = clampDouble(velocity, 1, 10000);
     _stretchSizeTween.begin = _stretchSize.value;
@@ -873,6 +874,7 @@ class _StretchController extends ChangeNotifier {
     _stretchController.duration = Duration(milliseconds: (velocity * 0.02).round());
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
+    _stretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
   }
 
   /// Handle a user-driven overscroll.
@@ -880,8 +882,19 @@ class _StretchController extends ChangeNotifier {
   /// The `normalizedOverscroll` argument should be the absolute value of the
   /// scroll distance in logical pixels, divided by the extent of the viewport
   /// in the main axis.
-  void pull(double normalizedOverscroll) {
+  void pull(double normalizedOverscroll, double totalOverscroll) {
     assert(normalizedOverscroll >= 0.0);
+
+    final _StretchDirection newStretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading; 
+    if (_stretchDirection != newStretchDirection && _state == _StretchState.recede) {
+      // When the stretch direction changes while we are in the recede state, we need to ignore the change.
+      // If we don't, the stretch will instantly jump to the new direction with the recede animation still playing, which causes
+      // a unwanted visual abnormality (https://github.com/flutter/flutter/pull/116548#issuecomment-1414872567).
+      // By ignoring the directional change until the recede state is finished, we can avoid this.
+      return;
+    }
+
+    _stretchDirection = newStretchDirection;
     _pullDistance = normalizedOverscroll;
     _stretchSizeTween.begin = _stretchSize.value;
     final double linearIntensity =_stretchIntensity * _pullDistance;

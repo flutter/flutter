@@ -820,7 +820,6 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -20.0));
     await tester.pumpAndSettle();
 
-
     // The boxes should remain roughly at the same locations, since the pointer
     // didn't move far.
     expect(box1.localToGlobal(Offset.zero), Offset.zero);
@@ -891,7 +890,6 @@ void main() {
     await gesture.moveBy(const Offset(-20.0, 0.0));
     await tester.pumpAndSettle();
 
-
     // The boxes should remain roughly at the same locations, since the pointer
     // didn't move far.
     expect(box1.localToGlobal(Offset.zero), Offset.zero);
@@ -915,7 +913,6 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
   });
-
 
   testWidgets('Fling toward the trailing edge causes stretch toward the leading edge', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
