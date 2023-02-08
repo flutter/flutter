@@ -913,21 +913,22 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    LocaleInfo locale,
+    final LocaleInfo locale,
   ) {
     final Iterable<String> methods = _allMessages.map((Message message) {
+      LocaleInfo localeWithFallback = locale;
       if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
-        locale = _templateArbLocale;
+        localeWithFallback = _templateArbLocale;
       }
-      if (message.parsedMessages[locale] == null) {
+      if (message.parsedMessages[localeWithFallback] == null) {
         // The message exists, but parsedMessages[locale] is null due to a syntax error.
         // This means that we have already set hadErrors = true while constructing the Message.
         return '';
       }
       return _generateMethod(
         message,
-        locale,
+        localeWithFallback,
       );
     });
 
