@@ -2413,10 +2413,47 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
+  // Select a paragraph around the given position.
+  //
+  // A paragraph boundary is defined as the range that most closely
+  // encapsulates the given position within two line terminators. If a
+  // line terminator does not exist in a given direction the selection
+  // extends to the start/end of the document in that direction.
+  void _selectParagraph({required Offset position, SelectionChangedCause? cause}) {
+    _selectParagraphsInRange(from: position, cause: cause);
+  }
+
+  // Selects the set of paragraphs in a document that intersect a given range of global positions.
+  //
+  // The set of paragraphs selected are not strictly bounded by the range of global positions.
+  //
+  // The first and last endpoints of the selection will always be at the beginning and end of a
+  // paragraph respectively.
+  void _selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
+    final TextBoundary paragraphBoundary = ParagraphBoundary(editableText.textEditingValue.text);
+    final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
+    final TextRange fromRange = paragraphBoundary.getTextBoundaryAt(fromPosition.offset);
+    final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
+    final TextRange toRange = toPosition == fromPosition ? fromRange : paragraphBoundary.getTextBoundaryAt(
+      toPosition.offset == editableText.textEditingValue.text.length ? toPosition.offset - 1 : toPosition.offset,
+    );
+    final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
+
+    final TextSelection newSelection = TextSelection(
+      baseOffset: isFromParagraphBeforeToParagraph ? fromRange.start : fromRange.end,
+      extentOffset: isFromParagraphBeforeToParagraph ? toRange.end : toRange.start,
+    );
+
+    editableText.userUpdateTextEditingValue(
+      editableText.textEditingValue.copyWith(selection: newSelection),
+      cause,
+    );
+  }
+
   /// Handler for [TextSelectionGestureDetector.onTripleTapDown].
   ///
-  /// By default, it selects a word through [EditableTextState.selectParagraph] if
-  /// selectionEnabled and shows toolbar if necessary.
+  /// By default, it selects a paragraph if [TextSelectionGestureDetectorBuilderDelegate.selectionEnabled] is true 
+  /// and shows the toolbar if necessary.
   ///
   /// See also:
   ///
@@ -2428,7 +2465,7 @@ class TextSelectionGestureDetectorBuilder {
       if (renderEditable.maxLines == 1) {
         editableText.selectAll(SelectionChangedCause.tap);
       } else {
-        editableText.selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+        _selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
       }
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
@@ -2568,7 +2605,7 @@ class TextSelectionGestureDetectorBuilder {
           case TargetPlatform.linux:
           case TargetPlatform.windows:
           case TargetPlatform.macOS:
-            return editableText.selectParagraphsInRange(
+            return _selectParagraphsInRange(
               from: dragStartGlobalPosition - editableOffset - scrollableOffset,
               to: details.globalPosition,
               cause: SelectionChangedCause.drag,

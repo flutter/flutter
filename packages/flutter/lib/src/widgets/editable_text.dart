@@ -4212,43 +4212,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : TextPosition(offset: textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? 0);
   }
 
-  /// Select a paragraph around the given position.
-  ///
-  /// A paragraph boundary is defined as the range that most closely
-  /// encapsulates the given position within two line terminators. If a
-  /// line terminator does not exist in a given direction the selection
-  /// extends to the start/end of the document in that direction.
-  void selectParagraph({required Offset position, SelectionChangedCause? cause}) {
-    selectParagraphsInRange(from: position, cause: cause);
-  }
-
-  /// Selects the set of paragraphs in a document that intersect a given range of global positions.
-  ///
-  /// The set of paragraphs selected are not strictly bounded by the range of global positions.
-  ///
-  /// The first and last endpoints of the selection will always be at the beginning and end of a
-  /// paragraph respectively.
-  void selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
-    final TextBoundary paragraphBoundary = ParagraphBoundary(_value.text);
-    final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
-    final TextRange fromRange = paragraphBoundary.getTextBoundaryAt(fromPosition.offset);
-    final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
-    final TextRange toRange = toPosition == fromPosition ? fromRange : paragraphBoundary.getTextBoundaryAt(
-      toPosition.offset == _value.text.length ? toPosition.offset - 1 : toPosition.offset,
-    );
-    final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
-
-    final TextSelection newSelection = TextSelection(
-      baseOffset: isFromParagraphBeforeToParagraph ? fromRange.start : fromRange.end,
-      extentOffset: isFromParagraphBeforeToParagraph ? toRange.end : toRange.start,
-    );
-
-    userUpdateTextEditingValue(
-      currentTextEditingValue.copyWith(selection: newSelection),
-      cause,
-    );
-  }
-
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
