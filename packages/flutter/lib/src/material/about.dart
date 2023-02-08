@@ -872,7 +872,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           title: _PackageLicensePageTitle(
             title,
             subtitle,
-            theme.primaryTextTheme,
+            theme.textTheme,
             theme.appBarTheme.titleTextStyle,
           ),
         ),
