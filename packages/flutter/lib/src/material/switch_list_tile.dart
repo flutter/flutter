@@ -292,7 +292,7 @@ class SwitchListTile extends StatelessWidget {
   /// {@end-tool}
   final ValueChanged<bool>? onChanged;
 
-  /// {@macros flutter.material.switch.activeColor}
+  /// {@macro flutter.material.switch.activeColor}
   ///
   /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
