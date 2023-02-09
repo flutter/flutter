@@ -210,7 +210,7 @@ FLUTTER_ASSERT_ARC
                        [timeoutFirstFrame fulfill];
                      }
                    }];
-  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [self waitForExpectationsWithTimeout:5 handler:nil];
 }
 
 - (void)testSpawn {
