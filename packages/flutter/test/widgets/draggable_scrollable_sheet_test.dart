@@ -486,9 +486,7 @@ void main() {
         await tester.pumpWidget(buildWidget(controller: outerController));
 
         await tester.fling(find.byType(ListView), const Offset(0, -100), 1000);
-        // TODO(AsturaPhoenix): This should really be in exclusive range
-        // (0.5, 1.0) and will be fixed in a later commit.
-        expect(outerController.size, 0.5);
+        expect(outerController.size, inExclusiveRange(0.5, 1.0));
         await tester.pumpAndSettle();
         expect(outerController.size, 1.0);
       }, variant: TargetPlatformVariant.all());

@@ -880,7 +880,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   });
 
   final _DraggableSheetExtent Function() getExtent;
-  bool get listShouldScroll => pixels > 0.0;
   bool get isActive => activity != null && activity is! IdleScrollActivity;
 
   _DraggableSheetExtent get extent => getExtent();
@@ -897,15 +896,18 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     super.dispose();
   }
 
+  bool shouldScrollList(double direction) =>
+      pixels > 0.0 &&
+      (pixels < maxScrollExtent || direction < 0) ||
+      extent.isAtMin && direction < 0 ||
+      extent.isAtMax && direction > 0;
+
   @override
   void applyUserOffset(double delta) {
-    if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-          (extent.isAtMin && delta < 0) ||
-          (extent.isAtMax && delta > 0))) {
-      extent.addPixelDelta(-delta, context.notificationContext!);
-    } else {
+    if (shouldScrollList(-delta)) {
       super.applyUserOffset(delta);
+    } else {
+      extent.addPixelDelta(-delta, context.notificationContext!);
     }
   }
 
@@ -945,22 +947,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   @override
   void goBallistic(double velocity) {
     if ((velocity == 0.0 && !_shouldSnap) ||
-        (velocity < 0.0 && listShouldScroll) ||
-        (velocity > 0.0 && (extent.isAtMax ||
-          // Go ballistic on inner scrollable if we're snapped, it's scrolled,
-          // and it can be scrolled further. Otherwise, we'd try to use a
-          // snapping simulation that would no-op and kill the momentum,
-          // inconsistent with the velocity < 0.0 case.
-          //
-          // This differs from applyUserOffset, which always defers to
-          // listShouldScroll. This means that in the non-snap case, dragging a
-          // scrolled inner list upwards will first scroll the list, but upon
-          // release (when it goes ballistic) will scroll the sheet. In the snap
-          // case, this means that dragging an inner list scrolled to its end
-          // upwards will first do nothing, but upon release with velocity will
-          // scroll the sheet to the next snap point.
-          (extent.snap && _isAtSnapSize &&
-           listShouldScroll && pixels < maxScrollExtent))) ||
+        shouldScrollList(velocity) ||
         // If we've already deferred to the inner scrollable, stick with it.
         // This can also prevent conflicts with activities on other scroll
         // positions, which could otherwise, if they resize the sheet, cause
