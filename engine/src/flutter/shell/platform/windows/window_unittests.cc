@@ -360,5 +360,23 @@ TEST(MockWindow, UnknownPointerTypeSkipsDirectManipulation) {
   window.InjectWindowMessage(DM_POINTERHITTEST, MAKEWPARAM(pointer_id, 0), 0);
 }
 
+// Test that the root UIA object is queried by WM_GETOBJECT.
+TEST(MockWindow, GetObjectUia) {
+  MockWindow window;
+  bool uia_called = false;
+  ON_CALL(window, OnGetObject)
+      .WillByDefault(Invoke([&uia_called](UINT msg, WPARAM wpar, LPARAM lpar) {
+#ifdef FLUTTER_ENGINE_USE_UIA
+        uia_called = true;
+#endif  // FLUTTER_ENGINE_USE_UIA
+        return static_cast<LRESULT>(0);
+      }));
+  EXPECT_CALL(window, OnGetObject).Times(1);
+
+  window.InjectWindowMessage(WM_GETOBJECT, 0, UiaRootObjectId);
+
+  EXPECT_TRUE(uia_called);
+}
+
 }  // namespace testing
 }  // namespace flutter

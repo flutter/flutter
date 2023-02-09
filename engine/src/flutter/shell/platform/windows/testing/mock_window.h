@@ -67,6 +67,8 @@ class MockWindow : public Window {
 
   MOCK_METHOD0(GetAxFragmentRootDelegate, ui::AXFragmentRootDelegateWin*());
 
+  MOCK_METHOD3(OnGetObject, LRESULT(UINT, WPARAM, LPARAM));
+
   void CallOnImeComposition(UINT const message,
                             WPARAM const wparam,
                             LPARAM const lparam);
