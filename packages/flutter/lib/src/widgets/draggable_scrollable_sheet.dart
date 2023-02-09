@@ -827,12 +827,9 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 
 class _SheetBallisticScrollActivity extends BallisticScrollActivity {
   _SheetBallisticScrollActivity(
-      _DraggableScrollableSheetScrollPosition scrollPosition,
-      Simulation simulation,
-      {required this.isScrolling})
-      : super(scrollPosition, simulation, scrollPosition.context.vsync, false);
-  @override
-  final bool isScrolling;
+    _DraggableScrollableSheetScrollPosition scrollPosition,
+    Simulation simulation,
+  ) : super(scrollPosition, simulation, scrollPosition.context.vsync, false);
 
   @override
   _DraggableScrollableSheetScrollPosition get delegate =>
@@ -980,35 +977,28 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       return;
     }
 
+    final Simulation simulation;
     if (extent.snap) {
       // Snap is enabled, simulate snapping instead of clamping scroll.
-      final Simulation simulation = _SnappingSimulation(
+      simulation = _SnappingSimulation(
         position: extent.currentPixels,
         initialVelocity: velocity,
         pixelSnapSize: extent.pixelSnapSizes,
         snapAnimationDuration: extent.snapAnimationDuration,
         tolerance: physics.toleranceFor(this),
       );
-      beginActivity(_SheetBallisticScrollActivity(
-        this,
-        simulation,
-        isScrolling: velocity != 0,
-      ));
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
       // the ballistic back to the ScrollView, it will use the right simulation.
-      final Simulation simulation = ClampingScrollSimulation(
+      simulation = ClampingScrollSimulation(
         // Run the simulation in terms of pixels, not extent.
         position: extent.currentPixels,
         velocity: velocity,
         tolerance: physics.toleranceFor(this),
       );
-      beginActivity(_SheetBallisticScrollActivity(
-        this,
-        simulation,
-        isScrolling: true,
-      ));
     }
+
+    beginActivity(_SheetBallisticScrollActivity(this, simulation));
   }
 }
 
