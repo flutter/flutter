@@ -32,6 +32,11 @@ import sys
 # If there are differences between before and after, whether positive or
 # negative, the exit code for this script will be 1, and 0 otherwise.
 
+CORES = [
+    'Mali-G78',  # Pixel 6 / 2020
+    'Mali-T880',  # 2016
+]
+
 
 def parse_args(argv):
   parser = argparse.ArgumentParser(
@@ -86,6 +91,9 @@ def read_malioc_file(malioc_tree, json_file):
 
   results = []
   for shader in json_obj['shaders']:
+    # Ignore cores not in the allowlist above.
+    if shader['hardware']['core'] not in CORES:
+      continue
     result = {}
     result['filename'] = os.path.relpath(shader['filename'], build_gen_dir)
     result['core'] = shader['hardware']['core']
@@ -200,6 +208,8 @@ def main(argv):
   changed = False
   for filename, shaders in before_json.items():
     for core, before_shader in shaders.items():
+      if core not in after_json[filename].keys():
+        continue
       after_shader = after_json[filename][core]
       if compare_shaders(args.after, before_shader, after_shader):
         changed = True
