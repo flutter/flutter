@@ -615,6 +615,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   Future<void> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      // TODO(justinmc): Maybe I need to be considering these didPopRoute observers too, or I need to deprecate them.
       if (await observer.didPopRoute()) {
         return;
       }

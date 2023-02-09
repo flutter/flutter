@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
@@ -9,6 +11,52 @@ class SystemNavigator {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   SystemNavigator._();
+
+  static bool _navigationStackHasMultiple = true;
+
+  /// Inform the platform of whether or not the navigation stack is empty.
+  ///
+  /// Currently, this is used only on Android to inform its use of the
+  /// predictive back gesture when exiting the app.
+  ///
+  /// See also:
+  ///
+  ///  * The
+  ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
+  ///    for predictive back in native Android apps.
+  static Future<void> updateNavigationStackStatus(bool navigationStackHasMultiple) async {
+    // TODO(justinmc): Maybe instead of hasMultiple it's more like frameworkCanHandleBack?
+    print('justin called updateNavigationStackStatus with $navigationStackHasMultiple');
+    if (navigationStackHasMultiple == _navigationStackHasMultiple) {
+      return;
+    }
+    // Currently, this method call is only relevant on Android.
+    if (kIsWeb) {
+      return;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return;
+      case TargetPlatform.android:
+        // Set the local boolean before the call is made, so that duplicate
+        // calls to this method don't cause duplicate calls to the platform.
+        _navigationStackHasMultiple = navigationStackHasMultiple;
+        try {
+        await SystemChannels.platform.invokeMethod<void>(
+          'SystemNavigator.updateNavigationStackStatus',
+          navigationStackHasMultiple,
+        );
+        } catch (error) {
+          _navigationStackHasMultiple = !navigationStackHasMultiple;
+          rethrow;
+        }
+        break;
+    }
+  }
 
   /// Removes the topmost Flutter instance, presenting what was before
   /// it.
