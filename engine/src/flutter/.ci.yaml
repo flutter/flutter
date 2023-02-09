@@ -24,7 +24,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_bitcode: "false"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -47,7 +46,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_bitcode: "false"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -70,7 +68,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_bitcode: "false"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -336,7 +333,6 @@ targets:
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
       build_android_aot: "true"
-      jazzy_version: "0.14.1"
     timeout: 60
 
   - name: Mac Host Engine
@@ -346,7 +342,6 @@ targets:
         {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
-      jazzy_version: "0.14.1"
     timeout: 75
 
   - name: Mac mac_android_aot_engine
@@ -370,7 +365,6 @@ targets:
     recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
-      jazzy_version: "0.14.1"
       runtime_versions: >-
         [
           "ios-16-0_14a5294e"
@@ -382,7 +376,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       cores: "12"
-      jazzy_version: "0.14.1"
       lint_host: "true"
       lint_ios: "false"
     timeout: 75
@@ -404,7 +397,6 @@ targets:
     recipe: engine/engine_lint
     properties:
       add_recipes_cq: "true"
-      jazzy_version: "0.14.1"
       lint_host: "false"
       lint_ios: "true"
     timeout: 75
@@ -428,7 +420,6 @@ targets:
       add_recipes_cq: "true"
       build_ios: "true"
       ios_debug: "true"
-      jazzy_version: "0.14.1"
     timeout: 60
 
   - name: Mac Web Engine
@@ -548,7 +539,6 @@ targets:
     properties:
       build_ios: "true"
       ios_profile: "true"
-      jazzy_version: "0.14.1"
     timeout: 90
     runIf:
       - DEPS
@@ -560,7 +550,6 @@ targets:
     properties:
       build_ios: "true"
       ios_release: "true"
-      jazzy_version: "0.14.1"
     timeout: 90
     runIf:
       - DEPS
