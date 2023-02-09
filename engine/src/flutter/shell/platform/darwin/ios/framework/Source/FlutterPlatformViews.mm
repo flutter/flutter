@@ -193,14 +193,14 @@ void FlutterPlatformViewsController::OnMethodCall(FlutterMethodCall* call, Flutt
 void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterResult& result) {
   NSDictionary<NSString*, id>* args = [call arguments];
 
-  long viewId = [args[@"id"] longValue];
+  int64_t viewId = [args[@"id"] longLongValue];
   NSString* viewTypeString = args[@"viewType"];
   std::string viewType(viewTypeString.UTF8String);
 
   if (views_.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
                                message:@"trying to create an already created view"
-                               details:[NSString stringWithFormat:@"view id: '%ld'", viewId]]);
+                               details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
   }
 
   NSObject<FlutterPlatformViewFactory>* factory = factories_[viewType].get();
@@ -234,7 +234,8 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
                                                                 arguments:params];
   UIView* platform_view = [embedded_view view];
   // Set a unique view identifier, so the platform view can be identified in unit tests.
-  platform_view.accessibilityIdentifier = [NSString stringWithFormat:@"platform_view[%ld]", viewId];
+  platform_view.accessibilityIdentifier =
+      [NSString stringWithFormat:@"platform_view[%lld]", viewId];
   views_[viewId] = fml::scoped_nsobject<NSObject<FlutterPlatformView>>([embedded_view retain]);
 
   FlutterTouchInterceptingView* touch_interceptor = [[[FlutterTouchInterceptingView alloc]
