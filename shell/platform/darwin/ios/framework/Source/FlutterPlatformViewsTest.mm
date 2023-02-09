@@ -278,12 +278,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
   auto embeddedViewParams =
       std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
@@ -348,12 +348,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 8, 8));
+  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 8, screenScale * 8));
 
   auto embeddedViewParams =
       std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(5, 10), stack);
@@ -418,17 +418,17 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 50; i++) {
     auto filter = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   auto embeddedViewParams =
-      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
+      std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(20, 20), stack);
 
   flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
   flutterPlatformViewsController->CompositeEmbeddedView(2);
@@ -489,12 +489,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a backdrop filter
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+  stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
 
   auto embeddedViewParams =
       std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix, SkSize::Make(10, 10), stack);
@@ -530,7 +530,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 2; i++) {
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -600,13 +600,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   auto embeddedViewParams =
@@ -641,7 +641,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   stack2.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   for (int i = 0; i < 4; i++) {
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -735,13 +735,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push backdrop filters
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
   for (int i = 0; i < 5; i++) {
-    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   auto embeddedViewParams =
@@ -780,11 +780,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       auto filter2 =
           std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
 
-      stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(filter2,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -833,11 +834,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     if (i == 0) {
       auto filter2 =
           std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
-      stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(filter2,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -884,11 +886,12 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     if (i == 4) {
       auto filter2 =
           std::make_shared<flutter::DlBlurImageFilter>(2, 5, flutter::DlTileMode::kClamp);
-      stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(filter2,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -936,7 +939,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   for (int i = 0; i < 5; i++) {
     auto filter2 = std::make_shared<flutter::DlBlurImageFilter>(i, 2, flutter::DlTileMode::kClamp);
 
-    stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(filter2, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -1007,8 +1010,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
   // Push a dilate backdrop filter
   auto dilateFilter = std::make_shared<flutter::DlDilateImageFilter>(5, 2);
@@ -1045,11 +1048,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   for (int i = 0; i < 5; i++) {
     if (i == 2) {
-      stack2.PushBackdropFilter(dilateFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(dilateFilter,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(blurFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(blurFilter,
+                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -1082,11 +1087,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Push backdrop filters and dilate filter
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
-      stack2.PushBackdropFilter(dilateFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(dilateFilter,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(blurFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(blurFilter,
+                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -1119,11 +1126,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Push backdrop filters and dilate filter
   for (int i = 0; i < 5; i++) {
     if (i == 4) {
-      stack2.PushBackdropFilter(dilateFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+      stack2.PushBackdropFilter(dilateFilter,
+                                SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
       continue;
     }
 
-    stack2.PushBackdropFilter(blurFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(blurFilter,
+                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -1155,7 +1164,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   }
   // Push dilate filters
   for (int i = 0; i < 5; i++) {
-    stack2.PushBackdropFilter(dilateFilter, SkRect::MakeXYWH(0, 0, 10, 10));
+    stack2.PushBackdropFilter(dilateFilter,
+                              SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   }
 
   embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix,
@@ -1352,8 +1362,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  SkMatrix screenScaleMatrix =
-      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
   stack.PushTransform(screenScaleMatrix);
 
   auto embeddedViewParams =
@@ -1363,8 +1373,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutterPlatformViewsController->PrerollCompositeEmbeddedView(2, std::move(embeddedViewParams));
   flutterPlatformViewsController->PushVisitedPlatformView(2);
   auto filter = std::make_shared<flutter::DlBlurImageFilter>(5, 2, flutter::DlTileMode::kClamp);
-  flutterPlatformViewsController->PushFilterToVisitedPlatformViews(filter,
-                                                                   SkRect::MakeXYWH(0, 0, 10, 10));
+  flutterPlatformViewsController->PushFilterToVisitedPlatformViews(
+      filter, SkRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
   flutterPlatformViewsController->CompositeEmbeddedView(2);
   XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
   ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;

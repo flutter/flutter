@@ -14,6 +14,7 @@
 #include "assets/directory_asset_bundle.h"
 #include "common/graphics/persistent_cache.h"
 #include "flutter/flow/layers/backdrop_filter_layer.h"
+#include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/layer_raster_cache_item.h"
 #include "flutter/flow/layers/platform_view_layer.h"
@@ -827,10 +828,16 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
     auto platform_view_layer = std::make_shared<PlatformViewLayer>(
         SkPoint::Make(10, 10), SkSize::Make(10, 10), 50);
     root->Add(platform_view_layer);
+    auto transform_layer =
+        std::make_shared<TransformLayer>(SkMatrix::Translate(1, 1));
+    root->Add(transform_layer);
+    auto clip_rect_layer = std::make_shared<ClipRectLayer>(
+        SkRect::MakeLTRB(0, 0, 30, 30), Clip::hardEdge);
+    transform_layer->Add(clip_rect_layer);
     auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
     auto backdrop_filter_layer =
         std::make_shared<BackdropFilterLayer>(filter, DlBlendMode::kSrcOver);
-    root->Add(backdrop_filter_layer);
+    clip_rect_layer->Add(backdrop_filter_layer);
     auto platform_view_layer2 = std::make_shared<PlatformViewLayer>(
         SkPoint::Make(10, 10), SkSize::Make(10, 10), 75);
     backdrop_filter_layer->Add(platform_view_layer2);
@@ -846,6 +853,10 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   auto mutator = *external_view_embedder->GetStack(50).Begin();
   ASSERT_EQ(mutator->GetType(), MutatorType::kBackdropFilter);
   ASSERT_EQ(mutator->GetFilterMutation().GetFilter(), filter);
+  // Make sure the filterRect is in global coordinates (contains the (1,1)
+  // translation).
+  ASSERT_EQ(mutator->GetFilterMutation().GetFilterRect(),
+            SkRect::MakeLTRB(1, 1, 31, 31));
 
   DestroyShell(std::move(shell));
 }
