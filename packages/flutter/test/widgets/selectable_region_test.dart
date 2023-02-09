@@ -1695,14 +1695,14 @@ void main() {
         ),
       ),
     );
-        
+
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
-    
+
     expect(buttonItems.length, 2);
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
 
@@ -1712,10 +1712,10 @@ void main() {
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
     expect(regionState.selectionOverlay, isNull);
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
-  
+
   testWidgets('the handles are not disappear when clicking `Select all` item', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
@@ -1734,7 +1734,7 @@ void main() {
         ),
       ),
     );
-        
+
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
     addTearDown(gesture.removePointer);
@@ -1753,9 +1753,8 @@ void main() {
     expect(regionState.selectionOverlay, isNotNull);
     expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
     expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-    
   },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
