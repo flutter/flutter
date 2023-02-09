@@ -895,6 +895,7 @@ void main() {
           ),
         ),
       );
+
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
@@ -1673,6 +1674,88 @@ void main() {
     );
   },
     skip: kIsWeb, // [intended] Web uses its native context menu.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
+
+  testWidgets('hide selection overlay when clicking `Copy` item', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+        
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    
+    expect(buttonItems.length, 2);
+    expect(buttonItems[0].type, ContextMenuButtonType.copy);
+
+    // press `Copy` item
+    buttonItems[0].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+    expect(regionState.selectionOverlay, isNull);
+  },
+    skip: kIsWeb,
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
+  
+  testWidgets('the handles are not disappear when clicking `Select all` item', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+        
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    expect(buttonItems.length, 2);
+    expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+
+    // press `Select All` item
+    buttonItems[1].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    expect(regionState.selectionOverlay, isNotNull);
+    expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+    expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+    
+  },
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 

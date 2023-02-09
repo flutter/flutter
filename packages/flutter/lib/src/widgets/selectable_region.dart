@@ -319,6 +319,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   Offset? lastSecondaryTapDownPosition;
 
+  /// The current status of the selection overlay.
+  @visibleForTesting
+  SelectionOverlay? get selectionOverlay => _selectionOverlay;
+
   @override
   void initState() {
     super.initState();
@@ -889,7 +893,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _selectAll() {
-     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
+    _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     _updateSelectedContentIfNeeded();
   }
 
