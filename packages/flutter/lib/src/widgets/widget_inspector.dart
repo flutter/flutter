@@ -2455,7 +2455,10 @@ class _ElementLocationStatsTracker {
       return;
     }
     final _HasCreationLocation creationLocationSource = widget;
-    final _Location location = creationLocationSource._location;
+    final _Location? location = creationLocationSource._location;
+    if (location == null) {
+      return;
+    }
     final int id = _toLocationId(location);
 
     _LocationCount entry;
@@ -3279,7 +3282,7 @@ const TextStyle _messageStyle = TextStyle(
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 // ignore: unused_element
 abstract class _HasCreationLocation {
-  _Location get _location;
+  _Location? get _location;
 }
 
 /// A tuple with file, line, and column number, for displaying human-readable

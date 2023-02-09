@@ -1492,8 +1492,6 @@ flutter:
           commandHelp.c,
           commandHelp.q,
           '',
-          '💪 Running with sound null safety 💪',
-          '',
           'A Dart VM Service on FakeDevice is available at: null',
           '',
         ].join('\n')
@@ -1522,8 +1520,6 @@ flutter:
           commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
-          '',
-          '💪 Running with sound null safety 💪',
           '',
           'A Dart VM Service on FakeDevice is available at: null',
           '',

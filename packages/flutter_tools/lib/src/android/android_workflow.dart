@@ -439,8 +439,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         .then(
           (Object? socket) => socket,
           onError: (dynamic err, StackTrace stack) {
-            _logger.printError('Echoing stdin to the licenses subprocess failed:');
-            _logger.printError('$err\n$stack');
+            _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+            _logger.printTrace('$err\n$stack');
           },
         ),
       );
@@ -453,12 +453,19 @@ class AndroidLicenseValidator extends DoctorValidator {
           _stdio.addStderrStream(process.stderr),
         ]);
       } on Exception catch (err, stack) {
-        _logger.printError('Echoing stdout or stderr from the license subprocess failed:');
-        _logger.printError('$err\n$stack');
+        _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
+        _logger.printTrace('$err\n$stack');
       }
 
       final int exitCode = await process.exitCode;
-      return exitCode == 0;
+      if (exitCode != 0) {
+        throwToolExit(_userMessages.androidCannotRunSdkManager(
+          _androidSdk?.sdkManagerPath ?? '',
+          'exited code $exitCode',
+          _platform,
+        ));
+      }
+      return true;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
         _androidSdk?.sdkManagerPath ?? '',
