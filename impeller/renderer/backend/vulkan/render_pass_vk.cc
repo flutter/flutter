@@ -9,6 +9,7 @@
 
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/commands_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -394,46 +395,9 @@ vk::Framebuffer RenderPassVK::CreateFrameBuffer(
 bool RenderPassVK::TransitionImageLayout(vk::Image image,
                                          vk::ImageLayout layout_old,
                                          vk::ImageLayout layout_new) const {
-  auto transition_cmd = command_buffer_->GetSingleUseChild();
-
-  vk::CommandBufferBeginInfo begin_info;
-  begin_info.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-  auto res = transition_cmd.begin(begin_info);
-
-  if (res != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to begin command buffer: " << vk::to_string(res);
-    return false;
-  }
-
-  vk::ImageMemoryBarrier barrier =
-      vk::ImageMemoryBarrier()
-          .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite |
-                            vk::AccessFlagBits::eTransferWrite)
-          .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead |
-                            vk::AccessFlagBits::eShaderRead)
-          .setOldLayout(layout_old)
-          .setNewLayout(layout_new)
-          .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-          .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-          .setImage(image)
-          .setSubresourceRange(
-              vk::ImageSubresourceRange()
-                  .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                  .setBaseMipLevel(0)
-                  .setLevelCount(1)
-                  .setBaseArrayLayer(0)
-                  .setLayerCount(1));
-  transition_cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllGraphics,
-                                 vk::PipelineStageFlagBits::eAllGraphics, {},
-                                 nullptr, nullptr, barrier);
-
-  res = transition_cmd.end();
-  if (res != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to end command buffer: " << vk::to_string(res);
-    return false;
-  }
-
-  return true;
+  auto transition_cmd =
+      TransitionImageLayoutCommandVK(image, layout_old, layout_new);
+  return transition_cmd.Submit(command_buffer_.get());
 }
 
 bool RenderPassVK::CopyBufferToImage(const TextureVK& texture_vk) const {

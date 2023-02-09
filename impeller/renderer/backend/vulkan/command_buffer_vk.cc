@@ -9,6 +9,7 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/vulkan/blit_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -120,7 +121,16 @@ std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
 
 std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() const {
   // TODO(kaushikiska): https://github.com/flutter/flutter/issues/112649
-  return nullptr;
+  if (!IsValid()) {
+    return nullptr;
+  }
+
+  auto pass = std::make_shared<BlitPassVK>(fenced_command_buffer_);
+  if (!pass->IsValid()) {
+    return nullptr;
+  }
+
+  return pass;
 }
 
 std::shared_ptr<ComputePass> CommandBufferVK::OnCreateComputePass() const {
