@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/common/path_utils.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
@@ -206,6 +207,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
   // https://github.com/flutter/flutter/issues/71099
+  internal_plugin_registrar_ =
+      std::make_unique<PluginRegistrar>(plugin_registrar_.get());
   cursor_handler_ =
       std::make_unique<CursorHandler>(messenger_wrapper_.get(), this);
   platform_handler_ =
@@ -322,7 +325,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   };
   args.on_pre_engine_restart_callback = [](void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    host->view()->OnPreEngineRestart();
+    host->OnPreEngineRestart();
   };
   args.update_semantics_callback = [](const FlutterSemanticsUpdate* update,
                                       void* user_data) {
@@ -401,6 +404,7 @@ bool FlutterWindowsEngine::Stop() {
 
 void FlutterWindowsEngine::SetView(FlutterWindowsView* view) {
   view_ = view;
+  InitializeKeyboard();
 }
 
 void FlutterWindowsEngine::OnVsync(intptr_t baton) {
@@ -561,6 +565,47 @@ void FlutterWindowsEngine::SendSystemLocales() {
                               flutter_locale_list.size());
 }
 
+void FlutterWindowsEngine::InitializeKeyboard() {
+  if (view_ == nullptr) {
+    FML_LOG(ERROR) << "Cannot initialize keyboard on Windows headless mode.";
+  }
+
+  auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
+  KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state = GetKeyState;
+  KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan =
+      [](UINT virtual_key, bool extended) {
+        return MapVirtualKey(virtual_key,
+                             extended ? MAPVK_VK_TO_VSC_EX : MAPVK_VK_TO_VSC);
+      };
+  keyboard_key_handler_ = std::move(CreateKeyboardKeyHandler(
+      internal_plugin_messenger, get_key_state, map_vk_to_scan));
+  text_input_plugin_ =
+      std::move(CreateTextInputPlugin(internal_plugin_messenger));
+}
+
+std::unique_ptr<KeyboardHandlerBase>
+FlutterWindowsEngine::CreateKeyboardKeyHandler(
+    BinaryMessenger* messenger,
+    KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+    KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
+  auto keyboard_key_handler = std::make_unique<KeyboardKeyHandler>();
+  keyboard_key_handler->AddDelegate(
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [this](const FlutterKeyEvent& event, FlutterKeyEventCallback callback,
+                 void* user_data) {
+            return SendKeyEvent(event, callback, user_data);
+          },
+          get_key_state, map_vk_to_scan));
+  keyboard_key_handler->AddDelegate(
+      std::make_unique<KeyboardKeyChannelHandler>(messenger));
+  return keyboard_key_handler;
+}
+
+std::unique_ptr<TextInputPlugin> FlutterWindowsEngine::CreateTextInputPlugin(
+    BinaryMessenger* messenger) {
+  return std::make_unique<TextInputPlugin>(messenger, view_);
+}
+
 bool FlutterWindowsEngine::RegisterExternalTexture(int64_t texture_id) {
   return (embedder_api_.RegisterExternalTexture(engine_, texture_id) ==
           kSuccess);
@@ -623,6 +668,13 @@ std::shared_ptr<AccessibilityBridgeWindows>
 FlutterWindowsEngine::CreateAccessibilityBridge(FlutterWindowsEngine* engine,
                                                 FlutterWindowsView* view) {
   return std::make_shared<AccessibilityBridgeWindows>(engine, view);
+}
+
+void FlutterWindowsEngine::OnPreEngineRestart() {
+  // Reset the keyboard's state on hot restart.
+  if (view_) {
+    InitializeKeyboard();
+  }
 }
 
 gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeAccessibleFromId(

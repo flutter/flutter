@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
+#include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
