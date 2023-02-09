@@ -175,7 +175,6 @@ class _SnackBarExampleState extends State<SnackBarExample> {
     final String label = _multiLine
         ? 'A Snack Bar with quite a lot of text which spans across multiple lines'
         : 'Single Line Snack Bar';
-    print(_sliderValue);
     return SnackBar(
       content: Text(label),
       showCloseIcon: _withIcon,
