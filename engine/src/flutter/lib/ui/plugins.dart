@@ -40,9 +40,9 @@ class CallbackHandle {
 ///  * [IsolateNameServer], which provides utilities for dealing with
 ///    [Isolate]s.
 class PluginUtilities {
-  // This class is only a namespace, and should not be instantiated or
-  // extended directly.
-  factory PluginUtilities._() => throw UnsupportedError('Namespace');
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  PluginUtilities._();
 
   static final Map<Function, CallbackHandle?> _forwardCache =
       <Function, CallbackHandle?>{};

@@ -3501,6 +3501,9 @@ class _ColorFilter extends NativeFieldWrapperClass1 {
 ///  * [SceneBuilder.pushImageFilter], which is the low-level API for using
 ///    this class as a child layer filter.
 abstract class ImageFilter {
+  // This class is not meant to be extended; this constructor prevents extension.
+  ImageFilter._(); // ignore: unused_element
+
   /// Creates an image filter that applies a Gaussian blur.
   factory ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0, TileMode tileMode = TileMode.clamp }) {
     return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
