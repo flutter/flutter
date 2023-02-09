@@ -136,8 +136,6 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             const Text('Action new-line overflow threshold'),
             Slider(
               value: _sliderValue,
-              max: 1,
-              min: 0,
               divisions: 20,
               label: _sliderValue.toStringAsFixed(2),
               onChanged:  _snackBarBehavior == SnackBarBehavior.fixed
