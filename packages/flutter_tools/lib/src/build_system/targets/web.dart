@@ -529,10 +529,7 @@ class WebBuiltInAssets extends Target {
 
     // Write the flutter.js file
     final File flutterJsFile = environment.outputDir.childFile('flutter.js');
-    final String fileGeneratorsPath =
-        globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
-    flutterJsFile.writeAsStringSync(
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath));
+    flutterJsFile.writeAsStringSync(flutter_js.generateFlutterJsFile());
   }
 }
 
@@ -601,10 +598,7 @@ class WebServiceWorker extends Target {
     final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
     );
-    final String fileGeneratorsPath =
-        globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String serviceWorker = generateServiceWorker(
-      fileGeneratorsPath,
       urlToHash,
       <String>[
         'main.dart.js',
