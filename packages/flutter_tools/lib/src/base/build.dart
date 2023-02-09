@@ -205,11 +205,11 @@ class AOTSnapshotter {
         .createSync(recursive: true);
     }
 
-    // Optimization arguments.
+    // Debugging information.
     genSnapshotArgs.addAll(<String>[
-      // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
+        '--resolve-dwarf-paths',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
