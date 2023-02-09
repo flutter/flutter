@@ -105,11 +105,6 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
     );
-    const BuildInfo sound = BuildInfo(
-      BuildMode.debug,
-      '',
-      treeShakeIcons: false,
-    );
 
     final BufferLogger logger = BufferLogger.test();
     FakeBuildSubCommand(logger).test(unsound);

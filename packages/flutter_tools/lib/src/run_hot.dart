@@ -1029,8 +1029,8 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+      globals.printStatus('');
       globals.printStatus(
         'Running without sound null safety ⚠️',
         emphasis: true,
