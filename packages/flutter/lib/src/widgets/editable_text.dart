@@ -5385,7 +5385,7 @@ class _UndoStack<T> {
 
   final List<T> _list = <T>[];
 
-  // The index of the current value, or null if the list is emtpy.
+  // The index of the current value, or null if the list is empty.
   late int _index;
 
   /// Returns the current value of the stack.
