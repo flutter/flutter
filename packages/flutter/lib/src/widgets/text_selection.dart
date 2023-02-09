@@ -2431,10 +2431,26 @@ class TextSelectionGestureDetectorBuilder {
   // paragraph respectively.
   void _selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary paragraphBoundary = ParagraphBoundary(editableText.textEditingValue.text);
+    _selectTextBoundaryInRange(boundary: paragraphBoundary, from: from, to: to, cause: cause);
+  }
+
+  // Selects the line around the given position.
+  void _selectLine({required Offset position, SelectionChangedCause? cause}) {
+    _selectLinesInRange(from: position, cause: cause);
+  }
+
+  // Selects the set of lines in a document that intersect a given range of global positions.
+  void _selectLinesInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
+    final TextBoundary lineBoundary = LineBoundary(renderEditable);
+    _selectTextBoundaryInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
+  }
+
+  // Selects the set of text boundaries in a document that intersect a given range of global positions.
+  void _selectTextBoundaryInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
-    final TextRange fromRange = paragraphBoundary.getTextBoundaryAt(fromPosition.offset);
+    final TextRange fromRange = boundary.getTextBoundaryAt(fromPosition.offset);
     final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
-    final TextRange toRange = toPosition == fromPosition ? fromRange : paragraphBoundary.getTextBoundaryAt(
+    final TextRange toRange = toPosition == fromPosition ? fromRange : boundary.getTextBoundaryAt(
       toPosition.offset == editableText.textEditingValue.text.length ? toPosition.offset - 1 : toPosition.offset,
     );
     final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
@@ -2465,7 +2481,18 @@ class TextSelectionGestureDetectorBuilder {
       if (renderEditable.maxLines == 1) {
         editableText.selectAll(SelectionChangedCause.tap);
       } else {
-        _selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            _selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+            break;
+          case TargetPlatform.linux:
+            _selectLine(position: details.globalPosition, cause: SelectionChangedCause.tap);
+            break;
+        }
       }
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
@@ -2598,6 +2625,11 @@ class TextSelectionGestureDetectorBuilder {
             // The gesture is less intuitive on mobile devices.
             return;
           case TargetPlatform.linux:
+            return _selectLinesInRange(
+              from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+              to: details.globalPosition,
+              cause: SelectionChangedCause.drag,
+            );
           case TargetPlatform.windows:
           case TargetPlatform.macOS:
             return _selectParagraphsInRange(
