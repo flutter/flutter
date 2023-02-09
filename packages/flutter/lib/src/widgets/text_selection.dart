@@ -2495,7 +2495,7 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
 
-    if (details.consecutiveTapCount > 1) {
+    if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
       // Do not set the selection on a consecutive tap and drag.
       return;
     }
@@ -2578,12 +2578,9 @@ class TextSelectionGestureDetectorBuilder {
         _scrollPosition - _dragStartScrollOffset,
       );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
-      // From observation, Windows 11 alternates between double tap and triple tap actions when going past
-      // a consecutive tap count of 3.
-      final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
 
       // Select word by word.
-      if (alternateBetweenEvenOdd ? details.consecutiveTapCount.isEven : details.consecutiveTapCount == 2) {
+      if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
         return renderEditable.selectWordsInRange(
           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
@@ -2592,9 +2589,7 @@ class TextSelectionGestureDetectorBuilder {
       }
 
       // Select paragraph by paragraph.
-      if (alternateBetweenEvenOdd ?
-          (details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd)
-          : details.consecutiveTapCount >= 3) {
+      if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 3) {
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -2894,7 +2889,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  static int? _getDefaultMaxConsecutiveTap() {
+  static int _getEffectiveConsecutiveTapCount(int rawCount) {
     switch(defaultTargetPlatform) {
       // From observation, these platform's reset their tap count to 0 when the number of consecutive taps
       // exceeds 3. For example on Debian Linux with GTK, when going past a triple click, on the fourth click the selection
@@ -2903,18 +2898,19 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        return 3;
+        return rawCount <= 3 ? rawCount : 0 + (rawCount % 3 == 0 ? 3 : rawCount % 3);
       // From observation, these platform's either hold their tap count at 3 or they
       // allow it to grow infinitely. For example on macOS, when going past a triple click,
       // the selection should be retained at the paragraph that was first selected on triple click.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        return math.min(rawCount, 3);
       // From observation, this platform's consecutive tap count grows infinitely, alternating
       // between double click and triple click actions. For example, after a triple click has
       // selected a paragraph, on the next click the word at the clicked position will be selected,
       // and on the next click the paragraph at the position.
       case TargetPlatform.windows:
-        return null;
+        return rawCount < 2 ? rawCount : 2 + rawCount % 2;
     }
   }
 
@@ -2931,22 +2927,17 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-
-    // From observation, Windows 11 alternates between double tap and triple tap actions when going past
-    // a consecutive tap count of 3.
-    final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
-    if (alternateBetweenEvenOdd && details.consecutiveTapCount.isEven || details.consecutiveTapCount == 2) {
+    if (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
       return widget.onDoubleTapDown?.call(details);
     }
 
-    if (alternateBetweenEvenOdd && details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd
-        || !alternateBetweenEvenOdd && details.consecutiveTapCount >= 3) {
+    if (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 3) {
       return widget.onTripleTapDown?.call(details);
     }
   }
 
   void _handleTapUp(TapDragUpDetails details) {
-    if (details.consecutiveTapCount == 1) {
+    if (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 1) {
       widget.onSingleTapUp?.call(details);
     }
   }
@@ -3031,7 +3022,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
             ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
-            ..maxConsecutiveTap = _getDefaultMaxConsecutiveTap()
             ..onTapDown = _handleTapDown
             ..onDragStart = _handleDragStart
             ..onDragUpdate = _handleDragUpdate
