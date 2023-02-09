@@ -10,7 +10,7 @@
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 @TestOn('!chrome')
 library;
 
@@ -220,6 +220,14 @@ class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   }
 }
 
+Widget _applyConstructor(Widget Function() constructor) => constructor();
+
+class _TrivialWidget extends StatelessWidget {
+  const _TrivialWidget() : super(key: const Key('singleton'));
+  @override
+  Widget build(BuildContext context) => const Text('Hello, world!');
+}
+
 int getChildLayerCount(OffsetLayer layer) {
   Layer? child = layer.firstChild;
   int count = 0;
@@ -240,8 +248,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    tearDown(() {
+    tearDown(() async {
       service.resetAllState();
+
+      if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'false'},
+        );
+      }
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
@@ -3582,6 +3597,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         },
       );
+    },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets with tear-offs', (WidgetTester tester) async {
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetInspector(
+          selectButtonBuilder: null,
+          child: _applyConstructor(_TrivialWidget.new),
+        ),
+      );
+
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+
+      await tester.pumpWidget(widget);
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
