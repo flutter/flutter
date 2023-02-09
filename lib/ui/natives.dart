@@ -7,6 +7,10 @@ part of dart.ui;
 
 /// Helper functions for Dart Plugin Registrants.
 class DartPluginRegistrant {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  DartPluginRegistrant._();
+
   static bool _wasInitialized = false;
 
   /// Makes sure the that the Dart Plugin Registrant has been called for this

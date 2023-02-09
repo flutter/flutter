@@ -20,9 +20,9 @@ part of dart.ui;
 /// recommended to establish a separate communication channel in that first
 /// message (e.g. by passing a dedicated [SendPort]).
 class IsolateNameServer {
-  // This class is only a namespace, and should not be instantiated or
-  // extended directly.
-  factory IsolateNameServer._() => throw UnsupportedError('Namespace');
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  IsolateNameServer._();
 
   /// Looks up the [SendPort] associated with a given name.
   ///
