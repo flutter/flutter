@@ -11,6 +11,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h"
 #import "flutter/testing/testing.h"
 
+extern const uint64_t kFlutterDefaultViewId;
+
 @interface FlutterViewMockProvider : NSObject <FlutterViewProvider> {
   FlutterView* _defaultView;
 }
@@ -30,7 +32,7 @@
   return self;
 }
 
-- (nullable FlutterView*)getView:(uint64_t)viewId {
+- (nullable FlutterView*)viewForId:(uint64_t)viewId {
   if (viewId == kFlutterDefaultViewId) {
     return _defaultView;
   }
