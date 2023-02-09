@@ -2601,7 +2601,7 @@ void main() {
         matchesGoldenFile('snack_bar.goldenTest.multiLineWithIcon.png'));
   });
 
-  testWidgets('Floating multi-line snackbar with icon and actionOverflowThreshold=0 is aligned correctly', (WidgetTester tester) async {
+  testWidgets('Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         bottomSheet: SizedBox(
