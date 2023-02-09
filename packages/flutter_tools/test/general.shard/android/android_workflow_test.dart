@@ -339,7 +339,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     await licenseValidator.runLicenseManager();
-    expect(logger.errorText, contains(exceptionMessage));
+    expect(logger.traceText, contains(exceptionMessage));
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -360,6 +360,42 @@ Review licenses that have not been accepted (y/N)?
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
+  });
+
+  testWithoutContext('runLicenseManager errors when sdkmanager exits non-zero', () async {
+    const String sdkManagerPath = '/foo/bar/sdkmanager';
+    sdk.sdkManagerPath = sdkManagerPath;
+    final BufferLogger logger = BufferLogger.test();
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[sdkManagerPath, '--licenses'],
+        exitCode: 1,
+        stderr: 'sdkmanager crash',
+      ),
+    );
+
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: logger,
+      userMessages: UserMessages(),
+      androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await expectLater(
+      licenseValidator.runLicenseManager(),
+      throwsToolExit(
+        message: 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code 1"',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.traceText, isEmpty);
+    expect(stdio.writtenToStdout, isEmpty);
+    expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
   testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
