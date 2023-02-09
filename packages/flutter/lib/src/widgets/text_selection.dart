@@ -2621,8 +2621,22 @@ class TextSelectionGestureDetectorBuilder {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            // Triple tap to drag is not present on these platforms at the moment.
-            // The gesture is less intuitive on mobile devices.
+            switch (details.kind) {
+              case PointerDeviceKind.mouse:
+              case PointerDeviceKind.trackpad:
+                return _selectParagraphsInRange(
+                  from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+                  to: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              case PointerDeviceKind.stylus:
+              case PointerDeviceKind.invertedStylus:
+              case PointerDeviceKind.touch:
+              case PointerDeviceKind.unknown:
+                // Triple tap to drag is not present on these platforms when using
+                // non-precise pointer devices at the moment.
+                break;
+            }
             return;
           case TargetPlatform.linux:
             return _selectLinesInRange(
