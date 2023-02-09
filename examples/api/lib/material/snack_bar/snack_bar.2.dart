@@ -43,6 +43,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   bool _withAction = true;
   bool _multiLine = false;
   bool _longActionLabel = false;
+  double _sliderValue = 0.25;
 
   Padding _configRow(List<Widget> children) => Padding(
       padding: const EdgeInsets.all(8.0), child: Row(children: children));
@@ -130,6 +131,24 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ),
           ],
         ),
+        _configRow(
+          <Widget>[
+            const Text('Action new-line overflow threshold'),
+            Slider(
+              value: _sliderValue,
+              max: 1,
+              min: 0,
+              divisions: 20,
+              label: _sliderValue.toStringAsFixed(2),
+              onChanged:  _snackBarBehavior == SnackBarBehavior.fixed
+                ? null : (double value) {
+                setState(() {
+                  _sliderValue = value;
+                });
+              },
+            ),
+          ]
+        ),
         const SizedBox(height: 16.0),
         ElevatedButton(
           child: const Text('Show Snackbar'),
@@ -156,6 +175,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
     final String label = _multiLine
         ? 'A Snack Bar with quite a lot of text which spans across multiple lines'
         : 'Single Line Snack Bar';
+    print(_sliderValue);
     return SnackBar(
       content: Text(label),
       showCloseIcon: _withIcon,
@@ -163,6 +183,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       behavior: _snackBarBehavior,
       action: action,
       duration: const Duration(seconds: 3),
+      actionOverflowThreshold: _sliderValue,
     );
   }
 }

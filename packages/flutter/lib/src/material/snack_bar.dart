@@ -246,11 +246,14 @@ class SnackBar extends StatefulWidget {
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
     this.clipBehavior = Clip.hardEdge,
+    this.actionOverflowThreshold,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(
          width == null || margin == null,
-         'Width and margin can not be used together',
-       );
+         'Width and margin can not be used together'),
+       assert(actionOverflowThreshold == null
+         || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+         'Action overflow threshold must be between 0 and 1 inclusive');
 
   /// The primary content of the snack bar.
   ///
@@ -404,6 +407,15 @@ class SnackBar extends StatefulWidget {
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
+  /// The overflow threshold for action widgets.
+  ///
+  /// Must be between 0 and 1. Represents the % width value of the action widgets
+  /// permissable before the actions overflow to a new line. At a value of 0, the
+  /// action will not overflow.
+  ///
+  /// Defaults to 0.25.
+  final double? actionOverflowThreshold;
+
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
@@ -438,6 +450,7 @@ class SnackBar extends StatefulWidget {
       onVisible: onVisible,
       dismissDirection: dismissDirection,
       clipBehavior: clipBehavior,
+      actionOverflowThreshold: actionOverflowThreshold,
     );
   }
 
@@ -601,10 +614,12 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
     final double snackBarWidth = widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
-    // Action and Icon will overflow to a new line if their width is greater
-    // than one quarter of the total Snack Bar width.
-    final bool actionLineOverflow =
-        actionAndIconWidth / snackBarWidth > 0.25;
+    final double actionOverflowThreshold = widget.actionOverflowThreshold
+      ?? snackBarTheme.actionOverflowThreshold
+      ?? defaults.actionOverflowThreshold
+      ?? 0.25;
+    final bool willOverflowAction =
+        actionAndIconWidth / snackBarWidth > actionOverflowThreshold;
 
     final List<Widget> maybeActionAndIcon = <Widget>[
       if (widget.action != null)
@@ -645,11 +660,11 @@ class _SnackBarState extends State<SnackBar> {
                     ),
                   ),
                 ),
-                if(!actionLineOverflow) ...maybeActionAndIcon,
-                if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
+                if(!willOverflowAction) ...maybeActionAndIcon,
+                if(willOverflowAction) SizedBox(width: snackBarWidth*0.4),
               ],
             ),
-            if(actionLineOverflow) Padding(
+            if(willOverflowAction) Padding(
               padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
               child: Row(mainAxisAlignment: MainAxisAlignment.end,
               children: maybeActionAndIcon),
@@ -884,6 +899,12 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   bool get showCloseIcon => false;
+
+  @override
+  Color? get closeIconColor => _colors.onInverseSurface;
+
+  @override
+  double get actionOverflowThreshold => 0.25;
 }
 
 // END GENERATED TOKEN PROPERTIES - Snackbar
