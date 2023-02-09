@@ -17,3 +17,7 @@
 if (is_android) {
   import("//build/config/android/config.gni")
 }
+
+declare_args() {
+  use_blink = false
+}
