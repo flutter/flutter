@@ -370,7 +370,7 @@ Review licenses that have not been accepted (y/N)?
       const FakeCommand(
         command: <String>[sdkManagerPath, '--licenses'],
         exitCode: 1,
-        stderr: 'failed to accept licenses',
+        stderr: 'sdkmanager crash',
       ),
     );
 
@@ -395,7 +395,7 @@ Review licenses that have not been accepted (y/N)?
     expect(processManager, hasNoRemainingExpectations);
     expect(logger.traceText, isEmpty);
     expect(stdio.writtenToStdout, isEmpty);
-    expect(stdio.writtenToStderr, isNotEmpty);
+    expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
   testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
