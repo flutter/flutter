@@ -4298,7 +4298,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// A fragment with only partial information that must not form a explicit
+/// A fragment with partial information that must not form an explicit
 /// semantics node without merging into another _SwitchableSemanticsFragment.
 ///
 /// This fragment is generated from synthetic SemanticsConfiguration returned from
@@ -4331,12 +4331,12 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void markAsExplicit() {
-    assert((){
-      throw FlutterError(
-        'SemanticsConfiguration created in SemanticsConfiguration.merger must '
-        'be not be explicit',
-      );
-    }());
+    assert(
+      false,
+      'SemanticsConfiguration created in '
+      'SemanticsConfiguration.childConfigurationsDelegate must not produce '
+      'its own semantics node'
+    );
   }
 }
 

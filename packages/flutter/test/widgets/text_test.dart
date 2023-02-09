@@ -448,16 +448,20 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(Text)),
-        matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]));
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
 
     // If the Paragraph is not dirty it should use the cache correctly.
     final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
-    expect(tester.getSemantics(find.byType(Text)),
-        matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]));
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
   });
 
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {

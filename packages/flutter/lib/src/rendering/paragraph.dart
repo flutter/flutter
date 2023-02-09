@@ -1082,6 +1082,26 @@ class RenderParagraph extends RenderBox
 
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(List<SemanticsConfiguration> childConfigs) {
     if (_cachedAttributedLabels == null) {
+      final ChildSemanticsConfigurationsResult result = _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
+      assert(() {
+        // Verify the cache will produce the same result.
+        final ChildSemanticsConfigurationsResult resultBuiltFromCache = _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
+        assert(result.siblingMergeGroups.isEmpty && resultBuiltFromCache.siblingMergeGroups.isEmpty);
+        assert(result.mergeUp.length == resultBuiltFromCache.mergeUp.length);
+        int childConfigsIndex = 0;
+        for (int index = 0; index < result.mergeUp.length; index += 1) {
+          if (identical(result.mergeUp[index], resultBuiltFromCache.mergeUp[index])) {
+            // This must be coming from the input `childConfigs`
+            assert(identical(result.mergeUp[index], childConfigs[childConfigsIndex]));
+            childConfigsIndex += 1;
+          } else {
+            assert(result.mergeUp[index].label == resultBuiltFromCache.mergeUp[index].label);
+          }
+        }
+        // All the ``childConfigs` must be included in the merge up.
+        assert(childConfigs.length == childConfigsIndex);
+        return true;
+      }());
       return _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
     }
     return _buildChildSemanticsConfigurationsResultFromCache(childConfigs);
@@ -1184,8 +1204,6 @@ class RenderParagraph extends RenderBox
     }
     return builder.build();
   }
-
-
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
   // can be re-used when [assembleSemanticsNode] is called again. This ensures

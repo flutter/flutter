@@ -346,7 +346,7 @@ class AttributedString {
   }
 
   @override
-  int get hashCode => Object.hash(string, attributes,);
+  int get hashCode => Object.hash(string, attributes);
 
   @override
   String toString() {
