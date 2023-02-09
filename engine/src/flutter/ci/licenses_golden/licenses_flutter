@@ -1506,6 +1506,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.h
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc + ../../../flutter/LICENSE
@@ -1514,6 +1516,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc +
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.cc + ../../../flutter/LICENSE
@@ -3987,6 +3991,8 @@ FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc
@@ -3995,6 +4001,8 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.cc
