@@ -111,12 +111,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
     _logger.printStatus('');
-    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      _logger.printStatus(
-        '💪 Building with sound null safety 💪',
-        emphasis: true,
-      );
-    } else {
+    if (buildInfo.nullSafetyMode != NullSafetyMode.sound) {
       _logger.printStatus(
         'Building without sound null safety ⚠️',
         emphasis: true,

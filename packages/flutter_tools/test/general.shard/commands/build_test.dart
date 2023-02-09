@@ -115,11 +115,6 @@ void main() {
     FakeBuildSubCommand(logger).test(unsound);
     expect(logger.statusText,
         contains('Building without sound null safety ⚠️'));
-
-    logger.clear();
-    FakeBuildSubCommand(logger).test(sound);
-    expect(logger.statusText,
-        contains('💪 Building with sound null safety 💪'));
   });
 
   testUsingContext('Include only supported sub commands', () {
