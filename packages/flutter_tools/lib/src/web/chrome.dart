@@ -223,7 +223,11 @@ class ChromiumLauncher {
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
         // cleanup temp dir
-        userDataDir.deleteSync(recursive: true);
+        try {
+          userDataDir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // ignore
+        }
       }));
     }
     return connect(Chromium(
