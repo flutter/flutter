@@ -153,7 +153,7 @@ class NavigationRailThemeData with Diagnosticable {
       selectedLabelTextStyle: TextStyle.lerp(a?.selectedLabelTextStyle, b?.selectedLabelTextStyle, t),
       unselectedIconTheme: a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
         ? null : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
-      selectedIconTheme: a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
+      selectedIconTheme: a?.selectedIconTheme == null && b?.selectedIconTheme == null
         ? null : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
