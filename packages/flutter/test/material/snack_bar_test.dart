@@ -2415,7 +2415,7 @@ void main() {
     );
   });
 
-  for (final double overflowThreshold in [-1.0, -.0001, 1.000001, 5]) {
+  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
     testWidgets('SnackBar will assert for actionOverflowThreshold outside of 0-1 range', (WidgetTester tester) async {
       await tester.pumpWidget(doBuildApp(
         actionOverflowThreshold: overflowThreshold,

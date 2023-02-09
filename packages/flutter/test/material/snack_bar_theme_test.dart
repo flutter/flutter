@@ -379,8 +379,8 @@ void main() {
     );
   });
 
-  for (final double overflowThreshold in [-1.0, -.0001, 1.000001, 5]) {
-    testWidgets('SnackBar theme will assert for actionOverflowThreshold outside of 0-1 range', {
+  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
+    test('SnackBar theme will assert for actionOverflowThreshold outside of 0-1 range', () {
       expect(
         () => SnackBarThemeData(
               actionOverflowThreshold: overflowThreshold,
