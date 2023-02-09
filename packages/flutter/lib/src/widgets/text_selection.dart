@@ -2414,21 +2414,11 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   // Select a paragraph around the given position.
-  //
-  // A paragraph boundary is defined as the range that most closely
-  // encapsulates the given position within two line terminators. If a
-  // line terminator does not exist in a given direction the selection
-  // extends to the start/end of the document in that direction.
   void _selectParagraph({required Offset position, SelectionChangedCause? cause}) {
     _selectParagraphsInRange(from: position, cause: cause);
   }
 
   // Selects the set of paragraphs in a document that intersect a given range of global positions.
-  //
-  // The set of paragraphs selected are not strictly bounded by the range of global positions.
-  //
-  // The first and last endpoints of the selection will always be at the beginning and end of a
-  // paragraph respectively.
   void _selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary paragraphBoundary = ParagraphBoundary(editableText.textEditingValue.text);
     _selectTextBoundaryInRange(boundary: paragraphBoundary, from: from, to: to, cause: cause);
@@ -2446,6 +2436,11 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   // Selects the set of text boundaries in a document that intersect a given range of global positions.
+  //
+  // The set of text boundaries selected are not strictly bounded by the range of global positions.
+  //
+  // The first and last endpoints of the selection will always be at the beginning and end of a
+  // text boundary respectively.
   void _selectTextBoundaryInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
     final TextRange fromRange = boundary.getTextBoundaryAt(fromPosition.offset);
