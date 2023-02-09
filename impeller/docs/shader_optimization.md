@@ -267,7 +267,7 @@ vec4 FrobnicateColor(vec4 color) {
   vec4 result;
 
   if (color.a == 0) {
-    result vec4(0);
+    result = vec4(0);
   } else {
     result = DoExtremelyExpensiveThing(color);
   }
