@@ -105,21 +105,11 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
     );
-    const BuildInfo sound = BuildInfo(
-      BuildMode.debug,
-      '',
-      treeShakeIcons: false,
-    );
 
     final BufferLogger logger = BufferLogger.test();
     FakeBuildSubCommand(logger).test(unsound);
     expect(logger.statusText,
         contains('Building without sound null safety ⚠️'));
-
-    logger.clear();
-    FakeBuildSubCommand(logger).test(sound);
-    expect(logger.statusText,
-        contains('💪 Building with sound null safety 💪'));
   });
 
   testUsingContext('Include only supported sub commands', () {

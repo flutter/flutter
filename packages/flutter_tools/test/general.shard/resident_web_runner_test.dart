@@ -547,8 +547,6 @@ void main() {
       'Waiting for connection from debug service on FakeDevice...\n'
       'Debug service listening on ws://127.0.0.1/abcd/\n'
       '\n'
-      '💪 Running with sound null safety 💪\n'
-      '\n'
       'first\n'
       '\n'
       'second\n'
