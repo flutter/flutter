@@ -2628,6 +2628,7 @@ class TextSelectionGestureDetectorBuilder {
               case PointerDeviceKind.invertedStylus:
               case PointerDeviceKind.touch:
               case PointerDeviceKind.unknown:
+              case null:
                 // Triple tap to drag is not present on these platforms when using
                 // non-precise pointer devices at the moment.
                 break;
