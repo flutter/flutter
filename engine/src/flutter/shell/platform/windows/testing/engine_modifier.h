@@ -60,6 +60,10 @@ class EngineModifier {
   // engine unless overwritten again.
   void ReleaseSurfaceManager() { engine_->surface_manager_.release(); }
 
+  // Run the FlutterWindowsEngine's handler that runs right before an engine
+  // restart. This resets the keyboard's state if it exists.
+  void Restart() { engine_->OnPreEngineRestart(); }
+
  private:
   FlutterWindowsEngine* engine_;
 };

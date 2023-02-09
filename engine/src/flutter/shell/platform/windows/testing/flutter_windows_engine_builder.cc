@@ -7,6 +7,42 @@
 namespace flutter {
 namespace testing {
 
+class TestFlutterWindowsEngine : public FlutterWindowsEngine {
+ public:
+  TestFlutterWindowsEngine(
+      const FlutterProjectBundle& project,
+      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+      KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan)
+      : FlutterWindowsEngine(project),
+        get_key_state_(std::move(get_key_state)),
+        map_vk_to_scan_(std::move(map_vk_to_scan)) {}
+
+  // Prevent copying.
+  TestFlutterWindowsEngine(TestFlutterWindowsEngine const&) = delete;
+  TestFlutterWindowsEngine& operator=(TestFlutterWindowsEngine const&) = delete;
+
+ protected:
+  std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
+      BinaryMessenger* messenger,
+      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+      KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
+    if (get_key_state_) {
+      get_key_state = get_key_state_;
+    }
+
+    if (map_vk_to_scan_) {
+      map_vk_to_scan = map_vk_to_scan_;
+    }
+
+    return FlutterWindowsEngine::CreateKeyboardKeyHandler(
+        messenger, get_key_state, map_vk_to_scan);
+  }
+
+ private:
+  KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state_;
+  KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan_;
+};
+
 FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(
     WindowsTestContext& context)
     : context_(context) {
@@ -24,6 +60,13 @@ void FlutterWindowsEngineBuilder::SetDartEntrypoint(std::string entrypoint) {
 
 void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
   dart_entrypoint_arguments_.emplace_back(std::move(arg));
+}
+
+void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(
+    KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+    KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
+  get_key_state_ = std::move(get_key_state);
+  map_vk_to_scan_ = std::move(map_vk_to_scan);
 }
 
 std::unique_ptr<FlutterWindowsEngine> FlutterWindowsEngineBuilder::Build() {
@@ -44,7 +87,8 @@ std::unique_ptr<FlutterWindowsEngine> FlutterWindowsEngineBuilder::Build() {
 
   FlutterProjectBundle project(properties_);
 
-  return std::make_unique<FlutterWindowsEngine>(project);
+  return std::make_unique<TestFlutterWindowsEngine>(project, get_key_state_,
+                                                    map_vk_to_scan_);
 }
 
 }  // namespace testing

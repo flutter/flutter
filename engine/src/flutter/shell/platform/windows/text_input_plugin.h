@@ -16,9 +16,10 @@
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
-#include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 
 namespace flutter {
+
+class TextInputPluginDelegate;
 
 // Implements a text input plugin.
 //

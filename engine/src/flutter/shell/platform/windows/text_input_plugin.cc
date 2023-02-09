@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
+#include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 
 #include <windows.h>
 
