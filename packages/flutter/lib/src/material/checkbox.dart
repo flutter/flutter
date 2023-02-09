@@ -254,10 +254,12 @@ class Checkbox extends StatefulWidget {
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
+  /// {@endtemplate}
   ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
@@ -332,10 +334,12 @@ class Checkbox extends StatefulWidget {
   /// will be width 2.
   final BorderSide? side;
 
+  /// {@template flutter.material.checkbox.isError}
   /// True if this checkbox wants to show an error state.
   ///
   /// The checkbox will have different default container color and check color when
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
+  /// {@endtemplate}
   ///
   /// Must not be null. Defaults to false.
   final bool isError;
