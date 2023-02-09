@@ -1778,4 +1778,21 @@ TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
   ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
 }
 
+TEST(FlutterTextInputPluginTest, HasZeroSize) {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  ASSERT_TRUE(NSIsEmptyRect(plugin.frame));
+}
+
 }  // namespace flutter::testing
