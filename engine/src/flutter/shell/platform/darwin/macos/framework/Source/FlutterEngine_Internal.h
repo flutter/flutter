@@ -48,39 +48,9 @@
 @property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
 
 /**
- * Attach a view controller to the engine as its default controller.
- *
- * Practically, since FlutterEngine can only be attached with one controller,
- * the given controller, if successfully attached, will always have the default
- * view ID kFlutterDefaultViewId.
- *
- * The engine holds a weak reference to the attached view controller.
- *
- * If the given view controller is already attached to an engine, this call
- * throws an assertion.
+ * Informs the engine that the associated view controller's view size has changed.
  */
-- (void)addViewController:(nonnull FlutterViewController*)viewController;
-
-/**
- * Dissociate the given view controller from this engine.
- *
- * Practically, since FlutterEngine can only be attached with one controller,
- * the given controller must be the default view controller.
- *
- * If the view controller is not associated with this engine, this call throws an
- * assertion.
- */
-- (void)removeViewController:(nonnull FlutterViewController*)viewController;
-
-/**
- * The `FlutterViewController` associated with the given view ID, if any.
- */
-- (nullable FlutterViewController*)viewControllerForId:(uint64_t)viewId;
-
-/**
- * Informs the engine that the specified view controller's window metrics have changed.
- */
-- (void)updateWindowMetricsForViewController:(nonnull FlutterViewController*)viewController;
+- (void)updateWindowMetrics;
 
 /**
  * Dispatches the given pointer event data to engine.
