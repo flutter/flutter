@@ -1329,9 +1329,25 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   void printStructuredErrorLog(vm_service.Event event) {
     if (event.extensionKind == 'Flutter.Error' && !machine) {
-      final Map<dynamic, dynamic>? json = event.extensionData?.data;
+      final Map<String, Object?>? json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
-        globals.printStatus('\n${json['renderedErrorText']}');
+        final int errorsSinceReload;
+        if (json.containsKey('errorsSinceReload') && json['errorsSinceReload'] is int) {
+          errorsSinceReload = json['errorsSinceReload']! as int;
+        } else {
+          errorsSinceReload = 0;
+        }
+        if (errorsSinceReload == 0) {
+          // We print a blank line around the first error, to more clearly emphasize it
+          // in the output. (Other errors don't get this.)
+          globals.printStatus('');
+        }
+        globals.printStatus('${json['renderedErrorText']}');
+        if (errorsSinceReload == 0) {
+          globals.printStatus('');
+        }
+      } else {
+        globals.printError('Received an invalid ${globals.logger.terminal.bolden("Flutter.Error")} message from app: $json');
       }
     }
   }

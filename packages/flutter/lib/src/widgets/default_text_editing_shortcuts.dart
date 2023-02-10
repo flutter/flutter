@@ -37,15 +37,15 @@ import 'text_editing_intents.dart';
 ///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
 ///   // then DefaultTextEditingShortcuts is already being inserted into the
 ///   // widget tree.
-///   return DefaultTextEditingShortcuts(
+///   return const DefaultTextEditingShortcuts(
 ///     child: Center(
 ///       child: Shortcuts(
-///         shortcuts: const <ShortcutActivator, Intent>{
+///         shortcuts: <ShortcutActivator, Intent>{
 ///           SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): NextFocusIntent(),
 ///           SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): PreviousFocusIntent(),
 ///         },
 ///         child: Column(
-///           children: const <Widget>[
+///           children: <Widget>[
 ///             TextField(
 ///               decoration: InputDecoration(
 ///                 hintText: 'alt + down moves to the next field.',
@@ -206,6 +206,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: false),
 
     // Page Up / Down: Move selection by page.
     const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),

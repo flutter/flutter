@@ -35,7 +35,7 @@ void main() {
   }
 
   setUpAll(() {
-    final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(TestWidgetsFlutterBinding.instance.window);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(TestWidgetsFlutterBinding.instance.window);
     defaultSize = mediaQueryData.size;
   });
 
@@ -1205,7 +1205,7 @@ void main() {
 
     testWidgets('menus close on view size change', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
-      final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(tester.binding.window);
+      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.binding.window);
 
       Widget build(Size size) {
         return MaterialApp(

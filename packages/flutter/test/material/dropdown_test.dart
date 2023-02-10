@@ -246,7 +246,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromView(View.of(context)).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -401,7 +401,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(tester.binding.window),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
