@@ -285,7 +285,7 @@ targets:
         {"download_emsdk": true}
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:110.0"},
+          {"dependency": "chrome_and_driver", "version": "version:111.0"},
           {"dependency": "firefox", "version": "version:106.0"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -310,7 +310,7 @@ targets:
         {"download_emsdk": true}
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:111.0"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       framework: "true"
@@ -525,7 +525,7 @@ targets:
       gcs_goldens_bucket: flutter_logs
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:110.0"}
+          {"dependency": "chrome_and_driver", "version": "version:111.0"}
         ]
     timeout: 60
     runIf:
