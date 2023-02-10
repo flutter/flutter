@@ -1938,3 +1938,165 @@ class GridView extends BoxScrollView {
     );
   }
 }
+
+// 2D ScrollView
+
+/// A widget that scrolls in both dimensions.
+///
+/// A two-way scrollable widget consist of three pieces:
+///
+///  1. A [TwoDimensionalScrollable] widget, which listens for various user
+///     gestures and implements the interaction design for scrolling.
+///  2. A [TwoDimensionalViewport] widget, which implements the visual design
+///     for scrolling by displaying only a portion
+///     of the widgets inside the scroll view.
+///  3. A [TwoDimensionalChildDelgate], which provides the children visible in
+///     the scroll view.
+///
+/// [TwoDimensionalScrollView] helps orchestrate these pieces by creating the
+/// [TwoDimensionalScrollable] and deferring to its subclass to create the
+/// viewport and delegate.
+abstract class TwoDimensionalScrollView extends StatelessWidget {
+  /// Creates a widget that scrolls in both dimensions.
+  ///
+  /// The [TwoDimensionalScrollView.primary] argument defaults to true for
+  /// the [delegate.mainAxis]. The main axis controller
+  /// must be null if [primary] is explicitly set to true. If [primary] is true,
+  /// the nearest [PrimaryScrollController] surrounding the widget is attached
+  /// to the scroll position of that axis.
+  const TwoDimensionalScrollView({
+    super.key,
+    this.panAxes = false,
+    // TODO(Piinks): This is parity, but maybe redundant and unnecessary since
+    //  one axis must always be primary.
+    this.primary,
+    this.verticalDetails = const ScrollableDetails.vertical(),
+    this.horizontalDetails = const ScrollableDetails.horizontal(),
+    this.cacheExtent,
+    required this.delegate,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.clipBehavior = Clip.hardEdge,
+  }); // TODO(Piinks): Assert primary/mainAxis conflicts
+
+  /// A delegate that provides the children for the [TwoDimensionalScrollView].
+  final TwoDimensionalChildDelegate delegate;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  final double? cacheExtent;
+
+  /// Whether scrolling gestures should lock to one axes, or allow free movement
+  /// in both axes.
+  ///
+  /// If false, panning is only allowed in the direction of the horizontal axis
+  /// or the vertical axis during a given gesture.
+  ///
+  /// When this is true, diagonal scrolling is allowed. A single gesture begun
+  /// along one axis cannot also cause panning along the other axis without
+  /// stopping and beginning a new gesture. This is a common
+  /// pattern in tables where data is displayed in columns and rows.
+  final bool panAxes;
+
+  /// {@macro flutter.widgets.scroll_view.primary}
+  final bool? primary;
+
+  /// The configuration of the vertical Scrollable.
+  ///
+  /// These [ScrollableDetails] can be used to set the [AxisDirection],
+  /// [ScrollController], [ScrollPhysics] and more for the vertical axis.
+  final ScrollableDetails verticalDetails;
+
+  /// The configuration of the horizontal Scrollable.
+  ///
+  /// These [ScrollableDetails] can be used to set the [AxisDirection],
+  /// [ScrollController], [ScrollPhysics] and more for the horizontal axis.
+  final ScrollableDetails horizontalDetails;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// Build the two dimensional viewport.
+  ///
+  /// Subclasses may override this method to change how the viewport is built,
+  /// likely a subclass of [TwoDimensionalViewport].
+  ///
+  /// The `verticalOffset` and `horizontalOffset` arguments are the values
+  /// obtained from [TwoDimensionalScrollable.viewportBuilder].
+  Widget buildViewport(
+    BuildContext context,
+    ViewportOffset verticalOffset,
+    ViewportOffset horizontalOffset,
+  );
+
+  ScrollableDetails get _mainAxisDetails => delegate.mainAxis == Axis.vertical
+      ? verticalDetails
+      : horizontalDetails;
+  ScrollableDetails get _secondaryAxisDetails => delegate.mainAxis == Axis.vertical
+      ? horizontalDetails
+      : verticalDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool effectivePrimary = primary
+      ?? _mainAxisDetails.controller == null && PrimaryScrollController.shouldInherit(
+        context,
+        delegate.mainAxis,
+      );
+
+    // TODO(Piinks): This scroll controller logic is messy. Each must have a
+    //  controller, while allowing for PSC, but make this cleaner.
+    final ScrollController mainScrollController = (effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : _mainAxisDetails.controller) ?? ScrollController();
+    final ScrollController secondaryScrollController = _secondaryAxisDetails.controller ?? ScrollController();
+
+    final TwoDimensionalScrollable scrollable = TwoDimensionalScrollable(
+      horizontalDetails : delegate.mainAxis == Axis.horizontal
+          ? horizontalDetails.copyWith(controller: mainScrollController)
+          : horizontalDetails.copyWith(controller: secondaryScrollController),
+      verticalDetails: delegate.mainAxis == Axis.vertical
+          ? verticalDetails.copyWith(controller: mainScrollController)
+          : verticalDetails.copyWith(controller: secondaryScrollController),
+      panAxes: panAxes,
+      viewportBuilder: buildViewport,
+      dragStartBehavior: dragStartBehavior,
+    );
+
+    final Widget scrollableResult = effectivePrimary
+    // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+      ? PrimaryScrollController.none(child: scrollable)
+      : scrollable;
+
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+      return NotificationListener<ScrollUpdateNotification>(
+        child: scrollableResult,
+        onNotification: (ScrollUpdateNotification notification) {
+          final FocusScopeNode focusScope = FocusScope.of(context);
+          if (notification.dragDetails != null && focusScope.hasFocus) {
+            focusScope.unfocus();
+          }
+          return false;
+        },
+      );
+    } else {
+      return scrollableResult;
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<Axis>('mainAxis', delegate.mainAxis));
+    properties.add(FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
+    properties.add(DiagnosticsProperty<ScrollableDetails>('verticalDetails', verticalDetails, showName: false));
+    properties.add(DiagnosticsProperty<ScrollableDetails>('horizontalDetails', horizontalDetails, showName: false));
+  }
+}
