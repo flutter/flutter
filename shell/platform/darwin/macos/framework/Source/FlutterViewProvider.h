@@ -20,6 +20,6 @@ extern const uint64_t kFlutterDefaultViewId;
  *
  * Returns nil if the ID is invalid.
  */
-- (nullable FlutterView*)viewForId:(uint64_t)id;
+- (nullable FlutterView*)getView:(uint64_t)id;
 
 @end
