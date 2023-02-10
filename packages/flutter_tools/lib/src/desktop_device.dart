@@ -146,7 +146,10 @@ abstract class DesktopDevice extends Device {
       rethrow;
     }
     _runningProcesses.add(process);
-    unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
+    unawaited(process.exitCode.then((exitCode) {
+      _logger.printTrace('!!!! Process $executable exited with code $exitCode');
+      _runningProcesses.remove(process)
+    });
 
     _deviceLogReader.initializeProcess(process);
     if (debuggingOptions.buildInfo.isRelease == true) {
