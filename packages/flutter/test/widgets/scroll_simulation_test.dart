@@ -63,19 +63,36 @@ void main() {
 
   test('ClampingScrollSimulation is ballistic', () {
     // Regression test for https://github.com/flutter/flutter/issues/120338
+    const double delta = 1 / 90;
     final ClampingScrollSimulation undisturbed =
         ClampingScrollSimulation(position: 0, velocity: 8000.0);
+
     double time = 0.0;
     ClampingScrollSimulation restarted = undisturbed;
-    while (!undisturbed.isDone(time) || !restarted.isDone(time)) {
-      expect(time, lessThan(3.0));
-
-      const double delta = 1 / 90;
+    final List<double> xsRestarted = <double>[];
+    final List<double> xsUndisturbed = <double>[];
+    final List<double> dxsRestarted = <double>[];
+    final List<double> dxsUndisturbed = <double>[];
+    do {
+      expect(time, lessThan(4.0));
       time += delta;
       restarted = ClampingScrollSimulation(
           position: restarted.x(delta), velocity: restarted.dx(delta));
-      expect(restarted.x(0),  moreOrLessEquals(undisturbed.x(time)));
-      expect(restarted.dx(0), moreOrLessEquals(undisturbed.dx(time)));
+      xsRestarted.add(restarted.x(0));
+      xsUndisturbed.add(undisturbed.x(time));
+      dxsRestarted.add(restarted.dx(0));
+      dxsUndisturbed.add(undisturbed.dx(time));
+    } while (!restarted.isDone(0) || !undisturbed.isDone(time));
+
+    // Compare the headline number first: the total distances traveled.
+    // This way, if the test fails, it shows the big final difference
+    // instead of the tiny difference that's in the very first frame.
+    expect(xsRestarted.last, moreOrLessEquals(xsUndisturbed.last));
+
+    // The whole trajectories along the way should match too.
+    for (int i = 0; i < xsRestarted.length; i++) {
+      expect(xsRestarted[i],  moreOrLessEquals(xsUndisturbed[i]));
+      expect(dxsRestarted[i], moreOrLessEquals(dxsUndisturbed[i]));
     }
   });
 
