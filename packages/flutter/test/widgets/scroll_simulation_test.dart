@@ -29,7 +29,7 @@ void main() {
   test('ClampingScrollSimulation only decelerates, never speeds up', () {
     // Regression test for https://github.com/flutter/flutter/issues/113424
     final ClampingScrollSimulation simulation =
-    ClampingScrollSimulation(position: 0, velocity: 8000.0);
+        ClampingScrollSimulation(position: 0, velocity: 8000.0);
     double time = 0.0;
     double velocity = simulation.dx(time);
     while (!simulation.isDone(time)) {
@@ -39,6 +39,26 @@ void main() {
       expect(nextVelocity, lessThanOrEqualTo(velocity));
       velocity = nextVelocity;
     }
+  });
+
+  test('ClampingScrollSimulation reaches a smooth stop: velocity is continuous and goes to zero', () {
+    // Regression test for https://github.com/flutter/flutter/issues/113424
+    const double initialVelocity = 8000.0;
+    const double maxDeceleration = 5130.0; // -acceleration(initialVelocity), from formula below
+    final ClampingScrollSimulation simulation =
+        ClampingScrollSimulation(position: 0, velocity: initialVelocity);
+
+    double time = 0.0;
+    double velocity = simulation.dx(time);
+    const double delta = 1 / 60;
+    do {
+      expect(time, lessThan(3.0));
+      time += delta;
+      final double nextVelocity = simulation.dx(time);
+      expect((nextVelocity - velocity).abs(), lessThan(delta * maxDeceleration));
+      velocity = nextVelocity;
+    } while (!simulation.isDone(time));
+    expect(velocity, moreOrLessEquals(0.0));
   });
 
   test('ClampingScrollSimulation is ballistic', () {
@@ -58,7 +78,6 @@ void main() {
       expect(restarted.dx(0), moreOrLessEquals(undisturbed.dx(time)));
     }
   });
-
 
   test('ClampingScrollSimulation satisfies a physical acceleration formula', () {
     // Different regression test for https://github.com/flutter/flutter/issues/120338
