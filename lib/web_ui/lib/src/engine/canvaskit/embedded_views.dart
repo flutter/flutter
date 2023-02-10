@@ -133,15 +133,9 @@ class HtmlViewEmbedder {
           'displayed at once. '
           'You may experience incorrect rendering.');
     }
-    // We need an overlay for the first platform view no matter what. The first
-    // visible platform view doesn't need to create a new one if we already
-    // created one.
-    final bool needNewOverlay = (platformViewManager.isVisible(viewId) &&
-            _context.seenFirstVisibleViewInPreroll) ||
-        _context.pictureRecordersCreatedDuringPreroll.isEmpty;
-    if (platformViewManager.isVisible(viewId)) {
-      _context.seenFirstVisibleViewInPreroll = true;
-    }
+    // We need an overlay for each visible platform view. Invisible platform
+    // views will be grouped with (at most) one visible platform view later.
+    final bool needNewOverlay = platformViewManager.isVisible(viewId);
     if (needNewOverlay && hasAvailableOverlay) {
       final CkPictureRecorder pictureRecorder = CkPictureRecorder();
       pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
@@ -169,17 +163,12 @@ class HtmlViewEmbedder {
   CkCanvas? compositeEmbeddedView(int viewId) {
     final int overlayIndex = _context.visibleViewCount;
     _compositionOrder.add(viewId);
-    if (platformViewManager.isVisible(viewId) ||
-        _context.pictureRecorders.isEmpty) {
+    // Keep track of the number of visible platform views.
+    if (platformViewManager.isVisible(viewId)) {
       _context.visibleViewCount++;
     }
-    // We need a new overlay if this is a visible view or if we don't have one yet.
-    final bool needNewOverlay = (platformViewManager.isVisible(viewId) &&
-            _context.seenFirstVisibleView) ||
-        _context.pictureRecorders.isEmpty;
-    if (platformViewManager.isVisible(viewId)) {
-      _context.seenFirstVisibleView = true;
-    }
+    // We need a new overlay if this is a visible view.
+    final bool needNewOverlay = platformViewManager.isVisible(viewId);
     CkPictureRecorder? recorderToUseForRendering;
     if (needNewOverlay) {
       if (overlayIndex < _context.pictureRecordersCreatedDuringPreroll.length) {
@@ -424,7 +413,11 @@ class HtmlViewEmbedder {
             ? null
             : diffViewList(_activeCompositionOrder, _compositionOrder);
     _updateOverlays(diffResult);
-    assert(_context.pictureRecorders.length == _overlays.length);
+    assert(
+      _context.pictureRecorders.length == _overlays.length,
+      'There should be the same number of picture recorders '
+      '(${_context.pictureRecorders.length}) as overlays (${_overlays.length}).',
+    );
     int pictureRecorderIndex = 0;
 
     for (int i = 0; i < _compositionOrder.length; i++) {
@@ -600,9 +593,13 @@ class HtmlViewEmbedder {
       // overlays.
       return;
     }
-    final List<List<int>> overlayGroups = getOverlayGroups(_compositionOrder);
+    // Group platform views from their composition order.
+    // Each group contains one visible view, and any number of invisible views
+    // before or after that visible view.
+    final List<OverlayGroup> overlayGroups =
+        getOverlayGroups(_compositionOrder);
     final List<int> viewsNeedingOverlays =
-        overlayGroups.map((List<int> group) => group.last).toList();
+        overlayGroups.map((OverlayGroup group) => group.last).toList();
     // If there were more visible views than overlays, then the last group
     // doesn't have an overlay.
     if (viewsNeedingOverlays.length > SurfaceFactory.instance.maximumOverlays) {
@@ -642,44 +639,48 @@ class HtmlViewEmbedder {
   // If there are more visible views than overlays, then the views which cannot
   // be assigned an overlay are grouped together and will be rendered on top of
   // the rest of the scene.
-  List<List<int>> getOverlayGroups(List<int> views) {
-    // Visibility groups are typically a visible view followed by zero or more
-    // invisible views. However, if the view list begins with one or more
-    // invisible views, we can group them with the first visible view.
+  List<OverlayGroup> getOverlayGroups(List<int> views) {
     final int maxOverlays = SurfaceFactory.instance.maximumOverlays;
     if (maxOverlays == 0) {
-      return const <List<int>>[];
+      return const <OverlayGroup>[];
     }
-    bool foundFirstVisibleView = false;
-    final List<List<int>> result = <List<int>>[];
-    List<int> currentGroup = <int>[];
-    int i = 0;
-    for (; i < views.length; i++) {
+    final List<OverlayGroup> result = <OverlayGroup>[];
+    OverlayGroup currentGroup = OverlayGroup(<int>[]);
+
+    for (int i = 0; i < views.length; i++) {
       final int view = views[i];
       if (platformViewManager.isInvisible(view)) {
+        // We add as many invisible views as we find to the current group.
         currentGroup.add(view);
       } else {
-        if (foundFirstVisibleView) {
-          result.add(currentGroup);
-          // If we are out of overlays, then break let the rest of the views be
-          // added to an extra group that will be rendered on top of the scene.
-          if (result.length == maxOverlays) {
-            currentGroup = <int>[];
-            break;
-          } else {
-            currentGroup = <int>[view];
-          }
+        // `view` is visible.
+        if (!currentGroup.hasVisibleView) {
+          // If `view` is the first visible one of the group, add it.
+          currentGroup.add(view, visible: true);
         } else {
-          // We hit this case if this is the first visible view.
-          foundFirstVisibleView = true;
-          currentGroup.add(view);
+          // There's already a visible `view` in `currentGroup`, so a new
+          // OverlayGroup will be needed.
+          // Let's decide what to do with the `currentGroup` first:
+          if (currentGroup.hasVisibleView) {
+            // We only care about groups that have one visible view.
+            result.add(currentGroup);
+          }
+          // If there are overlays still available.
+          if (result.length < maxOverlays) {
+            // Create a new group, starting with `view`.
+            currentGroup = OverlayGroup(<int>[view], visible: true);
+          } else {
+            // Add the rest of the views to a final group that will be rendered
+            // on top of the scene.
+            currentGroup = OverlayGroup(views.sublist(i), visible: true);
+            // And break out of the loop!
+            break;
+          }
         }
       }
     }
-    if (i < views.length) {
-      currentGroup.addAll(views.sublist(i));
-    }
-    if (currentGroup.isNotEmpty) {
+    // Handle the last group to be (maybe) returned.
+    if (currentGroup.hasVisibleView) {
       result.add(currentGroup);
     }
     return result;
@@ -725,6 +726,39 @@ class HtmlViewEmbedder {
     _activeCompositionOrder.clear();
     _compositionOrder.clear();
   }
+}
+
+/// A group of views that will be composited together within the same overlay.
+///
+/// Each OverlayGroup is a sublist of the composition order which can share the
+/// same overlay.
+///
+/// Every overlay group is a list containing a visible view preceded or followed
+/// by zero or more invisible views.
+class OverlayGroup {
+  /// Constructor
+  OverlayGroup(
+    List<int> viewGroup, {
+    bool visible = false,
+  })  : _group = viewGroup,
+        _containsVisibleView = visible;
+
+  // The internal list of ints.
+  final List<int> _group;
+  // A boolean flag to mark if any visible view has been added to the list.
+  bool _containsVisibleView;
+
+  /// Add a [view] (maybe [visible]) to this group.
+  void add(int view, {bool visible = false}) {
+    _group.add(view);
+    _containsVisibleView |= visible;
+  }
+
+  /// Get the "last" view added to this group.
+  int get last => _group.last;
+
+  /// Returns true if this group contains any visible view.
+  bool get hasVisibleView => _group.isNotEmpty && _containsVisibleView;
 }
 
 /// Represents a Clip Chain (for a view).
@@ -905,12 +939,6 @@ class MutatorsStack extends Iterable<Mutator> {
 
 /// The state for the current frame.
 class EmbedderFrameContext {
-  /// Whether or not we have seen a visible platform view in this frame yet.
-  bool seenFirstVisibleViewInPreroll = false;
-
-  /// Whether or not we have seen a visible platform view in this frame yet.
-  bool seenFirstVisibleView = false;
-
   /// Picture recorders which were created during the preroll phase.
   ///
   /// These picture recorders will be "claimed" in the paint phase by platform
