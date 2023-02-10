@@ -1007,156 +1007,101 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  Future<void> prepareBigLayout(
-      WidgetTester tester,
-      TextDirection textDirection,
-      ) async {
-    // Sizes based on a macOS screen
-    await tester.binding.setSurfaceSize(const Size(1011.0, 628.0));
+  testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
+    const TextDirection textDirection = TextDirection.ltr;
+    const Size narrowSize = Size(800.0, 600.0);
+    const Size wideSize = Size(1200.0, 600.0);
+    const String title = 'License ABC';
 
-    LicenseRegistry.addLicense(() {
-      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Package '], 'LicenseEntry'),
-      ]);
-    });
+    // Configure a narrow window to show the default layout.
+    await tester.binding.setSurfaceSize(narrowSize);
+
     await tester.pumpWidget(
-      MaterialApp(
-        title: 'License ABC',
+      const MaterialApp(
+        title: title,
         home: Scaffold(
-          body: MediaQuery(
-            data: const MediaQueryData(
-              size: Size(1011.0, 628.0),
-            ),
-            child: Directionality(
-              textDirection: textDirection,
-              child: const LicensePage(),
-            ),
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle(const Duration(milliseconds: 300));
-  }
 
-  testWidgets(
-    'LicensePage lateralUI layout (ltr)',
-        (WidgetTester tester) async {
-      // Set big screen
-      await prepareBigLayout(tester, TextDirection.ltr);
+    // If the layout width is less than 840.0 pixels, nested layout is
+    // used which positions license page title at the top center.
+    Offset titleOffset = tester.getCenter(find.text(title));
+    expect(titleOffset, Offset(narrowSize.width / 2, 92.0));
 
-      expect(find.text('License ABC'), findsOneWidget);
-      final Finder packagesViewTitle = find.text('License ABC');
-      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
-      expect(titleLeftPadding, 28.0);
+    // Configure a wide window to show the lateral UI.
+    await tester.binding.setSurfaceSize(wideSize);
 
-      // Check for the PackageListTile position
-      final Finder packageListTile = find.byType(ListTile);
-      final double listTileLeftPadding1 = tester.getTopLeft(packageListTile).dx;
-      expect(listTileLeftPadding1, 0);
-
-      // Check for the position of the detail view card
-      final Finder packageDetailCard = find.byType(Card);
-      final double cardLeftPadding = tester.getTopLeft(packageDetailCard).dx;
-      expect(cardLeftPadding, 316.0);
-
-      tester.binding.setSurfaceSize(null);
-    },
-  );
-
-  testWidgets(
-    'LicensePage lateralUI layout (rtl)',
-        (WidgetTester tester) async {
-      // Set big screen
-      await prepareBigLayout(tester, TextDirection.rtl);
-
-      expect(find.text('License ABC'), findsOneWidget);
-      final Finder packagesViewTitle = find.text('License ABC');
-      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
-      expect(titleLeftPadding, 719.0);
-
-      // Check for the PackageListTile position
-      final Finder packageListTile = find.byType(ListTile);
-      final double listTileLeftPadding = tester.getTopLeft(packageListTile).dx;
-      expect(listTileLeftPadding, 691.0);
-
-      // Check for the position of the detail view card
-      final Finder packageDetailCard = find.byType(Card);
-      final double cardRightPadding = tester.getTopLeft(packageDetailCard).dx;
-      expect(cardRightPadding, 24.0);
-
-      tester.binding.setSurfaceSize(null);
-    },
-  );
-
-  testWidgets(
-    'LicensePage nestedUI layout (ltr)',
-        (WidgetTester tester) async {
-      LicenseRegistry.addLicense(() {
-        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-          const LicenseEntryWithLineBreaks(
-              <String>['NestedUI '], 'LicenseEntry'),
-        ]);
-      });
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          title: 'License Nested',
-          home: Scaffold(
-            body: Directionality(
-              textDirection: TextDirection.ltr,
-              child: LicensePage(),
-            ),
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
           ),
         ),
-      );
-      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      ),
+    );
 
-      expect(find.text('License Nested'), findsOneWidget);
-      final Finder packagesViewTitle = find.text('License Nested');
-      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
-      expect(titleLeftPadding, 232.0);
+    // If the layout width is greater than 840.0 pixels, lateral UI layout
+    // is used which positions license page title at the top left.
+    titleOffset = tester.getTopRight(find.text(title));
+    expect(titleOffset, const Offset(292.0, 136.0));
+    expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
+  });
 
-      final Finder packageName = find.text('NestedUI ');
-      expect(packageName, findsOneWidget);
-      final double packageNameLeftPadding = tester.getTopLeft(packageName).dx;
-      expect(packageNameLeftPadding, 116);
-    },
-  );
+  testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
+    const TextDirection textDirection = TextDirection.rtl;
+    const Size narrowSize = Size(800.0, 600.0);
+    const Size wideSize = Size(1200.0, 600.0);
+    const String title = 'License ABC';
 
-  testWidgets(
-    'LicensePage nestedUI layout (rtl)',
-        (WidgetTester tester) async {
-      LicenseRegistry.addLicense(() {
-        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-          const LicenseEntryWithLineBreaks(
-              <String>['NestedUI '], 'LicenseEntry'),
-        ]);
-      });
+    // Configure a narrow window to show the default layout.
+    await tester.binding.setSurfaceSize(narrowSize);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          title: 'License Nested',
-          home: Scaffold(
-            body: Directionality(
-              textDirection: TextDirection.rtl,
-              child: LicensePage(),
-            ),
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
           ),
         ),
-      );
-      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      ),
+    );
 
-      expect(find.text('License Nested'), findsOneWidget);
-      final Finder packagesViewTitle = find.text('License Nested');
-      final double titleLeftPadding = tester.getTopLeft(packagesViewTitle).dx;
-      expect(titleLeftPadding, 232.0);
+    // If the layout width is less than 840.0 pixels, nested layout is
+    // used which positions license page title at the top center.
+    Offset titleOffset = tester.getCenter(find.text(title));
+    expect(titleOffset, Offset(narrowSize.width / 2, 92.0));
 
-      final Finder packageName = find.text('NestedUI ');
-      expect(packageName, findsOneWidget);
-      final double packageNameRightPadding = tester.getTopRight(packageName).dx;
-      expect(packageNameRightPadding, 684);
-    },
-  );
+    // Configure a wide window to show the lateral UI.
+    await tester.binding.setSurfaceSize(wideSize);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
+          ),
+        ),
+      ),
+    );
+
+    // If the layout width is greater than 840.0 pixels, lateral UI layout
+    // is used which positions license page title at the top right.
+    titleOffset = tester.getTopLeft(find.text(title));
+    expect(titleOffset, const Offset(908.0, 136.0));
+    expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
