@@ -32,7 +32,7 @@ class AndroidImageGenerator : public ImageGenerator {
 
   // |ImageGenerator|
   const ImageGenerator::FrameInfo GetFrameInfo(
-      unsigned int frame_index) const override;
+      unsigned int frame_index) override;
 
   // |ImageGenerator|
   SkISize GetScaledDimensions(float desired_scale) override;
