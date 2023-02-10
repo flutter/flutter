@@ -16,6 +16,8 @@ namespace impeller {
 ContentContextOptions OptionsFromPass(const RenderPass& pass) {
   ContentContextOptions opts;
   opts.sample_count = pass.GetRenderTarget().GetSampleCount();
+  opts.has_stencil_attachment =
+      pass.GetRenderTarget().GetStencilAttachment().has_value();
   return opts;
 }
 
@@ -23,6 +25,8 @@ ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
                                                const Entity& entity) {
   ContentContextOptions opts;
   opts.sample_count = pass.GetRenderTarget().GetSampleCount();
+  opts.has_stencil_attachment =
+      pass.GetRenderTarget().GetStencilAttachment().has_value();
   opts.blend_mode = entity.GetBlendMode();
   return opts;
 }

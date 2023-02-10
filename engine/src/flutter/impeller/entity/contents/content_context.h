@@ -179,17 +179,29 @@ using GeometryColorPipeline =
 using YUVToRGBFilterPipeline =
     RenderPipelineT<YuvToRgbFilterVertexShader, YuvToRgbFilterFragmentShader>;
 
+/// Pipeline state configuration.
+///
+/// Each unique combination of these options requires a different pipeline state
+/// object to be built. This struct is used as a key for the per-pipeline
+/// variant cache.
+///
+/// When adding fields to this key, reliant features should take care to limit
+/// the combinatorical explosion of variations. A sufficiently complicated
+/// Flutter application may easily require building hundreds of PSOs in total,
+/// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
+  bool has_stencil_attachment = true;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
       return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
-                              o.stencil_operation, o.primitive_type);
+                              o.stencil_operation, o.primitive_type,
+                              o.has_stencil_attachment);
     }
   };
 
@@ -200,7 +212,8 @@ struct ContentContextOptions {
              lhs.blend_mode == rhs.blend_mode &&
              lhs.stencil_compare == rhs.stencil_compare &&
              lhs.stencil_operation == rhs.stencil_operation &&
-             lhs.primitive_type == rhs.primitive_type;
+             lhs.primitive_type == rhs.primitive_type &&
+             lhs.has_stencil_attachment == rhs.has_stencil_attachment;
     }
   };
 

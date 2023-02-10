@@ -156,31 +156,39 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
 
   if (context->SupportsOffscreenMSAA()) {
     return RenderTarget::CreateOffscreenMSAA(
-        *context,                          // context
-        size,                              // size
-        "EntityPass",                      // label
-        StorageMode::kDeviceTransient,     // color_storage_mode
-        StorageMode::kDevicePrivate,       // color_resolve_storage_mode
-        LoadAction::kDontCare,             // color_load_action
-        StoreAction::kMultisampleResolve,  // color_store_action
-        readable ? StorageMode::kDevicePrivate
-                 : StorageMode::kDeviceTransient,  // stencil_storage_mode
-        LoadAction::kDontCare,                     // stencil_load_action
-        StoreAction::kDontCare                     // stencil_store_action
+        *context,      // context
+        size,          // size
+        "EntityPass",  // label
+        RenderTarget::AttachmentConfigMSAA{
+            .storage_mode = StorageMode::kDeviceTransient,
+            .resolve_storage_mode = StorageMode::kDevicePrivate,
+            .load_action = LoadAction::kDontCare,
+            .store_action = StoreAction::kMultisampleResolve,
+        },  // color_attachment_config
+        RenderTarget::AttachmentConfig{
+            .storage_mode = readable ? StorageMode::kDevicePrivate
+                                     : StorageMode::kDeviceTransient,
+            .load_action = LoadAction::kDontCare,
+            .store_action = StoreAction::kDontCare,
+        }  // stencil_attachment_config
     );
   }
 
   return RenderTarget::CreateOffscreen(
-      *context,                     // context
-      size,                         // size
-      "EntityPass",                 // label
-      StorageMode::kDevicePrivate,  // color_storage_mode
-      LoadAction::kDontCare,        // color_load_action
-      StoreAction::kDontCare,       // color_store_action
-      readable ? StorageMode::kDevicePrivate
-               : StorageMode::kDeviceTransient,  // stencil_storage_mode
-      LoadAction::kDontCare,                     // stencil_load_action
-      StoreAction::kDontCare                     // stencil_store_action
+      *context,      // context
+      size,          // size
+      "EntityPass",  // label
+      RenderTarget::AttachmentConfig{
+          .storage_mode = StorageMode::kDevicePrivate,
+          .load_action = LoadAction::kDontCare,
+          .store_action = StoreAction::kDontCare,
+      },  // color_attachment_config
+      RenderTarget::AttachmentConfig{
+          .storage_mode = readable ? StorageMode::kDevicePrivate
+                                   : StorageMode::kDeviceTransient,
+          .load_action = LoadAction::kDontCare,
+          .store_action = StoreAction::kDontCare,
+      }  // stencil_attachment_config
   );
 }
 
