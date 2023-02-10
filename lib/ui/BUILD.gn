@@ -59,6 +59,8 @@ source_set("ui") {
     "painting/image_filter.h",
     "painting/image_generator.cc",
     "painting/image_generator.h",
+    "painting/image_generator_apng.cc",
+    "painting/image_generator_apng.h",
     "painting/image_generator_registry.cc",
     "painting/image_generator_registry.h",
     "painting/image_shader.cc",
@@ -161,6 +163,7 @@ source_set("ui") {
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/rapidjson",
     "//third_party/skia",
+    "//third_party/zlib:zlib",
   ]
 
   if (impeller_supports_rendering) {

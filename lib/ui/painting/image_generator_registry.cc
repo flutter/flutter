@@ -14,9 +14,17 @@
 #include "third_party/skia/include/ports/SkImageGeneratorWIC.h"
 #endif
 
+#include "image_generator_apng.h"
+
 namespace flutter {
 
 ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
+  AddFactory(
+      [](sk_sp<SkData> buffer) {
+        return APNGImageGenerator::MakeFromData(std::move(buffer));
+      },
+      0);
+
   AddFactory(
       [](sk_sp<SkData> buffer) {
         return BuiltinSkiaCodecImageGenerator::MakeFromData(std::move(buffer));
