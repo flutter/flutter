@@ -419,13 +419,6 @@ void main() {
       cacheDir: dataDir,
     );
 
-    exitCompleter.complete();
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-
-    // writes non-crash back to dart_tool
-    expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
-
-
     // validate any Default content is copied
     final Directory defaultContentDir = fileSystem
         .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
@@ -434,6 +427,12 @@ void main() {
 
     expect(defaultContentDir, exists);
 
+    exitCompleter.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+
+    // writes non-crash back to dart_tool
+    expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
+
     // Validate cache dirs are not copied.
     for (final String cache in kCodeCache) {
       expect(fileSystem
@@ -441,6 +440,9 @@ void main() {
         .childDirectory('Default')
         .childDirectory(cache), isNot(exists));
     }
+
+    // validate defaultContentDir is deleted after exit, data is in cache
+    expect(defaultContentDir, isNot(exists));
   });
 
   testWithoutContext('can retry launch when glibc bug happens', () async {
