@@ -630,6 +630,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _entry?.remove();
     }
     _isConcealed = false;
+    _entry?.dispose();
     _entry = null;
     if (_mouseIsConnected) {
       Tooltip._revealLastTooltip();
@@ -751,7 +752,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: _excludeFromSemantics,
+        excludeFromSemantics: true,
         child: result,
       );
       // Only check for hovering if there is a mouse connected.

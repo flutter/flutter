@@ -292,11 +292,11 @@ void main() {
     checkTree(tester, <TestParentData>[]);
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: DummyWidget(
           child: Row(
-            children: const <Widget>[
+            children: <Widget>[
               Positioned(
                 top: 6.0,
                 left: 7.0,

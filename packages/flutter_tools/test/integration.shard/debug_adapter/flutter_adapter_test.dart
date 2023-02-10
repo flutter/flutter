@@ -67,7 +67,7 @@ void main() {
         'Application finished.',
         '',
         startsWith('Exited'),
-      ]);
+      ], allowExtras: true);
     });
 
     testWithoutContext('logs to client when sendLogsToClient=true', () async {
@@ -131,7 +131,7 @@ void main() {
         'Application finished.',
         '',
         startsWith('Exited'),
-      ]);
+      ], allowExtras: true);
 
       // If we're running with an out-of-process debug adapter, ensure that its
       // own process shuts down after we terminated.
@@ -561,11 +561,18 @@ void main() {
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
 
-      // Detach.
-      await dap.client.terminate();
+      // Detach and expected resume and correct output.
+      await Future.wait(<Future<void>>[
+        // We should print "Detached" instead of "Exited".
+        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
+        // We should still get terminatedEvent (this signals the DAP server terminating).
+        dap.client.event('terminated'),
+        // We should get output showing the app resumed.
+        testProcess.output.firstWhere((String output) => output.contains('topLevelFunction')),
+        // Trigger the detach.
+        dap.client.terminate(),
+      ]);
 
-      // Ensure we get additional output (confirming the process resumed).
-      await testProcess.output.first;
     });
   });
 }

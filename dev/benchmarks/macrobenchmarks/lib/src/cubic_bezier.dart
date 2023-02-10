@@ -12,10 +12,10 @@ class CubicBezierPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
+        children: <Widget>[
           Bezier(Colors.amber, 1.0),
         ],
       ),
