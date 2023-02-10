@@ -81,6 +81,8 @@ def main():
       '-Oz',
       # Allow aggressive, lossy floating-point optimizations.
       '-ffast-math',
+      # Record symbols in a separate *.metallibsym file.
+      '-frecord-sources=flat',
       '-MF',
       args.depfile,
       '-o',
@@ -97,7 +99,7 @@ def main():
   elif args.platform == 'ios':
     command += [
         '--std=ios-metal1.2',
-        '-mios-version-min=10.0',
+        '-mios-version-min=11.0',
     ]
   elif args.platform == 'ios-simulator':
     command += [
