@@ -89,9 +89,7 @@ FLUTTER_DARWIN_EXPORT
     NS_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithCoder:(nonnull NSCoder*)nibNameOrNil NS_DESIGNATED_INITIALIZER;
 /**
- * Initializes this FlutterViewController with an existing `FlutterEngine`.
- *
- * The initialized view controller will add itself to the engine as part of this process.
+ * Initializes this FlutterViewController with the specified `FlutterEngine`.
  *
  * This initializer is suitable for both the first Flutter view controller and
  * the following ones of the app.

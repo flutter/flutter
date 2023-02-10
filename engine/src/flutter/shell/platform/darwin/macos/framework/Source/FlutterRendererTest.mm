@@ -9,54 +9,37 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/testing.h"
 
-@interface RendererTestViewController : FlutterViewController
-- (void)loadMockFlutterView:(FlutterView*)mockView;
-@end
-
-@implementation RendererTestViewController {
-  FlutterView* _mockFlutterView;
-}
-
-- (void)loadMockFlutterView:(FlutterView*)mockView {
-  _mockFlutterView = mockView;
-  [self loadView];
-}
-
-- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
-                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
-  return _mockFlutterView;
-}
-@end
-
 namespace flutter::testing {
 
 namespace {
 // Returns an engine configured for the test fixture resource configuration.
-RendererTestViewController* CreateTestViewController() {
+FlutterEngine* CreateTestEngine() {
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  RendererTestViewController* viewController =
-      [[RendererTestViewController alloc] initWithProject:project];
-  return viewController;
+  return [[FlutterEngine alloc] initWithName:@"test" project:project allowHeadlessExecution:true];
+}
+
+void SetEngineDefaultView(FlutterEngine* engine, id flutterView) {
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController flutterView]).andReturn(flutterView);
+  [engine setViewController:mockFlutterViewController];
 }
 
 }  // namespace
 
 TEST(FlutterRenderer, PresentDelegatesToFlutterView) {
-  RendererTestViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
+  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
 
   id viewMock = OCMClassMock([FlutterView class]);
-  [viewController loadMockFlutterView:viewMock];
-  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
+  SetEngineDefaultView(engine, viewMock);
 
   id surfaceManagerMock = OCMClassMock([FlutterSurfaceManager class]);
   OCMStub([viewMock surfaceManager]).andReturn(surfaceManagerMock);
@@ -78,12 +61,11 @@ TEST(FlutterRenderer, PresentDelegatesToFlutterView) {
 }
 
 TEST(FlutterRenderer, TextureReturnedByFlutterView) {
-  RendererTestViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
+  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
 
   id viewMock = OCMClassMock([FlutterView class]);
-  [viewController loadMockFlutterView:viewMock];
-  FlutterRenderer* renderer = [[FlutterRenderer alloc] initWithFlutterEngine:engine];
+  SetEngineDefaultView(engine, viewMock);
 
   id surfaceManagerMock = OCMClassMock([FlutterSurfaceManager class]);
   OCMStub([viewMock surfaceManager]).andReturn(surfaceManagerMock);
