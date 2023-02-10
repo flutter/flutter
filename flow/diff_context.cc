@@ -12,7 +12,8 @@ DiffContext::DiffContext(SkISize frame_size,
                          PaintRegionMap& this_frame_paint_region_map,
                          const PaintRegionMap& last_frame_paint_region_map,
                          bool has_raster_cache)
-    : rects_(std::make_shared<std::vector<SkRect>>()),
+    : clip_tracker_(DisplayListMatrixClipTracker(kGiantRect, SkMatrix::I())),
+      rects_(std::make_shared<std::vector<SkRect>>()),
       frame_size_(frame_size),
       frame_device_pixel_ratio_(frame_device_pixel_ratio),
       this_frame_paint_region_map_(this_frame_paint_region_map),
@@ -21,12 +22,18 @@ DiffContext::DiffContext(SkISize frame_size,
 
 void DiffContext::BeginSubtree() {
   state_stack_.push_back(state_);
-  state_.rect_index_ = rects_->size();
+
+  bool had_integral_transform = state_.integral_transform;
+  state_.rect_index = rects_->size();
   state_.has_filter_bounds_adjustment = false;
   state_.has_texture = false;
-  if (state_.transform_override) {
-    state_.transform = *state_.transform_override;
-    state_.transform_override = std::nullopt;
+  state_.integral_transform = false;
+
+  state_.clip_tracker_save_count = clip_tracker_.getSaveCount();
+  clip_tracker_.save();
+
+  if (had_integral_transform) {
+    MakeCurrentTransformIntegral();
   }
 }
 
@@ -35,23 +42,33 @@ void DiffContext::EndSubtree() {
   if (state_.has_filter_bounds_adjustment) {
     filter_bounds_adjustment_stack_.pop_back();
   }
+  clip_tracker_.restoreToCount(state_.clip_tracker_save_count);
   state_ = state_stack_.back();
   state_stack_.pop_back();
 }
 
 DiffContext::State::State()
     : dirty(false),
-      cull_rect(kGiantRect),
-      rect_index_(0),
+      rect_index(0),
+      integral_transform(false),
+      clip_tracker_save_count(0),
       has_filter_bounds_adjustment(false),
       has_texture(false) {}
 
 void DiffContext::PushTransform(const SkMatrix& transform) {
-  state_.transform.preConcat(transform);
+  clip_tracker_.transform(transform);
 }
 
-void DiffContext::SetTransform(const SkMatrix& transform) {
-  state_.transform_override = transform;
+void DiffContext::MakeCurrentTransformIntegral() {
+  // TODO(knopp): This is duplicated from LayerStack. Maybe should be part of
+  // clip tracker?
+  if (clip_tracker_.using_4x4_matrix()) {
+    clip_tracker_.setTransform(
+        RasterCacheUtil::GetIntegralTransCTM(clip_tracker_.matrix_4x4()));
+  } else {
+    clip_tracker_.setTransform(
+        RasterCacheUtil::GetIntegralTransCTM(clip_tracker_.matrix_3x3()));
+  }
 }
 
 void DiffContext::PushFilterBoundsAdjustment(
@@ -128,21 +145,23 @@ Damage DiffContext::ComputeDamage(const SkIRect& accumulated_buffer_damage,
   return res;
 }
 
+SkRect DiffContext::MapRect(const SkRect& rect) {
+  SkRect mapped_rect(rect);
+  clip_tracker_.mapRect(&mapped_rect);
+  return mapped_rect;
+}
+
 bool DiffContext::PushCullRect(const SkRect& clip) {
-  SkRect cull_rect = state_.transform.mapRect(clip);
-  return state_.cull_rect.intersect(cull_rect);
+  clip_tracker_.clipRect(clip, SkClipOp::kIntersect, false);
+  return !clip_tracker_.device_cull_rect().isEmpty();
+}
+
+SkMatrix DiffContext::GetTransform3x3() const {
+  return clip_tracker_.matrix_3x3();
 }
 
 SkRect DiffContext::GetCullRect() const {
-  SkMatrix inverse_transform;
-  // Perspective projections don't produce rectangles that are useful for
-  // culling for some reason.
-  if (!state_.transform.hasPerspective() &&
-      state_.transform.invert(&inverse_transform)) {
-    return inverse_transform.mapRect(state_.cull_rect);
-  } else {
-    return kGiantRect;
-  }
+  return clip_tracker_.local_cull_rect();
 }
 
 void DiffContext::MarkSubtreeDirty(const PaintRegion& previous_paint_region) {
@@ -163,16 +182,17 @@ void DiffContext::AddLayerBounds(const SkRect& rect) {
   // During painting we cull based on non-overriden transform and then
   // override the transform right before paint. Do the same thing here to get
   // identical paint rect.
-  auto transformed_rect =
-      ApplyFilterBoundsAdjustment(state_.transform.mapRect(rect));
-  if (transformed_rect.intersects(state_.cull_rect)) {
-    auto paint_rect = state_.transform_override
-                          ? ApplyFilterBoundsAdjustment(
-                                state_.transform_override->mapRect(rect))
-                          : transformed_rect;
-    rects_->push_back(paint_rect);
+  auto transformed_rect = ApplyFilterBoundsAdjustment(MapRect(rect));
+  if (transformed_rect.intersects(clip_tracker_.device_cull_rect())) {
+    if (state_.integral_transform) {
+      clip_tracker_.save();
+      MakeCurrentTransformIntegral();
+      transformed_rect = ApplyFilterBoundsAdjustment(MapRect(rect));
+      clip_tracker_.restore();
+    }
+    rects_->push_back(transformed_rect);
     if (IsSubtreeDirty()) {
-      AddDamage(paint_rect);
+      AddDamage(transformed_rect);
     }
   }
 }
@@ -208,8 +228,8 @@ void DiffContext::AddReadbackRegion(const SkIRect& rect) {
 PaintRegion DiffContext::CurrentSubtreeRegion() const {
   bool has_readback = std::any_of(
       readbacks_.begin(), readbacks_.end(),
-      [&](const Readback& r) { return r.position >= state_.rect_index_; });
-  return PaintRegion(rects_, state_.rect_index_, rects_->size(), has_readback,
+      [&](const Readback& r) { return r.position >= state_.rect_index; });
+  return PaintRegion(rects_, state_.rect_index, rects_->size(), has_readback,
                      state_.has_texture);
 }
 

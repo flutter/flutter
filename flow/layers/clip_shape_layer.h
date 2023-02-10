@@ -33,8 +33,7 @@ class ClipShapeLayer : public CacheableContainerLayer {
       }
     }
     if (UsesSaveLayer() && context->has_raster_cache()) {
-      context->SetTransform(
-          RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+      context->WillPaintWithIntegralTransform();
     }
     if (context->PushCullRect(clip_shape_bounds())) {
       DiffChildren(context, prev);
