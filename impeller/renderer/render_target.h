@@ -19,28 +19,44 @@ class Context;
 
 class RenderTarget {
  public:
+  struct AttachmentConfig {
+    StorageMode storage_mode;
+    LoadAction load_action;
+    StoreAction store_action;
+  };
+
+  struct AttachmentConfigMSAA {
+    StorageMode storage_mode;
+    StorageMode resolve_storage_mode;
+    LoadAction load_action;
+    StoreAction store_action;
+  };
+
+  static constexpr AttachmentConfig kDefaultAttachmentConfig = {
+      .storage_mode = StorageMode::kDevicePrivate,
+      .load_action = LoadAction::kClear,
+      .store_action = StoreAction::kStore};
+
+  static constexpr AttachmentConfigMSAA kDefaultAttachmentConfigMSAA = {
+      .storage_mode = StorageMode::kDeviceTransient,
+      .resolve_storage_mode = StorageMode::kDevicePrivate,
+      .load_action = LoadAction::kClear,
+      .store_action = StoreAction::kMultisampleResolve};
+
   static RenderTarget CreateOffscreen(
       const Context& context,
       ISize size,
       const std::string& label = "Offscreen",
-      StorageMode color_storage_mode = StorageMode::kDevicePrivate,
-      LoadAction color_load_action = LoadAction::kClear,
-      StoreAction color_store_action = StoreAction::kStore,
-      StorageMode stencil_storage_mode = StorageMode::kDeviceTransient,
-      LoadAction stencil_load_action = LoadAction::kClear,
-      StoreAction stencil_store_action = StoreAction::kDontCare);
+      AttachmentConfig color_attachment_config = kDefaultAttachmentConfig,
+      std::optional<AttachmentConfig> stencil_attachment_config = std::nullopt);
 
   static RenderTarget CreateOffscreenMSAA(
       const Context& context,
       ISize size,
       const std::string& label = "Offscreen MSAA",
-      StorageMode color_storage_mode = StorageMode::kDeviceTransient,
-      StorageMode color_resolve_storage_mode = StorageMode::kDevicePrivate,
-      LoadAction color_load_action = LoadAction::kClear,
-      StoreAction color_store_action = StoreAction::kMultisampleResolve,
-      StorageMode stencil_storage_mode = StorageMode::kDeviceTransient,
-      LoadAction stencil_load_action = LoadAction::kClear,
-      StoreAction stencil_store_action = StoreAction::kDontCare);
+      AttachmentConfigMSAA color_attachment_config =
+          kDefaultAttachmentConfigMSAA,
+      std::optional<AttachmentConfig> stencil_attachment_config = std::nullopt);
 
   RenderTarget();
 

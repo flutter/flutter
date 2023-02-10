@@ -83,6 +83,12 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       std::optional<StencilAttachmentDescriptor> front,
       std::optional<StencilAttachmentDescriptor> back);
 
+  void ClearStencilAttachments();
+
+  void ClearDepthAttachment();
+
+  void ClearColorAttachment(size_t index);
+
   std::optional<StencilAttachmentDescriptor>
   GetFrontStencilAttachmentDescriptor() const;
 
