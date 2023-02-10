@@ -280,7 +280,7 @@ class NextContext extends Context {
             name: RemoteName.upstream,
             url: state.engine.upstream.url,
         );
-        final FrameworkRepository engine = FrameworkRepository(
+        final EngineRepository engine = EngineRepository(
             checkouts,
             // We explicitly want to check out the merged version from upstream
             initialRef: '${engineUpstream.name}/${state.engine.candidateBranch}',
