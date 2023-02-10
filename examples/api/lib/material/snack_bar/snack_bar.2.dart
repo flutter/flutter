@@ -45,18 +45,20 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   bool _longActionLabel = false;
   double _sliderValue = 0.25;
 
-  Padding _configRow(List<Widget> children) => Padding(
-      padding: const EdgeInsets.all(8.0), child: Row(children: children));
+  Padding _padRow(List<Widget> children) => Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(children: children),
+    );
 
   @override
   Widget build(BuildContext context) {
     return Padding(padding: const EdgeInsets.only(left: 50.0), child: Column(
       children: <Widget>[
-        _configRow(<Widget>[
+        _padRow(<Widget>[
           Text('Snack Bar configuration',
               style: Theme.of(context).textTheme.bodyLarge),
         ]),
-        _configRow(
+        _padRow(
           <Widget>[
             const Text('Fixed'),
             Radio<SnackBarBehavior>(
@@ -80,7 +82,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ),
           ],
         ),
-        _configRow(
+        _padRow(
           <Widget>[
             const Text('Include Icon '),
             Switch(
@@ -93,7 +95,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ),
           ],
         ),
-        _configRow(
+        _padRow(
           <Widget>[
             const Text('Include Action '),
             Switch(
@@ -118,7 +120,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ),
           ],
         ),
-        _configRow(
+        _padRow(
           <Widget>[
             const Text('Multi Line Text'),
             Switch(
@@ -131,15 +133,14 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ),
           ],
         ),
-        _configRow(
+        _padRow(
           <Widget>[
             const Text('Action new-line overflow threshold'),
             Slider(
               value: _sliderValue,
               divisions: 20,
               label: _sliderValue.toStringAsFixed(2),
-              onChanged:  _snackBarBehavior == SnackBarBehavior.fixed
-                ? null : (double value) {
+              onChanged:  _snackBarBehavior == SnackBarBehavior.fixed ? null : (double value) {
                 setState(() {
                   _sliderValue = value;
                 });

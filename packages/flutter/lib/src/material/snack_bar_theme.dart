@@ -66,12 +66,9 @@ class SnackBarThemeData with Diagnosticable {
     this.closeIconColor,
     this.actionOverflowThreshold,
   })  : assert(elevation == null || elevation >= 0.0),
-        assert(
-            width == null ||
-                (identical(behavior, SnackBarBehavior.floating)),
-            'Width can only be set if behaviour is SnackBarBehavior.floating'),
-        assert(actionOverflowThreshold == null
-          || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+        assert(width == null || identical(behavior, SnackBarBehavior.floating),
+          'Width can only be set if behaviour is SnackBarBehavior.floating'),
+        assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
           'Action overflow threshold must be between 0 and 1 inclusive');
 
   /// Overrides the default value for [SnackBar.backgroundColor].
@@ -140,7 +137,7 @@ class SnackBarThemeData with Diagnosticable {
 
   /// Overrides the default value for [SnackBar.actionOverflowThreshold].
   ///
-  /// Must be a value between 0 and 1. Defaults to 0.25.
+  /// Must be a value between 0 and 1, if present.
   final double? actionOverflowThreshold;
 
   /// Creates a copy of this object with the given fields replaced with the

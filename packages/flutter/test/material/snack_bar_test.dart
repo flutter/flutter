@@ -2616,8 +2616,7 @@ void main() {
 
     final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
     scaffoldMessengerState.showSnackBar(const SnackBar(
-      content: Text(
-          'This is a really long snackbar message. So long, it spans across more than one line!'),
+      content: Text('This is a really long snackbar message. So long, it spans across more than one line!'),
       duration: Duration(seconds: 2),
       showCloseIcon: true,
       behavior: SnackBarBehavior.floating,
