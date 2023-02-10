@@ -94,10 +94,8 @@ bool ImGui_ImplImpeller_Init(
     auto desc = impeller::PipelineBuilder<impeller::ImguiRasterVertexShader,
                                           impeller::ImguiRasterFragmentShader>::
         MakeDefaultPipelineDescriptor(*context);
-    desc->SetStencilPixelFormat(impeller::PixelFormat::kUnknown);
-    desc->SetStencilAttachmentDescriptors(std::nullopt);
-    desc->SetDepthPixelFormat(impeller::PixelFormat::kUnknown);
-    desc->SetDepthStencilAttachmentDescriptor(std::nullopt);
+    desc->ClearStencilAttachments();
+    desc->ClearDepthAttachment();
 
     bd->pipeline =
         context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
