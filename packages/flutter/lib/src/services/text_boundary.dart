@@ -152,7 +152,7 @@ class ParagraphBoundary extends TextBoundary {
 
     int index = position;
 
-    if (index > 1 && _text.codeUnitAt(index) == 0xA && _text.codeUnitAt(index - 1) == 0xD) {
+    if (index > 1 && _text.codeUnitAt(index) == 0x0A && _text.codeUnitAt(index - 1) == 0x0D) {
       index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
       index -= 1;
@@ -192,8 +192,8 @@ class ParagraphBoundary extends TextBoundary {
     }
 
     return index < _text.length - 1
-                && _text.codeUnitAt(index) == 0xD
-                && _text.codeUnitAt(index + 1) == 0xA
+                && _text.codeUnitAt(index) == 0x0D
+                && _text.codeUnitAt(index + 1) == 0x0A
                 ? index + 2
                 : index + 1;
   }
