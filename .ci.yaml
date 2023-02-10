@@ -3213,6 +3213,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3228,6 +3229,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
