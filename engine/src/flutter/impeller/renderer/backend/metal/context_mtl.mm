@@ -149,6 +149,9 @@ static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFileData(
                      << shader_library_error.localizedDescription.UTF8String;
       return nil;
     }
+    if (!label.empty()) {
+      library.label = @(label.c_str());
+    }
     [found_libraries addObject:library];
   }
   return found_libraries;

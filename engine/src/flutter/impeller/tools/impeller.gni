@@ -130,8 +130,13 @@ template("metal_library") {
     inputs = invoker.sources
 
     metal_library_path = "$root_out_dir/shaders/$metal_library_name.metallib"
+    metal_library_symbols_path =
+        "$root_out_dir/shaders/$metal_library_name.metallibsym"
 
-    outputs = [ metal_library_path ]
+    outputs = [
+      metal_library_path,
+      metal_library_symbols_path,
+    ]
 
     script = "//flutter/impeller/tools/build_metal_library.py"
 
