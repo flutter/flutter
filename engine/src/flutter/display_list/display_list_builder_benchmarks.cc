@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/benchmarking/benchmarking.h"
-#include "flutter/display_list/display_list_test_utils.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 
 namespace flutter {
 namespace {

@@ -5,9 +5,9 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_H_
 
-#include "flutter/display_list/display_list_benchmarks_canvas_provider.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_vertices.h"
+#include "flutter/display_list/testing/dl_test_surface_provider.h"
 
 #include "third_party/benchmark/include/benchmark/benchmark.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -16,20 +16,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkVertices.h"
 
-#ifdef ENABLE_SOFTWARE_BENCHMARKS
-#include "flutter/display_list/display_list_benchmarks_software.h"
-#endif
-#ifdef ENABLE_OPENGL_BENCHMARKS
-#include "flutter/display_list/display_list_benchmarks_gl.h"
-#endif
-#ifdef ENABLE_METAL_BENCHMARKS
-#include "flutter/display_list/display_list_benchmarks_metal.h"
-#endif
-
 namespace flutter {
 namespace testing {
-
-typedef enum { kSoftware_Backend, kOpenGL_Backend, kMetal_Backend } BackendType;
 
 enum BenchmarkAttributes {
   kEmpty_Flag = 0,
@@ -39,8 +27,9 @@ enum BenchmarkAttributes {
   kAntiAliasing_Flag = 1 << 3
 };
 
-std::unique_ptr<CanvasProvider> CreateCanvasProvider(BackendType backend_type);
 SkPaint GetPaintForRun(unsigned attributes);
+
+using BackendType = DlSurfaceProvider::BackendType;
 
 // Benchmarks
 

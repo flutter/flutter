@@ -4,7 +4,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_test_utils.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/image_filter_layer.h"

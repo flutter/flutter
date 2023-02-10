@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_ATTRIBUTES_TESTING_H_
-#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_ATTRIBUTES_TESTING_H_
+#ifndef FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_EQUALITY_H_
+#define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_EQUALITY_H_
 
 #include "flutter/display_list/display_list_attributes.h"
 #include "flutter/display_list/display_list_comparable.h"
@@ -39,4 +39,4 @@ static void TestNotEquals(T& source1, T& source2, std::string label) {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_ATTRIBUTES_TESTING_H_
+#endif  // FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_EQUALITY_H_

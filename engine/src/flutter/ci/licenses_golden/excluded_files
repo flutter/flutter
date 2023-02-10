@@ -43,6 +43,7 @@
 ../../../flutter/display_list/display_list_unittests.cc
 ../../../flutter/display_list/display_list_utils_unittests.cc
 ../../../flutter/display_list/display_list_vertices_unittests.cc
+../../../flutter/display_list/testing
 ../../../flutter/docs
 ../../../flutter/examples
 ../../../flutter/flow/README.md

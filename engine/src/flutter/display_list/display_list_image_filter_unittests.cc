@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/display_list_attributes_testing.h"
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_color.h"
@@ -11,6 +10,7 @@
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_tile_mode.h"
+#include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/types.h"
 #include "gtest/gtest.h"
 

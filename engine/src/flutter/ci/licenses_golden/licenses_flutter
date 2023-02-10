@@ -822,16 +822,8 @@ ORIGIN: ../../../flutter/common/task_runners.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_attributes.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_attributes_testing.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_benchmarks.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_canvas_provider.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_gl.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_gl.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_metal.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_metal.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_software.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_benchmarks_software.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_blend_mode.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_blend_mode.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_builder.cc + ../../../flutter/LICENSE
@@ -881,8 +873,6 @@ ORIGIN: ../../../flutter/display_list/display_list_rtree.h + ../../../flutter/LI
 ORIGIN: ../../../flutter/display_list/display_list_runtime_effect.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_runtime_effect.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_sampling_options.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_test_utils.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/display_list/display_list_test_utils.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_tile_mode.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_utils.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list_utils.h + ../../../flutter/LICENSE
@@ -3309,16 +3299,8 @@ FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/display_list/display_list.cc
 FILE: ../../../flutter/display_list/display_list.h
 FILE: ../../../flutter/display_list/display_list_attributes.h
-FILE: ../../../flutter/display_list/display_list_attributes_testing.h
 FILE: ../../../flutter/display_list/display_list_benchmarks.cc
 FILE: ../../../flutter/display_list/display_list_benchmarks.h
-FILE: ../../../flutter/display_list/display_list_benchmarks_canvas_provider.h
-FILE: ../../../flutter/display_list/display_list_benchmarks_gl.cc
-FILE: ../../../flutter/display_list/display_list_benchmarks_gl.h
-FILE: ../../../flutter/display_list/display_list_benchmarks_metal.cc
-FILE: ../../../flutter/display_list/display_list_benchmarks_metal.h
-FILE: ../../../flutter/display_list/display_list_benchmarks_software.cc
-FILE: ../../../flutter/display_list/display_list_benchmarks_software.h
 FILE: ../../../flutter/display_list/display_list_blend_mode.cc
 FILE: ../../../flutter/display_list/display_list_blend_mode.h
 FILE: ../../../flutter/display_list/display_list_builder.cc
@@ -3368,8 +3350,6 @@ FILE: ../../../flutter/display_list/display_list_rtree.h
 FILE: ../../../flutter/display_list/display_list_runtime_effect.cc
 FILE: ../../../flutter/display_list/display_list_runtime_effect.h
 FILE: ../../../flutter/display_list/display_list_sampling_options.h
-FILE: ../../../flutter/display_list/display_list_test_utils.cc
-FILE: ../../../flutter/display_list/display_list_test_utils.h
 FILE: ../../../flutter/display_list/display_list_tile_mode.h
 FILE: ../../../flutter/display_list/display_list_utils.cc
 FILE: ../../../flutter/display_list/display_list_utils.h

@@ -183,7 +183,7 @@ if (enable_unittests) {
       ":flow_fixtures",
       ":flow_testing",
       "//flutter/common/graphics",
-      "//flutter/display_list:display_list_testing",
+      "//flutter/display_list/testing:display_list_testing",
       "//flutter/fml",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
