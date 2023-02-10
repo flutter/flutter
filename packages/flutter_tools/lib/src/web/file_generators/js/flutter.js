@@ -72,8 +72,7 @@ _flutter.loader = null;
      */
     constructor(validPatterns, policyName = "flutter-js") {
       const patterns = validPatterns || [
-        /\.dart\.js$/,
-        /^flutter_service_worker.js$/
+        /\.js$/,
       ];
       if (window.trustedTypes) {
         this.policy = trustedTypes.createPolicy(policyName, {
