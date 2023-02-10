@@ -20,7 +20,7 @@
 
 static NSString* const kTextInputChannel = @"flutter/textinput";
 
-#pragma mark - Textinput channel method names
+#pragma mark - TextInput channel method names
 // See https://api.flutter.dev/flutter/services/SystemChannels/textInput-constant.html
 static NSString* const kSetClientMethod = @"TextInput.setClient";
 static NSString* const kShowMethod = @"TextInput.show";
@@ -62,6 +62,7 @@ static NSString* const kAutofillHints = @"hints";
 static NSString* const kTextAffinityDownstream = @"TextAffinity.downstream";
 static NSString* const kTextAffinityUpstream = @"TextAffinity.upstream";
 
+#pragma mark - Enums
 /**
  * The affinity of the current cursor position. If the cursor is at a position representing
  * a line break, the cursor may be drawn either at the end of the current line (upstream)
@@ -71,6 +72,8 @@ typedef NS_ENUM(NSUInteger, FlutterTextAffinity) {
   kFlutterTextAffinityUpstream,
   kFlutterTextAffinityDownstream
 };
+
+#pragma mark - Static functions
 
 /*
  * Updates a range given base and extent fields.
@@ -135,6 +138,8 @@ static BOOL EnableAutocomplete(NSDictionary* configuration) {
   return EnableAutocompleteForTextInputConfiguration(configuration);
 }
 
+#pragma mark - NSEvent (KeyEquivalentMarker) protocol
+
 @interface NSEvent (KeyEquivalentMarker)
 
 // Internally marks that the event was received through performKeyEquivalent:.
@@ -163,6 +168,8 @@ static char markerKey;
 }
 
 @end
+
+#pragma mark - FlutterTextInputPlugin private interface
 
 /**
  * Private properties of FlutterTextInputPlugin.
@@ -284,6 +291,8 @@ static char markerKey;
 @property(readwrite, nonatomic) NSString* customRunLoopMode;
 
 @end
+
+#pragma mark - FlutterTextInputPlugin
 
 @implementation FlutterTextInputPlugin {
   /**
