@@ -83,8 +83,14 @@ void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
 
 void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
   FML_DCHECK(outer && inner);
-  filter_ = std::make_shared<DlComposeImageFilter>(outer->dl_filter(),
-                                                   inner->dl_filter());
+  if (!outer->dl_filter()) {
+    filter_ = inner->filter();
+  } else if (!inner->dl_filter()) {
+    filter_ = outer->filter();
+  } else {
+    filter_ = std::make_shared<DlComposeImageFilter>(outer->dl_filter(),
+                                                     inner->dl_filter());
+  }
 }
 
 }  // namespace flutter
