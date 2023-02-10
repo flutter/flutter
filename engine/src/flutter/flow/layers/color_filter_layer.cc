@@ -28,8 +28,7 @@ void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
 
   if (context->has_raster_cache()) {
-    context->SetTransform(
-        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+    context->WillPaintWithIntegralTransform();
   }
 
   DiffChildren(context, prev);

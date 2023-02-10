@@ -23,7 +23,7 @@ class DisplayListMatrixClipTracker {
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkMatrix& matrix);
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkM44& matrix);
 
-  bool using_4x4_matrix() { return current_->is_4x4(); }
+  bool using_4x4_matrix() const { return current_->is_4x4(); }
 
   SkM44 matrix_4x4() const { return current_->matrix_4x4(); }
   SkMatrix matrix_3x3() const { return current_->matrix_3x3(); }

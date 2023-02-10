@@ -9,8 +9,8 @@
 #include <map>
 #include <optional>
 #include <vector>
+#include "display_list/display_list_matrix_clip_tracker.h"
 #include "flutter/flow/paint_region.h"
-#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -83,16 +83,16 @@ class DiffContext {
   // subtree will have bounds adjusted by this function.
   void PushFilterBoundsAdjustment(const FilterBoundsAdjustment& filter);
 
-  // Returns transform matrix for current subtree
-  const SkMatrix& GetTransform() const { return state_.transform; }
+  // Instruct DiffContext that current layer will paint with integral transform.
+  void WillPaintWithIntegralTransform() { state_.integral_transform = true; }
 
-  // Overrides transform matrix for current subtree
-  void SetTransform(const SkMatrix& transform);
+  // Returns current transform as SkMatrix.
+  SkMatrix GetTransform3x3() const;
 
-  // Return cull rect for current subtree (in local coordinates)
+  // Return cull rect for current subtree (in local coordinates).
   SkRect GetCullRect() const;
 
-  // Sets the dirty flag on current subtree;
+  // Sets the dirty flag on current subtree.
   //
   // previous_paint_region, which should represent region of previous subtree
   // at this level will be added to damage area.
@@ -196,24 +196,29 @@ class DiffContext {
 
   Statistics& statistics() { return statistics_; }
 
+  SkRect MapRect(const SkRect& rect);
+
  private:
   struct State {
     State();
 
     bool dirty;
-    SkRect cull_rect;  // in screen coordinates
 
-    // In order to replicate paint process closely, we need both the original
-    // transform, and the overriden transform (set for layers that need to paint
-    // on integer coordinates). The reason for this is that during paint the
-    // transform matrix is overriden only after layer passes the cull check
-    // first (with original transform). So to cull layer we use transform, but
-    // to get paint coordinates we use transform_override. Child layers are
-    // painted after transform override, so if set we use transform_override as
-    // base when diffing child layers.
-    SkMatrix transform;
-    std::optional<SkMatrix> transform_override;
-    size_t rect_index_;
+    size_t rect_index;
+
+    // In order to replicate paint process closely, DiffContext needs to take
+    // into account that some layers are painted with transform translation
+    // snapped to integral coordinates.
+    //
+    // It's not possible to simply snap the transform itself, because culling
+    // needs to happen with original (unsnapped) transform, just like it does
+    // during paint. This means the integral coordinates must be applied after
+    // culling before painting the layer content (either the layer itself, or
+    // when starting subtree to paint layer children).
+    bool integral_transform;
+
+    // Used to restoring clip tracker when popping state.
+    int clip_tracker_save_count;
 
     // Whether this subtree has filter bounds adjustment function. If so,
     // it will need to be removed from stack when subtree is closed.
@@ -223,6 +228,9 @@ class DiffContext {
     bool has_texture;
   };
 
+  void MakeCurrentTransformIntegral();
+
+  DisplayListMatrixClipTracker clip_tracker_;
   std::shared_ptr<std::vector<SkRect>> rects_;
   State state_;
   SkISize frame_size_;
