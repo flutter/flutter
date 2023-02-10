@@ -10,7 +10,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -599,12 +598,6 @@ class FrameworkRepository extends Repository {
   static const String defaultUpstream = 'git@github.com:flutter/flutter.git';
   static const String defaultBranch = 'master';
 
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml =
-        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
-
   Future<String> get cacheDirectory async {
     return fileSystem.path.join(
       (await checkoutDirectory).path,
@@ -857,11 +850,6 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
-
   static const String defaultUpstream = 'git@github.com:flutter/engine.git';
   static const String defaultBranch = 'main';
 
@@ -929,27 +917,4 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
-}
-
-class CiYaml {
-  CiYaml(this.file) {
-    if (!file.existsSync()) {
-      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
-    }
-  }
-
-  /// Underlying [File] that this object wraps.
-  final File file;
-
-  /// Returns the raw string contents of this file.
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  String get stringContents => file.readAsStringSync();
-
-  /// Returns the parsed contents of the file as a [YamlMap].
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  YamlMap get contents => loadYaml(stringContents) as YamlMap;
 }
