@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
@@ -456,12 +457,24 @@ bool EntityPass::OnRender(
             element_entity.GetStencilDepth() - stencil_depth_floor;
         FML_DCHECK(restoration_depth < stencil_stack.size());
 
+        // We only need to restore the area that covers the coverage of the
+        // stencil rect at target depth + 1.
+        std::optional<Rect> restore_coverage =
+            (restoration_depth + 1 < stencil_stack.size())
+                ? stencil_stack[restoration_depth + 1].coverage
+                : std::nullopt;
+
         stencil_stack.resize(restoration_depth + 1);
 
         if (!stencil_stack.back().coverage.has_value()) {
           // Running this restore op won't make anything renderable, so skip it.
           return true;
         }
+
+        auto restore_contents = static_cast<ClipRestoreContents*>(
+            element_entity.GetContents().get());
+        restore_contents->SetRestoreCoverage(restore_coverage);
+
       } break;
     }
 
