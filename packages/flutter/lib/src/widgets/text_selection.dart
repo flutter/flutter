@@ -2933,25 +2933,25 @@ class TextSelectionGestureDetector extends StatefulWidget {
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
   static int _getEffectiveConsecutiveTapCount(int rawCount) {
     switch(defaultTargetPlatform) {
-      // From observation, these platform's reset their tap count to 0 when the number of consecutive taps
-      // exceeds 3. For example on Debian Linux with GTK, when going past a triple click, on the fourth click the selection
-      // is moved to the precise click position, on the fifth click the word at the position is selected, and
-      // on the sixth click the paragraph at the position is selected.
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
+        // From observation, these platform's reset their tap count to 0 when the number of consecutive taps
+        // exceeds 3. For example on Debian Linux with GTK, when going past a triple click, on the fourth click
+        // the selection is moved to the precise click position, on the fifth click the word at the position is
+        // selected, and on the sixth click the paragraph at the position is selected.
         return rawCount <= 3 ? rawCount : 0 + (rawCount % 3 == 0 ? 3 : rawCount % 3);
-      // From observation, these platform's either hold their tap count at 3 or they
-      // allow it to grow infinitely. For example on macOS, when going past a triple click,
-      // the selection should be retained at the paragraph that was first selected on triple click.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // From observation, these platform's either hold their tap count at 3.
+        // For example on macOS, when going past a triple click, the selection
+        // should be retained at the paragraph that was first selected on triple click.
         return math.min(rawCount, 3);
-      // From observation, this platform's consecutive tap count grows infinitely, alternating
-      // between double click and triple click actions. For example, after a triple click has
-      // selected a paragraph, on the next click the word at the clicked position will be selected,
-      // and on the next click the paragraph at the position.
       case TargetPlatform.windows:
+        // From observation, this platform's consecutive tap actions alternate between
+        // double click and triple click actions. For example, after a triple click has
+        // selected a paragraph, on the next click the word at the clicked position will
+        // be selected, and on the next click the paragraph at the position is selected.
         return rawCount < 2 ? rawCount : 2 + rawCount % 2;
     }
   }
