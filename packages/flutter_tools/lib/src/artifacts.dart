@@ -171,9 +171,6 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'platform_strong.dill';
     case Artifact.platformLibrariesJson:
       return 'libraries.json';
-    case Artifact.flutterPatchedSdkPath:
-      assert(false, 'No filename for sdk path, should not be invoked');
-      return null;
     case Artifact.engineDartSdkPath:
       return 'dart-sdk';
     case Artifact.engineDartBinary:
@@ -186,14 +183,10 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'dart2wasm_product.snapshot';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
-    case Artifact.linuxDesktopPath:
-      return '';
     case Artifact.linuxHeaders:
       return 'flutter_linux';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.windowsDesktopPath:
-      return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.fuchsiaKernelCompiler:
@@ -206,8 +199,12 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterPatchedSdkPath:
+    case Artifact.linuxDesktopPath:
+    case Artifact.windowsDesktopPath:
     case Artifact.flutterToolsFileGenerators:
-      return '';
+      assert(false, 'No filename for a folder path, should not be invoked');
+      return null;
   }
 }
 
