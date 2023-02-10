@@ -319,6 +319,27 @@ abstract class Repository {
     );
   }
 
+  /// Tag [commit] and push the tag to the remote.
+  Future<void> tag(String commit, String tagName, String remote) async {
+    assert(commit.isNotEmpty);
+    assert(tagName.isNotEmpty);
+    assert(remote.isNotEmpty);
+    stdio.printStatus('About to tag commit $commit as $tagName...');
+    await git.run(
+      <String>['tag', tagName, commit],
+      'tag the commit with the version label',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tagging successful.');
+    stdio.printStatus('About to push $tagName to remote $remote...');
+    await git.run(
+      <String>['push', remote, tagName],
+      'publish the tag to the repo',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tag push successful.');
+  }
+
   /// List commits in reverse chronological order.
   Future<List<String>> revList(List<String> args) async {
     return (await git.getOutput(<String>['rev-list', ...args],
@@ -590,27 +611,6 @@ class FrameworkRepository extends Repository {
       'bin',
       'cache',
     );
-  }
-
-  /// Tag [commit] and push the tag to the remote.
-  Future<void> tag(String commit, String tagName, String remote) async {
-    assert(commit.isNotEmpty);
-    assert(tagName.isNotEmpty);
-    assert(remote.isNotEmpty);
-    stdio.printStatus('About to tag commit $commit as $tagName...');
-    await git.run(
-      <String>['tag', tagName, commit],
-      'tag the commit with the version label',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tagging successful.');
-    stdio.printStatus('About to push $tagName to remote $remote...');
-    await git.run(
-      <String>['push', remote, tagName],
-      'publish the tag to the repo',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tag push successful.');
   }
 
   @override

@@ -758,6 +758,10 @@ void main() {
             candidateBranch: candidateBranch,
             upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
           ),
+          engine: pb.Repository(
+            candidateBranch: candidateBranch,
+            upstream: pb.Remote(url: EngineRepository.defaultUpstream),
+          ),
           releaseVersion: releaseVersion,
         );
         platform = FakePlatform(
@@ -773,6 +777,18 @@ void main() {
         stdio.stdin.add('n');
         final FakeProcessManager processManager = FakeProcessManager.list(
           <FakeCommand>[
+            // Framework checkout
+            const FakeCommand(
+              command: <String>['git', 'fetch', 'upstream'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'rev-parse', 'HEAD'],
+              stdout: revision1,
+            ),
+            // Engine checkout
             const FakeCommand(
               command: <String>['git', 'fetch', 'upstream'],
             ),
@@ -818,6 +834,7 @@ void main() {
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          // Framework checkout
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
@@ -828,8 +845,27 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
+          // Engine checkout
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
+          ),
+          // Framework tag
           const FakeCommand(
             command: <String>['git', 'tag', releaseVersion, revision1],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', remoteName, releaseVersion],
+          ),
+          // Engine tag
+          const FakeCommand(
+            command: <String>['git', 'tag', releaseVersion, revision2],
           ),
           const FakeCommand(
             command: <String>['git', 'push', remoteName, releaseVersion],
