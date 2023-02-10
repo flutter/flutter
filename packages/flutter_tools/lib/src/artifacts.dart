@@ -203,8 +203,10 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.linuxDesktopPath:
     case Artifact.windowsDesktopPath:
     case Artifact.flutterToolsFileGenerators:
-      assert(false, 'No filename for a folder path, should not be invoked');
-      return null;
+      throw UnimplementedError(
+        'Cannot get a filename for a non-file artifact. '
+        'This should not be happening, please file a bug.',
+      );
   }
 }
 
