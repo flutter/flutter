@@ -835,6 +835,13 @@ class _SheetBallisticScrollActivity extends BallisticScrollActivity {
   _DraggableScrollableSheetScrollPosition get delegate =>
       super.delegate as _DraggableScrollableSheetScrollPosition;
 
+  /// The relative velocity of the inner content during the ballistic scrolling
+  /// of the outer sheet is always effectively 0. This allows the scroll physics
+  /// to maintain the inner extent within its bounds while the sheet size
+  /// changes.
+  @override
+  double get velocity => 0.0;
+
   @override
   void applyNewDimensions() {
     // This is expected to happen continuously while scrolling the outer sheet.
@@ -846,6 +853,7 @@ class _SheetBallisticScrollActivity extends BallisticScrollActivity {
     extent.updateSize(
         extent.pixelsToSize(value), delegate.context.notificationContext!);
 
+    final double velocity = super.velocity;
     if ((velocity < 0.0 && extent.isAtMin) ||
         (velocity > 0.0 && extent.isAtMax)) {
       // Make sure we pass along enough velocity to keep scrolling - otherwise

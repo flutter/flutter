@@ -434,6 +434,49 @@ void main() {
       // When a Ticker leaks an exception is thrown
     });
 
+    // This test ensures that as a sheet is expanded through a drag, fling, and
+    // settle, if the inner scrollable is already scrolled to its max extent,
+    // RangeMaintainingScrollPhysics is able to keep the inner scrollable within
+    // its continuously updating max extent.
+    testWidgets('Maintains inner max extent while sheet is expanded', (WidgetTester tester) async {
+      // Use an outer controller to monitor the sheet size to ensure that the
+      // test case is well formed in that the sheet is indeed expanding.
+      final DraggableScrollableController outerController = DraggableScrollableController();
+      // This test needs to start with the inner content scrolled to its end,
+      // so inject a temporary scroll controller just to jump to the end of the
+      // inner scrollable before allowing the DraggableScrollableSheet to link
+      // its scroll controller.
+      final ScrollController innerController = ScrollController();
+      await tester.pumpWidget(boilerplateWidget(
+        controller: outerController,
+        innerControllerOverride: innerController,
+      ));
+      innerController.jumpTo(innerController.position.maxScrollExtent);
+      await tester.pumpWidget(boilerplateWidget(controller: outerController));
+
+      final Offset lastItemPosition = tester.getCenter(find.text('Item 99'), warnIfMissed: true);
+      double sheetSize = outerController.size;
+
+      await tester.fling(find.text('Item 99'), const Offset(0, -200), 2000);
+      expect(outerController.size, greaterThan(sheetSize));
+      expect(tester.getCenter(find.text('Item 99'), warnIfMissed: true), lastItemPosition);
+
+      sheetSize = outerController.size;
+
+      // Verify the ballistic phase.
+      // Pump a frame to get the animation controller to record its start time.
+      // (fling doesn't pump a frame after its up event.)
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(outerController.size, inExclusiveRange(sheetSize, 1.0));
+      expect(tester.getCenter(find.text('Item 99'), warnIfMissed: true), lastItemPosition);
+
+      // Verify the end state.
+      await tester.pumpAndSettle();
+      expect(outerController.size, 1.0);
+      expect(tester.getCenter(find.text('Item 99'), warnIfMissed: true), lastItemPosition);
+    }, variant: TargetPlatformVariant.all());
+
     group('While content is scrolled and sheet is snapped somewhere other than min/max', () {
       Widget buildWidget({
         DraggableScrollableController? controller,
