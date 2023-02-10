@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'colors.dart';
 import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -72,9 +73,7 @@ class BottomAppBar extends StatefulWidget {
     this.padding,
     this.surfaceTintColor,
     this.height,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(notchMargin != null),
-       assert(clipBehavior != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -179,6 +178,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color? shadowColor = isMaterial3 ? Colors.transparent : null;
 
     final Widget child = Padding(
       padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
@@ -189,18 +189,17 @@ class _BottomAppBarState extends State<BottomAppBar> {
       height: height,
       child: PhysicalShape(
         clipper: clipper,
-        elevation: elevation,
         color: effectiveColor,
         clipBehavior: widget.clipBehavior,
+        elevation: isMaterial3 ? 0 : elevation,
         child: Material(
           key: materialKey,
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
           color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
-          child: child == null
-            ? null
-            : SafeArea(child: child),
+          shadowColor: shadowColor,
+          child: SafeArea(child: child),
         ),
       ),
     );
@@ -213,10 +212,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     required this.shape,
     required this.materialKey,
     required this.notchMargin,
-  }) : assert(geometry != null),
-       assert(shape != null),
-       assert(notchMargin != null),
-       super(reclip: geometry);
+  }) : super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
@@ -276,7 +272,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_158
 
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM3(this.context)

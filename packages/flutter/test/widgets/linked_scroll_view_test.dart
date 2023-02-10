@@ -111,7 +111,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     required super.context,
     required double super.initialPixels,
     super.oldPosition,
-  }) : assert(owner != null);
+  });
 
   final LinkedScrollController owner;
 

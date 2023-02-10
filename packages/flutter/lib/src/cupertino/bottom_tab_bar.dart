@@ -74,16 +74,12 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         width: 0.0, // 0.0 means one physical pixel
       ),
     ),
-  }) : assert(items != null),
-       assert(
+  }) : assert(
          items.length >= 2,
          "Tabs need at least 2 items to conform to Apple's HIG",
        ),
-       assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(iconSize != null),
-       assert(height != null && height >= 0.0),
-       assert(inactiveColor != null);
+       assert(height >= 0.0);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///

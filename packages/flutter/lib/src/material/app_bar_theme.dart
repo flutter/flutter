@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'text_theme.dart';
 import 'theme.dart';
 
 /// Overrides the default values of visual properties for descendant
@@ -43,11 +42,6 @@ class AppBarTheme with Diagnosticable {
     this.shape,
     this.iconTheme,
     this.actionsIconTheme,
-    @Deprecated(
-      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.textTheme,
     this.centerTitle,
     this.titleSpacing,
     this.toolbarHeight,
@@ -161,24 +155,6 @@ class AppBarTheme with Diagnosticable {
   ///    [AppBar.foregroundColor] in all descendant [AppBar] widgets.
   final IconThemeData? actionsIconTheme;
 
-  /// This property is deprecated, please use [toolbarTextStyle] and
-  /// [titleTextStyle] instead.
-  ///
-  /// Overrides the default value of the obsolete [AppBar.textTheme]
-  /// property in all descendant [AppBar] widgets.
-  ///
-  /// See also:
-  ///
-  ///  * [toolbarTextStyle], which overrides the default value of
-  ///    [AppBar.toolbarTextStyle in all descendant [AppBar] widgets.
-  ///  * [titleTextStyle], which overrides the default value of
-  ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
-  @Deprecated(
-    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final TextTheme? textTheme;
-
   /// Overrides the default value of [AppBar.centerTitle]
   /// property in all descendant [AppBar] widgets.
   final bool? centerTitle;
@@ -252,11 +228,6 @@ class AppBarTheme with Diagnosticable {
     Color? surfaceTintColor,
     ShapeBorder? shape,
     IconThemeData? iconTheme,
-    @Deprecated(
-      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
     double? toolbarHeight,
@@ -284,7 +255,6 @@ class AppBarTheme with Diagnosticable {
       shape: shape ?? this.shape,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
-      textTheme: textTheme ?? this.textTheme,
       centerTitle: centerTitle ?? this.centerTitle,
       titleSpacing: titleSpacing ?? this.titleSpacing,
       toolbarHeight: toolbarHeight ?? this.toolbarHeight,
@@ -306,7 +276,6 @@ class AppBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
-    assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -318,7 +287,6 @@ class AppBarTheme with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
-      textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
       centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
       titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
       toolbarHeight: lerpDouble(a?.toolbarHeight, b?.toolbarHeight, t),
@@ -341,7 +309,6 @@ class AppBarTheme with Diagnosticable {
     shape,
     iconTheme,
     actionsIconTheme,
-    textTheme,
     centerTitle,
     titleSpacing,
     toolbarHeight,
@@ -370,7 +337,6 @@ class AppBarTheme with Diagnosticable {
         && other.shape == shape
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
-        && other.textTheme == textTheme
         && other.centerTitle == centerTitle
         && other.titleSpacing == titleSpacing
         && other.toolbarHeight == toolbarHeight
@@ -393,7 +359,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));

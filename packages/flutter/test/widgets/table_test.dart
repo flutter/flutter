@@ -879,24 +879,24 @@ void main() {
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'Table-[GlobalKey#00000](dependencies: [Directionality], renderObject: RenderTable#00000)\n'
-        '├Text("A")\n'
+        'Table-[GlobalKey#00000](dependencies: [Directionality, MediaQuery], renderObject: RenderTable#00000)\n'
+        '├Text("A", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("B")\n'
+        '├Text("B", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("C")\n'
+        '├Text("C", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("D")\n'
+        '├Text("D", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("EEE")\n'
+        '├Text("EEE", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("F")\n'
+        '├Text("F", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("G")\n'
+        '├Text("G", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '├Text("H")\n'
+        '├Text("H", dependencies: [MediaQuery])\n'
         '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
-        '└Text("III")\n'
+        '└Text("III", dependencies: [MediaQuery])\n'
         ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
       ),
     );
@@ -940,7 +940,7 @@ void main() {
   });
 
   testWidgets(
-    'Table widget requires all TableRows to have non-null children',
+    'Table widget requires all TableRows to have same number of children',
     (WidgetTester tester) async {
       FlutterError? error;
       try {
@@ -959,7 +959,7 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
+        expect(error!.toStringDeep(), contains('Table contains irregular row lengths.'));
       }
     },
   );

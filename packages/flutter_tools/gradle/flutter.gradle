@@ -618,10 +618,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean shouldSplitPerAbi() {
-        if (project.hasProperty('split-per-abi')) {
-            return project.property('split-per-abi').toBoolean()
-        }
-        return false;
+        return project.findProperty('split-per-abi')?.toBoolean() ?: false;
     }
 
     private Boolean useLocalEngine() {
@@ -629,18 +626,12 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean isVerbose() {
-        if (project.hasProperty('verbose')) {
-            return project.property('verbose').toBoolean()
-        }
-        return false
+        return project.findProperty('verbose')?.toBoolean() ?: false;
     }
 
     /** Whether to build the debug app in "fast-start" mode. */
     private Boolean isFastStart() {
-        if (project.hasProperty("fast-start")) {
-            return project.property("fast-start").toBoolean()
-        }
-        return false
+        return project.findProperty("fast-start")?.toBoolean() ?: false;
     }
 
     private static Boolean isBuiltAsApp(Project project) {
@@ -877,6 +868,12 @@ class FlutterPlugin implements Plugin<Project> {
             }
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            // Be careful when configuring task below, Groovy has bizarre
+            // scoping rules: writing `verbose isVerbose()` means calling
+            // `isVerbose` on the task itself - which would return `verbose`
+            // original value. You either need to hoist the value
+            // into a separate variable `verbose verboseValue` or prefix with
+            // `this` (`verbose this.isVerbose()`).
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
@@ -884,8 +881,8 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
-                verbose isVerbose()
-                fastStart isFastStart()
+                verbose this.isVerbose()
+                fastStart this.isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -1089,7 +1086,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean fastStart
     @Input
     String targetPath
-    @Optional @Internal
+    @Optional @Input
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots

@@ -985,7 +985,7 @@ class Node {
     }
     final String content = stamp.readAsStringSync();
     // Something went wrong writing the stamp file.
-    if (content == null || content.isEmpty) {
+    if (content.isEmpty) {
       stamp.deleteSync();
       // Malformed stamp file, not safe to skip.
       _dirty = true;

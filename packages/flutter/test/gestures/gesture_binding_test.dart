@@ -35,14 +35,20 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
     return _instance!;
   }
 
-  HandleEventCallback? callback;
+  HandleEventCallback? onHandlePointerEvent;
+
+  @override
+  void handlePointerEvent(PointerEvent event) {
+    onHandlePointerEvent?.call(event);
+    super.handlePointerEvent(event);
+  }
+
+  HandleEventCallback? onHandleEvent;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null) {
-      callback?.call(event);
-    }
+    onHandleEvent?.call(event);
   }
 }
 
@@ -58,7 +64,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = events.add;
+    binding.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
@@ -76,7 +82,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = events.add;
+    binding.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
@@ -101,7 +107,7 @@ void main() {
     GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = events.add;
+    binding.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
@@ -126,7 +132,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = events.add;
+    binding.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
@@ -143,7 +149,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = (PointerEvent event) {
+    binding.onHandleEvent = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent) {
         binding.cancelPointer(event.pointer);
@@ -175,6 +181,47 @@ void main() {
     expect(events[2], isA<PointerRemovedEvent>());
     expect(events[3], isA<PointerAddedEvent>());
     expect(events[4], isA<PointerHoverEvent>());
+  });
+
+  test('Can handle malformed scrolling event.', () {
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, device: 24),
+      ],
+    );
+    List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+
+    expect(events.length, 1);
+    expect(events[0], isA<PointerAddedEvent>());
+
+    // Send packet contains malformed scroll events.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.infinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.nan, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.negativeInfinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.infinity, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.nan, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.negativeInfinity, scrollDeltaX: 10),
+      ],
+    );
+    events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+    expect(events.length, 0);
+
+    // Send packet with a valid scroll event.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: 10, scrollDeltaY: 10),
+      ],
+    );
+    // Make sure PointerEventConverter can expand when device pixel ratio is valid.
+    events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+    expect(events.length, 1);
+    expect(events[0], isA<PointerScrollEvent>());
+
+    // Make sure PointerEventConverter returns none when device pixel ratio is invalid.
+    events = PointerEventConverter.expand(packet.data, 0).toList();
+    expect(events.length, 0);
   });
 
   test('Can expand pointer scroll events', () {
@@ -348,12 +395,36 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.callback = events.add;
+    binding.onHandleEvent = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    binding.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerPanZoomStartEvent>());
     expect(events[1], isA<PointerPanZoomUpdateEvent>());
     expect(events[2], isA<PointerPanZoomEndEvent>());
+  });
+
+  test('Error handling', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.up),
+      ],
+    );
+
+    final List<String> events = <String>[];
+    binding.onHandlePointerEvent = (PointerEvent event) { throw Exception('zipzapzooey $event'); };
+    FlutterError.onError = (FlutterErrorDetails details) { events.add(details.toString()); };
+    try {
+      GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
+      expect(events.length, 1);
+      expect(events[0], contains('while handling a pointer data\npacket')); // The default stringifying behavior uses 65 character wrapWidth.
+      expect(events[0], contains('zipzapzooey'));
+      expect(events[0], contains('PointerDownEvent'));
+      expect(events[0], isNot(contains('PointerUpEvent'))); // Failure happens on the first message, remaining messages aren't processed.
+    } finally {
+      binding.onHandlePointerEvent = null;
+      FlutterError.onError = FlutterError.presentError;
+    }
   });
 }

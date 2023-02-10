@@ -113,9 +113,9 @@ class Xcode {
         final RunResult result = _processUtils.runSync(
           <String>[...xcrunCommand(), 'clang'],
         );
-        if (result.stdout != null && result.stdout.contains('license')) {
+        if (result.stdout.contains('license')) {
           _eulaSigned = false;
-        } else if (result.stderr != null && result.stderr.contains('license')) {
+        } else if (result.stderr.contains('license')) {
           _eulaSigned = false;
         } else {
           _eulaSigned = true;
@@ -181,7 +181,6 @@ class Xcode {
   }
 
   Future<String> sdkLocation(EnvironmentType environmentType) async {
-    assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
       <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
@@ -202,7 +201,6 @@ class Xcode {
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
-  assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

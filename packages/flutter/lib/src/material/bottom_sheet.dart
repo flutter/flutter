@@ -84,10 +84,7 @@ class BottomSheet extends StatefulWidget {
     this.constraints,
     required this.onClosing,
     required this.builder,
-  }) : assert(enableDrag != null),
-       assert(onClosing != null),
-       assert(builder != null),
-       assert(elevation == null || elevation >= 0.0);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -273,14 +270,16 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
-    final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
+    final BottomSheetThemeData defaults = useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
+    final Color? shadowColor = useMaterial3 ? Colors.transparent : null;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -289,6 +288,7 @@ class _BottomSheetState extends State<BottomSheet> {
       surfaceTintColor: surfaceTintColor,
       shape: shape,
       clipBehavior: clipBehavior,
+      shadowColor: shadowColor,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: widget.builder(context),
@@ -329,7 +329,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     required this.isScrollControlled,
     required this.onChildSizeChanged,
     super.child,
-  }) : assert(animationValue != null);
+  });
 
   final double animationValue;
   final bool isScrollControlled;
@@ -358,8 +358,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
-  }) : assert(animationValue != null),
-       _animationValue = animationValue,
+  }) : _animationValue = animationValue,
        _isScrollControlled = isScrollControlled,
        _onChildSizeChanged = onChildSizeChanged,
        super(child);
@@ -369,7 +368,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
   _SizeChangeCallback<Size> _onChildSizeChanged;
     set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
-    assert(newCallback != null);
     if (_onChildSizeChanged == newCallback) {
       return;
     }
@@ -381,7 +379,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   double get animationValue => _animationValue;
   double _animationValue;
   set animationValue(double newValue) {
-    assert(newValue != null);
     if (_animationValue == newValue) {
       return;
     }
@@ -393,7 +390,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   bool get isScrollControlled => _isScrollControlled;
   bool _isScrollControlled;
   set isScrollControlled(bool newValue) {
-    assert(newValue != null);
     if (_isScrollControlled == newValue) {
       return;
     }
@@ -491,8 +487,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
-  }) : assert(isScrollControlled != null),
-       assert(enableDrag != null);
+  });
 
   final ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
@@ -671,9 +666,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.transitionAnimationController,
     this.anchorPoint,
     this.useSafeArea = false,
-  }) : assert(isScrollControlled != null),
-       assert(isDismissible != null),
-       assert(enableDrag != null);
+  });
 
   /// A builder for the contents of the sheet.
   ///
@@ -884,7 +877,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildModalBarrier() {
-    if (barrierColor != null && barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
+    if (barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor.withOpacity(0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
@@ -935,8 +928,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
     this.startingPoint, {
     this.curve = Curves.easeOutCubic,
-  }) : assert(startingPoint != null),
-       assert(curve != null);
+  });
 
   /// The progress value at which [curve] should begin.
   final double startingPoint;
@@ -1034,12 +1026,6 @@ Future<T?> showModalBottomSheet<T>({
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
 }) {
-  assert(context != null);
-  assert(builder != null);
-  assert(isScrollControlled != null);
-  assert(useRootNavigator != null);
-  assert(isDismissible != null);
-  assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -1121,8 +1107,6 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   bool? enableDrag,
   AnimationController? transitionAnimationController,
 }) {
-  assert(context != null);
-  assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
   return Scaffold.of(context).showBottomSheet<T>(
@@ -1146,7 +1130,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_158
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
    const _BottomSheetDefaultsM3(this.context)

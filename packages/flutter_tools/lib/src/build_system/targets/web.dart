@@ -17,6 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../html_utils.dart';
 import '../../project.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
@@ -49,9 +50,6 @@ const String kCspMode = 'cspMode';
 
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
-
-/// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -334,6 +332,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
+    Source.pattern('{OUTPUT_DIR}/main.dart.mjs'),
   ];
 
   // TODO(jacksongardner): override `depfiles` once dart2wasm begins producing
@@ -348,7 +347,9 @@ class WebReleaseBundle extends Target {
   final WebRendererMode webRenderer;
   final bool isWasm;
 
-  String get outputFileName => isWasm ? 'main.dart.wasm' : 'main.dart.js';
+  String get outputFileNameNoSuffix => 'main.dart';
+  String get outputFileName => '$outputFileNameNoSuffix${isWasm ? '.wasm' : '.js'}';
+  String get wasmJSRuntimeFileName => '$outputFileNameNoSuffix.mjs';
 
   @override
   String get name => 'web_release_bundle';
@@ -362,11 +363,13 @@ class WebReleaseBundle extends Target {
   List<Source> get inputs => <Source>[
     Source.pattern('{BUILD_DIR}/$outputFileName'),
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    if (isWasm) Source.pattern('{BUILD_DIR}/$wasmJSRuntimeFileName'),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     Source.pattern('{OUTPUT_DIR}/$outputFileName'),
+    if (isWasm) Source.pattern('{OUTPUT_DIR}/$wasmJSRuntimeFileName'),
   ];
 
   @override
@@ -376,20 +379,20 @@ class WebReleaseBundle extends Target {
     'web_resources.d',
   ];
 
+  bool shouldCopy(String name) =>
+      // Do not copy the deps file.
+      (name.contains(outputFileName) && !name.endsWith('.deps')) ||
+      (isWasm && name == wasmJSRuntimeFileName);
+
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = globals.fs.path.basename(outputFile.path);
-      if (!basename.contains(outputFileName)) {
-        continue;
+      if (shouldCopy(basename)) {
+        outputFile.copySync(
+          environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
+        );
       }
-      // Do not copy the deps file.
-      if (basename.endsWith('.deps')) {
-        continue;
-      }
-      outputFile.copySync(
-        environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
-      );
     }
 
     if (isWasm) {
@@ -437,25 +440,12 @@ class WebReleaseBundle extends Target {
       // because it would need to be the hash for the entire bundle and not just the resource
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final String randomHash = Random().nextInt(4294967296).toString();
-        String resultString = inputFile.readAsStringSync()
-          .replaceFirst(
-            'var serviceWorkerVersion = null',
-            "var serviceWorkerVersion = '$randomHash'",
-          )
-          // This is for legacy index.html that still use the old service
-          // worker loading mechanism.
-          .replaceFirst(
-            "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
-          );
-        final String? baseHref = environment.defines[kBaseHref];
-        if (resultString.contains(kBaseHrefPlaceholder) && baseHref == null) {
-          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
-        } else if (resultString.contains(kBaseHrefPlaceholder) && baseHref != null) {
-          resultString = resultString.replaceAll(kBaseHrefPlaceholder, baseHref);
-        }
-        outputFile.writeAsStringSync(resultString);
+        final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
+        indexHtml.applySubstitutions(
+          baseHref: environment.defines[kBaseHref] ?? '/',
+          serviceWorkerVersion: Random().nextInt(4294967296).toString(),
+        );
+        outputFile.writeAsStringSync(indexHtml.content);
         continue;
       }
       inputFile.copySync(outputFile.path);
@@ -533,16 +523,6 @@ class WebBuiltInAssets extends Target {
     }
 
     if (isWasm) {
-      final String dartSdkPath =
-        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath);
-      final File dart2wasmRuntime = fileSystem.directory(dartSdkPath)
-        .childDirectory('bin')
-        .childFile('dart2wasm_runtime.mjs');
-      final String targetPath = fileSystem.path.join(
-        environment.outputDir.path,
-        'dart2wasm_runtime.mjs');
-      dart2wasmRuntime.copySync(targetPath);
-
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
       bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
     }
