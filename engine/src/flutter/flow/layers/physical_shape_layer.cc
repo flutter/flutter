@@ -38,7 +38,7 @@ void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
   } else {
     bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
         path_, elevation_, context->frame_device_pixel_ratio(),
-        context->GetTransform());
+        context->GetTransform3x3());
   }
 
   context->AddLayerBounds(bounds);

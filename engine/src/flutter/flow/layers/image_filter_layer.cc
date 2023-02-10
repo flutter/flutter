@@ -29,12 +29,11 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
   context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
   if (context->has_raster_cache()) {
-    context->SetTransform(
-        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+    context->WillPaintWithIntegralTransform();
   }
 
   if (filter_) {
-    auto filter = filter_->makeWithLocalMatrix(context->GetTransform());
+    auto filter = filter_->makeWithLocalMatrix(context->GetTransform3x3());
     if (filter) {
       // This transform will be applied to every child rect in the subtree
       context->PushFilterBoundsAdjustment([filter](SkRect rect) {

@@ -53,8 +53,7 @@ void DisplayListLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
   context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
   if (context->has_raster_cache()) {
-    context->SetTransform(
-        RasterCacheUtil::GetIntegralTransCTM(context->GetTransform()));
+    context->WillPaintWithIntegralTransform();
   }
   context->AddLayerBounds(display_list()->bounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
