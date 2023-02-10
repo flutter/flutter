@@ -8,7 +8,7 @@
 #include "flutter/display_list/display_list_complexity_gl.h"
 #include "flutter/display_list/display_list_complexity_metal.h"
 #include "flutter/display_list/display_list_sampling_options.h"
-#include "flutter/display_list/display_list_test_utils.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkColor.h"
 

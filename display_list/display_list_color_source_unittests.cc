@@ -5,12 +5,12 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/display_list/display_list_attributes_testing.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_color_source.h"
 #include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_runtime_effect.h"
 #include "flutter/display_list/display_list_sampling_options.h"
+#include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/types.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/core/SkSurface.h"
