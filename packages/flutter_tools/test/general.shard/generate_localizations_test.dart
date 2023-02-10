@@ -2345,7 +2345,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                      ^'''));
         }
       });
- 
+
       testWithoutContext('errors thrown in multiple languages are all shown', () {
         const String messageEn = '''
 {
