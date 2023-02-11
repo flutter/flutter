@@ -287,6 +287,12 @@ class Rasterizer final : public SnapshotDelegate,
     /// container is used.
     ///
     CompressedImage,
+
+    //--------------------------------------------------------------------------
+    /// Reads the data directly from the Rasterizer's surface. The pixel format
+    /// is determined from the surface. This is the only way to read wide gamut
+    /// color data, but isn't supported everywhere.
+    SurfaceData,
   };
 
   //----------------------------------------------------------------------------
@@ -308,6 +314,11 @@ class Rasterizer final : public SnapshotDelegate,
     SkISize frame_size = SkISize::MakeEmpty();
 
     //--------------------------------------------------------------------------
+    /// Characterization of the format of the data in `data`.
+    ///
+    std::string format;
+
+    //--------------------------------------------------------------------------
     /// @brief      Creates an empty screenshot
     ///
     Screenshot();
@@ -317,8 +328,11 @@ class Rasterizer final : public SnapshotDelegate,
     ///
     /// @param[in]  p_data  The screenshot data
     /// @param[in]  p_size  The screenshot size.
+    /// @param[in]  p_format  The screenshot format.
     ///
-    Screenshot(sk_sp<SkData> p_data, SkISize p_size);
+    Screenshot(sk_sp<SkData> p_data,
+               SkISize p_size,
+               const std::string& p_format);
 
     //--------------------------------------------------------------------------
     /// @brief      The copy constructor for a screenshot.

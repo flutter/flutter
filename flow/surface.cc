@@ -30,4 +30,8 @@ impeller::AiksContext* Surface::GetAiksContext() const {
   return nullptr;
 }
 
+Surface::SurfaceData Surface::GetSurfaceData() const {
+  return {};
+}
+
 }  // namespace flutter
