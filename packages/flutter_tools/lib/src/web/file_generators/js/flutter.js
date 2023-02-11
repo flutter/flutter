@@ -115,6 +115,11 @@ _flutter.loader = null;
      * @returns {Promise} that resolves when the latest serviceWorker is ready.
      */
     loadServiceWorker(settings) {
+      if (settings == null) {
+        // In the future, settings = null -> uninstall service worker?
+        console.debug("Null serviceWorker configuration. Skipping.");
+        return Promise.resolve();
+      }
       if (!("serviceWorker" in navigator)) {
         let errorMessage = "Service Worker API unavailable.";
         if (!window.isSecureContext) {
@@ -124,11 +129,6 @@ _flutter.loader = null;
         return Promise.reject(
           new Error(errorMessage)
         );
-      }
-      if (settings == null) {
-        // In the future, settings = null -> uninstall service worker?
-        console.debug("Null serviceWorker configuration. Skipping.");
-        return Promise.resolve();
       }
       const {
         serviceWorkerVersion,
