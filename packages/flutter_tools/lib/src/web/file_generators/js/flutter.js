@@ -116,8 +116,13 @@ _flutter.loader = null;
      */
     loadServiceWorker(settings) {
       if (!("serviceWorker" in navigator)) {
+        let errorMessage = "Service Worker API unavailable.";
+        if (!window.isSecureContext) {
+          errorMessage += "\nThe current context is NOT secure."
+          errorMessage += "\nRead more: https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts";
+        }
         return Promise.reject(
-          new Error("Service Worker API unavailable.")
+          new Error(errorMessage)
         );
       }
       if (settings == null) {
