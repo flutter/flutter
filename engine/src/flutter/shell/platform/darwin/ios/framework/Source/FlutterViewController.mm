@@ -161,7 +161,9 @@ typedef struct MouseState {
     }
     _engine.reset([engine retain]);
     _engineNeedsLaunch = NO;
-    _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
+    _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine
+                                                      opaque:self.isViewOpaque
+                                             enableWideGamut:engine.project.isWideGamutEnabled]);
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
     _ongoingTouches.reset([[NSMutableSet alloc] init]);
 
@@ -236,7 +238,9 @@ typedef struct MouseState {
 
   _viewOpaque = YES;
   _engine = engine;
-  _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
+  _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine
+                                                    opaque:self.isViewOpaque
+                                           enableWideGamut:project.isWideGamutEnabled]);
   [_engine.get() createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;
   _ongoingTouches.reset([[NSMutableSet alloc] init]);

@@ -81,6 +81,8 @@ extern NSString* _Nonnull const kFlutterEngineWillDealloc;
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
+
+@property(nonatomic, readonly, nonnull) FlutterDartProject* project;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_ENGINE_INTERNAL_H_

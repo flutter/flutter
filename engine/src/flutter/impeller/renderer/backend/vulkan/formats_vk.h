@@ -137,6 +137,8 @@ constexpr std::optional<vk::ShaderStageFlagBits> ToVKShaderStageFlagBits(
 constexpr vk::Format ToVKImageFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
       return vk::Format::eUndefined;
     case PixelFormat::kA8UNormInt:
       return vk::Format::eR8Unorm;

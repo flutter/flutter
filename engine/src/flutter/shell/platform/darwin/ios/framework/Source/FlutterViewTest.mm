@@ -43,7 +43,7 @@
 
 - (void)testFlutterViewEnableSemanticsWhenIsAccessibilityElementIsCalled {
   FakeDelegate* delegate = [[FakeDelegate alloc] init];
-  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO];
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO enableWideGamut:NO];
   delegate.callbackCalled = NO;
   XCTAssertFalse(view.isAccessibilityElement);
   XCTAssertTrue(delegate.callbackCalled);
@@ -51,7 +51,7 @@
 
 - (void)testFlutterViewBackgroundColorIsNotNil {
   FakeDelegate* delegate = [[FakeDelegate alloc] init];
-  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO];
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO enableWideGamut:NO];
   XCTAssertNotNil(view.backgroundColor);
 }
 

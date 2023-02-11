@@ -711,22 +711,32 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   }
 
   sk_sp<SkData> data = nullptr;
+  std::string format;
 
   GrDirectContext* surface_context =
       surface_ ? surface_->GetContext() : nullptr;
 
   switch (type) {
     case ScreenshotType::SkiaPicture:
+      format = "ScreenshotType::SkiaPicture";
       data = ScreenshotLayerTreeAsPicture(layer_tree, *compositor_context_);
       break;
     case ScreenshotType::UncompressedImage:
+      format = "ScreenshotType::UncompressedImage";
       data = ScreenshotLayerTreeAsImage(layer_tree, *compositor_context_,
                                         surface_context, false);
       break;
     case ScreenshotType::CompressedImage:
+      format = "ScreenshotType::CompressedImage";
       data = ScreenshotLayerTreeAsImage(layer_tree, *compositor_context_,
                                         surface_context, true);
       break;
+    case ScreenshotType::SurfaceData: {
+      Surface::SurfaceData surface_data = surface_->GetSurfaceData();
+      format = surface_data.pixel_format;
+      data = surface_data.data;
+      break;
+    }
   }
 
   if (data == nullptr) {
@@ -738,10 +748,10 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     size_t b64_size = SkBase64::Encode(data->data(), data->size(), nullptr);
     auto b64_data = SkData::MakeUninitialized(b64_size);
     SkBase64::Encode(data->data(), data->size(), b64_data->writable_data());
-    return Rasterizer::Screenshot{b64_data, layer_tree->frame_size()};
+    return Rasterizer::Screenshot{b64_data, layer_tree->frame_size(), format};
   }
 
-  return Rasterizer::Screenshot{data, layer_tree->frame_size()};
+  return Rasterizer::Screenshot{data, layer_tree->frame_size(), format};
 }
 
 void Rasterizer::SetNextFrameCallback(const fml::closure& callback) {
@@ -810,8 +820,10 @@ std::optional<size_t> Rasterizer::GetResourceCacheMaxBytes() const {
 
 Rasterizer::Screenshot::Screenshot() {}
 
-Rasterizer::Screenshot::Screenshot(sk_sp<SkData> p_data, SkISize p_size)
-    : data(std::move(p_data)), frame_size(p_size) {}
+Rasterizer::Screenshot::Screenshot(sk_sp<SkData> p_data,
+                                   SkISize p_size,
+                                   const std::string& p_format)
+    : data(std::move(p_data)), frame_size(p_size), format(p_format) {}
 
 Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 

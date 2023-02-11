@@ -91,6 +91,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 ///
 /// Used for testing deallocation.
 @interface MockEngine : NSObject
+@property(nonatomic, strong) FlutterDartProject* project;
 @end
 
 @implementation MockEngine

@@ -104,4 +104,20 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   return mtl_desc;
 }
 
+MTLPixelFormat SafeMTLPixelFormatBGR10_XR_sRGB() {
+  if (@available(iOS 11, macOS 11.0, *)) {
+    return MTLPixelFormatBGR10_XR_sRGB;
+  } else {
+    return MTLPixelFormatInvalid;
+  }
+}
+
+MTLPixelFormat SafeMTLPixelFormatBGR10_XR() {
+  if (@available(iOS 10, macOS 11.0, *)) {
+    return MTLPixelFormatBGR10_XR;
+  } else {
+    return MTLPixelFormatInvalid;
+  }
+}
+
 }  // namespace impeller
