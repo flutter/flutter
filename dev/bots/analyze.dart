@@ -47,10 +47,9 @@ Future<void> main(List<String> arguments) async {
   printProgress('STARTING ANALYSIS');
   await run(arguments);
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Analysis failed.$reset');
   }
-  printProgress('${bold}Analysis successful.$reset');
+  reportSuccessAndExit('${bold}Analysis successful.$reset');
 }
 
 /// Scans [arguments] for an argument of the form `--dart-sdk` or
@@ -169,8 +168,9 @@ Future<void> run(List<String> arguments) async {
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
+  // We specify a failureMessage so that the actual output is muted in the case where _runFlutterAnalyze above already failed.
   printProgress('Dart analysis (with --watch)...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
+  await _runFlutterAnalyze(flutterRoot, failureMessage: 'Dart analyzer failed when --watch was used.', options: <String>[
     '--flutter-repo',
     '--watch',
     '--benchmark',
@@ -196,7 +196,7 @@ Future<void> run(List<String> arguments) async {
       ],
       workingDirectory: flutterRoot,
     );
-    await _runFlutterAnalyze(outDir.path, options: <String>[
+    await _runFlutterAnalyze(outDir.path, failureMessage: 'Dart analyzer failed on mega_gallery benchmark.', options: <String>[
       '--watch',
       '--benchmark',
       ...arguments,
@@ -1942,11 +1942,13 @@ Diff at character #$indexOfDifference
 
 Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
+  String? failureMessage,
 }) async {
   return runCommand(
     flutter,
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
+    failureMessage: failureMessage,
   );
 }
 

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_js.dart' as flutter_js;
@@ -784,19 +785,40 @@ void main() {
   }));
 
   test('Generated service worker is empty with none-strategy', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
+    final String fileGeneratorsPath =
+        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
+    final String result = generateServiceWorker(
+      fileGeneratorsPath,
+      <String, String>{'/foo': 'abcd'},
+      <String>[],
+      serviceWorkerStrategy: ServiceWorkerStrategy.none,
+    );
 
     expect(result, '');
   });
 
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
+    final String fileGeneratorsPath =
+        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
+    final String result = generateServiceWorker(
+      fileGeneratorsPath,
+      <String, String>{'/foo': 'abcd'},
+      <String>[],
+      serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
+    );
 
-    expect(result, contains('{\n  "/foo": "abcd"\n};'));
+    expect(result, contains('{"/foo": "abcd"};'));
   });
 
   test('Generated service worker includes core files', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar'], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
+    final String fileGeneratorsPath =
+        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
+    final String result = generateServiceWorker(
+      fileGeneratorsPath,
+      <String, String>{'/foo': 'abcd'},
+      <String>['foo', 'bar'],
+      serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
+    );
 
     expect(result, contains('"foo",\n"bar"'));
   });
@@ -853,7 +875,10 @@ void main() {
   }));
 
   test('flutter.js sanity checks', () {
-    final String flutterJsContents = flutter_js.generateFlutterJsFile();
+    final String fileGeneratorsPath = environment.artifacts
+        .getArtifactPath(Artifact.flutterToolsFileGenerators);
+    final String flutterJsContents =
+        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
     expect(flutterJsContents, contains('"use strict";'));
     expect(flutterJsContents, contains('main.dart.js'));
     expect(flutterJsContents, contains('flutter_service_worker.js?v='));
@@ -872,8 +897,14 @@ void main() {
     await WebBuiltInAssets(globals.fs, globals.cache, false).build(environment);
 
     // No caching of source maps.
-    expect(environment.outputDir.childFile('flutter.js').readAsStringSync(),
-      equals(flutter_js.generateFlutterJsFile()));
+    final String fileGeneratorsPath = environment.artifacts
+        .getArtifactPath(Artifact.flutterToolsFileGenerators);
+    final String flutterJsContents =
+        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
+    expect(
+      environment.outputDir.childFile('flutter.js').readAsStringSync(),
+      equals(flutterJsContents),
+    );
   }));
 
   test('wasm build copies and generates specific files', () => testbed.run(() async {

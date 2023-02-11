@@ -142,7 +142,7 @@ void main() {
       throwsA(isA<UnimplementedError>()),
     );
     await expectLater(() => device.buildForDevice(buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
-    expect(device.executablePathForDevice(FakeIOSApp(), BuildMode.debug), null);
+    expect(device.executablePathForDevice(FakeIOSApp(), BuildInfo.debug), null);
   });
 }
 

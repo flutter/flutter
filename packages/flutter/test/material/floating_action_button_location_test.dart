@@ -317,8 +317,8 @@ void main() {
           appBar: AppBar(),
           floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
           floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-          body: Column(
-            children: const <Widget>[
+          body: const Column(
+            children: <Widget>[
               ListTile(
                 leading: CircleAvatar(),
               ),

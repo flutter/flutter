@@ -283,7 +283,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
-          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analzye --suggestions" command.', exitCode: 2);
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },

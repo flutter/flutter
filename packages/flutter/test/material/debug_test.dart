@@ -192,8 +192,6 @@ void main() {
       '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromView\n'
       '     Semantics\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
