@@ -16,8 +16,16 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
+static BOOL IsWideGamutSupported() {
+  // This predicates the decision on the capabilities of the iOS device's
+  // display.  This means external displays will not support wide gamut if the
+  // device's display doesn't support it.  It practice that should be never.
+  return UIScreen.mainScreen.traitCollection.displayGamut != UIDisplayGamutSRGB;
+}
+
 @implementation FlutterView {
   id<FlutterViewEngineDelegate> _delegate;
+  BOOL _isWideGamutEnabled;
 }
 
 - (instancetype)init {
@@ -35,7 +43,9 @@
   return nil;
 }
 
-- (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate opaque:(BOOL)opaque {
+- (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate
+                          opaque:(BOOL)opaque
+                 enableWideGamut:(BOOL)isWideGamutEnabled {
   if (delegate == nil) {
     NSLog(@"FlutterView delegate was nil.");
     [self release];
@@ -46,6 +56,7 @@
 
   if (self) {
     _delegate = delegate;
+    _isWideGamutEnabled = isWideGamutEnabled;
     self.layer.opaque = opaque;
 
     // This line is necessary. CoreAnimation(or UIKit) may take this to do
@@ -60,10 +71,27 @@
 
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+// It is a known Apple bug that CAMetalLayer incorrectly reports its supported
+// SDKs. It is, in fact, available since iOS 8.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    CAMetalLayer* layer = (CAMetalLayer*)self.layer;
+#pragma clang diagnostic pop
     CGFloat screenScale = [UIScreen mainScreen].scale;
-    self.layer.allowsGroupOpacity = YES;
-    self.layer.contentsScale = screenScale;
-    self.layer.rasterizationScale = screenScale;
+    layer.allowsGroupOpacity = YES;
+    layer.contentsScale = screenScale;
+    layer.rasterizationScale = screenScale;
+    layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
+    if (_isWideGamutEnabled && IsWideGamutSupported()) {
+      CGColorSpaceRef srgb = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
+      layer.colorspace = srgb;
+      CFRelease(srgb);
+      if (self.opaque) {
+        layer.pixelFormat = MTLPixelFormatBGR10_XR;
+      } else {
+        layer.pixelFormat = MTLPixelFormatBGRA10_XR;
+      }
+    }
   }
 
   [super layoutSubviews];

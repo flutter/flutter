@@ -15,7 +15,7 @@ namespace impeller {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
 
-std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
+std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     const std::shared_ptr<Context>& context,
     CAMetalLayer* layer) {
   TRACE_EVENT0("impeller", "SurfaceMTL::WrapCurrentMetalLayerDrawable");
