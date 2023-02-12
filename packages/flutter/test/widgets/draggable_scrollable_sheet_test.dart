@@ -831,7 +831,88 @@ void main() {
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.25, precisionErrorTolerance),
     );
+  }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Fling-snap continues if widget tree is rebuilt', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+
+    Widget buildWidget() {
+      return boilerplateWidget(
+        snap: true,
+        stackKey: stackKey,
+        containerKey: containerKey,
+        snapSizes: const <double>[.5],
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(1, precisionErrorTolerance),
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Fling snaps to updated snap point', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+
+    await tester.pumpWidget(boilerplateWidget(
+      snap: true,
+      stackKey: stackKey,
+      containerKey: containerKey,
+      snapSizes: const <double>[.5],
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    await tester.fling(find.text('Item 1'), Offset(0, -.1 * screenHeight), 1000);
+    await tester.pumpWidget(boilerplateWidget(
+      snap: true,
+      stackKey: stackKey,
+      containerKey: containerKey,
+      snapSizes: const <double>[.5, .75],
+    ));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Fling snaps to updated dimensions', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+
+    await tester.pumpWidget(boilerplateWidget(
+      snap: true,
+      stackKey: stackKey,
+      containerKey: containerKey,
+      snapSizes: const <double>[.5, .75],
+    ));
+    await tester.pumpAndSettle();
+    final double oldScreenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    await tester.fling(find.text('Item 1'), Offset(0, -.1 * oldScreenHeight), 1000);
+
+    final Size physicalSize = tester.binding.window.physicalSize;
+    tester.binding.window.physicalSizeTestValue = Size(physicalSize.width, 2.0 * physicalSize.height);
+    // Other tests expect the default dimensions.
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+    await tester.pumpAndSettle();
+    final double newScreenHeight = tester.getSize(find.byKey(stackKey)).height;
+    assert(newScreenHeight == 2.0 * oldScreenHeight);
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / newScreenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
   }, variant: TargetPlatformVariant.all());
 
   testWidgets("Changing parameters with an un-listened controller doesn't throw", (WidgetTester tester) async {

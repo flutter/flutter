@@ -685,6 +685,11 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       builder: (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+
+          for (final _DraggableScrollableSheetScrollPosition position in _scrollController.positions) {
+            position.applyNewOuterDimensions(isLayout: true);
+          }
+
           final Widget sheet = FractionallySizedBox(
             heightFactor: currentSize,
             alignment: Alignment.bottomCenter,
@@ -731,10 +736,8 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       // this runs-we can't use the previous extent's available pixels as it may
       // have changed when the widget was updated.
       WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        for (int index = 0; index < _scrollController.positions.length; index++) {
-          final _DraggableScrollableSheetScrollPosition position =
-            _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
-          position.goBallistic(0);
+        for (final _DraggableScrollableSheetScrollPosition position in _scrollController.positions) {
+          position.applyNewOuterDimensions(isLayout: false);
         }
       });
     }
@@ -798,6 +801,10 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   }
 
   @override
+  Iterable<_DraggableScrollableSheetScrollPosition> get positions =>
+      super.positions.cast<_DraggableScrollableSheetScrollPosition>();
+
+  @override
   _DraggableScrollableSheetScrollPosition get position =>
       super.position as _DraggableScrollableSheetScrollPosition;
 
@@ -842,9 +849,18 @@ class _SheetBallisticScrollActivity extends BallisticScrollActivity {
   @override
   double get velocity => 0.0;
 
+  // The velocity of the outer sheet. This is used to transfer velocity when the
+  // widget is updated while a sheet ballistic scrolling activity is underway.
+  double get outerVelocity => super.velocity;
+
   @override
   void applyNewDimensions() {
     // This is expected to happen continuously while scrolling the outer sheet.
+  }
+
+  /// Re-evaluates scroll physics for updated max dimensions or snap positions.
+  void applyNewOuterDimensions() {
+    delegate.goBallistic(outerVelocity);
   }
 
   @override
@@ -853,14 +869,13 @@ class _SheetBallisticScrollActivity extends BallisticScrollActivity {
     extent.updateSize(
         extent.pixelsToSize(value), delegate.context.notificationContext!);
 
-    final double velocity = super.velocity;
-    if ((velocity < 0.0 && extent.isAtMin) ||
-        (velocity > 0.0 && extent.isAtMax)) {
+    if ((outerVelocity < 0.0 && extent.isAtMin) ||
+        (outerVelocity > 0.0 && extent.isAtMax)) {
       // Make sure we pass along enough velocity to keep scrolling - otherwise
       // we just "bounce" off the top making it look like the list doesn't have
       // more to scroll.
-      delegate.goBallistic(velocity +
-          delegate.physics.toleranceFor(delegate).velocity * velocity.sign);
+      delegate.goBallistic(outerVelocity +
+          delegate.physics.toleranceFor(delegate).velocity * outerVelocity.sign);
     }
 
     return true;
@@ -949,6 +964,19 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         --extent.activePositionCount;
         assert(extent.activePositionCount >= 0);
       }
+    }
+  }
+
+  /// Re-evaluates scroll physics for updated max dimensions or snap positions.
+  ///
+  /// Skips plain [ScrollActivity.applyNewDimensions] calls if we're in a layout
+  /// since that will happen anyway if needed.
+  void applyNewOuterDimensions({required bool isLayout}) {
+    final ScrollActivity? activity = this.activity;
+    if (activity is _SheetBallisticScrollActivity) {
+      activity.applyNewOuterDimensions();
+    } else if (!isLayout) {
+      activity?.applyNewDimensions();
     }
   }
 
