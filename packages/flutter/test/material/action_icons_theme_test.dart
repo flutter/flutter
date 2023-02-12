@@ -86,9 +86,9 @@ void main() {
         theme: ThemeData.light(useMaterial3: true).copyWith(
           actionIconTheme: actionIconTheme,
         ),
-        home: Material(
+        home: const Material(
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               BackButton(),
               CloseButton(),
               DrawerButton(),
@@ -146,9 +146,9 @@ void main() {
       MaterialApp(
         home: ActionIconTheme(
           data: actionIconTheme,
-          child: Material(
+          child: const Material(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 BackButton(),
                 CloseButton(),
                 DrawerButton(),

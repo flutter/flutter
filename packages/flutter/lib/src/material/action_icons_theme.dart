@@ -63,9 +63,7 @@ class ActionIconThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two action icon themes.
-  static ActionIconThemeData? lerp(
-      ActionIconThemeData? a, ActionIconThemeData? b, double t) {
-    assert(t != null);
+  static ActionIconThemeData? lerp(ActionIconThemeData? a, ActionIconThemeData? b, double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -97,12 +95,11 @@ class ActionIconThemeData with Diagnosticable {
       return false;
     }
     return other is ActionIconThemeData
-        && other.backButtonIconBuilder == backButtonIconBuilder
-        && other.closeButtonIconBuilder == closeButtonIconBuilder
-        && other.drawerButtonIconBuilder == drawerButtonIconBuilder
-        && other.endDrawerButtonIconBuilder == endDrawerButtonIconBuilder;
+    && other.backButtonIconBuilder == backButtonIconBuilder
+    && other.closeButtonIconBuilder == closeButtonIconBuilder
+    && other.drawerButtonIconBuilder == drawerButtonIconBuilder
+    && other.endDrawerButtonIconBuilder == endDrawerButtonIconBuilder;
   }
-
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -113,7 +110,6 @@ class ActionIconThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<WidgetBuilder>('endDrawerButtonIconBuilder', endDrawerButtonIconBuilder, defaultValue: null));
   }
 }
-
 
 /// An inherited widget that overrides the default icon of [BackButtonIcon],
 /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
@@ -126,7 +122,7 @@ class ActionIconTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the default icon overrides for descendant [BackButtonIcon],
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] widgets.
