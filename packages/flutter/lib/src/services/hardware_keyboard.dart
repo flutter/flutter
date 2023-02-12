@@ -100,7 +100,7 @@ abstract class KeyEvent with Diagnosticable {
   /// is a mnemonic ("keyA" is easier to remember than 0x70004), derived from the
   /// key's effect on a QWERTY keyboard. The name does not represent the key's
   /// effect whatsoever (a physical "keyA" can be the Q key on an AZERTY
-  /// keyboard.)
+  /// keyboard).
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing a
@@ -241,6 +241,9 @@ class KeyUpEvent extends KeyEvent {
 /// An event indicating that the user has been holding a key on the keyboard
 /// and causing repeated events.
 ///
+/// Repeat events are not guaranteed and are provided only if supported by the
+/// underlying platform.
+///
 /// See also:
 ///
 ///  * [KeyDownEvent], a key event representing the user
@@ -258,7 +261,7 @@ class KeyRepeatEvent extends KeyEvent {
   });
 }
 
-/// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
+/// The signature for [HardwareKeyboard.addHandler], a callback to decide whether
 /// the entire framework handles a key event.
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
@@ -737,7 +740,7 @@ class KeyEventManager {
   /// The global entrance which handles all key events sent to Flutter.
   ///
   /// Typical applications use [WidgetsBinding], where this field is
-  /// set by the focus system (see `FocusManger`) on startup to a function that
+  /// set by the focus system (see `FocusManager`) on startup to a function that
   /// dispatches incoming events to the focus system, including
   /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
   /// the application does not need to read, assign, or invoke this value.

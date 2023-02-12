@@ -133,7 +133,6 @@ class Net {
       _logger.printTrace('Download error: $error');
       return false;
     }
-    assert(response != null);
 
     // If we're making a HEAD request, we're only checking to see if the URL is
     // valid.

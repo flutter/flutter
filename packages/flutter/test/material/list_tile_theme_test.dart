@@ -71,6 +71,7 @@ void main() {
     expect(themeData.enableFeedback, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.visualDensity, null);
+    expect(themeData.titleAlignment, null);
   });
 
   testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
@@ -106,6 +107,7 @@ void main() {
       enableFeedback: true,
       mouseCursor: MaterialStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
+      titleAlignment: ListTileTitleAlignment.top,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -134,6 +136,7 @@ void main() {
         'enableFeedback: true',
         'mouseCursor: MaterialStateMouseCursor(clickable)',
         'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
+        'titleAlignment: ListTileTitleAlignment.top',
       ]),
     );
   });
@@ -215,6 +218,7 @@ void main() {
                 selectedColor: selectedColor,
                 iconColor: iconColor,
                 textColor: textColor,
+                minVerticalPadding: 25.0,
                 mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
@@ -223,6 +227,7 @@ void main() {
                   return SystemMouseCursors.click;
                 }),
                 visualDensity: VisualDensity.compact,
+                titleAlignment: ListTileTitleAlignment.bottom,
               ),
               child: Builder(
                 builder: (BuildContext context) {
@@ -311,7 +316,14 @@ void main() {
 
     // VisualDensity is respected
     final RenderBox box = tester.renderObject(find.byKey(listTileKey));
-    expect(box.size, equals(const Size(800, 64.0)));
+    expect(box.size, equals(const Size(800, 80.0)));
+
+    // titleAlignment is respected.
+    final Offset titleOffset = tester.getTopLeft(find.text('title'));
+    final Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+    expect(leadingOffset.dy - titleOffset.dy, 6);
+    expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
   testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
@@ -378,8 +390,8 @@ void main() {
     "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      listTileTheme: const ListTileThemeData(
+        useMaterial3: true,
+        listTileTheme: const ListTileThemeData(
         titleTextStyle: TextStyle(fontSize: 20.0),
         subtitleTextStyle: TextStyle(fontSize: 17.5),
         leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
@@ -396,7 +408,7 @@ void main() {
                 return const ListTile(
                   leading: TestText('leading'),
                   title: TestText('title'),
-                  subtitle: TestText('subtitle') ,
+                  subtitle: TestText('subtitle'),
                   trailing: TestText('trailing'),
                 );
               },
@@ -446,7 +458,7 @@ void main() {
                   leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
                   leading: TestText('leading'),
                   title: TestText('title'),
-                  subtitle: TestText('subtitle') ,
+                  subtitle: TestText('subtitle'),
                   trailing: TestText('trailing'),
                 );
               },
@@ -595,11 +607,9 @@ void main() {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
-
           if (states.contains(MaterialState.selected)) {
             return selectedColor;
           }
-
           return defaultColor;
         }),
       ),
@@ -658,11 +668,9 @@ void main() {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
-
           if (states.contains(MaterialState.selected)) {
             return selectedColor;
           }
-
           return defaultColor;
         }),
       ),
@@ -703,6 +711,104 @@ void main() {
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(iconColor(leadingKey), selectedColor);
+  });
+
+  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/119734
+
+    const ListTileThemeData original = ListTileThemeData(
+      dense: true,
+      shape: StadiumBorder(),
+      style: ListTileStyle.drawer,
+      selectedColor: Color(0x00000001),
+      iconColor: Color(0x00000002),
+      textColor: Color(0x00000003),
+      titleTextStyle: TextStyle(color: Color(0x00000004)),
+      subtitleTextStyle: TextStyle(color: Color(0x00000005)),
+      leadingAndTrailingTextStyle: TextStyle(color: Color(0x00000006)),
+      contentPadding: EdgeInsets.all(100),
+      tileColor: Color(0x00000007),
+      selectedTileColor: Color(0x00000008),
+      horizontalTitleGap: 200,
+      minVerticalPadding: 300,
+      minLeadingWidth: 400,
+      enableFeedback: true,
+      titleAlignment: ListTileTitleAlignment.bottom,
+    );
+
+    final ListTileThemeData copy = original.copyWith(
+      dense: false,
+      shape: const RoundedRectangleBorder(),
+      style: ListTileStyle.list,
+      selectedColor: const Color(0x00000009),
+      iconColor: const Color(0x0000000A),
+      textColor: const Color(0x0000000B),
+      titleTextStyle: const TextStyle(color: Color(0x0000000C)),
+      subtitleTextStyle: const TextStyle(color: Color(0x0000000D)),
+      leadingAndTrailingTextStyle: const TextStyle(color: Color(0x0000000E)),
+      contentPadding: const EdgeInsets.all(500),
+      tileColor: const Color(0x0000000F),
+      selectedTileColor: const Color(0x00000010),
+      horizontalTitleGap: 600,
+      minVerticalPadding: 700,
+      minLeadingWidth: 800,
+      enableFeedback: false,
+      titleAlignment: ListTileTitleAlignment.top,
+    );
+
+    expect(copy.dense, false);
+    expect(copy.shape, const RoundedRectangleBorder());
+    expect(copy.style, ListTileStyle.list);
+    expect(copy.selectedColor, const Color(0x00000009));
+    expect(copy.iconColor, const Color(0x0000000A));
+    expect(copy.textColor, const Color(0x0000000B));
+    expect(copy.titleTextStyle, const TextStyle(color: Color(0x0000000C)));
+    expect(copy.subtitleTextStyle, const TextStyle(color: Color(0x0000000D)));
+    expect(copy.leadingAndTrailingTextStyle, const TextStyle(color: Color(0x0000000E)));
+    expect(copy.contentPadding, const EdgeInsets.all(500));
+    expect(copy.tileColor, const Color(0x0000000F));
+    expect(copy.selectedTileColor, const Color(0x00000010));
+    expect(copy.horizontalTitleGap, 600);
+    expect(copy.minVerticalPadding, 700);
+    expect(copy.minLeadingWidth, 800);
+    expect(copy.enableFeedback, false);
+    expect(copy.titleAlignment, ListTileTitleAlignment.top);
+  });
+
+  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const String titleText = '\nHeadline Text\n';
+    const String subtitleText = '\nSupporting Text\n';
+
+    Widget buildFrame({ ListTileTitleAlignment? alignment }) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          listTileTheme: const ListTileThemeData(
+            titleAlignment: ListTileTitleAlignment.center,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.top,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+              title: const Text(titleText),
+              subtitle: const Text(subtitleText),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    final Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+    expect(leadingOffset.dy - tileOffset.dy, 8.0);
+    expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
 }
 

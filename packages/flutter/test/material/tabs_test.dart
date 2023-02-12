@@ -704,7 +704,7 @@ void main() {
     }
     // End the fling by reversing direction. This should cause not cause
     // a change to the selected tab, everything should just settle back to
-    // to where it started.
+    // where it started.
     for (int index = 0; index > 50; index += 1) {
       await gesture.moveBy(const Offset(10.0, 0.0));
       await tester.pump(const Duration(milliseconds: 1));
@@ -4515,10 +4515,10 @@ void main() {
 
   testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Row(
-            children: const <Tab>[
+            children: <Tab>[
               Tab(icon: Icon(Icons.message)),
               Tab(text: 'Two'),
               Tab(text: 'Three', icon: Icon(Icons.chat)),

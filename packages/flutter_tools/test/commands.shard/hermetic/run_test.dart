@@ -24,6 +24,8 @@ import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -426,7 +428,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false',
+            'cd56': 'false', 'cd57': 'usb',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -663,6 +665,104 @@ void main() {
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    group('usageValues', () {
+      testUsingContext('with only non-iOS usb device', () async {
+        final List<Device> devices = <Device>[
+          FakeDevice(targetPlatform: TargetPlatform.android_arm, platformType: PlatformType.android),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'android-arm',
+          commandRunTargetOsVersion: '',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunEnableImpeller: false,
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with only iOS usb device', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'ios',
+          commandRunTargetOsVersion: 'iOS 16.2',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunEnableImpeller: false,
+          commandRunIOSInterfaceType: 'usb',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with only iOS network device', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'ios',
+          commandRunTargetOsVersion: 'iOS 16.2',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunEnableImpeller: false,
+          commandRunIOSInterfaceType: 'wireless',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with both iOS usb and network devices', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'multiple',
+          commandRunTargetOsVersion: 'multiple',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunEnableImpeller: false,
+          commandRunIOSInterfaceType: 'wireless',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
     });
   });
 
@@ -1029,6 +1129,49 @@ class FakeDevice extends Fake implements Device {
       }
       _throwToolExit(kSuccess);
     }
+  }
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({
+    this.interfaceType = IOSDeviceConnectionInterface.none,
+    bool isLocalEmulator = false,
+    String sdkNameAndVersion = '',
+  }): _isLocalEmulator = isLocalEmulator,
+      _sdkNameAndVersion = sdkNameAndVersion;
+
+  final bool _isLocalEmulator;
+  final String _sdkNameAndVersion;
+
+  @override
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
+
+  @override
+  Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
+
+  @override
+  final IOSDeviceConnectionInterface interfaceType;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class TestRunCommandForUsageValues extends RunCommand {
+  TestRunCommandForUsageValues({
+   this.devices,
+  });
+
+  @override
+  // devices is not set within usageValues, so we override the field
+  // ignore: overridden_fields
+  List<Device>? devices;
+
+  @override
+  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   }
 }
 

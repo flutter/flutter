@@ -81,7 +81,7 @@ abstract class ListWheelChildDelegate {
 /// conditions.
 class ListWheelChildListDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a concrete list of children.
-  ListWheelChildListDelegate({required this.children}) : assert(children != null);
+  ListWheelChildListDelegate({required this.children});
 
   /// The list containing all children that can be supplied.
   final List<Widget> children;
@@ -125,7 +125,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 /// conditions.
 class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a concrete list of children.
-  ListWheelChildLoopingListDelegate({required this.children}) : assert(children != null);
+  ListWheelChildLoopingListDelegate({required this.children});
 
   /// The list containing all children that can be supplied.
   final List<Widget> children;
@@ -162,7 +162,7 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   ListWheelChildBuilderDelegate({
     required this.builder,
     this.childCount,
-  }) : assert(builder != null);
+  });
 
   /// Called lazily to build children.
   final NullableIndexedWidgetBuilder builder;
@@ -218,7 +218,7 @@ class FixedExtentScrollController extends ScrollController {
   /// [initialItem] defaults to 0 and must not be null.
   FixedExtentScrollController({
     this.initialItem = 0,
-  }) : assert(initialItem != null);
+  });
 
   /// The page to show when first creating the scroll view.
   ///
@@ -574,21 +574,13 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     required List<Widget> children,
-  }) : assert(children != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(perspective != null),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
        assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
-       assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -615,21 +607,13 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     required this.childDelegate,
-  }) : assert(childDelegate != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(perspective != null),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
        assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
-       assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -987,21 +971,12 @@ class ListWheelViewport extends RenderObjectWidget {
     required this.offset,
     required this.childDelegate,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(childDelegate != null),
-       assert(offset != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(perspective != null),
+  }) : assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
-       assert(overAndUnderCenterOpacity != null),
        assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
-       assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,

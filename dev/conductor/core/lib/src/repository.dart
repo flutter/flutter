@@ -10,7 +10,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -28,7 +27,6 @@ class Remote {
     required RemoteName name,
     required this.url,
   })  : _name = name,
-        assert(url != null),
         assert(url != '');
 
   factory Remote.mirror(String url) {
@@ -241,7 +239,6 @@ abstract class Repository {
 
   /// The URL of the remote named [remoteName].
   Future<String> remoteUrl(String remoteName) async {
-    assert(remoteName != null);
     return git.getOutput(
       <String>['remote', 'get-url', remoteName],
       'verify the URL of the $remoteName remote',
@@ -319,6 +316,27 @@ abstract class Repository {
       'obtain last released version number',
       workingDirectory: (await checkoutDirectory).path,
     );
+  }
+
+  /// Tag [commit] and push the tag to the remote.
+  Future<void> tag(String commit, String tagName, String remote) async {
+    assert(commit.isNotEmpty);
+    assert(tagName.isNotEmpty);
+    assert(remote.isNotEmpty);
+    stdio.printStatus('About to tag commit $commit as $tagName...');
+    await git.run(
+      <String>['tag', tagName, commit],
+      'tag the commit with the version label',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tagging successful.');
+    stdio.printStatus('About to push $tagName to remote $remote...');
+    await git.run(
+      <String>['push', remote, tagName],
+      'publish the tag to the repo',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tag push successful.');
   }
 
   /// List commits in reverse chronological order.
@@ -580,39 +598,12 @@ class FrameworkRepository extends Repository {
   static const String defaultUpstream = 'git@github.com:flutter/flutter.git';
   static const String defaultBranch = 'master';
 
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml =
-        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
-
   Future<String> get cacheDirectory async {
     return fileSystem.path.join(
       (await checkoutDirectory).path,
       'bin',
       'cache',
     );
-  }
-
-  /// Tag [commit] and push the tag to the remote.
-  Future<void> tag(String commit, String tagName, String remote) async {
-    assert(commit.isNotEmpty);
-    assert(tagName.isNotEmpty);
-    assert(remote.isNotEmpty);
-    stdio.printStatus('About to tag commit $commit as $tagName...');
-    await git.run(
-      <String>['tag', tagName, commit],
-      'tag the commit with the version label',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tagging successful.');
-    stdio.printStatus('About to push $tagName to remote $remote...');
-    await git.run(
-      <String>['push', remote, tagName],
-      'publish the tag to the repo',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tag push successful.');
   }
 
   @override
@@ -859,11 +850,6 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
-
   static const String defaultUpstream = 'git@github.com:flutter/engine.git';
   static const String defaultBranch = 'main';
 
@@ -931,27 +917,4 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
-}
-
-class CiYaml {
-  CiYaml(this.file) {
-    if (!file.existsSync()) {
-      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
-    }
-  }
-
-  /// Underlying [File] that this object wraps.
-  final File file;
-
-  /// Returns the raw string contents of this file.
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  String get stringContents => file.readAsStringSync();
-
-  /// Returns the parsed contents of the file as a [YamlMap].
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  YamlMap get contents => loadYaml(stringContents) as YamlMap;
 }

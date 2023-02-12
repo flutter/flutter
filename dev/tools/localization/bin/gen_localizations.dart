@@ -71,12 +71,8 @@ String generateArbBasedLocalizationSubclasses({
   required String supportedLanguagesConstant,
   required String supportedLanguagesDocMacro,
 }) {
-  assert(localeToResources != null);
-  assert(localeToResourceAttributes != null);
   assert(generatedClassPrefix.isNotEmpty);
   assert(baseClass.isNotEmpty);
-  assert(generateHeader != null);
-  assert(generateConstructor != null);
   assert(factoryName.isNotEmpty);
   assert(factoryDeclaration.isNotEmpty);
   assert(factoryArguments.isNotEmpty);

@@ -90,7 +90,7 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File? which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty) {
+    if (result.isEmpty) {
       return null;
     }
     return result.first;

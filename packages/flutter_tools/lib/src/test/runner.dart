@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
@@ -144,9 +143,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testFiles: testFiles,
         buildInfo: debuggingOptions.buildInfo,
       );
-      if (result == null) {
-        throwToolExit('Failed to compile tests');
-      }
       testArgs
         ..add('--platform=chrome')
         ..add('--')
