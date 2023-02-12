@@ -120,7 +120,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: BackButton(
-            color: Colors.blue,
+            color: Colors.red,
           ),
         ),
       ),
@@ -130,7 +130,7 @@ void main() {
       of: find.byType(BackButton),
       matching: find.byType(RichText),
     ));
-    expect(iconText.text.style!.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('BackButton color with ButtonStyle', (WidgetTester tester) async {
@@ -140,7 +140,7 @@ void main() {
         home: const Material(
           child: BackButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.blue),
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -151,7 +151,7 @@ void main() {
       of: find.byType(BackButton),
       matching: find.byType(RichText),
     ));
-    expect(iconText.text.style!.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('BackButton.style.iconColor parameter overrides BackButton.color', (WidgetTester tester) async {
