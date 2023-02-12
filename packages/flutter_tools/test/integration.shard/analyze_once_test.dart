@@ -229,9 +229,9 @@ void main() {
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
         'Analyzing',
-        "info $analyzerSeparator The declaration '_incrementCounter' isn't",
-        'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-        "warning $analyzerSeparator The parameter 'onPressed' is required",
+        'unused_element',
+        'only_throw_errors',
+        'missing_required_param',
       ],
       exitMessageContains: '3 issues found.',
       exitCode: 1,
@@ -389,10 +389,8 @@ analyzer:
 }
 
 void assertContains(String text, List<String> patterns) {
-  if (patterns != null) {
-    for (final String pattern in patterns) {
-      expect(text, contains(pattern));
-    }
+  for (final String pattern in patterns) {
+    expect(text, contains(pattern));
   }
 }
 
@@ -465,7 +463,7 @@ class _MyHomePageState extends State<MyHomePage> {
 const String pubspecYamlSrc = r'''
 name: flutter_project
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.1.0 <4.0.0"
 
 dependencies:
   flutter:

@@ -9,9 +9,11 @@ import 'package:material_color_utilities/material_color_utilities.dart';
 import 'colors.dart';
 import 'theme_data.dart';
 
+/// {@template flutter.material.color_scheme.ColorScheme}
 /// A set of 30 colors based on the
 /// [Material spec](https://m3.material.io/styles/color/the-color-system/color-roles)
 /// that can be used to configure the color properties of most components.
+/// {@endtemplate}
 ///
 /// The main accent color groups in the scheme are [primary], [secondary],
 /// and [tertiary].
@@ -117,18 +119,7 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
     Color? secondaryVariant,
-  }) : assert(brightness != null),
-       assert(primary != null),
-       assert(onPrimary != null),
-       assert(secondary != null),
-       assert(onSecondary != null),
-       assert(error != null),
-       assert(onError != null),
-       assert(background != null),
-       assert(onBackground != null),
-       assert(surface != null),
-       assert(onSurface != null),
-       _primaryContainer = primaryContainer,
+  }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
@@ -295,18 +286,7 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
     Color? secondaryVariant = const Color(0xff018786),
-  }) : assert(brightness != null),
-       assert(primary != null),
-       assert(onPrimary != null),
-       assert(secondary != null),
-       assert(onSecondary != null),
-       assert(error != null),
-       assert(onError != null),
-       assert(background != null),
-       assert(onBackground != null),
-       assert(surface != null),
-       assert(onSurface != null),
-       _primaryContainer = primaryContainer,
+  }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
@@ -373,18 +353,7 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
     Color? secondaryVariant = const Color(0xff03dac6),
-  }) : assert(brightness != null),
-       assert(primary != null),
-       assert(onPrimary != null),
-       assert(secondary != null),
-       assert(onSecondary != null),
-       assert(error != null),
-       assert(onError != null),
-       assert(background != null),
-       assert(onBackground != null),
-       assert(surface != null),
-       assert(onSurface != null),
-       _primaryContainer = primaryContainer,
+  }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
@@ -451,18 +420,7 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
     Color? secondaryVariant = const Color(0xff018786),
-  }) : assert(brightness != null),
-       assert(primary != null),
-       assert(onPrimary != null),
-       assert(secondary != null),
-       assert(onSecondary != null),
-       assert(error != null),
-       assert(onError != null),
-       assert(background != null),
-       assert(onBackground != null),
-       assert(surface != null),
-       assert(onSurface != null),
-       _primaryContainer = primaryContainer,
+  }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
@@ -529,18 +487,7 @@ class ColorScheme with Diagnosticable {
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
     Color? secondaryVariant = const Color(0xff66fff9),
-  }) : assert(brightness != null),
-       assert(primary != null),
-       assert(onPrimary != null),
-       assert(secondary != null),
-       assert(onSecondary != null),
-       assert(error != null),
-       assert(onError != null),
-       assert(background != null),
-       assert(onBackground != null),
-       assert(surface != null),
-       assert(onSurface != null),
-       _primaryContainer = primaryContainer,
+  }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
@@ -576,8 +523,6 @@ class ColorScheme with Diagnosticable {
     Color? errorColor,
     Brightness brightness = Brightness.light,
   }) {
-    assert(primarySwatch != null);
-    assert(brightness != null);
 
     final bool isDark = brightness == Brightness.dark;
     final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;

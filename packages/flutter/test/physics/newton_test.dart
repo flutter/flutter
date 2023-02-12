@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
@@ -59,7 +60,7 @@ void main() {
     expect(friction.dx(1.0), moreOrLessEquals(endVelocity));
 
     // Same scenario as above except that the velocities are
-    // are negative.
+    // negative.
     startPosition = 1000.0;
     startVelocity = -500.0;
     f = FrictionSimulation(0.025, 1000.0, -500.0);

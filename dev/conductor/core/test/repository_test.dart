@@ -393,15 +393,6 @@ vars = {
       expect(didUpdate, false);
     });
 
-    test('CiYaml(file) will throw if file does not exist', () {
-      final File file = fileSystem.file('/non/existent/file.txt');
-
-      expect(
-        () => CiYaml(file),
-        throwsExceptionWith('Could not find the .ci.yaml file at /non/existent/file.txt'),
-      );
-    });
-
     test('framework repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
       const String commit = 'deadbeef';
       const String candidateBranch = 'flutter-1.2-candidate.3';

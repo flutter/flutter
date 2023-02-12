@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [KeyEventManager.keyMessageHandler].
+// Flutter code sample for [KeyEventManager.keyMessageHandler].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -91,7 +91,7 @@ class FallbackFocusNode {
 ///
 /// A global registrar like [FallbackKeyEventRegistrar] is almost always needed
 /// when patching [KeyEventManager.keyMessageHandler]. This is because
-/// [FallbackFocus] will add and and remove callbacks constantly, but
+/// [FallbackFocus] will add and remove callbacks constantly, but
 /// [KeyEventManager.keyMessageHandler] can only be patched once, and can not
 /// be unpatched. Therefore [FallbackFocus] must not directly interact with
 /// [KeyEventManager.keyMessageHandler], but through a separate registrar that

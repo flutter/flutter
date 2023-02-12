@@ -100,11 +100,7 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(axisDirection != null),
-       assert(dragStartBehavior != null),
-       assert(viewportBuilder != null),
-       assert(excludeFromSemantics != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -421,8 +417,7 @@ class _ScrollableScope extends InheritedWidget {
     required this.scrollable,
     required this.position,
     required super.child,
-  }) : assert(scrollable != null),
-       assert(child != null);
+  });
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -461,7 +456,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
-  MediaQueryData? _mediaQueryData;
+  DeviceGestureSettings? _mediaQueryGestureSettings;
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -516,7 +511,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
-    _mediaQueryData = MediaQuery.maybeOf(context);
+    _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -635,7 +630,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings;
               },
             ),
           };
@@ -656,7 +651,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings;
               },
             ),
           };
@@ -727,6 +722,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   void _handleDragCancel() {
+    if (_gestureDetectorKey.currentContext == null) {
+      // The cancel was caused by the GestureDetector getting disposed, which
+      // means we will get disposed momentarily as well and shouldn't do
+      // any work.
+      return;
+    }
     // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
@@ -755,12 +756,32 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
   }
 
-  // Returns the delta that should result from applying [event] with axis and
-  // direction taken into account.
+  // Returns the delta that should result from applying [event] with axis,
+  // direction, and any modifiers specified by the ScrollBehavior taken into
+  // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    late double delta;
+    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
+      // Axes are only flipped for physical mouse wheel input.
+      // On some platforms, like web, trackpad input is handled through pointer
+      // signals, but should not be included in this axis modifying behavior.
+      // This is because on a trackpad, all directional axes are available to
+      // the user, while mouse scroll wheels typically are restricted to one
+      // axis.
+      event.kind == PointerDeviceKind.mouse;
+
+    switch (widget.axis) {
+      case Axis.horizontal:
+        delta = flipAxes
+          ? event.scrollDelta.dy
+          : event.scrollDelta.dx;
+        break;
+      case Axis.vertical:
+        delta = flipAxes
+          ? event.scrollDelta.dx
+          : event.scrollDelta.dy;
+    }
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
@@ -780,7 +801,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     } else if (event is PointerScrollInertiaCancelEvent) {
-      position.jumpTo(position.pixels);
+      position.pointerScroll(0);
       // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
     }
   }
@@ -1546,8 +1567,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
     super.child,
-  }) : assert(position != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -1580,7 +1600,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
        _semanticChildCount = semanticChildCount,
-       assert(position != null),
        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
@@ -1589,7 +1608,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
   ScrollPosition get position => _position;
   ScrollPosition _position;
   set position(ScrollPosition value) {
-    assert(value != null);
     if (value == _position) {
       return;
     }
@@ -1726,8 +1744,7 @@ class ScrollIncrementDetails {
   const ScrollIncrementDetails({
     required this.type,
     required this.metrics,
-  })  : assert(type != null),
-        assert(metrics != null);
+  });
 
   /// The type of scroll this is (e.g. line, page, etc.).
   ///
@@ -1750,8 +1767,7 @@ class ScrollIntent extends Intent {
   const ScrollIntent({
     required this.direction,
     this.type = ScrollIncrementType.line,
-  })  : assert(direction != null),
-        assert(type != null);
+  });
 
   /// The direction in which to scroll the scrollable containing the focused
   /// widget.
@@ -1797,12 +1813,7 @@ class ScrollAction extends Action<ScrollIntent> {
   /// null. The type and state arguments must not be null, and the widget must
   /// have already been laid out so that the position fields are valid.
   static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
-    assert(type != null);
-    assert(state.position != null);
     assert(state.position.hasPixels);
-    assert(state.position.viewportDimension != null);
-    assert(state.position.maxScrollExtent != null);
-    assert(state.position.minScrollExtent != null);
     assert(state._physics == null || state._physics!.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator!(
@@ -1904,9 +1915,6 @@ class ScrollAction extends Action<ScrollIntent> {
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
-    assert(state!.position.viewportDimension != null);
-    assert(state!.position.maxScrollExtent != null);
-    assert(state!.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
     if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {

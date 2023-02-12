@@ -118,7 +118,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    WebApplicationPackage? package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -153,7 +153,7 @@ abstract class ChromiumDevice extends Device {
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(observatoryUri: Uri.parse(url));
   }
 
   @override

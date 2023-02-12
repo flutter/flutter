@@ -237,6 +237,10 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    if (debuggingOptions.serveObservatory) {
+      await enableObservatory();
+    }
+
     if (enableDevTools) {
       // The method below is guaranteed never to return a failing future.
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
@@ -507,6 +511,7 @@ class HotRunner extends ResidentRunner {
       }
       devFS.assetPathsToEvict.clear();
       devFS.shaderPathsToEvict.clear();
+      devFS.scenePathsToEvict.clear();
     }
   }
 
@@ -1024,10 +1029,8 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    globals.printStatus('');
-    if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-    } else {
+    if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+      globals.printStatus('');
       globals.printStatus(
         'Running without sound null safety ⚠️',
         emphasis: true,
@@ -1044,7 +1047,9 @@ class HotRunner extends ResidentRunner {
   Future<void> evictDirtyAssets() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty &&
+          device.devFS!.shaderPathsToEvict.isEmpty &&
+          device.devFS!.scenePathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1096,8 +1101,18 @@ class HotRunner extends ResidentRunner {
             )
         );
       }
+      for (final String assetPath in device.devFS!.scenePathsToEvict) {
+        futures.add(
+          device.vmService!
+            .flutterEvictScene(
+              assetPath,
+              isolateId: views.first.uiIsolate!.id!,
+            )
+        );
+      }
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
+      device.devFS!.scenePathsToEvict.clear();
     }
     await Future.wait<void>(futures);
   }
@@ -1367,7 +1382,6 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  assert(serviceEventKind != null);
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
@@ -1440,8 +1454,6 @@ class ProjectFileInvalidator {
     required PackageConfig packageConfig,
     bool asyncScanning = false,
   }) async {
-    assert(urisToMonitor != null);
-    assert(packagesPath != null);
 
     if (lastCompiled == null) {
       // Initial load.
@@ -1471,7 +1483,7 @@ class ProjectFileInvalidator {
             :  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
-              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+              if (updatedAt.isAfter(lastCompiled)) {
                 invalidatedFiles.add(uri);
               }
             })
@@ -1485,7 +1497,7 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
           ? _fileSystem.file(uri).statSync().modified
           : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+        if (updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
@@ -1494,7 +1506,7 @@ class ProjectFileInvalidator {
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
-    if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+    if (updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
       packageConfig = await _createPackageConfig(packagesPath);
       // The frontend_server might be monitoring the package_config.json file,

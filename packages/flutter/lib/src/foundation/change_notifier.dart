@@ -104,7 +104,7 @@ const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
-/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// {@macro flutter.flutter.ListenableBuilder.ChangeNotifier.rebuild}
 ///
 /// See also:
 ///

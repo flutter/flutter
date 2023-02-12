@@ -5,8 +5,10 @@
 import 'package:intl/locale.dart';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../convert.dart';
 import 'localizations_utils.dart';
+import 'message_parser.dart';
 
 // The set of date formats that can be automatically localized.
 //
@@ -137,15 +139,29 @@ class L10nParserException extends L10nException {
     this.messageString,
     this.charNumber
   ): super('''
-$error
-[$fileName:$messageId] $messageString
-${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+[$fileName:$messageId] $error
+    $messageString
+    ${List<String>.filled(charNumber, ' ').join()}^''');
 
   final String error;
   final String fileName;
   final String messageId;
   final String messageString;
+  // Position of character within the "messageString" where the error is.
   final int charNumber;
+}
+
+class L10nMissingPlaceholderException extends L10nParserException {
+  L10nMissingPlaceholderException(
+    super.error,
+    super.fileName,
+    super.messageId,
+    super.messageString,
+    super.charNumber,
+    this.placeholderName,
+  );
+
+  final String placeholderName;
 }
 
 // One optional named parameter to be used by a NumberFormat.
@@ -169,7 +185,7 @@ ${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').
 //   }
 // }
 class OptionalParameter {
-  const OptionalParameter(this.name, this.value) : assert(name != null), assert(value != null);
+  const OptionalParameter(this.name, this.value);
 
   final String name;
   final Object value;
@@ -210,10 +226,8 @@ class OptionalParameter {
 //
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
-    : assert(resourceId != null),
-      assert(name != null),
-      example = _stringAttribute(resourceId, name, attributes, 'example'),
-      type = _stringAttribute(resourceId, name, attributes, 'type') ?? 'Object',
+    : example = _stringAttribute(resourceId, name, attributes, 'example'),
+      type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
       isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
@@ -221,10 +235,13 @@ class Placeholder {
   final String resourceId;
   final String name;
   final String? example;
-  String? type;
   final String? format;
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
+  // The following will be initialized after all messages are parsed in the Message constructor.
+  String? type;
+  bool isPlural = false;
+  bool isSelect = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
   bool get requiresDateFormatting => type == 'DateTime';
@@ -294,7 +311,7 @@ class Placeholder {
   }
 }
 
-// One translation: one pair of foo,@foo entries from the template ARB file.
+// All translations for a given message specified by a resource id.
 //
 // The template ARB file must contain an entry called @myResourceId for each
 // message named myResourceId. The @ entry describes message parameters
@@ -309,48 +326,51 @@ class Placeholder {
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
-// TODO(thkim1011): We need to refactor this Message class to own all the messages in each language.
-// See https://github.com/flutter/flutter/issues/112709.
 class Message {
-  Message(Map<String, Object?> bundle, this.resourceId, bool isResourceAttributeRequired)
-    : assert(bundle != null),
-      assert(resourceId != null && resourceId.isNotEmpty),
-      value = _value(bundle, resourceId),
-      description = _description(bundle, resourceId, isResourceAttributeRequired),
-      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
-      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId)),
-      _selectMatch = _selectRE.firstMatch(_value(bundle, resourceId)) {
-        if (isPlural) {
-          final Placeholder placeholder = getCountPlaceholder();
-          placeholder.type = 'num';
-        }
-      }
-
-  static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
-  static final RegExp _selectRE = RegExp(r'\s*\{([\w\s,]*),\s*select\s*,');
+  Message(
+    AppResourceBundle templateBundle,
+    AppResourceBundleCollection allBundles,
+    this.resourceId,
+    bool isResourceAttributeRequired,
+    {
+      this.useEscaping = false,
+      this.logger,
+    }
+  ) : assert(resourceId.isNotEmpty),
+      value = _value(templateBundle.resources, resourceId),
+      description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      messages = <LocaleInfo, String?>{},
+      parsedMessages = <LocaleInfo, Node?>{} {
+    // Filenames for error handling.
+    final Map<LocaleInfo, String> filenames = <LocaleInfo, String>{};
+    // Collect all translations from allBundles and parse them.
+    for (final AppResourceBundle bundle in allBundles.bundles) {
+      filenames[bundle.locale] = bundle.file.basename;
+      final String? translation = bundle.translationFor(resourceId);
+      messages[bundle.locale] = translation;
+      parsedMessages[bundle.locale] = translation == null ? null : Parser(
+        resourceId,
+        bundle.file.basename,
+        translation,
+        useEscaping: useEscaping,
+        logger: logger
+      ).parse();
+    }
+    // Infer the placeholders
+    _inferPlaceholders(filenames);
+  }
 
   final String resourceId;
   final String value;
   final String? description;
-  final List<Placeholder> placeholders;
-  final RegExpMatch? _pluralMatch;
-  final RegExpMatch? _selectMatch;
+  late final Map<LocaleInfo, String?> messages;
+  final Map<LocaleInfo, Node?> parsedMessages;
+  final Map<String, Placeholder> placeholders;
+  final bool useEscaping;
+  final Logger? logger;
 
-  bool get isPlural => _pluralMatch != null && _pluralMatch!.groupCount == 1;
-  bool get isSelect => _selectMatch != null && _selectMatch!.groupCount == 1;
-
-  bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
-
-  Placeholder getCountPlaceholder() {
-    assert(isPlural);
-    final String countPlaceholderName = _pluralMatch![1]!;
-    return placeholders.firstWhere(
-      (Placeholder p) => p.name == countPlaceholderName,
-      orElse: () {
-        throw L10nException('Cannot find the $countPlaceholderName placeholder in plural message "$resourceId".');
-      }
-    );
-  }
+  bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -385,23 +405,6 @@ class Message {
       );
     }
 
-    if (attributes == null) {
-
-      void throwEmptyAttributes(final RegExp regExp, final String type) {
-        final RegExpMatch? match = regExp.firstMatch(_value(bundle, resourceId));
-        final bool isMatch = match != null && match.groupCount == 1;
-        if (isMatch) {
-          throw L10nException(
-            'Resource attribute "@$resourceId" was not found. Please '
-            'ensure that $type resources have a corresponding @resource.'
-          );
-        }
-      }
-
-      throwEmptyAttributes(_pluralRE, 'plural');
-      throwEmptyAttributes(_selectRE, 'select');
-    }
-
     return attributes as Map<String, Object?>?;
   }
 
@@ -427,18 +430,18 @@ class Message {
     return value;
   }
 
-  static List<Placeholder> _placeholders(
+  static Map<String, Placeholder> _placeholders(
     Map<String, Object?> bundle,
     String resourceId,
     bool isResourceAttributeRequired,
   ) {
     final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
     if (resourceAttributes == null) {
-      return <Placeholder>[];
+      return <String, Placeholder>{};
     }
     final Object? allPlaceholdersMap = resourceAttributes['placeholders'];
     if (allPlaceholdersMap == null) {
-      return <Placeholder>[];
+      return <String, Placeholder>{};
     }
     if (allPlaceholdersMap is! Map<String, Object?>) {
       throw L10nException(
@@ -446,24 +449,82 @@ class Message {
         'properly formatted. Ensure that it is a map with string valued keys.'
       );
     }
-    return allPlaceholdersMap.keys.map<Placeholder>((String placeholderName) {
-      final Object? value = allPlaceholdersMap[placeholderName];
-      if (value is! Map<String, Object?>) {
-        throw L10nException(
-          'The value of the "$placeholderName" placeholder attribute for message '
-          '"$resourceId", is not properly formatted. Ensure that it is a map '
-          'with string valued keys.'
-        );
+    return Map<String, Placeholder>.fromEntries(
+      allPlaceholdersMap.keys.map((String placeholderName) {
+        final Object? value = allPlaceholdersMap[placeholderName];
+        if (value is! Map<String, Object?>) {
+          throw L10nException(
+            'The value of the "$placeholderName" placeholder attribute for message '
+            '"$resourceId", is not properly formatted. Ensure that it is a map '
+            'with string valued keys.'
+          );
+        }
+        return MapEntry<String, Placeholder>(placeholderName, Placeholder(resourceId, placeholderName, value));
+      }),
+    );
+  }
+
+  // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
+  // For undeclared placeholders, create a new placeholder.
+  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+    // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
+    final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
+    // Helper for getting placeholder by name.
+    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
+    for (final LocaleInfo locale in parsedMessages.keys) {
+      if (parsedMessages[locale] == null) {
+        continue;
       }
-      return Placeholder(resourceId, placeholderName, value);
-    }).toList();
+      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
+      while (traversalStack.isNotEmpty) {
+        final Node node = traversalStack.removeLast();
+        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
+          final String identifier = node.children[1].value!;
+          Placeholder? placeholder = getPlaceholder(identifier);
+          if (placeholder == null) {
+            placeholder = Placeholder(resourceId, identifier, <String, Object?>{});
+            undeclaredPlaceholders[identifier] = placeholder;
+          }
+          if (node.type == ST.pluralExpr) {
+            placeholder.isPlural = true;
+          } else if (node.type == ST.selectExpr) {
+            placeholder.isSelect = true;
+          }
+        }
+        traversalStack.addAll(node.children);
+      }
+    }
+    placeholders.addEntries(
+      undeclaredPlaceholders.entries
+        .toList()
+        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+    );
+
+    for (final Placeholder placeholder in placeholders.values) {
+      if (placeholder.isPlural && placeholder.isSelect) {
+        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
+      } else if (placeholder.isPlural) {
+        if (placeholder.type == null) {
+          placeholder.type = 'num';
+        }
+        else if (!<String>['num', 'int'].contains(placeholder.type)) {
+          throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
+        }
+      } else if (placeholder.isSelect) {
+        if (placeholder.type == null) {
+          placeholder.type = 'String';
+        } else if (placeholder.type != 'String') {
+          throw L10nException("Placeholders used in selects must be of type 'String'");
+        }
+      }
+      placeholder.type ??= 'Object';
+    }
   }
 }
 
 // Represents the contents of one ARB file.
 class AppResourceBundle {
   factory AppResourceBundle(File file) {
-    assert(file != null);
     // Assuming that the caller has verified that the file exists and is readable.
     Map<String, Object?> resources;
     try {
@@ -482,7 +543,7 @@ class AppResourceBundle {
 
     for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
-      if (fileName[index] == '_' && fileName[index + 1] != null) {
+      if (fileName[index] == '_') {
         // If Locale.tryParse fails, it returns null.
         final Locale? parserResult = Locale.tryParse(fileName.substring(index + 1));
         // If the parserResult is not an actual locale identifier, end the loop.
@@ -532,10 +593,11 @@ class AppResourceBundle {
 
   final File file;
   final LocaleInfo locale;
+  /// JSON representation of the contents of the ARB file.
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String? translationFor(Message message) => resources[message.resourceId] as String?;
+  String? translationFor(String resourceId) => resources[resourceId] as String?;
 
   @override
   String toString() {
@@ -546,7 +608,6 @@ class AppResourceBundle {
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {
-    assert(directory != null);
     // Assuming that the caller has verified that the directory is readable.
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
@@ -795,50 +856,3 @@ final Set<String> _iso639Languages = <String>{
   'zh',
   'zu',
 };
-
-// Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
-class HelperMethod {
-  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }):
-    assert((() {
-      // At least one of helper, placeholder, string must be nonnull.
-      final bool a = helper == null;
-      final bool b = placeholder == null;
-      final bool c = string == null;
-      return (!a && b && c) || (a && !b && c) || (a && b && !c);
-    })());
-
-  Set<Placeholder> dependentPlaceholders;
-  String? helper;
-  Placeholder? placeholder;
-  String? string;
-
-  String get helperOrPlaceholder {
-    if (helper != null) {
-      return '$helper($methodArguments)';
-    } else if (string != null) {
-      return '$string';
-    } else {
-      if (placeholder!.requiresFormatting) {
-        return '${placeholder!.name}String';
-      } else {
-        return placeholder!.name;
-      }
-    }
-  }
-
-  String get methodParameters {
-    assert(helper != null);
-    return dependentPlaceholders.map((Placeholder placeholder) =>
-      (placeholder.requiresFormatting)
-        ? 'String ${placeholder.name}String'
-        : '${placeholder.type} ${placeholder.name}').join(', ');
-  }
-
-  String get methodArguments {
-    assert(helper != null);
-    return dependentPlaceholders.map((Placeholder placeholder) =>
-      (placeholder.requiresFormatting)
-        ? '${placeholder.name}String'
-        : placeholder.name).join(', ');
-  }
-}
