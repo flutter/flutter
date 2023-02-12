@@ -318,8 +318,8 @@ class _LocalizationsScope extends InheritedWidget {
 /// }
 /// ```
 ///
-/// Each delegate can be viewed as a factory for objects that encapsulate a
-/// a set of localized resources. These objects are retrieved with
+/// Each delegate can be viewed as a factory for objects that encapsulate a set
+/// of localized resources. These objects are retrieved with
 /// by runtime type with [Localizations.of].
 ///
 /// The [WidgetsApp] class creates a [Localizations] widget so most apps

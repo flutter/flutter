@@ -10,7 +10,7 @@
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 @TestOn('!chrome')
 library;
 
@@ -220,6 +220,14 @@ class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   }
 }
 
+Widget _applyConstructor(Widget Function() constructor) => constructor();
+
+class _TrivialWidget extends StatelessWidget {
+  const _TrivialWidget() : super(key: const Key('singleton'));
+  @override
+  Widget build(BuildContext context) => const Text('Hello, world!');
+}
+
 int getChildLayerCount(OffsetLayer layer) {
   Layer? child = layer.firstChild;
   int count = 0;
@@ -240,17 +248,24 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    tearDown(() {
+    tearDown(() async {
       service.resetAllState();
+
+      if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'false'},
+        );
+      }
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -260,12 +275,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             selectButtonBuilder: null,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -365,8 +380,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             selectButtonBuilder: null,
             child: Transform(
               transform: Matrix4.identity()..scale(0.0),
-              child: Stack(
-                children: const <Widget>[
+              child: const Stack(
+                children: <Widget>[
                   Text('a', textDirection: TextDirection.ltr),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -729,10 +744,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService maybeSetSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -776,10 +791,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService defunct selection regression test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
             ],
           ),
@@ -831,10 +846,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -902,10 +917,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -929,10 +944,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -977,10 +992,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   testWidgets('WidgetInspectorService setSelection notifiers for an Element',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1023,10 +1038,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       'WidgetInspectorService setSelection notifiers for a RenderObject',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          Directionality(
+          const Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -1118,10 +1133,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1182,10 +1197,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will not re-order if before stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1249,10 +1264,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1283,10 +1298,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1315,10 +1330,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1454,10 +1469,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when there are no pubRootDirectories',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1484,10 +1499,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject when the element is part of the pubRootDirectory',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1510,10 +1525,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1535,10 +1550,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1560,10 +1575,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1585,10 +1600,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject even if another pubRootDirectory does not match',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1613,10 +1628,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
             (WidgetTester tester) async {
-              final Widget widget = Directionality(
+              const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -1690,10 +1705,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'reacts to add and removing pubRootDirectories',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1728,10 +1743,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not match when the package directory does not match',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1756,10 +1771,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1781,10 +1796,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle consecutive calls to add',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1810,10 +1825,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle removing an unrelated pubRootDirectory',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1846,10 +1861,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle parent widget being part of a separate package',
           (WidgetTester tester) async {
-            final Widget widget = Directionality(
+            const Widget widget = Directionality(
               textDirection: TextDirection.ltr,
               child: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('a'),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -1970,10 +1985,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2022,10 +2037,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2097,10 +2112,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2128,10 +2143,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2167,10 +2182,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2260,10 +2275,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2369,10 +2384,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2460,10 +2475,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2529,10 +2544,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -2593,10 +2608,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject when the widget is in the pubRootDirectory',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2626,10 +2641,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2659,10 +2674,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2692,10 +2707,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2725,10 +2740,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject if at least one of the pubRootDirectories matches',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2762,10 +2777,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2873,10 +2888,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject when the widget is in the pubRootDirectory',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                       Text('c', textDirection: TextDirection.ltr),
@@ -2905,10 +2920,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2940,10 +2955,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -2972,10 +2987,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -3007,10 +3022,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           'has createdByLocalProject if at least one of the pubRootDirectories matches',
           (WidgetTester tester) async {
             await tester.pumpWidget(
-              Directionality(
+              const Directionality(
                 textDirection: TextDirection.ltr,
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('a'),
                     Text('b', textDirection: TextDirection.ltr),
                     Text('c', textDirection: TextDirection.ltr),
@@ -3064,10 +3079,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'reacts to add and removing pubRootDirectories',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3114,10 +3129,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'does not match when the package directory does not match',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3148,10 +3163,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3179,10 +3194,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle consecutive calls to add',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3213,10 +3228,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle removing an unrelated pubRootDirectory',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3259,10 +3274,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle parent widget being part of a separate package',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3370,10 +3385,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'reacts to add and removing pubRootDirectories',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3422,10 +3437,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'does not match when the package directory does not match',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3456,10 +3471,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3490,10 +3505,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle consecutive calls to add',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3530,10 +3545,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle removing an unrelated pubRootDirectory',
         (WidgetTester tester) async {
-          final Widget widget = Directionality(
+          const Widget widget = Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a'),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -3582,6 +3597,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         },
       );
+    },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets with tear-offs', (WidgetTester tester) async {
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetInspector(
+          selectButtonBuilder: null,
+          child: _applyConstructor(_TrivialWidget.new),
+        ),
+      );
+
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+
+      await tester.pumpWidget(widget);
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
@@ -4303,11 +4340,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
-        final Widget widget = Directionality(
+        const Widget widget = Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Flexible(
                   child: ColoredBox(
                     color: Colors.green,
@@ -4959,9 +4996,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             appBar: AppBar(
               title: const Text('Hello World!'),
             ),
-            body: Center(
+            body: const Center(
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('Hello World!'),
                 ],
               ),

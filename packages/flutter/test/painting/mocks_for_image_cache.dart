@@ -86,6 +86,11 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   @override
+  ImageStreamCompleter loadImage(ErrorImageProvider key, ImageDecoderCallback decode) {
+    throw Error();
+  }
+
+  @override
   ImageStreamCompleter loadBuffer(ErrorImageProvider key, DecoderBufferCallback decode) {
     throw Error();
   }
@@ -103,8 +108,13 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
 
 class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
   @override
-  ImageStreamCompleter loadBuffer(ObtainKeyErrorImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(ObtainKeyErrorImageProvider key, ImageDecoderCallback decode) {
     throw Error();
+  }
+
+  @override
+  ImageStreamCompleter loadBuffer(ObtainKeyErrorImageProvider key, DecoderBufferCallback decode) {
+    throw UnimplementedError();
   }
 
   @override
@@ -120,8 +130,13 @@ class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvi
 
 class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   @override
-  ImageStreamCompleter loadBuffer(LoadErrorImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(LoadErrorImageProvider key, ImageDecoderCallback decode) {
     throw Error();
+  }
+
+  @override
+  ImageStreamCompleter loadBuffer(LoadErrorImageProvider key, DecoderBufferCallback decode) {
+    throw UnimplementedError();
   }
 
   @override

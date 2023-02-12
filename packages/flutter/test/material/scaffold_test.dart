@@ -136,12 +136,6 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(boilerplate(Scaffold(
-        appBar: AppBar(title: const Text('Title')),
-        body: Container(key: bodyKey),
-      ),
-    ));
-    expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2391,24 +2385,21 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                key: tapTarget,
-                onTap: () {
-                  ScaffoldMessenger.of(context);
-                },
-                behavior: HitTestBehavior.opaque,
-                child: const SizedBox(
-                  height: 100.0,
-                  width: 100.0,
-                ),
-              );
-            },
-          ),
+      child: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context);
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
         ),
       ),
     ));
@@ -2459,8 +2450,10 @@ void main() {
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
-      '     MediaQuery\n'
       '     Directionality\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
       '     View-[GlobalObjectKey TestWindow#e6136]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'

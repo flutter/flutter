@@ -115,7 +115,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
-/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// escape key, by tapping the scrim, or by calling pop route function such as
 /// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
@@ -821,7 +821,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)

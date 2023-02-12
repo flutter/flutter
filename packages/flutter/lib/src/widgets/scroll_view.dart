@@ -180,6 +180,12 @@ abstract class ScrollView extends StatelessWidget {
   /// [TargetPlatformVariant.mobile] for ScrollViews in the [Axis.vertical]
   /// scroll direction. Adding another to your app will override the
   /// PrimaryScrollController above it.
+  ///
+  /// The following video contains more information about scroll controllers,
+  /// the PrimaryScrollController widget, and their impact on your apps:
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=33_0ABjFJUU}
+  ///
   /// {@endtemplate}
   final bool? primary;
 
@@ -1251,26 +1257,17 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           final Widget? widget;
            if (index.isEven) {
-             widget = itemBuilder(context, itemIndex);
-           } else {
-             widget = separatorBuilder(context, itemIndex);
-             assert(() {
-               if (widget == null) {
-                 throw FlutterError('separatorBuilder cannot return null.');
-               }
-               return true;
-             }());
+             return itemBuilder(context, itemIndex);
            }
-           return widget;
+           return separatorBuilder(context, itemIndex);
          },
          findChildIndexCallback: findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-         semanticIndexCallback: (Widget _, int index) {
+         semanticIndexCallback: (Widget widget, int index) {
            return index.isEven ? index ~/ 2 : null;
          },
        ),

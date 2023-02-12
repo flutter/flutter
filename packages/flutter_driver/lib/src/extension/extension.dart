@@ -255,7 +255,6 @@ abstract class FinderExtension {
 /// See also:
 ///   * [CommandWithTarget], a base class for [Command]s with [Finder]s.
 abstract class CommandExtension {
-
   /// Identifies the type of command to be used by the driver extension.
   String get commandKind;
 

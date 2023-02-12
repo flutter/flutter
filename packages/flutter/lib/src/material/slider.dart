@@ -431,7 +431,7 @@ class Slider extends StatefulWidget {
   /// the slider thumb is focused, hovered, or dragged.
   ///
   /// If this property is null, [Slider] will use [activeColor] with
-  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// an opacity of 0.12, If null, [SliderThemeData.overlayColor]
   /// will be used.
   ///
   /// If that is also null, If [ThemeData.useMaterial3] is true,
@@ -1878,7 +1878,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)

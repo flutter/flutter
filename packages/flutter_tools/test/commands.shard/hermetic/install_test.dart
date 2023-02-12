@@ -157,6 +157,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'iOS';
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -177,4 +180,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     AndroidApk app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'Android';
 }

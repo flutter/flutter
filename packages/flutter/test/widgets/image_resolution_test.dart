@@ -85,7 +85,7 @@ class TestAssetImage extends AssetImage {
   final Map<double, ui.Image> images;
 
   @override
-  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final ui.Image image = images[scaleOf(data)]!;

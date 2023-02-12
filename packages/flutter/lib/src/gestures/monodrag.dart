@@ -75,11 +75,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     super.supportedDevices,
@@ -180,7 +175,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [allowedButtonsFilter], which decides which button will be allowed.
   GestureDragCancelCallback? onCancel;
 
-  /// The minimum distance an input pointer drag must have moved to
+  /// The minimum distance an input pointer drag must have moved
   /// to be considered a fling gesture.
   ///
   /// This value is typically compared with the distance traveled along the
@@ -554,11 +549,6 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalDragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
@@ -601,11 +591,6 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalDragGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });

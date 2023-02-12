@@ -26,6 +26,8 @@ const double _kIndicatorWidth = 64;
 
 /// Material 3 Navigation Bar component.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DVGYddFaLv0}
+///
 /// Navigation bars offer a persistent and convenient way to switch between
 /// primary destinations in an app.
 ///
@@ -1366,7 +1368,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)

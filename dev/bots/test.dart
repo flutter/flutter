@@ -271,11 +271,9 @@ Future<void> main(List<String> args) async {
     system.exit(255);
   }
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Test failed.$reset');
   }
-  printProgress('${bold}Test successful.$reset');
-  system.exit(0);
+  reportSuccessAndExit('${bold}Test successful.$reset');
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
@@ -1802,6 +1800,7 @@ Future<void> _runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
     if (!hasColor)
@@ -1813,8 +1812,6 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
-    if (collectMetrics)
-      '--file-reporter=json:${metricFile.path}',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1840,19 +1837,24 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
+  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
+  final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
+  info.writeAsStringSync(json.encode(test.errors));
+
   if (collectMetrics) {
     try {
       final List<String> testList = <String>[];
-      final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
+      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
       for (final TestSpecs testSpecs in allTestSpecs.values) {
         testList.add(testSpecs.toJson());
       }
       if (testList.isNotEmpty) {
         final String testJson = json.encode(testList);
-        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+        final File testResults = fileSystem.file(
+            path.join(flutterRoot, 'test_results.json'));
         testResults.writeAsStringSync(testJson);
       }
-    } on fs.FileSystemException catch (e){
+    } on fs.FileSystemException catch (e) {
       print('Failed to generate metrics: $e');
     }
   }

@@ -210,7 +210,7 @@ void main() {
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(noGroupKey.value);
                       },
-                      child: Stack(key: noGroupKey),
+                      child: const Stack(key: noGroupKey),
                     ),
                   ),
                   ConstrainedBox(
@@ -221,7 +221,7 @@ void main() {
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(group1AKey.value);
                       },
-                      child: Stack(key: group1AKey),
+                      child: const Stack(key: group1AKey),
                     ),
                   ),
                   ConstrainedBox(
@@ -232,7 +232,7 @@ void main() {
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(group1BKey.value);
                       },
-                      child: Stack(key: group1BKey),
+                      child: const Stack(key: group1BKey),
                     ),
                   ),
                 ],

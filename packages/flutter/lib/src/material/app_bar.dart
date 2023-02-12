@@ -128,7 +128,7 @@ class _PreferredAppBarSize extends Size {
 ///
 /// If the app bar's [actions] contains [TextButton]s, they will not
 /// be visible if their foreground (text) color is the same as the
-/// the app bar's background color.
+/// app bar's background color.
 ///
 /// The default app bar [backgroundColor] is the overall theme's
 /// [ColorScheme.primary] if the overall theme's brightness is
@@ -200,11 +200,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
-    @Deprecated(
-      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.textTheme,
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
@@ -590,7 +585,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// See also:
   ///
   ///  * [actionsIconTheme], which defines the appearance of icons in
-  ///    in the [actions] list.
+  ///    the [actions] list.
   final IconThemeData? iconTheme;
 
   /// {@template flutter.material.appbar.actionsIconTheme}
@@ -610,23 +605,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   ///  * [iconTheme], which defines the appearance of all of the toolbar icons.
   final IconThemeData? actionsIconTheme;
-
-  /// {@template flutter.material.appbar.textTheme}
-  /// This property is deprecated, please use [toolbarTextStyle] and
-  /// [titleTextStyle] instead.
-  ///
-  /// The typographic styles to use for text in the app bar. Typically this is
-  /// set along with [backgroundColor], [iconTheme].
-  ///
-  /// If this property is null, then [AppBarTheme.textTheme] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, then
-  /// [ThemeData.primaryTextTheme] is used.
-  /// {@endtemplate}
-  @Deprecated(
-    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final TextTheme? textTheme;
 
   /// {@template flutter.material.appbar.primary}
   /// Whether this app bar is being displayed at the top of the screen.
@@ -714,7 +692,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If true, preserves the original defaults for the [backgroundColor],
   /// [iconTheme], [actionsIconTheme] properties, and the original use of
-  /// the [textTheme] and [brightness] properties.
+  /// the [brightness] property.
   ///
   /// If this property is null, then [AppBarTheme.backwardsCompatibility] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
@@ -745,7 +723,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   ///  * [titleTextStyle], which overrides the default text style for the [title].
   ///  * [DefaultTextStyle], which overrides the default text style for all of the
-  ///    the widgets in a subtree.
+  ///    widgets in a subtree.
   final TextStyle? toolbarTextStyle;
 
   /// {@template flutter.material.appbar.titleTextStyle}
@@ -763,7 +741,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    [title], [leading], and [actions] widgets, also known as the
   ///    AppBar's "toolbar".
   ///  * [DefaultTextStyle], which overrides the default text style for all of the
-  ///    the widgets in a subtree.
+  ///    widgets in a subtree.
   final TextStyle? titleTextStyle;
 
   /// {@template flutter.material.appbar.systemOverlayStyle}
@@ -959,16 +937,16 @@ class _AppBarState extends State<AppBar> {
       ?? overallIconTheme;
 
     TextStyle? toolbarTextStyle = backwardsCompatibility
-      ? widget.textTheme?.bodyMedium
-        ?? appBarTheme.textTheme?.bodyMedium
+      ? widget.toolbarTextStyle
+        ?? appBarTheme.toolbarTextStyle
         ?? theme.primaryTextTheme.bodyMedium
       : widget.toolbarTextStyle
         ?? appBarTheme.toolbarTextStyle
         ?? defaults.toolbarTextStyle?.copyWith(color: foregroundColor);
 
     TextStyle? titleTextStyle = backwardsCompatibility
-      ? widget.textTheme?.titleLarge
-        ?? appBarTheme.textTheme?.titleLarge
+      ? widget.titleTextStyle
+        ?? appBarTheme.titleTextStyle
         ?? theme.primaryTextTheme.titleLarge
       : widget.titleTextStyle
         ?? appBarTheme.titleTextStyle
@@ -1279,7 +1257,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.brightness,
     required this.iconTheme,
     required this.actionsIconTheme,
-    required this.textTheme,
     required this.primary,
     required this.centerTitle,
     required this.excludeHeaderSemantics,
@@ -1320,7 +1297,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Brightness? brightness;
   final IconThemeData? iconTheme;
   final IconThemeData? actionsIconTheme;
-  final TextTheme? textTheme;
   final bool primary;
   final bool? centerTitle;
   final bool excludeHeaderSemantics;
@@ -1397,7 +1373,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         brightness: brightness,
         iconTheme: iconTheme,
         actionsIconTheme: actionsIconTheme,
-        textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
         excludeHeaderSemantics: excludeHeaderSemantics,
@@ -1433,7 +1408,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || brightness != oldDelegate.brightness
         || iconTheme != oldDelegate.iconTheme
         || actionsIconTheme != oldDelegate.actionsIconTheme
-        || textTheme != oldDelegate.textTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
         || titleSpacing != oldDelegate.titleSpacing
@@ -1573,11 +1547,6 @@ class SliverAppBar extends StatefulWidget {
     this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
-    @Deprecated(
-      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.textTheme,
     this.primary = true,
     this.centerTitle,
     this.excludeHeaderSemantics = false,
@@ -1900,15 +1869,6 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final IconThemeData? actionsIconTheme;
 
-  /// {@macro flutter.material.appbar.textTheme}
-  ///
-  /// This property is used to configure an [AppBar].
-  @Deprecated(
-    'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final TextTheme? textTheme;
-
   /// {@macro flutter.material.appbar.primary}
   ///
   /// This property is used to configure an [AppBar].
@@ -2177,7 +2137,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           brightness: widget.brightness,
           iconTheme: widget.iconTheme,
           actionsIconTheme: widget.actionsIconTheme,
-          textTheme: widget.textTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
@@ -2398,7 +2357,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)

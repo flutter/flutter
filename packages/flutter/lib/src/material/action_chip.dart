@@ -20,7 +20,7 @@ import 'theme_data.dart';
 /// Action chips can be tapped to trigger an action or show progress and
 /// confirmation. For Material 3, a disabled state is supported for Action
 /// chips and is specified with [onPressed] being null. For previous versions
-/// of Material Design, it is recommended to remove the Action chip from the
+/// of Material Design, it is recommended to remove the Action chip from
 /// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
@@ -175,7 +175,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)

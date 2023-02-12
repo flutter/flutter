@@ -785,6 +785,28 @@ void main() {
   });
 
   group('generateLocalizations', () {
+    // Regression test for https://github.com/flutter/flutter/issues/119593
+    testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      final Logger logger = BufferLogger.test();
+      logger.printError('An error output from a different tool in flutter_tools');
+
+      // Should run without error.
+      generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDirectory: Uri.directory(defaultL10nPathString),
+          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          useSyntheticPackage: false,
+        ),
+        logger: logger,
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+      );
+    });
+
     testWithoutContext('forwards arguments correctly', () async {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationOptions options = LocalizationOptions(

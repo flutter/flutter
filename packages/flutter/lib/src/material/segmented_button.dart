@@ -372,7 +372,7 @@ class SegmentedButton<T> extends StatelessWidget {
   }
 }
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedButtonRenderWidget({
+  const _SegmentedButtonRenderWidget({
     super.key,
     required this.segments,
     required this.enabledBorder,
@@ -717,15 +717,13 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);
-
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final ColorScheme _colors = _theme.colorScheme;
-
   @override ButtonStyle? get style {
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge),
@@ -763,7 +761,7 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
           if (states.contains(MaterialState.focused)) {
             return _colors.onSurface;
           }
-          return null;
+          return _colors.onSurface;
         }
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -800,9 +798,9 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
         return BorderSide(color: _colors.outline);
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
     );
   }
-
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 }

@@ -96,7 +96,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarThemeData.actionTextColor].
   ///
   /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -140,15 +140,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
     MaterialStateColor resolveForegroundColor() {
-      if (widget.textColor is MaterialStateColor) {
-        return widget.textColor! as MaterialStateColor;
+      if (widget.textColor != null) {
+        if (widget.textColor is MaterialStateColor) {
+          return widget.textColor! as MaterialStateColor;
+        }
+      } else if (snackBarTheme.actionTextColor != null) {
+        if (snackBarTheme.actionTextColor is MaterialStateColor) {
+          return snackBarTheme.actionTextColor! as MaterialStateColor;
+        }
+      } else if (defaults.actionTextColor != null) {
+        if (defaults.actionTextColor is MaterialStateColor) {
+          return defaults.actionTextColor! as MaterialStateColor;
+        }
       }
-      if (snackBarTheme.actionTextColor is MaterialStateColor) {
-        return snackBarTheme.actionTextColor! as MaterialStateColor;
-      }
-      if (defaults.actionTextColor is MaterialStateColor) {
-        return defaults.actionTextColor! as MaterialStateColor;
-      }
+
       return MaterialStateColor.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return widget.disabledTextColor ??
@@ -366,7 +371,7 @@ class SnackBar extends StatefulWidget {
   /// inverse surface.
   ///
   /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;
@@ -824,7 +829,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);

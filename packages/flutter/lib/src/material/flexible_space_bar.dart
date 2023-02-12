@@ -116,7 +116,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// bottom-left or its center.
   ///
   /// Typically this property is used to adjust how far the title is
-  /// is inset from the bottom-left and it is specified along with
+  /// inset from the bottom-left and it is specified along with
   /// [centerTitle] false.
   ///
   /// By default the value of this property is
