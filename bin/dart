@@ -16,7 +16,7 @@ set -e
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 
-# On Mac OS, readlink -f doesn't work, so follow_links traverses the path one
+# On Mac OS(Operating System), readlink -f doesn't work, so follow_links traverses the path one
 # link at a time, and then cds into the link destination and find out where it
 # ends up.
 #
