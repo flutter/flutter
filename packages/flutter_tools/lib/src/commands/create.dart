@@ -482,8 +482,7 @@ If you prefer video documentation, consider: https://www.youtube.com/c/flutterde
 
 In order to run your $application, type:
 
-  \$ cd $relativeAppPath
-  \$ flutter run
+  ${relativeAppPath != "." ? "\$ cd $relativeAppPath\n  \$ flutter run" : "\$ flutter run"}
 
 Your $application code is in $relativeAppMain.
 ''');
