@@ -13,7 +13,7 @@ import 'package:process/process.dart';
 const LocalFileSystem fs = LocalFileSystem();
 const LocalProcessManager processManager = LocalProcessManager();
 final String dart = io.Platform.resolvedExecutable;
-late final Directory tempDir =
+final Directory tempDir =
     fs.systemTempDirectory.createTempSync('flutter_tools.run_local_linter');
 
 void main(List<String> args) {
@@ -55,33 +55,43 @@ void _main(List<String> args) {
   }
   final File linter = precompileLinter(linterEntrypoint);
   print('Starting recursive lint of $rootDir...\n');
-  final IssueReport report = lintDirRecursively(
+  lintDirRecursively(
     rootDir,
     linter,
     rules,
   );
-  print(report);
 }
 
 File precompileLinter(String linterEntrypoint) {
   final File snapshot = tempDir.childFile('linter-snapshot.jit');
   print('Precompiling $linterEntrypoint to ${snapshot.path}...');
   final io.ProcessResult result = processManager.runSync(
-    <String>[dart, 'compile', 'jit-snapshot', '--output', snapshot.path, linterEntrypoint, 'help'],
+    <String>[
+      dart,
+      'compile',
+      'jit-snapshot',
+      '--output',
+      snapshot.path,
+      linterEntrypoint,
+      'help'
+    ],
   );
   if (result.exitCode != 0) {
-    throw Exception('Compiling JIT snapshot failed with code ${result.exitCode}\nSTDOUT: ${result.stdout}\nSTDERR: ${result.stderr}');
+    throw Exception(
+        'Compiling JIT snapshot failed with code ${result.exitCode}\nSTDOUT: ${result.stdout}\nSTDERR: ${result.stderr}');
   }
   return snapshot;
 }
 
-List<Issue> lintDirRecursively(
+void lintDirRecursively(
   Directory dir,
   File linterEntrypoint,
   List<String> rules,
 ) {
-  final Iterable<String> allFiles =
-      dir.listSync(recursive: true).whereType<File>().map((File file) => file.path);
+  final Iterable<String> allFiles = dir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map((File file) => file.path);
 
   final io.ProcessResult result = processManager.runSync(
     <String>[
@@ -93,22 +103,22 @@ List<Issue> lintDirRecursively(
     ],
   );
 
-  if (result.exitCode != 0) {
-    final String stderr = result.stderr as String;
-    if (stderr.isNotEmpty) {
-      throw Exception(
-        'Linter failed with code ${result.exitCode}\nSTDERR: $stderr\nSTDOUT: ${result.stdout}',
-      );
-    }
-    return (result.stdout as String)
-        .split('\n')
-        .map<Issue?>((String line) => Issue.maybe(line))
-        .whereType<Issue>()
-        .toList();
+  if (result.exitCode == 0) {
+    print('No issues found.');
+    return;
   }
-
-  // If the linter returned 0, there were no issues found.
-  return const <Issue>[];
+  final String stderr = result.stderr as String;
+  if (stderr.isNotEmpty) {
+    throw Exception(
+      'Linter failed with code ${result.exitCode}\nSTDERR: $stderr\nSTDOUT: ${result.stdout}',
+    );
+  }
+  final Iterable<Issue> issues = (result.stdout as String)
+      .split('\n')
+      .map<Issue?>((String line) => Issue.maybe(line))
+      .whereType<Issue>();
+  issues.forEach(print);
+  print('\n${issues.length} total issues in ${allFiles.length} files.');
 }
 
 /// A single issue caught by the linter.
