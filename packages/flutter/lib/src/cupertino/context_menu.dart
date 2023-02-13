@@ -1447,11 +1447,11 @@ class _ContextMenuSheet extends StatelessWidget {
                 DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(
-                        color: CupertinoDynamicColor.resolve(_borderColor, context),
-                        width: 0.5,
-                      )
-                    ),
+                        top: BorderSide(
+                      color:
+                          CupertinoDynamicColor.resolve(_borderColor, context),
+                      width: 0.4,
+                    )),
                   ),
                   position: DecorationPosition.foreground,
                   child: action,
