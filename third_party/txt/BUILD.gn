@@ -37,12 +37,6 @@ config("allow_posix_names") {
   }
 }
 
-config("define_skshaper") {
-  if (flutter_enable_skshaper) {
-    defines = [ "FLUTTER_ENABLE_SKSHAPER" ]
-  }
-}
-
 source_set("txt") {
   defines = []
   if (flutter_use_fontconfig) {
@@ -50,44 +44,10 @@ source_set("txt") {
   }
 
   sources = [
-    "src/log/log.cc",
-    "src/log/log.h",
-    "src/minikin/CmapCoverage.cpp",
-    "src/minikin/CmapCoverage.h",
-    "src/minikin/Emoji.cpp",
-    "src/minikin/Emoji.h",
-    "src/minikin/FontCollection.cpp",
-    "src/minikin/FontCollection.h",
-    "src/minikin/FontFamily.cpp",
-    "src/minikin/FontFamily.h",
-    "src/minikin/FontLanguage.cpp",
-    "src/minikin/FontLanguage.h",
-    "src/minikin/FontLanguageListCache.cpp",
-    "src/minikin/FontLanguageListCache.h",
-    "src/minikin/FontUtils.cpp",
-    "src/minikin/FontUtils.h",
-    "src/minikin/GraphemeBreak.cpp",
-    "src/minikin/GraphemeBreak.h",
-    "src/minikin/HbFontCache.cpp",
-    "src/minikin/HbFontCache.h",
-    "src/minikin/Hyphenator.cpp",
-    "src/minikin/Hyphenator.h",
-    "src/minikin/Layout.cpp",
-    "src/minikin/Layout.h",
-    "src/minikin/LayoutUtils.cpp",
-    "src/minikin/LayoutUtils.h",
-    "src/minikin/LineBreaker.cpp",
-    "src/minikin/LineBreaker.h",
-    "src/minikin/Measurement.cpp",
-    "src/minikin/Measurement.h",
-    "src/minikin/MinikinFont.cpp",
-    "src/minikin/MinikinFont.h",
-    "src/minikin/MinikinInternal.cpp",
-    "src/minikin/MinikinInternal.h",
-    "src/minikin/SparseBitSet.cpp",
-    "src/minikin/SparseBitSet.h",
-    "src/minikin/WordBreaker.cpp",
-    "src/minikin/WordBreaker.h",
+    "src/skia/paragraph_builder_skia.cc",
+    "src/skia/paragraph_builder_skia.h",
+    "src/skia/paragraph_skia.cc",
+    "src/skia/paragraph_skia.h",
     "src/txt/asset_font_manager.cc",
     "src/txt/asset_font_manager.h",
     "src/txt/font_asset_provider.cc",
@@ -96,28 +56,18 @@ source_set("txt") {
     "src/txt/font_collection.h",
     "src/txt/font_features.cc",
     "src/txt/font_features.h",
-    "src/txt/font_skia.cc",
-    "src/txt/font_skia.h",
     "src/txt/font_style.h",
     "src/txt/font_weight.h",
     "src/txt/line_metrics.h",
-    "src/txt/paint_record.cc",
-    "src/txt/paint_record.h",
     "src/txt/paragraph.h",
     "src/txt/paragraph_builder.cc",
     "src/txt/paragraph_builder.h",
-    "src/txt/paragraph_builder_txt.cc",
-    "src/txt/paragraph_builder_txt.h",
     "src/txt/paragraph_style.cc",
     "src/txt/paragraph_style.h",
-    "src/txt/paragraph_txt.cc",
-    "src/txt/paragraph_txt.h",
     "src/txt/placeholder_run.cc",
     "src/txt/placeholder_run.h",
     "src/txt/platform.h",
     "src/txt/run_metrics.h",
-    "src/txt/styled_runs.cc",
-    "src/txt/styled_runs.h",
     "src/txt/test_font_manager.cc",
     "src/txt/test_font_manager.h",
     "src/txt/text_baseline.h",
@@ -129,18 +79,9 @@ source_set("txt") {
     "src/txt/text_style.h",
     "src/txt/typeface_font_asset_provider.cc",
     "src/txt/typeface_font_asset_provider.h",
-    "src/utils/JenkinsHash.cpp",
-    "src/utils/JenkinsHash.h",
-    "src/utils/LinuxUtils.h",
-    "src/utils/LruCache.h",
-    "src/utils/MacUtils.h",
-    "src/utils/TypeHelpers.h",
-    "src/utils/WindowsUtils.h",
   ]
 
   public_configs = [ ":txt_config" ]
-
-  configs += [ ":define_skshaper" ]
 
   public_deps = [
     "//flutter/display_list",
@@ -150,21 +91,13 @@ source_set("txt") {
     "//third_party/skia",
   ]
 
-  deps = [ "//third_party/skia" ]
+  deps = [
+    "//third_party/skia",
+    "//third_party/skia/modules/skparagraph",
+  ]
 
   if (flutter_use_fontconfig) {
     deps += [ "//third_party/fontconfig" ]
-  }
-
-  if (flutter_enable_skshaper) {
-    sources += [
-      "src/skia/paragraph_builder_skia.cc",
-      "src/skia/paragraph_builder_skia.h",
-      "src/skia/paragraph_skia.cc",
-      "src/skia/paragraph_skia.h",
-    ]
-
-    deps += [ "//third_party/skia/modules/skparagraph" ]
   }
 
   if (is_mac || is_ios) {
@@ -185,179 +118,47 @@ source_set("txt") {
 }
 
 if (enable_unittests) {
-  txt_common_executable_deps = [
-    "//flutter/fml",  # For ICU initialization.
-    "//third_party/dart/runtime:libdart_jit",  # For logging.
-  ]
-
   test_fixtures("txt_fixtures") {
-    fixtures = [
-      "third_party/fonts/Bold.ttf",
-      "third_party/fonts/Bold.ttx",
-      "third_party/fonts/BoldItalic.ttf",
-      "third_party/fonts/BoldItalic.ttx",
-      "third_party/fonts/ColorEmojiFont.ttf",
-      "third_party/fonts/ColorEmojiFont.ttx",
-      "third_party/fonts/ColorTextMixedEmojiFont.ttf",
-      "third_party/fonts/ColorTextMixedEmojiFont.ttx",
-      "third_party/fonts/DroidSerif.ttf",
-      "third_party/fonts/Emoji.ttf",
-      "third_party/fonts/Emoji.ttx",
-      "third_party/fonts/HomemadeApple.ttf",
-      "third_party/fonts/Italic.ttf",
-      "third_party/fonts/Italic.ttx",
-      "third_party/fonts/Ja.ttf",
-      "third_party/fonts/Ja.ttx",
-      "third_party/fonts/Katibeh-Regular.ttf",
-      "third_party/fonts/Ko.ttf",
-      "third_party/fonts/Ko.ttx",
-      "third_party/fonts/MultiAxis.ttf",
-      "third_party/fonts/MultiAxis.ttx",
-      "third_party/fonts/NoCmapFormat14.ttf",
-      "third_party/fonts/NoCmapFormat14.ttx",
-      "third_party/fonts/NoGlyphFont.ttf",
-      "third_party/fonts/NoGlyphFont.ttx",
-      "third_party/fonts/NotoColorEmoji.ttf",
-      "third_party/fonts/NotoNaskhArabic-Regular.ttf",
-      "third_party/fonts/NotoSansCJK-Regular.ttc",
-      "third_party/fonts/NotoSansKhmer-Regular.ttf",
-      "third_party/fonts/Regular.ttf",
-      "third_party/fonts/Regular.ttx",
-      "third_party/fonts/Roboto-Black.ttf",
-      "third_party/fonts/Roboto-BlackItalic.ttf",
-      "third_party/fonts/Roboto-Bold.ttf",
-      "third_party/fonts/Roboto-BoldItalic.ttf",
-      "third_party/fonts/Roboto-Italic.ttf",
-      "third_party/fonts/Roboto-Light.ttf",
-      "third_party/fonts/Roboto-LightItalic.ttf",
-      "third_party/fonts/Roboto-Medium.ttf",
-      "third_party/fonts/Roboto-MediumItalic.ttf",
-      "third_party/fonts/Roboto-Regular.ttf",
-      "third_party/fonts/Roboto-Thin.ttf",
-      "third_party/fonts/Roboto-ThinItalic.ttf",
-      "third_party/fonts/SourceHanSerifCN-Bold.otf",
-      "third_party/fonts/SourceHanSerifCN-Regular.otf",
-      "third_party/fonts/TextEmojiFont.ttf",
-      "third_party/fonts/TextEmojiFont.ttx",
-      "third_party/fonts/UnicodeBMPOnly.ttf",
-      "third_party/fonts/UnicodeBMPOnly.ttx",
-      "third_party/fonts/UnicodeBMPOnly2.ttf",
-      "third_party/fonts/UnicodeBMPOnly2.ttx",
-      "third_party/fonts/UnicodeUCS4.ttf",
-      "third_party/fonts/UnicodeUCS4.ttx",
-      "third_party/fonts/VariationSelectorTest-Regular.ttf",
-      "third_party/fonts/VariationSelectorTest-Regular.ttx",
-      "third_party/fonts/ZhHans.ttf",
-      "third_party/fonts/ZhHans.ttx",
-      "third_party/fonts/ZhHant.ttf",
-      "third_party/fonts/ZhHant.ttx",
-      "third_party/fonts/ahem.ttf",
-      "third_party/fonts/emoji.xml",
-      "third_party/fonts/itemize.xml",
-    ]
-  }
-
-  source_set("txt_test_utils") {
-    sources = [
-      "tests/txt_test_utils.cc",
-      "tests/txt_test_utils.h",
-    ]
-
-    configs += [ ":define_skshaper" ]
-
-    deps = [
-      ":txt",
-      "//flutter/fml",
-      "//third_party/skia",
-    ]
+    fixtures = [ "third_party/fonts/Roboto-Regular.ttf" ]
   }
 
   executable("txt_benchmarks") {
     testonly = true
 
     sources = [
-      "benchmarks/paint_record_benchmarks.cc",
-      "benchmarks/paragraph_benchmarks.cc",
-      "benchmarks/paragraph_builder_benchmarks.cc",
+      "benchmarks/skparagraph_benchmarks.cc",
       "benchmarks/txt_run_all_benchmarks.cc",
+      "tests/txt_test_utils.cc",
+      "tests/txt_test_utils.h",
     ]
 
-    configs += [ ":define_skshaper" ]
-
     deps = [
-             ":txt",
-             ":txt_fixtures",
-             ":txt_test_utils",
-             "//flutter/testing:testing_lib",
-             "//third_party/benchmark",
-           ] + txt_common_executable_deps
-
-    if (flutter_enable_skshaper) {
-      sources += [ "benchmarks/skparagraph_benchmarks.cc" ]
-
-      deps += [ "//third_party/skia/modules/skparagraph" ]
-    }
+      ":txt",
+      ":txt_fixtures",
+      "//flutter/fml",
+      "//flutter/testing:testing_lib",
+      "//third_party/benchmark",
+      "//third_party/skia/modules/skparagraph",
+    ]
   }
 
   executable("txt_unittests") {
     testonly = true
 
-    sources = [
-      "tests/CmapCoverageTest.cpp",
-      "tests/EmojiTest.cpp",
-      "tests/FileUtils.cpp",
-      "tests/FileUtils.h",
-      "tests/FontTestUtils.h",
-      "tests/GraphemeBreakTests.cpp",
-      "tests/ICUTestBase.h",
-      "tests/LayoutUtilsTest.cpp",
-      "tests/MeasurementTests.cpp",
-      "tests/SparseBitSetTest.cpp",
-      "tests/UnicodeUtils.cpp",
-      "tests/UnicodeUtils.h",
-      "tests/UnicodeUtilsTest.cpp",
-      "tests/font_collection_unittests.cc",
-      "tests/paragraph_unittests.cc",
-      "tests/render_test.cc",
-      "tests/render_test.h",
-      "tests/txt_run_all_unittests.cc",
+    sources = [ "tests/txt_run_all_unittests.cc" ]
 
-      # These tests require static fixtures.
-      # "tests/FontCollectionItemizeTest.cpp",
-      # "tests/FontCollectionTest.cpp",
-      # "tests/FontFamilyTest.cpp",
-      # "tests/FontLanguageListCacheTest.cpp",
-      # "tests/FontTestUtils.cpp",
-      # "tests/HbFontCacheTest.cpp",
-      # "tests/HyphenatorTest.cpp",
-      # "tests/LayoutTest.cpp",
-    ]
-
-    if (!is_win) {
-      sources += [
-        "tests/MinikinFontForTest.cpp",
-        "tests/MinikinFontForTest.h",
-      ]
-    }
-
-    configs += [
-      ":allow_posix_names",
-      ":define_skshaper",
-    ]
+    configs += [ ":allow_posix_names" ]
 
     deps = [
-             ":txt",
-             ":txt_test_utils",
-             "//flutter/testing:testing_lib",
-             ":txt_fixtures",
-           ] + txt_common_executable_deps
+      ":txt_fixtures",
+      "//flutter/fml",
+      "//flutter/testing:testing_lib",
+    ]
 
+    # This is needed for //third_party/googletest for linking zircon symbols.
     if (is_fuchsia) {
-      sources += [ "tests/platform_fuchsia_unittests.cc" ]
-      deps += [
-        "$fuchsia_sdk_root/fidl:fuchsia.fonts",
-        "$fuchsia_sdk_root/pkg:async-testing",
-      ]
+      libs =
+          [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
     }
   }
 }

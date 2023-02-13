@@ -39,8 +39,6 @@ public class FlutterLoader {
 
   private static final String OLD_GEN_HEAP_SIZE_META_DATA_KEY =
       "io.flutter.embedding.android.OldGenHeapSize";
-  private static final String ENABLE_SKPARAGRAPH_META_DATA_KEY =
-      "io.flutter.embedding.android.EnableSkParagraph";
   private static final String ENABLE_IMPELLER_META_DATA_KEY =
       "io.flutter.embedding.android.EnableImpeller";
 
@@ -317,10 +315,6 @@ public class FlutterLoader {
       shellArgs.add("--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold);
 
       shellArgs.add("--prefetched-default-font-manager");
-
-      boolean enableSkParagraph =
-          metaData == null || metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY, true);
-      shellArgs.add("--enable-skparagraph=" + enableSkParagraph);
 
       if (metaData != null && metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
         shellArgs.add("--enable-impeller");

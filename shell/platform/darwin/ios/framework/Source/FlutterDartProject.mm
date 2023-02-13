@@ -156,10 +156,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   settings.may_insecurely_connect_to_all_domains = true;
   settings.domain_network_policy = "";
 
-  // SkParagraph text layout library
-  NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
-  settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : true;
-
   // Whether to enable Impeller.
   NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
   // TODO(gaaclarke): Make this value `on` by default (pending memory audit).
