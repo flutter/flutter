@@ -17,7 +17,7 @@
   * Please also report any performance regressions.
 * What does it mean for an Impeller platform to be "in preview". How long will
   be the preview last?
-  * The team is focused on getting one platform right at time. This includes
+  * The team is focused on getting one platform right at a time. This includes
     ensuring all fidelity issues are fixed, performance issues addressed, and
     compatibility with plugins guaranteed.
   * When the team believes that the majority of Flutter applications will
@@ -57,7 +57,7 @@
   * Similarly, Impeller does not perform image decompression. Flutter uses a
     standard set of codecs wrapped by Skia before querying the system supplied
     image formats.
-  * So, while Impeller does not use nor is it a wrapper for Skia, some Skia
+  * So, while Impeller does not use nor is a wrapper for Skia, some Skia
     components are still used by Flutter when rendering using Impeller.
 * Is Impeller going to be supported on the Web?
   * The current priority for Impeller is to be amazing on all platforms targeted
