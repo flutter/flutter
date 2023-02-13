@@ -57,7 +57,7 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 /**
  * The text input plugin set by initialization.
  */
-@property(nonatomic) id<FlutterKeyboardViewDelegate> viewDelegate;
+@property(nonatomic, weak) id<FlutterKeyboardViewDelegate> viewDelegate;
 
 /**
  * The primary responders added by addPrimaryResponder.

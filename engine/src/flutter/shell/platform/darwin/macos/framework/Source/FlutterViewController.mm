@@ -309,11 +309,12 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"The FlutterViewController is unexpectedly attached to "
             @"engine %@ before initialization.",
             controller.engine);
-  engine.viewController = controller;
+  [engine addViewController:controller];
   NSCAssert(controller.engine != nil,
             @"The FlutterViewController unexpectedly stays unattached after initialization. "
             @"In unit tests, this is likely because either the FlutterViewController or "
-            @"the FlutterEngine is mocked. Please subclass these classes instead.");
+            @"the FlutterEngine is mocked. Please subclass these classes instead.",
+            controller.engine, controller.id);
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller initializeKeyboard];
@@ -355,11 +356,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                        nibName:(nullable NSString*)nibName
                         bundle:(nullable NSBundle*)nibBundle {
   NSAssert(engine != nil, @"Engine is required");
-  NSAssert(engine.viewController == nil,
-           @"The supplied FlutterEngine is already used with FlutterViewController "
-            "instance. One instance of the FlutterEngine can only be attached to one "
-            "FlutterViewController at a time. Set FlutterEngine.viewController "
-            "to nil before attaching it to another FlutterViewController.");
 
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
@@ -412,7 +408,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)dealloc {
-  _engine.viewController = nil;
+  if ([self attached]) {
+    [_engine removeViewController:self];
+  }
   CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
   CFNotificationCenterRemoveEveryObserver(cfCenter, (__bridge void*)self);
 }
@@ -583,8 +581,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 - (void)initializeKeyboard {
   // TODO(goderbauer): Seperate keyboard/textinput stuff into ViewController specific and Engine
   // global parts. Move the global parts to FlutterEngine.
-  __weak FlutterViewController* weakSelf = self;
-  _keyboardManager = [[FlutterKeyboardManager alloc] initWithViewDelegate:weakSelf];
+  _keyboardManager = [[FlutterKeyboardManager alloc] initWithViewDelegate:self];
 }
 
 - (void)dispatchMouseEvent:(nonnull NSEvent*)event {
@@ -795,7 +792,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
  * Responds to view reshape by notifying the engine of the change in dimensions.
  */
 - (void)viewDidReshape:(NSView*)view {
-  [_engine updateWindowMetrics];
+  [_engine updateWindowMetricsForViewController:self];
 }
 
 #pragma mark - FlutterPluginRegistry
