@@ -223,10 +223,6 @@ void ParagraphSkia::Layout(double width) {
   paragraph_->layout(width);
 }
 
-void ParagraphSkia::Paint(SkCanvas* canvas, double x, double y) {
-  paragraph_->paint(canvas, x, y);
-}
-
 bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
   DisplayListParagraphPainter painter(builder, dl_paints_);
   paragraph_->paint(&painter, x, y);

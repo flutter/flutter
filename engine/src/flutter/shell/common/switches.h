@@ -257,9 +257,6 @@ DEF_SWITCH(OldGenHeapSize,
 DEF_SWITCH(ResourceCacheMaxBytesThreshold,
            "resource-cache-max-bytes-threshold",
            "The max bytes threshold of resource cache, or 0 for unlimited.")
-DEF_SWITCH(EnableSkParagraph,
-           "enable-skparagraph",
-           "Selects the SkParagraph implementation of the text layout engine.")
 DEF_SWITCH(EnableImpeller,
            "enable-impeller",
            "Enable the Impeller renderer on supported platforms. Ignored if "

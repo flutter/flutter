@@ -27,9 +27,8 @@ class SkCanvas;
 
 namespace txt {
 
-// Interface for text layout engines.  The original implementation was based on
-// the Minikin text layout library used by Android.  Another implementation is
-// available based on Skia's SkShaper/SkParagraph text layout module.
+// Interface for text layout engines.  The current implementation is based on
+// Skia's SkShaper/SkParagraph text layout module.
 class Paragraph {
  public:
   enum Affinity { UPSTREAM, DOWNSTREAM };
@@ -144,9 +143,8 @@ class Paragraph {
   // before Painting and getting any statistics from this class.
   virtual void Layout(double width) = 0;
 
-  // Paints the laid out text onto the supplied SkCanvas at (x, y) offset from
-  // the origin. Only valid after Layout() is called.
-  virtual void Paint(SkCanvas* canvas, double x, double y) = 0;
+  // Paints the laid out text onto the supplied DisplayListBuilder at
+  // (x, y) offset from the origin. Only valid after Layout() is called.
   virtual bool Paint(flutter::DisplayListBuilder* builder,
                      double x,
                      double y) = 0;

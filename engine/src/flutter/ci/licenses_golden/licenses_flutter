@@ -1,48 +1,7 @@
 ====================================================================================================
 LIBRARY: txt
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/paint_record_benchmarks.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/paragraph_benchmarks.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/paragraph_builder_benchmarks.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/skparagraph_benchmarks.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/txt_run_all_benchmarks.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/log/log.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/log/log.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/CmapCoverage.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/CmapCoverage.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Emoji.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Emoji.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontCollection.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontCollection.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontFamily.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontFamily.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontLanguage.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontLanguage.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontLanguageListCache.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontLanguageListCache.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontUtils.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/FontUtils.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/GraphemeBreak.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/GraphemeBreak.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/HbFontCache.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/HbFontCache.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Hyphenator.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Hyphenator.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Layout.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Layout.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/LayoutUtils.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/LayoutUtils.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/LineBreaker.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/LineBreaker.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Measurement.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/Measurement.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/MinikinFont.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/MinikinFont.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/MinikinInternal.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/MinikinInternal.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/SparseBitSet.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/SparseBitSet.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/WordBreaker.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/minikin/WordBreaker.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/skia/paragraph_skia.cc
@@ -55,27 +14,17 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_collection.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_features.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_features.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_skia.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_skia.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_style.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/font_weight.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/line_metrics.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paint_record.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paint_record.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_builder.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_builder.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_style.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_style.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_txt.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/paragraph_txt.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/placeholder_run.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/placeholder_run.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/run_metrics.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/styled_runs.cc
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/styled_runs.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/test_font_manager.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/test_font_manager.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/text_baseline.h
@@ -87,57 +36,9 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/text_style.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/JenkinsHash.cpp
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/JenkinsHash.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/LinuxUtils.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/LruCache.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/MacUtils.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/TypeHelpers.h
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/utils/WindowsUtils.h
 TYPE: LicenseType.apache
-FILE: ../../../flutter/third_party/txt/benchmarks/paint_record_benchmarks.cc
-FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_benchmarks.cc
-FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_builder_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/skparagraph_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/txt_run_all_benchmarks.cc
-FILE: ../../../flutter/third_party/txt/src/log/log.cc
-FILE: ../../../flutter/third_party/txt/src/log/log.h
-FILE: ../../../flutter/third_party/txt/src/minikin/CmapCoverage.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/CmapCoverage.h
-FILE: ../../../flutter/third_party/txt/src/minikin/Emoji.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/Emoji.h
-FILE: ../../../flutter/third_party/txt/src/minikin/FontCollection.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/FontCollection.h
-FILE: ../../../flutter/third_party/txt/src/minikin/FontFamily.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/FontFamily.h
-FILE: ../../../flutter/third_party/txt/src/minikin/FontLanguage.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/FontLanguage.h
-FILE: ../../../flutter/third_party/txt/src/minikin/FontLanguageListCache.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/FontLanguageListCache.h
-FILE: ../../../flutter/third_party/txt/src/minikin/FontUtils.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/FontUtils.h
-FILE: ../../../flutter/third_party/txt/src/minikin/GraphemeBreak.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/GraphemeBreak.h
-FILE: ../../../flutter/third_party/txt/src/minikin/HbFontCache.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/HbFontCache.h
-FILE: ../../../flutter/third_party/txt/src/minikin/Hyphenator.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/Hyphenator.h
-FILE: ../../../flutter/third_party/txt/src/minikin/Layout.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/Layout.h
-FILE: ../../../flutter/third_party/txt/src/minikin/LayoutUtils.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/LayoutUtils.h
-FILE: ../../../flutter/third_party/txt/src/minikin/LineBreaker.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/LineBreaker.h
-FILE: ../../../flutter/third_party/txt/src/minikin/Measurement.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/Measurement.h
-FILE: ../../../flutter/third_party/txt/src/minikin/MinikinFont.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/MinikinFont.h
-FILE: ../../../flutter/third_party/txt/src/minikin/MinikinInternal.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/MinikinInternal.h
-FILE: ../../../flutter/third_party/txt/src/minikin/SparseBitSet.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/SparseBitSet.h
-FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.cpp
-FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.h
 FILE: ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.cc
 FILE: ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.h
 FILE: ../../../flutter/third_party/txt/src/skia/paragraph_skia.cc
@@ -150,27 +51,17 @@ FILE: ../../../flutter/third_party/txt/src/txt/font_collection.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_collection.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_features.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_features.h
-FILE: ../../../flutter/third_party/txt/src/txt/font_skia.cc
-FILE: ../../../flutter/third_party/txt/src/txt/font_skia.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_weight.h
 FILE: ../../../flutter/third_party/txt/src/txt/line_metrics.h
-FILE: ../../../flutter/third_party/txt/src/txt/paint_record.cc
-FILE: ../../../flutter/third_party/txt/src/txt/paint_record.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder.h
-FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.cc
-FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.h
-FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.cc
-FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.h
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.cc
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.h
 FILE: ../../../flutter/third_party/txt/src/txt/run_metrics.h
-FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.cc
-FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.h
 FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.cc
 FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_baseline.h
@@ -182,13 +73,6 @@ FILE: ../../../flutter/third_party/txt/src/txt/text_style.cc
 FILE: ../../../flutter/third_party/txt/src/txt/text_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.cc
 FILE: ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.h
-FILE: ../../../flutter/third_party/txt/src/utils/JenkinsHash.cpp
-FILE: ../../../flutter/third_party/txt/src/utils/JenkinsHash.h
-FILE: ../../../flutter/third_party/txt/src/utils/LinuxUtils.h
-FILE: ../../../flutter/third_party/txt/src/utils/LruCache.h
-FILE: ../../../flutter/third_party/txt/src/utils/MacUtils.h
-FILE: ../../../flutter/third_party/txt/src/utils/TypeHelpers.h
-FILE: ../../../flutter/third_party/txt/src/utils/WindowsUtils.h
 ----------------------------------------------------------------------------------------------------
 Apache License
 Version 2.0, January 2004

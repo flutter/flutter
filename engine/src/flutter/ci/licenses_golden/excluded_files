@@ -398,7 +398,6 @@
 ../../../flutter/third_party/txt/.clang-format
 ../../../flutter/third_party/txt/.gitattributes
 ../../../flutter/third_party/txt/.gitignore
-../../../flutter/third_party/txt/PATENTS
 ../../../flutter/third_party/txt/tests
 ../../../flutter/third_party/txt/third_party/fonts
 ../../../flutter/third_party/web_locale_keymap/CHANGELOG.md

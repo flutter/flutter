@@ -22,7 +22,6 @@
 
 #include "font_style.h"
 #include "font_weight.h"
-#include "minikin/LineBreaker.h"
 #include "text_style.h"
 
 namespace txt {
@@ -95,13 +94,6 @@ class ParagraphStyle {
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
-
-  // Default strategy is kBreakStrategy_Greedy. Sometimes,
-  // kBreakStrategy_HighQuality will produce more desirable layouts (e.g., very
-  // long words are more likely to be reasonably placed).
-  // kBreakStrategy_Balanced will balance between the two.
-  minikin::BreakStrategy break_strategy =
-      minikin::BreakStrategy::kBreakStrategy_Greedy;
 
   TextStyle GetTextStyle() const;
 

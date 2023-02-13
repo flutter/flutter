@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "flutter/fml/command_line.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/logging.h"
 #include "flutter/testing/testing.h"
@@ -24,7 +25,6 @@
 int main(int argc, char** argv) {
   ::benchmark::Initialize(&argc, argv);
   fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
-  txt::SetCommandLine(cmd);
   txt::SetFontDir(flutter::testing::GetFixturesPath());
   if (txt::GetFontDir().length() <= 0) {
     FML_LOG(ERROR) << "Font directory not set via txt::SetFontDir.";

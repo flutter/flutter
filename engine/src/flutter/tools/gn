@@ -282,10 +282,7 @@ def to_gn_args(args):
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
   gn_args['skia_use_legacy_layer_bounds'
          ] = True  # Temporary: See skbug.com/12083, skbug.com/12303.
-
-  if args.enable_skshaper:
-    gn_args['skia_use_icu'] = True
-    gn_args['flutter_always_use_skshaper'] = args.always_use_skshaper
+  gn_args['skia_use_icu'] = True
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
   gn_args['android_full_debug'
          ] = args.target_os == 'android' and args.unoptimized
@@ -371,7 +368,6 @@ def to_gn_args(args):
     gn_args['dart_debug_optimization_level'] = '0'
 
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
-  gn_args['flutter_enable_skshaper'] = args.enable_skshaper
   gn_args['dart_component_kind'
          ] = 'static_library'  # Always link Dart in statically.
   gn_args['embedder_for_target'] = args.embedder_for_target
@@ -827,14 +823,6 @@ def parse_args(args):
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
   parser.add_argument(
       '--enable-vulkan-validation-layers', action='store_true', default=False
-  )
-
-  parser.add_argument('--enable-skshaper', action='store_true', default=True)
-  parser.add_argument(
-      '--no-enable-skshaper', dest='enable_skshaper', action='store_false'
-  )
-  parser.add_argument(
-      '--always-use-skshaper', action='store_true', default=False
   )
 
   parser.add_argument(

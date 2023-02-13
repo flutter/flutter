@@ -657,7 +657,7 @@ bool PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(
   }
 
   auto completion_callback = [response =
-                                  message->response()](uint num_successes) {
+                                  message->response()](uint32_t num_successes) {
     std::ostringstream result_stream;
     result_stream << "[" << num_successes << "]";
 

@@ -14,12 +14,6 @@ declare_args() {
   # The runtime mode ("debug", "profile", "release", or "jit_release")
   flutter_runtime_mode = "debug"
 
-  # Whether to link the Skia text shaper module into the engine
-  flutter_enable_skshaper = false
-
-  # Whether to use the Skia text shaper module for all text rendering
-  flutter_always_use_skshaper = false
-
   # Whether to use a prebuilt Dart SDK instead of building one.
   flutter_prebuilt_dart_sdk = false
 
