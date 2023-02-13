@@ -36,6 +36,10 @@ void _main(List<String> args) {
 
   final String linterEntrypoint = results['linter-entrypoint'] as String;
   final List<String> rules = results['rules'] as List<String>;
+  if (rules.isEmpty) {
+    throw Exception('Must provide one or more --rules');
+  }
+
   final Directory rootDir;
   if (results.rest.isEmpty) {
     rootDir = fs.directory('.');
@@ -63,7 +67,7 @@ File precompileLinter(String linterEntrypoint) {
   final File snapshot = tempDir.childFile('linter-snapshot.jit');
   print('Precompiling $linterEntrypoint to ${snapshot.path}...');
   final io.ProcessResult result = processManager.runSync(
-    <String>[dart, 'compile', 'jit-snapshot', '--output', snapshot.path, linterEntrypoint],
+    <String>[dart, 'compile', 'jit-snapshot', '--output', snapshot.path, linterEntrypoint, 'help'],
   );
   if (result.exitCode != 0) {
     throw Exception('Compiling JIT snapshot failed with code ${result.exitCode}\nSTDOUT: ${result.stdout}\nSTDERR: ${result.stderr}');
@@ -71,103 +75,43 @@ File precompileLinter(String linterEntrypoint) {
   return snapshot;
 }
 
-IssueReport lintDirRecursively(
+List<Issue> lintDirRecursively(
   Directory dir,
   File linterEntrypoint,
   List<String> rules,
 ) {
-  final IssueReport report = IssueReport();
-
-  final List<File> allFiles =
-      dir.listSync(recursive: true).whereType<File>().toList();
-
-  // This var to be referenced from the [write] closure.
-  int lastLineLength = 0;
-
-  void write(String str) {
-    io.stdout.write(str.padRight(lastLineLength));
-    lastLineLength = str.length;
-  }
-
-  for (final File file in allFiles) {
-    lintFile(linterEntrypoint, file, rules, report, allFiles.length, write);
-  }
-
-  // Two newlines
-  print('\n');
-
-  return report;
-}
-
-void lintFile(
-  File linterEntrypoint,
-  File sourceFile,
-  List<String> rules,
-  IssueReport report,
-  int totalFiles,
-  void Function(String) write,
-) {
-  if (!linterEntrypoint.existsSync()) {
-    throw Exception(
-        'Expected ${linterEntrypoint.absolute.path} to exist, but it did not.');
-  }
-  if (!sourceFile.existsSync()) {
-    throw Exception(
-        'Expected ${sourceFile.absolute.path} to exist, but it did not.');
-  }
-  if (rules.isEmpty) {
-    throw Exception('Must provide one or more --rules');
-  }
+  final Iterable<String> allFiles =
+      dir.listSync(recursive: true).whereType<File>().map((File file) => file.path);
 
   final io.ProcessResult result = processManager.runSync(
     <String>[
       dart,
       linterEntrypoint.path,
-      sourceFile.path,
+      ...allFiles,
       '--rules=${rules.join(',')}',
       '--machine',
     ],
   );
-  report.visitedFiles.add(sourceFile.path);
-  write(
-    '\rLinted ${report.visitedFiles.length.toString().padLeft(3)} of '
-    '$totalFiles files (${report.issues.length} issues found) - last '
-    'file: ${sourceFile.path}',
-  );
+
   if (result.exitCode != 0) {
-    report.addBlob(result.stdout as String);
+    final String stderr = result.stderr as String;
+    if (stderr.isNotEmpty) {
+      throw Exception(
+        'Linter failed with code ${result.exitCode}\nSTDERR: $stderr\nSTDOUT: ${result.stdout}',
+      );
+    }
+    return (result.stdout as String)
+        .split('\n')
+        .map<Issue?>((String line) => Issue.maybe(line))
+        .whereType<Issue>()
+        .toList();
   }
+
+  // If the linter returned 0, there were no issues found.
+  return const <Issue>[];
 }
 
-class IssueReport {
-  IssueReport();
-
-  final List<String> blobs = <String>[];
-  final List<Issue> issues = <Issue>[];
-  final List<String> visitedFiles = <String>[];
-
-  void addBlob(String blob) {
-    blobs.add(blob);
-    issues.addAll(
-      blob
-          .split('\n')
-          .map<Issue?>((String line) => Issue.maybe(line))
-          .whereType<Issue>()
-          .toList(),
-    );
-  }
-
-  @override
-  String toString() {
-    final StringBuffer buffer = StringBuffer();
-    issues.forEach(buffer.writeln);
-    buffer.write(
-      '\n${issues.length} total issues in ${visitedFiles.length} files.',
-    );
-    return buffer.toString();
-  }
-}
-
+/// A single issue caught by the linter.
 class Issue {
   Issue._({
     required this.rule,
@@ -175,6 +119,17 @@ class Issue {
     required this.line,
     required this.col,
   });
+
+  /// Parses a line of output from `dart linter.dart --machine`.
+  ///
+  /// Will return null if the line does not represent a linter issue.
+  ///
+  /// The format looks like:
+  ///
+  /// INFO|LINT|rule_name|/path/to/library.dart|288|30|356|Lint message.
+  /// INFO|LINT|rule_name|/path/to/library.dart|973|12|463|Lint message.
+  ///
+  /// 1 file analyzed, 2 issues found, in 6987 ms.
   static Issue? maybe(String line) {
     final RegExpMatch? match = _pattern.firstMatch(line);
     if (match == null) {
