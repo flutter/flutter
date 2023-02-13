@@ -608,10 +608,8 @@ class ResidentWebRunner extends ResidentRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
-      _logger.printStatus('');
-      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-      } else {
+      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+        _logger.printStatus('');
         _logger.printStatus(
           'Running without sound null safety ⚠️',
           emphasis: true,
