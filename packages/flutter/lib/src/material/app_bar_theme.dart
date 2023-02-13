@@ -48,11 +48,6 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
-    @Deprecated(
-      'This property is obsolete and is false by default. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.backwardsCompatibility,
   }) : assert(
          color == null || backgroundColor == null,
          'The color and backgroundColor parameters mean the same thing. Only specify one.',
@@ -69,31 +64,11 @@ class AppBarTheme with Diagnosticable {
   ///
   ///  * [systemOverlayStyle], which overrides the default value of
   ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
-  ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
-  ///    on this obsolete property.
   @Deprecated(
     'This property is no longer used, please use systemOverlayStyle instead. '
     'This feature was deprecated after v2.4.0-0.0.pre.',
   )
   final Brightness? brightness;
-
-  /// This property is deprecated, please use [backgroundColor] instead.
-  ///
-  /// Obsolete property that overrides the default value of
-  /// [AppBar.backgroundColor] in all descendant [AppBar] widgets.
-  ///
-  /// See also:
-  ///
-  ///  * [backgroundColor], which serves this same purpose
-  ///    as this property, but has a name that's consistent with
-  ///    [AppBar.backgroundColor].
-  ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
-  ///    on this obsolete property.
-  @Deprecated(
-    'This property is no longer used, please use backgroundColor instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
   /// descendant [AppBar] widgets.
@@ -177,9 +152,6 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
-  /// If this property is specified, then [backwardsCompatibility]
-  /// should be false (the default).
-  ///
   /// See also:
   ///
   ///  * [titleTextStyle], which overrides the default of [AppBar.titleTextStyle]
@@ -188,9 +160,6 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value of [AppBar.titleTextStyle]
   /// property in all descendant [AppBar] widgets.
-  ///
-  /// If this property is specified, then [backwardsCompatibility]
-  /// should be false (the default).
   ///
   /// See also:
   ///
@@ -201,14 +170,6 @@ class AppBarTheme with Diagnosticable {
   /// Overrides the default value of [AppBar.systemOverlayStyle]
   /// property in all descendant [AppBar] widgets.
   final SystemUiOverlayStyle? systemOverlayStyle;
-
-  /// Overrides the default value of [AppBar.backwardsCompatibility]
-  /// property in all descendant [AppBar] widgets.
-  @Deprecated(
-    'This property is obsolete and is false by default. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final bool? backwardsCompatibility;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -234,11 +195,6 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
-    @Deprecated(
-      'This property is obsolete and is false by default. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    bool? backwardsCompatibility,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -261,7 +217,6 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
-      backwardsCompatibility: backwardsCompatibility ?? this.backwardsCompatibility,
     );
   }
 
@@ -293,7 +248,6 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
-      backwardsCompatibility: t < 0.5 ? a?.backwardsCompatibility : b?.backwardsCompatibility,
     );
   }
 
@@ -315,7 +269,6 @@ class AppBarTheme with Diagnosticable {
     toolbarTextStyle,
     titleTextStyle,
     systemOverlayStyle,
-    backwardsCompatibility,
   );
 
   @override
@@ -342,8 +295,7 @@ class AppBarTheme with Diagnosticable {
         && other.toolbarHeight == toolbarHeight
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle
-        && other.backwardsCompatibility == backwardsCompatibility;
+        && other.systemOverlayStyle == systemOverlayStyle;
   }
 
   @override
@@ -364,6 +316,5 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('toolbarHeight', toolbarHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));
   }
 }
