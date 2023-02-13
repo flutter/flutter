@@ -1178,21 +1178,23 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// child as usual. It just cannot be the target of located events, because it
 /// returns false from [RenderSliver.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
+/// {@macro flutter.widgets.IgnorePointer.Semantics}
 ///
 /// See also:
 ///
 ///  * [IgnorePointer], the equivalent widget for boxes.
+>>>>>>> 38d7ad5e15 (Fixes IgnorePointer and AbsorbPointer to only block user interactions in a11y)
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   const SliverIgnorePointer({
     super.key,
     this.ignoring = true,
+    @Deprecated(
+      'Create a custom sliver ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
     Widget? sliver,
   }) : super(child: sliver);
@@ -1201,14 +1203,18 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   ///
   /// Regardless of whether this sliver is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   final bool ignoring;
 
   /// Whether the semantics of this sliver is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  @Deprecated(
+    'Create a custom sliver ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override

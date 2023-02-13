@@ -2817,7 +2817,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
         child: IgnorePointer(
           ignoring: isSelectMode,
           key: _ignorePointerKey,
-          ignoringSemantics: false,
           child: widget.child,
         ),
       ),

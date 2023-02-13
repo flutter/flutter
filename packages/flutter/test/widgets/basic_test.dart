@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
@@ -829,6 +831,80 @@ void main() {
     await tester.pumpWidget(target(ignoring: true));
     expect(logs, <String>['exit3', 'enter2']);
     logs.clear();
+  });
+
+  group('IgnorePointer semantics', () {
+    testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoring: false,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          label: 'button',
+          hasTapAction: true,
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
+
+    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoringSemantics: true,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(semantics, isNot(includesNodeWith(label: 'button')));
+      semantics.dispose();
+    });
+
+    testWidgets('ignores user interactions', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        // Tap action is blocked.
+        matchesSemantics(
+          label: 'button',
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
   });
 
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
