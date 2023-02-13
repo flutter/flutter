@@ -3081,6 +3081,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3106,6 +3107,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3131,6 +3133,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3156,6 +3159,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
