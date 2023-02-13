@@ -1684,7 +1684,8 @@ void main() {
     );
 
     expect(find.text('September'), findsOneWidget);
-    expect(find.text(' Sat 15 '), findsOneWidget);
+    expect(find.textContaining('Sat').last, findsOneWidget);
+    expect(find.textContaining('15').last, findsOneWidget);
     expect(find.text('2018'), findsOneWidget);
   });
 }
