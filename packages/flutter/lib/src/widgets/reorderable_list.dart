@@ -610,10 +610,14 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _autoScroller?.stopAutoScroll();
       _autoScroller = EdgeDraggingAutoScroller(
         _scrollable,
-        onScrollViewScrolled: _handleScrollableAutoScrolled
+        onScrollViewScrolled: _handleScrollableAutoScrolled,
+        velocityScalar: _kDefaultSelectToScrollVelocityScalar
       );
     }
   }
+
+  // An eye-balled value for a smooth scrolling speed.
+  static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
