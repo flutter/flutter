@@ -1050,7 +1050,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
             ..onTertiaryTapCancel = onTertiaryTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1065,7 +1066,8 @@ class GestureDetector extends StatelessWidget {
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
             ..onDoubleTapCancel = onDoubleTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1116,7 +1118,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
             ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1136,7 +1139,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1156,7 +1160,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1176,7 +1181,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1192,7 +1198,8 @@ class GestureDetector extends StatelessWidget {
             ..dragStartBehavior = dragStartBehavior
             ..gestureSettings = gestureSettings
             ..trackpadScrollCausesScale = trackpadScrollCausesScale
-            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor;
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1209,7 +1216,8 @@ class GestureDetector extends StatelessWidget {
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
             ..onEnd = onForcePressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
