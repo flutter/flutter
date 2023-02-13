@@ -1508,6 +1508,66 @@ TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
   }
 }
 
+TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
+  // Intersection: No stencil coverage, no geometry.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    clip->SetClipOperation(Entity::ClipOperation::kIntersect);
+    auto result = clip->GetStencilCoverage(Entity{}, Rect{});
+
+    ASSERT_FALSE(result.coverage.has_value());
+  }
+
+  // Intersection: No stencil coverage, with geometry.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    clip->SetClipOperation(Entity::ClipOperation::kIntersect);
+    clip->SetGeometry(Geometry::MakeFillPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
+    auto result = clip->GetStencilCoverage(Entity{}, Rect{});
+
+    ASSERT_FALSE(result.coverage.has_value());
+  }
+
+  // Intersection: With stencil coverage, no geometry.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    clip->SetClipOperation(Entity::ClipOperation::kIntersect);
+    auto result =
+        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+
+    ASSERT_FALSE(result.coverage.has_value());
+  }
+
+  // Intersection: With stencil coverage, with geometry.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    clip->SetClipOperation(Entity::ClipOperation::kIntersect);
+    clip->SetGeometry(Geometry::MakeFillPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 50, 50)).TakePath()));
+    auto result =
+        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+
+    ASSERT_TRUE(result.coverage.has_value());
+    ASSERT_RECT_NEAR(result.coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
+    ASSERT_EQ(result.type, Contents::StencilCoverage::Type::kAppend);
+  }
+
+  // Difference: With stencil coverage, with geometry.
+  {
+    auto clip = std::make_shared<ClipContents>();
+    clip->SetClipOperation(Entity::ClipOperation::kDifference);
+    clip->SetGeometry(Geometry::MakeFillPath(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 50, 50)).TakePath()));
+    auto result =
+        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+
+    ASSERT_TRUE(result.coverage.has_value());
+    ASSERT_RECT_NEAR(result.coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+    ASSERT_EQ(result.type, Contents::StencilCoverage::Type::kAppend);
+  }
+}
+
 TEST_P(EntityTest, RRectShadowTest) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
     static Color color = Color::Red();

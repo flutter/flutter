@@ -47,10 +47,18 @@ Contents::StencilCoverage ClipContents::GetStencilCoverage(
       return {.type = StencilCoverage::Type::kAppend,
               .coverage = current_stencil_coverage};
     case Entity::ClipOperation::kIntersect:
+      if (!geometry_) {
+        return {.type = StencilCoverage::Type::kAppend,
+                .coverage = std::nullopt};
+      }
+      auto coverage = geometry_->GetCoverage(entity.GetTransformation());
+      if (!coverage.has_value() || !current_stencil_coverage.has_value()) {
+        return {.type = StencilCoverage::Type::kAppend,
+                .coverage = std::nullopt};
+      }
       return {
           .type = StencilCoverage::Type::kAppend,
-          .coverage = current_stencil_coverage->Intersection(
-              geometry_->GetCoverage(entity.GetTransformation()).value()),
+          .coverage = current_stencil_coverage->Intersection(coverage.value()),
       };
   }
   FML_UNREACHABLE();
