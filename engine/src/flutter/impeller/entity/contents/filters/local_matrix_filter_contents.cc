@@ -19,13 +19,15 @@ Matrix LocalMatrixFilterContents::GetLocalTransform(
   return matrix_;
 }
 
-std::optional<Snapshot> LocalMatrixFilterContents::RenderFilter(
+std::optional<Entity> LocalMatrixFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
     const Matrix& effect_transform,
     const Rect& coverage) const {
-  return inputs[0]->GetSnapshot(renderer, entity);
+  return Contents::EntityFromSnapshot(inputs[0]->GetSnapshot(renderer, entity),
+                                      entity.GetBlendMode(),
+                                      entity.GetStencilDepth());
 }
 
 }  // namespace impeller

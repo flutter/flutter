@@ -11,14 +11,14 @@ namespace impeller {
 
 class BlendFilterContents : public ColorFilterContents {
  public:
-  using AdvancedBlendProc = std::function<std::optional<Snapshot>(
-      const FilterInput::Vector& inputs,
-      const ContentContext& renderer,
-      const Entity& entity,
-      const Rect& coverage,
-      std::optional<Color> foreground_color,
-      bool absorb_opacity,
-      std::optional<Scalar> alpha)>;
+  using AdvancedBlendProc =
+      std::function<std::optional<Entity>(const FilterInput::Vector& inputs,
+                                          const ContentContext& renderer,
+                                          const Entity& entity,
+                                          const Rect& coverage,
+                                          std::optional<Color> foreground_color,
+                                          bool absorb_opacity,
+                                          std::optional<Scalar> alpha)>;
 
   BlendFilterContents();
 
@@ -32,11 +32,11 @@ class BlendFilterContents : public ColorFilterContents {
 
  private:
   // |FilterContents|
-  std::optional<Snapshot> RenderFilter(const FilterInput::Vector& inputs,
-                                       const ContentContext& renderer,
-                                       const Entity& entity,
-                                       const Matrix& effect_transform,
-                                       const Rect& coverage) const override;
+  std::optional<Entity> RenderFilter(const FilterInput::Vector& inputs,
+                                     const ContentContext& renderer,
+                                     const Entity& entity,
+                                     const Matrix& effect_transform,
+                                     const Rect& coverage) const override;
 
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   AdvancedBlendProc advanced_blend_proc_;

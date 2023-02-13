@@ -23,7 +23,7 @@ void ColorMatrixFilterContents::SetMatrix(const ColorMatrix& matrix) {
   matrix_ = matrix;
 }
 
-std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
+std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
@@ -104,11 +104,12 @@ std::optional<Snapshot> ColorMatrixFilterContents::RenderFilter(
   }
   out_texture->SetLabel("ColorMatrixFilter Texture");
 
-  return Snapshot{
-      .texture = out_texture,
-      .transform = input_snapshot->transform,
-      .sampler_descriptor = input_snapshot->sampler_descriptor,
-      .opacity = GetAbsorbOpacity() ? 1.0f : input_snapshot->opacity};
+  return Contents::EntityFromSnapshot(
+      Snapshot{.texture = out_texture,
+               .transform = input_snapshot->transform,
+               .sampler_descriptor = input_snapshot->sampler_descriptor,
+               .opacity = GetAbsorbOpacity() ? 1.0f : input_snapshot->opacity},
+      entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
 }  // namespace impeller

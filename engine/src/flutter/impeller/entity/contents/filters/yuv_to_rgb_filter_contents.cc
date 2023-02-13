@@ -36,7 +36,7 @@ void YUVToRGBFilterContents::SetYUVColorSpace(YUVColorSpace yuv_color_space) {
   yuv_color_space_ = yuv_color_space;
 }
 
-std::optional<Snapshot> YUVToRGBFilterContents::RenderFilter(
+std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
@@ -118,7 +118,9 @@ std::optional<Snapshot> YUVToRGBFilterContents::RenderFilter(
   }
   out_texture->SetLabel("YUVToRGB Texture");
 
-  return Snapshot{.texture = out_texture};
+  return Contents::EntityFromSnapshot(Snapshot{.texture = out_texture},
+                                      entity.GetBlendMode(),
+                                      entity.GetStencilDepth());
 }
 
 }  // namespace impeller

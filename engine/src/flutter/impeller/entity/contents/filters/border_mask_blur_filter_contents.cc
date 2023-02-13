@@ -47,7 +47,7 @@ void BorderMaskBlurFilterContents::SetBlurStyle(BlurStyle blur_style) {
   }
 }
 
-std::optional<Snapshot> BorderMaskBlurFilterContents::RenderFilter(
+std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
@@ -126,9 +126,11 @@ std::optional<Snapshot> BorderMaskBlurFilterContents::RenderFilter(
   }
   out_texture->SetLabel("BorderMaskBlurFilter Texture");
 
-  return Snapshot{.texture = out_texture,
-                  .transform = Matrix::MakeTranslation(coverage.origin),
-                  .opacity = input_snapshot->opacity};
+  return Contents::EntityFromSnapshot(
+      Snapshot{.texture = out_texture,
+               .transform = Matrix::MakeTranslation(coverage.origin),
+               .opacity = input_snapshot->opacity},
+      entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
 std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
