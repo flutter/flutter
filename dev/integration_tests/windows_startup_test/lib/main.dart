@@ -51,7 +51,7 @@ void main() async {
       // which will use the UTF16 to UTF8 utility function to convert them to a
       // std::string, which should equate to the original expected string.
       // TODO(schectman): Remove trailing null from returned string
-      const String expected = 'ABCℵ\x00';
+      const String expected = 'ABCℵ';
       final Int32List codePoints = Int32List.fromList(expected.codeUnits);
       final String converted = await testStringConversion(codePoints);
       return (converted == expected)
