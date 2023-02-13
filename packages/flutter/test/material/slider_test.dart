@@ -2949,7 +2949,7 @@ void main() {
     );
   });
 
-  testWidgets('sliderTheme change should trigger re-layout', (WidgetTester tester) async {
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/118955
     double sliderValue = 0.0;
     Widget buildFrame(ThemeMode themeMode) {
@@ -2975,6 +2975,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildFrame(ThemeMode.light));
 
     // _RenderSlider is the last render object in the tree.
@@ -2989,6 +2990,7 @@ void main() {
 
     expect(renderObject.debugNeedsLayout, true);
 
+    // Pump the rest of the frames to complete the test.
     await tester.pumpAndSettle();
   });
 
