@@ -978,14 +978,16 @@ class FlutterVmService {
   /// been collected.
   Future<vm_service.Isolate?> getIsolateOrNull(String isolateId) async {
     return service.getIsolate(isolateId)
-      // The .then() call is required to cast from Future<Isolate> to Future<Isolate?>
-      .then<vm_service.Isolate?>((vm_service.Isolate isolate) => isolate)
-      .catchError((Object? error, StackTrace stackTrace) {
-        return null;
-      }, test: (Object? error) {
-        return (error is vm_service.SentinelException) ||
-          (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared);
-      });
+      .then<vm_service.Isolate?>(
+        (vm_service.Isolate isolate) => isolate,
+        onError: (Object? error) {
+          if (error is vm_service.SentinelException ||
+            error == null ||
+            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            return null;
+          }
+          return Future<vm_service.Isolate?>.error(error);
+        });
   }
 
   /// Create a new development file system on the device.
