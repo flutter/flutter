@@ -138,6 +138,7 @@ class CupertinoContextMenu extends StatefulWidget {
     super.key,
     required this.actions,
     required Widget this.child,
+    this.enableHapticFeedback = false,
     @Deprecated(
       'Use CupertinoContextMenu.builder instead. '
       'This feature was deprecated after v3.4.0-34.1.pre.',
@@ -159,9 +160,10 @@ class CupertinoContextMenu extends StatefulWidget {
     super.key,
     required this.actions,
     required this.builder,
-  }) : assert(actions != null && actions.isNotEmpty),
-       child = null,
-       previewBuilder = null;
+    this.enableHapticFeedback = false,
+  })  : assert(actions != null && actions.isNotEmpty),
+        child = null,
+        previewBuilder = null;
 
   /// Exposes the default border radius for matching iOS 16.0 behavior. This
   /// value was eyeballed from the iOS simulator running iOS 16.0.
@@ -390,6 +392,13 @@ class CupertinoContextMenu extends StatefulWidget {
   /// This parameter cannot be null or empty.
   final List<Widget> actions;
 
+  /// Enables if clicking on the [CupertinoContextMenuAction]s will
+  /// produce a haptic feedback.
+  ///
+  /// Uses [HapticFeedback.heavyImpact] when activated.
+  /// Defaults to false.
+  final bool enableHapticFeedback;
+
   /// A function that returns an alternative widget to show when the
   /// [CupertinoContextMenu] is open.
   ///
@@ -608,7 +617,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     Future<void>.delayed(const Duration(milliseconds: 350), () {
-      if (_openController.isAnimating && _openController.status != AnimationStatus.reverse) {
+      if (_openController.isAnimating &&
+          _openController.status != AnimationStatus.reverse &&
+          widget.enableHapticFeedback) {
         HapticFeedback.heavyImpact();
       }
     });
