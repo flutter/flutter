@@ -73,9 +73,6 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
         platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
-      if (prefix == null) {
-        return false;
-      }
       final String path = fileSystem.path.join(prefix, kWindowsExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -102,9 +99,6 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
         platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
-      if (prefix == null) {
-        return false;
-      }
       final String path = fileSystem.path.join(prefix, kWindowsEdgeExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -228,6 +222,12 @@ class ChromiumLauncher {
     if (process != null && cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
+        // cleanup temp dir
+        try {
+          userDataDir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // ignore
+        }
       }));
     }
     return connect(Chromium(

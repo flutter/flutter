@@ -112,7 +112,7 @@ class DropdownMenuTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the visual properties used by descendant [DropdownMenu]
   /// widgets.
@@ -162,7 +162,6 @@ class DropdownMenuTheme extends InheritedTheme {
   ///  * [of], which will return [ThemeData.dropdownMenuTheme] if it doesn't
   ///    find a [DropdownMenuTheme] ancestor, instead of returning null.
   static DropdownMenuThemeData? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 

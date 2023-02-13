@@ -399,7 +399,6 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync(io.pid.toString());
   }
@@ -419,7 +418,6 @@ class _TestProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync('12345');
   }

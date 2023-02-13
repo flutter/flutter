@@ -149,25 +149,13 @@ class RenderListWheelViewport
     bool renderChildrenOutsideViewport = false,
     Clip clipBehavior = Clip.none,
     List<RenderBox>? children,
-  }) : assert(childManager != null),
-       assert(offset != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0, diameterRatioZeroMessage),
-       assert(perspective != null),
+  }) : assert(diameterRatio > 0, diameterRatioZeroMessage),
        assert(perspective > 0),
        assert(perspective <= 0.01, perspectiveTooHighMessage),
-       assert(offAxisFraction != null),
-       assert(useMagnifier != null),
-       assert(magnification != null),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
        assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
-       assert(itemExtent != null),
-       assert(squeeze != null),
        assert(squeeze > 0),
        assert(itemExtent > 0),
-       assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -225,7 +213,6 @@ class RenderListWheelViewport
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
-    assert(value != null);
     if (value == _offset) {
       return;
     }
@@ -270,7 +257,6 @@ class RenderListWheelViewport
   double get diameterRatio => _diameterRatio;
   double _diameterRatio;
   set diameterRatio(double value) {
-    assert(value != null);
     assert(
       value > 0,
       diameterRatioZeroMessage,
@@ -300,7 +286,6 @@ class RenderListWheelViewport
   double get perspective => _perspective;
   double _perspective;
   set perspective(double value) {
-    assert(value != null);
     assert(value > 0);
     assert(
       value <= 0.01,
@@ -342,7 +327,6 @@ class RenderListWheelViewport
   double get offAxisFraction => _offAxisFraction;
   double _offAxisFraction = 0.0;
   set offAxisFraction(double value) {
-    assert(value != null);
     if (value == _offAxisFraction) {
       return;
     }
@@ -356,7 +340,6 @@ class RenderListWheelViewport
   bool get useMagnifier => _useMagnifier;
   bool _useMagnifier = false;
   set useMagnifier(bool value) {
-    assert(value != null);
     if (value == _useMagnifier) {
       return;
     }
@@ -376,7 +359,6 @@ class RenderListWheelViewport
   double get magnification => _magnification;
   double _magnification = 1.0;
   set magnification(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _magnification) {
       return;
@@ -396,7 +378,6 @@ class RenderListWheelViewport
   double get overAndUnderCenterOpacity => _overAndUnderCenterOpacity;
   double _overAndUnderCenterOpacity = 1.0;
   set overAndUnderCenterOpacity(double value) {
-    assert(value != null);
     assert(value >= 0 && value <= 1);
     if (value == _overAndUnderCenterOpacity) {
       return;
@@ -414,7 +395,6 @@ class RenderListWheelViewport
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _itemExtent) {
       return;
@@ -447,7 +427,6 @@ class RenderListWheelViewport
   double get squeeze => _squeeze;
   double _squeeze;
   set squeeze(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _squeeze) {
       return;
@@ -470,7 +449,6 @@ class RenderListWheelViewport
   bool get renderChildrenOutsideViewport => _renderChildrenOutsideViewport;
   bool _renderChildrenOutsideViewport;
   set renderChildrenOutsideViewport(bool value) {
-    assert(value != null);
     assert(
       !renderChildrenOutsideViewport || clipBehavior == Clip.none,
       clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -489,7 +467,6 @@ class RenderListWheelViewport
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -636,7 +613,6 @@ class RenderListWheelViewport
   ///
   /// This relies on the [childManager] maintaining [ListWheelParentData.index].
   int indexOf(RenderBox child) {
-    assert(child != null);
     final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
     assert(childParentData.index != null);
     return childParentData.index!;

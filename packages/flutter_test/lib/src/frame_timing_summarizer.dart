@@ -22,7 +22,6 @@ class FrameTimingSummarizer {
     int? newGenGCCount,
     int? oldGenGCCount,
   }) {
-    assert(data != null);
     assert(data.isNotEmpty);
     final List<Duration> frameBuildTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.buildDuration),

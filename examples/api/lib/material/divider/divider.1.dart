@@ -28,11 +28,11 @@ class DividerExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Expanded(
               child: Card(
                 child: SizedBox.expand(),

@@ -45,8 +45,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
     super.key,
     required CupertinoUserInterfaceLevelData data,
     required super.child,
-  }) : assert(data != null),
-      _data = data;
+  }) : _data = data;
 
   final CupertinoUserInterfaceLevelData _data;
 
@@ -65,7 +64,6 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///  * [maybeOf], which is similar, but will return null if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData of(BuildContext context) {
-    assert(context != null);
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null) {
       return query._data;
@@ -95,7 +93,6 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///  * [of], which is similar, but will throw an exception if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
-    assert(context != null);
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null) {
       return query._data;

@@ -90,7 +90,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     }
     await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
-    status.cancel();
+    status.stop();
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);

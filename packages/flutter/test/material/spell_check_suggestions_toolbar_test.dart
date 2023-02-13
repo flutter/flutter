@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart' show CupertinoTextSelectionToolbar;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -48,7 +49,7 @@ void main() {
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
     const double expectedToolbarY =
-        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - TextSelectionToolbar.kToolbarScreenPadding;
+        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - CupertinoTextSelectionToolbar.kToolbarScreenPadding;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -68,7 +69,7 @@ void main() {
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
     const double expectedToolbarY =
-        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - TextSelectionToolbar.kToolbarScreenPadding - _kTestToolbarOverlap;
+        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - CupertinoTextSelectionToolbar.kToolbarScreenPadding - _kTestToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(

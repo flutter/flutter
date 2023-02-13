@@ -890,7 +890,6 @@ abstract class WidgetController {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
-      assert(gesture != null);
 
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
@@ -1120,7 +1119,6 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -1268,9 +1266,7 @@ abstract class WidgetController {
       }
       if (!found) {
         bool outOfBounds = false;
-        if (binding.renderView != null && binding.renderView.size != null) {
-          outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
-        }
+        outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
@@ -1349,7 +1345,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
@@ -1393,7 +1388,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1427,7 +1421,6 @@ abstract class WidgetController {
         String platform = _defaultPlatform,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -1469,7 +1462,6 @@ abstract class WidgetController {
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1627,7 +1619,6 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
   ]) {
-    assert(duration != null);
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
       int count = 0;
@@ -1641,7 +1632,6 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
-    assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];

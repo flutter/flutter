@@ -57,6 +57,11 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   late List<String> processArgs;
   late Map<String, String>? env;
 
+  /// Overrides base implementation of [sendLogsToClient] which requires valid
+  /// `args` to have been set which may not be the case for mocks.
+  @override
+  bool get sendLogsToClient => false;
+
   final StreamController<Map<String, Object?>> _dapToClientMessagesController = StreamController<Map<String, Object?>>.broadcast();
 
   /// A stream of all messages sent from the adapter back to the client.

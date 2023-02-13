@@ -144,8 +144,7 @@ class CupertinoContextMenu extends StatefulWidget {
       'This feature was deprecated after v3.4.0-34.1.pre.',
     )
     this.previewBuilder = _defaultPreviewBuilder,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null),
+  }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
 
   /// Creates a context menu with a custom [builder] controlling the widget.
@@ -161,9 +160,9 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required this.builder,
     this.enableHapticFeedback = false,
-  })  : assert(actions != null && actions.isNotEmpty),
-        child = null,
-        previewBuilder = null;
+  }) : assert(actions.isNotEmpty),
+       child = null,
+       previewBuilder = null;
 
   /// Exposes the default border radius for matching iOS 16.0 behavior. This
   /// value was eyeballed from the iOS simulator running iOS 16.0.
@@ -812,8 +811,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     super.filter,
     required Rect previousChildRect,
     super.settings,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
+  }) : assert(actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
@@ -1099,8 +1097,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.onDismiss,
     required this.orientation,
     this.sheetGlobalKey,
-  }) : assert(contextMenuLocation != null),
-       assert(orientation != null);
+  });
 
   final List<Widget>? actions;
   final Widget child;
@@ -1424,9 +1421,7 @@ class _ContextMenuSheet extends StatelessWidget {
     required this.actions,
     required _ContextMenuLocation contextMenuLocation,
     required Orientation orientation,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
-       assert(orientation != null),
+  }) : assert(actions.isNotEmpty),
        _contextMenuLocation = contextMenuLocation,
        _orientation = orientation;
 

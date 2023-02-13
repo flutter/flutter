@@ -165,7 +165,6 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return '[☠]';
@@ -180,7 +179,6 @@ class ValidationResult {
   }
 
   String get coloredLeadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return globals.terminal.color(leadingBox, TerminalColor.red);
@@ -196,7 +194,6 @@ class ValidationResult {
 
   /// The string representation of the type.
   String get typeStr {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return 'crash';
