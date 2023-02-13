@@ -1081,128 +1081,57 @@ class RenderParagraph extends RenderBox
   }
 
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(List<SemanticsConfiguration> childConfigs) {
-    if (_cachedAttributedLabels == null) {
-      final ChildSemanticsConfigurationsResult result = _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
-      assert(() {
-        // Verify the cache will produce the same result.
-        final ChildSemanticsConfigurationsResult resultBuiltFromCache = _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
-        assert(result.siblingMergeGroups.isEmpty && resultBuiltFromCache.siblingMergeGroups.isEmpty);
-        assert(result.mergeUp.length == resultBuiltFromCache.mergeUp.length);
-        int childConfigsIndex = 0;
-        for (int index = 0; index < result.mergeUp.length; index += 1) {
-          if (identical(result.mergeUp[index], resultBuiltFromCache.mergeUp[index])) {
-            // This must be coming from the input `childConfigs`
-            assert(identical(result.mergeUp[index], childConfigs[childConfigsIndex]));
-            childConfigsIndex += 1;
-          } else {
-            assert(result.mergeUp[index].label == resultBuiltFromCache.mergeUp[index].label);
-          }
-        }
-        // All the ``childConfigs` must be included in the merge up.
-        assert(childConfigs.length == childConfigsIndex);
-        return true;
-      }());
-      return _buildChildSemanticsConfigurationsResultAndFillCache(childConfigs);
-    }
-    return _buildChildSemanticsConfigurationsResultFromCache(childConfigs);
-  }
-
-  ChildSemanticsConfigurationsResult _buildChildSemanticsConfigurationsResultAndFillCache(List<SemanticsConfiguration> childConfigs) {
-    final List<AttributedString> cachedStrings = _cachedAttributedLabels = <AttributedString>[];
     final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
     int placeholderIndex = 0;
     int childConfigsIndex = 0;
-    int textSpanLabelIndex = 0;
-    int offset = 0;
-    StringBuffer? buffer;
-    List<StringAttribute>? attributes;
-    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+    int attributedLabelCacheIndex = 0;
+    InlineSpanSemanticsInformation? seenTextInfo;
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       if (info.isPlaceholder) {
-        // buffer will not be null if there are TextSpans before this
-        // PlaceholderSpan.
-        if (buffer != null) {
-          final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-          textSpanConfig.textDirection = textDirection;
-          assert(attributes != null);
-          textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
-          assert(textSpanLabelIndex == cachedStrings.length);
-          cachedStrings.add(textSpanConfig.attributedLabel);
-          buffer = null;
-          offset = 0;
-          attributes = null;
-          textSpanLabelIndex += 1;
-          builder.markAsMergeUp(textSpanConfig);
+        if (seenTextInfo != null) {
+          builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
+          attributedLabelCacheIndex += 1;
         }
+        // Mark every childConfig belongs to this placeholder to merge up group.
         while (childConfigsIndex < childConfigs.length &&
             childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           builder.markAsMergeUp(childConfigs[childConfigsIndex]);
           childConfigsIndex += 1;
         }
         placeholderIndex += 1;
-        continue;
+      } else {
+        seenTextInfo = info;
       }
-      buffer ??= StringBuffer();
-      attributes ??= <StringAttribute>[];
-      final String label = info.semanticsLabel ?? info.text;
-      for (final StringAttribute infoAttribute in info.stringAttributes) {
-        final TextRange originalRange = infoAttribute.range;
-        attributes.add(
-          infoAttribute.copy(
-            range: TextRange(
-              start: offset + originalRange.start,
-              end: offset + originalRange.end,
-            ),
-          ),
-        );
-      }
-      buffer.write(label);
-      offset += label.length;
     }
-    if (buffer != null) {
-      final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-      textSpanConfig.textDirection = textDirection;
-      assert(attributes != null);
-      textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
-      cachedStrings.add(textSpanConfig.attributedLabel);
-      builder.markAsMergeUp(textSpanConfig);
+
+    // Handle plain text info at the end.
+    if (seenTextInfo != null) {
+      builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
     }
     return builder.build();
   }
 
-  ChildSemanticsConfigurationsResult _buildChildSemanticsConfigurationsResultFromCache(List<SemanticsConfiguration> childConfigs) {
-    final List<AttributedString> cachedStrings = _cachedAttributedLabels!;
-    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
-    int placeholderIndex = 0;
-    int childConfigsIndex = 0;
-    int textSpanLabelIndex = 0;
-    bool seenTextSpan = false;
-    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-      if (info.isPlaceholder) {
-        if (seenTextSpan) {
-          final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-          textSpanConfig.textDirection = textDirection;
-          textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
-          textSpanLabelIndex += 1;
-          builder.markAsMergeUp(textSpanConfig);
-          seenTextSpan = false;
-        }
-        while (childConfigsIndex < childConfigs.length &&
-            childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
-          builder.markAsMergeUp(childConfigs[childConfigsIndex]);
-          childConfigsIndex += 1;
-        }
-        placeholderIndex += 1;
-        continue;
-      }
-      seenTextSpan = true;
+  SemanticsConfiguration _createSemanticsConfigForTextInfo(InlineSpanSemanticsInformation textInfo, int cacheIndex) {
+    assert(!textInfo.requiresOwnNode);
+    final List<AttributedString> cachedStrings = _cachedAttributedLabels ??= <AttributedString>[];
+    assert(cacheIndex <= cachedStrings.length);
+    final bool hasCache = cacheIndex < cachedStrings.length;
+
+    late AttributedString attributedLabel;
+    if (hasCache) {
+      attributedLabel = cachedStrings[cacheIndex];
+    } else {
+      assert(cachedStrings.length == cacheIndex);
+      attributedLabel = AttributedString(
+        textInfo.semanticsLabel ?? textInfo.text,
+        attributes: textInfo.stringAttributes,
+      );
+      cachedStrings.add(attributedLabel);
     }
-    if (seenTextSpan) {
-      final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-      textSpanConfig.textDirection = textDirection;
-      textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
-      builder.markAsMergeUp(textSpanConfig);
-    }
-    return builder.build();
+    return SemanticsConfiguration()
+      ..textDirection = textDirection
+      ..attributedLabel = attributedLabel;
   }
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
