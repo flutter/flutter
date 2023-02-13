@@ -1882,10 +1882,10 @@ void main() {
     expect(iconColor(trailingKey), colorScheme.primary);
 
     await tester.pumpWidget(buildFrame(selected: false));
-    expect(iconColor(leadingKey), colorScheme.onSurface);
-    expect(iconColor(titleKey), colorScheme.onSurface);
-    expect(iconColor(subtitleKey), colorScheme.onSurface);
-    expect(iconColor(trailingKey), colorScheme.onSurface);
+    expect(iconColor(leadingKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(titleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(subtitleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(trailingKey), colorScheme.onSurfaceVariant);
   });
 
   testWidgets('ListTile font size', (WidgetTester tester) async {
