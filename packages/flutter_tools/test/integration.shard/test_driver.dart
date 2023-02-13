@@ -806,7 +806,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     if (withDebugger) {
       final Map<String, Object?> startedProcessParams =
           (await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout))['params']! as Map<String, Object?>;
-      final String vmServiceHttpString = startedProcessParams['observatoryUri']! as String;
+      final String vmServiceHttpString = startedProcessParams['vmServiceUri']! as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.
