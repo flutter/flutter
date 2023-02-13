@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ExpansionTile].
+// Flutter code sample for [ExpansionTile].
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -42,10 +42,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             child: SizedBox(
               height: 200,
               child: Column(
-                children: [
+                children: <Widget>[
                   Flexible(
                     child: ListView(
-                      children: [
+                      children: <Widget>[
                         for (int i = 0; i < 30; ++i)
                           ListTile(title: Text('Tile $i')),
                       ],
@@ -65,7 +65,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     title:
                         const Text('Expansion tile takes up the parent space'),
                     child: ListView(
-                      children: [
+                      children: <Widget>[
                         for (int i = 0; i < 30; ++i)
                           ListTile(title: Text('Tile $i')),
                       ],
