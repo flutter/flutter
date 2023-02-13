@@ -505,7 +505,7 @@ class SystemChrome {
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
   /// However, the [AppBar] widget automatically sets the system overlay style
-  /// based on its [AppBar.brightness], so configure that instead of calling
+  /// based on its [AppBar.systemOverlayStyle], so configure that instead of calling
   /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
   /// via [CupertinoNavigationBar.backgroundColor].
   ///

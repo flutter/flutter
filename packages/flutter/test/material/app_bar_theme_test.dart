@@ -87,7 +87,7 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
@@ -167,7 +167,6 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             backgroundColor: color,
-            brightness: brightness,
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
@@ -246,7 +245,7 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
@@ -804,7 +803,6 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
-      brightness: Brightness.dark,
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
       shadowColor: Color(0xff000002),
@@ -819,7 +817,6 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'brightness: Brightness.dark',
       'backgroundColor: Color(0xff000001)',
       'elevation: 8.0',
       'shadowColor: Color(0xff000002)',
@@ -837,7 +834,7 @@ void main() {
 }
 
 AppBarTheme _appBarTheme() {
-  const Brightness brightness = Brightness.light;
+  const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
   const Color backgroundColor = Colors.lightBlue;
   const double elevation = 6.0;
   const Color shadowColor = Colors.red;
@@ -846,7 +843,7 @@ AppBarTheme _appBarTheme() {
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
   return const AppBarTheme(
     actionsIconTheme: actionsIconThemeData,
-    brightness: brightness,
+    systemOverlayStyle: systemOverlayStyle,
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
