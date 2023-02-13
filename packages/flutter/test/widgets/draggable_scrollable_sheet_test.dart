@@ -1661,6 +1661,39 @@ void main() {
     expect(buildCount, 2);
   });
 
+  testWidgets('DraggableScrollableSheet should not recreate ballistic animations every frame', (WidgetTester tester) async {
+    // Use an outer controller to monitor the sheet size to ensure that the test
+    // case is well formed in that the sheet is indeed expanding.
+    final DraggableScrollableController outerController = DraggableScrollableController();
+    late ScrollController innerController;
+    await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: DraggableScrollableSheet(
+              controller: outerController,
+              builder: (BuildContext context, ScrollController controller) {
+                innerController = controller;
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                );
+              }
+            ),
+          ),
+        ));
+
+    await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
+
+    final ScrollActivity? activity = innerController.position.activity;
+    await tester.pump();
+    expect(innerController.position.activity, activity);
+    final double sheetSize = outerController.size;
+
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(outerController.size, inExclusiveRange(sheetSize, 1.0));
+    expect(innerController.position.activity, activity);
+  });
+
   testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
     final DraggableScrollableController controller2 = DraggableScrollableController();

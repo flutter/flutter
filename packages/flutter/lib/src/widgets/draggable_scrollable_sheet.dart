@@ -680,25 +680,30 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
+    final Widget child = ValueListenableBuilder<double>(
       valueListenable: _extent._currentSize,
-      builder: (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-
-          for (final _DraggableScrollableSheetScrollPosition position in _scrollController.positions) {
-            position.applyNewOuterDimensions(isLayout: true);
-          }
-
-          final Widget sheet = FractionallySizedBox(
-            heightFactor: currentSize,
-            alignment: Alignment.bottomCenter,
-            child: child,
-          );
-          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
-        },
-      ),
+      builder: (BuildContext context, double currentSize, Widget? child) =>
+        FractionallySizedBox(
+          heightFactor: currentSize,
+          alignment: Alignment.bottomCenter,
+          child: child,
+        ),
       child: widget.builder(context, _scrollController),
+    );
+
+    final Widget wrappedChild = widget.expand ?
+      SizedBox.expand(child: child) : child;
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+
+        for (final _DraggableScrollableSheetScrollPosition position in _scrollController.positions) {
+          position.applyNewOuterDimensions(isLayout: true);
+        }
+
+        return wrappedChild;
+      },
     );
   }
 
