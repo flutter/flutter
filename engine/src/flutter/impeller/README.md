@@ -13,8 +13,6 @@
 
 ![Impeller](docs/assets/showcase.png)
 
-⚠️ Impeller is a Prototype and Work-In-Progress. Proceed with caution. ⚠️
-
 Impeller is a rendering runtime for Flutter with the following objectives:
 
 * **Predictable Performance**: All shader compilation and reflection is
