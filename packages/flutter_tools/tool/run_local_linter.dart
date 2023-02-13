@@ -12,8 +12,23 @@ import 'package:process/process.dart';
 
 const LocalFileSystem fs = LocalFileSystem();
 const LocalProcessManager processManager = LocalProcessManager();
+final String dart = io.Platform.resolvedExecutable;
+late final Directory tempDir =
+    fs.systemTempDirectory.createTempSync('flutter_tools.run_local_linter');
 
 void main(List<String> args) {
+  try {
+    _main(args);
+  } finally {
+    try {
+      tempDir.deleteSync(recursive: true);
+    } on FileSystemException {
+      // ignore
+    }
+  }
+}
+
+void _main(List<String> args) {
   final ArgParser parser = ArgParser()
     ..addOption('linter-entrypoint', mandatory: true)
     ..addMultiOption('rules');
@@ -21,12 +36,39 @@ void main(List<String> args) {
 
   final String linterEntrypoint = results['linter-entrypoint'] as String;
   final List<String> rules = results['rules'] as List<String>;
+  final Directory rootDir;
+  if (results.rest.isEmpty) {
+    rootDir = fs.directory('.');
+  } else if (results.rest.length == 1) {
+    rootDir = fs.directory(results.rest.first);
+    if (!rootDir.existsSync()) {
+      throw Exception(
+          'The argument ${results.rest.first} is not a valid directory on disk.');
+    }
+  } else {
+    throw Exception(
+        'Too many arguments passed (expected 0 or 1): ${results.rest}');
+  }
+  final File linter = precompileLinter(linterEntrypoint);
+  print('Starting recursive lint of $rootDir...\n');
   final IssueReport report = lintDirRecursively(
-    fs.directory('lib/src/web/file_generators'),
-    fs.file(linterEntrypoint),
+    rootDir,
+    linter,
     rules,
   );
   print(report);
+}
+
+File precompileLinter(String linterEntrypoint) {
+  final File snapshot = tempDir.childFile('linter-snapshot.jit');
+  print('Precompiling $linterEntrypoint to ${snapshot.path}...');
+  final io.ProcessResult result = processManager.runSync(
+    <String>[dart, 'compile', 'jit-snapshot', '--output', snapshot.path, linterEntrypoint],
+  );
+  if (result.exitCode != 0) {
+    throw Exception('Compiling JIT snapshot failed with code ${result.exitCode}\nSTDOUT: ${result.stdout}\nSTDERR: ${result.stderr}');
+  }
+  return snapshot;
 }
 
 IssueReport lintDirRecursively(
@@ -36,13 +78,23 @@ IssueReport lintDirRecursively(
 ) {
   final IssueReport report = IssueReport();
 
-  for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
-    if (entity is! File) {
-      print('skipping $entity');
-      continue;
-    }
-    lintFile(linterEntrypoint, entity, rules, report);
+  final List<File> allFiles =
+      dir.listSync(recursive: true).whereType<File>().toList();
+
+  // This var to be referenced from the [write] closure.
+  int lastLineLength = 0;
+
+  void write(String str) {
+    io.stdout.write(str.padRight(lastLineLength));
+    lastLineLength = str.length;
   }
+
+  for (final File file in allFiles) {
+    lintFile(linterEntrypoint, file, rules, report, allFiles.length, write);
+  }
+
+  // Two newlines
+  print('\n');
 
   return report;
 }
@@ -52,8 +104,9 @@ void lintFile(
   File sourceFile,
   List<String> rules,
   IssueReport report,
+  int totalFiles,
+  void Function(String) write,
 ) {
-  final String dart = io.Platform.resolvedExecutable;
   if (!linterEntrypoint.existsSync()) {
     throw Exception(
         'Expected ${linterEntrypoint.absolute.path} to exist, but it did not.');
@@ -76,6 +129,11 @@ void lintFile(
     ],
   );
   report.visitedFiles.add(sourceFile.path);
+  write(
+    '\rLinted ${report.visitedFiles.length.toString().padLeft(3)} of '
+    '$totalFiles files (${report.issues.length} issues found) - last '
+    'file: ${sourceFile.path}',
+  );
   if (result.exitCode != 0) {
     report.addBlob(result.stdout as String);
   }
@@ -103,7 +161,9 @@ class IssueReport {
   String toString() {
     final StringBuffer buffer = StringBuffer();
     issues.forEach(buffer.writeln);
-    buffer.write('\n${issues.length} total issues in ${visitedFiles.length} files.');
+    buffer.write(
+      '\n${issues.length} total issues in ${visitedFiles.length} files.',
+    );
     return buffer.toString();
   }
 }
