@@ -3898,6 +3898,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
 
+  - name: Mac_ios wide_gamut_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: wide_gamut_ios
+
   - name: Mac_ios simple_animation_perf_impeller_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
