@@ -1215,7 +1215,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _sliderTheme = value;
-    markNeedsPaint();
+    _updateLabelPainter();
   }
 
   double get textScaleFactor => _textScaleFactor;
