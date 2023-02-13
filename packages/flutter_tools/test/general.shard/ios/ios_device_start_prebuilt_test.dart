@@ -85,7 +85,7 @@ FakeCommand attachDebuggerCommand({
       if (!isNetworkDevice) '--no-wifi',
       '--args',
       if (isNetworkDevice)
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --observatory-host=0.0.0.0'
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
       else
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
     ],
@@ -152,7 +152,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -190,7 +190,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -230,7 +230,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...'));
     expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
@@ -275,7 +275,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('The Dart VM Service was not discovered after 45 seconds. This is taking much longer than expected...'));
     expect(logger.errorText, contains('Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.'));
@@ -308,7 +308,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, false);
+    expect(launchResult.hasVmService, false);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -335,7 +335,7 @@ void main() {
           <String>[
             '--enable-dart-profiling',
             '--disable-service-auth-codes',
-            '--disable-observatory-publication',
+            '--disable-vm-service-publication',
             '--start-paused',
             '--dart-flags="--foo,--null_assertions"',
             '--use-test-fonts',

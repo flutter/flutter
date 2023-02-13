@@ -547,8 +547,6 @@ void main() {
       'Waiting for connection from debug service on FakeDevice...\n'
       'Debug service listening on ws://127.0.0.1/abcd/\n'
       '\n'
-      '💪 Running with sound null safety 💪\n'
-      '\n'
       'first\n'
       '\n'
       'second\n'
@@ -1599,7 +1597,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
+  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();

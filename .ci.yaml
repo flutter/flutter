@@ -1776,7 +1776,6 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2247,16 +2246,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: routing_test
 
-  - name: Linux_android spell_check_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: spell_check_test
-
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2511,6 +2500,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2530,6 +2520,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2549,6 +2540,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2568,6 +2560,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3220,10 +3213,10 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 verify_binaries_codesigned
-    bringup: true
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3236,10 +3229,10 @@ targets:
       validation_name: Verify x64 binaries codesigned
 
   - name: Mac_arm64 verify_binaries_codesigned
-    bringup: true
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3255,6 +3248,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
