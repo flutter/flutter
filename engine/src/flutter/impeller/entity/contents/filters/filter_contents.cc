@@ -167,26 +167,11 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   // Run the filter.
 
-  auto maybe_snapshot = RenderToSnapshot(renderer, entity);
-  if (!maybe_snapshot.has_value()) {
-    return false;
+  auto maybe_entity = GetEntity(renderer, entity);
+  if (!maybe_entity.has_value()) {
+    return true;
   }
-  auto& snapshot = maybe_snapshot.value();
-
-  // Draw the result texture, respecting the transform and clip stack.
-
-  auto texture_rect = Rect::MakeSize(snapshot.texture->GetSize());
-  auto contents = TextureContents::MakeRect(texture_rect);
-  contents->SetTexture(snapshot.texture);
-  contents->SetSamplerDescriptor(snapshot.sampler_descriptor);
-  contents->SetSourceRect(texture_rect);
-  contents->SetOpacity(snapshot.opacity);
-
-  Entity e;
-  e.SetBlendMode(entity.GetBlendMode());
-  e.SetStencilDepth(entity.GetStencilDepth());
-  e.SetTransformation(snapshot.transform);
-  return contents->Render(renderer, e, pass);
+  return maybe_entity->Render(renderer, pass);
 }
 
 std::optional<Rect> FilterContents::GetLocalCoverage(
@@ -234,11 +219,8 @@ std::optional<Rect> FilterContents::GetFilterCoverage(
   return result;
 }
 
-std::optional<Snapshot> FilterContents::RenderToSnapshot(
-    const ContentContext& renderer,
-    const Entity& entity,
-    const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled) const {
+std::optional<Entity> FilterContents::GetEntity(const ContentContext& renderer,
+                                                const Entity& entity) const {
   Entity entity_with_local_transform = entity;
   entity_with_local_transform.SetTransformation(
       GetTransform(entity.GetTransformation()));
@@ -250,6 +232,21 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
 
   return RenderFilter(inputs_, renderer, entity_with_local_transform,
                       effect_transform_, coverage.value());
+}
+
+std::optional<Snapshot> FilterContents::RenderToSnapshot(
+    const ContentContext& renderer,
+    const Entity& entity,
+    const std::optional<SamplerDescriptor>& sampler_descriptor,
+    bool msaa_enabled) const {
+  // Resolve the render instruction (entity) from the filter and render it to a
+  // snapshot.
+  if (std::optional<Entity> result = GetEntity(renderer, entity);
+      result.has_value()) {
+    return result->GetContents()->RenderToSnapshot(renderer, result.value());
+  }
+
+  return std::nullopt;
 }
 
 Matrix FilterContents::GetLocalTransform(const Matrix& parent_transform) const {

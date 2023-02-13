@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/snapshot.h"
@@ -39,6 +40,12 @@ class Contents {
     Type type = Type::kNone;
     std::optional<Rect> coverage = std::nullopt;
   };
+
+  /// @brief  Create an entity that renders a given snapshot.
+  static std::optional<Entity> EntityFromSnapshot(
+      const std::optional<Snapshot>& snapshot,
+      BlendMode blend_mode = BlendMode::kSourceOver,
+      uint32_t stencil_depth = 0);
 
   virtual bool Render(const ContentContext& renderer,
                       const Entity& entity,

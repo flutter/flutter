@@ -37,12 +37,11 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
  private:
   // |FilterContents|
-  std::optional<Snapshot> RenderFilter(
-      const FilterInput::Vector& input_textures,
-      const ContentContext& renderer,
-      const Entity& entity,
-      const Matrix& effect_transform,
-      const Rect& coverage) const override;
+  std::optional<Entity> RenderFilter(const FilterInput::Vector& input_textures,
+                                     const ContentContext& renderer,
+                                     const Entity& entity,
+                                     const Matrix& effect_transform,
+                                     const Rect& coverage) const override;
   Sigma blur_sigma_;
   Sigma secondary_blur_sigma_;
   Vector2 blur_direction_;

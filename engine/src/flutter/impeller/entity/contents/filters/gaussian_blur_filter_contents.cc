@@ -81,7 +81,7 @@ void DirectionalGaussianBlurFilterContents::SetSourceOverride(
   source_override_ = std::move(source_override);
 }
 
-std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
+std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
     const Entity& entity,
@@ -106,7 +106,9 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   }
 
   if (blur_sigma_.sigma < kEhCloseEnough) {
-    return input_snapshot.value();  // No blur to render.
+    return Contents::EntityFromSnapshot(
+        input_snapshot.value(), entity.GetBlendMode(),
+        entity.GetStencilDepth());  // No blur to render.
   }
 
   auto radius = Radius{blur_sigma_}.radius;
@@ -120,7 +122,9 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   // If the radius length is < .5, the shader will take at most 1 sample,
   // resulting in no blur.
   if (transformed_blur_radius_length < .5) {
-    return input_snapshot.value();  // No blur to render.
+    return Contents::EntityFromSnapshot(
+        input_snapshot.value(), entity.GetBlendMode(),
+        entity.GetStencilDepth());  // No blur to render.
   }
 
   // A matrix that rotates the snapshot space such that the blur direction is
@@ -283,14 +287,15 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
   sampler_desc.min_filter = MinMagFilter::kLinear;
   sampler_desc.mag_filter = MinMagFilter::kLinear;
 
-  return Snapshot{
-      .texture = out_texture,
-      .transform =
-          texture_rotate.Invert() *
-          Matrix::MakeTranslation(pass_texture_rect.origin) *
-          Matrix::MakeScale((1 / scale) * (scaled_size / floored_size)),
-      .sampler_descriptor = sampler_desc,
-      .opacity = input_snapshot->opacity};
+  return Contents::EntityFromSnapshot(
+      Snapshot{.texture = out_texture,
+               .transform = texture_rotate.Invert() *
+                            Matrix::MakeTranslation(pass_texture_rect.origin) *
+                            Matrix::MakeScale((1 / scale) *
+                                              (scaled_size / floored_size)),
+               .sampler_descriptor = sampler_desc,
+               .opacity = input_snapshot->opacity},
+      entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
