@@ -33,8 +33,9 @@ typedef _PointerDataCallback = void Function(Iterable<ui.PointerData>);
 // here, we use an already very large number (30 bits).
 const int _kButtonsMask = 0x3FFFFFFF;
 
-// Intentionally set to -1 so it doesn't conflict with other device IDs.
+// Intentionally set to -1 or -2 so it doesn't conflict with other device IDs.
 const int _mouseDeviceId = -1;
+const int _trackpadDeviceId = -2;
 
 const int _kPrimaryMouseButton = 0x1;
 const int _kSecondaryMouseButton = 0x2;
@@ -421,8 +422,10 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     const int domDeltaPage = 0x02;
 
     ui.PointerDeviceKind kind = ui.PointerDeviceKind.mouse;
+    int deviceId = _mouseDeviceId;
     if (_isTrackpadEvent(event)) {
       kind = ui.PointerDeviceKind.trackpad;
+      deviceId = _trackpadDeviceId;
     }
 
     // Flutter only supports pixel scroll delta. Convert deltaMode values
@@ -459,7 +462,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
       kind: kind,
       signalKind: ui.PointerSignalKind.scroll,
-      device: _mouseDeviceId,
+      device: deviceId,
       physicalX: offset.dx * ui.window.devicePixelRatio,
       physicalY: offset.dy * ui.window.devicePixelRatio,
       buttons: event.buttons!.toInt(),
