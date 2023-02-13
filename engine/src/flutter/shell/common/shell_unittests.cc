@@ -1425,36 +1425,6 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
-TEST_F(ShellTest, ReloadSystemFonts) {
-  auto settings = CreateSettingsForFixture();
-
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
-                           task_runner);
-  auto shell = CreateShell(settings, task_runners);
-
-  auto fontCollection = GetFontCollection(shell.get());
-  std::vector<std::string> families(1, "Robotofake");
-  auto font =
-      fontCollection->GetMinikinFontCollectionForFamilies(families, "en");
-  if (font == nullptr) {
-    // The system does not have default font. Aborts this test.
-    return;
-  }
-  unsigned int id = font->getId();
-  // The result should be cached.
-  font = fontCollection->GetMinikinFontCollectionForFamilies(families, "en");
-  ASSERT_EQ(font->getId(), id);
-  bool result = shell->ReloadSystemFonts();
-
-  // The cache is cleared, and FontCollection will be assigned a new id.
-  font = fontCollection->GetMinikinFontCollectionForFamilies(families, "en");
-  ASSERT_NE(font->getId(), id);
-  ASSERT_TRUE(result);
-  shell.reset();
-}
-
 TEST_F(ShellTest, WaitForFirstFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);

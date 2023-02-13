@@ -443,10 +443,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_asset_fonts =
       !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
-  std::string enable_skparagraph = command_line.GetOptionValueWithDefault(
-      FlagForSwitch(Switch::EnableSkParagraph), "");
-  settings.enable_skparagraph = enable_skparagraph != "false";
-
   settings.enable_impeller =
       command_line.HasOption(FlagForSwitch(Switch::EnableImpeller));
 

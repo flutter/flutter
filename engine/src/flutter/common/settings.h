@@ -205,9 +205,6 @@ struct Settings {
   // manager before creating the engine.
   bool prefetched_default_font_manager = false;
 
-  // Selects the SkParagraph implementation of the text layout engine.
-  bool enable_skparagraph = false;
-
   // Enable the rendering of colors outside of the sRGB gamut.
   bool enable_wide_gamut = false;
 

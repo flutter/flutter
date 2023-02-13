@@ -198,44 +198,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsEnableSkParagraphByDefault() {
-    // SkParagraph is enabled by default
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains("--enable-skparagraph=true"));
-  }
-
-  @Test
-  public void itSetsEnableSkParagraphFromMetaData() {
-    // SkParagraph can be disabled using metadata.
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableSkParagraph", false);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains("--enable-skparagraph=false"));
-  }
-
-  @Test
   @TargetApi(23)
   @Config(sdk = 23)
   public void itReportsFpsToVsyncWaiterAndroidM() {

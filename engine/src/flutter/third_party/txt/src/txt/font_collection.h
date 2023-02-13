@@ -23,17 +23,12 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "minikin/FontCollection.h"
-#include "minikin/FontFamily.h"
 #include "third_party/googletest/googletest/include/gtest/gtest_prod.h"  // nogncheck
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/modules/skparagraph/include/FontCollection.h"  // nogncheck
 #include "txt/asset_font_manager.h"
 #include "txt/text_style.h"
-
-#if FLUTTER_ENABLE_SKSHAPER
-#include "third_party/skia/modules/skparagraph/include/FontCollection.h"  // nogncheck
-#endif
 
 namespace txt {
 
@@ -51,16 +46,6 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   void SetDynamicFontManager(sk_sp<SkFontMgr> font_manager);
   void SetTestFontManager(sk_sp<SkFontMgr> font_manager);
 
-  std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamilies(
-      const std::vector<std::string>& font_families,
-      const std::string& locale);
-
-  // Provides a FontFamily that contains glyphs for ch. This caches previously
-  // matched fonts. Also see FontCollection::DoMatchFallbackFont.
-  const std::shared_ptr<minikin::FontFamily>& MatchFallbackFont(
-      uint32_t ch,
-      std::string locale);
-
   // Do not provide alternative fonts that can match characters which are
   // missing from the requested font family.
   void DisableFontFallback();
@@ -68,74 +53,20 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   // Remove all entries in the font family cache.
   void ClearFontFamilyCache();
 
-#if FLUTTER_ENABLE_SKSHAPER
-
   // Construct a Skia text layout FontCollection based on this collection.
   sk_sp<skia::textlayout::FontCollection> CreateSktFontCollection();
 
-#endif  // FLUTTER_ENABLE_SKSHAPER
-
  private:
-  struct FamilyKey {
-    FamilyKey(const std::vector<std::string>& families, const std::string& loc);
-
-    // Concatenated string with all font families.
-    std::string font_families;
-    std::string locale;
-
-    bool operator==(const FamilyKey& other) const;
-
-    struct Hasher {
-      size_t operator()(const FamilyKey& key) const;
-    };
-  };
-
   sk_sp<SkFontMgr> default_font_manager_;
   sk_sp<SkFontMgr> asset_font_manager_;
   sk_sp<SkFontMgr> dynamic_font_manager_;
   sk_sp<SkFontMgr> test_font_manager_;
-  std::unordered_map<FamilyKey,
-                     std::shared_ptr<minikin::FontCollection>,
-                     FamilyKey::Hasher>
-      font_collections_cache_;
-  // Cache that stores the results of MatchFallbackFont to ensure lag-free emoji
-  // font fallback matching.
-  std::unordered_map<uint32_t, const std::shared_ptr<minikin::FontFamily>*>
-      fallback_match_cache_;
-  std::unordered_map<std::string, std::shared_ptr<minikin::FontFamily>>
-      fallback_fonts_;
-  std::unordered_map<std::string, std::vector<std::string>>
-      fallback_fonts_for_locale_;
   bool enable_font_fallback_;
 
-#if FLUTTER_ENABLE_SKSHAPER
   // An equivalent font collection usable by the Skia text shaper library.
   sk_sp<skia::textlayout::FontCollection> skt_collection_;
-#endif
-
-  // Performs the actual work of MatchFallbackFont. The result is cached in
-  // fallback_match_cache_.
-  const std::shared_ptr<minikin::FontFamily>& DoMatchFallbackFont(
-      uint32_t ch,
-      std::string locale);
 
   std::vector<sk_sp<SkFontMgr>> GetFontManagerOrder() const;
-
-  std::shared_ptr<minikin::FontFamily> FindFontFamilyInManagers(
-      const std::string& family_name);
-
-  std::shared_ptr<minikin::FontFamily> CreateMinikinFontFamily(
-      const sk_sp<SkFontMgr>& manager,
-      const std::string& family_name);
-
-  // Sorts in-place a group of SkTypeface from an SkTypefaceSet into a
-  // reasonable order for future queries.
-  FRIEND_TEST(FontCollectionTest, CheckSkTypefacesSorting);
-  static void SortSkTypefaces(std::vector<sk_sp<SkTypeface>>& sk_typefaces);
-
-  const std::shared_ptr<minikin::FontFamily>& GetFallbackFontFamily(
-      const sk_sp<SkFontMgr>& manager,
-      const std::string& family_name);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };

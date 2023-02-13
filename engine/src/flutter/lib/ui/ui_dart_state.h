@@ -153,8 +153,6 @@ class UIDartState : public tonic::DartState {
   // @param[in]  message  The message to be logged.
   void LogMessage(const std::string& tag, const std::string& message) const;
 
-  bool enable_skparagraph() const;
-
   template <class T>
   static flutter::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {
@@ -185,7 +183,6 @@ class UIDartState : public tonic::DartState {
               LogMessageCallback log_message_callback,
               std::shared_ptr<IsolateNameServer> isolate_name_server,
               bool is_root_isolate_,
-              bool enable_skparagraph,
               const UIDartState::Context& context);
 
   ~UIDartState() override;
@@ -210,7 +207,6 @@ class UIDartState : public tonic::DartState {
   UnhandledExceptionCallback unhandled_exception_callback_;
   LogMessageCallback log_message_callback_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
-  const bool enable_skparagraph_;
   UIDartState::Context context_;
 
   void AddOrRemoveTaskObserver(bool add);

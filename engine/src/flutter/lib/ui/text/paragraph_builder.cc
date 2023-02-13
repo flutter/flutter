@@ -297,23 +297,8 @@ ParagraphBuilder::ParagraphBuilder(
                                         ->client()
                                         ->GetFontCollection();
 
-  typedef std::unique_ptr<txt::ParagraphBuilder> (*ParagraphBuilderFactory)(
-      const txt::ParagraphStyle& style,
-      std::shared_ptr<txt::FontCollection> font_collection);
-  ParagraphBuilderFactory factory = txt::ParagraphBuilder::CreateTxtBuilder;
-
-#if FLUTTER_ENABLE_SKSHAPER
-#if FLUTTER_ALWAYS_USE_SKSHAPER
-  bool enable_skparagraph = true;
-#else
-  bool enable_skparagraph = UIDartState::Current()->enable_skparagraph();
-#endif
-  if (enable_skparagraph) {
-    factory = txt::ParagraphBuilder::CreateSkiaBuilder;
-  }
-#endif  // FLUTTER_ENABLE_SKSHAPER
-
-  m_paragraphBuilder = factory(style, font_collection.GetFontCollection());
+  m_paragraphBuilder = txt::ParagraphBuilder::CreateSkiaBuilder(
+      style, font_collection.GetFontCollection());
 }
 
 ParagraphBuilder::~ParagraphBuilder() = default;

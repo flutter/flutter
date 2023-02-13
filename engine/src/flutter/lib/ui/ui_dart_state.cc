@@ -60,7 +60,6 @@ UIDartState::UIDartState(
     LogMessageCallback log_message_callback,
     std::shared_ptr<IsolateNameServer> isolate_name_server,
     bool is_root_isolate,
-    bool enable_skparagraph,
     const UIDartState::Context& context)
     : add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
@@ -69,7 +68,6 @@ UIDartState::UIDartState(
       unhandled_exception_callback_(std::move(unhandled_exception_callback)),
       log_message_callback_(std::move(log_message_callback)),
       isolate_name_server_(std::move(isolate_name_server)),
-      enable_skparagraph_(enable_skparagraph),
       context_(context) {
   AddOrRemoveTaskObserver(true /* add */);
 }
@@ -232,10 +230,6 @@ void UIDartState::LogMessage(const std::string& tag,
     std::cout << message << std::endl;
 #endif
   }
-}
-
-bool UIDartState::enable_skparagraph() const {
-  return enable_skparagraph_;
 }
 
 Dart_Handle UIDartState::HandlePlatformMessage(
