@@ -195,12 +195,14 @@ struct ContentContextOptions {
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
+  PixelFormat color_attachment_pixel_format = PixelFormat::kDefaultColor;
   bool has_stencil_attachment = true;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
       return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
                               o.stencil_operation, o.primitive_type,
+                              o.color_attachment_pixel_format,
                               o.has_stencil_attachment);
     }
   };
@@ -213,6 +215,8 @@ struct ContentContextOptions {
              lhs.stencil_compare == rhs.stencil_compare &&
              lhs.stencil_operation == rhs.stencil_operation &&
              lhs.primitive_type == rhs.primitive_type &&
+             lhs.color_attachment_pixel_format ==
+                 rhs.color_attachment_pixel_format &&
              lhs.has_stencil_attachment == rhs.has_stencil_attachment;
     }
   };
