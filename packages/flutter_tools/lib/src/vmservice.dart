@@ -287,10 +287,17 @@ Future<vm_service.VmService> setUpVmService(
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      .then<vm_service.Success?>((vm_service.Success success) => success)
-      // It is safe to ignore this error because we expect an error to be
-      // thrown if we're already subscribed.
-      .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
+      .then<vm_service.Success?>(
+        (vm_service.Success success) => success,
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're already subscribed.
+        onError: (Object? error) {
+          if (error is vm_service.RPCError || error == null) {
+            return null;
+          }
+          return Future<vm_service.Success?>.error(error);
+        },
+      ),
     );
   }
 
