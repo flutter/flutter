@@ -176,6 +176,8 @@ void CreateSimulatedPointerData(PointerData& data,
   data.platformData = 0;
   data.scroll_delta_x = 0.0;
   data.scroll_delta_y = 0.0;
+  data.preferred_auxiliary_stylus_action =
+      PointerData::PreferredStylusAuxiliaryAction::kIgnore;
 }
 
 TEST_F(ShellTest, MissAtMostOneFrameForIrregularInputEvents) {
