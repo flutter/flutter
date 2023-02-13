@@ -140,6 +140,14 @@ std::shared_ptr<Texture> RenderTarget::GetRenderTargetTexture() const {
                                        : found->second.texture;
 }
 
+PixelFormat RenderTarget::GetRenderTargetPixelFormat() const {
+  if (auto texture = GetRenderTargetTexture(); texture != nullptr) {
+    return texture->GetTextureDescriptor().format;
+  }
+
+  return PixelFormat::kUnknown;
+}
+
 RenderTarget& RenderTarget::SetColorAttachment(
     const ColorAttachment& attachment,
     size_t index) {

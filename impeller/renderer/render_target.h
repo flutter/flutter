@@ -72,6 +72,8 @@ class RenderTarget {
 
   std::shared_ptr<Texture> GetRenderTargetTexture() const;
 
+  PixelFormat GetRenderTargetPixelFormat() const;
+
   std::optional<ISize> GetColorAttachmentSize(size_t index) const;
 
   RenderTarget& SetColorAttachment(const ColorAttachment& attachment,
