@@ -2421,7 +2421,7 @@ class TextSelectionGestureDetectorBuilder {
   // Selects the set of paragraphs in a document that intersect a given range of global positions.
   void _selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary paragraphBoundary = ParagraphBoundary(editableText.textEditingValue.text);
-    _selectTextBoundaryInRange(boundary: paragraphBoundary, from: from, to: to, cause: cause);
+    _selectTextBoundariesInRange(boundary: paragraphBoundary, from: from, to: to, cause: cause);
   }
 
   // Selects the line around the given position.
@@ -2432,7 +2432,7 @@ class TextSelectionGestureDetectorBuilder {
   // Selects the set of lines in a document that intersect a given range of global positions.
   void _selectLinesInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary lineBoundary = LineBoundary(renderEditable);
-    _selectTextBoundaryInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
+    _selectTextBoundariesInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
   }
 
   // Selects the set of text boundaries in a document that intersect a given range of global positions.
@@ -2441,7 +2441,7 @@ class TextSelectionGestureDetectorBuilder {
   //
   // The first and last endpoints of the selection will always be at the beginning and end of a
   // text boundary respectively.
-  void _selectTextBoundaryInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
+  void _selectTextBoundariesInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
     final TextRange fromRange = boundary.getTextBoundaryAt(fromPosition.offset);
     final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
