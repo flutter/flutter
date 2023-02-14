@@ -251,6 +251,7 @@
         "templates/plugin/android-java.tmpl/build.gradle.tmpl",
         "templates/plugin/android-java.tmpl/projectName_android.iml.tmpl",
         "templates/plugin/android-java.tmpl/src/main/java/androidIdentifier/pluginClass.java.tmpl",
+        "templates/plugin/android-java.tmpl/src/test/java/androidIdentifier/pluginClassTest.java.tmpl",
         "templates/plugin/android-kotlin.tmpl/build.gradle.tmpl",
         "templates/plugin/android-kotlin.tmpl/projectName_android.iml.tmpl",
         "templates/plugin/android-kotlin.tmpl/src/main/kotlin/androidIdentifier/pluginClass.kt.tmpl",
