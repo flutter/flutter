@@ -164,7 +164,7 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<LinearGradientFillPipeline>(*context_);
   radial_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<RadialGradientFillPipeline>(*context_);
-  if (context_->GetBackendFeatures().ssbo_support) {
+  if (context_->GetDeviceCapabilities().SupportsSSBO()) {
     linear_gradient_ssbo_fill_pipelines_[{}] =
         CreateDefaultPipeline<LinearGradientSSBOFillPipeline>(*context_);
     radial_gradient_ssbo_fill_pipelines_[{}] =
@@ -270,7 +270,8 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   auto context = GetContext();
 
   RenderTarget subpass_target;
-  if (context->SupportsOffscreenMSAA() && msaa_enabled) {
+  if (context->GetDeviceCapabilities().SupportsOffscreenMSAA() &&
+      msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(*context, texture_size);
   } else {
     subpass_target = RenderTarget::CreateOffscreen(*context, texture_size);
@@ -324,8 +325,8 @@ std::shared_ptr<Context> ContentContext::GetContext() const {
   return context_;
 }
 
-const BackendFeatures& ContentContext::GetBackendFeatures() const {
-  return context_->GetBackendFeatures();
+const IDeviceCapabilities& ContentContext::GetDeviceCapabilities() const {
+  return context_->GetDeviceCapabilities();
 }
 
 }  // namespace impeller
