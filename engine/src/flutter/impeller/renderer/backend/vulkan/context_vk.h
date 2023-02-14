@@ -20,6 +20,7 @@
 #include "impeller/renderer/backend/vulkan/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
@@ -116,6 +117,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::unique_ptr<SwapchainVK> swapchain_;
   std::unique_ptr<SurfaceProducerVK> surface_producer_;
   std::shared_ptr<WorkQueue> work_queue_;
+  std::unique_ptr<IDeviceCapabilities> device_capabilities_;
   bool is_valid_ = false;
 
   ContextVK(
@@ -147,10 +149,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
   // |Context|
-  bool SupportsOffscreenMSAA() const override;
-
-  // |Context|
-  const BackendFeatures& GetBackendFeatures() const override;
+  const IDeviceCapabilities& GetDeviceCapabilities() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContextVK);
 };

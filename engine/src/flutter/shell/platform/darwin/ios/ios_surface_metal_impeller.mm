@@ -52,12 +52,8 @@ class CustomColorAttachmentPixelFormatContext final : public Context {
     return color_attachment_pixel_format_;
   }
 
-  bool HasThreadingRestrictions() const override { return context_->HasThreadingRestrictions(); }
-
-  bool SupportsOffscreenMSAA() const override { return context_->SupportsOffscreenMSAA(); }
-
-  const BackendFeatures& GetBackendFeatures() const override {
-    return context_->GetBackendFeatures();
+  const IDeviceCapabilities& GetDeviceCapabilities() const override {
+    return context_->GetDeviceCapabilities();
   }
 
  private:

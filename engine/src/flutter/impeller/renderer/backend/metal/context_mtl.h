@@ -17,6 +17,7 @@
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/sampler.h"
 
 namespace impeller {
@@ -45,6 +46,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<WorkQueue> work_queue_;
   std::shared_ptr<GPUTracerMTL> gpu_tracer_;
+  std::unique_ptr<IDeviceCapabilities> device_capabilities_;
   bool is_valid_ = false;
 
   ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
@@ -74,10 +76,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<GPUTracer> GetGPUTracer() const override;
 
   // |Context|
-  bool SupportsOffscreenMSAA() const override;
-
-  // |Context|
-  const BackendFeatures& GetBackendFeatures() const override;
+  const IDeviceCapabilities& GetDeviceCapabilities() const override;
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;

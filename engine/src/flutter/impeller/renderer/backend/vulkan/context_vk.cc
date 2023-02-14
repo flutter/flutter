@@ -26,7 +26,7 @@
 #include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/backend_features.h"
+#include "impeller/renderer/device_capabilities.h"
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
@@ -499,6 +499,12 @@ ContextVK::ContextVK(
   transfer_queue_ =
       device_->getQueue(transfer_queue->family, transfer_queue->index);
 
+  device_capabilities_ = DeviceCapabilitiesBuilder()
+                             .SetHasThreadingRestrictions(false)
+                             .SetSupportsOffscreenMSAA(true)
+                             .SetSupportsSSBO(false)
+                             .Build();
+
   is_valid_ = true;
 }
 
@@ -589,10 +595,6 @@ void ContextVK::SetupSwapchain(vk::UniqueSurfaceKHR surface) {
                  });
 }
 
-bool ContextVK::SupportsOffscreenMSAA() const {
-  return true;
-}
-
 std::unique_ptr<DescriptorPoolVK> ContextVK::CreateDescriptorPool() const {
   return std::make_unique<DescriptorPoolVK>(*device_);
 }
@@ -601,8 +603,8 @@ PixelFormat ContextVK::GetColorAttachmentPixelFormat() const {
   return ToPixelFormat(surface_format_);
 }
 
-const BackendFeatures& ContextVK::GetBackendFeatures() const {
-  return kLegacyBackendFeatures;
+const IDeviceCapabilities& ContextVK::GetDeviceCapabilities() const {
+  return *device_capabilities_;
 }
 
 vk::Queue ContextVK::GetGraphicsQueue() const {

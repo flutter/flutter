@@ -154,7 +154,7 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
   /// What's important is the `StorageMode` of the textures, which cannot be
   /// changed for the lifetime of the textures.
 
-  if (context->SupportsOffscreenMSAA()) {
+  if (context->GetDeviceCapabilities().SupportsOffscreenMSAA()) {
     return RenderTarget::CreateOffscreenMSAA(
         *context,      // context
         size,          // size
