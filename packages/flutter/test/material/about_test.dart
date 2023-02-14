@@ -1012,6 +1012,11 @@ void main() {
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
     const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
@@ -1027,12 +1032,14 @@ void main() {
         ),
       ),
     );
+    // To stop loading
+    await tester.pumpAndSettle();
 
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
     expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
-
+    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
 
@@ -1047,13 +1054,16 @@ void main() {
         ),
       ),
     );
+    // To finish the FakeTimer
+    await tester.pumpAndSettle();
 
     // If the layout width is greater than 840.0 pixels, lateral UI layout
-    // is used which positions license page title at the top left.
+    // is used which positions license page title and packageList
+    // at the top left.
     titleOffset = tester.getTopRight(find.text(title));
     expect(titleOffset, const Offset(292.0, 136.0));
     expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
-
+    expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
   });
@@ -1063,6 +1073,11 @@ void main() {
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
     const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
@@ -1078,12 +1093,13 @@ void main() {
         ),
       ),
     );
-
+    // To stop loading
+    await tester.pumpAndSettle();
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
     expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
-
+    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
 
@@ -1099,12 +1115,16 @@ void main() {
       ),
     );
 
+    // To finish the FakeTimer
+    await tester.pumpAndSettle();
+
     // If the layout width is greater than 840.0 pixels, lateral UI layout
-    // is used which positions license page title at the top right.
+    // is used which positions license page title and packageList
+    // at the top right.
     titleOffset = tester.getTopLeft(find.text(title));
     expect(titleOffset, const Offset(908.0, 136.0));
     expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
-
+    expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
   });
