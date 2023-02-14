@@ -702,6 +702,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      xvfb: true
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
