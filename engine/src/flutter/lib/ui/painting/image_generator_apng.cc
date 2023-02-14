@@ -7,7 +7,6 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
-#include "third_party/libpng/png.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorType.h"
@@ -202,8 +201,7 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
   }
   // Validate the full PNG signature.
   const uint8_t* data_p = static_cast<const uint8_t*>(data.get()->data());
-  if (png_sig_cmp(static_cast<png_const_bytep>(data_p), 0,
-                  sizeof(kPngSignature))) {
+  if (memcmp(data_p, kPngSignature, sizeof(kPngSignature))) {
     return nullptr;
   }
 
