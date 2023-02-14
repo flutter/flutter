@@ -1833,4 +1833,49 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
   });
+
+  testWidgets('Scrollable can be wrapped in a DraggableScrollableSheet while animating', (WidgetTester tester) async {
+    final Key innerKey = GlobalKey();
+
+    Widget buildScrollable({ScrollController? controller}) {
+      return SingleChildScrollView(
+        key: innerKey,
+        controller: controller,
+        child: const SizedBox(height: 100000),
+      );
+    }
+
+    final ScrollController animator = ScrollController();
+    await tester.pumpWidget(buildScrollable(controller: animator));
+    animator.animateTo(50000, duration: const Duration(seconds: 1), curve: Curves.easeInOut);
+
+    await tester.pumpWidget(DraggableScrollableSheet(
+      builder: (BuildContext context, ScrollController controller) {
+        return buildScrollable(controller: controller);
+      },
+    ));
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Scrollable can be unwrapped from a DraggableScrollableSheet while the sheet is ballistic', (WidgetTester tester) async {
+    final Key innerKey = GlobalKey();
+
+    Widget buildScrollable({ScrollController? controller}) {
+      return SingleChildScrollView(
+        key: innerKey,
+        controller: controller,
+        child: const SizedBox(height: 100000),
+      );
+    }
+
+    await tester.pumpWidget(DraggableScrollableSheet(
+      builder: (BuildContext context, ScrollController controller) {
+        return buildScrollable(controller: controller);
+      },
+    ));
+    await tester.fling(find.byKey(innerKey), const Offset(0, -200), 2000);
+    await tester.pumpWidget(buildScrollable());
+    await tester.pumpAndSettle();
+  });
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -859,6 +860,17 @@ class _SheetBallisticScrollActivity extends BallisticScrollActivity {
   double get outerVelocity => super.velocity;
 
   @override
+  void resetActivity() {
+    // This actually happens before the delegate is updated, so we have to
+    // do our reset in a microtask.
+    //
+    // This may have been a regression introduced long ago.
+    scheduleMicrotask(() {
+      super.delegate.goBallistic(outerVelocity);
+    });
+  }
+
+  @override
   void applyNewDimensions() {
     // This is expected to happen continuously while scrolling the outer sheet.
   }
@@ -908,9 +920,29 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   });
 
   final _DraggableSheetExtent Function() getExtent;
-  bool get isActive => activity != null && activity is! IdleScrollActivity;
+
+  static bool isActivityActive(ScrollActivity? activity) {
+    return activity != null && activity is! IdleScrollActivity;
+  }
+  bool get isActive => isActivityActive(activity);
 
   _DraggableSheetExtent get extent => getExtent();
+
+  @override
+  void absorb(ScrollPosition other) {
+    // super.absorb will adopt other.activity, but may also immediately reset it
+    // (if other was of a different runtimeType) or goIdle (if other was not a
+    // ScrollPositionWithSingleContext). We need to prepare for this by updating
+    // extent.activePositionCount as if the activity were ours.
+    if (isActivityActive(other.activity)) {
+      if (other is _DraggableScrollableSheetScrollPosition) {
+        --other.extent.activePositionCount;
+      }
+      ++extent.activePositionCount;
+    }
+
+    super.absorb(other);
+  }
 
   @override
   void dispose() {
