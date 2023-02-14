@@ -1009,12 +1009,12 @@ void main() {
 
   testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
-    const Size narrowSize = Size(800.0, 600.0);
+    const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
     const String title = 'License ABC';
 
-    // Configure a narrow window to show the default layout.
-    await tester.binding.setSurfaceSize(narrowSize);
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1031,7 +1031,7 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(narrowSize.width / 2, 92.0));
+    expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1053,16 +1053,19 @@ void main() {
     titleOffset = tester.getTopRight(find.text(title));
     expect(titleOffset, const Offset(292.0, 136.0));
     expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
   });
 
   testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
-    const Size narrowSize = Size(800.0, 600.0);
+    const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
     const String title = 'License ABC';
 
-    // Configure a narrow window to show the default layout.
-    await tester.binding.setSurfaceSize(narrowSize);
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1079,7 +1082,7 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(narrowSize.width / 2, 92.0));
+    expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1101,6 +1104,9 @@ void main() {
     titleOffset = tester.getTopLeft(find.text(title));
     expect(titleOffset, const Offset(908.0, 136.0));
     expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
   });
 }
 
