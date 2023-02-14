@@ -303,7 +303,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/flutter
     presubmit: false
-    timeout: 60
+    timeout: 90
     properties:
       cores: "32"
       dependencies: >-
