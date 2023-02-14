@@ -489,13 +489,15 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       upperBound: CupertinoContextMenu.animationOpensAt,
     );
     _openController.addStatusListener(_onDecoyAnimationStatusChange);
-    _openController.addListener(() {
-      if (_openController.status != AnimationStatus.reverse &&
-          (_openController.value * 1000).truncate() == 500 &&
-          widget.enableHapticFeedback) {
-        HapticFeedback.heavyImpact();
-      }
-    });
+  }
+
+  void _listenerCallback() {
+    if (_openController.status != AnimationStatus.reverse &&
+        _openController.value >= _midpoint &&
+        widget.enableHapticFeedback) {
+      HapticFeedback.heavyImpact();
+      _openController.removeListener(_listenerCallback);
+    }
   }
 
   // Determine the _ContextMenuLocation based on the location of the original
@@ -600,24 +602,28 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 
   void _onTap() {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapCancel() {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapDown(TapDownDetails details) {
+    _openController.addListener(_listenerCallback);
     setState(() {
       _childHidden = true;
     });
