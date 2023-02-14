@@ -997,6 +997,26 @@ void render_targets_are_recycled() {
       builder.addPlatformView(42 + i, width: 30.0, height: 20.0);
     }
     PlatformDispatcher.instance.views.first.render(builder.build());
+    frame_count++;
+    if (frame_count == 8) {
+      signalNativeTest();
+    } else {
+      PlatformDispatcher.instance.scheduleFrame();
+    }
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void render_targets_are_in_stable_order() {
+  int frame_count = 0;
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    for (int i = 0; i < 10; i++) {
+      builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(30.0, 20.0)));
+      builder.addPlatformView(42 + i, width: 30.0, height: 20.0);
+    }
+    PlatformDispatcher.instance.views.first.render(builder.build());
     PlatformDispatcher.instance.scheduleFrame();
     frame_count++;
     if (frame_count == 8) {
