@@ -1005,4 +1005,66 @@ void main() {
     expect(box2.localToGlobal(Offset.zero).dy, 250.0);
     expect(box3.localToGlobal(Offset.zero).dy, 500.0);
   });
+
+  testWidgets('changing scroll direction during recede animation will not change the stretch direction', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(box1Key, box2Key, box3Key, controller, boxHeight: 205.0),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    // Fling to the trailing edge
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 10000.0);
+    await tester.pumpAndSettle();
+
+    expect(box1.localToGlobal(Offset.zero).dy, -15.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 190.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 395.0);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll to the trailing edge
+    await gesture.moveBy(const Offset(0.0, -200.0));
+    await tester.pumpAndSettle();
+
+    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-25.0));
+    expect(box2.localToGlobal(Offset.zero).dy, lessThan(185.0));
+    expect(box3.localToGlobal(Offset.zero).dy, lessThan(392.0));
+
+    // This will trigger the recede animation
+    // The y offset of the boxes should be increasing, since the boxes were stretched
+    // toward the leading edge.
+    await gesture.moveBy(const Offset(0.0, 150.0));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Explicitly check that the box1 offset is not 0.0, since this would probably mean that
+    // the stretch direction is wrong.
+    expect(box1.localToGlobal(Offset.zero).dy, isNot(0.0));
+
+    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-12.0));
+    expect(box2.localToGlobal(Offset.zero).dy, lessThan(197.0));
+    expect(box3.localToGlobal(Offset.zero).dy, lessThan(407.0));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-6.0));
+    expect(box2.localToGlobal(Offset.zero).dy, lessThan(201.0));
+    expect(box3.localToGlobal(Offset.zero).dy, lessThan(408.0));
+
+    await tester.pumpAndSettle();
+
+    // The recede animation is done now, we should now be at the leading edge.
+    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 205.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 410.0);
+
+    await gesture.up();
+  });
 }
