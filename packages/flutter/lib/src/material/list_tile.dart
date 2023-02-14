@@ -474,7 +474,7 @@ class ListTile extends StatelessWidget {
   /// Defines the default color for [leading] and [trailing] icons.
   ///
   /// If this property is null and [selected] is false then [ListTileThemeData.iconColor]
-  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurface]
+  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurfaceVariant]
   /// is used, otherwise if [ThemeData.brightness] is [Brightness.light], [Colors.black54] is used,
   /// and if [ThemeData.brightness] is [Brightness.dark], the value is null.
   ///
@@ -1593,7 +1593,7 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   Color? get selectedColor => _colors.primary;
 
   @override
-  Color? get iconColor => _colors.onSurface;
+  Color? get iconColor => _colors.onSurfaceVariant;
 }
 
 // END GENERATED TOKEN PROPERTIES - LisTile
