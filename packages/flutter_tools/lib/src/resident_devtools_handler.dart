@@ -114,7 +114,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
-      _residentRunner.printDebuggerList(includeObservatory: false);
+      _residentRunner.printDebuggerList(includeVmService: false);
     }
   }
 

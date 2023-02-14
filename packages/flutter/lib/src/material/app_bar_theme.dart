@@ -27,11 +27,6 @@ import 'theme.dart';
 class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
-    @Deprecated(
-      'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.brightness,
     Color? color,
     Color? backgroundColor,
     this.foregroundColor,
@@ -53,22 +48,6 @@ class AppBarTheme with Diagnosticable {
          'The color and backgroundColor parameters mean the same thing. Only specify one.',
        ),
        backgroundColor = backgroundColor ?? color;
-
-  /// This property is deprecated, please use [systemOverlayStyle] instead.
-  ///
-  /// Overrides the default value of the obsolete [AppBar.brightness]
-  /// property which implicitly defines [AppBar.systemOverlayStyle] in
-  /// all descendant [AppBar] widgets.
-  ///
-  /// See also:
-  ///
-  ///  * [systemOverlayStyle], which overrides the default value of
-  ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
-  @Deprecated(
-    'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final Brightness? brightness;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
   /// descendant [AppBar] widgets.
@@ -175,11 +154,6 @@ class AppBarTheme with Diagnosticable {
   /// new values.
   AppBarTheme copyWith({
     IconThemeData? actionsIconTheme,
-    @Deprecated(
-      'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    Brightness? brightness,
     Color? color,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -201,7 +175,6 @@ class AppBarTheme with Diagnosticable {
       'The color and backgroundColor parameters mean the same thing. Only specify one.',
     );
     return AppBarTheme(
-      brightness: brightness ?? this.brightness,
       backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
@@ -232,7 +205,6 @@ class AppBarTheme with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
     return AppBarTheme(
-      brightness: t < 0.5 ? a?.brightness : b?.brightness,
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -253,7 +225,6 @@ class AppBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    brightness,
     backgroundColor,
     foregroundColor,
     elevation,
@@ -280,7 +251,6 @@ class AppBarTheme with Diagnosticable {
       return false;
     }
     return other is AppBarTheme
-        && other.brightness == brightness
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
@@ -301,7 +271,6 @@ class AppBarTheme with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
