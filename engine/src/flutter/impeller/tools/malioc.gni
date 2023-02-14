@@ -14,7 +14,7 @@ declare_args() {
 }
 
 if (impeller_malioc_path != "" && impeller_malioc_cores == []) {
-  core_list_file = "$root_gen_dir/mali_core_list.json"
+  core_list_file = "$root_build_dir/mali_core_list.json"
   exec_script("//build/gn_run_binary.py",
               [
                 rebase_path(impeller_malioc_path, root_build_dir),
