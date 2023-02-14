@@ -460,13 +460,14 @@ void DisplayListDispatcher::setColorSource(
       auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
       auto desc = ToSamplerDescriptor(image_color_source->sampling());
       auto matrix = ToMatrix(image_color_source->matrix());
-      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc,
-                             matrix]() {
+      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc, matrix,
+                             &paint = paint_]() {
         auto contents = std::make_shared<TiledTextureContents>();
         contents->SetTexture(texture);
         contents->SetTileModes(x_tile_mode, y_tile_mode);
         contents->SetSamplerDescriptor(desc);
         contents->SetEffectTransform(matrix);
+        contents->SetColorFilter(paint.color_filter);
         return contents;
       };
       return;
