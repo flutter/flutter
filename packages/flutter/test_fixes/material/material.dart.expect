@@ -303,4 +303,7 @@ void main() {
   ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(trackVisibility: nowShowing);
   scrollbarTheme.copyWith(trackVisibility: nowShowing);
   scrollbarTheme.trackVisibility;
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOf(context);
 }

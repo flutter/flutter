@@ -32,8 +32,7 @@ class RenderListBody extends RenderBox
   RenderListBody({
     List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
-  }) : assert(axisDirection != null),
-       _axisDirection = axisDirection {
+  }) : _axisDirection = axisDirection {
     addAll(children);
   }
 
@@ -51,7 +50,6 @@ class RenderListBody extends RenderBox
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
-    assert(value != null);
     if (_axisDirection == value) {
       return;
     }
@@ -259,7 +257,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
@@ -270,7 +267,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
@@ -281,7 +277,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
@@ -292,7 +287,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));

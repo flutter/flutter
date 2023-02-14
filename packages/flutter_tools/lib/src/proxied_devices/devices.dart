@@ -172,22 +172,22 @@ class ProxiedDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) => throw UnimplementedError();
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) => throw UnimplementedError();
 
   @override
   Future<bool> installApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
   Future<bool> uninstallApp(
-    covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) => throw UnimplementedError();
 
@@ -224,7 +224,7 @@ class ProxiedDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant PrebuiltApplicationPackage package, {
+    PrebuiltApplicationPackage package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -245,12 +245,12 @@ class ProxiedDevice extends Device {
       'userIdentifier': userIdentifier,
     }));
     final bool started = _cast<bool>(result['started']);
-    final String? observatoryUriStr = _cast<String?>(result['observatoryUri']);
-    final Uri? observatoryUri = observatoryUriStr == null ? null : Uri.parse(observatoryUriStr);
+    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']);
+    final Uri? vmServiceUri = vmServiceUriStr == null ? null : Uri.parse(vmServiceUriStr);
     if (started) {
-      if (observatoryUri != null) {
-        final int hostPort = await proxiedPortForwarder.forward(observatoryUri.port);
-        return LaunchResult.succeeded(observatoryUri: observatoryUri.replace(port: hostPort));
+      if (vmServiceUri != null) {
+        final int hostPort = await proxiedPortForwarder.forward(vmServiceUri.port);
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri.replace(port: hostPort));
       } else {
         return LaunchResult.succeeded();
       }

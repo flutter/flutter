@@ -82,11 +82,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.textDirection,
     super.child,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(vsync != null),
-       assert(duration != null),
-       assert(curve != null),
-       assert(clipBehavior != null),
-       _vsync = vsync,
+  }) : _vsync = vsync,
        _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
@@ -119,7 +115,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The duration of the animation.
   Duration get duration => _controller.duration!;
   set duration(Duration value) {
-    assert(value != null);
     if (value == _controller.duration) {
       return;
     }
@@ -138,7 +133,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The curve of the animation.
   Curve get curve => _animation.curve;
   set curve(Curve value) {
-    assert(value != null);
     if (value == _animation.curve) {
       return;
     }
@@ -151,7 +145,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -169,7 +162,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   TickerProvider get vsync => _vsync;
   TickerProvider _vsync;
   set vsync(TickerProvider value) {
-    assert(value != null);
     if (value == _vsync) {
       return;
     }
@@ -218,7 +210,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
     child!.layout(constraints, parentUsesSize: true);
 
-    assert(_state != null);
     switch (_state) {
       case RenderAnimatedSizeState.start:
         _layoutStart();
@@ -253,7 +244,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     // size without modifying global state. See performLayout for comments
     // explaining the rational behind the implementation.
     final Size childSize = child!.getDryLayout(constraints);
-    assert(_state != null);
     switch (_state) {
       case RenderAnimatedSizeState.start:
         return constraints.constrain(childSize);

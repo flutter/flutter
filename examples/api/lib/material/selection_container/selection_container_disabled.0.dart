@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter example for [SelectionContainer.disabled].
+// Flutter example for [SelectionContainer.disabled].
 
 import 'package:flutter/material.dart';
 
@@ -19,11 +19,11 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: Center(
+        body: const Center(
           child: SelectionArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Selectable text'),
                 SelectionContainer.disabled(child: Text('Non-selectable text')),
                 Text('Selectable text'),

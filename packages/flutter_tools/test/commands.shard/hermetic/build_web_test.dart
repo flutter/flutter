@@ -137,7 +137,7 @@ void main() {
         'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
-        'TreeShakeIcons': 'false',
+        'TreeShakeIcons': 'true',
       });
     }),
   });
@@ -187,7 +187,7 @@ void main() {
         'DartDefines': 'RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
-        'TreeShakeIcons': 'false',
+        'TreeShakeIcons': 'true',
       });
     }),
   });

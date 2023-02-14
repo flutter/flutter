@@ -114,7 +114,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ))..failOnce = true;
 
     await expectLater(
@@ -139,7 +139,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -170,7 +170,7 @@ void main() {
     final FakeDevtoolsLauncher launcher = FakeDevtoolsLauncher();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService, devtoolsLauncher: launcher);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -202,7 +202,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -232,7 +232,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
     final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
 
@@ -258,7 +258,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -290,7 +290,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -448,7 +448,6 @@ FlutterDriverService setUpDriverService({
       Device? device,
       required Logger logger,
     }) async {
-      assert(logger != null);
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
       }
@@ -503,13 +502,13 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) async => NoOpDeviceLogReader('test');
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -526,13 +525,13 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     didUninstallApp = true;
     return true;
   }
@@ -552,7 +551,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
+    Uri vmServiceUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,

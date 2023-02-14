@@ -457,6 +457,7 @@ class _SnippetChecker {
     '// ignore_for_file: directives_ordering',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
+    '// ignore_for_file: unreachable_from_main',
     '// ignore_for_file: unused_element',
     '// ignore_for_file: unused_local_variable',
   ];
@@ -923,7 +924,7 @@ class _SnippetChecker {
         continue;
       }
 
-      final _SnippetFile snippet = snippets[file.path]!;
+      final _SnippetFile? snippet = snippets[file.path];
       if (snippet == null) {
         errors.add(_SnippetCheckerException(
           "Unknown section for ${file.path}. Maybe the temporary directory wasn't empty?",

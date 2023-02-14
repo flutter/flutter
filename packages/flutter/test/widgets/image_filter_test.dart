@@ -5,7 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -26,6 +28,26 @@ void main() {
     await expectLater(
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_blur.png'),
+    );
+  });
+
+  testWidgets('Image filter - blur with offset', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Transform.translate(
+          offset: const Offset(50, 50),
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+            child: const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('image_filter_blur_offset.png'),
     );
   });
 
@@ -94,6 +116,44 @@ void main() {
     await expectLater(
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
+    );
+  });
+
+  testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
+    final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
+    final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
+    final Key key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Transform.translate(
+          offset: const Offset(50, 50),
+          child: ImageFiltered(
+            imageFilter: matrixFilter,
+            child: MaterialApp(
+              title: 'Flutter Demo',
+              theme: ThemeData(primarySwatch: Colors.blue),
+              home: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Matrix ImageFilter Test'),
+                ),
+                body: const Center(
+                  child:Text('Hooray!'),
+                ),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () { },
+                  tooltip: 'Increment',
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('image_filter_matrix_offset.png'),
     );
   });
 

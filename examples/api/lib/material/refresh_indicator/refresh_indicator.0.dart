@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RefreshIndicator].
+// Flutter code sample for [RefreshIndicator].
 
 import 'package:flutter/material.dart';
 
@@ -43,7 +43,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
         strokeWidth: 4.0,
         onRefresh: () async {
           // Replace this delay with the code to be executed during refresh
-          // and return a Future when code finishs execution.
+          // and return a Future when code finishes execution.
           return Future<void>.delayed(const Duration(seconds: 3));
         },
         // Pull from top to show refresh indicator.

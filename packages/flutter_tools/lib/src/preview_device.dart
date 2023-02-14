@@ -65,16 +65,16 @@ class PreviewDevice extends Device {
   final DesktopLogReader _logReader = DesktopLogReader();
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({covariant ApplicationPackage? app, bool includePastLogs = false}) => _logReader;
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) => _logReader;
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage? app, {String? userIdentifier}) async => true;
+  Future<bool> installApp(ApplicationPackage? app, {String? userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String? userIdentifier}) async => false;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -97,7 +97,7 @@ class PreviewDevice extends Device {
   Process? _process;
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -139,16 +139,16 @@ class PreviewDevice extends Device {
     _process = process;
     _logReader.initializeProcess(process);
 
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_logReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Error waiting for a debug connection: '
@@ -157,13 +157,13 @@ class PreviewDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery.cancel();
+      await vmServiceDiscovery.cancel();
     }
     return LaunchResult.failed();
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return _process?.kill() ?? false;
   }
 
@@ -176,12 +176,12 @@ class PreviewDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     return true;
   }
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 }

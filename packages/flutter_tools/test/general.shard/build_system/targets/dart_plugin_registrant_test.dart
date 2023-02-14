@@ -86,7 +86,7 @@ flutter:
         pluginClass: none
 
 environment:
-  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  sdk: ">=2.12.0-259.9.beta <4.0.0"
   flutter: ">=1.20.0"
 ''';
 

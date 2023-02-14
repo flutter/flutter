@@ -448,8 +448,7 @@ ui.PointerData _pointerData(
 }
 
 class _CursorUpdateDetails extends MethodCall {
-  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments)
-    : assert(arguments != null);
+  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments);
 
   _CursorUpdateDetails.wrap(MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
@@ -462,7 +461,7 @@ class _CursorUpdateDetails extends MethodCall {
   Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(other, this)) {
       return true;
     }

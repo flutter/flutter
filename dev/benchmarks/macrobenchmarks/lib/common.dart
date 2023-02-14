@@ -31,6 +31,7 @@ const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
 const String kGradientPerfRouteName = '/gradient_perf';
 const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
+const String kAnimatedComplexImageFilteredPerfRouteName = '/animated_complex_image_filtered';
 const String kListTextLayoutRouteName = '/list_text_layout';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';

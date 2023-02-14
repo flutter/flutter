@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @Tags(<String>['web'])
+library;
+
 import 'dart:js' as js;
 
 import 'package:flutter_test/flutter_test.dart';

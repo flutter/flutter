@@ -337,7 +337,6 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
-    assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
+
+import 'editable_text.dart' show EditableTextContextMenuBuilder;
+import 'framework.dart' show immutable;
 
 /// Controls how spell check is performed for text input.
 ///
@@ -19,12 +21,14 @@ class SpellCheckConfiguration {
   const SpellCheckConfiguration({
     this.spellCheckService,
     this.misspelledTextStyle,
+    this.spellCheckSuggestionsToolbarBuilder,
   }) : _spellCheckEnabled = true;
 
   /// Creates a configuration that disables spell check.
   const SpellCheckConfiguration.disabled()
     :  _spellCheckEnabled = false,
        spellCheckService = null,
+       spellCheckSuggestionsToolbarBuilder = null,
        misspelledTextStyle = null;
 
   /// The service used to fetch spell check results for text input.
@@ -38,6 +42,10 @@ class SpellCheckConfiguration {
   /// assertion error.
   final TextStyle? misspelledTextStyle;
 
+  /// Builds the toolbar used to display spell check suggestions for misspelled
+  /// words.
+  final EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder;
+
   final bool _spellCheckEnabled;
 
   /// Whether or not the configuration should enable or disable spell check.
@@ -47,7 +55,8 @@ class SpellCheckConfiguration {
   /// specified overrides.
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
-    TextStyle? misspelledTextStyle}) {
+    TextStyle? misspelledTextStyle,
+    EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder}) {
     if (!_spellCheckEnabled) {
       // A new configuration should be constructed to enable spell check.
       return const SpellCheckConfiguration.disabled();
@@ -56,6 +65,7 @@ class SpellCheckConfiguration {
     return SpellCheckConfiguration(
       spellCheckService: spellCheckService ?? this.spellCheckService,
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
+      spellCheckSuggestionsToolbarBuilder : spellCheckSuggestionsToolbarBuilder ?? this.spellCheckSuggestionsToolbarBuilder,
     );
   }
 
@@ -65,6 +75,7 @@ class SpellCheckConfiguration {
   spell check enabled   : $_spellCheckEnabled
   spell check service   : $spellCheckService
   misspelled text style : $misspelledTextStyle
+  spell check suggesstions toolbar builder: $spellCheckSuggestionsToolbarBuilder
 '''
         .trim();
   }
@@ -78,11 +89,12 @@ class SpellCheckConfiguration {
     return other is SpellCheckConfiguration
       && other.spellCheckService == spellCheckService
       && other.misspelledTextStyle == misspelledTextStyle
+      && other.spellCheckSuggestionsToolbarBuilder == spellCheckSuggestionsToolbarBuilder
       && other._spellCheckEnabled == _spellCheckEnabled;
   }
 
   @override
-  int get hashCode => Object.hash(spellCheckService, misspelledTextStyle, _spellCheckEnabled);
+  int get hashCode => Object.hash(spellCheckService, misspelledTextStyle, spellCheckSuggestionsToolbarBuilder, _spellCheckEnabled);
 }
 
 // Methods for displaying spell check results:
