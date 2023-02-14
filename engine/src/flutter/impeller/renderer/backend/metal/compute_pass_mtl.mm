@@ -241,23 +241,23 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
         return false;
       }
     }
-  }
-  // TODO(dnfield): use feature detection to support non-uniform threadgroup
-  // sizes.
-  // https://github.com/flutter/flutter/issues/110619
+    // TODO(dnfield): use feature detection to support non-uniform threadgroup
+    // sizes.
+    // https://github.com/flutter/flutter/issues/110619
 
-  // For now, check that the sizes are uniform.
-  FML_DCHECK(grid_size == thread_group_size);
-  auto width = grid_size.width;
-  auto height = grid_size.height;
-  while (width * height >
-         static_cast<int64_t>(
-             pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup)) {
-    width /= 2;
-    height /= 2;
+    // For now, check that the sizes are uniform.
+    FML_DCHECK(grid_size == thread_group_size);
+    auto width = grid_size.width;
+    auto height = grid_size.height;
+    while (width * height >
+           static_cast<int64_t>(
+               pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup)) {
+      width /= 2;
+      height /= 2;
+    }
+    auto size = MTLSizeMake(width, height, 1);
+    [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
   }
-  auto size = MTLSizeMake(width, height, 1);
-  [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
 
   return true;
 }
