@@ -980,13 +980,13 @@ class FlutterVmService {
     return service.getIsolate(isolateId)
       .then<vm_service.Isolate?>(
         (vm_service.Isolate isolate) => isolate,
-        onError: (Object? error) {
+        onError: (Object? error, StackTrace stackTrace) {
           if (error is vm_service.SentinelException ||
             error == null ||
             (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
             return null;
           }
-          return Future<vm_service.Isolate?>.error(error);
+          return Future<vm_service.Isolate?>.error(error, stackTrace);
         });
   }
 

@@ -525,8 +525,8 @@ class HotRunner extends ResidentRunner {
           .timeout(const Duration(milliseconds: 250))
           .then<void>(
             (Object? _) {},
-            onError: (Object? error) {
-              globals.printTrace('Ignored error while cleaning up DevFS: $error');
+            onError: (Object? error, StackTrace stackTrace) {
+              globals.printTrace('Ignored error while cleaning up DevFS: $error\n$stackTrace');
             }
           ),
         );
@@ -645,7 +645,7 @@ class HotRunner extends ResidentRunner {
           // catching errors.
           .then<vm_service.Success?>(
             (vm_service.Success success) => success,
-            onError: (Object? error, StackTrace stackTrace) {
+            onError: (Object error, StackTrace stackTrace) {
               if (error is vm_service.SentinelException ||
                   (error is vm_service.RPCError && error.code == 105)) {
                 // Do nothing on a SentinelException since it means the isolate
@@ -655,7 +655,7 @@ class HotRunner extends ResidentRunner {
                 // isolate before it has finished starting up.
                 return null;
               }
-              return Future<vm_service.Success?>.error(error ?? 'null', stackTrace);
+              return Future<vm_service.Success?>.error(error, stackTrace);
             },
           ),
         );
@@ -1321,12 +1321,12 @@ Future<ReassembleResult> _defaultReassembleHelper(
         }
         reassembleFutures.add(reassembleWork.then(
           (Object? obj) => obj,
-          onError: (Object? error, StackTrace stackTrace) {
+          onError: (Object error, StackTrace stackTrace) {
             if (error is! Exception) {
-              return Future<Object?>.error(error ?? 'null', stackTrace);
+              return Future<Object?>.error(error, stackTrace);
             }
             failedReassemble = true;
-            globals.printError('Reassembling ${view.uiIsolate!.name} failed: $error');
+            globals.printError('Reassembling ${view.uiIsolate!.name} failed: $error\n$stackTrace');
           },
         ));
       }

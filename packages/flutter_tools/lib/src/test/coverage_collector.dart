@@ -135,7 +135,7 @@ class CoverageCollector extends TestWatcher {
         if (error is TestDeviceException) {
           throw Exception(
             'Failed to collect coverage, test device terminated prematurely with '
-            'error: ${error.message}.');
+            'error: ${error.message}.\n$stackTrace');
         }
         return Future<Object?>.error(error, stackTrace);
       }
