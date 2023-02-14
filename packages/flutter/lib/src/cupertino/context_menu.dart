@@ -489,6 +489,13 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       upperBound: CupertinoContextMenu.animationOpensAt,
     );
     _openController.addStatusListener(_onDecoyAnimationStatusChange);
+    _openController.addListener(() {
+      if (_openController.status != AnimationStatus.reverse &&
+          (_openController.value * 1000).truncate() == 500 &&
+          widget.enableHapticFeedback) {
+        HapticFeedback.heavyImpact();
+      }
+    });
   }
 
   // Determine the _ContextMenuLocation based on the location of the original
@@ -613,14 +620,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   void _onTapDown(TapDownDetails details) {
     setState(() {
       _childHidden = true;
-    });
-
-    Future<void>.delayed(const Duration(milliseconds: 350), () {
-      if (_openController.isAnimating &&
-          _openController.status != AnimationStatus.reverse &&
-          widget.enableHapticFeedback) {
-        HapticFeedback.heavyImpact();
-      }
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
