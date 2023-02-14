@@ -1,4 +1,4 @@
-Signature: 9facd122a406290741cb8c6a2bbafc91
+Signature: a1134810bb5e48224869eaa35dc7943a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8981,6 +8981,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/FuzzCubicQuadRoots.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/graphite_replay.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkFixed.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkMalloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
@@ -9005,6 +9006,7 @@ ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLIsDynamicallyUniformExpr
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCubicQuadRoots.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp
+FILE: ../../../third_party/skia/gm/graphite_replay.cpp
 FILE: ../../../third_party/skia/include/private/SkFixed.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
