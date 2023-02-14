@@ -29,6 +29,9 @@
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
 #define FML_OS_IOS 1
 #endif  // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+#define FML_OS_IOS_SIMULATOR 1
+#endif  // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
 #elif defined(__linux__)
 #define FML_OS_LINUX 1
 // include a system header to pull in features.h for glibc/uclibc macros.
@@ -95,6 +98,12 @@
 #define FML_ARCH_CPU_LITTLE_ENDIAN 1
 #else
 #error Please add support for your architecture in flutter/fml/build_config.h
+#endif
+
+#if defined(FML_OS_IOS)
+#if !defined(FML_OS_IOS_SIMULATOR)
+#define FML_OS_PHYSICAL_IOS 1
+#endif
 #endif
 
 #endif  // FLUTTER_FML_BUILD_CONFIG_H_
