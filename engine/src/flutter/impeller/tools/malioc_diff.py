@@ -81,6 +81,27 @@ def validate_args(args):
   return True
 
 
+# Reads the 'performance' section of the malioc analysis results.
+def read_malioc_file_performance(performance_json):
+  performance = {}
+  performance['pipelines'] = performance_json['pipelines']
+
+  longest_path_cycles = performance_json['longest_path_cycles']
+  performance['longest_path_cycles'] = longest_path_cycles['cycle_count']
+  performance['longest_path_bound_pipelines'] = longest_path_cycles[
+      'bound_pipelines']
+
+  shortest_path_cycles = performance_json['shortest_path_cycles']
+  performance['shortest_path_cycles'] = shortest_path_cycles['cycle_count']
+  performance['shortest_path_bound_pipelines'] = shortest_path_cycles[
+      'bound_pipelines']
+
+  total_cycles = performance_json['total_cycles']
+  performance['total_cycles'] = total_cycles['cycle_count']
+  performance['total_bound_pipelines'] = total_cycles['bound_pipelines']
+  return performance
+
+
 # Parses the json output from malioc, which follows the schema defined in
 # `mali_offline_compiler/samples/json_schemas/performance-schema.json`.
 def read_malioc_file(malioc_tree, json_file):
@@ -107,14 +128,9 @@ def read_malioc_file(malioc_tree, json_file):
       for prop in variant['properties']:
         variant_result[prop['name']] = prop['value']
 
-      performance = variant['performance']
-      variant_result['pipelines'] = performance['pipelines']
-      variant_result['longest_path_cycles'] = performance['longest_path_cycles'
-                                                         ]['cycle_count']
-      variant_result['shortest_path_cycles'] = performance[
-          'shortest_path_cycles']['cycle_count']
-      variant_result['total_cycles'] = performance['total_cycles']['cycle_count'
-                                                                  ]
+      performance_json = variant['performance']
+      performance = read_malioc_file_performance(performance_json)
+      variant_result['performance'] = performance
       result['variants'][variant['name']] = variant_result
     results.append(result)
 
@@ -141,16 +157,62 @@ def read_malioc_tree(malioc_tree):
   return results
 
 
+# Converts a list to a string in which each list element is left-aligned in
+# a space of `width` characters, and separated by `sep`. The separator does not
+# count against the `width`. If `width` is 0, then the width is unconstrained.
+def pretty_list(lst, fmt='s', sep='', width=12):
+  return (sep.join(['{:<{width}{fmt}}'] * len(lst))).format(
+      width='' if width == 0 else width, fmt=fmt, *lst
+  )
+
+
+def compare_performance(variant, before, after):
+  cycles = [['longest_path_cycles', 'longest_path_bound_pipelines'],
+            ['shortest_path_cycles', 'shortest_path_bound_pipelines'],
+            ['total_cycles', 'total_bound_pipelines']]
+  differences = []
+  for cycle in cycles:
+    if before[cycle[0]] == after[cycle[0]]:
+      continue
+    before_cycles = before[cycle[0]]
+    before_bounds = before[cycle[1]]
+    after_cycles = after[cycle[0]]
+    after_bounds = after[cycle[1]]
+    differences += [
+        '{} in variant {}\n{}{}\n{:<8}{}{}\n{:<8}{}{}\n'.format(
+            cycle[0],
+            variant,
+            ' ' * 8,
+            pretty_list(before['pipelines'] + ['bound']),  # Column labels.
+            'before',
+            pretty_list(before_cycles, fmt='f'),
+            pretty_list(before_bounds, sep=',', width=0),
+            'after',
+            pretty_list(after_cycles, fmt='f'),
+            pretty_list(after_bounds, sep=',', width=0),
+        )
+    ]
+  return differences
+
+
 def compare_variants(befores, afters):
   differences = []
   for variant_name, before_variant in befores.items():
     after_variant = afters[variant_name]
     for variant_key, before_variant_val in before_variant.items():
       after_variant_val = after_variant[variant_key]
-      if before_variant_val != after_variant_val:
+      if variant_key == 'performance':
+        differences += compare_performance(
+            variant_name, before_variant_val, after_variant_val
+        )
+      elif before_variant_val != after_variant_val:
         differences += [
-            '{} in variant {}:\n  {} <- before\n  {} <- after'.format(
-                variant_key, variant_name, before_variant_val, after_variant_val
+            'In variant {}:\n  {vkey}: {} <- before\n  {vkey}: {} <- after'
+            .format(
+                variant_name,
+                before_variant_val,
+                after_variant_val,
+                vkey=variant_key,
             )
         ]
   return differences
@@ -162,6 +224,8 @@ def compare_shaders(malioc_tree, before_shader, after_shader):
     after_val = after_shader[key]
     if key == 'variants':
       differences += compare_variants(before_val, after_val)
+    elif key == 'performance':
+      differences += compare_performance('Default', before_val, after_val)
     elif before_val != after_val:
       differences += [
           '{}:\n  {} <- before\n  {} <- after'.format(
@@ -178,7 +242,7 @@ def compare_shaders(malioc_tree, before_shader, after_shader):
     for diff in differences:
       print(diff)
     print(
-        '\nFor a full report, run:\n  $ malioc --{} --core {} {}/{}'.format(
+        '\nFor a full report, run:\n  $ malioc --{} --core {} {}/{}\n'.format(
             typ.lower(), core, build_gen_dir, filename
         )
     )
