@@ -123,13 +123,11 @@ class _DaemonServer {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.then(
-          (Object? obj) => obj,
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
           onError: (Object error, StackTrace stackTrace) {
             logger.printError('Socket error: $error');
             logger.printTrace('$stackTrace');
-
-            return null;
           });
         final Daemon daemon = Daemon(
           DaemonConnection(
@@ -1420,13 +1418,11 @@ class ProxyDomain extends Domain {
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.then(
+    unawaited(socket.done.then<Object?>(
       (Object? obj) => obj,
       onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
-
-      return null;
     }).then((Object? _) {
       sendEvent('proxy.disconnected.$id');
     }));

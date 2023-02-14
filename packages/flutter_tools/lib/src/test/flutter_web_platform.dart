@@ -684,6 +684,8 @@ class BrowserManager {
       (int? browserExitCode) {
         throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
       },
+    ).then(
+      (Object? obj) => obj,
       onError: (Object error, StackTrace stackTrace) {
         if (!completer.isCompleted) {
           completer.completeError(error, stackTrace);

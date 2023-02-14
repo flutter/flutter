@@ -291,8 +291,8 @@ Future<vm_service.VmService> setUpVmService(
         (vm_service.Success success) => success,
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're already subscribed.
-        onError: (Object? error, StackTrace stackTrace) {
-          if (error is vm_service.RPCError || error == null) {
+        onError: (Object error, StackTrace stackTrace) {
+          if (error is vm_service.RPCError) {
             return null;
           }
           return Future<vm_service.Success?>.error(error, stackTrace);
