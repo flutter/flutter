@@ -68,9 +68,9 @@ bool _findDeepRed(List<Object?> result) {
   final int height = (result[1] as int?)!;
   final String format = (result[2] as String?)!;
   if (format == 'MTLPixelFormatBGR10_XR') {
-    return _findDeepRedBGR10(result[3] as Uint8List, width, height);
+    return _findDeepRedBGR10((result[3] as Uint8List?)!, width, height);
   } else if (format == 'MTLPixelFormatBGRA10_XR') {
-    return _findDeepRedBGRA10(result[3] as Uint8List, width, height);
+    return _findDeepRedBGRA10((result[3] as Uint8List?)!, width, height);
   } else {
     fail('Unsupported pixel format: $format');
   }

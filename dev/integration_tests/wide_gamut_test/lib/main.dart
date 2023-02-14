@@ -76,9 +76,9 @@ void run(Setup setup) {
 }
 
 class MyApp extends StatelessWidget {
-  final Setup _setup;
-
   const MyApp(this._setup, {super.key});
+
+  final Setup _setup;
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +93,15 @@ class MyApp extends StatelessWidget {
 }
 
 class _SaveLayerDrawer extends CustomPainter {
-  final ui.Image? _image;
   _SaveLayerDrawer(this._image);
+
+  final ui.Image? _image;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (_image != null) {
       final Rect imageRect = Rect.fromCenter(
-          center: const Offset(0, 0),
+          center: Offset.zero,
           width: _image!.width.toDouble(),
           height: _image!.height.toDouble());
       canvas.saveLayer(
@@ -136,9 +137,9 @@ Future<ui.Image> _loadImage() async {
 }
 
 class MyHomePage extends StatefulWidget {
-  final Setup setup;
   const MyHomePage(this.setup, {super.key, required this.title});
 
+  final Setup setup;
   final String title;
 
   @override
@@ -151,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     if (widget.setup == Setup.canvasSaveLayer) {
-      _loadImage().then((value) {
+      _loadImage().then((ui.Image? value) {
         setState(() {
           _image = value;
         });
