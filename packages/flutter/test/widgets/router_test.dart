@@ -823,8 +823,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
   testWidgets('PlatformRouteInformationProvider updates route information', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     TestDefaultBinaryMessengerBinding
-      .instance!
-      .defaultBinaryMessenger
+      .instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
         SystemChannels.navigation,
         (MethodCall methodCall) async {

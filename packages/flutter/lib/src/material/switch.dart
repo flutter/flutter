@@ -197,7 +197,9 @@ class Switch extends StatelessWidget {
   /// ```
   final ValueChanged<bool>? onChanged;
 
+  /// {@template flutter.material.switch.activeColor}
   /// The color to use when this switch is on.
+  /// {@endtemplate}
   ///
   /// Defaults to [ColorScheme.secondary].
   ///
@@ -205,7 +207,9 @@ class Switch extends StatelessWidget {
   /// state, it will be used instead of this color.
   final Color? activeColor;
 
+  /// {@template flutter.material.switch.activeTrackColor}
   /// The color to use on the track when this switch is on.
+  /// {@endtemplate}
   ///
   /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
@@ -215,7 +219,9 @@ class Switch extends StatelessWidget {
   /// state, it will be used instead of this color.
   final Color? activeTrackColor;
 
+  /// {@template flutter.material.switch.inactiveThumbColor}
   /// The color to use on the thumb when this switch is off.
+  /// {@endtemplate}
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
@@ -225,7 +231,9 @@ class Switch extends StatelessWidget {
   /// used instead of this color.
   final Color? inactiveThumbColor;
 
+  /// {@template flutter.material.switch.inactiveTrackColor}
   /// The color to use on the track when this switch is off.
+  /// {@endtemplate}
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
@@ -235,22 +243,30 @@ class Switch extends StatelessWidget {
   /// used instead of this color.
   final Color? inactiveTrackColor;
 
+  /// {@template flutter.material.switch.activeThumbImage}
   /// An image to use on the thumb of this switch when the switch is on.
+  /// {@endtemplate}
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? activeThumbImage;
 
+  /// {@template flutter.material.switch.onActiveThumbImageError}
   /// An optional error callback for errors emitted when loading
   /// [activeThumbImage].
+  /// {@endtemplate}
   final ImageErrorListener? onActiveThumbImageError;
 
+  /// {@template flutter.material.switch.inactiveThumbImage}
   /// An image to use on the thumb of this switch when the switch is off.
+  /// {@endtemplate}
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider? inactiveThumbImage;
 
+  /// {@template flutter.material.switch.onInactiveThumbImageError}
   /// An optional error callback for errors emitted when loading
   /// [inactiveThumbImage].
+  /// {@endtemplate}
   final ImageErrorListener? onInactiveThumbImageError;
 
   /// {@template flutter.material.switch.thumbColor}

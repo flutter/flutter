@@ -1471,6 +1471,40 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
+  testWidgets("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
+      return MaterialApp(
+        scrollBehavior: const NoScrollbarBehavior().copyWith(
+          dragDevices: dragDevices,
+        ),
+        home: ListView.builder(
+          itemCount: 1000,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.stylus}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Non-matching device should not allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.stylus);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 200.0);
+  });
+
   testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);

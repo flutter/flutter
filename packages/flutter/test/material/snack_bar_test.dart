@@ -812,7 +812,7 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + widgetWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 2)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -851,6 +851,110 @@ void main() {
     if (textWidget is Text) {
       final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
       expect(effectiveStyle.color, Colors.lightBlue);
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 3)',
+      (WidgetTester tester) async {
+    const MaterialColor usedColor = Colors.teal;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: usedColor,
+                        label: 'ACTION',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextButton =
+        tester.element(find.widgetWithText(TextButton, 'ACTION'));
+    final Widget textButton = actionTextButton.widget;
+    if (textButton is TextButton) {
+      final ButtonStyle buttonStyle = textButton.style!;
+      if (buttonStyle.foregroundColor is MaterialStateColor) {
+        // Same color when resolved
+        expect(buttonStyle.foregroundColor!.resolve(<MaterialState>{}), usedColor);
+      } else {
+        expect(false, true);
+      }
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)',
+      (WidgetTester tester) async {
+    const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: usedColor,
+                        label: 'ACTION',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextButton =
+        tester.element(find.widgetWithText(TextButton, 'ACTION'));
+    final Widget textButton = actionTextButton.widget;
+    if (textButton is TextButton) {
+      final ButtonStyle buttonStyle = textButton.style!;
+      if (buttonStyle.foregroundColor is MaterialStateColor) {
+        // Exactly the same object
+        expect(buttonStyle.foregroundColor, usedColor);
+      } else {
+        expect(false, true);
+      }
     } else {
       expect(false, true);
     }
@@ -2587,4 +2691,20 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   }
 
   return dragGestures;
+}
+
+class _TestMaterialStateColor extends MaterialStateColor {
+  const _TestMaterialStateColor() : super(_colorRed);
+
+  static const int _colorRed = 0xFFF44336;
+  static const int _colorBlue = 0xFF2196F3;
+
+  @override
+  Color resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return const Color(_colorBlue);
+    }
+
+    return const Color(_colorRed);
+  }
 }
