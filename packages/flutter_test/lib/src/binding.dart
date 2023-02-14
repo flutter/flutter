@@ -968,7 +968,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late bool _beforeTestCheckIntrinsicSizes;
 
   void _verifyInvariants() {
-    // subclasses overrides this
+    // subclasses such as AutomatedTestWidgetsFlutterBinding overrides this
+    // to perform more verifications.
   }
 
   void _verifyTearDownInvariants() {
