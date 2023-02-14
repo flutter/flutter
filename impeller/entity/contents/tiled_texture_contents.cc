@@ -33,6 +33,23 @@ void TiledTextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
   sampler_descriptor_ = std::move(desc);
 }
 
+void TiledTextureContents::SetColorFilter(
+    std::optional<ColorFilterProc> color_filter) {
+  color_filter_ = std::move(color_filter);
+}
+
+std::optional<std::shared_ptr<Texture>>
+TiledTextureContents::CreateFilterTexture(
+    const ContentContext& renderer) const {
+  const ColorFilterProc& filter = color_filter_.value();
+  auto color_filter_contents = filter(FilterInput::Make(texture_));
+  auto snapshot = color_filter_contents->RenderToSnapshot(renderer, Entity());
+  if (snapshot.has_value()) {
+    return snapshot.value().texture;
+  }
+  return std::nullopt;
+}
+
 bool TiledTextureContents::Render(const ContentContext& renderer,
                                   const Entity& entity,
                                   RenderPass& pass) const {
@@ -87,9 +104,21 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   cmd.BindVertices(geometry_result.vertex_buffer);
   VS::BindVertInfo(cmd, host_buffer.EmplaceUniform(vert_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
-  FS::BindTextureSampler(cmd, texture_,
-                         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-                             sampler_descriptor_));
+  if (color_filter_.has_value()) {
+    auto filtered_texture = CreateFilterTexture(renderer);
+    if (!filtered_texture.has_value()) {
+      return false;
+    }
+    FS::BindTextureSampler(
+        cmd, filtered_texture.value(),
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            sampler_descriptor_));
+  } else {
+    FS::BindTextureSampler(
+        cmd, texture_,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            sampler_descriptor_));
+  }
 
   if (!pass.AddCommand(std::move(cmd))) {
     return false;
