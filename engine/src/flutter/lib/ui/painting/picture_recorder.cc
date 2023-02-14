@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/painting/picture_recorder.h"
 
-#include "flutter/display_list/display_list.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -26,10 +25,10 @@ PictureRecorder::PictureRecorder() {}
 
 PictureRecorder::~PictureRecorder() {}
 
-SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
-  display_list_recorder_ =
-      sk_make_sp<DisplayListCanvasRecorder>(bounds, /*prepare_rtree=*/true);
-  return display_list_recorder_.get();
+sk_sp<DisplayListBuilder> PictureRecorder::BeginRecording(SkRect bounds) {
+  display_list_builder_ =
+      sk_make_sp<DisplayListBuilder>(bounds, /*prepare_rtree=*/true);
+  return display_list_builder_;
 }
 
 fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
@@ -40,8 +39,8 @@ fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
   fml::RefPtr<Picture> picture;
 
   picture = Picture::Create(dart_picture, UIDartState::CreateGPUObject(
-                                              display_list_recorder_->Build()));
-  display_list_recorder_ = nullptr;
+                                              display_list_builder_->Build()));
+  display_list_builder_ = nullptr;
 
   canvas_->Invalidate();
   canvas_ = nullptr;
