@@ -27,13 +27,19 @@ impeller_shaders("shader_fixtures") {
     "mipmaps.frag",
     "mipmaps.vert",
     "sample.comp",
+    "stage1.comp",
+    "stage2.comp",
     "simple.vert",
     "test_texture.frag",
     "test_texture.vert",
   ]
 
   if (impeller_enable_opengles) {
-    gles_exclusions = [ "sample.comp" ]
+    gles_exclusions = [
+      "sample.comp",
+      "stage1.comp",
+      "stage2.comp",
+    ]
   }
 }
 
@@ -77,6 +83,8 @@ test_fixtures("file_fixtures") {
     "sample_with_binding.vert",
     "simple.vert.hlsl",
     "sa%m#ple.vert",
+    "stage1.comp",
+    "stage2.comp",
     "struct_def_bug.vert",
     "table_mountain_nx.png",
     "table_mountain_ny.png",
