@@ -391,8 +391,8 @@ class CupertinoContextMenu extends StatefulWidget {
   /// This parameter cannot be null or empty.
   final List<Widget> actions;
 
-  /// Enables if clicking on the [CupertinoContextMenuAction]s will
-  /// produce a haptic feedback.
+  /// If true, clicking on the [CupertinoContextMenuAction]s will
+  /// produce haptic feedback.
   ///
   /// Uses [HapticFeedback.heavyImpact] when activated.
   /// Defaults to false.
