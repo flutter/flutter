@@ -255,6 +255,7 @@
         "templates/plugin/android-kotlin.tmpl/build.gradle.tmpl",
         "templates/plugin/android-kotlin.tmpl/projectName_android.iml.tmpl",
         "templates/plugin/android-kotlin.tmpl/src/main/kotlin/androidIdentifier/pluginClass.kt.tmpl",
+        "templates/plugin/android-kotlin.tmpl/src/test/kotlin/androidIdentifier/pluginClassTest.kt.tmpl",
         "templates/plugin/android.tmpl/.gitignore",
         "templates/plugin/android.tmpl/gradle/wrapper/gradle-wrapper.properties",
         "templates/plugin/android.tmpl/gradle.properties.tmpl",
