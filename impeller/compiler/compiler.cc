@@ -35,6 +35,7 @@ static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
   // Metal to AIR must be updated as well.
   sl_options.msl_version =
       spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
+  sl_options.use_framebuffer_fetch_subpasses = true;
   sl_compiler->set_msl_options(sl_options);
 
   // Sort the float and sampler uniforms according to their declared/decorated
