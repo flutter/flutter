@@ -211,7 +211,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('file-reporter',
         help: 'Enable an additional reporter writing test results to a file.\n'
           'Should be in the form <reporter>:<filepath>, '
-          'Example: "json:reports/tests.json"'
+          'Example: "json:reports/tests.json".'
       )
       ..addOption('timeout',
         help: 'The default test timeout, specified either '
