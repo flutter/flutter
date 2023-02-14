@@ -504,7 +504,6 @@ targets:
       config_name: windows_host_engine
 
   - name: Windows windows_arm_host_engine
-    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
