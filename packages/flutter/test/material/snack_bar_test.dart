@@ -2317,6 +2317,7 @@ void main() {
     required SnackBarBehavior? behavior,
     EdgeInsetsGeometry? margin,
     double? width,
+    double? actionOverflowThreshold,
   }) {
     return MaterialApp(
       home: Scaffold(
@@ -2335,6 +2336,7 @@ void main() {
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  actionOverflowThreshold: actionOverflowThreshold,
                 ));
               },
               child: const Text('X'),
@@ -2412,6 +2414,22 @@ void main() {
       'was set by default.',
     );
   });
+
+  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
+    testWidgets('SnackBar will assert for actionOverflowThreshold outside of 0-1 range', (WidgetTester tester) async {
+      await tester.pumpWidget(doBuildApp(
+        actionOverflowThreshold: overflowThreshold,
+        behavior: SnackBarBehavior.fixed,
+      ));
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final AssertionError exception = tester.takeException() as AssertionError;
+      expect(exception.message, 'Action overflow threshold must be between 0 and 1 inclusive');
+    });
+  }
+
 
   testWidgets('Snackbar by default clips BackdropFilter', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98205
@@ -2556,7 +2574,7 @@ void main() {
         matchesGoldenFile('snack_bar.goldenTest.floatingWithIcon.png'));
   });
 
-  testWidgets('Fixed multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
+  testWidgets('Floating multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         bottomSheet: SizedBox(
@@ -2581,6 +2599,33 @@ void main() {
 
     await expectLater(find.byType(MaterialApp),
         matchesGoldenFile('snack_bar.goldenTest.multiLineWithIcon.png'));
+  });
+
+  testWidgets('Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        bottomSheet: SizedBox(
+          width: 200,
+          height: 50,
+          child: ColoredBox(
+            color: Colors.pink,
+          ),
+        ),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(const SnackBar(
+      content: Text('This is a really long snackbar message. So long, it spans across more than one line!'),
+      duration: Duration(seconds: 2),
+      showCloseIcon: true,
+      behavior: SnackBarBehavior.floating,
+      actionOverflowThreshold: 1,
+    ));
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    await expectLater(find.byType(MaterialApp),
+        matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
   });
 
   testWidgets(

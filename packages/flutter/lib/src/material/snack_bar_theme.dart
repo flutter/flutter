@@ -64,11 +64,13 @@ class SnackBarThemeData with Diagnosticable {
     this.insetPadding,
     this.showCloseIcon,
     this.closeIconColor,
+    this.actionOverflowThreshold,
   })  : assert(elevation == null || elevation >= 0.0),
-        assert(
-            width == null ||
-                (identical(behavior, SnackBarBehavior.floating)),
-            'Width can only be set if behaviour is SnackBarBehavior.floating');
+        assert(width == null || identical(behavior, SnackBarBehavior.floating),
+          'Width can only be set if behaviour is SnackBarBehavior.floating'),
+        assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+          'Action overflow threshold must be between 0 and 1 inclusive');
+
   /// Overrides the default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
@@ -133,6 +135,11 @@ class SnackBarThemeData with Diagnosticable {
   /// This value is only used if [showCloseIcon] is true.
   final Color? closeIconColor;
 
+  /// Overrides the default value for [SnackBar.actionOverflowThreshold].
+  ///
+  /// Must be a value between 0 and 1, if present.
+  final double? actionOverflowThreshold;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
@@ -147,6 +154,7 @@ class SnackBarThemeData with Diagnosticable {
     EdgeInsets? insetPadding,
     bool? showCloseIcon,
     Color? closeIconColor,
+    double? actionOverflowThreshold,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -160,6 +168,7 @@ class SnackBarThemeData with Diagnosticable {
       insetPadding: insetPadding ?? this.insetPadding,
       showCloseIcon: showCloseIcon ?? this.showCloseIcon,
       closeIconColor: closeIconColor ?? this.closeIconColor,
+      actionOverflowThreshold: actionOverflowThreshold ?? this.actionOverflowThreshold,
     );
   }
 
@@ -180,6 +189,7 @@ class SnackBarThemeData with Diagnosticable {
       width: lerpDouble(a?.width, b?.width, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
       closeIconColor: Color.lerp(a?.closeIconColor, b?.closeIconColor, t),
+      actionOverflowThreshold: lerpDouble(a?.actionOverflowThreshold, b?.actionOverflowThreshold, t),
     );
   }
 
@@ -196,6 +206,7 @@ class SnackBarThemeData with Diagnosticable {
         insetPadding,
         showCloseIcon,
         closeIconColor,
+        actionOverflowThreshold,
       );
 
   @override
@@ -217,7 +228,8 @@ class SnackBarThemeData with Diagnosticable {
         && other.width == width
         && other.insetPadding == insetPadding
         && other.showCloseIcon == showCloseIcon
-        && other.closeIconColor == closeIconColor;
+        && other.closeIconColor == closeIconColor
+        && other.actionOverflowThreshold == actionOverflowThreshold;
   }
 
   @override
@@ -234,5 +246,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showCloseIcon', showCloseIcon, defaultValue: null));
     properties.add(ColorProperty('closeIconColor', closeIconColor, defaultValue: null));
+    properties.add(DoubleProperty('actionOverflowThreshold', actionOverflowThreshold, defaultValue: null));
   }
 }
