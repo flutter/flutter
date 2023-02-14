@@ -2977,7 +2977,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
   builder.SetCompositor();
-  builder.SetDartEntrypoint("render_targets_are_recycled");
+  builder.SetDartEntrypoint("render_targets_are_in_stable_order");
   builder.SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture);
 
@@ -4018,7 +4018,7 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   TestGLSurface surface(SkISize::Make(100, 100));
   auto context = surface.GetGrContext();
 
-  typedef void (*glGenTexturesProc)(uint32_t n, uint32_t * textures);
+  typedef void (*glGenTexturesProc)(uint32_t n, uint32_t* textures);
   glGenTexturesProc glGenTextures;
 
   glGenTextures = reinterpret_cast<glGenTexturesProc>(
