@@ -668,7 +668,7 @@ void main() {
       );
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
-        <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64-debug', 'linux-x64-debug/linux-x64-flutter-gtk.zip'],
         <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
         <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
       ]);
