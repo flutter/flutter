@@ -237,8 +237,17 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
+    bool validateFormField(FormFieldState<dynamic> field) =>
+        !field.validate() || hasError;
+
     for (final FormFieldState<dynamic> field in _fields) {
-      hasError = !field.validate() || hasError;
+      if (widget.autovalidateMode == AutovalidateMode.onUserInteraction) {
+        if (_hasInteractedByUser && field._hasInteractedByUser.value) {
+          hasError = validateFormField(field);
+        }
+      } else {
+        hasError = validateFormField(field);
+      }
     }
     return !hasError;
   }

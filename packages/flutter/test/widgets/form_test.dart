@@ -649,7 +649,7 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form only validates changed form fields if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     const String initialValue = 'foo';
     String? errorText(String? value) => 'error/$value';
 
@@ -689,18 +689,20 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
-    // We expect no validation error text being shown.
+    // We expect no validation error text being shown initially.
     expect(find.text(errorText(initialValue)!), findsNothing);
 
-    // Set a empty string into the first form field to
-    // trigger the fields validators.
+    // Change first field's text to trigger the text field validator.
+    // Expect one error message to be shown.
     await tester.enterText(find.byType(TextFormField).first, '');
     await tester.pump();
+    expect(find.text(errorText('')!), findsNWidgets(1));
 
-    // Now we expect the errors to be shown for the first Text Field and
-    // for the next two form fields that have their contents unchanged.
-    expect(find.text(errorText('')!), findsOneWidget);
-    expect(find.text(errorText(initialValue)!), findsNWidgets(2));
+    // Change third text field's text to trigger the text field validator.
+    // Expect two error messages to be shown.
+    await tester.enterText(find.byType(TextFormField).at(2), '');
+    await tester.pump();
+    expect(find.text(errorText('')!), findsNWidgets(2));
   });
 
   testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
