@@ -104,8 +104,7 @@ class _ActionIcon extends StatelessWidget {
     // expects the duplicated tooltip and label.
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        semanticsLabel =
-            getAndroidSemanticsLabel(MaterialLocalizations.of(context));
+        semanticsLabel = getAndroidSemanticsLabel(MaterialLocalizations.of(context));
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

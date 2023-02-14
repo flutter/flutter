@@ -158,17 +158,15 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(
-        tester.getSemantics(find.byType(DrawerButton)),
-        matchesSemantics(
-          tooltip: 'Open navigation menu',
-          label: expectedLabel,
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(DrawerButton)), matchesSemantics(
+      tooltip: 'Open navigation menu',
+      label: expectedLabel,
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -218,17 +216,15 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(
-        tester.getSemantics(find.byType(EndDrawerButton)),
-        matchesSemantics(
-          tooltip: 'Open navigation menu',
-          label: expectedLabel,
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(EndDrawerButton)), matchesSemantics(
+      tooltip: 'Open navigation menu',
+      label: expectedLabel,
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -260,8 +256,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: EndDrawerButton(
-                onPressed: () => customCallbackWasCalled = true),
+            child: EndDrawerButton(onPressed: () => customCallbackWasCalled = true),
           ),
           endDrawer: const Drawer(),
         ),

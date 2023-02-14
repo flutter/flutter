@@ -95,10 +95,10 @@ class ActionIconThemeData with Diagnosticable {
       return false;
     }
     return other is ActionIconThemeData
-    && other.backButtonIconBuilder == backButtonIconBuilder
-    && other.closeButtonIconBuilder == closeButtonIconBuilder
-    && other.drawerButtonIconBuilder == drawerButtonIconBuilder
-    && other.endDrawerButtonIconBuilder == endDrawerButtonIconBuilder;
+        && other.backButtonIconBuilder == backButtonIconBuilder
+        && other.closeButtonIconBuilder == closeButtonIconBuilder
+        && other.drawerButtonIconBuilder == drawerButtonIconBuilder
+        && other.endDrawerButtonIconBuilder == endDrawerButtonIconBuilder;
   }
 
   @override
