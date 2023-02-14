@@ -1431,7 +1431,6 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h + ../../.
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend_features.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/blit_command.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/blit_command.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/blit_pass.cc + ../../../flutter/LICENSE
@@ -1459,6 +1458,8 @@ ORIGIN: ../../../flutter/impeller/renderer/device_buffer.cc + ../../../flutter/L
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/device_capabilities.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/device_capabilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/formats.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/formats.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/gpu_tracer.cc + ../../../flutter/LICENSE
@@ -3908,7 +3909,6 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vk.h
-FILE: ../../../flutter/impeller/renderer/backend_features.h
 FILE: ../../../flutter/impeller/renderer/blit_command.cc
 FILE: ../../../flutter/impeller/renderer/blit_command.h
 FILE: ../../../flutter/impeller/renderer/blit_pass.cc
@@ -3936,6 +3936,8 @@ FILE: ../../../flutter/impeller/renderer/device_buffer.cc
 FILE: ../../../flutter/impeller/renderer/device_buffer.h
 FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.h
+FILE: ../../../flutter/impeller/renderer/device_capabilities.cc
+FILE: ../../../flutter/impeller/renderer/device_capabilities.h
 FILE: ../../../flutter/impeller/renderer/formats.cc
 FILE: ../../../flutter/impeller/renderer/formats.h
 FILE: ../../../flutter/impeller/renderer/gpu_tracer.cc

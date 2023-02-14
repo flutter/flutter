@@ -53,7 +53,7 @@ const std::vector<Scalar>& SweepGradientContents::GetStops() const {
 bool SweepGradientContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
-  if (renderer.GetBackendFeatures().ssbo_support) {
+  if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
     return RenderSSBO(renderer, entity, pass);
   }
   return RenderTexture(renderer, entity, pass);

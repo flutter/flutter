@@ -35,6 +35,8 @@ impeller_component("renderer") {
     "device_buffer.h",
     "device_buffer_descriptor.cc",
     "device_buffer_descriptor.h",
+    "device_capabilities.cc",
+    "device_capabilities.h",
     "formats.cc",
     "formats.h",
     "gpu_tracer.cc",

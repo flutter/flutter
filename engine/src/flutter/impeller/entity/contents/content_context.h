@@ -62,6 +62,7 @@
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
+#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/scene/scene_context.h"
@@ -245,19 +246,19 @@ class ContentContext {
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const {
-    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
     return GetPipeline(linear_gradient_ssbo_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetRadialGradientSSBOFillPipeline(ContentContextOptions opts) const {
-    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
     return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetSweepGradientSSBOFillPipeline(ContentContextOptions opts) const {
-    FML_DCHECK(GetBackendFeatures().ssbo_support);
+    FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
     return GetPipeline(sweep_gradient_ssbo_fill_pipelines_, opts);
   }
 
@@ -442,7 +443,7 @@ class ContentContext {
 
   std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext() const;
 
-  const BackendFeatures& GetBackendFeatures() const;
+  const IDeviceCapabilities& GetDeviceCapabilities() const;
 
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
