@@ -194,11 +194,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.shape,
     this.backgroundColor,
     this.foregroundColor,
-    @Deprecated(
-      'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
     this.primary = true,
@@ -499,7 +494,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
   /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
-  /// if the overall theme's [brightness] is [Brightness.dark].
+  /// if the overall theme's brightness is [Brightness.dark].
   ///
   /// If this color is a [MaterialStateColor] it will be resolved against
   /// [MaterialState.scrolledUnder] when the content of the app's
@@ -525,7 +520,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// value is also null, then [AppBar] uses the overall theme's
   /// [ColorScheme.onPrimary] if the overall theme's brightness is
   /// [Brightness.light], and [ColorScheme.onSurface] if the overall
-  /// theme's [brightness] is [Brightness.dark].
+  /// theme's brightness is [Brightness.dark].
   ///
   /// This color is used to configure [DefaultTextStyle] that contains
   /// the toolbar's children, and the default [IconTheme] widgets that
@@ -542,38 +537,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
   final Color? foregroundColor;
-
-  /// {@template flutter.material.appbar.brightness}
-  /// This property is deprecated, please use [systemOverlayStyle] instead.
-  ///
-  /// Determines the brightness of the [SystemUiOverlayStyle]: for
-  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
-  /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
-  ///
-  /// If this value is null then [AppBarTheme.brightness] is used
-  /// and if that's null then overall theme's brightness is used.
-  ///
-  /// The AppBar is built within a `AnnotatedRegion<SystemUiOverlayStyle>`
-  /// which causes [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically. Apps should not enclose the AppBar with
-  /// their own [AnnotatedRegion].
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///  * [Theme.of], which returns the current overall Material theme as
-  ///    a [ThemeData].
-  ///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
-  ///    default colors are based on.
-  ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
-  ///    is light or dark.
-  ///  * [backwardsCompatibility], which forces AppBar to use this
-  ///    obsolete property.
-  @Deprecated(
-    'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final Brightness? brightness;
 
   /// {@template flutter.material.appbar.iconTheme}
   /// The color, opacity, and size to use for toolbar icons.
@@ -692,8 +655,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This property is deprecated and is false by default.
   ///
   /// If true, preserves the original defaults for the [backgroundColor],
-  /// [iconTheme], [actionsIconTheme] properties, and the original use of
-  /// the [brightness] property.
+  /// [iconTheme], [actionsIconTheme] properties.
   ///
   /// If this property is null, then [AppBarTheme.backwardsCompatibility] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
@@ -1212,11 +1174,9 @@ class _AppBarState extends State<AppBar> {
     }
 
     final SystemUiOverlayStyle overlayStyle = backwardsCompatibility
-      ? _systemOverlayStyleForBrightness(
-          widget.brightness
-          ?? appBarTheme.brightness
-          ?? ThemeData.estimateBrightnessForColor(backgroundColor),
-        )
+      ? widget.systemOverlayStyle
+        ?? appBarTheme.systemOverlayStyle
+        ?? _systemOverlayStyleForBrightness(ThemeData.estimateBrightnessForColor(backgroundColor))
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
         ?? defaults.systemOverlayStyle
@@ -1269,7 +1229,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.forceElevated,
     required this.backgroundColor,
     required this.foregroundColor,
-    required this.brightness,
     required this.iconTheme,
     required this.actionsIconTheme,
     required this.primary,
@@ -1309,7 +1268,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool forceElevated;
   final Color? backgroundColor;
   final Color? foregroundColor;
-  final Brightness? brightness;
   final IconThemeData? iconTheme;
   final IconThemeData? actionsIconTheme;
   final bool primary;
@@ -1385,7 +1343,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         surfaceTintColor: surfaceTintColor,
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
-        brightness: brightness,
         iconTheme: iconTheme,
         actionsIconTheme: actionsIconTheme,
         primary: primary,
@@ -1420,7 +1377,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || shadowColor != oldDelegate.shadowColor
         || backgroundColor != oldDelegate.backgroundColor
         || foregroundColor != oldDelegate.foregroundColor
-        || brightness != oldDelegate.brightness
         || iconTheme != oldDelegate.iconTheme
         || actionsIconTheme != oldDelegate.actionsIconTheme
         || primary != oldDelegate.primary
@@ -1555,11 +1511,6 @@ class SliverAppBar extends StatefulWidget {
     this.forceElevated = false,
     this.backgroundColor,
     this.foregroundColor,
-    @Deprecated(
-      'This property is no longer used, please use systemOverlayStyle instead. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.brightness,
     this.iconTheme,
     this.actionsIconTheme,
     this.primary = true,
@@ -1865,15 +1816,6 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final Color? foregroundColor;
 
-  /// {@macro flutter.material.appbar.brightness}
-  ///
-  /// This property is used to configure an [AppBar].
-  @Deprecated(
-    'This property is no longer used, please use systemOverlayStyle instead. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final Brightness? brightness;
-
   /// {@macro flutter.material.appbar.iconTheme}
   ///
   /// This property is used to configure an [AppBar].
@@ -2149,7 +2091,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           forceElevated: widget.forceElevated,
           backgroundColor: widget.backgroundColor,
           foregroundColor: widget.foregroundColor,
-          brightness: widget.brightness,
           iconTheme: widget.iconTheme,
           actionsIconTheme: widget.actionsIconTheme,
           primary: widget.primary,

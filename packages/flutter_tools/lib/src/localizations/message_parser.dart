@@ -587,17 +587,8 @@ class Parser {
   }
 
   Node parse() {
-    try {
-      final Node syntaxTree = compress(parseIntoTree());
-      checkExtraRules(syntaxTree);
-      return syntaxTree;
-    } on L10nParserException catch (error) {
-      // For debugging purposes.
-      if (logger == null) {
-        rethrow;
-      }
-      logger?.printError(error.toString());
-      return Node(ST.empty, 0, value: '');
-    }
+    final Node syntaxTree = compress(parseIntoTree());
+    checkExtraRules(syntaxTree);
+    return syntaxTree;
   }
 }
