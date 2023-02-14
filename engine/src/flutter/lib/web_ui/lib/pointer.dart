@@ -34,24 +34,6 @@ enum PointerSignalKind {
   unknown
 }
 
-  /// The preferred action for stylus action
-enum PointerPreferredStylusAuxiliaryAction {
-  /// Ignore pointer input
-  ignore,
-
-  /// Show colour palette if available
-  showColorPalette,
-
-  /// Switch to eraser if available
-  switchEraser,
-
-  /// Switch to previous tool
-  switchPrevious,
-
-  /// unknown preferred action
-  unknown,
-}
-
 class PointerData {
   const PointerData({
     this.embedderId = 0,
@@ -89,7 +71,6 @@ class PointerData {
     this.panDeltaY = 0.0,
     this.scale = 0.0,
     this.rotation = 0.0,
-    this.preferredStylusAuxiliaryAction = PointerPreferredStylusAuxiliaryAction.ignore,
   });
   final int embedderId;
   final Duration timeStamp;
@@ -126,7 +107,6 @@ class PointerData {
   final double panDeltaY;
   final double scale;
   final double rotation;
-  final PointerPreferredStylusAuxiliaryAction preferredStylusAuxiliaryAction;
 
   @override
   String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
@@ -165,8 +145,7 @@ class PointerData {
            'panDeltaX: $panDeltaX, '
            'panDeltaY: $panDeltaY, '
            'scale: $scale, '
-           'rotation: $rotation, '
-           'preferredStylusAuxiliaryAction: $preferredStylusAuxiliaryAction'
+           'rotation: $rotation'
            ')';
   }
 }
