@@ -599,7 +599,7 @@ void main() {
         onDateTimeChanged: (_) { },
         initialDateTime: DateTime(2018, 1, 1, 10, 30),
       );
-      
+
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
