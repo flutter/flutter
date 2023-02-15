@@ -3568,6 +3568,46 @@ void main() {
     expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
   });
 
+  testWidgets('Do not throw when switching beetween a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/120649
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Widget buildFrame(TabController controller, bool isScrollable) {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            controller: controller,
+            isScrollable: isScrollable,
+            tabs: const <Tab>[
+              Tab(text: 'LEFT'),
+              Tab(text: 'RIGHT'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show both controllers once.
+    await tester.pumpWidget(buildFrame(controller1, false));
+    await tester.pumpWidget(buildFrame(controller2, true));
+
+    // Switch back to the first controller.
+    await tester.pumpWidget(buildFrame(controller1, false));
+    expect(tester.takeException(), null);
+
+    // Switch back to the second controller.
+    await tester.pumpWidget(buildFrame(controller2, true));
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Default tab indicator color is white', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/15958
     final List<String> tabs = <String>['LEFT', 'RIGHT'];
