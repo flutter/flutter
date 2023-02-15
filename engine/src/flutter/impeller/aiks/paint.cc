@@ -69,7 +69,6 @@ std::shared_ptr<Contents> Paint::WithFilters(
 std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
-  input = WithMaskBlur(input, false, effect_transform);
   input = WithImageFilter(input, effect_transform);
   input = WithColorFilter(input, /**absorb_opacity=*/true);
   return input;
