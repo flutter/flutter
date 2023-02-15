@@ -22,9 +22,9 @@ body:
       label: Is there an existing issue for this?
       description: Please search to see if an issue already exists for the bug you encountered.
       options:
-      - label: I have searched the existing issues
+      - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
         required: true
-      - label: I have read [the guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
         required: true
   - type: textarea
     attributes:
