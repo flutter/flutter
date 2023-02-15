@@ -295,6 +295,13 @@ StringBuffer bar = StringBuffer('baz');
 int analyze() {}
 ''';
 
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: info
+  ''');
+    
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub'],
@@ -305,13 +312,20 @@ int analyze() {}
       exitMessageContains: '1 issue found.',
       exitCode: 1,
     );
-  }, skip: true); // https://github.com/flutter/flutter/issues/120750
+  });
 
   testWithoutContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
 int analyze() {}
 ''';
 
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: info
+  ''');
+    
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub', '--no-fatal-infos'],
@@ -321,13 +335,20 @@ int analyze() {}
       ],
       exitMessageContains: '1 issue found.',
     );
-  }, skip: true); // https://github.com/flutter/flutter/issues/120750
+  });
 
   testWithoutContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
 int analyze() {}
 ''';
 
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: info
+  ''');
+    
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
@@ -337,7 +358,7 @@ int analyze() {}
       ],
       exitMessageContains: '1 issue found.',
     );
-  }, skip: true); // https://github.com/flutter/flutter/issues/120750
+  });
 
   testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
