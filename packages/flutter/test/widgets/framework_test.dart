@@ -1753,6 +1753,26 @@ The findRenderObject() method was called for the following element:
     child.dependOnInheritedElement(ancestor);
     expect(child.doesDependOnInheritedElement(ancestor), isTrue);
   });
+
+  testWidgets(
+      'RenderObjectElement updateChildren modifying GlobalKey Widget index and parent',
+      (WidgetTester tester) async {
+    final GlobalKey globalKey = GlobalKey();
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        const SizedBox(),
+        SizedBox(key: globalKey),
+        const SizedBox(),
+      ],
+    ));
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        const SizedBox(),
+        const SizedBox(),
+        SizedBox(child: SizedBox(key: globalKey)),
+      ],
+    ));
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
