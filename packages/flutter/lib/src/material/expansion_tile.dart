@@ -83,7 +83,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Typically a [CircleAvatar] widget.
   ///
-  /// Note that depending on the value of [controlAffinity], the [leading] widget
+  /// Depending on the value of [controlAffinity], the [leading] widget
   /// may replace the rotating expansion arrow icon.
   final Widget? leading;
 
@@ -133,7 +133,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// A widget to display after the title.
   ///
-  /// Note that depending on the value of [controlAffinity], the [trailing] widget
+  /// Depending on the value of [controlAffinity], the [trailing] widget
   /// may replace the rotating expansion arrow icon.
   final Widget? trailing;
 
@@ -190,9 +190,9 @@ class ExpansionTile extends StatefulWidget {
   /// [children], and the `crossAxisAlignment` parameter is passed directly into the [Column].
   ///
   /// Modifying this property controls the cross axis alignment of each child
-  /// within its [Column]. Note that the width of the [Column] that houses
-  /// [children] will be the same as the widest child widget in [children]. It is
-  /// not necessarily the width of [Column] is equal to the width of expanded tile.
+  /// within its [Column]. The width of the [Column] that houses [children] will
+  /// be the same as the widest child widget in [children]. It is not
+  /// necessarily the width of [Column] is equal to the width of expanded tile.
   ///
   /// To align the [Column] along the expanded tile, use the [expandedAlignment] property
   /// instead.

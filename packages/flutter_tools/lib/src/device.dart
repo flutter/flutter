@@ -278,7 +278,7 @@ abstract class DeviceManager {
         // user only typed 'flutter run' and both an Android device and desktop
         // device are available, choose the Android device.
 
-        // Note: ephemeral is nullable for device types where this is not well
+        // Ephemeral is nullable for device types where this is not well
         // defined.
         final List<Device> ephemeralDevices = <Device>[
           for (final Device device in devices)

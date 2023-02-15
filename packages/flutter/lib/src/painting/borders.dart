@@ -26,8 +26,8 @@ enum BorderStyle {
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
 /// [Border.left], [Border.right], and [Border.bottom].
 ///
-/// Note that setting [BorderSide.width] to 0.0 will result in hairline
-/// rendering. A more involved explanation is present in [BorderSide.width].
+/// Setting [BorderSide.width] to 0.0 will result in hairline rendering; see
+/// [BorderSide.width] for a more involved explanation.
 ///
 /// {@tool snippet}
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
@@ -108,7 +108,7 @@ class BorderSide with Diagnosticable {
   /// The width of this side of the border, in logical pixels.
   ///
   /// Setting width to 0.0 will result in a hairline border. This means that
-  /// the border will have the width of one physical pixel. Also, hairline
+  /// the border will have the width of one physical pixel. Hairline
   /// rendering takes shortcuts when the path overlaps a pixel more than once.
   /// This means that it will render faster than otherwise, but it might
   /// double-hit pixels, giving it a slightly darker/lighter result.

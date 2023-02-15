@@ -2741,7 +2741,7 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
@@ -2771,7 +2771,7 @@ class InputDecoration {
   ///
   /// If null, defaults to [labelStyle].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
@@ -2871,8 +2871,8 @@ class InputDecoration {
   /// By default the color of style will be used by the label of
   /// [InputDecoration] if [InputDecoration.errorText] is not null. See
   /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
-  /// an example of how to replicate this behavior if you have specified either
-  /// style.
+  /// an example of how to replicate this behavior when specifying those
+  /// styles.
   /// {@endtemplate}
   final TextStyle? errorStyle;
 
@@ -3022,7 +3022,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
@@ -3199,7 +3199,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
