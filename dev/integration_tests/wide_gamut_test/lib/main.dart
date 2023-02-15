@@ -111,11 +111,11 @@ class _SaveLayerDrawer extends CustomPainter {
           imageRect.inflate(-_image!.width.toDouble() / 4.0),
           Paint()
             ..style = PaintingStyle.stroke
-            ..color = const Color(0xff00ff00)
+            ..color = const Color(0xffffffff)
             ..strokeWidth = 3);
       canvas.saveLayer(
           imageRect,
-          Paint()..blendMode = BlendMode.dstOver);
+          Paint()..blendMode = BlendMode.multiply);
       canvas.drawImage(_image!,
           Offset(-_image!.width / 2.0, -_image!.height / 2.0), Paint());
       canvas.restore();
