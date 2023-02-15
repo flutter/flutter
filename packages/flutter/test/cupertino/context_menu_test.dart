@@ -583,6 +583,49 @@ void main() {
       final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
+
+    testWidgets('CupertinoContextMenu width is correct', (WidgetTester tester) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
+      expect(find.byWidget(child), findsOneWidget);
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+
+      // Start a press on the child.
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 400));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales by _kOpenSize.
+      await tester.pump(const Duration(milliseconds: 800));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * kOpenScale);
+
+      // Then the CupertinoContextMenu opens.
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      // The CupertinoContextMenu has the correct width and height.
+      final CupertinoContextMenu widget = tester.widget(find.byType(CupertinoContextMenu));
+      for (final Widget action in widget.actions) {
+        // The value of the height is 80 because of the font and icon size.
+        expect(tester.getSize(find.byWidget(action)).width, 250);
+      }
+    });
   });
 
   group("Open layout differs depending on child's position on screen", () {
