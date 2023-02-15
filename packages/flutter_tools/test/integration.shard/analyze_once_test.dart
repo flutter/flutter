@@ -301,7 +301,7 @@ analyzer:
   errors:
     missing_return: info
   ''');
-    
+
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub'],
@@ -325,7 +325,7 @@ analyzer:
   errors:
     missing_return: info
   ''');
-    
+
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub', '--no-fatal-infos'],
@@ -348,7 +348,7 @@ analyzer:
   errors:
     missing_return: info
   ''');
-    
+
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(infoSourceCode);
     await runCommand(
       arguments: <String>['analyze', '--no-pub', '--fatal-warnings', '--no-fatal-infos'],
