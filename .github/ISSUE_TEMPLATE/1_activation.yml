@@ -61,6 +61,9 @@ body:
         If the logs are too large to be uploaded to Github, you may upload
         it as a `txt` file or use online tools like https://pastebin.com to
         share it.
+
+        Note: Please do not upload screenshots of code, or text output. Instead, use 
+        code blocks or the above mentioned ways to upload logs.
       value: |
         <details>
         <summary>Logs</summary>
