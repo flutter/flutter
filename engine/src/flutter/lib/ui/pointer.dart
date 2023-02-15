@@ -133,8 +133,29 @@ enum PointerSignalKind {
   /// A pointer-generated scale event (e.g. trackpad pinch).
   scale,
 
+  /// A stylus generated action (e.g. double tap on Apple Pencil 2)
+  stylusAuxiliaryAction,
+
   /// An unknown pointer signal kind.
   unknown
+}
+
+  /// The preferred action for stylus action
+enum PointerPreferredStylusAuxiliaryAction {
+  /// Ignore pointer input
+  ignore,
+
+  /// Show colour palette if available
+  showColorPalette,
+
+  /// Switch to eraser if available
+  switchEraser,
+
+  /// Switch to previous tool
+  switchPrevious,
+
+  /// unknown preferred action
+  unknown,
 }
 
 /// Information about the state of a pointer.
@@ -176,6 +197,7 @@ class PointerData {
     this.panDeltaY = 0.0,
     this.scale = 0.0,
     this.rotation = 0.0,
+    this.preferredStylusAuxiliaryAction = PointerPreferredStylusAuxiliaryAction.ignore,
   });
 
   /// Unique identifier that ties the [PointerEvent] to embedder event created it.
@@ -374,6 +396,11 @@ class PointerData {
   /// The current angle of the pan/zoom in radians, with 0.0 as the initial angle.
   final double rotation;
 
+  /// For events with signal kind of stylusAuxiliaryAction
+  ///
+  /// The current preferred action for stylusAuxiliaryAction, with ignore as the default.
+  final PointerPreferredStylusAuxiliaryAction preferredStylusAuxiliaryAction;
+
   @override
   String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
 
@@ -413,7 +440,8 @@ class PointerData {
              'panDeltaX: $panDeltaX, '
              'panDeltaY: $panDeltaY, '
              'scale: $scale, '
-             'rotation: $rotation'
+             'rotation: $rotation, '
+             'preferredStylusAuxiliaryAction: $preferredStylusAuxiliaryAction'
            ')';
   }
 }
