@@ -252,36 +252,50 @@ public class $pluginClass: NSObject, FlutterPlugin {
     // build files.
     await build(buildTarget, validateNativeBuildProject: false);
 
-    if (buildTarget == 'ios') {
-      await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+    switch(buildTarget) {
+      case 'apk':
+        if (await exec(
+          path.join('.', 'gradlew'),
+          <String>['testDebugUnitTest'],
+          workingDirectory: path.join(rootPath, 'android'),
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+        break;
+      case 'ios':
+        await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+          if (!await runXcodeTests(
+            platformDirectory: path.join(rootPath, 'ios'),
+            destination: 'id=$deviceId',
+            configuration: 'Debug',
+            testName: 'native_plugin_unit_tests_ios',
+            skipCodesign: true,
+          )) {
+            throw TaskResult.failure('Platform unit tests failed');
+          }
+        });
+        break;
+      case 'macos':
         if (!await runXcodeTests(
-          platformDirectory: path.join(rootPath, 'ios'),
-          destination: 'id=$deviceId',
+          platformDirectory: path.join(rootPath, 'macos'),
+          destination: 'platform=macOS',
           configuration: 'Debug',
-          testName: 'native_plugin_unit_tests_ios',
+          testName: 'native_plugin_unit_tests_macos',
           skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
         }
-      });
-    } else if (buildTarget == 'macos') {
-      if (!await runXcodeTests(
-        platformDirectory: path.join(rootPath, 'macos'),
-        destination: 'platform=macOS',
-        configuration: 'Debug',
-        testName: 'native_plugin_unit_tests_macos',
-        skipCodesign: true,
-      )) {
-        throw TaskResult.failure('Platform unit tests failed');
-      }
-    } else if (buildTarget == 'windows') {
-      if (await exec(
-        path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_plugin_test'),
-        <String>[],
-        canFail: true,
-      ) != 0) {
-        throw TaskResult.failure('Platform unit tests failed');
-      }
+        break;
+      case 'windows':
+        if (await exec(
+          path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_plugin_test'),
+          <String>[],
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+        break;
     }
   }
 
