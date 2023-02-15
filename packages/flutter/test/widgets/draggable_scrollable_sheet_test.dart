@@ -1878,4 +1878,80 @@ void main() {
     await tester.pumpWidget(buildScrollable());
     await tester.pumpAndSettle();
   });
+
+  // This test ensures that an active position that has been absorbed by another
+  // scroll controller/position does not leave the DraggableScrollableSheet
+  // extent stale and prevent future snap animations.
+  testWidgets('Snap should still work after active position is absorbed', (WidgetTester tester) async {
+    final Key originalInnerKey = GlobalKey();
+    final DraggableScrollableController outerController = DraggableScrollableController();
+
+    Widget buildScrollable({Key? key, ScrollController? controller}) {
+      return SingleChildScrollView(
+        key: key,
+        controller: controller,
+        child: const SizedBox(height: 100000),
+      );
+    }
+
+    Widget buildSheet({required ScrollableWidgetBuilder builder}) {
+      return DraggableScrollableSheet(
+        controller: outerController,
+        snap: true,
+        snapSizes: const <double>[0.5],
+        builder: builder,
+      );
+    }
+
+    await tester.pumpWidget(Stack(
+      alignment: Alignment.bottomCenter,
+      children: <Widget>[
+        buildSheet(
+          builder: (BuildContext context, ScrollController controller) {
+            return buildScrollable(
+              key: originalInnerKey,
+              controller: controller
+            );
+          },
+        ),
+      ],
+    ));
+
+    await tester.fling(find.byKey(originalInnerKey),
+      const Offset(0, -200), 2000);
+    // We need to pump a frame after the fling or the last dirty state of the
+    // sheet size listener will try to make it rebuild with the old inner
+    // scrollable in the same frame that we try to move it, which causes an
+    // assertion error.
+    await tester.pump();
+
+    await tester.pumpWidget(Stack(
+      alignment: Alignment.bottomCenter,
+      children: <Widget>[
+        buildScrollable(key: originalInnerKey),
+        buildSheet(
+          builder: (BuildContext context, ScrollController controller) {
+            return buildScrollable(controller: controller);
+          },
+        ),
+      ],
+    ));
+
+    await tester.pumpAndSettle();
+
+    // TODO(AsturaPhoenix): Since dispose happens in a microtask after absorb
+    // right now, the interrupted animation may not snap to a snap point. Update
+    // layout dimensions to make sure we're not stuck.
+    //
+    // A user interaction would also unstick us, but that could happen even if
+    // we're holding onto a stale extent lock since we allow scrolling scroll
+    // activities to trigger snaps regardless.
+    //
+    // Ideally, the snap should complete without any changes.
+    tester.binding.window.physicalSizeTestValue = tester.binding.window.physicalSize + const Offset(0, 1);
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    await tester.pumpAndSettle();
+
+    expect(outerController.size, 1.0);
+  });
 }
