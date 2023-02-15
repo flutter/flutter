@@ -45,6 +45,8 @@ void CreateSimulatedPointerData(PointerData& data,  // NOLINT
   data.platformData = 0;
   data.scroll_delta_x = 0.0;
   data.scroll_delta_y = 0.0;
+  data.preferred_auxiliary_stylus_action =
+      PointerData::PreferredStylusAuxiliaryAction::kIgnore;
 }
 
 void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
@@ -84,6 +86,8 @@ void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
   data.platformData = 0;
   data.scroll_delta_x = scroll_delta_x;
   data.scroll_delta_y = scroll_delta_y;
+  data.preferred_auxiliary_stylus_action =
+      PointerData::PreferredStylusAuxiliaryAction::kIgnore;
 }
 
 void CreateSimulatedTrackpadGestureData(PointerData& data,  // NOLINT
@@ -129,6 +133,8 @@ void CreateSimulatedTrackpadGestureData(PointerData& data,  // NOLINT
   data.pan_delta_y = 0.0;
   data.scale = scale;
   data.rotation = rotation;
+  data.preferred_auxiliary_stylus_action =
+      PointerData::PreferredStylusAuxiliaryAction::kIgnore;
 }
 
 void UnpackPointerPacket(std::vector<PointerData>& output,  // NOLINT
