@@ -194,10 +194,13 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     await resume().timeout(defaultTimeout)
-        .catchError((Object e) {
-          _debugPrint('Ignoring failure to resume during shutdown');
-          return null;
-        });
+        .then(
+          (Isolate? isolate) => isolate,
+          onError: (Object e) {
+            _debugPrint('Ignoring failure to resume during shutdown');
+            return null;
+          },
+        );
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid!);
@@ -472,13 +475,16 @@ abstract class FlutterTestDriver {
     });
     final Future<T> future = callback().whenComplete(longWarning.cancel);
 
-    return future.catchError((Object error) {
-      if (!timeoutExpired) {
-        timeoutExpired = true;
-        _debugPrint(messages.toString());
-      }
-      throw error; // ignore: only_throw_errors
-    }).whenComplete(() => subscription.cancel());
+    return future.then(
+      (T t) => t,
+      onError: (Object error) {
+        if (!timeoutExpired) {
+          timeoutExpired = true;
+          _debugPrint(messages.toString());
+        }
+        throw error; // ignore: only_throw_errors
+      },
+    ).whenComplete(() => subscription.cancel());
   }
 }
 

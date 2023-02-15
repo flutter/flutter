@@ -507,8 +507,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
     completer.future
-        .then((Object? value) => sendResponseToFlutter(id, value))
-        .catchError((Object? e) => sendResponseToFlutter(id, e.toString(), error: true));
+        .then(
+          (Object? value) => sendResponseToFlutter(id, value),
+          onError: (Object? e) => sendResponseToFlutter(id, e.toString(), error: true),
+        );
 
     if (_requestsToForwardToClient.contains(method)) {
       // Forward the request to the client in an event.

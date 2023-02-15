@@ -27,7 +27,10 @@ class DapTestClient {
     vmServiceUri = event('dart.debuggerUris').then<Uri?>((Event event) {
       final Map<String, Object?> body = event.body! as Map<String, Object?>;
       return Uri.parse(body['vmServiceUri']! as String);
-    }).catchError((Object? e) => null);
+    }).then(
+      (Uri? uri) => uri,
+      onError: (Object? e) => null,
+    );
 
     _subscription = _channel.listen(
       _handleMessage,
