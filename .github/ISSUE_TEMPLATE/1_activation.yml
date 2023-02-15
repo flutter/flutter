@@ -16,8 +16,7 @@ body:
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
         If you have found a bug or if our documentation doesn't have an answer
-        to what you're looking for, then fill out the template below. Please read
-        our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
+        to what you're looking for, then fill out the template below.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -79,7 +78,7 @@ body:
     attributes:
       label: Flutter Doctor output
       description: |
-        Include the entire logs of running `flutter doctor -v`
+        Please provide the full output of running `flutter doctor -v`
       value: |
         <details>
         <summary>Doctor output</summary>
