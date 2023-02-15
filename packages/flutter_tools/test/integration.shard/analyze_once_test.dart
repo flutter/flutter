@@ -305,7 +305,7 @@ int analyze() {}
       exitMessageContains: '1 issue found.',
       exitCode: 1,
     );
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/120750
 
   testWithoutContext('analyze once with no-fatal-infos has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
@@ -321,7 +321,7 @@ int analyze() {}
       ],
       exitMessageContains: '1 issue found.',
     );
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/120750
 
   testWithoutContext('analyze once only fatal-warnings has info issue finally exit code 0.', () async {
     const String infoSourceCode = '''
@@ -337,7 +337,7 @@ int analyze() {}
       ],
       exitMessageContains: '1 issue found.',
     );
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/120750
 
   testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
