@@ -274,7 +274,7 @@ class _UntilTextBoundary extends TextBoundary {
 /// caret's size and position. This is preferred due to the expensive
 /// nature of the calculation.
 ///
-///// This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
+// This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
 // or an _EmptyLineCaretMetrics.
 @immutable
 abstract class _CaretMetrics { }
