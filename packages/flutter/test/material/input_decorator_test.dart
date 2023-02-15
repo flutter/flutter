@@ -1829,32 +1829,25 @@ void main() {
     expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
   });
 
-
-  testWidgets('InputDecorator errorBuilder', (WidgetTester tester) async {
-    /// when errorBuilder is defined error message will be from the validator,
-    /// the errorMessage will never be null
+  testWidgets('InputDecorator errorWidget', (WidgetTester tester) async {
+    // when errorWidget is defined
     await tester.pumpWidget(
-        buildInputDecorator(
-            decoration: InputDecoration(
-              errorBuilder: (String errorMessage) => Text(errorMessage),
-            )
-        )
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          errorWidget: Text('errorText'),
+        ),
+      ),
     );
-
-    /// When errorText and errorBuilder is defined,
+    //When errorText and errorBuilder is defined then errorWidget will be shown
     await tester.pumpWidget(
-        buildInputDecorator(
-            decoration: InputDecoration(
-                errorBuilder: (String errorMessage) => Text(errorMessage),
-                errorText: 'errorText'
-            )
-        )
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          errorWidget: Text('errorText'),
+          errorText: 'errorText',
+        ),
+      ),
     );
-
-
   });
-
-
 
   testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
     const Key pKey = Key('p');

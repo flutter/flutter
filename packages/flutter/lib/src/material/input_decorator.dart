@@ -303,7 +303,7 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.errorBuilder,
+    this.errorWidget,
   });
 
   final TextAlign? textAlign;
@@ -313,7 +313,7 @@ class _HelperError extends StatefulWidget {
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
-  final Widget Function(String errorMessage)? errorBuilder;
+  final Widget? errorWidget;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -398,8 +398,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     );
   }
 
-  Widget _buildErrorBuilder(){
-    assert(widget.errorBuilder != null);
+  Widget _buildErrorWidget() {
+    assert(widget.errorWidget != null);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -410,7 +410,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: widget.errorText != null ? widget.errorBuilder!(widget.errorText!) : empty,
+          child: widget.errorText != null ? widget.errorWidget : empty,
         ),
       ),
     );
@@ -444,10 +444,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     if (_controller.isDismissed) {
       _error = null;
-      if(widget.errorBuilder != null){
-        return _buildErrorBuilder();
-      }
-      else if (widget.helperText != null) {
+      if (widget.errorWidget != null) {
+        return _buildErrorWidget();
+      } else if (widget.helperText != null) {
         return _helper = _buildHelper();
       } else {
         _helper = null;
@@ -457,8 +456,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if(widget.errorBuilder != null){
-        return _error = _buildErrorBuilder();
+      if (widget.errorWidget != null) {
+        return _error = _buildErrorWidget();
       } else if (widget.errorText != null) {
         return _error = _buildError();
       } else {
@@ -468,8 +467,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     }
 
     if (_helper == null && widget.errorText != null) {
-      if(widget.errorBuilder != null){
-        return _buildErrorBuilder();
+      if (widget.errorWidget != null) {
+        return _buildErrorWidget();
       } else {
         return _buildError();
       }
@@ -2391,7 +2390,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
-      errorBuilder: decoration.errorBuilder,
+      errorWidget: decoration.errorWidget,
     );
 
     Widget? counter;
@@ -2623,7 +2622,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.errorBuilder,
+    this.errorWidget,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
@@ -2684,7 +2683,7 @@ class InputDecoration {
        semanticCounterText = null,
        alignLabelWithHint = false,
        constraints = null,
-       errorBuilder = null;
+       errorWidget = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3500,9 +3499,9 @@ class InputDecoration {
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
   ///
-  /// If both [errorText] and [errorBuilder] are specified, the [errorMessage]
-  /// is equal to the [errorText] and never null.
-  final Widget Function(String errorMessage)? errorBuilder;
+  /// If both [errorText] and [errorWidget] are specified, then errorWidget
+  /// is shown.
+  final Widget? errorWidget;
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
@@ -3557,7 +3556,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    Widget Function(String? errorMessage)? errorBuilder,
+    Widget? errorWidget,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3610,7 +3609,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      errorBuilder: errorBuilder ?? this.errorBuilder,
+      errorWidget: errorWidget ?? this.errorWidget,
     );
   }
 
@@ -3710,7 +3709,7 @@ class InputDecoration {
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
         && other.constraints == constraints
-        && other.errorBuilder == errorBuilder;
+        && other.errorWidget == errorWidget;
   }
 
   @override
@@ -3766,7 +3765,7 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      errorBuilder,
+      errorWidget,
     ];
     return Object.hashAll(values);
   }
@@ -3820,7 +3819,7 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (errorBuilder != null) 'errorBuilder: "$errorBuilder"',
+      if (errorWidget != null) 'errorWidget: "$errorWidget"',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
