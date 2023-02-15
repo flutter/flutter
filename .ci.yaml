@@ -702,6 +702,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -721,6 +722,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
