@@ -6,35 +6,33 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SwitchListTileApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class SwitchListTileApp extends StatelessWidget {
+  const SwitchListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('SwitchListTile Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: SwitchListTileExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SwitchListTileExample extends StatefulWidget {
+  const SwitchListTileExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SwitchListTileExample> createState() => _SwitchListTileExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   bool _lights = false;
 
   @override

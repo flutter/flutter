@@ -987,7 +987,6 @@ class _IntrinsicDimensionsCacheEntry {
 /// AxisDirection get axis => _axis;
 /// AxisDirection _axis = AxisDirection.down; // or initialized in constructor
 /// set axis(AxisDirection value) {
-///   assert(value != null); // same checks as in the constructor
 ///   if (value == _axis) {
 ///     return;
 ///   }

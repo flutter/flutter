@@ -41,8 +41,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'archive': '3.3.2',
   // https://github.com/flutter/flutter/issues/116376
   'path_provider_android': '2.0.21',
-  // https://github.com/flutter/flutter/issues/117163
-  'intl': '0.17.0',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -138,7 +136,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   );
 
   Future<void> _downloadCoverageData() async {
-    final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+    final String urlBase = globals.platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int>? data = await _net.fetchUrl(
       coverageUri,

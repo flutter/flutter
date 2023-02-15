@@ -14,7 +14,7 @@ class ListTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(useMaterial3: true),
       home: const ListTileExample(),
     );
   }
@@ -27,7 +27,7 @@ class ListTileExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Sample')),
-      body: Column(
+      body: ListView(
         children: const <Widget>[
           ListTile(
             leading: CircleAvatar(
@@ -37,7 +37,7 @@ class ListTileExample extends StatelessWidget {
             subtitle: Text('Supporting text'),
             trailing: Icon(Icons.favorite_rounded),
           ),
-          Divider(),
+          Divider(height: 0),
           ListTile(
             leading: CircleAvatar(
               child: Text('B')
@@ -46,7 +46,7 @@ class ListTileExample extends StatelessWidget {
             subtitle: Text('Longer supporting text to demonstrate how the text wraps and how the leading and trailing widgets are centered vertically with the text.'),
             trailing: Icon(Icons.favorite_rounded),
           ),
-          Divider(),
+          Divider(height: 0),
           ListTile(
             leading: CircleAvatar(
               child: Text('C')
@@ -56,7 +56,7 @@ class ListTileExample extends StatelessWidget {
             trailing: Icon(Icons.favorite_rounded),
             isThreeLine: true,
           ),
-          Divider(),
+          Divider(height: 0),
         ],
       ),
     );

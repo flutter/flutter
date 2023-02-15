@@ -24,13 +24,13 @@ class SdkWebConfigurationProvider extends SdkConfigurationProvider {
   Future<SdkConfiguration> get configuration async {
     if (_configuration == null) {
       final String sdkDir = _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
-      final String unsoundSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformDDCKernelDill).path;
+      final String weakSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformDDCKernelDill).path;
       final String soundSdkSummaryPath = _artifacts.getHostArtifact(HostArtifact.webPlatformDDCSoundKernelDill).path;
       final String librariesPath = _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path;
 
       _configuration = SdkConfiguration(
         sdkDirectory: sdkDir,
-        unsoundSdkSummaryPath: unsoundSdkSummaryPath,
+        weakSdkSummaryPath: weakSdkSummaryPath,
         soundSdkSummaryPath: soundSdkSummaryPath,
         librariesPath: librariesPath,
       );

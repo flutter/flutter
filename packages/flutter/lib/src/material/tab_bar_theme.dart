@@ -55,6 +55,12 @@ class TabBarTheme with Diagnosticable {
   final Color? dividerColor;
 
   /// Overrides the default value for [TabBar.labelColor].
+  ///
+  /// If [labelColor] is a [MaterialStateColor], then the effective color will
+  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// resolved color will be used even if [TabBar.unselectedLabelColor] or
+  /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
 
   /// Overrides the default value for [TabBar.labelPadding].

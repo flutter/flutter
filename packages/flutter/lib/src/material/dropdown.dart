@@ -1358,9 +1358,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Orientation _getOrientation(BuildContext context) {
     Orientation? result = MediaQuery.maybeOrientationOf(context);
     if (result == null) {
-      // If there's no MediaQuery, then use the window aspect to determine
+      // If there's no MediaQuery, then use the view aspect to determine
       // orientation.
-      final Size size = WidgetsBinding.instance.window.physicalSize;
+      final Size size = View.of(context).physicalSize;
       result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
     }
     return result;

@@ -73,7 +73,7 @@ abstract class RPCErrorCodes {
 /// The VM Service Protocol allows clients to register custom services that
 /// can be invoked by other clients through the service protocol itself.
 ///
-/// Clients like Observatory use external 'reloadSources' services,
+/// Clients like VmService use external 'reloadSources' services,
 /// when available, instead of the VM internal one. This allows these clients to
 /// invoke Flutter HotReload when connected to a Flutter Application started in
 /// hot mode.
@@ -285,11 +285,11 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
-    // It is safe to ignore this error because we expect an error to be
-    // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
       .then<vm_service.Success?>((vm_service.Success success) => success)
+      // It is safe to ignore this error because we expect an error to be
+      // thrown if we're already subscribed.
       .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
     );
   }

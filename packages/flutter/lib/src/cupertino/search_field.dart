@@ -122,6 +122,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.focusNode,
     this.smartQuotesType,
     this.smartDashesType,
+    this.enableIMEPersonalizedLearning = true,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
@@ -311,6 +312,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   final SmartDashesType? smartDashesType;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -453,6 +457,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       autocorrect: widget.autocorrect,
       smartQuotesType: widget.smartQuotesType,
       smartDashesType: widget.smartDashesType,
+      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
       textInputAction: TextInputAction.search,
     );
   }

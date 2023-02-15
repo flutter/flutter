@@ -58,7 +58,7 @@ TaskFunction createMacOSRunReleaseTest() {
 }
 
 TaskFunction createWindowsRunDebugTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: false,
@@ -66,7 +66,7 @@ TaskFunction createWindowsRunDebugTest() {
 }
 
 TaskFunction createWindowsRunReleaseTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: true,
@@ -164,6 +164,30 @@ class AndroidRunOutputTest extends RunOutputTask {
   }
 }
 
+class WindowsRunOutputTest extends DesktopRunOutputTest {
+  WindowsRunOutputTest(
+    super.testDirectory,
+    super.testTarget, {
+      required super.release,
+      super.allowStderr = false,
+    }
+  );
+
+  static final RegExp _buildOutput = RegExp(
+    r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
+    multiLine: true,
+  );
+
+  @override
+  void verifyBuildOutput(List<String> stdout) {
+    _findNextMatcherInList(
+      stdout,
+      _buildOutput.hasMatch,
+      'Building Windows application...',
+    );
+  }
+}
+
 class DesktopRunOutputTest extends RunOutputTask {
   DesktopRunOutputTest(
     super.testDirectory,
@@ -188,6 +212,8 @@ class DesktopRunOutputTest extends RunOutputTask {
       'Launching $testTarget on',
     );
 
+    verifyBuildOutput(stdout);
+
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Quit (terminate the application on the device).'),
@@ -202,6 +228,9 @@ class DesktopRunOutputTest extends RunOutputTask {
 
     return TaskResult.success(null);
   }
+
+  /// Verify the output from `flutter run`'s build step.
+  void verifyBuildOutput(List<String> stdout) {}
 }
 
 /// Test that the output of `flutter run` is expected.

@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -2221,7 +2223,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      alwaysIncludeSemantics: isEmpty || (decoration.labelText == null && decoration.label == null),
       child: Text(
         hintText,
         style: hintStyle,
@@ -2336,19 +2337,27 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           cursor: SystemMouseCursors.basic,
           child: ConstrainedBox(
             constraints: decoration.prefixIconConstraints ??
-                themeData.visualDensity.effectiveConstraints(
-                  const BoxConstraints(
-                    minWidth: kMinInteractiveDimension,
-                    minHeight: kMinInteractiveDimension,
-                  ),
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
                 ),
+              ),
             child: IconTheme.merge(
               data: IconThemeData(
                 color: _getPrefixIconColor(themeData, defaults),
                 size: iconSize,
               ),
-              child: Semantics(
-                child: decoration.prefixIcon,
+              child: IconButtonTheme(
+                data: IconButtonThemeData(
+                style: IconButton.styleFrom(
+                  foregroundColor: _getPrefixIconColor(themeData, defaults),
+                  iconSize: iconSize,
+                  ),
+                ),
+                child: Semantics(
+                  child: decoration.prefixIcon,
+                ),
               ),
             ),
           ),
@@ -2363,24 +2372,32 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           cursor: SystemMouseCursors.basic,
           child: ConstrainedBox(
             constraints: decoration.suffixIconConstraints ??
-                themeData.visualDensity.effectiveConstraints(
-                  const BoxConstraints(
-                    minWidth: kMinInteractiveDimension,
-                    minHeight: kMinInteractiveDimension,
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
+                ),
+              ),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: _getSuffixIconColor(themeData, defaults),
+                  size: iconSize,
+                ),
+                child: IconButtonTheme(
+                  data: IconButtonThemeData(
+                  style: IconButton.styleFrom(
+                    foregroundColor: _getSuffixIconColor(themeData, defaults),
+                    iconSize: iconSize,
+                    ),
+                  ),
+                  child: Semantics(
+                    child: decoration.suffixIcon,
                   ),
                 ),
-            child: IconTheme.merge(
-              data: IconThemeData(
-                color: _getSuffixIconColor(themeData, defaults),
-                size: iconSize,
-              ),
-              child: Semantics(
-                child: decoration.suffixIcon,
               ),
             ),
           ),
-        ),
-      );
+        );
 
     final Widget helperError = _HelperError(
       textAlign: textAlign,
@@ -4570,7 +4587,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)

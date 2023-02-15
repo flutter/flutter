@@ -274,6 +274,14 @@ public class $pluginClass: NSObject, FlutterPlugin {
       )) {
         throw TaskResult.failure('Platform unit tests failed');
       }
+    } else if (buildTarget == 'windows') {
+      if (await exec(
+        path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_plugin_test'),
+        <String>[],
+        canFail: true,
+      ) != 0) {
+        throw TaskResult.failure('Platform unit tests failed');
+      }
     }
   }
 

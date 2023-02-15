@@ -2,27 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CheckboxListTile].
+// Flutter code sample for custom labeled checkbox.
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const LabeledCheckboxApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class LabeledCheckboxApp extends StatelessWidget {
+  const LabeledCheckboxApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
-      ),
+      theme: ThemeData(useMaterial3: true),
+      home: const LabeledCheckboxExample(),
     );
   }
 }
@@ -65,27 +58,32 @@ class LabeledCheckbox extends StatelessWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class LabeledCheckboxExample extends StatefulWidget {
+  const LabeledCheckboxExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<LabeledCheckboxExample> createState() => _LabeledCheckboxExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
   bool _isSelected = false;
 
   @override
   Widget build(BuildContext context) {
-    return LabeledCheckbox(
-      label: 'This is the label text',
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      value: _isSelected,
-      onChanged: (bool newValue) {
-        setState(() {
-          _isSelected = newValue;
-        });
-      },
+    return Scaffold(
+      appBar: AppBar(title: const Text('Custom Labeled Checkbox Sample')),
+      body: Center(
+        child: LabeledCheckbox(
+          label: 'This is the label text',
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          value: _isSelected,
+          onChanged: (bool newValue) {
+            setState(() {
+              _isSelected = newValue;
+            });
+          },
+        ),
+      ),
     );
   }
 }

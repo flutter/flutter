@@ -192,8 +192,6 @@ void main() {
       '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromWindow\n'
       '     Semantics\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
@@ -235,6 +233,9 @@ void main() {
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
       '     View-[GlobalObjectKey TestWindow#00000]\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
@@ -251,18 +252,15 @@ void main() {
     );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Builder(
-            builder: (BuildContext context) {
-              return Scaffold(
-                key: scaffoldKey,
-                body: Container(),
-              );
-            },
-          ),
+      child: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              key: scaffoldKey,
+              body: Container(),
+            );
+          },
         ),
       ),
     ));
@@ -278,12 +276,9 @@ void main() {
     // Pump widget to rebuild without ScaffoldMessenger
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          key: scaffoldKey,
-          body: Container(),
-        ),
+      child: Scaffold(
+        key: scaffoldKey,
+        body: Container(),
       ),
     ));
     // Tap SnackBarAction to dismiss.
@@ -378,8 +373,10 @@ void main() {
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
-      '     MediaQuery\n'
       '     Directionality\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
       '     View-[GlobalObjectKey TestWindow#00000]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'

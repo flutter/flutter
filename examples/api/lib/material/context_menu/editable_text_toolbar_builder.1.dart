@@ -5,15 +5,23 @@
 // This example demonstrates showing a custom context menu only when some
 // narrowly defined text is selected.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 const String emailAddress = 'me@example.com';
 const String text = 'Select the email address and open the menu: $emailAddress';
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
 
   final TextEditingController _controller = TextEditingController(
     text: text,
@@ -27,6 +35,24 @@ class MyApp extends StatelessWidget {
           const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // On web, disable the browser's context menu since this example uses a custom
+    // Flutter-rendered context menu.
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
+    super.dispose();
   }
 
   @override

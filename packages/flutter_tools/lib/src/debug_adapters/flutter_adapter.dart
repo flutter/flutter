@@ -354,7 +354,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   Future<void> terminateImpl() async {
     if (isAttach) {
-      await preventBreakingAndResume();
+      await handleDetach();
     }
 
     // Send a request to stop/detach to give Flutter chance to do some cleanup.
