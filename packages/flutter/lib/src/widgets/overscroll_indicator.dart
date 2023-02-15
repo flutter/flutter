@@ -695,6 +695,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+    if (notification.metrics.axis != widget.axis) {
+      // This widget is explicitly configured to one axis. If a notification
+      // from different axis bubbles up, do nothing.
+      return false;
+    }
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
@@ -704,7 +709,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         _accepted = confirmationNotification.accepted;
       }
 
-      assert(notification.metrics.axis == widget.axis);
       if (_accepted) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
