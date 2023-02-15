@@ -1081,7 +1081,7 @@ class _TabBarState extends State<TabBar> {
       _updateTabController();
       _initIndicatorPainter();
       // Adjust scroll position.
-      if (_scrollController != null) {
+      if (_scrollController != null && _scrollController!.hasClients) {
         final ScrollPosition position = _scrollController!.position;
         if (position is _TabBarScrollPosition) {
           position.markNeedsPixelsCorrection();
