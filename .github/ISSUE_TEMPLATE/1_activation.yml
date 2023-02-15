@@ -44,12 +44,6 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Expected results
-      description: Please tell us what you expect to happen
-    validations:
-      required: true
-  - type: textarea
-    attributes:
       label: Logs
       description: |
         Include the full logs of the commands you are running between the lines
