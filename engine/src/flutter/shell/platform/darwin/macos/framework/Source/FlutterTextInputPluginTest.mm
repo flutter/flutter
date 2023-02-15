@@ -449,6 +449,12 @@
 
   // Verify autocomplete is enabled.
   EXPECT_TRUE([plugin isAutomaticTextCompletionEnabled]);
+
+  // Verify content type is nil for unsupported content types.
+  if (@available(macOS 11.0, *)) {
+    EXPECT_EQ([plugin contentType], nil);
+  }
+
   return true;
 }
 
@@ -510,7 +516,6 @@
                                                   @"obscureText" : @YES,
                                                   @"autofill" : @{
                                                     @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[ @"name" ],
                                                     @"editingValue" : @{@"text" : @""},
                                                   }
                                                 }
@@ -555,6 +560,11 @@
 
   // Verify autocomplete is disabled.
   EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+
+  // Verify content type is password.
+  if (@available(macOS 11.0, *)) {
+    EXPECT_EQ([plugin contentType], NSTextContentTypePassword);
+  }
   return true;
 }
 
@@ -605,6 +615,86 @@
 
   // Verify autocomplete is disabled.
   EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+  return true;
+}
+
+- (bool)testContentTypeWhenAutofillTypeIsUsername {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[ @"username" ],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+
+  // Verify content type is username.
+  if (@available(macOS 11.0, *)) {
+    EXPECT_EQ([plugin contentType], NSTextContentTypeUsername);
+  }
+  return true;
+}
+
+- (bool)testContentTypeWhenAutofillTypeIsOneTimeCode {
+  // Set up FlutterTextInputPlugin.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Set input client 1.
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                  @"autofill" : @{
+                                                    @"uniqueIdentifier" : @"field1",
+                                                    @"hints" : @[ @"oneTimeCode" ],
+                                                    @"editingValue" : @{@"text" : @""},
+                                                  }
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  // Verify autocomplete is disabled.
+  EXPECT_FALSE([plugin isAutomaticTextCompletionEnabled]);
+
+  // Verify content type is username.
+  if (@available(macOS 11.0, *)) {
+    EXPECT_EQ([plugin contentType], NSTextContentTypeOneTimeCode);
+  }
   return true;
 }
 
