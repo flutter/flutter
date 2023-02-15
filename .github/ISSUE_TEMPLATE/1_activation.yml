@@ -25,7 +25,7 @@ body:
       options:
       - label: I have searched the existing issues
         required: true
-      - label: I have read [our guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+      - label: I have read [the guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
         required: true
   - type: textarea
     attributes:
