@@ -15,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/expect.dart' show fail;
-import 'package:test_api/scaffolding.dart'; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
@@ -920,13 +919,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
-    bool shouldTearDownVerifyInvariants = false;
-    addTearDown(() {
-      if (shouldTearDownVerifyInvariants) {
-        _verifyTearDownInvariants();
-      }
-    });
-
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
@@ -957,7 +949,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
       _verifyInvariants();
-      shouldTearDownVerifyInvariants = true;
     }
 
     assert(inTest);
@@ -967,11 +958,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late bool _beforeTestCheckIntrinsicSizes;
 
   void _verifyInvariants() {
-    // subclasses such as AutomatedTestWidgetsFlutterBinding overrides this
-    // to perform more verifications.
-  }
-
-  void _verifyTearDownInvariants() {
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));

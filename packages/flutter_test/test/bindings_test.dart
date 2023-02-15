@@ -12,7 +12,6 @@ library;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,17 +101,5 @@ void main() {
       responded = true;
     });
     expect(responded, true);
-  });
-
-  group('should be able to reset values in either tearDown or end of function', () {
-    testWidgets('addTearDown should work', (WidgetTester tester) async {
-      timeDilation = 2;
-      addTearDown(() => timeDilation = 1);
-    });
-
-    testWidgets('directly reset should work', (WidgetTester tester) async {
-      timeDilation = 2;
-      timeDilation = 1;
-    });
   });
 }
