@@ -147,7 +147,6 @@ targets:
 
   - name: Linux Fuchsia FEMU
     recipe: engine/femu_test
-    bringup: true
     properties:
       add_recipes_cq: "true"
       build_fuchsia: "true"
