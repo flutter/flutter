@@ -504,10 +504,10 @@ class SystemChrome {
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
-  /// However, the [AppBar] widget automatically sets the system overlay style
-  /// based on its [AppBar.systemOverlayStyle], so configure that instead of calling
-  /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
-  /// via [CupertinoNavigationBar.backgroundColor].
+  /// The [AppBar] widget automatically sets the system overlay style based on
+  /// its [AppBar.systemOverlayStyle], so configure that instead of calling this
+  /// method directly. Likewise, do the same for [CupertinoNavigationBar] via
+  /// [CupertinoNavigationBar.backgroundColor].
   ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.

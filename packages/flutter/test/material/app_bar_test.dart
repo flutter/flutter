@@ -2509,15 +2509,13 @@ void main() {
   });
 
   testWidgets('Default status bar color', (WidgetTester tester) async {
-    Future<void> pumpBoilerplate({required bool useMaterial3, required bool backwardsCompatibility}) async {
+    Future<void> pumpBoilerplate({required bool useMaterial3}) async {
       await tester.pumpWidget(
         MaterialApp(
           key: GlobalKey(),
           theme: ThemeData.light().copyWith(
             useMaterial3: useMaterial3,
-            appBarTheme: AppBarTheme(
-              backwardsCompatibility: backwardsCompatibility,
-            ),
+            appBarTheme: const AppBarTheme(),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -2528,14 +2526,10 @@ void main() {
       );
     }
 
-    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: false);
+    await pumpBoilerplate(useMaterial3: false);
     expect(SystemChrome.latestStyle!.statusBarColor, null);
-    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: true);
-    expect(SystemChrome.latestStyle!.statusBarColor, null);
-    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: false);
+    await pumpBoilerplate(useMaterial3: true);
     expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
-    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: true);
-    expect(SystemChrome.latestStyle!.statusBarColor, null);
   });
 
   testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
@@ -3374,53 +3368,6 @@ void main() {
       expect(leadingIconButtonColor(), Colors.purple);
       expect(actionIconButtonColor(), Colors.purple);
     });
-  });
-
-  testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
-    const Color foregroundColor = Color(0xff00ff00);
-    final Key leadingIconKey = UniqueKey();
-    final Key actionIconKey = UniqueKey();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light().copyWith(
-          useMaterial3: false,
-          appBarTheme: const AppBarTheme(
-            backwardsCompatibility: false,
-          ),
-        ),
-        home: Scaffold(
-          appBar: AppBar(
-            foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
-            leading: Icon(Icons.add_circle, key: leadingIconKey),
-            title: const Text('title'),
-            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
-          ),
-        ),
-      ),
-    );
-
-    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
-      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
-    ).style;
-    expect(titleTextStyle.color, foregroundColor);
-
-    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
-    expect(leadingIconTheme.color, foregroundColor);
-
-    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
-    expect(actionIconTheme.color, foregroundColor);
-
-    // Test icon color
-    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
-
-    expect(leadingIconColor(), foregroundColor);
-    expect(actionIconColor(), foregroundColor);
   });
 
   group('MaterialStateColor scrolledUnder', () {
