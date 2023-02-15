@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show base64Decode;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 /// A 100x100 png in Display P3 colorspace.
@@ -63,12 +64,21 @@ const String _displayP3Logo =
     'ElWKtuy2OXm9QtxYmoawGJUL3jcwHpiBNxagGJUL3jcwHpiBNxagGJUL3jcwHpiBNxagGJUL3j'
     'cwHpiBNx6gU/2fLWVmm7wQAAAABJRU5ErkJggg==';
 
-void main() {
-  runApp(const MyApp());
+void main() => run(Setup.canvasSaveLayer);
+
+enum Setup {
+  image,
+  canvasSaveLayer,
+}
+
+void run(Setup setup) {
+  runApp(MyApp(setup));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp(this._setup, {super.key});
+
+  final Setup _setup;
 
   @override
   Widget build(BuildContext context) {
@@ -77,27 +87,101 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Wide Gamut Test'),
+      home: MyHomePage(_setup, title: 'Wide Gamut Test'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
+class _SaveLayerDrawer extends CustomPainter {
+  _SaveLayerDrawer(this._image);
 
+  final ui.Image? _image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (_image != null) {
+      final Rect imageRect = Rect.fromCenter(
+          center: Offset.zero,
+          width: _image!.width.toDouble(),
+          height: _image!.height.toDouble());
+      canvas.saveLayer(
+          imageRect,
+          Paint());
+      canvas.drawRect(
+          imageRect.inflate(-_image!.width.toDouble() / 4.0),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = const Color(0xffffffff)
+            ..strokeWidth = 3);
+      canvas.saveLayer(
+          imageRect,
+          Paint()..blendMode = BlendMode.multiply);
+      canvas.drawImage(_image!,
+          Offset(-_image!.width / 2.0, -_image!.height / 2.0), Paint());
+      canvas.restore();
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+Future<ui.Image> _loadImage() async {
+  final ui.ImmutableBuffer buffer =
+      await ui.ImmutableBuffer.fromUint8List(base64Decode(_displayP3Logo));
+  final ui.ImageDescriptor descriptor =
+      await ui.ImageDescriptor.encoded(buffer);
+  final ui.Codec codec = await descriptor.instantiateCodec();
+  return (await codec.getNextFrame()).image;
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage(this.setup, {super.key, required this.title});
+
+  final Setup setup;
   final String title;
 
   @override
+  State<StatefulWidget> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  ui.Image? _image;
+
+  @override
+  void initState() {
+    if (widget.setup == Setup.canvasSaveLayer) {
+      _loadImage().then((ui.Image? value) {
+        setState(() {
+          _image = value;
+        });
+      });
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    late Widget imageWidget;
+    switch (widget.setup) {
+      case Setup.image:
+        imageWidget = Image.memory(base64Decode(_displayP3Logo));
+        break;
+      case Setup.canvasSaveLayer:
+        imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.memory(base64Decode(_displayP3Logo)),
+            imageWidget,
           ],
         ),
       ),
