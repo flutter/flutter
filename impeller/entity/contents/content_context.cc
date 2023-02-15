@@ -306,9 +306,13 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   RenderTarget subpass_target;
   if (context->GetDeviceCapabilities().SupportsOffscreenMSAA() &&
       msaa_enabled) {
-    subpass_target = RenderTarget::CreateOffscreenMSAA(*context, texture_size);
+    subpass_target = RenderTarget::CreateOffscreenMSAA(
+        *context, texture_size, "Contents Offscreen MSAA",
+        RenderTarget::kDefaultColorAttachmentConfigMSAA, std::nullopt);
   } else {
-    subpass_target = RenderTarget::CreateOffscreen(*context, texture_size);
+    subpass_target = RenderTarget::CreateOffscreen(
+        *context, texture_size, "Contents Offscreen",
+        RenderTarget::kDefaultColorAttachmentConfig, std::nullopt);
   }
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {

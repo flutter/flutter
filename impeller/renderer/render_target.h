@@ -32,31 +32,38 @@ class RenderTarget {
     StoreAction store_action;
   };
 
-  static constexpr AttachmentConfig kDefaultAttachmentConfig = {
+  static constexpr AttachmentConfig kDefaultColorAttachmentConfig = {
       .storage_mode = StorageMode::kDevicePrivate,
       .load_action = LoadAction::kClear,
       .store_action = StoreAction::kStore};
 
-  static constexpr AttachmentConfigMSAA kDefaultAttachmentConfigMSAA = {
+  static constexpr AttachmentConfigMSAA kDefaultColorAttachmentConfigMSAA = {
       .storage_mode = StorageMode::kDeviceTransient,
       .resolve_storage_mode = StorageMode::kDevicePrivate,
       .load_action = LoadAction::kClear,
       .store_action = StoreAction::kMultisampleResolve};
 
+  static constexpr AttachmentConfig kDefaultStencilAttachmentConfig = {
+      .storage_mode = StorageMode::kDeviceTransient,
+      .load_action = LoadAction::kClear,
+      .store_action = StoreAction::kDontCare};
+
   static RenderTarget CreateOffscreen(
       const Context& context,
       ISize size,
       const std::string& label = "Offscreen",
-      AttachmentConfig color_attachment_config = kDefaultAttachmentConfig,
-      std::optional<AttachmentConfig> stencil_attachment_config = std::nullopt);
+      AttachmentConfig color_attachment_config = kDefaultColorAttachmentConfig,
+      std::optional<AttachmentConfig> stencil_attachment_config =
+          kDefaultStencilAttachmentConfig);
 
   static RenderTarget CreateOffscreenMSAA(
       const Context& context,
       ISize size,
       const std::string& label = "Offscreen MSAA",
       AttachmentConfigMSAA color_attachment_config =
-          kDefaultAttachmentConfigMSAA,
-      std::optional<AttachmentConfig> stencil_attachment_config = std::nullopt);
+          kDefaultColorAttachmentConfigMSAA,
+      std::optional<AttachmentConfig> stencil_attachment_config =
+          kDefaultStencilAttachmentConfig);
 
   RenderTarget();
 
