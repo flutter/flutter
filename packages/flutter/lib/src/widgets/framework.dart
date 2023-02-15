@@ -5945,7 +5945,7 @@ abstract class RenderObjectElement extends Element {
     int oldChildrenBottom = oldChildren.length - 1;
 
     final List<Element> newChildren = oldChildren.length == newWidgets.length ?
-        oldChildren : List<Element>.filled(newWidgets.length, _NullElement.instance);
+        <Element>[...oldChildren] : List<Element>.filled(newWidgets.length, _NullElement.instance);
 
     Element? previousChild;
 
