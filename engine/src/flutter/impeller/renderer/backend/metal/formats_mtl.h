@@ -41,6 +41,8 @@ constexpr PixelFormat FromMTLPixelFormat(MTLPixelFormat format) {
       return PixelFormat::kB10G10R10XRSRGB;
     case MTLPixelFormatBGR10_XR:
       return PixelFormat::kB10G10R10XR;
+    case MTLPixelFormatBGRA10_XR:
+      return PixelFormat::kB10G10R10A10XR;
     default:
       return PixelFormat::kUnknown;
   }
@@ -55,6 +57,10 @@ MTLPixelFormat SafeMTLPixelFormatBGR10_XR_sRGB();
 /// Safe accessor for MTLPixelFormatBGR10_XR.
 /// Returns PixelFormat::kUnknown if MTLPixelFormatBGR10_XR isn't supported.
 MTLPixelFormat SafeMTLPixelFormatBGR10_XR();
+
+/// Safe accessor for MTLPixelFormatBGRA10_XR.
+/// Returns PixelFormat::kUnknown if MTLPixelFormatBGR10_XR isn't supported.
+MTLPixelFormat SafeMTLPixelFormatBGRA10_XR();
 
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
@@ -86,6 +92,8 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatBGR10_XR_sRGB();
     case PixelFormat::kB10G10R10XR:
       return SafeMTLPixelFormatBGR10_XR();
+    case PixelFormat::kB10G10R10A10XR:
+      return SafeMTLPixelFormatBGRA10_XR();
   }
   return MTLPixelFormatInvalid;
 };

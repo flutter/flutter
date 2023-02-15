@@ -138,6 +138,7 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
     case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kB10G10R10XRSRGB:
       return vk::Format::eUndefined;
     case PixelFormat::kA8UNormInt:

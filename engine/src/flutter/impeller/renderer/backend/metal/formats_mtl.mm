@@ -120,4 +120,12 @@ MTLPixelFormat SafeMTLPixelFormatBGR10_XR() {
   }
 }
 
+MTLPixelFormat SafeMTLPixelFormatBGRA10_XR() {
+  if (@available(iOS 10, macOS 11.0, *)) {
+    return MTLPixelFormatBGRA10_XR;
+  } else {
+    return MTLPixelFormatInvalid;
+  }
+}
+
 }  // namespace impeller
