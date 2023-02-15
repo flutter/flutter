@@ -133,6 +133,9 @@ class TabBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return TabBarTheme(
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
