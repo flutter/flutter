@@ -303,7 +303,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/flutter
     presubmit: false
-    timeout: 60
+    timeout: 90
     properties:
       cores: "32"
       dependencies: >-
@@ -697,11 +697,32 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux plugin_test_linux
+    recipe: devicelab/devicelab_drone
+    bringup: true # New task
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: plugin_test_linux
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux run_debug_test_linux
     recipe: devicelab/devicelab_drone
     bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -721,6 +742,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -1776,7 +1798,6 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2501,6 +2522,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2520,6 +2542,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2539,6 +2562,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2558,6 +2582,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/120292
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2985,6 +3010,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119750
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3078,6 +3104,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3103,6 +3130,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3128,6 +3156,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3153,6 +3182,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3213,6 +3243,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3228,6 +3259,7 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3892,6 +3924,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
+
+  - name: Mac_ios wide_gamut_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: wide_gamut_ios
 
   - name: Mac_ios simple_animation_perf_impeller_ios
     recipe: devicelab/devicelab_drone

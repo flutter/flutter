@@ -2949,6 +2949,51 @@ void main() {
     );
   });
 
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118955
+    double sliderValue = 0.0;
+    Widget buildFrame(ThemeMode themeMode) {
+      return MaterialApp(
+        themeMode: themeMode,
+        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
+        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: sliderValue,
+                  label: 'label',
+                  onChanged: (double value) => sliderValue = value,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(ThemeMode.light));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+    expect(renderObject.debugNeedsLayout, false);
+
+    await tester.pumpWidget(buildFrame(ThemeMode.dark));
+    await tester.pump(
+      const Duration(milliseconds: 100), // to let the theme animate
+      EnginePhase.build,
+    );
+
+    expect(renderObject.debugNeedsLayout, true);
+
+    // Pump the rest of the frames to complete the test.
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
