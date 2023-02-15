@@ -766,6 +766,15 @@ config("no_rtti") {
   }
 }
 
+config("enable_exceptions") {
+  if (is_win) {
+    cflags_cc = [ "/EHsc" ]
+    defines = [ "_HAS_EXCEPTIONS=1" ]
+  } else if (is_clang) {
+    cflags_cc = [ "-fexceptions" ]
+  }
+}
+
 # Warnings ---------------------------------------------------------------------
 
 # On Windows compiling on x64, VC will issue a warning when converting
