@@ -889,7 +889,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
                   // A Scrollbar is built-in below.
                   behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: Scrollbar(
-                    child: ListView(padding: padding, children: listWidgets),
+                    child: ListView(
+                      primary: true,
+                      padding: padding,
+                      children: listWidgets,
+                    ),
                   ),
                 ),
               ),
