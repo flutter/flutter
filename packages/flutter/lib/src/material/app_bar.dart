@@ -1543,13 +1543,16 @@ class SliverAppBar extends StatefulWidget {
       key: key,
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
+        hasLeading: leading != null,
         title: title,
+        actions: actions,
         foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.medium,
         centerCollapsedTitle: centerTitle,
         primary: primary,
+        leadingWidth: leadingWidth,
+        titleSpacing: titleSpacing,
       ),
       bottom: bottom,
       elevation: elevation,
@@ -1645,13 +1648,16 @@ class SliverAppBar extends StatefulWidget {
       key: key,
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
+        hasLeading: leading != null,
         title: title,
+        actions: actions,
         foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.large,
         centerCollapsedTitle: centerTitle,
         primary: primary,
+        leadingWidth: leadingWidth,
+        titleSpacing: titleSpacing,
       ),
       bottom: bottom,
       elevation: elevation,
@@ -2092,18 +2098,26 @@ enum _ScrollUnderFlexibleVariant { medium, large }
 
 class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
+    required this.hasLeading,
     this.title,
+    this.actions,
     this.foregroundColor,
     required this.variant,
     this.centerCollapsedTitle,
     this.primary = true,
+    this.leadingWidth,
+    this.titleSpacing,
   });
 
+  final bool hasLeading;
   final Widget? title;
+  final List<Widget>? actions;
   final Color? foregroundColor;
   final _ScrollUnderFlexibleVariant variant;
   final bool? centerCollapsedTitle;
   final bool primary;
+  final double? leadingWidth;
+  final double? titleSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -2157,6 +2171,14 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
       centerTitle = centerCollapsedTitle ?? appBarTheme.centerTitle ?? platformCenter();
     }
 
+    EdgeInsetsGeometry effectiveCollapsedTitlePadding = EdgeInsets.zero;
+    if (hasLeading && leadingWidth == null) {
+      effectiveCollapsedTitlePadding = centerTitle
+        ? config.collapsedCenteredTitlePadding!
+        : config.collapsedTitlePadding!;
+    } else if (hasLeading && leadingWidth != null) {
+      effectiveCollapsedTitlePadding = EdgeInsetsDirectional.only(start: leadingWidth!);
+    }
     final bool isCollapsed = settings.isScrolledUnder ?? false;
     return Column(
       children: <Widget>[
@@ -2164,17 +2186,20 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
           padding: EdgeInsets.only(top: topPadding),
           child: Container(
             height: collapsedHeight,
-            padding: centerTitle ? config.collapsedCenteredTitlePadding : config.collapsedTitlePadding,
-            child: AnimatedOpacity(
-              opacity: isCollapsed ? 1 : 0,
-              duration: const Duration(milliseconds: 500),
-              curve: const Cubic(0.2, 0.0, 0.0, 1.0),
-              child: Align(
-                alignment: centerTitle
-                  ? Alignment.center
-                  : AlignmentDirectional.centerStart,
+            padding: effectiveCollapsedTitlePadding,
+            child: NavigationToolbar(
+              centerMiddle: centerTitle,
+              middleSpacing: titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
+              middle: AnimatedOpacity(
+                opacity: isCollapsed ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                curve: const Cubic(0.2, 0.0, 0.0, 1.0),
                 child: collapsedTitle,
               ),
+              trailing: actions != null ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: actions!,
+              ) : null,
             ),
           ),
         ),
@@ -2310,10 +2335,10 @@ class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     _textTheme.headlineSmall?.apply(color: _colors.onSurface);
 
   @override
-  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.fromSTEB(48, 0, 16, 0);
+  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.only(start: 40);
 
   @override
-  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 0);
+  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsetsDirectional.only(start: 40);
 
   @override
   EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
@@ -2339,10 +2364,10 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     _textTheme.headlineMedium?.apply(color: _colors.onSurface);
 
   @override
-  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.fromSTEB(48, 0, 16, 0);
+  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.only(start: 40);
 
   @override
-  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 0);
+  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsetsDirectional.only(start: 40);
 
   @override
   EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
