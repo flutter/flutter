@@ -697,7 +697,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     }
     if (notification.metrics.axis != widget.axis) {
       // This widget is explicitly configured to one axis. If a notification
-      // from different axis bubbles up, do nothing.
+      // from a different axis bubbles up, do nothing.
       return false;
     }
 
