@@ -91,6 +91,7 @@ enum class PixelFormat {
   kR16G16B16A16Float,
   kB10G10R10XR,
   kB10G10R10XRSRGB,
+  kB10G10R10A10XR,
   // Depth and stencil formats.
   kS8UInt,
   kD32FloatS8UInt,
@@ -296,6 +297,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kD32FloatS8UInt:
       return 5u;
     case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10A10XR:
       return 8u;
     case PixelFormat::kR32G32B32A32Float:
       return 16u;

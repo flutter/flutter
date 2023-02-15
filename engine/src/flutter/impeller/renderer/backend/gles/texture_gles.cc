@@ -124,6 +124,7 @@ struct TexImage2DData {
       case PixelFormat::kR8G8UNormInt:
       case PixelFormat::kB10G10R10XRSRGB:
       case PixelFormat::kB10G10R10XR:
+      case PixelFormat::kB10G10R10A10XR:
         return;
     }
     is_valid_ = true;
@@ -171,6 +172,7 @@ struct TexImage2DData {
       case PixelFormat::kR8G8UNormInt:
       case PixelFormat::kB10G10R10XRSRGB:
       case PixelFormat::kB10G10R10XR:
+      case PixelFormat::kB10G10R10A10XR:
         return;
     }
     is_valid_ = true;
@@ -318,6 +320,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10A10XR:
       return std::nullopt;
   }
   FML_UNREACHABLE();
