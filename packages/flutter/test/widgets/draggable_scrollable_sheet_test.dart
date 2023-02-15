@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,11 +25,12 @@ void main() {
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
     ScrollController? innerControllerOverride,
+    MediaQueryData mediaQueryData = const MediaQueryData(),
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(),
+        data: mediaQueryData,
         child: Stack(
           key: stackKey,
           children: <Widget>[
@@ -1612,6 +1614,55 @@ void main() {
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.6, precisionErrorTolerance),
     );
+  });
+
+  testWidgets('DraggableScrollableSheet should snap after user drag with intervening dependency change', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    Widget buildWidget(MediaQueryData mediaQueryData) {
+      return boilerplateWidget(
+        controller: controller,
+        snap: true,
+        mediaQueryData: mediaQueryData,
+      );
+    }
+    await tester.pumpWidget(buildWidget(const MediaQueryData()));
+    final Offset dragStart = tester.getCenter(find.byType(DraggableScrollableSheet));
+
+    const int steps = 4;
+    final double distance = dragStart.dy / 4;
+    final double dy = -distance / steps;
+
+    const Duration dt = Duration(milliseconds: 16);
+    Duration t = Duration.zero;
+    Duration nextTime() => t += dt;
+
+    final TestGesture gesture = await tester.startGesture(dragStart);
+
+    for (int i = 0; i < steps; ++i) {
+      await gesture.moveBy(Offset(0, dy), timeStamp: nextTime());
+    }
+
+    // Interrupt the drag with a dependency change.
+    // This can happen in any number of ways in a real app.
+    await tester.pumpWidget(buildWidget(
+      const MediaQueryData(
+        gestureSettings: DeviceGestureSettings(touchSlop: kTouchSlop + 1.0),
+      ),
+    ));
+
+    for (int i = 0; i < steps; ++i) {
+      await gesture.moveBy(Offset(0, dy), timeStamp: nextTime());
+    }
+    // Hold to zero out the velocity. Otherwise the fling will snap anyway and
+    // cover up the case we're testing.
+    for (int i = 0; i < 2; ++i) {
+      await gesture.moveBy(Offset.zero, timeStamp: nextTime());
+    }
+    await gesture.up(timeStamp: nextTime());
+    expect(controller.size, closeTo(.75, 1 / 16));
+
+    await tester.pumpAndSettle();
+    expect(controller.size, 1.0);
   });
 
   testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {

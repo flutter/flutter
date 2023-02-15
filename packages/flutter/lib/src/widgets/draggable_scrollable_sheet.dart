@@ -933,6 +933,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     // extent.activePositionCount as if the activity were ours.
     if (other.activity!.isScrolling) {
       ++extent.activePositionCount;
+      _isActive = true;
       // The symmetric -- case is handled in dispose.
     }
 
