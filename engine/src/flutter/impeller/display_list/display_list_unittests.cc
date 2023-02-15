@@ -265,6 +265,19 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+  flutter::DisplayListBuilder builder;
+  auto filter = flutter::DlBlurMaskFilter(kNormal_SkBlurStyle, 10.0f);
+  flutter::DlPaint paint;
+  paint.setMaskFilter(&filter);
+  builder.saveLayer(nullptr, &paint);
+  builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
+                    flutter::DlImageSampling::kNearestNeighbor);
+  builder.restore();
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
