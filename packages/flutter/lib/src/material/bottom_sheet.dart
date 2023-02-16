@@ -505,8 +505,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
     BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
-      final maxWidget= min(constraints.maxWidth, 640.0);
-
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
