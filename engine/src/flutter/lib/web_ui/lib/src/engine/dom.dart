@@ -38,8 +38,18 @@ extension DomWindowExtension on DomWindow {
   external DomNavigator get navigator;
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
-  Future<Object?> fetch(String url) =>
-      js_util.promiseToFuture(js_util.callMethod(this, 'fetch', <String>[url]));
+
+  @visibleForTesting
+  Future<Object?> fetch(String url) {
+    // To make sure we have a consistent approach for handling and reporting
+    // network errors, all code related to making HTTP calls is consolidated
+    // into the `httpFetch` function, and a few convenience wrappers.
+    throw UnsupportedError(
+      'Do not use window.fetch directly. '
+      'Use httpFetch* family of functions instead.',
+    );
+  }
+
   // ignore: non_constant_identifier_names
   external DomURL get URL;
   external bool dispatchEvent(DomEvent event);
@@ -756,56 +766,400 @@ extension DomCanvasGradientExtension on DomCanvasGradient {
 @staticInterop
 class DomXMLHttpRequestEventTarget extends DomEventTarget {}
 
-@JS()
-@staticInterop
-class DomXMLHttpRequest extends DomXMLHttpRequestEventTarget {}
-
-DomXMLHttpRequest createDomXMLHttpRequest() =>
-    domCallConstructorString('XMLHttpRequest', <Object?>[])!
-        as DomXMLHttpRequest;
-
-extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
-  external dynamic get response;
-  external String? get responseText;
-  external String get responseType;
-  external double? get status;
-  external set responseType(String value);
-  void open(String method, String url, [bool? async]) => js_util.callMethod(
-      this, 'open', <Object>[method, url, if (async != null) async]);
-  void send([Object? bodyOrData]) => js_util
-      .callMethod(this, 'send', <Object>[if (bodyOrData != null) bodyOrData]);
+Future<_DomResponse> _rawHttpGet(String url) {
+  return js_util.promiseToFuture<_DomResponse>(js_util.callMethod(domWindow, 'fetch', <String>[url]));
 }
 
-Future<DomXMLHttpRequest> domHttpRequest(String url,
-    {String? responseType, String method = 'GET', dynamic sendData}) {
-  final Completer<DomXMLHttpRequest> completer = Completer<DomXMLHttpRequest>();
-  final DomXMLHttpRequest xhr = createDomXMLHttpRequest();
-  xhr.open(method, url, /* async */ true);
-  if (responseType != null) {
-    xhr.responseType = responseType;
+typedef MockHttpFetchResponseFactory = Future<MockHttpFetchResponse> Function(String url);
+
+MockHttpFetchResponseFactory? mockHttpFetchResponseFactory;
+
+/// Makes an HTTP GET request to the given [url] and returns the response.
+///
+/// If the request fails, throws [HttpFetchError]. HTTP error statuses, such as
+/// 404 and 500 are not treated as request failures. In those cases the HTTP
+/// part did succeed and correctly passed the HTTP status down from the server
+/// to the client. Those statuses represent application-level errors that need
+/// extra interpretation to decide if they are "failures" or not. See
+/// [HttpFetchResponse.hasPayload] and [HttpFetchResponse.payload].
+///
+/// This function is designed to handle the most general cases. If the default
+/// payload handling, including error checking, is sufficient, consider using
+/// convenience functions [httpFetchByteBuffer], [httpFetchJson], or
+/// [httpFetchText] instead.
+Future<HttpFetchResponse> httpFetch(String url) async {
+  if (mockHttpFetchResponseFactory != null) {
+    return mockHttpFetchResponseFactory!(url);
+  }
+  try {
+    final _DomResponse domResponse = await _rawHttpGet(url);
+    return HttpFetchResponseImpl._(url, domResponse);
+  } catch (requestError) {
+    throw HttpFetchError(url, requestError: requestError);
+  }
+}
+
+Future<_DomResponse> _rawHttpPost(String url, String data) {
+  return js_util.promiseToFuture<_DomResponse>(js_util.callMethod(
+    domWindow,
+    'fetch',
+    <Object?>[
+      url,
+      js_util.jsify(<String, Object?>{
+        'method': 'POST',
+        'headers': <String, Object?>{
+          'Content-Type': 'text/plain',
+        },
+        'body': data,
+      }),
+    ],
+  ));
+}
+
+/// Sends a [data] string as HTTP POST request to [url].
+///
+/// The web engine does not make POST requests in production code because it is
+/// designed to be able to run web apps served from plain file servers, so this
+/// is meant for tests only.
+@visibleForTesting
+Future<HttpFetchResponse> testOnlyHttpPost(String url, String data) async {
+  try {
+    final _DomResponse domResponse = await _rawHttpPost(url, data);
+    return HttpFetchResponseImpl._(url, domResponse);
+  } catch (requestError) {
+    throw HttpFetchError(url, requestError: requestError);
+  }
+}
+
+/// Convenience function for making a fetch request and getting the data as a
+/// [ByteBuffer], when the default error handling mechanism is sufficient.
+Future<ByteBuffer> httpFetchByteBuffer(String url) async {
+  final HttpFetchResponse response = await httpFetch(url);
+  return response.asByteBuffer();
+}
+
+/// Convenience function for making a fetch request and getting the data as a
+/// JSON object, when the default error handling mechanism is sufficient.
+Future<Object?> httpFetchJson(String url) async {
+  final HttpFetchResponse response = await httpFetch(url);
+  return response.json();
+}
+
+/// Convenience function for making a fetch request and getting the data as a
+/// [String], when the default error handling mechanism is sufficient.
+Future<String> httpFetchText(String url) async {
+  final HttpFetchResponse response = await httpFetch(url);
+  return response.text();
+}
+
+/// Successful result of [httpFetch].
+abstract class HttpFetchResponse {
+  /// The URL passed to [httpFetch] that returns this response.
+  String get url;
+
+  /// The HTTP response status, such as 200 or 404.
+  int get status;
+
+  /// The payload length of this response parsed from the "Content-Length" HTTP
+  /// header.
+  ///
+  /// Returns null if "Content-Length" is missing.
+  int? get contentLength;
+
+  /// Return true if this response has a [payload].
+  ///
+  /// Returns false if this response does not have a payload and therefore it is
+  /// unsafe to call the [payload] getter.
+  bool get hasPayload;
+
+  /// Returns the payload of this response.
+  ///
+  /// It is only safe to call this getter if [hasPayload] is true. If
+  /// [hasPayload] is false, throws [HttpFetchNoPayloadError].
+  HttpFetchPayload get payload;
+}
+
+/// Convenience methods for simple cases when the default error checking
+/// mechanisms are sufficient.
+extension HttpFetchResponseExtension on HttpFetchResponse {
+  /// Reads the payload a chunk at a time.
+  ///
+  /// Combined with [HttpFetchResponse.contentLength], this can be used to
+  /// implement various "progress bar" functionality.
+  Future<void> read<T>(HttpFetchReader<T> reader) {
+    return payload.read(reader);
   }
 
-  xhr.addEventListener('load', allowInterop((DomEvent e) {
-    final int status = xhr.status!.toInt();
+  /// Returns the data as a [ByteBuffer].
+  Future<ByteBuffer> asByteBuffer() {
+    return payload.asByteBuffer();
+  }
+
+  /// Returns the data as a [Uint8List].
+  Future<Uint8List> asUint8List() async {
+    return (await payload.asByteBuffer()).asUint8List();
+  }
+
+  /// Returns the data parsed as JSON.
+  Future<dynamic> json() {
+    return payload.json();
+  }
+
+  /// Return the data as a string.
+  Future<String> text() {
+    return payload.text();
+  }
+}
+
+class HttpFetchResponseImpl implements HttpFetchResponse {
+  HttpFetchResponseImpl._(this.url, this._domResponse);
+
+  @override
+  final String url;
+
+  final _DomResponse _domResponse;
+
+  @override
+  int get status => _domResponse.status.toInt();
+
+  @override
+  int? get contentLength {
+    final String? header = _domResponse.headers.get('Content-Length');
+    if (header == null) {
+      return null;
+    }
+    return int.tryParse(header);
+  }
+
+  @override
+  bool get hasPayload {
     final bool accepted = status >= 200 && status < 300;
     final bool fileUri = status == 0;
     final bool notModified = status == 304;
     final bool unknownRedirect = status > 307 && status < 400;
-    if (accepted || fileUri || notModified || unknownRedirect) {
-      completer.complete(xhr);
-    } else {
-      completer.completeError(e);
-    }
-  }));
+    return accepted || fileUri || notModified || unknownRedirect;
+  }
 
-  xhr.addEventListener('error', allowInterop((DomEvent event) => completer.completeError(event)));
-  xhr.send(sendData);
-  return completer.future;
+  @override
+  HttpFetchPayload get payload {
+    if (!hasPayload) {
+      throw HttpFetchNoPayloadError(url, status: status);
+    }
+    return HttpFetchPayloadImpl._(_domResponse);
+  }
+}
+
+/// A fake implementation of [HttpFetchResponse] for testing.
+class MockHttpFetchResponse implements HttpFetchResponse {
+  MockHttpFetchResponse({
+    required this.url,
+    required this.status,
+    this.contentLength,
+    HttpFetchPayload? payload,
+  }) : _payload = payload;
+
+  final HttpFetchPayload? _payload;
+
+  @override
+  final String url;
+
+  @override
+  final int status;
+
+  @override
+  final int? contentLength;
+
+  @override
+  bool get hasPayload => _payload != null;
+
+  @override
+  HttpFetchPayload get payload => _payload!;
+}
+
+typedef HttpFetchReader<T> = void Function(T chunk);
+
+/// Data returned with a [HttpFetchResponse].
+abstract class HttpFetchPayload {
+  /// Reads the payload a chunk at a time.
+  ///
+  /// Combined with [HttpFetchResponse.contentLength], this can be used to
+  /// implement various "progress bar" functionality.
+  Future<void> read<T>(HttpFetchReader<T> reader);
+
+  /// Returns the data as a [ByteBuffer].
+  Future<ByteBuffer> asByteBuffer();
+
+  /// Returns the data parsed as JSON.
+  Future<dynamic> json();
+
+  /// Return the data as a string.
+  Future<String> text();
+}
+
+class HttpFetchPayloadImpl implements HttpFetchPayload {
+  HttpFetchPayloadImpl._(this._domResponse);
+
+  final _DomResponse _domResponse;
+
+  @override
+  Future<void> read<T>(HttpFetchReader<T> callback) async {
+    final _DomReadableStream stream = _domResponse.body;
+    final _DomStreamReader reader = stream.getReader();
+
+    while (true) {
+      final _DomStreamChunk chunk = await reader.read();
+      if (chunk.done) {
+        break;
+      }
+      callback(chunk.value as T);
+    }
+  }
+
+  /// Returns the data as a [ByteBuffer].
+  @override
+  Future<ByteBuffer> asByteBuffer() async {
+    return (await _domResponse.arrayBuffer()) as ByteBuffer;
+  }
+
+  /// Returns the data parsed as JSON.
+  @override
+  Future<dynamic> json() => _domResponse.json();
+
+  /// Return the data as a string.
+  @override
+  Future<String> text() => _domResponse.text();
+}
+
+typedef MockOnRead = Future<void> Function<T>(HttpFetchReader<T> callback);
+
+class MockHttpFetchPayload implements HttpFetchPayload {
+  MockHttpFetchPayload({
+    ByteBuffer? byteBuffer,
+    Object? json,
+    String? text,
+    MockOnRead? onRead,
+  }) : _byteBuffer = byteBuffer, _json = json, _text = text, _onRead = onRead;
+
+  final ByteBuffer? _byteBuffer;
+  final Object? _json;
+  final String? _text;
+  final MockOnRead? _onRead;
+
+  @override
+  Future<void> read<T>(HttpFetchReader<T> callback) => _onRead!(callback);
+
+  @override
+  Future<ByteBuffer> asByteBuffer() async => _byteBuffer!;
+
+  @override
+  Future<dynamic> json() async => _json!;
+
+  @override
+  Future<String> text() async => _text!;
+}
+
+/// Indicates a missing HTTP payload when one was expected, such as when
+/// [HttpFetchResponse.payload] was called.
+///
+/// Unlike [HttpFetchError], this error happens when the HTTP request/response
+/// succeeded, but the response type is not the kind that provides useful
+/// payload, such as 404, or 500.
+class HttpFetchNoPayloadError implements Exception {
+  /// Creates an exception from a successful HTTP request, but an unsuccessful
+  /// HTTP response code, such as 404 or 500.
+  HttpFetchNoPayloadError(this.url, { required this.status });
+
+  /// HTTP request URL for asset.
+  final String url;
+
+  /// If the HTTP request succeeded, the HTTP response status.
+  ///
+  /// Null if the HTTP request failed.
+  final int status;
+
+  @override
+  String toString() {
+    return 'Flutter Web engine failed to fetch "$url". HTTP request succeeded, '
+           'but the server responded with HTTP status $status.';
+  }
+}
+
+/// Indicates a failure trying to fetch a [url].
+///
+/// Unlike [HttpFetchNoPayloadError] this error indicates that there was no HTTP
+/// response and the roundtrip what interrupted by something else, like a loss
+/// of network connectivity, or request being interrupted by the OS, a browser
+/// CORS policy, etc. In particular, there's not even a HTTP status code to
+/// report, such as 200, 404, or 500.
+class HttpFetchError implements Exception {
+  /// Creates an exception from a failed HTTP request.
+  HttpFetchError(this.url, { required this.requestError });
+
+  /// HTTP request URL for asset.
+  final String url;
+
+  /// The underlying network error that prevented [httpFetch] from succeeding.
+  final Object requestError;
+
+  @override
+  String toString() {
+    return 'Flutter Web engine failed to complete HTTP request to fetch '
+           '"$url": $requestError';
+  }
 }
 
 @JS()
 @staticInterop
-class DomResponse {}
+class _DomResponse {}
+
+extension _DomResponseExtension on _DomResponse {
+  external double get status;
+
+  external _DomHeaders get headers;
+
+  external _DomReadableStream get body;
+
+  Future<dynamic> arrayBuffer() => js_util
+      .promiseToFuture(js_util.callMethod(this, 'arrayBuffer', <Object>[]));
+
+  Future<dynamic> json() =>
+      js_util.promiseToFuture(js_util.callMethod(this, 'json', <Object>[]));
+
+  Future<String> text() =>
+      js_util.promiseToFuture(js_util.callMethod(this, 'text', <Object>[]));
+}
+
+@JS()
+@staticInterop
+class _DomHeaders {}
+
+extension _DomHeadersExtension on _DomHeaders {
+  external String? get(String? headerName);
+}
+
+@JS()
+@staticInterop
+class _DomReadableStream {}
+extension _DomReadableStreamExtension on _DomReadableStream {
+  external _DomStreamReader getReader();
+}
+
+@JS()
+@staticInterop
+class _DomStreamReader {}
+extension _DomStreamReaderExtension on _DomStreamReader {
+  Future<_DomStreamChunk> read() {
+    return js_util.promiseToFuture<_DomStreamChunk>(js_util.callMethod(this, 'read', <Object>[]));
+  }
+}
+
+@JS()
+@staticInterop
+class _DomStreamChunk {}
+extension _DomStreamChunkExtension on _DomStreamChunk {
+  external Object? get value;
+  external bool get done;
+}
 
 @JS()
 @staticInterop
@@ -938,17 +1292,6 @@ extension DomClipboardExtension on DomClipboard {
 
   Future<dynamic> writeText(String data) => js_util
       .promiseToFuture(js_util.callMethod(this, 'writeText', <Object>[data]));
-}
-
-extension DomResponseExtension on DomResponse {
-  Future<dynamic> arrayBuffer() => js_util
-      .promiseToFuture(js_util.callMethod(this, 'arrayBuffer', <Object>[]));
-
-  Future<dynamic> json() =>
-      js_util.promiseToFuture(js_util.callMethod(this, 'json', <Object>[]));
-
-  Future<String> text() =>
-      js_util.promiseToFuture(js_util.callMethod(this, 'text', <Object>[]));
 }
 
 @JS()

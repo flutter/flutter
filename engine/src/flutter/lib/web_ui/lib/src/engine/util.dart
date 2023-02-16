@@ -563,12 +563,6 @@ String blurSigmasToCssString(double sigmaX, double sigmaY) {
   return 'blur(${(sigmaX + sigmaY) * 0.5}px)';
 }
 
-/// A typed variant of [domWindow.fetch].
-Future<DomResponse> httpFetch(String url) async {
-  final Object? result = await domWindow.fetch(url);
-  return result! as DomResponse;
-}
-
 /// Extensions to [Map] that make it easier to treat it as a JSON object. The
 /// keys are `dynamic` because when JSON is deserialized from method channels
 /// it arrives as `Map<dynamic, dynamic>`.

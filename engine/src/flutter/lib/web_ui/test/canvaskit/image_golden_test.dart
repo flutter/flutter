@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -25,7 +24,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     tearDown(() {
-      debugRestoreHttpRequestFactory();
+      mockHttpFetchResponseFactory = null;
     });
 
     _testCkAnimatedImage();
@@ -196,7 +195,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       // This test ensures that toByteData() returns pixels that can be used by decodeImageFromPixels
       // for the following videoFrame formats:
       // [BGRX, I422, I420, I444, BGRA]
-      final DomResponse listingResponse = await httpFetch('/test_images/');
+      final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
       final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
 
       Future<ui.Image> testDecodeFromPixels(Uint8List pixels, int width, int height) async {
@@ -224,8 +223,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(testFiles, contains(matches(RegExp(r'.*\.bmp'))));
 
       for (final String testFile in testFiles) {
-        final DomResponse imageResponse = await httpFetch('/test_images/$testFile');
-        final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+        final HttpFetchResponse imageResponse = await httpFetch('/test_images/$testFile');
+        final Uint8List imageData = await imageResponse.asUint8List();
         final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
         expect(codec.frameCount, greaterThan(0));
         expect(codec.repetitionCount, isNotNull);
@@ -289,15 +288,16 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
     test('skiaInstantiateWebImageCodec loads an image from the network',
         () async {
-      final TestHttpRequestMock mock = TestHttpRequestMock()
-          ..status = 200
-          ..response = kTransparentImage.buffer;
-      httpRequestFactory = () => TestHttpRequest(mock);
-      final Future<ui.Codec> futureCodec =
-          skiaInstantiateWebImageCodec('http://image-server.com/picture.jpg',
-              null);
-      mock.sendEvent('load', DomProgressEvent('test progress event'));
-      final ui.Codec codec = await futureCodec;
+      mockHttpFetchResponseFactory = (String url) async {
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: kTransparentImage.buffer),
+        );
+      };
+
+      final ui.Codec codec = await skiaInstantiateWebImageCodec(
+          'http://image-server.com/picture.jpg', null);
       expect(codec.frameCount, 1);
       final ui.Image image = (await codec.getNextFrame()).image;
       expect(image.height, 1);
@@ -365,13 +365,12 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
     test('skiaInstantiateWebImageCodec throws exception on request error',
         () async {
-      final TestHttpRequestMock mock = TestHttpRequestMock();
-      httpRequestFactory = () => TestHttpRequest(mock);
+      mockHttpFetchResponseFactory = (String url) async {
+        throw HttpFetchError(url, requestError: 'This is a test request error.');
+      };
+
       try {
-        final Future<ui.Codec> futureCodec = skiaInstantiateWebImageCodec(
-            'url-does-not-matter', null);
-        mock.sendEvent('error', DomProgressEvent('test error'));
-        await futureCodec;
+        await skiaInstantiateWebImageCodec('url-does-not-matter', null);
         fail('Expected to throw');
       } on ImageCodecException catch (exception) {
         expect(
@@ -403,15 +402,16 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
     test('skiaInstantiateWebImageCodec includes URL in the error for malformed image',
         () async {
-      final TestHttpRequestMock mock = TestHttpRequestMock()
-          ..status = 200
-          ..response = Uint8List(0).buffer;
-      httpRequestFactory = () => TestHttpRequest(mock);
+      mockHttpFetchResponseFactory = (String url) async {
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+        );
+      };
+
       try {
-        final Future<ui.Codec> futureCodec = skiaInstantiateWebImageCodec(
-            'http://image-server.com/picture.jpg', null);
-        mock.sendEvent('load', DomProgressEvent('test progress event'));
-        await futureCodec;
+        await skiaInstantiateWebImageCodec('http://image-server.com/picture.jpg', null);
         fail('Expected to throw');
       } on ImageCodecException catch (exception) {
         if (!browserSupportsImageDecoder) {
@@ -620,7 +620,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     });
 
     test('Decode test images', () async {
-      final DomResponse listingResponse = await httpFetch('/test_images/');
+      final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
       final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
 
       // Sanity-check the test file list. If suddenly test files are moved or
@@ -634,8 +634,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(testFiles, contains(matches(RegExp(r'.*\.bmp'))));
 
       for (final String testFile in testFiles) {
-        final DomResponse imageResponse = await httpFetch('/test_images/$testFile');
-        final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+        final HttpFetchResponse imageResponse = await httpFetch('/test_images/$testFile');
+        final Uint8List imageData = await imageResponse.asUint8List();
         final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
         expect(codec.frameCount, greaterThan(0));
         expect(codec.repetitionCount, isNotNull);
@@ -650,8 +650,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
     // Reproduces https://skbug.com/12721
     test('decoded image can be read back from picture', () async {
-      final DomResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
-      final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+      final HttpFetchResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
+      final Uint8List imageData = await imageResponse.asUint8List();
       final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
       final ui.FrameInfo frame = await codec.getNextFrame();
       final CkImage image = frame.image as CkImage;
@@ -743,8 +743,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     });
 
     test('toImageSync with texture-backed image', () async {
-      final DomResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
-      final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+      final HttpFetchResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
+      final Uint8List imageData = await imageResponse.asUint8List();
       final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
       final ui.FrameInfo frame = await codec.getNextFrame();
       final CkImage mandrill = frame.image as CkImage;
@@ -787,8 +787,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     });
 
     test('decoded image can be read back from picture', () async {
-      final DomResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
-      final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+      final HttpFetchResponse imageResponse = await httpFetch('/test_images/mandrill_128.png');
+      final Uint8List imageData = await imageResponse.asUint8List();
       final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
       final ui.FrameInfo frame = await codec.getNextFrame();
       final CkImage image = frame.image as CkImage;
@@ -957,55 +957,6 @@ void _testCkBrowserImageDecoder() {
     // TODO(jacksongardner): enable on wasm
     // see https://github.com/flutter/flutter/issues/118334
   }, skip: isWasm);
-}
-
-class TestHttpRequestMock {
-  String responseType = 'invalid';
-  int timeout = 10;
-  bool withCredentials = false;
-  dynamic response;
-  int status = -1;
-  Map<String, DomEventListener> listeners = <String, DomEventListener>{};
-
-  void open(String method, String url, [bool? async]) {}
-  void send() {}
-  void addEventListener(String eventType, DomEventListener listener, [bool?
-      useCapture]) =>
-      listeners[eventType] = listener;
-
-  void sendEvent(String eventType, DomProgressEvent event) =>
-      listeners[eventType]!(event);
-}
-
-@JS()
-@anonymous
-@staticInterop
-class TestHttpRequest implements DomXMLHttpRequest {
-  factory TestHttpRequest(TestHttpRequestMock mock) {
-    return TestHttpRequest._(
-        responseType: mock.responseType,
-        timeout: mock.timeout.toDouble(),
-        withCredentials: mock.withCredentials,
-        response: mock.response,
-        status: mock.status.toDouble(),
-        open: allowInterop((String method, String url, [bool? async]) =>
-            mock.open(method, url, async)),
-        send: allowInterop(() => mock.send()),
-        addEventListener: allowInterop((String eventType, DomEventListener
-                listener, [bool? useCapture]) =>
-            mock.addEventListener(eventType, listener, useCapture)));
-  }
-
-  external factory TestHttpRequest._({
-    String responseType,
-    double timeout,
-    bool withCredentials,
-    dynamic response,
-    double status,
-    void Function(String method, String url, [bool? async]) open,
-    void Function() send,
-    void Function(String eventType, DomEventListener listener) addEventListener
-  });
 }
 
 Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {

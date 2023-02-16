@@ -27,21 +27,15 @@ class HtmlFontCollection implements FontCollection {
   /// fonts declared within.
   @override
   Future<void> downloadAssetFonts(AssetManager assetManager) async {
-    ByteData byteData;
+    final HttpFetchResponse response = await assetManager.loadAsset('FontManifest.json');
 
-    try {
-      byteData = await assetManager.load('FontManifest.json');
-    } on AssetManagerException catch (e) {
-      if (e.httpStatus == 404) {
-        printWarning('Font manifest does not exist at `${e.url}` – ignoring.');
-        return;
-      } else {
-        rethrow;
-      }
+    if (!response.hasPayload) {
+      printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
+      return;
     }
 
-    final List<dynamic>? fontManifest =
-        json.decode(utf8.decode(byteData.buffer.asUint8List())) as List<dynamic>?;
+    final Uint8List data = await response.asUint8List();
+    final List<dynamic>? fontManifest = json.decode(utf8.decode(data)) as List<dynamic>?;
     if (fontManifest == null) {
       throw AssertionError(
           'There was a problem trying to load FontManifest.json');

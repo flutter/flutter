@@ -463,12 +463,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       case 'flutter/assets':
         final String url = utf8.decode(data!.buffer.asUint8List());
-        ui.webOnlyAssetManager.load(url).then((ByteData assetData) {
-          replyToPlatformMessage(callback, assetData);
-        }, onError: (dynamic error) {
-          printWarning('Error while trying to load an asset: $error');
-          replyToPlatformMessage(callback, null);
-        });
+        _handleFlutterAssetsMessage(url, callback);
         return;
 
       case 'flutter/platform':
@@ -611,6 +606,17 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // implemented. Look at [MethodChannel.invokeMethod] to see how [null] is
     // handled.
     replyToPlatformMessage(callback, null);
+  }
+
+  Future<void> _handleFlutterAssetsMessage(String url, ui.PlatformMessageResponseCallback? callback) async {
+    try {
+      final HttpFetchResponse response = await ui.webOnlyAssetManager.loadAsset(url);
+      final ByteBuffer assetData = await response.asByteBuffer();
+      replyToPlatformMessage(callback, assetData.asByteData());
+    } catch (error) {
+      printWarning('Error while trying to load an asset: $error');
+      replyToPlatformMessage(callback, null);
+    }
   }
 
   int _getHapticFeedbackDuration(String? type) {

@@ -32,7 +32,12 @@ void testMain() {
     });
 
     setUp(() {
+      mockHttpFetchResponseFactory = null;
       warnings.clear();
+    });
+
+    tearDown(() {
+      mockHttpFetchResponseFactory = null;
     });
 
     test('logs no warnings with the default mock asset manager', () async {
@@ -46,6 +51,15 @@ void testMain() {
     });
 
     test('logs a warning if one of the registered fonts is invalid', () async {
+      mockHttpFetchResponseFactory = (String url) async {
+        final ByteBuffer bogusData = Uint8List.fromList('this is not valid font data'.codeUnits).buffer;
+        return MockHttpFetchResponse(
+          status: 200,
+          url: url,
+          contentLength: bogusData.lengthInBytes,
+          payload: MockHttpFetchPayload(byteBuffer: bogusData),
+        );
+      };
       final SkiaFontCollection fontCollection = SkiaFontCollection();
       final WebOnlyMockAssetManager mockAssetManager =
           WebOnlyMockAssetManager();
@@ -75,6 +89,35 @@ void testMain() {
       );
     });
 
+    test('logs an HTTP warning if one of the registered fonts is missing (404 file not found)', () async {
+      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final WebOnlyMockAssetManager mockAssetManager =
+          WebOnlyMockAssetManager();
+      mockAssetManager.defaultFontManifest = '''
+[
+   {
+      "family":"Roboto",
+      "fonts":[{"asset":"/fonts/Roboto-Regular.ttf"}]
+   },
+   {
+      "family": "ThisFontDoesNotExist",
+      "fonts":[{"asset":"packages/bogus/ThisFontDoesNotExist.ttf"}]
+   }
+  ]
+      ''';
+
+      // It should complete without error, but emit a warning about ThisFontDoesNotExist.
+      await fontCollection.downloadAssetFonts(mockAssetManager);
+      fontCollection.registerDownloadedFonts();
+      expect(
+        warnings,
+        containsAllInOrder(<String>[
+          'Failed to load font ThisFontDoesNotExist at packages/bogus/ThisFontDoesNotExist.ttf',
+          'Flutter Web engine failed to fetch "packages/bogus/ThisFontDoesNotExist.ttf". HTTP request succeeded, but the server responded with HTTP status 404.',
+        ]),
+      );
+    });
+
     test('prioritizes Ahem loaded via FontManifest.json', () async {
       final SkiaFontCollection fontCollection = SkiaFontCollection();
       final WebOnlyMockAssetManager mockAssetManager =
@@ -88,7 +131,7 @@ void testMain() {
         ]
       '''.trim();
 
-      final ByteBuffer robotoData = (await (await httpFetch('/assets/fonts/Roboto-Regular.ttf')).arrayBuffer())! as ByteBuffer;
+      final ByteBuffer robotoData = await httpFetchByteBuffer('/assets/fonts/Roboto-Regular.ttf');
 
       await fontCollection.downloadAssetFonts(mockAssetManager);
       await fontCollection.debugDownloadTestFonts();
@@ -110,7 +153,7 @@ void testMain() {
           WebOnlyMockAssetManager();
       mockAssetManager.defaultFontManifest = '[]';
 
-      final ByteBuffer ahemData = (await (await httpFetch('/assets/fonts/ahem.ttf')).arrayBuffer())! as ByteBuffer;
+      final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
 
       await fontCollection.downloadAssetFonts(mockAssetManager);
       await fontCollection.debugDownloadTestFonts();
