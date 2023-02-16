@@ -10,9 +10,12 @@ uniform VertInfo {
 vert_info;
 
 in vec2 position;
-out vec2 v_position;
+// Note: The GLES backend uses name matching for attribute locations. This name
+// must match the name of the attribute input in:
+// impeller/compiler/shader_lib/flutter/runtime_effect.glsl
+out vec2 _fragCoord;
 
 void main() {
   gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
-  v_position = position;
+  _fragCoord = position;
 }
