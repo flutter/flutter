@@ -573,6 +573,61 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
   }
 }
 
+/// Platform view with clip rect then the PlatformView is moved for 10 frames.
+///
+/// The clip rect moves with the same transform matrix with the PlatformView.
+class PlatformViewClipRectAfterMovedScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Constructs a platform view with clip rect scenario.
+  PlatformViewClipRectAfterMovedScenario(
+    PlatformDispatcher dispatcher, {
+    required this.id,
+  }) : super(dispatcher);
+
+  /// The platform view identifier.
+  final int id;
+
+  int _numberOfFrames = 0;
+
+  double _y = 100.0;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 translateMatrix = Matrix4.identity()..translate(0.0, _y);
+    final SceneBuilder builder = SceneBuilder()
+      ..pushTransform(translateMatrix.storage)
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+
+    addPlatformView(
+      _numberOfFrames == 10? 10000:id,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+    super.onBeginFrame(duration);
+  }
+
+  @override
+  void onDrawFrame() {
+    if (_numberOfFrames < 10) {
+      _numberOfFrames ++;
+      _y -= 10;
+      window.scheduleFrame();
+    }
+    super.onDrawFrame();
+  }
+}
+
 /// Platform view with clip rrect.
 class PlatformViewClipRRectScenario extends PlatformViewScenario {
   /// Constructs a platform view with clip rrect scenario.
