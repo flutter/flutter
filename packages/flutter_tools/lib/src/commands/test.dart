@@ -273,15 +273,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     } else {
       for (final Uri uri in testUris) {
-        // Test URIs may have query strings to support name/line/col:
+        // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
-        // but it's not valid to call `getFilePath()` when there's a
-        // querystring so remove it before extracting the path.
-        final String testPath = uri.replace(query: '').toFilePath();
+        String testPath = uri.replace(query: '').toFilePath();
+        testPath = globals.fs.path.absolute(testPath);
+        testPath = globals.fs.path.normalize(testPath);
         if (globals.fs.isDirectorySync(testPath)) {
           _testFileUris.addAll(_findTests(globals.fs.directory(testPath)).map(Uri.file));
         } else {
-          _testFileUris.add(uri);
+          _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
         }
       }
     }
@@ -500,6 +500,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return FlutterCommandResult.success();
   }
 
+  /// Parses a test file/directory target passed as an argument and returns it
+  /// as an absolute file:/// [URI] with optional querystring for name/line/col.
+  Uri _parseTestArgument(String arg) {
+    // We can't parse Windows paths as URIs if they have query strings, so
+    // parse the file and query parts separately.
+    final int queryStart = arg.indexOf('?');
+    String filePart = queryStart == -1 ? arg : arg.substring(0, queryStart);
+    final String queryPart = queryStart == -1 ? '' : arg.substring(queryStart + 1);
+
+    filePart = globals.fs.path.absolute(filePart);
+    filePart = globals.fs.path.normalize(filePart);
+
+    return Uri.file(filePart)
+        .replace(query: queryPart.isEmpty ? null : queryPart);
+  }
+
   Future<void> _buildTestAsset() async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(packagesPath: '.packages');
@@ -535,22 +551,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
     return false;
-  }
-
-  /// Parses a test file/directory target passed as an argument and returns it
-  /// as an absolute file:/// [URI] with optional querystring for name/line/col.
-  Uri _parseTestArgument(String arg) {
-    // We can't parse Windows paths as URIs if they have query strings, so
-    // parse the file and query parts separately.
-    final int queryStart = arg.indexOf('?');
-    String filePart = queryStart == -1 ? arg : arg.substring(0, queryStart);
-    final String queryPart = queryStart == -1 ? '' : arg.substring(queryStart + 1);
-
-    filePart = globals.fs.path.absolute(filePart);
-    filePart = globals.fs.path.normalize(filePart);
-
-    return Uri.file(filePart)
-        .replace(query: queryPart.isEmpty ? null : queryPart);
   }
 }
 
