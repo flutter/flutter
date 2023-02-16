@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
@@ -95,30 +94,6 @@ class SystemNavigator {
         'location': location,
         'state': state,
         'replace': replace,
-      },
-    );
-  }
-
-  /// Notifies the platform of a route change, and selects single-entry history
-  /// mode.
-  ///
-  /// This is equivalent to calling [selectSingleEntryHistory] and
-  /// [routeInformationUpdated] together.
-  ///
-  /// The `previousRouteName` argument is ignored.
-  @Deprecated(
-    'Use routeInformationUpdated instead. '
-    'This feature was deprecated after v2.3.0-1.0.pre.'
-  )
-  static Future<void> routeUpdated({
-    String? routeName,
-    String? previousRouteName,
-  }) {
-    return SystemChannels.navigation.invokeMethod<void>(
-      'routeUpdated',
-      <String, dynamic>{
-        'previousRouteName': previousRouteName,
-        'routeName': routeName,
       },
     );
   }

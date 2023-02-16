@@ -52,7 +52,7 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
-        .map((ui.PointerData datum) {
+        .map<PointerEvent?>((ui.PointerData datum) {
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
           final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
           final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
@@ -247,6 +247,9 @@ class PointerEventConverter {
                   );
               }
             case ui.PointerSignalKind.scroll:
+              if (!datum.scrollDeltaX.isFinite || !datum.scrollDeltaY.isFinite || devicePixelRatio <= 0) {
+                return null;
+              }
               final Offset scrollDelta =
                   Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
               return PointerScrollEvent(
@@ -275,12 +278,14 @@ class PointerEventConverter {
                 scale: datum.scale,
               );
             case ui.PointerSignalKind.unknown:
+            default: // ignore: no_default_cases, to allow adding a new [PointerSignalKind] - PointerStylusAuxiliaryAction
+            // TODO(louisehsu): remove after landing engine PR https://github.com/flutter/engine/pull/39637
               // This branch should already have 'unknown' filtered out, but
               // we don't want to return anything or miss if someone adds a new
               // enumeration to PointerSignalKind.
               throw StateError('Unreachable');
           }
-        });
+        }).whereType<PointerEvent>();
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;

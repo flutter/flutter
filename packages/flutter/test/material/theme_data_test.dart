@@ -187,7 +187,6 @@ void main() {
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -239,7 +238,6 @@ void main() {
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -288,7 +286,6 @@ void main() {
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -338,7 +335,6 @@ void main() {
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -388,7 +384,6 @@ void main() {
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -781,6 +776,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
@@ -813,9 +809,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.black,
-      accentColorBrightness: Brightness.dark,
-      accentTextTheme: ThemeData.dark().textTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
@@ -901,6 +894,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.amber),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
@@ -934,9 +928,6 @@ void main() {
 
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.white,
-      accentColorBrightness: Brightness.light,
-      accentIconTheme: ThemeData.light().iconTheme,
-      accentTextTheme: ThemeData.light().textTheme,
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -1008,6 +999,7 @@ void main() {
       chipTheme: otherTheme.chipTheme,
       dataTableTheme: otherTheme.dataTableTheme,
       dialogTheme: otherTheme.dialogTheme,
+      datePickerTheme: otherTheme.datePickerTheme,
       dividerTheme: otherTheme.dividerTheme,
       drawerTheme: otherTheme.drawerTheme,
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
@@ -1038,9 +1030,6 @@ void main() {
 
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: otherTheme.accentColor,
-      accentColorBrightness: otherTheme.accentColorBrightness,
-      accentIconTheme: otherTheme.accentIconTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
@@ -1110,6 +1099,7 @@ void main() {
     expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.dataTableTheme, equals(otherTheme.dataTableTheme));
+    expect(themeDataCopy.datePickerTheme, equals(otherTheme.datePickerTheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.dividerTheme, equals(otherTheme.dividerTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
@@ -1143,9 +1133,6 @@ void main() {
 
     // DEPRECATED (newest deprecations at the bottom)
     expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
-    expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
-    expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
@@ -1248,6 +1235,7 @@ void main() {
       'checkboxTheme',
       'chipTheme',
       'dataTableTheme',
+      'datePickerTheme',
       'dialogTheme',
       'dividerTheme',
       'drawerTheme',
@@ -1280,9 +1268,6 @@ void main() {
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'accentColor',
-      'accentColorBrightness',
-      'accentTextTheme',
-      'accentIconTheme',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',

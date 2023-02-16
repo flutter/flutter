@@ -204,6 +204,9 @@ class ScrollbarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return ScrollbarThemeData(
       thumbVisibility: MaterialStateProperty.lerp<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
       thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),

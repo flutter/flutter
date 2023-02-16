@@ -53,7 +53,7 @@ void main() {
 
   test('can check the mock handler', () {
     Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value();
-    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger;
+    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);
     expect(messenger.checkMockMessageHandler('test_channel', handler), false);

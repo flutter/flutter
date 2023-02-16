@@ -16,13 +16,17 @@ Future<void> pumpTest(
   TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
+  Set<LogicalKeyboardKey>? axisModifier,
+  Axis scrollDirection = Axis.vertical,
   ScrollController? controller,
   bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
-      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
-      : null,
+    scrollBehavior: const NoScrollbarBehavior().copyWith(
+      dragDevices: enableMouseDrag
+        ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+        : null,
+      pointerAxisModifiers: axisModifier,
     ),
     theme: ThemeData(
       platform: platform,
@@ -30,9 +34,13 @@ Future<void> pumpTest(
     home: CustomScrollView(
       controller: controller,
       reverse: reverse,
+      scrollDirection: scrollDirection,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-      slivers: const <Widget>[
-        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      slivers: <Widget>[
+        SliverToBoxAdapter(child: SizedBox(
+          height: scrollDirection == Axis.vertical ? 2000.0 : null,
+          width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+        )),
       ],
     ),
   ));
@@ -398,6 +406,118 @@ void main() {
 
     expect(getScrollOffset(tester), 20.0);
   });
+
+  testWidgets('Scrolls horizontally when shift is pressed by default', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not flipped.
+    expect(getScrollOffset(tester), 0.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
@@ -1350,6 +1470,40 @@ void main() {
     await gesture.removePointer();
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
+  testWidgets("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
+      return MaterialApp(
+        scrollBehavior: const NoScrollbarBehavior().copyWith(
+          dragDevices: dragDevices,
+        ),
+        home: ListView.builder(
+          itemCount: 1000,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.stylus}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Non-matching device should not allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.stylus);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 200.0);
+  });
 
   testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
