@@ -864,7 +864,8 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgets('BottomSheet uses fallback values in material3',
+
+  testWidgets('BottomSheet uses fallback values in Material 3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
