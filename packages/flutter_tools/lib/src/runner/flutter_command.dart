@@ -629,12 +629,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void useDartDefineConfigJsonFileOption() {
-    argParser.addOption(
+    argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
-      valueHelp: 'use-define-config.json'
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
+      valueHelp: 'use-define-config.json',
+      splitCommas: false,
     );
   }
 
@@ -1180,21 +1182,27 @@ abstract class FlutterCommand extends Command<void> {
 
     Map<String, Object>? defineConfigJsonMap;
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          defineConfigJsonMap = <String, Object>{};
-          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            defineConfigJsonMap?[key]=value as Object;
-          });
-          defineConfigJsonMap.forEach((String key, Object value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
+      final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPaths.isNotEmpty) {
+        if (configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+          try {
+            defineConfigJsonMap = <String, Object>{};
+            for (final String path in configJsonPaths) {
+              final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+              // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+              (json.decode(configJsonRaw) as Map<String, dynamic>)
+                  .forEach((String key, dynamic value) {
+                defineConfigJsonMap?[key] = value as Object;
+              });
+              defineConfigJsonMap.forEach((String key, Object value) {
+                dartDefines.add('$key=$value');
+              });
+            }
+          } on FormatException catch (err) {
+            throwToolExit('Json config define file "--${FlutterOptions
+                .kDartDefineFromFileOption}=$configJsonPaths" format err, '
+                'please fix first! format err:\n$err');
+          }
         }
       }
     }

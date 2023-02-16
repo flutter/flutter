@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -518,13 +520,20 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    await globals.fs.file('config.json').writeAsString(
+    await globals.fs.file('config1.json').writeAsString(
       '''
         {
           "kInt": 1,
           "kDouble": 1.1,
           "name": "denghaizhu",
           "title": "this is title from config json file"
+        }
+      '''
+    );
+    await globals.fs.file('config2.json').writeAsString(
+        '''
+        {
+          "body": "this is body from config json file"
         }
       '''
     );
@@ -536,11 +545,12 @@ void main() {
     await runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--dart-define-from-file=config.json',
+      '--dart-define-from-file=config1.json',
+      '--dart-define-from-file=config2.json',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: false), (Target target, Environment environment) {
+      expect(environment.defines[kDartDefines], equals('a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,Ym9keT10aGlzIGlzIGJvZHkgZnJvbSBjb25maWcganNvbiBmaWxl'));
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
