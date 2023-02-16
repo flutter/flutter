@@ -147,9 +147,11 @@ class MaterialFonts extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {
     final Uri archiveUri = _toStorageUri(version!);
+    print('got $archiveUri');
     return artifactUpdater.downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 
+  //Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path/foo-bar');
   Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
 }
 

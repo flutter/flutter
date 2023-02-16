@@ -136,6 +136,7 @@ class PrecacheCommand extends FlutterCommand {
       await _cache.lock();
     }
     if (boolArgDeprecated('force')) {
+      print('force');
       _cache.clearStampFiles();
     }
 
@@ -164,6 +165,7 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
+    print(requiredArtifacts);
     if (!await _cache.isUpToDate()) {
       await _cache.updateAll(requiredArtifacts);
     } else {
