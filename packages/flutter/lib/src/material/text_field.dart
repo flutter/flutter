@@ -1486,7 +1486,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Token database version: v0_162
 
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-  final ColorScheme colors = Theme.of(context).colorScheme;
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
   }
