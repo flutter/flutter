@@ -125,14 +125,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       '--chain-stack-traces',
     ];
 
-    /// Helper to convert the [Uri] for a test to an argument that can be passed
-    /// to `dart test`.
-    ///
-    /// [Uri]s are (currently) only supported when there's a querystring.
-    /// https://github.com/dart-lang/test/issues/1891.
-    String testUriToArgument(Uri uri) =>
-        uri.hasQuery ? uri.toString() : uri.toFilePath();
-
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
         .createTempSync('flutter_test.')
@@ -155,7 +147,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testArgs
         ..add('--platform=chrome')
         ..add('--')
-        ..addAll(testFiles.map(testUriToArgument));
+        ..addAll(testFiles.map((Uri uri) => uri.toString()));
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
@@ -191,7 +183,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     testArgs
       ..add('--')
-      ..addAll(testFiles.map(testUriToArgument));
+      ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
         ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
