@@ -271,6 +271,11 @@ static BOOL _preparedOnce = NO;
   return self;
 }
 
+- (void)reset {
+  paths_.clear();
+  [self setNeedsDisplay];
+}
+
 // In some scenarios, when we add this view as a maskView of the ChildClippingView, iOS added
 // this view as a subview of the ChildClippingView.
 // This results this view blocking touch events on the ChildClippingView.

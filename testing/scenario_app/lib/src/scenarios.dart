@@ -32,6 +32,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'platform_view_max_overlays': () => PlatformViewMaxOverlaysScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_cliprect': () => PlatformViewClipRectScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_cliprect_with_transform': () => PlatformViewClipRectWithTransformScenario(PlatformDispatcher.instance, id: _viewId++),
+  'platform_view_cliprect_after_moved': () => PlatformViewClipRectAfterMovedScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_cliprrect': () => PlatformViewClipRRectScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_large_cliprrect': () => PlatformViewLargeClipRRectScenario(PlatformDispatcher.instance, id: _viewId++),
   'platform_view_cliprrect_with_transform': () => PlatformViewClipRRectWithTransformScenario(PlatformDispatcher.instance, id: _viewId++),

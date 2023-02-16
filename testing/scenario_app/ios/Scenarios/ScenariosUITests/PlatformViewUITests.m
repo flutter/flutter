@@ -98,6 +98,36 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @end
 
+@interface PlatformViewMutationClipRectAfterMovedTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipRectAfterMovedTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-cliprect-after-moved"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  // This test needs to wait for several frames for the PlatformView to settle to
+  // the correct position. The PlatformView accessiblity is set to platform_view[10000] when it is
+  // ready.
+  XCUIElement* element = self.application.otherElements[@"platform_view[10000]"];
+  BOOL exists = [element waitForExistenceWithTimeout:kSecondsToWaitForPlatformView];
+  if (!exists) {
+    XCTFail(@"It took longer than %@ second to find the platform view."
+            @"There might be issues with the platform view's construction,"
+            @"or with how the scenario is built.",
+            @(kSecondsToWaitForPlatformView));
+  }
+
+  [self checkPlatformViewGolden];
+}
+
+@end
+
 @interface PlatformViewMutationClipRRectTests : GoldenPlatformViewTests
 
 @end

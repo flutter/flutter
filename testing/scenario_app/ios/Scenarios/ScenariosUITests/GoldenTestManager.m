@@ -46,6 +46,7 @@ NSDictionary* launchArgsMap;
             @"non_full_screen_flutter_view_platform_view",
         @"--bogus-font-text" : @"bogus_font_text",
         @"--spawn-engine-works" : @"spawn_engine_works",
+        @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved",
       };
     });
     _identifier = launchArgsMap[launchArg];

@@ -66,7 +66,8 @@
     @"--bogus-font-text" : @"bogus_font_text",
     @"--spawn-engine-works" : @"spawn_engine_works",
     @"--pointer-events" : @"pointer_events",
-    @"--platform-view-scrolling-under-widget" : @"platform_view_scrolling_under_widget"
+    @"--platform-view-scrolling-under-widget" : @"platform_view_scrolling_under_widget",
+    @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved"
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
