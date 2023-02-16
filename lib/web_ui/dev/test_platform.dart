@@ -90,6 +90,12 @@ class BrowserPlatform extends PlatformPlugin {
         // This handler goes last, after all more specific handlers failed to handle the request.
         .add(_createAbsolutePackageUrlHandler())
         .add(_screenshotHandler)
+
+        // Generates and serves a test payload of given length, split into chunks
+        // of given size. Reponds to requests to /long_test_payload.
+        .add(_testPayloadGenerator)
+
+        // If none of the handlers above handled the request, return 404.
         .add(_fileNotFoundCatcher);
 
     server.mount(cascade.handler);
@@ -318,6 +324,46 @@ class BrowserPlatform extends PlatformPlugin {
       }
       return shelf.Response.ok(fileInPackage.openRead());
     };
+  }
+
+  Future<shelf.Response> _testPayloadGenerator(shelf.Request request) async {
+    if (!request.requestedUri.path.endsWith('/long_test_payload')) {
+      return shelf.Response.notFound(
+          'This request is not handled by the test payload generator');
+    }
+
+    final int payloadLength = int.parse(request.requestedUri.queryParameters['length']!);
+    final int chunkLength = int.parse(request.requestedUri.queryParameters['chunk']!);
+
+    final StreamController<List<int>> controller = StreamController<List<int>>();
+
+    Future<void> fillPayload() async {
+      int remainingByteCount = payloadLength;
+      int byteCounter = 0;
+      while (remainingByteCount > 0) {
+        final int currentChunkLength = min(chunkLength, remainingByteCount);
+        final List<int> chunk = List<int>.generate(
+          currentChunkLength,
+          (int i) => (byteCounter + i) & 0xFF,
+        );
+        byteCounter = (byteCounter + currentChunkLength) & 0xFF;
+        remainingByteCount -= currentChunkLength;
+        controller.add(chunk);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      await controller.close();
+    }
+
+    // Kick off payload filling function but don't block on it. The stream should
+    // be returned immediately, and the client should receive data in chunks.
+    unawaited(fillPayload());
+    return shelf.Response.ok(
+      controller.stream,
+      headers: <String, String>{
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': '$payloadLength',
+      },
+    );
   }
 
   Future<shelf.Response> _screenshotHandler(shelf.Request request) async {

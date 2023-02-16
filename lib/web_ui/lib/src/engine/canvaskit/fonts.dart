@@ -93,21 +93,15 @@ class SkiaFontCollection implements FontCollection {
   /// Loads fonts from `FontManifest.json`.
   @override
   Future<void> downloadAssetFonts(AssetManager assetManager) async {
-    ByteData byteData;
+    final HttpFetchResponse response = await assetManager.loadAsset('FontManifest.json');
 
-    try {
-      byteData = await assetManager.load('FontManifest.json');
-    } on AssetManagerException catch (e) {
-      if (e.httpStatus == 404) {
-        printWarning('Font manifest does not exist at `${e.url}` – ignoring.');
-        return;
-      } else {
-        rethrow;
-      }
+    if (!response.hasPayload) {
+      printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
+      return;
     }
 
-    final List<dynamic>? fontManifest =
-        json.decode(utf8.decode(byteData.buffer.asUint8List())) as List<dynamic>?;
+    final Uint8List data = await response.asUint8List();
+    final List<dynamic>? fontManifest = json.decode(utf8.decode(data)) as List<dynamic>?;
     if (fontManifest == null) {
       throw AssertionError(
           'There was a problem trying to load FontManifest.json');
@@ -206,10 +200,11 @@ class SkiaFontCollection implements FontCollection {
     String family
   ) {
     Future<UnregisteredFont?> downloadFont() async {
-      ByteBuffer buffer;
+      // Try to get the font leniently. Do not crash the app when failing to
+      // fetch the font in the spirit of "gradual degradation of functionality".
       try {
-        buffer = await httpFetch(url).then(_getArrayBuffer);
-        return UnregisteredFont(buffer, url, family);
+        final ByteBuffer data = await httpFetchByteBuffer(url);
+        return UnregisteredFont(data, url, family);
       } catch (e) {
         printWarning('Failed to load font $family at $url');
         printWarning(e.toString());
@@ -228,12 +223,6 @@ class SkiaFontCollection implements FontCollection {
     final String? actualFamily = tmpFontMgr.getFamilyName(0);
     tmpFontMgr.delete();
     return actualFamily;
-  }
-
-  Future<ByteBuffer> _getArrayBuffer(DomResponse fetchResult) {
-    return fetchResult
-        .arrayBuffer()
-        .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
   TypefaceFontProvider? fontProvider;

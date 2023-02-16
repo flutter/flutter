@@ -167,12 +167,6 @@ class ImageCodecException implements Exception {
 
 const String _kNetworkImageMessage = 'Failed to load network image.';
 
-typedef HttpRequestFactory = DomXMLHttpRequest Function();
-HttpRequestFactory httpRequestFactory = () => createDomXMLHttpRequest();
-void debugRestoreHttpRequestFactory() {
-  httpRequestFactory = () => createDomXMLHttpRequest();
-}
-
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
 /// requesting from URI.
 Future<ui.Codec> skiaInstantiateWebImageCodec(
@@ -186,49 +180,48 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
 }
 
 /// Sends a request to fetch image data.
-Future<Uint8List> fetchImage(
-    String url, WebOnlyImageCodecChunkCallback? chunkCallback) {
-  final Completer<Uint8List> completer = Completer<Uint8List>();
+Future<Uint8List> fetchImage(String url, WebOnlyImageCodecChunkCallback? chunkCallback) async {
+  try {
+    final HttpFetchResponse response = await httpFetch(url);
+    final int? contentLength = response.contentLength;
 
-  final DomXMLHttpRequest request = httpRequestFactory();
-  request.open('GET', url, true);
-  request.responseType = 'arraybuffer';
-  if (chunkCallback != null) {
-    request.addEventListener('progress', allowInterop((DomEvent event)  {
-      event = event as DomProgressEvent;
-      chunkCallback.call(event.loaded!.toInt(), event.total!.toInt());
-    }));
-  }
-
-  request.addEventListener('error', allowInterop((DomEvent event) {
-    completer.completeError(ImageCodecException('$_kNetworkImageMessage\n'
+    if (!response.hasPayload) {
+      throw ImageCodecException(
+        '$_kNetworkImageMessage\n'
         'Image URL: $url\n'
-        'Trying to load an image from another domain? Find answers at:\n'
-        'https://flutter.dev/docs/development/platform-integration/web-images'));
-  }));
-
-  request.addEventListener('load', allowInterop((DomEvent event) {
-    final int status = request.status!.toInt();
-    final bool accepted = status >= 200 && status < 300;
-    final bool fileUri = status == 0; // file:// URIs have status of 0.
-    final bool notModified = status == 304;
-    final bool unknownRedirect = status > 307 && status < 400;
-    final bool success = accepted || fileUri || notModified || unknownRedirect;
-
-    if (!success) {
-      completer.completeError(
-        ImageCodecException('$_kNetworkImageMessage\n'
-            'Image URL: $url\n'
-            'Server response code: $status'),
+        'Server response code: ${response.status}',
       );
-      return;
     }
 
-    completer.complete(Uint8List.view(request.response as ByteBuffer));
-  }));
+    if (chunkCallback != null && contentLength != null) {
+      return readChunked(response.payload, contentLength, chunkCallback);
+    } else {
+      return await response.asUint8List();
+    }
+  } on HttpFetchError catch (_) {
+    throw ImageCodecException(
+      '$_kNetworkImageMessage\n'
+      'Image URL: $url\n'
+      'Trying to load an image from another domain? Find answers at:\n'
+      'https://flutter.dev/docs/development/platform-integration/web-images',
+    );
+  }
+}
 
-  request.send();
-  return completer.future;
+/// Reads the [payload] in chunks using the browser's Streams API
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/Streams_API
+Future<Uint8List> readChunked(HttpFetchPayload payload, int contentLength, WebOnlyImageCodecChunkCallback chunkCallback) async {
+  final Uint8List result = Uint8List(contentLength);
+  int position = 0;
+  int cumulativeBytesLoaded = 0;
+  await payload.read<Uint8List>((Uint8List chunk) {
+    cumulativeBytesLoaded += chunk.lengthInBytes;
+    chunkCallback(cumulativeBytesLoaded, contentLength);
+    result.setAll(position, chunk);
+    position += chunk.lengthInBytes;
+  });
+  return result;
 }
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
