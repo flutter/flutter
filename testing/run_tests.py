@@ -570,17 +570,6 @@ def gather_dart_test(
   )
 
 
-def ensure_debug_unopt_sky_packages():
-  variant_out_dir = os.path.join(OUT_DIR, 'host_debug_unopt')
-  message = []
-  message.append('gn --runtime-mode debug --unopt --no-lto')
-  message.append('ninja -C %s flutter/sky/packages' % variant_out_dir)
-  final_message = "%s doesn't exist. Please run the following commands: \n%s" % (
-      variant_out_dir, '\n'.join(message)
-  )
-  assert os.path.exists(variant_out_dir), final_message
-
-
 def ensure_ios_tests_are_built(ios_out_dir):
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(OUT_DIR, ios_out_dir)
@@ -748,11 +737,6 @@ def gather_dart_tests(build_dir, test_filter):
       'testing',
       'dart',
   )
-
-  # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
-  # has dependencies that are hardcoded to point to the sky packages at host_debug_unopt/
-  # Before running Dart tests, make sure to run just that target (NOT the whole engine)
-  ensure_debug_unopt_sky_packages()
 
   # Now that we have the Sky packages at the hardcoded location, run `dart pub get`.
   run_engine_executable(
