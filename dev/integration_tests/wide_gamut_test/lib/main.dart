@@ -117,7 +117,7 @@ class _SaveLayerDrawer extends CustomPainter {
             ..strokeWidth = 3);
       canvas.saveLayer(
           imageRect,
-          Paint()..blendMode = BlendMode.multiply);
+          Paint()..blendMode = BlendMode.dstOver);
       canvas.drawImage(_image!,
           Offset(-_image!.width / 2.0, -_image!.height / 2.0), Paint());
       canvas.restore();
