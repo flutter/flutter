@@ -1284,15 +1284,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 }
 
-- (CGFloat)statusBarPadding {
-  UIScreen* screen = self.view.window.screen;
-  CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
-  CGRect viewFrame = [self.view convertRect:self.view.bounds
-                          toCoordinateSpace:screen.coordinateSpace];
-  CGRect intersection = CGRectIntersection(statusFrame, viewFrame);
-  return CGRectIsNull(intersection) ? 0.0 : intersection.size.height;
-}
-
 - (void)viewDidLayoutSubviews {
   CGRect viewBounds = self.view.bounds;
   CGFloat scale = [UIScreen mainScreen].scale;
