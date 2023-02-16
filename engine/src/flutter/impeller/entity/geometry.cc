@@ -385,26 +385,24 @@ VertexBuffer StrokePathGeometry::CreateSolidStrokeVertices(
     }
 
     // Generate contour geometry.
-    for (size_t point_i = contour_start_point_i; point_i < contour_end_point_i;
-         point_i++) {
-      if (point_i > contour_start_point_i) {
-        // Generate line rect.
-        vtx.position = polyline.points[point_i - 1] + offset;
-        vtx_builder.AppendVertex(vtx);
-        vtx.position = polyline.points[point_i - 1] - offset;
-        vtx_builder.AppendVertex(vtx);
-        vtx.position = polyline.points[point_i] + offset;
-        vtx_builder.AppendVertex(vtx);
-        vtx.position = polyline.points[point_i] - offset;
-        vtx_builder.AppendVertex(vtx);
+    for (size_t point_i = contour_start_point_i + 1;
+         point_i < contour_end_point_i; point_i++) {
+      // Generate line rect.
+      vtx.position = polyline.points[point_i - 1] + offset;
+      vtx_builder.AppendVertex(vtx);
+      vtx.position = polyline.points[point_i - 1] - offset;
+      vtx_builder.AppendVertex(vtx);
+      vtx.position = polyline.points[point_i] + offset;
+      vtx_builder.AppendVertex(vtx);
+      vtx.position = polyline.points[point_i] - offset;
+      vtx_builder.AppendVertex(vtx);
 
-        if (point_i < contour_end_point_i - 1) {
-          compute_offset(point_i + 1);
+      if (point_i < contour_end_point_i - 1) {
+        compute_offset(point_i + 1);
 
-          // Generate join from the current line to the next line.
-          join_proc(vtx_builder, polyline.points[point_i], previous_offset,
-                    offset, scaled_miter_limit, tolerance);
-        }
+        // Generate join from the current line to the next line.
+        join_proc(vtx_builder, polyline.points[point_i], previous_offset,
+                  offset, scaled_miter_limit, tolerance);
       }
     }
 
