@@ -400,9 +400,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     );
   }
 
-
   Widget _buildError() {
-    assert(widget.errorText != null || widget.error != null);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -413,7 +411,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: widget.error ??  Text(
+          child: widget.error ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -447,7 +445,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && _error != null) {
+    if (_helper == null && (widget.errorText != null || widget.error != null)) {
       return _buildError();
     }
 
