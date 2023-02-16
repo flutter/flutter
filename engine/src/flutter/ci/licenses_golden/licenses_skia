@@ -1,4 +1,4 @@
-Signature: 5d547e0bcba0c37a0decc220be274a0a
+Signature: 2335b877a79c95d248d6e4a8f8e8a9cc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8913,6 +8913,7 @@ ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_p
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkJpegConstants.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegGainmap.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../third_party/skia/LICENSE
@@ -8933,6 +8934,7 @@ FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
+FILE: ../../../third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.h
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
