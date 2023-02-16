@@ -8377,11 +8377,7 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
-      textTheme: TextTheme(
-        bodyLarge: TextStyle(
-          color: Colors.blue[500],
-        ),
-      ),
+      colorScheme: ColorScheme.light(onSurface: Colors.blue[500]!),
     );
 
     Widget buildFrame(TextStyle style) {
@@ -8400,7 +8396,10 @@ void main() {
     // Empty TextStyle is overridden by theme
     await tester.pumpWidget(buildFrame(const TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
+
+    // According to material 3 spec, the input text should be the color of onSurface.
+    expect(editableText.style.color, themeData.colorScheme.onSurface);
+
     expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
     expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
     expect(editableText.style.decoration, themeData.textTheme.bodyLarge!.decoration);
