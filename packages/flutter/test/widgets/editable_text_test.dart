@@ -12773,230 +12773,281 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
 
-    testWidgets('inside EditableText', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            cursorOpacityAnimates: true,
-            autofillHints: null,
-          ),
+    Widget boilerplate(TextEditingController controller, [FocusNode? focusNode]) {
+      return MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode ?? FocusNode(),
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+          autofillHints: null,
         ),
       );
+    }
 
-      expect(
-        controller.value,
-        TextEditingValue.empty,
-      );
+    // Wait for the throttling. This is used to ensure a new history entry is created.
+    Future<void> waitForThrottling(WidgetTester tester) async {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    // Empty text editing value with a collapsed selection.
+    const TextEditingValue emptyTextCollapsed = TextEditingValue(
+      selection: TextSelection.collapsed(offset: 0),
+    );
+
+    // Texts and text editing values used repeatedly in undo/redo tests.
+    const String textA = 'A';
+    const String textAB = 'AB';
+    const String textAC = 'AC';
+
+    const TextEditingValue textACollapsedAtEnd = TextEditingValue(
+      text: textA,
+      selection: TextSelection.collapsed(offset: textA.length),
+    );
+
+    const TextEditingValue textABCollapsedAtEnd = TextEditingValue(
+      text: textAB,
+      selection: TextSelection.collapsed(offset: textAB.length),
+    );
+
+    const TextEditingValue textACCollapsedAtEnd = TextEditingValue(
+      text: textAC,
+      selection: TextSelection.collapsed(offset: textAC.length),
+    );
+
+    testWidgets('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(boilerplate(controller));
+      expect(controller.value, TextEditingValue.empty);
 
       // Undo/redo have no effect on an empty field that has never been edited.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        TextEditingValue.empty,
-      );
+      expect(controller.value, TextEditingValue.empty);
       await sendRedo(tester);
-      expect(
-        controller.value,
-        TextEditingValue.empty,
-      );
-
+      expect(controller.value, TextEditingValue.empty);
       await tester.pump();
-      expect(
-        controller.value,
-        TextEditingValue.empty,
-      );
+      expect(controller.value, TextEditingValue.empty);
 
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Should have no effect on an empty and focused field', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+      await waitForThrottling(tester);
+      expect(controller.value, TextEditingValue.empty);
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
       focusNode.requestFocus();
-      expect(
-        controller.value,
-        TextEditingValue.empty,
-      );
       await tester.pump();
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
+      expect(controller.value,  emptyTextCollapsed);
+      await waitForThrottling(tester);
 
-      // Wait for the throttling.
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Undo/redo still have no effect. The field is focused and the value has
+      // Undo/redo should have no effect. The field is focused and the value has
       // changed, but the text remains empty.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
+      expect(controller.value,  emptyTextCollapsed);
+
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
+      expect(controller.value,  emptyTextCollapsed);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Can undo/redo a single insertion', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value,  emptyTextCollapsed);
+
+      // First insertion.
+      await tester.enterText(find.byType(EditableText), textA);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // A redo before any undo has no effect.
+      await sendRedo(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Can undo a single insertion.
+      await sendUndo(tester);
+      expect(controller.value, emptyTextCollapsed);
+
+      // A second undo has no effect.
+      await sendUndo(tester);
+      expect(controller.value, emptyTextCollapsed);
+
+      // Can redo a single insertion.
+      await sendRedo(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // A second redo has no effect.
+      await sendRedo(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Can undo/redo multiple insertions', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value,  emptyTextCollapsed);
+
+      // First insertion.
+      await tester.enterText(find.byType(EditableText), textA);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Second insertion.
+      await tester.enterText(find.byType(EditableText), textAB);
+      await waitForThrottling(tester);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the first insertion.
+      await sendUndo(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Undo the second insertion.
+      await sendUndo(tester);
+      expect(controller.value, emptyTextCollapsed);
+
+      // Redo the second insertion.
+      await sendRedo(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Redo the first insertion.
+      await sendRedo(tester);
+      expect(controller.value, textABCollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    // Regression test for https://github.com/flutter/flutter/issues/120794.
+    // This is only reproducible on Android platform because it is the only
+    // platform where composing changes are saved in the editing history.
+    testWidgets('Can undo as intented when adding a delay between undos', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value,  emptyTextCollapsed);
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      const TextEditingValue composingStep1 = TextEditingValue(
+        text: '1 ni',
+        composing: TextRange(start: 2, end: 4),
+        selection: TextSelection.collapsed(offset: 4),
       );
 
-      await tester.enterText(find.byType(EditableText), '1');
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
+      const TextEditingValue composingStep2 = TextEditingValue(
+        text: '1 nihao',
+        composing: TextRange(start: 2, end: 7),
+        selection: TextSelection.collapsed(offset: 7),
       );
+
+      const TextEditingValue composingStep3 = TextEditingValue(
+        text: '1 你好',
+        selection: TextSelection.collapsed(offset: 4),
+      );
+
+      // Enter some composing text.
+      state.userUpdateTextEditingValue(composingStep1, SelectionChangedCause.keyboard);
+      await waitForThrottling(tester);
+
+      state.userUpdateTextEditingValue(composingStep2, SelectionChangedCause.keyboard);
+      await waitForThrottling(tester);
+
+      state.userUpdateTextEditingValue(composingStep3, SelectionChangedCause.keyboard);
+      await waitForThrottling(tester);
+
+      // Undo first insertion.
+      await sendUndo(tester);
+      expect(controller.value, composingStep2.copyWith(composing: TextRange.empty));
+
+      // Waiting for the throttling beetween undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
-      // Can undo/redo a single insertion.
+      // Undo second insertion.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
-      await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
+      expect(controller.value, composingStep1.copyWith(composing: TextRange.empty));
 
-      await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
-      await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
-      // And can undo/redo multiple insertions.
-      await tester.enterText(find.byType(EditableText), '13');
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '13',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 500));
-      await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '13',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
-      await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
-      await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
-      await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
-      await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '13',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
+    testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
 
-      // Can change the middle of the stack timeline.
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value,  emptyTextCollapsed);
+
+      // First insertion.
+      await tester.enterText(find.byType(EditableText), textA);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Second insertion.
+      await tester.enterText(find.byType(EditableText), textAC);
+      await waitForThrottling(tester);
+      expect(controller.value, textACCollapsedAtEnd);
+
+      // Undo and make a change.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
-      await tester.enterText(find.byType(EditableText), '12');
-      await tester.pump(const Duration(milliseconds: 500));
+      expect(controller.value, textACollapsedAtEnd);
+      await tester.enterText(find.byType(EditableText), textAB);
+      await waitForThrottling(tester);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Try a redo, state should not change because of the previous undo.
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '12',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Trying again will have no effect.
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '12',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo should restore state as it was before second insertion.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Another undo will restore state as before first insertion.
       await sendUndo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          selection: TextSelection.collapsed(offset: 0),
-        ),
-      );
+      expect(controller.value,  emptyTextCollapsed);
+
+      // Redo all changes.
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '1',
-          selection: TextSelection.collapsed(offset: 1),
-        ),
-      );
+      expect(controller.value, textACollapsedAtEnd);
       await sendRedo(tester);
-      expect(
-        controller.value,
-        const TextEditingValue(
-          text: '12',
-          selection: TextSelection.collapsed(offset: 2),
-        ),
-      );
+      expect(controller.value, textABCollapsedAtEnd);
+
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
@@ -13465,6 +13516,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
+
       await sendUndo(tester);
       expect(
         controller.value,
