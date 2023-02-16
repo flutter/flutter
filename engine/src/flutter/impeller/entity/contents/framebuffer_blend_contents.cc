@@ -122,19 +122,15 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
       return false;
   }
 
-  FS::BlendInfo blend_info;
   VS::FrameInfo frame_info;
 
   auto src_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
       src_snapshot->sampler_descriptor);
   FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, src_sampler);
-  blend_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
-
-  auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
-  FS::BindBlendInfo(cmd, blend_uniform);
 
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    src_snapshot->transform;
+  frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
 
   auto uniform_view = host_buffer.EmplaceUniform(frame_info);
   VS::BindFrameInfo(cmd, uniform_view);
