@@ -1755,8 +1755,9 @@ The findRenderObject() method was called for the following element:
   });
 
   testWidgets(
-      'RenderObjectElement updateChildren modifying GlobalKey Widget index and parent',
+      'MultiChildRenderObjectElement.updateChildren test',
       (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120762.
     final GlobalKey globalKey = GlobalKey();
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -1765,6 +1766,8 @@ The findRenderObject() method was called for the following element:
         const SizedBox(),
       ],
     ));
+    expect(tester.takeException(), isNull);
+
     await tester.pumpWidget(Column(
       children: <Widget>[
         const SizedBox(),
@@ -1772,6 +1775,7 @@ The findRenderObject() method was called for the following element:
         SizedBox(child: SizedBox(key: globalKey)),
       ],
     ));
+    expect(tester.takeException(), isNull);
   });
 }
 
