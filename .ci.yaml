@@ -4420,7 +4420,6 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test_windows
-    bringup: true # New task
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
