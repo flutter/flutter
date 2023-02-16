@@ -36,6 +36,8 @@ class BottomSheetThemeData with Diagnosticable {
     this.shadowColor,
     this.modalElevation,
     this.shape,
+    this.dragHandleColor,
+    this.dragHandleSize,
     this.clipBehavior,
     this.constraints,
   });
@@ -80,6 +82,12 @@ class BottomSheetThemeData with Diagnosticable {
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
 
+  /// Overrides the default value for [BottomSheet.dragHandleColor].
+  final Color? dragHandleColor;
+
+  /// Overrides the default value for [BottomSheet.dragHandleSize].
+  final Size? dragHandleSize;
+
   /// Overrides the default value for [BottomSheet.clipBehavior].
   ///
   /// If null, [BottomSheet] uses [Clip.none].
@@ -101,6 +109,8 @@ class BottomSheetThemeData with Diagnosticable {
     Color? shadowColor,
     double? modalElevation,
     ShapeBorder? shape,
+    Color? dragHandleColor,
+    Size? dragHandleSize,
     Clip? clipBehavior,
     BoxConstraints? constraints,
   }) {
@@ -113,6 +123,8 @@ class BottomSheetThemeData with Diagnosticable {
       shadowColor: shadowColor ?? this.shadowColor,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
+      dragHandleColor: dragHandleColor ?? this.dragHandleColor,
+      dragHandleSize: dragHandleSize ?? this.dragHandleSize,
       clipBehavior: clipBehavior ?? this.clipBehavior,
       constraints: constraints ?? this.constraints,
     );

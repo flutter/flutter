@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -75,6 +77,7 @@ class BottomSheet extends StatefulWidget {
     super.key,
     this.animationController,
     this.enableDrag = true,
+    this.hasDragHandler,
     this.onDragStart,
     this.onDragEnd,
     this.backgroundColor,
@@ -112,6 +115,11 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Default is true.
   final bool enableDrag;
+
+  /// Specifies whether drag handler is displayed when the drag action is enabled.
+  ///
+  /// Defaults is true in material 3 and false in material 2.
+  final bool? hasDragHandler;
 
   /// Called when the user begins dragging the bottom sheet vertically, if
   /// [enableDrag] is true.
@@ -285,13 +293,14 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
-    final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
+    final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
     final Color? shadowColor = widget.shadowColor ?? bottomSheetTheme.shadowColor ?? defaults.shadowColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
+    final bool hasDragHandler = widget.hasDragHandler ?? Theme.of(context).useMaterial3;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -303,7 +312,14 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: widget.builder(context),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (widget.enableDrag && hasDragHandler)
+              _DragHandle(onSemanticsTap: widget.onClosing),
+            widget.builder(context),
+          ],
+        ),
       ),
     );
 
@@ -324,6 +340,39 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragEnd: _handleDragEnd,
       excludeFromSemantics: true,
       child: bottomSheet,
+    );
+  }
+}
+
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({required this.onSemanticsTap});
+  final VoidCallback onSemanticsTap;
+
+  @override
+  Widget build(BuildContext context) {
+
+    final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final BottomSheetThemeData m3Defaults =  _BottomSheetDefaultsM3(context) ;
+
+    final Size dragHandleSize= bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
+    final Color dragHandleColor= bottomSheetTheme.dragHandleColor ?? m3Defaults.dragHandleColor!;
+
+    return Semantics(
+      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      container: true,
+      onTap: onSemanticsTap,
+      child: Padding(
+        // Add padding to make sure target size is larger than 48dp.
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 30),
+        child: Container(
+          height: dragHandleSize.height,
+          width: dragHandleSize.width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(dragHandleSize.height/2),
+            color: dragHandleColor,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -456,6 +505,8 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
     BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
+      final maxWidget= min(constraints.maxWidth, 640.0);
+
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
@@ -499,6 +550,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
+    this.hasDragHandler = false,
   });
 
   final ModalBottomSheetRoute<T> route;
@@ -509,6 +561,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final Clip? clipBehavior;
   final BoxConstraints? constraints;
   final bool enableDrag;
+  final bool hasDragHandler;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -570,6 +623,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         clipBehavior: widget.clipBehavior,
         constraints: widget.constraints,
         enableDrag: widget.enableDrag,
+        hasDragHandler: widget.hasDragHandler,
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
       ),
@@ -671,6 +725,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.modalBarrierColor,
     this.isDismissible = true,
     this.enableDrag = true,
+    this.hasDragHandler,
     required this.isScrollControlled,
     super.settings,
     this.transitionAnimationController,
@@ -773,6 +828,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Defaults is true.
   final bool enableDrag;
 
+  /// Specifies whether drag handler is displayed when the drag action is enabled.
+  ///
+  /// Defaults is true in material 3 and false in material 2.
+  final bool? hasDragHandler;
+
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
   ///
@@ -866,6 +926,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
+            hasDragHandler: hasDragHandler ?? Theme.of(context).useMaterial3,
           );
         },
       ),
@@ -1148,6 +1209,7 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
       elevation: 1.0,
       modalElevation: 1.0,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))),
+      constraints: const BoxConstraints(maxWidth: 640),
     );
 
   final BuildContext context;
@@ -1160,6 +1222,12 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get dragHandleColor => Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4);
+
+  @override
+  Size? get dragHandleSize => const Size(32, 4);
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

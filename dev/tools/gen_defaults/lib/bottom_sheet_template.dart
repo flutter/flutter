@@ -15,6 +15,7 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
       elevation: ${elevation("md.comp.sheet.bottom.docked.standard.container")},
       modalElevation: ${elevation("md.comp.sheet.bottom.docked.modal.container")},
       shape: ${shape("md.comp.sheet.bottom.docked.container")},
+      constraints: const BoxConstraints(maxWidth: 640),
     );
 
   final BuildContext context;
@@ -27,6 +28,12 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get dragHandleColor => ${componentColor("md.comp.sheet.bottom.docked.drag-handle")};
+
+  @override
+  Size? get dragHandleSize => ${size("md.comp.sheet.bottom.docked.drag-handle")};
 }
 ''';
 }
