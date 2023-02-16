@@ -305,7 +305,7 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.errorWidget,
+    this.error,
   });
 
   final TextAlign? textAlign;
@@ -315,7 +315,7 @@ class _HelperError extends StatefulWidget {
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
-  final Widget? errorWidget;
+  final Widget? error;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -337,7 +337,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null) {
+    if (widget.errorText != null || widget.error != null) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -400,26 +400,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     );
   }
 
-  Widget _buildErrorWidget() {
-    assert(widget.errorWidget != null);
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      child: FadeTransition(
-        opacity: _controller,
-        child: FractionalTranslation(
-          translation: Tween<Offset>(
-            begin: const Offset(0.0, -0.25),
-            end: Offset.zero,
-          ).evaluate(_controller.view),
-          child: widget.errorText != null ? widget.errorWidget : empty,
-        ),
-      ),
-    );
-  }
 
   Widget _buildError() {
-    assert(widget.errorText != null);
+    assert(widget.errorText != null || widget.error != null);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -430,7 +413,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: Text(
+          child: widget.error ??  Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -446,9 +429,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     if (_controller.isDismissed) {
       _error = null;
-      if (widget.errorWidget != null) {
-        return _buildErrorWidget();
-      } else if (widget.helperText != null) {
+      if (widget.helperText != null) {
         return _helper = _buildHelper();
       } else {
         _helper = null;
@@ -458,9 +439,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if (widget.errorWidget != null) {
-        return _error = _buildErrorWidget();
-      } else if (widget.errorText != null) {
+      if (widget.errorText != null || widget.error != null) {
         return _error = _buildError();
       } else {
         _error = null;
@@ -468,19 +447,15 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && widget.errorText != null) {
-      if (widget.errorWidget != null) {
-        return _buildErrorWidget();
-      } else {
-        return _buildError();
-      }
+    if (_helper == null && _error != null) {
+      return _buildError();
     }
 
     if (_error == null && widget.helperText != null) {
       return _buildHelper();
     }
 
-    if (widget.errorText != null) {
+    if (widget.errorText != null || widget.error != null) {
       return Stack(
         children: <Widget>[
           FadeTransition(
@@ -2407,7 +2382,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
-      errorWidget: decoration.errorWidget,
+      error: decoration.error,
     );
 
     Widget? counter;
@@ -2639,7 +2614,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.errorWidget,
+    this.error,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
@@ -2700,7 +2675,7 @@ class InputDecoration {
        semanticCounterText = null,
        alignLabelWithHint = false,
        constraints = null,
-       errorWidget = null;
+       error = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3511,14 +3486,13 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
-  /// Widget that allows to customize the error text.
-  /// Widget that appears below the [InputDecorator.child] and the border.
+  /// Optional widget that appears below the [InputDecorator.child] and the border.
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
   ///
-  /// If both [errorText] and [errorWidget] are specified, then errorWidget
+  /// If both [errorText] and [error] are specified, then [error]
   /// is shown.
-  final Widget? errorWidget;
+  final Widget? error;
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
@@ -3573,7 +3547,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    Widget? errorWidget,
+    Widget? error,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3626,7 +3600,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      errorWidget: errorWidget ?? this.errorWidget,
+      error: error ?? this.error,
     );
   }
 
@@ -3726,7 +3700,7 @@ class InputDecoration {
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
         && other.constraints == constraints
-        && other.errorWidget == errorWidget;
+        && other.error == error;
   }
 
   @override
@@ -3782,7 +3756,7 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      errorWidget,
+      error,
     ];
     return Object.hashAll(values);
   }
@@ -3836,7 +3810,7 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (errorWidget != null) 'errorWidget: "$errorWidget"',
+      if (error != null) 'error: "$error"',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }

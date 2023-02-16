@@ -1863,20 +1863,20 @@ void main() {
     expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
   });
 
-  testWidgets('InputDecorator errorWidget', (WidgetTester tester) async {
-    // when errorWidget is defined
+  testWidgets('InputDecorator error', (WidgetTester tester) async {
+    // when error is defined
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          errorWidget: Text('errorText'),
+          error: Text('errorText'),
         ),
       ),
     );
-    //When errorText and errorBuilder is defined then errorWidget will be shown
+    //When errorText and error is defined then error will be shown
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          errorWidget: Text('errorText'),
+          error: Text('errorText'),
           errorText: 'errorText',
         ),
       ),
