@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -1201,16 +1202,26 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   TextStyle _getInputStyleForState(TextStyle style) {
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(_stateInputStyle!, _materialState);
+    final ThemeData theme = Theme.of(context);
+    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _stateInputStyleM3! : _stateInputStyleM2!, _materialState);
     final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
     return providedStyle.merge(stateStyle);
   }
 
-  TextStyle? get _stateInputStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get _stateInputStyleM3 => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: colors.onSurface.withOpacity(0.38));
     }
-    return TextStyle(color: widget.style?.color);
+    return TextStyle(color: colors.onSurface);
+  });
+
+  TextStyle? get _stateInputStyleM2 => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final ThemeData theme = Theme.of(context);
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: theme.disabledColor);
+    }
+    return theme.textTheme.titleMedium!;
   });
 
   @override
@@ -1226,7 +1237,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = _getInputStyleForState((theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style));
+    final TextStyle style = (theme.useMaterial3 ? _getInputStyleForState(_m3InputStyle(context)) : _getInputStyleForState(theme.textTheme.titleMedium!)).merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
