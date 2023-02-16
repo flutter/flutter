@@ -6294,11 +6294,11 @@ void main() {
 
   testWidgets('InputDecorator hint style has m3 defaults when enabled', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
-    final String hintText = 'This is a hint.';
+    const String hintText = 'This is a hint.';
     await tester.pumpWidget(
        MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextField(
             decoration: InputDecoration(
               hintText: hintText,
@@ -6312,16 +6312,16 @@ void main() {
 
     final Text hintTextWidget = tester.widget(find.text(hintText));
 
-    expect(hintTextWidget.style!.color!, theme.colorScheme.onSurfaceVariant);
+    expect(hintTextWidget.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('InputDecorator hint style has m3 defaults when disabled', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
-    final String hintText = 'This is a hint.';
+    const String hintText = 'This is a hint.';
     await tester.pumpWidget(
        MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextField(
             decoration: InputDecoration(
               hintText: hintText,
@@ -6335,16 +6335,16 @@ void main() {
 
     final Text hintTextWidget = tester.widget(find.text(hintText));
 
-    expect(hintTextWidget.style!.color!, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(hintTextWidget.style!.color, theme.colorScheme.onSurface.withOpacity(0.38));
   });
 
   testWidgets('InputDecorator hint style color is overriden by colorScheme when enabled', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true).copyWith(colorScheme: ColorScheme.light(onSurfaceVariant: Colors.green));
-    final String hintText = 'This is a hint.';
+    final ThemeData theme = ThemeData(useMaterial3: true).copyWith(colorScheme: const ColorScheme.light(onSurfaceVariant: Colors.green));
+    const String hintText = 'This is a hint.';
     await tester.pumpWidget(
        MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextField(
             decoration: InputDecoration(
               hintText: hintText,
@@ -6358,16 +6358,16 @@ void main() {
 
     final Text hintTextWidget = tester.widget(find.text(hintText));
 
-    expect(hintTextWidget.style!.color!, Colors.green);
+    expect(hintTextWidget.style!.color, Colors.green);
   });
 
   testWidgets('InputDecorator hint style color is overriden by colorScheme when disabled', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true).copyWith(colorScheme: ColorScheme.light(onSurface: Colors.green));
-    final String hintText = 'This is a hint.';
+    final ThemeData theme = ThemeData(useMaterial3: true).copyWith(colorScheme: const ColorScheme.light(onSurface: Colors.green));
+    const String hintText = 'This is a hint.';
     await tester.pumpWidget(
        MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextField(
             decoration: InputDecoration(
               hintText: hintText,
@@ -6381,7 +6381,7 @@ void main() {
 
     final Text hintTextWidget = tester.widget(find.text(hintText));
 
-    expect(hintTextWidget.style!.color!, Colors.green.withOpacity(0.38));
+    expect(hintTextWidget.style!.color, Colors.green.withOpacity(0.38));
   });
 }
 }
