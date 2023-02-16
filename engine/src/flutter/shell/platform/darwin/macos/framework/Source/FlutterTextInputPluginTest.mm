@@ -69,14 +69,12 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -134,14 +132,12 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -202,14 +198,12 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -270,14 +264,12 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -347,14 +339,12 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -401,14 +391,12 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -431,19 +419,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[ @"name" ],
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"hints" : @[ @"name" ],
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -454,7 +440,6 @@
   if (@available(macOS 11.0, *)) {
     EXPECT_EQ([plugin contentType], nil);
   }
-
   return true;
 }
 
@@ -472,19 +457,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[],
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"hints" : @[],
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -507,19 +490,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"obscureText" : @YES,
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"obscureText" : @YES,
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -542,19 +523,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[ @"password" ],
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"hints" : @[ @"password" ],
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -582,34 +561,32 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"fields" : @[
-                                                    @{
-                                                      @"inputAction" : @"action",
-                                                      @"inputType" : @{@"name" : @"inputName"},
-                                                      @"autofill" : @{
-                                                        @"uniqueIdentifier" : @"field1",
-                                                        @"hints" : @[ @"password" ],
-                                                        @"editingValue" : @{@"text" : @""},
-                                                      }
-                                                    },
-                                                    @{
-                                                      @"inputAction" : @"action",
-                                                      @"inputType" : @{@"name" : @"inputName"},
-                                                      @"autofill" : @{
-                                                        @"uniqueIdentifier" : @"field2",
-                                                        @"hints" : @[ @"name" ],
-                                                        @"editingValue" : @{@"text" : @""},
-                                                      }
-                                                    }
-                                                  ]
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"fields" : @[
+      @{
+        @"inputAction" : @"action",
+        @"inputType" : @{@"name" : @"inputName"},
+        @"autofill" : @{
+          @"uniqueIdentifier" : @"field1",
+          @"hints" : @[ @"password" ],
+          @"editingValue" : @{@"text" : @""},
+        }
+      },
+      @{
+        @"inputAction" : @"action",
+        @"inputType" : @{@"name" : @"inputName"},
+        @"autofill" : @{
+          @"uniqueIdentifier" : @"field2",
+          @"hints" : @[ @"name" ],
+          @"editingValue" : @{@"text" : @""},
+        }
+      }
+    ]
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -632,19 +609,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[ @"username" ],
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"hints" : @[ @"name" ],
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -672,19 +647,17 @@
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   // Set input client 1.
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                  @"autofill" : @{
-                                                    @"uniqueIdentifier" : @"field1",
-                                                    @"hints" : @[ @"oneTimeCode" ],
-                                                    @"editingValue" : @{@"text" : @""},
-                                                  }
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+    @"autofill" : @{
+      @"uniqueIdentifier" : @"field1",
+      @"hints" : @[ @"oneTimeCode" ],
+      @"editingValue" : @{@"text" : @""},
+    }
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -906,15 +879,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -962,15 +933,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
   [plugin insertText:@"text to insert"];
@@ -1079,15 +1048,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
   [plugin setMarkedText:@"m" selectedRange:NSMakeRange(0, 1)];
@@ -1316,15 +1283,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -1445,15 +1410,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -1521,15 +1484,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
   [plugin insertText:@"text to insert"];
@@ -1582,15 +1543,13 @@
   FlutterTextInputPlugin* plugin =
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
-  [plugin handleMethodCall:[FlutterMethodCall
-                               methodCallWithMethodName:@"TextInput.setClient"
-                                              arguments:@[
-                                                @(1), @{
-                                                  @"inputAction" : @"action",
-                                                  @"enableDeltaModel" : @"true",
-                                                  @"inputType" : @{@"name" : @"inputName"},
-                                                }
-                                              ]]
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
                     result:^(id){
                     }];
 
@@ -1767,25 +1726,24 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
     [viewController.view addSubview:mockTextField];
     [mockTextField startEditing];
 
-    NSDictionary* arguments = @{
+    NSDictionary* setClientConfig = @{
       @"inputAction" : @"action",
       @"inputType" : @{@"name" : @"inputName"},
     };
     FlutterMethodCall* methodCall =
         [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
-                                          arguments:@[ @(1), arguments ]];
+                                          arguments:@[ @(1), setClientConfig ]];
     FlutterResult result = ^(id result) {
     };
     [viewController.textInputPlugin handleMethodCall:methodCall result:result];
 
-    arguments = @{
+    NSDictionary* arguments = @{
       @"text" : @"new text",
       @"selectionBase" : @(1),
       @"selectionExtent" : @(2),
       @"composingBase" : @(-1),
       @"composingExtent" : @(-1),
     };
-
     methodCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
                                                    arguments:arguments];
     [viewController.textInputPlugin handleMethodCall:methodCall result:result];
