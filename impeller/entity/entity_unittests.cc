@@ -404,6 +404,52 @@ TEST_P(EntityTest, CubicCurveTest) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransformation) {
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    const char* input_axis[] = {"X", "Y", "Z"};
+    static int rotation_axis_index = 0;
+    static float rotation = 0;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Rotation", &rotation, -kPi, kPi);
+    ImGui::Combo("Rotation Axis", &rotation_axis_index, input_axis,
+                 sizeof(input_axis) / sizeof(char*));
+    Matrix rotation_matrix;
+    switch (rotation_axis_index) {
+      case 0:
+        rotation_matrix = Matrix::MakeRotationX(Radians(rotation));
+        break;
+      case 1:
+        rotation_matrix = Matrix::MakeRotationY(Radians(rotation));
+        break;
+      case 2:
+        rotation_matrix = Matrix::MakeRotationZ(Radians(rotation));
+        break;
+      default:
+        rotation_matrix = Matrix{};
+        break;
+    }
+
+    if (ImGui::Button("Reset")) {
+      rotation = 0;
+    }
+    ImGui::End();
+    Matrix current_transform =
+        Matrix::MakeScale(GetContentScale())
+            .MakeTranslation(
+                Vector3(Point(pass.GetRenderTargetSize().width / 2.0,
+                              pass.GetRenderTargetSize().height / 2.0)));
+    Matrix result_transform = current_transform * rotation_matrix;
+    Path path =
+        PathBuilder{}.AddRect(Rect::MakeXYWH(-300, -400, 600, 800)).TakePath();
+
+    Entity entity;
+    entity.SetTransformation(result_transform);
+    entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+    return entity.Render(context, pass);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(EntityTest, CubicCurveAndOverlapTest) {
   // Compare with https://fiddle.skia.org/c/7a05a3e186c65a8dfb732f68020aae06
   Path path =

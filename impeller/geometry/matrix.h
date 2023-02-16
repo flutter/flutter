@@ -443,7 +443,7 @@ struct Matrix {
     // Per assumptions about NDC documented above.
     const auto scale =
         MakeScale({2.0f / static_cast<Scalar>(size.width),
-                   -2.0f / static_cast<Scalar>(size.height), 1.0});
+                   -2.0f / static_cast<Scalar>(size.height), 0.0});
     const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
     return translate * scale;
   }
