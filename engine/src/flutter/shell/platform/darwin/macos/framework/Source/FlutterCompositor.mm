@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
 
 #include "flutter/fml/logging.h"
 
@@ -10,7 +11,9 @@ namespace flutter {
 
 FlutterCompositor::FlutterCompositor(id<FlutterViewProvider> view_provider,
                                      FlutterPlatformViewController* platform_view_controller)
-    : view_provider_(view_provider), platform_view_controller_(platform_view_controller) {
+    : view_provider_(view_provider),
+      platform_view_controller_(platform_view_controller),
+      mutator_views_([NSMapTable strongToStrongObjectsMapTable]) {
   FML_CHECK(view_provider != nullptr) << "view_provider cannot be nullptr";
 }
 
@@ -61,25 +64,43 @@ bool FlutterCompositor::Present(uint64_t view_id,
 
   [view.surfaceManager present:surfaces
                         notify:^{
-                          for (size_t i = 0; i < layers_count; i++) {
-                            const FlutterLayer* layer = layers[i];
-                            switch (layer->type) {
-                              case kFlutterLayerContentTypeBackingStore:
-                                break;
-                              case kFlutterLayerContentTypePlatformView:
-                                PresentPlatformView(view, layer, i);
-                                break;
-                            }
-                          }
-                          [platform_view_controller_ disposePlatformViews];
+                          PresentPlatformViews(view, layers, layers_count);
                         }];
 
   return true;
 }
 
-void FlutterCompositor::PresentPlatformView(FlutterView* default_base_view,
-                                            const FlutterLayer* layer,
-                                            size_t layer_position) {
+void FlutterCompositor::PresentPlatformViews(FlutterView* default_base_view,
+                                             const FlutterLayer** layers,
+                                             size_t layers_count) {
+  FML_DCHECK([[NSThread currentThread] isMainThread])
+      << "Must be on the main thread to present platform views";
+
+  // Active mutator views for this frame.
+  NSMutableArray<FlutterMutatorView*>* present_mutators = [NSMutableArray array];
+
+  for (size_t i = 0; i < layers_count; i++) {
+    FlutterLayer* layer = (FlutterLayer*)layers[i];
+    if (layer->type == kFlutterLayerContentTypePlatformView) {
+      [present_mutators addObject:PresentPlatformView(default_base_view, layer, i)];
+    }
+  }
+
+  NSMutableArray<FlutterMutatorView*>* obsolete_mutators =
+      [NSMutableArray arrayWithArray:[mutator_views_ objectEnumerator].allObjects];
+  [obsolete_mutators removeObjectsInArray:present_mutators];
+
+  for (FlutterMutatorView* mutator in obsolete_mutators) {
+    [mutator_views_ removeObjectForKey:mutator.platformView];
+    [mutator removeFromSuperview];
+  }
+
+  [platform_view_controller_ disposePlatformViews];
+}
+
+FlutterMutatorView* FlutterCompositor::PresentPlatformView(FlutterView* default_base_view,
+                                                           const FlutterLayer* layer,
+                                                           size_t layer_position) {
   FML_DCHECK([[NSThread currentThread] isMainThread])
       << "Must be on the main thread to present platform views";
 
@@ -88,13 +109,18 @@ void FlutterCompositor::PresentPlatformView(FlutterView* default_base_view,
 
   FML_DCHECK(platform_view) << "Platform view not found for id: " << platform_view_id;
 
-  CGFloat scale = default_base_view.layer.contentsScale;
-  platform_view.frame = CGRectMake(layer->offset.x / scale, layer->offset.y / scale,
-                                   layer->size.width / scale, layer->size.height / scale);
-  if (platform_view.superview == nil) {
-    [default_base_view addSubview:platform_view];
+  FlutterMutatorView* container = [mutator_views_ objectForKey:platform_view];
+
+  if (!container) {
+    container = [[FlutterMutatorView alloc] initWithPlatformView:platform_view];
+    [mutator_views_ setObject:container forKey:platform_view];
+    [default_base_view addSubview:container];
   }
-  platform_view.layer.zPosition = layer_position;
+
+  container.layer.zPosition = layer_position;
+  [container applyFlutterLayer:layer];
+
+  return container;
 }
 
 }  // namespace flutter
