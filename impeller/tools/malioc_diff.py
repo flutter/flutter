@@ -116,7 +116,10 @@ def read_malioc_file(malioc_tree, json_file):
     if shader['hardware']['core'] not in CORES:
       continue
     result = {}
-    result['filename'] = os.path.relpath(shader['filename'], build_gen_dir)
+    filename = os.path.relpath(shader['filename'], build_gen_dir)
+    if filename.startswith('../..'):
+      filename = filename[6:]
+    result['filename'] = filename
     result['core'] = shader['hardware']['core']
     result['type'] = shader['shader']['type']
     for prop in shader['properties']:

@@ -24,12 +24,6 @@ vec4 ReadDestination() {
 }
 #endif
 
-uniform BlendInfo {
-  float dst_input_alpha;
-  float src_y_coord_scale;
-}
-blend_info;
-
 uniform sampler2D texture_sampler_src;
 
 in vec2 v_src_texture_coords;
@@ -39,12 +33,10 @@ out vec4 frag_color;
 void main() {
   vec4 dst_sample = ReadDestination();
   vec4 dst = IPUnpremultiply(dst_sample);
-  vec4 src = IPUnpremultiply(IPSampleWithTileMode(
-      texture_sampler_src,           // sampler
-      v_src_texture_coords,          // texture coordinates
-      blend_info.src_y_coord_scale,  // y coordinate scale
-      kTileModeDecal                 // tile mode
-      ));
+  vec4 src =
+      IPUnpremultiply(IPSampleDecal(texture_sampler_src,  // sampler
+                                    v_src_texture_coords  // texture coordinates
+                                    ));
 
   vec4 blended = vec4(Blend(dst.rgb, src.rgb), 1) * dst.a;
 
