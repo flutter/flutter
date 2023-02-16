@@ -172,8 +172,8 @@ class ListTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,

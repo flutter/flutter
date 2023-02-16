@@ -49,8 +49,8 @@ class IconButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two icon button themes.
   static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return IconButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
