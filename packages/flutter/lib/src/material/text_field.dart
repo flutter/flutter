@@ -1203,26 +1203,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   TextStyle _getInputStyleForState(TextStyle style) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _stateInputStyleM3! : _stateInputStyleM2!, _materialState);
+    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context), _materialState);
     final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
     return providedStyle.merge(stateStyle);
   }
-
-  TextStyle? get _stateInputStyleM3 => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: colors.onSurface.withOpacity(0.38));
-    }
-    return TextStyle(color: colors.onSurface);
-  });
-
-  TextStyle? get _stateInputStyleM2 => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData theme = Theme.of(context);
-    if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: theme.disabledColor);
-    }
-    return TextStyle(color: theme.textTheme.titleMedium?.color);
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -1481,6 +1465,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
+TextStyle? _m2StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  final ThemeData theme = Theme.of(context);
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: theme.disabledColor);
+  }
+  return TextStyle(color: theme.textTheme.titleMedium?.color);
+});
+
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
@@ -1492,6 +1484,14 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // Token database version: v0_162
+
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  final ColorScheme colors = Theme.of(context).colorScheme;
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+  }
+  return TextStyle(color: Theme.of(context).colorScheme.onSurface);
+});
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
