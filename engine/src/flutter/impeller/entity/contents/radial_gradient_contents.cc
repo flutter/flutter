@@ -70,8 +70,9 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
   auto colors = CreateGradientColors(colors_, stops_);
 
   gradient_info.colors_length = colors.size();
-  auto color_buffer = host_buffer.Emplace(
-      colors.data(), colors.size() * sizeof(StopData), alignof(StopData));
+  auto color_buffer =
+      host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
+                          DefaultUniformAlignment());
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
