@@ -35,11 +35,8 @@ Future<void> testMain() async {
     test('loads Blehm font from buffer', () async {
       expect(_containsFontFamily('Blehm'), isFalse);
 
-      final DomXMLHttpRequest response = await domHttpRequest(
-          testFontUrl,
-          responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
-          fontFamily: 'Blehm');
+      final ByteBuffer response = await httpFetchByteBuffer(testFontUrl);
+      await ui.loadFontFromList(response.asUint8List(), fontFamily: 'Blehm');
 
       expect(_containsFontFamily('Blehm'), isTrue);
     },
@@ -59,11 +56,8 @@ Future<void> testMain() async {
 
       // Now, loads a new font using loadFontFromList. This should clear the
       // cache
-      final DomXMLHttpRequest response = await domHttpRequest(
-          testFontUrl,
-          responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
-          fontFamily: 'Blehm');
+      final ByteBuffer response = await httpFetchByteBuffer(testFontUrl);
+      await ui.loadFontFromList(response.asUint8List(), fontFamily: 'Blehm');
 
       // Verifies the font is loaded, and the cache is cleaned.
       expect(_containsFontFamily('Blehm'), isTrue);
@@ -84,11 +78,8 @@ Future<void> testMain() async {
             buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         message = utf8.decode(list);
       };
-      final DomXMLHttpRequest response = await domHttpRequest(
-          testFontUrl,
-          responseType: 'arraybuffer');
-      await ui.loadFontFromList(Uint8List.view(response.response as ByteBuffer),
-          fontFamily: 'Blehm');
+      final ByteBuffer response = await httpFetchByteBuffer(testFontUrl);
+      await ui.loadFontFromList(response.asUint8List(), fontFamily: 'Blehm');
       final Completer<void> completer = Completer<void>();
       domWindow.requestAnimationFrame(allowInterop((_) { completer.complete();}) );
       await completer.future;

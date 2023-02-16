@@ -63,52 +63,23 @@ class AssetManager {
     return Uri.encodeFull('${_baseUrl ?? ''}$assetsDir/$asset');
   }
 
+  /// Loads an asset and returns the server response.
+  Future<HttpFetchResponse> loadAsset(String asset) {
+    return httpFetch(getAssetUrl(asset));
+  }
+
   /// Loads an asset using an [DomXMLHttpRequest] and returns data as [ByteData].
   Future<ByteData> load(String asset) async {
     final String url = getAssetUrl(asset);
-    try {
-      final DomXMLHttpRequest request =
-          await domHttpRequest(url, responseType: 'arraybuffer');
+    final HttpFetchResponse response = await httpFetch(url);
 
-      final ByteBuffer response = request.response as ByteBuffer;
-      return response.asByteData();
-    } catch (e) {
-      if (!domInstanceOfString(e, 'ProgressEvent')){
-        rethrow;
-      }
-      final DomProgressEvent p = e as DomProgressEvent;
-      final DomEventTarget? target = p.target;
-      if (domInstanceOfString(target,'XMLHttpRequest')) {
-        final DomXMLHttpRequest request = target! as DomXMLHttpRequest;
-        if (request.status == 404 && asset == 'AssetManifest.json') {
-          printWarning('Asset manifest does not exist at `$url` – ignoring.');
-          return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
-        }
-        throw AssetManagerException(url, request.status!.toInt());
-      }
-
-      final String? constructorName = target == null ? 'null' :
-          domGetConstructorName(target);
-      printWarning('Caught ProgressEvent with unknown target: '
-          '$constructorName');
-      rethrow;
+    if (response.status == 404 && asset == 'AssetManifest.json') {
+      printWarning('Asset manifest does not exist at `$url` - ignoring.');
+      return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
     }
+
+    return (await response.payload.asByteBuffer()).asByteData();
   }
-}
-
-/// Thrown to indicate http failure during asset loading.
-class AssetManagerException implements Exception {
-  /// Initializes exception with request url and http status.
-  AssetManagerException(this.url, this.httpStatus);
-
-  /// Http request url for asset.
-  final String url;
-
-  /// Http status of response.
-  final int httpStatus;
-
-  @override
-  String toString() => 'Failed to load asset at "$url" ($httpStatus)';
 }
 
 /// An asset manager that gives fake empty responses for assets.
@@ -142,6 +113,33 @@ class WebOnlyMockAssetManager implements AssetManager {
   String getAssetUrl(String asset) => asset;
 
   @override
+  Future<HttpFetchResponse> loadAsset(String asset) async {
+    if (asset == getAssetUrl('AssetManifest.json')) {
+      return MockHttpFetchResponse(
+        url: asset,
+        status: 200,
+        payload: MockHttpFetchPayload(
+          byteBuffer: _toByteData(utf8.encode(defaultAssetManifest)).buffer,
+        )
+      );
+    }
+    if (asset == getAssetUrl('FontManifest.json')) {
+      return MockHttpFetchResponse(
+        url: asset,
+        status: 200,
+        payload: MockHttpFetchPayload(
+          byteBuffer: _toByteData(utf8.encode(defaultFontManifest)).buffer,
+        )
+      );
+    }
+
+    return MockHttpFetchResponse(
+      url: asset,
+      status: 404,
+    );
+  }
+
+  @override
   Future<ByteData> load(String asset) {
     if (asset == getAssetUrl('AssetManifest.json')) {
       return Future<ByteData>.value(
@@ -151,7 +149,7 @@ class WebOnlyMockAssetManager implements AssetManager {
       return Future<ByteData>.value(
           _toByteData(utf8.encode(defaultFontManifest)));
     }
-    throw AssetManagerException(asset, 404);
+    throw HttpFetchNoPayloadError(asset, status: 404);
   }
 
   ByteData _toByteData(List<int> bytes) {
