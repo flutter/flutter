@@ -39,7 +39,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
-      int view_id,
+      int64_t view_id,
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
@@ -53,7 +53,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
   std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
 
   // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
+  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,

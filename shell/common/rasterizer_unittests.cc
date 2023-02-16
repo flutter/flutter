@@ -64,13 +64,14 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
                     double device_pixel_ratio,
                     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger));
   MOCK_METHOD2(PrerollCompositeEmbeddedView,
-               void(int view_id, std::unique_ptr<EmbeddedViewParams> params));
+               void(int64_t view_id,
+                    std::unique_ptr<EmbeddedViewParams> params));
   MOCK_METHOD1(PostPrerollAction,
                PostPrerollResult(
                    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger));
   MOCK_METHOD0(GetCurrentCanvases, std::vector<SkCanvas*>());
   MOCK_METHOD0(GetCurrentBuilders, std::vector<DisplayListBuilder*>());
-  MOCK_METHOD1(CompositeEmbeddedView, EmbedderPaintContext(int view_id));
+  MOCK_METHOD1(CompositeEmbeddedView, EmbedderPaintContext(int64_t view_id));
   MOCK_METHOD2(SubmitFrame,
                void(GrDirectContext* context,
                     std::unique_ptr<SurfaceFrame> frame));

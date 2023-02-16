@@ -71,7 +71,7 @@ void EmbedderExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
-    int view_id,
+    int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
   auto vid = EmbedderExternalView::ViewIdentifier(view_id);
   FML_DCHECK(pending_views_.count(vid) == 0);
@@ -119,7 +119,7 @@ EmbedderExternalViewEmbedder::GetCurrentBuilders() {
 
 // |ExternalViewEmbedder|
 EmbedderPaintContext EmbedderExternalViewEmbedder::CompositeEmbeddedView(
-    int view_id) {
+    int64_t view_id) {
   auto vid = EmbedderExternalView::ViewIdentifier(view_id);
   auto found = pending_views_.find(vid);
   if (found == pending_views_.end()) {

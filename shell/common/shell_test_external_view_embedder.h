@@ -55,7 +55,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
-      int view_id,
+      int64_t view_id,
       std::unique_ptr<EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
@@ -69,7 +69,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
 
   // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
+  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   void PushVisitedPlatformView(int64_t view_id) override;
