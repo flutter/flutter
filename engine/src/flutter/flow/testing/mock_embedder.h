@@ -34,7 +34,7 @@ class MockViewEmbedder : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
-      int view_id,
+      int64_t view_id,
       std::unique_ptr<EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
@@ -44,7 +44,7 @@ class MockViewEmbedder : public ExternalViewEmbedder {
   std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
 
   // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
+  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
 
   std::vector<int64_t> prerolled_views() const { return prerolled_views_; }
   std::vector<int64_t> painted_views() const { return painted_views_; }

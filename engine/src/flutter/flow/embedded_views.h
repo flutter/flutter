@@ -420,7 +420,7 @@ class ExternalViewEmbedder {
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) = 0;
 
   virtual void PrerollCompositeEmbeddedView(
-      int view_id,
+      int64_t view_id,
       std::unique_ptr<EmbeddedViewParams> params) = 0;
 
   // This needs to get called after |Preroll| finishes on the layer tree.
@@ -436,7 +436,7 @@ class ExternalViewEmbedder {
   virtual std::vector<DisplayListBuilder*> GetCurrentBuilders() = 0;
 
   // Must be called on the UI thread.
-  virtual EmbedderPaintContext CompositeEmbeddedView(int view_id) = 0;
+  virtual EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) = 0;
 
   // Implementers must submit the frame by calling frame.Submit().
   //

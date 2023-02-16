@@ -96,7 +96,7 @@ FlatlandExternalViewEmbedder::GetCurrentBuilders() {
 }
 
 void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
-    int view_id,
+    int64_t view_id,
     std::unique_ptr<flutter::EmbeddedViewParams> params) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   FML_CHECK(frame_layers_.count(handle) == 0);
@@ -108,7 +108,7 @@ void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 flutter::EmbedderPaintContext
-FlatlandExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
+FlatlandExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   auto found = frame_layers_.find(handle);
   FML_CHECK(found != frame_layers_.end());
