@@ -341,7 +341,7 @@ TEST(GeometryTest, MatrixMakeOrthographic) {
     auto expect = Matrix{
         0.02, 0,     0,   0,  //
         0,    -0.01, 0,   0,  //
-        0,    0,     1,   0,  //
+        0,    0,     0,   0,  //
         -1,   1,     0.5, 1,  //
     };
     ASSERT_MATRIX_NEAR(m, expect);
@@ -352,7 +352,7 @@ TEST(GeometryTest, MatrixMakeOrthographic) {
     auto expect = Matrix{
         0.005, 0,     0,   0,  //
         0,     -0.02, 0,   0,  //
-        0,     0,     1,   0,  //
+        0,     0,     0,   0,  //
         -1,    1,     0.5, 1,  //
     };
     ASSERT_MATRIX_NEAR(m, expect);
