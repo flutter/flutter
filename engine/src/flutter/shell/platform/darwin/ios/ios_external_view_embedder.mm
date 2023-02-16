@@ -42,7 +42,7 @@ void IOSExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PrerollCompositeEmbeddedView(
-    int view_id,
+    int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PrerollCompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
@@ -71,7 +71,7 @@ std::vector<DisplayListBuilder*> IOSExternalViewEmbedder::GetCurrentBuilders() {
 }
 
 // |ExternalViewEmbedder|
-EmbedderPaintContext IOSExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
+EmbedderPaintContext IOSExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
   return platform_views_controller_->CompositeEmbeddedView(view_id);

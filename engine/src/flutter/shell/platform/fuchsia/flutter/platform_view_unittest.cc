@@ -64,9 +64,10 @@ class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
   }
 
   void PrerollCompositeEmbeddedView(
-      int view_id,
+      int64_t view_id,
       std::unique_ptr<flutter::EmbeddedViewParams> params) override {}
-  flutter::EmbedderPaintContext CompositeEmbeddedView(int view_id) override {
+  flutter::EmbedderPaintContext CompositeEmbeddedView(
+      int64_t view_id) override {
     return {nullptr, nullptr};
   }
 };

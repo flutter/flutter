@@ -52,7 +52,7 @@ void ShellTestExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(
-    int view_id,
+    int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
   SkRect view_bounds = SkRect::Make(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
@@ -100,7 +100,7 @@ void ShellTestExternalViewEmbedder::PushFilterToVisitedPlatformViews(
 }
 
 EmbedderPaintContext ShellTestExternalViewEmbedder::CompositeEmbeddedView(
-    int view_id) {
+    int64_t view_id) {
   return {slices_[view_id]->canvas(), slices_[view_id]->builder()};
 }
 
