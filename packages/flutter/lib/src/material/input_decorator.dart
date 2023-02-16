@@ -710,8 +710,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _expands = expands,
        _material3 = material3;
 
-  static const double subtextGap = 8.0;
-
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
   RenderBox? get label => childForSlot(_DecorationSlot.label);
@@ -944,6 +942,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       'can be used to constrain the width of the InputDecorator or the '
       'TextField that contains it.',
     );
+
+    final double subtextGap = material3 ? 4.0 : 8.0;
 
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{};
@@ -1247,6 +1247,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    final double subtextGap = material3 ? 4.0 : 8.0;
     final double iconHeight = _minHeight(icon, width);
     final double iconWidth = _minWidth(icon, iconHeight);
 
