@@ -7,6 +7,9 @@
 
 #if defined(IMPELLER_GRAPHICS_BACKEND)
 
+// Note: The GLES backend uses name matching for attribute locations. This name
+// must match the name of the attribute output in:
+// impeller/entity/shaders/runtime_effect.vert
 in vec2 _fragCoord;
 vec2 FlutterFragCoord() {
   return _fragCoord;
