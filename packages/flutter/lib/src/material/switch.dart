@@ -1832,19 +1832,6 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get trackOutlineColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return Colors.transparent;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      return _colors.outline;
-    });
-  }
-
-  @override
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
@@ -1948,6 +1935,19 @@ class _SwitchConfigM3 with _SwitchConfig {
 
   @override
   double get trackHeight => 32.0;
+
+  @override
+  MaterialStateProperty<Color?> get trackOutlineColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return null;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      return _colors.outline;
+    });
+  }
 
   @override
   double get trackWidth => 52.0;
