@@ -14,6 +14,11 @@ void main() {
     expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
   });
 
+  test('AppBarTheme lerp special cases', () {
+    const AppBarTheme data = AppBarTheme();
+    expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(

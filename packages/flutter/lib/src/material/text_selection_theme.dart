@@ -73,8 +73,8 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),

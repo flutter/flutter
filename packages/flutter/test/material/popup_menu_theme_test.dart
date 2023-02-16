@@ -50,6 +50,12 @@ void main() {
     expect(const PopupMenuThemeData().hashCode, const PopupMenuThemeData().copyWith().hashCode);
   });
 
+  test('PopupMenuThemeData lerp special cases', () {
+    expect(PopupMenuThemeData.lerp(null, null, 0), null);
+    const PopupMenuThemeData data = PopupMenuThemeData();
+    expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('PopupMenuThemeData null fields by default', () {
     const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);

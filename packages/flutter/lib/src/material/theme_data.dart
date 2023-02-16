@@ -1978,6 +1978,9 @@ class ThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -2732,6 +2735,9 @@ class VisualDensity with Diagnosticable {
 
   /// Linearly interpolate between two densities.
   static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return VisualDensity(
       horizontal: lerpDouble(a.horizontal, b.horizontal, t)!,
       vertical: lerpDouble(a.vertical, b.vertical, t)!,

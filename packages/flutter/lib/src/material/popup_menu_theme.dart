@@ -129,8 +129,8 @@ class PopupMenuThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return PopupMenuThemeData(
       color: Color.lerp(a?.color, b?.color, t),

@@ -125,8 +125,8 @@ class NavigationBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),

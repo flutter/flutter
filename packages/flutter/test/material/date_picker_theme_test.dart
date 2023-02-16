@@ -75,6 +75,11 @@ void main() {
     expect(const DatePickerThemeData().hashCode, const DatePickerThemeData().copyWith().hashCode);
   });
 
+  test('DatePickerThemeData lerp special cases', () {
+    const DatePickerThemeData data = DatePickerThemeData();
+    expect(identical(DatePickerThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('DatePickerThemeData defaults', () {
     const DatePickerThemeData theme = DatePickerThemeData();
     expect(theme.backgroundColor, null);

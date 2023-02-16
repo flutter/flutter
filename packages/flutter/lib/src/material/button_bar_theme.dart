@@ -146,8 +146,8 @@ class ButtonBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ButtonBarThemeData? lerp(ButtonBarThemeData? a, ButtonBarThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ButtonBarThemeData(
       alignment: t < 0.5 ? a?.alignment : b?.alignment,

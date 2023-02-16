@@ -118,8 +118,8 @@ class BottomSheetThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomSheetThemeData? lerp(BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),

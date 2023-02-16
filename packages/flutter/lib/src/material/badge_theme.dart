@@ -94,6 +94,9 @@ class BadgeThemeData with Diagnosticable {
 
   /// Linearly interpolate between two [Badge] themes.
   static BadgeThemeData lerp(BadgeThemeData? a, BadgeThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return BadgeThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       textColor: Color.lerp(a?.textColor, b?.textColor, t),

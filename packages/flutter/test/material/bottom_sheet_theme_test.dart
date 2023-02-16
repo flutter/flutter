@@ -12,6 +12,18 @@ void main() {
     expect(const BottomSheetThemeData().hashCode, const BottomSheetThemeData().copyWith().hashCode);
   });
 
+  test('BottomSheetThemeData lerp special cases', () {
+    expect(BottomSheetThemeData.lerp(null, null, 0), null);
+    const BottomSheetThemeData data = BottomSheetThemeData();
+    expect(identical(BottomSheetThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  test('BottomSheetThemeData lerp special cases', () {
+    expect(BottomSheetThemeData.lerp(null, null, 0), null);
+    const BottomSheetThemeData data = BottomSheetThemeData();
+    expect(identical(BottomSheetThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('BottomSheetThemeData null fields by default', () {
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData();
     expect(bottomSheetTheme.backgroundColor, null);

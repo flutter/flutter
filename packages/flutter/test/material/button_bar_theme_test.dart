@@ -8,6 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
+  test('ButtonBarThemeData lerp special cases', () {
+    expect(ButtonBarThemeData.lerp(null, null, 0), null);
+    const ButtonBarThemeData data = ButtonBarThemeData();
+    expect(identical(ButtonBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ButtonBarThemeData null fields by default', () {
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData();
     expect(buttonBarTheme.alignment, null);

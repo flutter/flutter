@@ -12,6 +12,11 @@ void main() {
     expect(const DataTableThemeData().hashCode, const DataTableThemeData().copyWith().hashCode);
   });
 
+  test('DataTableThemeData lerp special cases', () {
+    const DataTableThemeData data = DataTableThemeData();
+    expect(identical(DataTableThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('DataTableThemeData defaults', () {
     const DataTableThemeData themeData = DataTableThemeData();
     expect(themeData.decoration, null);

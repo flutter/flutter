@@ -77,6 +77,11 @@ void main() {
     expect(const TabBarTheme().mouseCursor, null);
   });
 
+  test('TabBarTheme lerp special cases', () {
+    const TabBarTheme theme = TabBarTheme();
+    expect(identical(TabBarTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Tab bar defaults', (WidgetTester tester) async {
     // tests for the default label color and label styles when tabBarTheme and tabBar do not provide any
     await tester.pumpWidget(_withTheme(null, useMaterial3: true));

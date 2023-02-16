@@ -356,6 +356,9 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Linearly interpolates between two [DatePickerThemeData].
   static DatePickerThemeData lerp(DatePickerThemeData? a, DatePickerThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DatePickerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -393,8 +396,8 @@ class DatePickerThemeData with Diagnosticable {
   }
 
   static BorderSide? _lerpBorderSide(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);

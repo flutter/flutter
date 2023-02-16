@@ -799,6 +799,9 @@ class TextTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme? a, TextTheme? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return TextTheme(
       displayLarge: TextStyle.lerp(a?.displayLarge, b?.displayLarge, t),
       displayMedium: TextStyle.lerp(a?.displayMedium, b?.displayMedium, t),

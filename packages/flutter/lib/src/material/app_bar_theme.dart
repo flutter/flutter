@@ -204,6 +204,9 @@ class AppBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return AppBarTheme(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),

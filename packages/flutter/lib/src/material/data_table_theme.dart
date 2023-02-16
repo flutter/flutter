@@ -122,6 +122,9 @@ class DataTableThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
