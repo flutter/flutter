@@ -98,5 +98,23 @@ void main() {
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findDeepRed(result), isTrue);
     });
+    testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
+      app.run(app.Setup.none);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findDeepRed(result), isFalse);
+    });
+    testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
+      app.run(app.Setup.blur);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findDeepRed(result), isTrue);
+    });
   });
 }

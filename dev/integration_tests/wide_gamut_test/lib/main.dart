@@ -67,8 +67,10 @@ const String _displayP3Logo =
 void main() => run(Setup.canvasSaveLayer);
 
 enum Setup {
+  none,
   image,
   canvasSaveLayer,
+  blur,
 }
 
 void run(Setup setup) {
@@ -165,11 +167,19 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     late Widget imageWidget;
     switch (widget.setup) {
+      case Setup.none:
+        imageWidget = Container();
+        break;
       case Setup.image:
         imageWidget = Image.memory(base64Decode(_displayP3Logo));
         break;
       case Setup.canvasSaveLayer:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
+        break;
+      case Setup.blur:
+        imageWidget = ImageFiltered(
+            imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Image.memory(base64Decode(_displayP3Logo)));
         break;
     }
 
