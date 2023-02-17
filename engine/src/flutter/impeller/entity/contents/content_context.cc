@@ -28,7 +28,13 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   desc.SetSampleCount(sample_count);
 
   ColorAttachmentDescriptor color0 = *desc.GetColorAttachmentDescriptor(0u);
-  color0.format = color_attachment_pixel_format;
+  if (!color_attachment_pixel_format.has_value()) {
+    VALIDATION_LOG << "Color attachment pixel format must be set.";
+    color0.format = PixelFormat::kB8G8R8A8UNormInt;
+  } else {
+    color0.format = *color_attachment_pixel_format;
+  }
+  color0.format = *color_attachment_pixel_format;
   color0.alpha_blend_op = BlendOperation::kAdd;
   color0.color_blend_op = BlendOperation::kAdd;
 
@@ -145,7 +151,9 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
     return nullptr;
   }
   // Apply default ContentContextOptions to the descriptor.
-  ContentContextOptions{}.ApplyToPipelineDescriptor(*desc);
+  const auto default_color_fmt = context.GetColorAttachmentPixelFormat();
+  ContentContextOptions{.color_attachment_pixel_format = default_color_fmt}
+      .ApplyToPipelineDescriptor(*desc);
   return std::make_unique<PipelineT>(context, desc);
 }
 

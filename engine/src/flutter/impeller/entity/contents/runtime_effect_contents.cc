@@ -102,6 +102,11 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   /// Get or create runtime stage pipeline.
   ///
 
+  const auto& device_capabilities = context->GetDeviceCapabilities();
+  const auto color_attachment_format = context->GetColorAttachmentPixelFormat();
+  const auto stencil_attachment_format =
+      device_capabilities.GetDefaultStencilFormat();
+
   using VS = RuntimeEffectVertexShader;
   PipelineDescriptor desc;
   desc.SetLabel("Runtime Stage");
@@ -115,9 +120,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   }
   desc.SetVertexDescriptor(std::move(vertex_descriptor));
   desc.SetColorAttachmentDescriptor(
-      0u, {.format = PixelFormat::kDefaultColor, .blending_enabled = true});
+      0u, {.format = color_attachment_format, .blending_enabled = true});
   desc.SetStencilAttachmentDescriptors({});
-  desc.SetStencilPixelFormat(PixelFormat::kDefaultStencil);
+  desc.SetStencilPixelFormat(stencil_attachment_format);
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {

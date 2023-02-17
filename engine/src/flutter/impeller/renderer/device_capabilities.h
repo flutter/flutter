@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/formats.h"
 
 namespace impeller {
 
@@ -20,16 +21,24 @@ class IDeviceCapabilities {
 
   bool SupportsSSBO() const;
 
+  PixelFormat GetDefaultColorFormat() const;
+
+  PixelFormat GetDefaultStencilFormat() const;
+
  private:
   IDeviceCapabilities(bool threading_restrictions,
                       bool offscreen_msaa,
-                      bool supports_ssbo);
+                      bool supports_ssbo,
+                      PixelFormat default_color_format,
+                      PixelFormat default_stencil_format);
 
   friend class DeviceCapabilitiesBuilder;
 
   bool threading_restrictions_ = false;
   bool offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
+  PixelFormat default_color_format_;
+  PixelFormat default_stencil_format_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IDeviceCapabilities);
 };
@@ -46,12 +55,18 @@ class DeviceCapabilitiesBuilder {
 
   DeviceCapabilitiesBuilder& SetSupportsSSBO(bool value);
 
+  DeviceCapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
+
+  DeviceCapabilitiesBuilder& SetDefaultStencilFormat(PixelFormat value);
+
   std::unique_ptr<IDeviceCapabilities> Build();
 
  private:
   bool threading_restrictions_ = false;
   bool offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
+  std::optional<PixelFormat> default_color_format_ = std::nullopt;
+  std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DeviceCapabilitiesBuilder);
 };

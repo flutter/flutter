@@ -90,11 +90,14 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
 #endif
 
   {
-    device_capabilities_ = DeviceCapabilitiesBuilder()
-                               .SetHasThreadingRestrictions(false)
-                               .SetSupportsOffscreenMSAA(true)
-                               .SetSupportsSSBO(true)
-                               .Build();
+    device_capabilities_ =
+        DeviceCapabilitiesBuilder()
+            .SetHasThreadingRestrictions(false)
+            .SetSupportsOffscreenMSAA(true)
+            .SetSupportsSSBO(true)
+            .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
+            .SetDefaultStencilFormat(PixelFormat::kS8UInt)
+            .Build();
   }
 
   is_valid_ = true;
