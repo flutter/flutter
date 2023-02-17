@@ -1138,10 +1138,11 @@ class ThemeData with Diagnosticable {
   /// will aim to only support Material 3.
   ///
   /// ## Defaults
-  /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
-  /// some properties will get updated defaults. Please note that
-  /// [ThemeData.copyWith] with [useMaterial3] set to true will
-  /// not change any of these properties in the resulting [ThemeData].
+  ///
+  /// If a [ThemeData] is _constructed_ with [useMaterial3] set to true, then
+  /// some properties will get updated defaults. However, the
+  /// [ThemeData.copyWith] method with [useMaterial3] set to true will _not_
+  /// change any of these properties in the resulting [ThemeData].
   ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///

@@ -617,8 +617,7 @@ class LocalizationsGenerator {
   /// locales, the difference is negligible, and might slow down the start up
   /// compared to bundling the localizations with the rest of the application.
   ///
-  /// Note that this flag does not affect other platforms such as mobile or
-  /// desktop.
+  /// This flag does not affect other platforms such as mobile or desktop.
   final bool useDeferredLoading;
 
   /// Contains a map of each output language file to its corresponding content in
