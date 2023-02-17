@@ -121,6 +121,10 @@ class RasterCache {
     const SkRect& logical_rect;
     const char* flow_type;
   };
+  struct CacheInfo {
+    const size_t accesses_since_visible;
+    const bool has_image;
+  };
 
   std::unique_ptr<RasterCacheResult> Rasterize(
       const RasterCache::Context& context,
@@ -203,7 +207,7 @@ class RasterCache {
    * If the number is one, then it must be prepared and drawn on 1 frame
    * and it will then be cached on the next frame if it is prepared.
    */
-  int access_threshold() const { return access_threshold_; }
+  size_t access_threshold() const { return access_threshold_; }
 
   bool GenerateNewCacheInThisFrame() const {
     // Disabling caching when access_threshold is zero is historic behavior.
@@ -221,9 +225,9 @@ class RasterCache {
    * @return the number of times the entry has been hit since it was created.
    * For a new entry that will be 1 if it is visible, or zero if non-visible.
    */
-  int MarkSeen(const RasterCacheKeyID& id,
-               const SkMatrix& matrix,
-               bool visible) const;
+  CacheInfo MarkSeen(const RasterCacheKeyID& id,
+                     const SkMatrix& matrix,
+                     bool visible) const;
 
   /**
    * Returns the access count (i.e. accesses_since_visible) for the given

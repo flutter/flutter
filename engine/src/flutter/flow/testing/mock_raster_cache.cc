@@ -65,7 +65,7 @@ void MockRasterCache::AddMockPicture(int width, int height) {
 
   DisplayListRasterCacheItem display_list_item(display_list.get(), SkPoint(),
                                                true, false);
-  for (int i = 0; i < access_threshold(); i++) {
+  for (size_t i = 0; i < access_threshold(); i++) {
     AutoCache(&display_list_item, &preroll_context_, ctm);
   }
   RasterCache::Context r_context = {
