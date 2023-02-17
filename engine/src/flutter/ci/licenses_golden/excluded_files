@@ -2739,6 +2739,7 @@
 ../../../third_party/skia/src/core/BUILD.bazel
 ../../../third_party/skia/src/effects/BUILD.bazel
 ../../../third_party/skia/src/effects/imagefilters/BUILD.bazel
+../../../third_party/skia/src/encode/BUILD.bazel
 ../../../third_party/skia/src/fonts/BUILD.bazel
 ../../../third_party/skia/src/gpu/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/BUILD.bazel
@@ -2771,7 +2772,6 @@
 ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/vk/BUILD.bazel
 ../../../third_party/skia/src/image/BUILD.bazel
-../../../third_party/skia/src/images/BUILD.bazel
 ../../../third_party/skia/src/lazy/BUILD.bazel
 ../../../third_party/skia/src/opts/BUILD.bazel
 ../../../third_party/skia/src/pathops/BUILD.bazel
