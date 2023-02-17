@@ -11,6 +11,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 Future<void> pumpTest(
   WidgetTester tester,
   TargetPlatform? platform, {
@@ -1645,6 +1647,7 @@ void main() {
   });
 
   testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
     final GlobalKey key1 = GlobalKey();
     Widget buildScrollable(bool withViewPort) {
@@ -1669,19 +1672,23 @@ void main() {
         home: buildScrollable(true),
       ),
     );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     // This does not use two panel, this should clear cached inner node.
     await tester.pumpWidget(
       MaterialApp(
         home: buildScrollable(false),
       ),
     );
+    expect(semantics, isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics})));
     // If the inner node was cleared in the previous step, this should not crash.
     await tester.pumpWidget(
       MaterialApp(
         home: buildScrollable(true),
       ),
     );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }
 
