@@ -32,13 +32,13 @@ Future<void> testMain() async {
       testScene.style.transform = 'scale(0.3)';
     }
     testScene.append(canvas.rootElement);
-    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene);
+    flutterViewEmbedder.glassPaneShadow.querySelector('flt-scene-host')!.append(testScene);
   }
 
   setUpStableTestFonts();
 
   tearDown(() {
-    flutterViewEmbedder.glassPaneShadow?.querySelector('flt-scene')?.remove();
+    flutterViewEmbedder.glassPaneShadow.querySelector('flt-scene')?.remove();
   });
 
   /// Draws several lines, some aligned precisely with the pixel grid, and some
@@ -260,7 +260,7 @@ Future<void> testMain() async {
     }
 
     sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
-    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);
+    flutterViewEmbedder.glassPaneShadow.querySelector('flt-scene-host')!.append(sceneElement);
 
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',

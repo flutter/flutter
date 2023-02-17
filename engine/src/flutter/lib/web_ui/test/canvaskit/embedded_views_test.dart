@@ -41,7 +41,7 @@ void testMain() {
       // The platform view is now split in two parts. The contents live
       // as a child of the glassPane, and the slot lives in the glassPane
       // shadow root. The slot is the one that has pointer events auto.
-      final DomElement contents = flutterViewEmbedder.glassPaneElement!
+      final DomElement contents = flutterViewEmbedder.glassPaneElement
           .querySelector('#view-0')!;
       final DomElement slot = flutterViewEmbedder.sceneElement!
           .querySelector('slot')!;
@@ -598,7 +598,7 @@ void testMain() {
       ]);
 
       expect(
-        flutterViewEmbedder.glassPaneElement!
+        flutterViewEmbedder.glassPaneElement
             .querySelector('flt-platform-view'),
         isNotNull,
       );
@@ -614,7 +614,7 @@ void testMain() {
       ]);
 
       expect(
-        flutterViewEmbedder.glassPaneElement!
+        flutterViewEmbedder.glassPaneElement
             .querySelector('flt-platform-view'),
         isNull,
       );
@@ -685,7 +685,7 @@ void testMain() {
       ]);
 
       expect(
-        flutterViewEmbedder.glassPaneElement!
+        flutterViewEmbedder.glassPaneElement
             .querySelector('flt-platform-view'),
         isNotNull,
       );
@@ -703,7 +703,7 @@ void testMain() {
       ]);
 
       expect(
-          flutterViewEmbedder.glassPaneElement!
+          flutterViewEmbedder.glassPaneElement
               .querySelectorAll('flt-platform-view'),
           hasLength(2));
 
@@ -719,7 +719,7 @@ void testMain() {
       // The actual contents of the platform view are kept in the dom, until
       // it's actually disposed of!
       expect(
-          flutterViewEmbedder.glassPaneElement!
+          flutterViewEmbedder.glassPaneElement
               .querySelectorAll('flt-platform-view'),
           hasLength(2));
     });
