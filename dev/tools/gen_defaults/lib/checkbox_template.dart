@@ -113,7 +113,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
 
   @override
   OutlinedBorder get shape => RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(${tokens['md.comp.checkbox.container.shape']}),
+    borderRadius: BorderRadius.circular(${tokens['md.comp.checkbox.unselected.outline.width']}),
   );
 }
 ''';
