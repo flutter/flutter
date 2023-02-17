@@ -237,7 +237,7 @@ class CanvasParagraph implements ui.Paragraph {
     }
 
     final ParagraphLine line = lines[i];
-    return ui.TextRange(start: line.startIndex, end: line.endIndex);
+    return ui.TextRange(start: line.startIndex, end: line.endIndex - line.trailingNewlines);
   }
 
   @override
