@@ -81,7 +81,8 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   stencil0_tex.storage_mode = StorageMode::kDeviceTransient;
   stencil0_tex.type = TextureType::kTexture2DMultisample;
   stencil0_tex.sample_count = SampleCount::kCount4;
-  stencil0_tex.format = PixelFormat::kDefaultStencil;
+  stencil0_tex.format =
+      context->GetDeviceCapabilities().GetDefaultStencilFormat();
   stencil0_tex.size = color0_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);

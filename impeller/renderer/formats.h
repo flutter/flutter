@@ -95,14 +95,6 @@ enum class PixelFormat {
   // Depth and stencil formats.
   kS8UInt,
   kD32FloatS8UInt,
-
-  // Defaults. If you don't know which ones to use, these are usually a safe
-  // bet.
-  //
-  // On Metal, this is a support format for layer drawable and can be used to
-  // specify the format of the resolve texture if needed.
-  kDefaultColor = kB8G8R8A8UNormInt,
-  kDefaultStencil = kS8UInt,
 };
 
 enum class BlendFactor {
