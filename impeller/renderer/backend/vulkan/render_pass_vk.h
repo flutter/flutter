@@ -65,7 +65,8 @@ class RenderPassVK final : public RenderPass {
 
   bool TransitionImageLayout(vk::Image image,
                              vk::ImageLayout layout_old,
-                             vk::ImageLayout layout_new) const;
+                             vk::ImageLayout layout_new,
+                             uint32_t mip_levels) const;
 
   bool CopyBufferToImage(const TextureVK& texture_vk) const;
 
