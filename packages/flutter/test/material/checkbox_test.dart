@@ -1766,7 +1766,7 @@ void main() {
       paints
         ..drrect(
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(2)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.circular(0)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.zero),
         ),
     );
   });
