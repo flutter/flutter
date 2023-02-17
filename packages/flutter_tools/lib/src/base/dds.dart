@@ -35,7 +35,7 @@ class DartDevelopmentService {
   final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
+    Uri observatoryUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,
@@ -49,11 +49,11 @@ class DartDevelopmentService {
     );
     logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
-      'connecting to VM service at $vmServiceUri.',
+      'connecting to VM service at $observatoryUri.',
     );
     try {
       _ddsInstance = await ddsLauncherCallback(
-          vmServiceUri,
+          observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 ?? false,

@@ -8,9 +8,9 @@ import 'test_device.dart';
 abstract class TestWatcher {
   /// Called after the test device starts.
   ///
-  /// If startPaused was true, the caller needs to resume in DevTools to
+  /// If startPaused was true, the caller needs to resume in Observatory to
   /// start running the tests.
-  void handleStartedDevice(Uri? vmServiceUri) { }
+  void handleStartedDevice(Uri? observatoryUri) { }
 
   /// Called after the tests finish but before the test device exits.
   ///

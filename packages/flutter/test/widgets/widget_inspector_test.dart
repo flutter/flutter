@@ -238,6 +238,13 @@ int getChildLayerCount(OffsetLayer layer) {
   return count;
 }
 
+extension TextFromString on String {
+  @widgetFactory
+  Widget text() {
+    return Text(this);
+  }
+}
+
 void main() {
   _TestWidgetInspectorService.runTests();
 }
@@ -944,19 +951,20 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
+              const Text('a'),
+              const Text('b', textDirection: TextDirection.ltr),
+              'c'.text(),
             ],
           ),
         ),
       );
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
+      final Element elementC = find.text('c').evaluate().first;
 
       service.disposeAllGroups();
       service.resetPubRootDirectories();
@@ -979,14 +987,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final int columnB = creationLocationB['column']! as int;
       final String? nameB = creationLocationB['name'] as String?;
       expect(nameB, equals('Text'));
+
+      service.setSelection(elementC, 'my-group');
+      final Map<String, Object?> jsonC = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+      final Map<String, Object?> creationLocationC = jsonC['creationLocation']! as Map<String, Object?>;
+      expect(creationLocationC, isNotNull);
+      final String fileC = creationLocationC['file']! as String;
+      final int lineC = creationLocationC['line']! as int;
+      final int columnC = creationLocationC['column']! as int;
+      final String? nameC = creationLocationC['name'] as String?;
+      expect(nameC, equals('TextFromString|text'));
+
       expect(fileA, endsWith('widget_inspector_test.dart'));
       expect(fileA, equals(fileB));
+      expect(fileA, equals(fileC));
       // We don't hardcode the actual lines the widgets are created on as that
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
+      expect(lineB + 1, equals(lineC));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(15));
+      expect(columnA, equals(21));
       expect(columnA, equals(columnB));
+      expect(columnC, equals(19));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
   testWidgets('WidgetInspectorService setSelection notifiers for an Element',

@@ -172,10 +172,7 @@ class _PreferredAppBarSize extends Size {
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design app bar.
   ///
-  /// The arguments [primary], [toolbarOpacity], [bottomOpacity],
-  /// [backwardsCompatibility], and [automaticallyImplyLeading] must
-  /// not be null. Additionally, if [elevation] is specified, it must
-  /// be non-negative.
+  /// If [elevation] is specified, it must be non-negative.
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
@@ -204,11 +201,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
     this.leadingWidth,
-    @Deprecated(
-      'This property is obsolete and is false by default. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
@@ -651,27 +643,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@endtemplate}
   final double? leadingWidth;
 
-  /// {@template flutter.material.appbar.backwardsCompatibility}
-  /// This property is deprecated and is false by default.
-  ///
-  /// If true, preserves the original defaults for the [backgroundColor],
-  /// [iconTheme], [actionsIconTheme] properties.
-  ///
-  /// If this property is null, then [AppBarTheme.backwardsCompatibility] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, the default
-  /// value is false.
-  ///
-  /// This is a temporary property and it has been deprecated. App
-  /// developers are encouraged to opt into the new features by
-  /// leaving it default (false) and using the [foregroundColor] and
-  /// [systemOverlayStyle] properties as needed.
-  /// {@endtemplate}
-  @Deprecated(
-    'This property is obsolete and is false by default. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final bool? backwardsCompatibility;
-
   /// {@template flutter.material.appbar.toolbarTextStyle}
   /// The default text style for the AppBar's [leading], and
   /// [actions] widgets, but not its [title].
@@ -709,8 +680,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@template flutter.material.appbar.systemOverlayStyle}
   /// Specifies the style to use for the system overlays that overlap the AppBar.
-  ///
-  /// This property is only used if [backwardsCompatibility] is false (the default).
   ///
   /// If this property is null, then [AppBarTheme.systemOverlayStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, an appropriate
@@ -862,18 +831,13 @@ class _AppBarState extends State<AppBar> {
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
-    final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? false;
 
-    final Color backgroundColor = backwardsCompatibility
-      ? widget.backgroundColor
-        ?? appBarTheme.backgroundColor
-        ?? theme.primaryColor
-      : _resolveColor(
-          states,
-          widget.backgroundColor,
-          appBarTheme.backgroundColor,
-          defaults.backgroundColor!,
-        );
+    final Color backgroundColor = _resolveColor(
+      states,
+      widget.backgroundColor,
+      appBarTheme.backgroundColor,
+      defaults.backgroundColor!,
+    );
 
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
@@ -890,13 +854,9 @@ class _AppBarState extends State<AppBar> {
         ?? elevation
       : elevation;
 
-    IconThemeData overallIconTheme = backwardsCompatibility
-      ? widget.iconTheme
-        ?? appBarTheme.iconTheme
-        ?? theme.primaryIconTheme
-      : widget.iconTheme
-        ?? appBarTheme.iconTheme
-        ?? defaults.iconTheme!.copyWith(color: foregroundColor);
+    IconThemeData overallIconTheme = widget.iconTheme
+      ?? appBarTheme.iconTheme
+      ?? defaults.iconTheme!.copyWith(color: foregroundColor);
 
     final Color? actionForegroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor;
@@ -907,21 +867,13 @@ class _AppBarState extends State<AppBar> {
       ?? defaults.actionsIconTheme?.copyWith(color: actionForegroundColor)
       ?? overallIconTheme;
 
-    TextStyle? toolbarTextStyle = backwardsCompatibility
-      ? widget.toolbarTextStyle
-        ?? appBarTheme.toolbarTextStyle
-        ?? theme.primaryTextTheme.bodyMedium
-      : widget.toolbarTextStyle
-        ?? appBarTheme.toolbarTextStyle
-        ?? defaults.toolbarTextStyle?.copyWith(color: foregroundColor);
+    TextStyle? toolbarTextStyle = widget.toolbarTextStyle
+      ?? appBarTheme.toolbarTextStyle
+      ?? defaults.toolbarTextStyle?.copyWith(color: foregroundColor);
 
-    TextStyle? titleTextStyle = backwardsCompatibility
-      ? widget.titleTextStyle
-        ?? appBarTheme.titleTextStyle
-        ?? theme.primaryTextTheme.titleLarge
-      : widget.titleTextStyle
-        ?? appBarTheme.titleTextStyle
-        ?? defaults.titleTextStyle?.copyWith(color: foregroundColor);
+    TextStyle? titleTextStyle = widget.titleTextStyle
+      ?? appBarTheme.titleTextStyle
+      ?? defaults.titleTextStyle?.copyWith(color: foregroundColor);
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -1173,19 +1125,15 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final SystemUiOverlayStyle overlayStyle = backwardsCompatibility
-      ? widget.systemOverlayStyle
-        ?? appBarTheme.systemOverlayStyle
-        ?? _systemOverlayStyleForBrightness(ThemeData.estimateBrightnessForColor(backgroundColor))
-      : widget.systemOverlayStyle
-        ?? appBarTheme.systemOverlayStyle
-        ?? defaults.systemOverlayStyle
-        ?? _systemOverlayStyleForBrightness(
-          ThemeData.estimateBrightnessForColor(backgroundColor),
-          // Make the status bar transparent for M3 so the elevation overlay
-          // color is picked up by the statusbar.
-          theme.useMaterial3 ? const Color(0x00000000) : null,
-        );
+    final SystemUiOverlayStyle overlayStyle = widget.systemOverlayStyle
+      ?? appBarTheme.systemOverlayStyle
+      ?? defaults.systemOverlayStyle
+      ?? _systemOverlayStyleForBrightness(
+        ThemeData.estimateBrightnessForColor(backgroundColor),
+        // Make the status bar transparent for M3 so the elevation overlay
+        // color is picked up by the statusbar.
+        theme.useMaterial3 ? const Color(0x00000000) : null,
+      );
 
     return Semantics(
       container: true,
@@ -1247,7 +1195,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.shape,
     required this.toolbarHeight,
     required this.leadingWidth,
-    required this.backwardsCompatibility,
     required this.toolbarTextStyle,
     required this.titleTextStyle,
     required this.systemOverlayStyle,
@@ -1282,7 +1229,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final ShapeBorder? shape;
   final double? toolbarHeight;
   final double? leadingWidth;
-  final bool? backwardsCompatibility;
   final TextStyle? toolbarTextStyle;
   final TextStyle? titleTextStyle;
   final SystemUiOverlayStyle? systemOverlayStyle;
@@ -1354,7 +1300,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / _bottomHeight, 0.0, 1.0),
         toolbarHeight: toolbarHeight,
         leadingWidth: leadingWidth,
-        backwardsCompatibility: backwardsCompatibility,
         toolbarTextStyle: toolbarTextStyle,
         titleTextStyle: titleTextStyle,
         systemOverlayStyle: systemOverlayStyle,
@@ -1393,7 +1338,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || forceElevated != oldDelegate.forceElevated
         || toolbarHeight != oldDelegate.toolbarHeight
         || leadingWidth != oldDelegate.leadingWidth
-        || backwardsCompatibility != oldDelegate.backwardsCompatibility
         || toolbarTextStyle != oldDelegate.toolbarTextStyle
         || titleTextStyle != oldDelegate.titleTextStyle
         || systemOverlayStyle != oldDelegate.systemOverlayStyle
@@ -1528,11 +1472,6 @@ class SliverAppBar extends StatefulWidget {
     this.shape,
     this.toolbarHeight = kToolbarHeight,
     this.leadingWidth,
-    @Deprecated(
-      'This property is obsolete and is false by default. '
-      'This feature was deprecated after v2.4.0-0.0.pre.',
-    )
-    this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
@@ -1977,15 +1916,6 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final double? leadingWidth;
 
-  /// {@macro flutter.material.appbar.backwardsCompatibility}
-  ///
-  /// This property is used to configure an [AppBar].
-  @Deprecated(
-    'This property is obsolete and is false by default. '
-    'This feature was deprecated after v2.4.0-0.0.pre.',
-  )
-  final bool? backwardsCompatibility;
-
   /// {@macro flutter.material.appbar.toolbarTextStyle}
   ///
   /// This property is used to configure an [AppBar].
@@ -2108,7 +2038,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           showOnScreenConfiguration: _showOnScreenConfiguration,
           toolbarHeight: widget.toolbarHeight,
           leadingWidth: widget.leadingWidth,
-          backwardsCompatibility: widget.backwardsCompatibility,
           toolbarTextStyle: widget.toolbarTextStyle,
           titleTextStyle: widget.titleTextStyle,
           systemOverlayStyle: widget.systemOverlayStyle,

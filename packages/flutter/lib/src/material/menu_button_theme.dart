@@ -59,6 +59,9 @@ class MenuButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two menu button themes.
   static MenuButtonThemeData? lerp(MenuButtonThemeData? a, MenuButtonThemeData? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return MenuButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
   }
 
