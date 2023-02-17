@@ -8,6 +8,9 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+// The FlutterView into which this example will draw; set in the main method.
+late final ui.FlutterView view;
+
 late ui.Color color;
 
 ui.Picture paint(ui.Rect paintBounds) {
@@ -43,7 +46,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   // the device's screen to "normal" sized pixels. We commonly work in logical
   // pixels, which are then scaled by the device pixel ratio before being drawn
   // on the screen.
-  final double devicePixelRatio = ui.window.devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
 
   // This transform scales the x and y coordinates by the devicePixelRatio.
   final Float64List deviceTransform = Float64List(16)
@@ -67,13 +70,13 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   // First, record a picture with our painting commands.
   final ui.Picture picture = paint(paintBounds);
   // Second, include that picture in a scene graph.
   final ui.Scene scene = composite(picture, paintBounds);
   // Third, instruct the engine to render that scene graph.
-  ui.window.render(scene);
+  view.render(scene);
 }
 
 void handlePointerDataPacket(ui.PointerDataPacket packet) {
@@ -86,7 +89,7 @@ void handlePointerDataPacket(ui.PointerDataPacket packet) {
       // Rather than calling paint() synchronously, we ask the engine to
       // schedule a frame. The engine will call onBeginFrame when it is actually
       // time to produce the frame.
-      ui.window.scheduleFrame();
+      ui.PlatformDispatcher.instance.scheduleFrame();
     } else if (datum.change == ui.PointerChange.up) {
       // Similarly, if the pointer went up, we change the color of the circle to
       // green and schedule a frame. It's harmless to call scheduleFrame many
@@ -102,6 +105,10 @@ void handlePointerDataPacket(ui.PointerDataPacket packet) {
 // This function is the primary entry point to your application. The engine
 // calls main() as soon as it has loaded your code.
 void main() {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  view = ui.PlatformDispatcher.instance.implicitView!;
+
   color = const ui.Color(0xFF00FF00);
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
   ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
