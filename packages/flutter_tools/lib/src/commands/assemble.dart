@@ -265,13 +265,13 @@ class AssembleCommand extends FlutterCommand {
     if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
       if (configJsonPaths.isNotEmpty && configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+        final Map<String, Object> defineConfigJsonMap = <String, Object>{};
         for (final String path in configJsonPaths) {
-          final String configJsonRaw = globals.fs.file(path)
-              .readAsStringSync();
+          final String configJsonRaw = globals.fs.file(path).readAsStringSync();
           try {
-            (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((
-                String key, dynamic value) {
-              dartDefines.add('$key=$value');
+            (json.decode(configJsonRaw) as Map<String, dynamic>)
+                .forEach((String key, dynamic value) {
+              defineConfigJsonMap[key] = value as Object;
             });
           } on FormatException catch (err) {
             throwToolExit('Json config define file "--${FlutterOptions
@@ -279,6 +279,9 @@ class AssembleCommand extends FlutterCommand {
                 'please fix first! format err:\n$err');
           }
         }
+        defineConfigJsonMap.forEach((String key, Object value) {
+          dartDefines.add('$key=$value');
+        });
       }
     }
     if(dartDefines.isNotEmpty){

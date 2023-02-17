@@ -1193,15 +1193,15 @@ abstract class FlutterCommand extends Command<void> {
                 .forEach((String key, dynamic value) {
               defineConfigJsonMap?[key] = value as Object;
             });
-            defineConfigJsonMap.forEach((String key, Object value) {
-              dartDefines.add('$key=$value');
-            });
           } on FormatException catch (err) {
             throwToolExit('Json config define file "--${FlutterOptions
                 .kDartDefineFromFileOption}=$path" format err, '
                 'please fix first! format err:\n$err');
           }
         }
+        defineConfigJsonMap.forEach((String key, Object value) {
+          dartDefines.add('$key=$value');
+        });
       }
     }
 
