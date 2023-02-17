@@ -7,11 +7,11 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkStream.h"
-#include "third_party/skia/src/codec/SkPngCodec.h"
 #include "third_party/zlib/zlib.h"  // For crc32
 
 namespace flutter {
@@ -494,8 +494,8 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
   }
 
   SkCodec::Result header_parse_result;
-  result.codec = SkPngCodec::MakeFromStream(
-      SkMemoryStream::Make(new_png_buffer), &header_parse_result);
+  result.codec = SkCodec::MakeFromStream(SkMemoryStream::Make(new_png_buffer),
+                                         &header_parse_result);
   if (header_parse_result != SkCodec::Result::kSuccess) {
     FML_DLOG(ERROR)
         << "Failed to parse image header during APNG demux. SkCodec::Result: "
