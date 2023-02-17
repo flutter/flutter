@@ -23,7 +23,7 @@ bool _isAlmost(double x, double y, double epsilon) {
   return (x - y).abs() < epsilon;
 }
 
-List<double> _deepRed = [1.0931, -0.2268, -0.1501];
+List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
 
 bool _findBGRA10Color(
     Uint8List bytes, int width, int height, List<double> color) {

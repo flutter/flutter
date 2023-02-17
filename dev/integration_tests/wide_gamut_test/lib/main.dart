@@ -246,12 +246,13 @@ class _MyHomePageState extends State<MyHomePage> {
       case Setup.blur:
         imageWidget = Stack(
           children: <Widget>[
-            Container(
-                color: Color(0xff00ff00),
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
-                )),
+            ColoredBox(
+              color: const Color(0xff00ff00),
+              child: const SizedBox(
+                width: 100,
+                height: 100,
+              ),
+            ),
             ImageFiltered(
                 imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                 child: Image.memory(base64Decode(_displayP3Logo))),
