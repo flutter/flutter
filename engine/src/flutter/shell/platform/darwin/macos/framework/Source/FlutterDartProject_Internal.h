@@ -26,11 +26,6 @@
 @property(nonatomic, readonly, nullable) NSString* ICUDataPath;
 
 /**
- * The command line arguments array for the engine.
- */
-@property(nonatomic, readonly) std::vector<std::string> switches;
-
-/**
  * The callback invoked by the engine in root isolate scope.
  */
 @property(nonatomic, nullable) void (*rootIsolateCreateCallback)(void* _Nullable);

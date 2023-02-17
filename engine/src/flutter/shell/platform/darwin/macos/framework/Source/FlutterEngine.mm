@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 
+#include "flutter/shell/platform/common/engine_switches.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
@@ -337,7 +338,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // The first argument of argv is required to be the executable name.
   std::vector<const char*> argv = {[self.executableName UTF8String]};
-  std::vector<std::string> switches = _project.switches;
+  std::vector<std::string> switches = self.switches;
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 
@@ -915,6 +916,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (NSPasteboard*)pasteboard {
   return [NSPasteboard generalPasteboard];
+}
+
+- (std::vector<std::string>)switches {
+  return flutter::GetSwitchesFromEnvironment();
 }
 
 #pragma mark - FlutterBinaryMessenger
