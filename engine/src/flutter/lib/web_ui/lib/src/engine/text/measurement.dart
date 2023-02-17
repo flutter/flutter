@@ -29,7 +29,7 @@ class RulerHost {
       ..height = '0';
 
     if (root == null) {
-      flutterViewEmbedder.glassPaneShadow!.node.appendChild(_rulerHost);
+      flutterViewEmbedder.glassPaneShadow.node.appendChild(_rulerHost);
     } else {
       root.appendChild(_rulerHost);
     }
