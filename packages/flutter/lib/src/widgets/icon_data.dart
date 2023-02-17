@@ -8,6 +8,12 @@ import 'package:flutter/foundation.dart';
 ///
 /// See [Icons] for a number of predefined icons available for material
 /// design applications.
+///
+/// In release builds, the Flutter tool will tree shake out of bundled fonts
+/// the code points (or instances of [IconData]) which are not referenced from
+/// Dart app code. This is a heuristic based on analyzing the output of the
+/// Dart frontend compiler and counting the references to instances of the
+/// [IconData] class.
 @immutable
 class IconData {
   /// Creates icon data.
@@ -17,6 +23,9 @@ class IconData {
   ///
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
+  ///
+  /// Instantiating non-const instances of this class can cause icon
+  /// tree-shaking to fail.
   const IconData(
     this.codePoint, {
     this.fontFamily,
@@ -101,4 +110,6 @@ class _StaticIconProvider {
 /// This is a hint to the font tree shaker to ignore the constant instances
 /// of [IconData] appearing in the class when tracking which code points
 /// should be retained in the bundled font.
+///
+/// Classes with this annotation 
 const Object staticIconProvider = _StaticIconProvider();
