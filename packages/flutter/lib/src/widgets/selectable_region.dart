@@ -319,7 +319,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   Offset? lastSecondaryTapDownPosition;
 
-  /// The current status of the selection overlay.
+  /// The [SelectionOverlay] that is currently visible on the screen.
+  ///
+  /// Can be null if there is no visible [SelectionOverlay].
   @visibleForTesting
   SelectionOverlay? get selectionOverlay => _selectionOverlay;
 
@@ -892,11 +894,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
-  void _selectAll() {
-    _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
-    _updateSelectedContentIfNeeded();
-  }
-
   /// {@macro flutter.widgets.EditableText.getAnchors}
   ///
   /// See also:
@@ -999,7 +996,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _clearSelection();
       },
       onSelectAll: () {
-        _selectAll();
+        selectAll(SelectionChangedCause.toolbar);
       },
     );
   }
