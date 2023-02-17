@@ -84,7 +84,7 @@ class TestGoldenComparator {
     }
     final List<String> command = <String>[
       shellPath!,
-      '--disable-vm-service',
+      '--disable-observatory',
       '--non-interactive',
       '--packages=${_fileSystem.path.join('.dart_tool', 'package_config.json')}',
       output,

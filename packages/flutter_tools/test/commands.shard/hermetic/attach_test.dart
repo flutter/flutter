@@ -118,8 +118,8 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
+            // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
             completer.complete();
           }
         });
@@ -131,7 +131,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
 
@@ -186,7 +186,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
 
@@ -207,8 +207,8 @@ void main() {
         expect(portForwarder.hostPort, hostPort);
         expect(hotRunnerFactory.devices, hasLength(1));
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -252,7 +252,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
 
@@ -274,8 +274,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -324,7 +324,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
 
@@ -346,8 +346,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -400,7 +400,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
 
@@ -422,8 +422,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -460,7 +460,7 @@ void main() {
         ),
       });
 
-      testUsingContext('finds VM Service port and forwards', () async {
+      testUsingContext('finds observatory port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -469,8 +469,8 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
+            // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
             completer.complete();
           }
         });
@@ -499,7 +499,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('Fails with tool exit on bad VmService uri', () async {
+      testUsingContext('Fails with tool exit on bad Observatory uri', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -545,7 +545,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
+        hotRunner.isWaitingForObservatory = false;
 
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
@@ -618,7 +618,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       },);
 
-      testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
+      testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -637,10 +637,10 @@ void main() {
           fileSystem: testFileSystem,
         );
         await expectLater(
-          createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
+          createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
             message: 'When the --debug-port or --debug-url is unknown, this command does not use '
-                     'the value of --vm-service-port.',
+                     'the value of --observatory-port.',
           ),
         );
       }, overrides: <Type, Generator>{
@@ -735,7 +735,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('skips in ipv4 mode with a provided VM Service port', () async {
+      testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
@@ -760,7 +760,7 @@ void main() {
             'attach',
             '--debug-port',
             '$devicePort',
-            '--vm-service-port',
+            '--observatory-port',
             '$hostPort',
             // Ensure DDS doesn't use hostPort by binding to a random port.
             '--dds-port',
@@ -780,7 +780,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('skips in ipv6 mode with a provided VM Service port', () async {
+      testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
@@ -805,7 +805,7 @@ void main() {
             'attach',
             '--debug-port',
             '$devicePort',
-            '--vm-service-port',
+            '--observatory-port',
             '$hostPort',
             '--ipv6',
             // Ensure DDS doesn't use hostPort by binding to a random port.
@@ -992,7 +992,7 @@ class FakeHotRunner extends Fake implements HotRunner {
   bool exited = false;
 
   @override
-  bool isWaitingForVmService = true;
+  bool isWaitingForObservatory = true;
 
   @override
   Future<int> attach({
@@ -1198,7 +1198,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
+    Uri observatoryUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,

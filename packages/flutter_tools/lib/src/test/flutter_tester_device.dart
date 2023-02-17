@@ -36,7 +36,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.logger,
     required this.shellPath,
     required this.debuggingOptions,
-    required this.enableVmService,
+    required this.enableObservatory,
     required this.machine,
     required this.host,
     required this.testAssetDirectory,
@@ -45,8 +45,8 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.compileExpression,
     required this.fontConfigManager,
     required this.uriConverter,
-  })  : assert(!debuggingOptions.startPaused || enableVmService),
-        _gotProcessVmServiceUri = enableVmService
+  })  : assert(!debuggingOptions.startPaused || enableObservatory),
+        _gotProcessObservatoryUri = enableObservatory
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
@@ -57,7 +57,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final Logger logger;
   final String shellPath;
   final DebuggingOptions debuggingOptions;
-  final bool enableVmService;
+  final bool enableObservatory;
   final bool? machine;
   final InternetAddress? host;
   final String? testAssetDirectory;
@@ -67,7 +67,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final FontConfigManager fontConfigManager;
   final UriConverter? uriConverter;
 
-  final Completer<Uri?> _gotProcessVmServiceUri;
+  final Completer<Uri?> _gotProcessObservatoryUri;
   final Completer<int> _exitCode = Completer<int>();
 
   Process? _process;
@@ -89,7 +89,7 @@ class FlutterTesterTestDevice extends TestDevice {
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
       shellPath,
-      if (enableVmService) ...<String>[
+      if (enableObservatory) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
         // only one test file is processed at a time, and the operating
         // environment hands out specific ports ahead of time in a cooperative
@@ -99,12 +99,12 @@ class FlutterTesterTestDevice extends TestDevice {
         //
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
-        '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
+        '--observatory-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       ]
       else
-        '--disable-vm-service',
+        '--disable-observatory',
       if (host!.type == InternetAddressType.IPv6) '--ipv6',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
@@ -154,11 +154,11 @@ class FlutterTesterTestDevice extends TestDevice {
     logger.printTrace('test $id: Started flutter_tester process at pid ${_process!.pid}');
 
     // Pipe stdout and stderr from the subprocess to our printStatus console.
-    // We also keep track of what VM Service port the engine used, if any.
+    // We also keep track of what observatory port the engine used, if any.
     _pipeStandardStreamsToConsole(
       process: _process!,
-      reportVmServiceUri: (Uri detectedUri) async {
-        assert(!_gotProcessVmServiceUri.isCompleted);
+      reportObservatoryUri: (Uri detectedUri) async {
+        assert(!_gotProcessObservatoryUri.isCompleted);
         assert(debuggingOptions.hostVmServicePort == null ||
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
@@ -194,11 +194,12 @@ class FlutterTesterTestDevice extends TestDevice {
 
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The test process has been started.');
-          logger.printStatus('You can now connect to it using vmService. To connect, load the following Web site in your browser:');
+          logger.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
           logger.printStatus('  $forwardingUri');
           logger.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
         }
-        _gotProcessVmServiceUri.complete(forwardingUri);
+
+        _gotProcessObservatoryUri.complete(forwardingUri);
       },
     );
 
@@ -206,8 +207,8 @@ class FlutterTesterTestDevice extends TestDevice {
   }
 
   @override
-  Future<Uri?> get vmServiceUri {
-    return _gotProcessVmServiceUri.future;
+  Future<Uri?> get observatoryUri {
+    return _gotProcessObservatoryUri.future;
   }
 
   @override
@@ -292,7 +293,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   void _pipeStandardStreamsToConsole({
     required Process process,
-    required Future<void> Function(Uri uri) reportVmServiceUri,
+    required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -309,9 +310,9 @@ class FlutterTesterTestDevice extends TestDevice {
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]!);
-              await reportVmServiceUri(uri);
+              await reportObservatoryUri(uri);
             } on Exception catch (error) {
-              logger.printError('Could not parse shell VM Service port message: $error');
+              logger.printError('Could not parse shell observatory port message: $error');
             }
           } else {
             logger.printStatus('Shell: $line');

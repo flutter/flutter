@@ -58,7 +58,7 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
   },
 );
 
-final Uri vmServiceUri = Uri.parse('http://localhost:1234');
+final Uri observatoryUri = Uri.parse('http://localhost:1234');
 
 void main() {
   late FakeVmServiceHost fakeVmServiceHost;
@@ -71,7 +71,7 @@ void main() {
         'ephemeral',
         'ephemeral',
         type: PlatformType.android,
-        launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+        launchResult: LaunchResult.succeeded(observatoryUri: observatoryUri),
       ),
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
@@ -126,7 +126,7 @@ void main() {
   testUsingContext('Can start the entrypoint', () async {
     await testDevice.start('entrypointPath');
 
-    expect(await testDevice.vmServiceUri, vmServiceUri);
+    expect(await testDevice.observatoryUri, observatoryUri);
     expect(testDevice.finished, doesNotComplete);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
@@ -161,7 +161,7 @@ void main() {
     }) async => fakeVmServiceHost.vmService,
   });
 
-  testUsingContext('when the device starts without providing an vmService URI', () async {
+  testUsingContext('when the device starts without providing an observatory URI', () async {
     final TestDevice testDevice = IntegrationTestTestDevice(
       id: 1,
       device: FakeDevice(

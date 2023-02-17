@@ -224,21 +224,21 @@ class FlutterDevice {
   final DevelopmentSceneImporter? developmentSceneImporter;
 
   DevFSWriter? devFSWriter;
-  Stream<Uri?>? vmServiceUris;
+  Stream<Uri?>? observatoryUris;
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
   // ignore: cancel_subscriptions
   StreamSubscription<String>? _loggingSubscription;
-  bool? _isListeningForVmServiceUri;
+  bool? _isListeningForObservatoryUri;
 
-  /// Whether the stream [vmServiceUris] is still open.
-  bool get isWaitingForVmService => _isListeningForVmServiceUri ?? false;
+  /// Whether the stream [observatoryUris] is still open.
+  bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
   /// The 'reloadSources' service can be used by other Service Protocol clients
-  /// connected to the VM (e.g. VmService) to request a reload of the source
+  /// connected to the VM (e.g. Observatory) to request a reload of the source
   /// code of the running application (a.k.a. HotReload).
   /// The 'compileExpression' service can be used to compile user-provided
   /// expressions requested during debugging of the application.
@@ -262,29 +262,29 @@ class FlutterDevice {
     late StreamSubscription<void> subscription;
     bool isWaitingForVm = false;
 
-    subscription = vmServiceUris!.listen((Uri? vmServiceUri) async {
+    subscription = observatoryUris!.listen((Uri? observatoryUri) async {
       // FYI, this message is used as a sentinel in tests.
-      globals.printTrace('Connecting to service protocol: $vmServiceUri');
+      globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       bool existingDds = false;
       FlutterVmService? service;
       if (enableDds) {
         void handleError(Exception e, StackTrace st) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
-            completer.completeError('failed to connect to $vmServiceUri', st);
+            completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
-        // First check if the VM service is actually listening on vmServiceUri as
+        // First check if the VM service is actually listening on observatoryUri as
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(vmServiceUri!, logger: globals.logger);
+          service = await connectToVmService(observatoryUri!, logger: globals.logger);
           await service.dispose();
         } on Exception catch (exception) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
-          if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-            completer.completeError('failed to connect to $vmServiceUri');
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri!) {
+            completer.completeError('failed to connect to $observatoryUri');
           }
           return;
         }
@@ -294,7 +294,7 @@ class FlutterDevice {
         // attaching to a VM service with existing clients, etc.).
         try {
           await device!.dds.startDartDevelopmentService(
-            vmServiceUri,
+            observatoryUri,
             hostPort: ddsPort,
             ipv6: ipv6,
             disableServiceAuthCodes: disableServiceAuthCodes,
@@ -324,7 +324,7 @@ class FlutterDevice {
         service = await Future.any<dynamic>(
           <Future<dynamic>>[
             connectToVmService(
-              enableDds ? (device!.dds.uri ?? vmServiceUri!): vmServiceUri!,
+              enableDds ? (device!.dds.uri ?? observatoryUri!): observatoryUri!,
               reloadSources: reloadSources,
               restart: restart,
               compileExpression: compileExpression,
@@ -338,30 +338,30 @@ class FlutterDevice {
           ]
         ) as FlutterVmService?;
       } on Exception catch (exception) {
-        globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
-        if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-          completer.completeError('failed to connect to $vmServiceUri');
+        globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+        if (!completer.isCompleted && !_isListeningForObservatoryUri!) {
+          completer.completeError('failed to connect to $observatoryUri');
         }
         return;
       }
       if (completer.isCompleted) {
         return;
       }
-      globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
+      globals.printTrace('Successfully connected to service protocol: $observatoryUri');
 
       vmService = service;
       (await device!.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
-      globals.printTrace('Fail to handle VM Service URI: $error');
+      globals.printTrace('Fail to handle observatory URI: $error');
     }, onDone: () {
-      _isListeningForVmServiceUri = false;
+      _isListeningForObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
         completer.completeError(Exception('connection to device ended too early'));
       }
     });
-    _isListeningForVmServiceUri = true;
+    _isListeningForObservatoryUri = true;
     return completer.future;
   }
 
@@ -471,12 +471,12 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    if (result.hasVmService) {
-      vmServiceUris = Stream<Uri?>
-        .value(result.vmServiceUri)
+    if (result.hasObservatory) {
+      observatoryUris = Stream<Uri?>
+        .value(result.observatoryUri)
         .asBroadcastStream();
     } else {
-      vmServiceUris = const Stream<Uri>
+      observatoryUris = const Stream<Uri>
         .empty()
         .asBroadcastStream();
     }
@@ -536,12 +536,12 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    if (result.hasVmService) {
-      vmServiceUris = Stream<Uri?>
-        .value(result.vmServiceUri)
+    if (result.hasObservatory) {
+      observatoryUris = Stream<Uri?>
+        .value(result.observatoryUri)
         .asBroadcastStream();
     } else {
-      vmServiceUris = const Stream<Uri>
+      observatoryUris = const Stream<Uri>
         .empty()
         .asBroadcastStream();
     }
@@ -1131,10 +1131,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   bool hotMode;
 
-  /// Returns true if every device is streaming vmService URIs.
-  bool get isWaitingForVmService {
+  /// Returns true if every device is streaming observatory URIs.
+  bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice? device) {
-      return device!.isWaitingForVmService;
+      return device!.isWaitingForObservatory;
     });
   }
 
@@ -1478,7 +1478,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   bool _reportedDebuggers = false;
 
-  void printDebuggerList({ bool includeVmService = true, bool includeDevtools = true }) {
+  void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
     final DevToolsServerAddress? devToolsServerAddress = residentDevtoolsHandler!.activeDevToolsServer;
     if (!residentDevtoolsHandler!.readyToAnnounce) {
       includeDevtools = false;
@@ -1488,10 +1488,10 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (device!.vmService == null) {
         continue;
       }
-      if (includeVmService) {
+      if (includeObservatory) {
         // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
-          'A Dart VM Service on ${device.device!.name} is available at: '
+          'An Observatory debugger and profiler on ${device.device!.name} is available at: '
           '${device.vmService!.httpAddress}',
         );
       }
