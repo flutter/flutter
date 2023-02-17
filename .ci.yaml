@@ -303,7 +303,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/flutter
     presubmit: false
-    timeout: 90
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
       dependencies: >-
@@ -321,7 +321,7 @@ targets:
 
   - name: Linux docs_test
     recipe: flutter/flutter
-    timeout: 60
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
       dependencies: >-
