@@ -336,6 +336,16 @@ gboolean fl_engine_unregister_external_texture(FlEngine* engine,
  */
 void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 
+/**
+ * fl_engine_get_switches:
+ * @project: an #FlEngine.
+ *
+ * Determines the switches that should be passed to the Flutter engine.
+ *
+ * Returns: an array of switches to pass to the Flutter engine.
+ */
+GPtrArray* fl_engine_get_switches(FlEngine* engine);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_ENGINE_PRIVATE_H_
