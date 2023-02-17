@@ -700,7 +700,8 @@ Future<void> testMain() async {
       for (int i = 0; i < 11; i++) {
         expect(
           paragraph.getLineBoundary(ui.TextPosition(offset: i)),
-          const ui.TextRange(start: 0, end: 11),
+          // The "\n" is not included in the line boundary.
+          const ui.TextRange(start: 0, end: 10),
           reason: 'failed at offset $i',
         );
       }
@@ -709,7 +710,8 @@ Future<void> testMain() async {
       for (int i = 11; i < 23; i++) {
         expect(
           paragraph.getLineBoundary(ui.TextPosition(offset: i)),
-          const ui.TextRange(start: 11, end: 23),
+          // The "\n" is not included in the line boundary.
+          const ui.TextRange(start: 11, end: 22),
           reason: 'failed at offset $i',
         );
       }
