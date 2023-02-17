@@ -22,7 +22,7 @@ import '../../matchers.dart';
 /// so we don't have to hardcode domDocument across the test. (The host of a
 /// normal flutter app used to be domDocument, but now that the app is wrapped
 /// in a Shadow DOM, that's not the case anymore.)
-HostNode get appHostNode => flutterViewEmbedder.glassPaneShadow!;
+HostNode get appHostNode => flutterViewEmbedder.glassPaneShadow;
 
 /// CSS style applied to the root of the semantics tree.
 // TODO(yjbanov): this should be handled internally by [expectSemanticsTree].

@@ -42,7 +42,7 @@ void main() {
 
 void testMain() {
   ensureFlutterViewEmbedderInitialized();
-  final DomElement glassPane = flutterViewEmbedder.glassPaneElement!;
+  final DomElement glassPane = flutterViewEmbedder.glassPaneElement;
   late double dpi;
 
   setUp(() {
