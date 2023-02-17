@@ -174,6 +174,30 @@ TEST_F(EmbedderTest, ExecutableNameNotNull) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, ImplicitViewNotNull) {
+  // TODO(loicsharma): Update this test when embedders can opt-out
+  // of the implicit view.
+  // See: https://github.com/flutter/flutter/issues/120306
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  bool implicitViewNotNull = false;
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "NotifyBoolValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        implicitViewNotNull = tonic::DartConverter<bool>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        latch.Signal();
+      }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("implicitViewNotNull");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+
+  EXPECT_TRUE(implicitViewNotNull);
+}
+
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {

@@ -889,6 +889,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
  private:
   // |RuntimeDelegate|
+  bool ImplicitViewEnabled() override;
+
+  // |RuntimeDelegate|
   std::string DefaultRouteName() override;
 
   // |RuntimeDelegate|

@@ -431,6 +431,14 @@ void Engine::SetAccessibilityFeatures(int32_t flags) {
   runtime_controller_->SetAccessibilityFeatures(flags);
 }
 
+bool Engine::ImplicitViewEnabled() {
+  // TODO(loicsharma): This value should be provided by the embedder
+  // when it launches the engine. For now, assume the embedder always creates a
+  // view.
+  // See: https://github.com/flutter/flutter/issues/120306
+  return true;
+}
+
 std::string Engine::DefaultRouteName() {
   if (!initial_route_.empty()) {
     return initial_route_;

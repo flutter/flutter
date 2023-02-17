@@ -299,6 +299,11 @@ RuntimeController::GetPlatformConfigurationIfAvailable() {
 }
 
 // |PlatformConfigurationClient|
+bool RuntimeController::ImplicitViewEnabled() {
+  return client_.ImplicitViewEnabled();
+}
+
+// |PlatformConfigurationClient|
 std::string RuntimeController::DefaultRouteName() {
   return client_.DefaultRouteName();
 }

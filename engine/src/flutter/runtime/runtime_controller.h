@@ -611,6 +611,9 @@ class RuntimeController : public PlatformConfigurationClient {
   bool FlushRuntimeStateToIsolate();
 
   // |PlatformConfigurationClient|
+  bool ImplicitViewEnabled() override;
+
+  // |PlatformConfigurationClient|
   std::string DefaultRouteName() override;
 
   // |PlatformConfigurationClient|

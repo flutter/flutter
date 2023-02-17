@@ -41,6 +41,13 @@ void testMain() {
     await window.resetHistory();
   });
 
+  // For now, web always has an implicit view provided by the web engine.
+  test('EnginePlatformDispatcher.instance.implicitView should be non-null', () async {
+    expect(EnginePlatformDispatcher.instance.implicitView, isNotNull);
+    expect(EnginePlatformDispatcher.instance.implicitView?.viewId, 0);
+    expect(window.viewId, 0);
+  });
+
   test('window.defaultRouteName should work with JsUrlStrategy', () async {
     dynamic state = <dynamic, dynamic>{};
     final JsUrlStrategy jsUrlStrategy = JsUrlStrategy(

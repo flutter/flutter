@@ -48,6 +48,7 @@ class MockResponse : public PlatformMessageResponse {
 
 class MockRuntimeDelegate : public RuntimeDelegate {
  public:
+  MOCK_METHOD0(ImplicitViewEnabled, bool());
   MOCK_METHOD0(DefaultRouteName, std::string());
   MOCK_METHOD1(ScheduleFrame, void(bool));
   MOCK_METHOD1(Render, void(std::shared_ptr<flutter::LayerTree>));
