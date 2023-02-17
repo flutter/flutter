@@ -2339,27 +2339,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Replace composing region with specified text.
-  void replaceText({required SelectionChangedCause cause, required String text, required TextRange replacementRange, bool shouldSelectWordEdgeAfterReplacement = false}) {
-    // Replacement cannot be performed if the text is read only or obscured.
-    assert(!widget.readOnly && !widget.obscureText);
-
-    _replaceText(ReplaceTextIntent(textEditingValue, text, replacementRange, cause));
-
-    if (cause == SelectionChangedCause.toolbar) {
-      // Schedule a call to bringIntoView() after renderEditable updates.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          bringIntoView(textEditingValue.selection.extent);
-        }
-      });
-      hideToolbar();
-      if (shouldSelectWordEdgeAfterReplacement) {
-        renderEditable.selectWordEdge(cause: cause);
-      }
-    }
-  }
-
   /// Finds specified [SuggestionSpan] that matches the provided index using
   /// binary search.
   ///

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart' show SuggestionSpan;
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
@@ -80,11 +81,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     for (final String suggestion in spanAtCursorIndex.suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
-          editableTextState
-            .replaceText(
-              cause: SelectionChangedCause.toolbar,
-              text: suggestion,
-              replacementRange: spanAtCursorIndex.range,
+          _replaceText(
+            editableTextState,
+            suggestion,
+            spanAtCursorIndex.range,
           );
         },
         label: suggestion,
@@ -95,10 +95,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
-          editableTextState.replaceText(
-            cause: SelectionChangedCause.toolbar,
-            text: '',
-            replacementRange: editableTextState.currentTextEditingValue.composing,
+          _replaceText(
+            editableTextState,
+            '',
+            editableTextState.currentTextEditingValue.composing,
           );
         },
         type: ContextMenuButtonType.delete,
@@ -106,6 +106,27 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     buttonItems.add(deleteButton);
 
     return buttonItems;
+  }
+
+  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+    // Replacement cannot be performed if the text is read only or obscured.
+    assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
+
+    final ReplaceTextIntent intent = ReplaceTextIntent(editableTextState.textEditingValue, text, replacementRange, SelectionChangedCause.toolbar);
+
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.replacementRange,
+      intent.replacementText,
+    );
+    editableTextState.userUpdateTextEditingValue(newValue, intent.cause);
+
+    // Schedule a call to bringIntoView() after renderEditable updates.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (editableTextState.mounted) {
+        editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
+      }
+    });
+    editableTextState.hideToolbar();
   }
 
   /// Determines the Offset that the toolbar will be anchored to.

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart' show SuggestionSpan;
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 import 'package:flutter/widgets.dart';
 
 import 'text_selection_toolbar.dart';
@@ -73,12 +74,10 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
         buttonItems.add(ContextMenuButtonItem(
           onPressed: () {
-            editableTextState
-              .replaceText(
-                cause: SelectionChangedCause.toolbar,
-                text: suggestion,
-                replacementRange: spanAtCursorIndex.range,
-                shouldSelectWordEdgeAfterReplacement: true,
+            _replaceText(
+              editableTextState,
+              suggestion,
+              spanAtCursorIndex.range,
             );
           },
           label: suggestion,
@@ -86,6 +85,28 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       suggestionCount += 1;
     }
     return buttonItems;
+  }
+
+  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+    // Replacement cannot be performed if the text is read only or obscured.
+    assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
+
+    final ReplaceTextIntent intent = ReplaceTextIntent(editableTextState.textEditingValue, text, replacementRange, SelectionChangedCause.toolbar);
+
+    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
+      intent.replacementRange,
+      intent.replacementText,
+    );
+    editableTextState.userUpdateTextEditingValue(newValue, intent.cause);
+
+    // Schedule a call to bringIntoView() after renderEditable updates.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (editableTextState.mounted) {
+        editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
+      }
+    });
+    editableTextState.hideToolbar();
+    editableTextState.renderEditable.selectWordEdge(cause: intent.cause);
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
