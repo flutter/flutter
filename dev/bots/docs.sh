@@ -18,7 +18,7 @@ function script_location() {
 
 function generate_docs() {
     # Install and activate dartdoc.
-    # NOTE: When updating to a new dartdoc version, please also update
+    # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
     "$DART" pub global activate dartdoc 6.1.5
 

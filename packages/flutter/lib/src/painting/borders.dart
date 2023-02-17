@@ -26,8 +26,8 @@ enum BorderStyle {
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
 /// [Border.left], [Border.right], and [Border.bottom].
 ///
-/// Note that setting [BorderSide.width] to 0.0 will result in hairline
-/// rendering. A more involved explanation is present in [BorderSide.width].
+/// Setting [BorderSide.width] to 0.0 will result in hairline rendering; see
+/// [BorderSide.width] for a more involved explanation.
 ///
 /// {@tool snippet}
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
@@ -108,7 +108,7 @@ class BorderSide with Diagnosticable {
   /// The width of this side of the border, in logical pixels.
   ///
   /// Setting width to 0.0 will result in a hairline border. This means that
-  /// the border will have the width of one physical pixel. Also, hairline
+  /// the border will have the width of one physical pixel. Hairline
   /// rendering takes shortcuts when the path overlaps a pixel more than once.
   /// This means that it will render faster than otherwise, but it might
   /// double-hit pixels, giving it a slightly darker/lighter result.
@@ -143,6 +143,11 @@ class BorderSide with Diagnosticable {
   /// - [strokeAlignCenter] provides padding with half [width].
   /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
   ///
+  /// This property is not honored by [toPaint] (because the [Paint] object
+  /// cannot represent it); it is intended that classes that use [BorderSide]
+  /// objects implement this property when painting borders by suitably
+  /// inflating or deflating their regions.
+  ///
   /// {@tool dartpad}
   /// This example shows an animation of how [strokeAlign] affects the drawing
   /// when applied to borders of various shapes.
@@ -153,15 +158,21 @@ class BorderSide with Diagnosticable {
 
   /// The border is drawn fully inside of the border path.
   ///
-  /// This is the default.
+  /// This is a constant for use with [strokeAlign].
+  ///
+  /// This is the default value for [strokeAlign].
   static const double strokeAlignInside = -1.0;
 
   /// The border is drawn on the center of the border path, with half of the
   /// [BorderSide.width] on the inside, and the other half on the outside of
   /// the path.
+  ///
+  /// This is a constant for use with [strokeAlign].
   static const double strokeAlignCenter = 0.0;
 
   /// The border is drawn on the outside of the border path.
+  ///
+  /// This is a constant for use with [strokeAlign].
   static const double strokeAlignOutside = 1.0;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
@@ -205,6 +216,9 @@ class BorderSide with Diagnosticable {
 
   /// Create a [Paint] object that, if used to stroke a line, will draw the line
   /// in this border's style.
+  ///
+  /// The [strokeAlign] property is not reflected in the [Paint]; consumers must
+  /// implement that directly by inflating or deflating their region appropriately.
   ///
   /// Not all borders use this method to paint their border sides. For example,
   /// non-uniform rectangular [Border]s have beveled edges and so paint their

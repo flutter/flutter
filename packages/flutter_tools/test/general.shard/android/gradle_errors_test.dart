@@ -808,9 +808,9 @@ assembleProfile
           '│   }                                                                                           │\n'
           '│ }                                                                                             │\n'
           '│                                                                                               │\n'
-          "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
-          '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
-          '│ Android SDK.                                                                                  │\n'
+          '│ Following this change, your app will not be available to users running Android SDKs below 19. │\n'
+          '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
+          '│ Android SDK instead.                                                                          │\n'
           '│ For more information, see:                                                                    │\n'
           '│ https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration          │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'

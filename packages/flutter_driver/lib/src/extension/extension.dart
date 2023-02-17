@@ -97,7 +97,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
 /// ```
 ///
-/// Note: SomeFinder and SomeFinderExtension must be placed in different files
+/// `SomeFinder` and `SomeFinderExtension` must be placed in different files
 /// to avoid `dart:ui` import issue. Imports relative to `dart:ui` can't be
 /// accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -140,7 +140,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 ///
-/// Note: SomeCommand, SomeResult and SomeCommandExtension must be placed in
+/// `SomeCommand`, `SomeResult` and `SomeCommandExtension` must be placed in
 /// different files to avoid `dart:ui` import issue. Imports relative to `dart:ui`
 /// can't be accessed from host runner, where flutter runtime is not accessible.
 ///

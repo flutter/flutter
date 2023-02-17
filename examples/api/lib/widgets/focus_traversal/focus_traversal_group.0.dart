@@ -164,7 +164,7 @@ class MyStatelessWidget extends StatelessWidget {
             ),
             // A group that orders in widget order, regardless of what the order is set to.
             FocusTraversalGroup(
-              // Note that because this is NOT an OrderedTraversalPolicy, the
+              // Because this is NOT an OrderedTraversalPolicy, the
               // assigned order of these OrderedButtons is ignored, and they
               // are traversed in widget order. TRY THIS: change this to
               // "OrderedTraversalPolicy()" and see that it now follows the

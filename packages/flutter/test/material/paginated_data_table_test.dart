@@ -771,7 +771,7 @@ void main() {
   testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
-    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // 800 is wide enough to ensure that all of the columns fit in the
     // Card. The test makes sure that the DataTable is exactly as wide
     // as the Card, minus the Card's margin.
     const double originalWidth = 800;

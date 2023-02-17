@@ -630,7 +630,7 @@ class GalleryDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context)!.scrollMode;
     return Drawer(
-      // Note: for real apps, see the Gallery material Drawer demo. More
+      // For real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
       // below it.
       child: ListView(

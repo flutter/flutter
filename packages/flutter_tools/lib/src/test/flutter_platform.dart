@@ -121,7 +121,7 @@ FlutterPlatform installHook({
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.
 ///
-// NOTE: this API is used by the fuchsia source tree, do not add new
+// This API is used by the Fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
   required Uri testUrl,

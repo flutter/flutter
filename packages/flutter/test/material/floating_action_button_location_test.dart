@@ -125,7 +125,7 @@ void main() {
           // Measure the delta in rotation.
           // Check that it never grows by more than a safe amount.
           //
-          // Note that there may be multiple transitions all active at
+          // There may be multiple transitions all active at
           // the same time. We are concerned only with the closest one.
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),

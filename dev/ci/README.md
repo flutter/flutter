@@ -9,7 +9,7 @@ On each new change to this `Dockerfile`, Cirrus will build a new version of
 the Docker image as a dependency to any Linux tests. It is no longer necessary
 to manually build and push the Docker image locally.
 
-NOTE: there are some factors external to the actual `Dockerfile` that would
+There are some factors external to the actual `Dockerfile` that would
 necessitate rebuilding the Docker image, such as upstream code changes, (Linux
 distribution) repository updates or a file that gets `COPY`ied into the image
 changing. In this case, a trivial `Dockerfile` change (such as a comment)

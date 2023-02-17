@@ -551,7 +551,7 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Note: checked state and toggled state are mutually exclusive.
+    // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         Semantics(
           key: const Key('a'),
