@@ -142,9 +142,9 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// normal [ExpansionPanelList] widgets, it is the responsibilty of the parent
 /// widget to rebuild the [ExpansionPanelList] with updated values for
 /// [ExpansionPanel.isExpanded]. For [ExpansionPanelList.radio] widgets, the
-/// callback is invoked both for the previously open panel, which is closing,
-/// and the previously closed panel, which is opening, and the widget tracks the
-/// open state internally.
+/// open state is tracked internally and the callback is invoked both for the
+/// previously open panel, which is closing, and the previously closed panel,
+/// which is opening.
 ///
 /// {@tool dartpad}
 /// Here is a simple example of how to use [ExpansionPanelList].

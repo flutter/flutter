@@ -90,7 +90,7 @@ class PhysicalKeyData {
   /// that we can get names for all of the available scan codes, not just ones
   /// defined for the generic profile.
   ///
-  /// Some keys (notably MEDIA_EJECT) can be mapped to more than
+  /// Some keys (notably `MEDIA_EJECT`) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
   static Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout, String nameMap) {
     final RegExp keyEntry = RegExp(

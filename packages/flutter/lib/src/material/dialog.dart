@@ -552,7 +552,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// If the widgets in [actions] do not fit into a single row, they are
   /// arranged into a column. This parameter provides additional vertical space
-  /// in between buttons when it does overflow.
+  /// between buttons when it does overflow.
   ///
   /// The button spacing may appear to be more than the value provided. This is
   /// because most buttons adhere to the [MaterialTapTargetSize] of 48px. So,
