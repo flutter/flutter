@@ -554,6 +554,45 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('test --dart-define-from-file option if conflict', () async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('config1.json').writeAsString(
+        '''
+        {
+          "kInt": 1,
+          "kDouble": 1.1,
+          "name": "denghaizhu",
+          "title": "this is title from config json file"
+        }
+      '''
+    );
+    await globals.fs.file('config2.json').writeAsString(
+        '''
+        {
+          "kInt": "2"
+        }
+      '''
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+      bundleBuilder: fakeBundleBuilder,
+    ));
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=config1.json',
+      '--dart-define-from-file=config2.json',
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: false), (Target target, Environment environment) {
+      expect(environment.defines[kDartDefines], 'a0ludD0y,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
+    }),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
   testUsingContext('test --dart-define-from-file option by corrupted json', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -584,7 +623,6 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     ProcessManager: () => FakeProcessManager.any(),
   });
-
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

@@ -1183,24 +1183,22 @@ abstract class FlutterCommand extends Command<void> {
     Map<String, Object>? defineConfigJsonMap;
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPaths.isNotEmpty) {
-        if (configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+      if (configJsonPaths.isNotEmpty && configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+        defineConfigJsonMap = <String, Object>{};
+        for (final String path in configJsonPaths) {
+          final String configJsonRaw = globals.fs.file(path).readAsStringSync();
           try {
-            defineConfigJsonMap = <String, Object>{};
-            for (final String path in configJsonPaths) {
-              final String configJsonRaw = globals.fs.file(path).readAsStringSync();
-              // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-              (json.decode(configJsonRaw) as Map<String, dynamic>)
-                  .forEach((String key, dynamic value) {
-                defineConfigJsonMap?[key] = value as Object;
-              });
-              defineConfigJsonMap.forEach((String key, Object value) {
-                dartDefines.add('$key=$value');
-              });
-            }
+            // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+            (json.decode(configJsonRaw) as Map<String, dynamic>)
+                .forEach((String key, dynamic value) {
+              defineConfigJsonMap?[key] = value as Object;
+            });
+            defineConfigJsonMap.forEach((String key, Object value) {
+              dartDefines.add('$key=$value');
+            });
           } on FormatException catch (err) {
             throwToolExit('Json config define file "--${FlutterOptions
-                .kDartDefineFromFileOption}=$configJsonPaths" format err, '
+                .kDartDefineFromFileOption}=$path" format err, '
                 'please fix first! format err:\n$err');
           }
         }
