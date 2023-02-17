@@ -913,6 +913,67 @@ void main() {
 
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('ListView of license entries is primary', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120710
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+         LicenseEntryWithLineBreaks(
+          <String>['AAA'],
+          // Add enough content to scroll
+          List<String>.generate(500, (int index) => 'BBBB').join('\n'),
+        ),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'Flutter Code Sample',
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) => TextButton(
+              child: const Text('Show License Page'),
+              onPressed: () {
+                showLicensePage(context: context);
+              },
+            ),
+          ),
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Show License Page'), findsOneWidget);
+    await tester.tap(find.text('Show License Page'));
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle();
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    switch (debugDefaultTargetPlatformOverride) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(find.byType(CupertinoScrollbar), findsNothing);
+        break;
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoScrollbar), findsOneWidget);
+        break;
+      case null:
+        break;
+    }
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+    await tester.drag(find.byType(ListView), const Offset(0.0, 20.0));
+    await tester.pumpAndSettle(); // No exception triggered.
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('LicensePage padding', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 

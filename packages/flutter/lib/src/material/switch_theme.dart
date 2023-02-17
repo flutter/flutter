@@ -116,6 +116,9 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return SwitchThemeData(
       thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
