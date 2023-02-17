@@ -127,7 +127,8 @@ struct PipelineBuilder {
       StencilAttachmentDescriptor stencil0;
       stencil0.stencil_compare = CompareFunction::kEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
-      desc.SetStencilPixelFormat(PixelFormat::kDefaultStencil);
+      desc.SetStencilPixelFormat(
+          context.GetDeviceCapabilities().GetDefaultStencilFormat());
     }
 
     return true;

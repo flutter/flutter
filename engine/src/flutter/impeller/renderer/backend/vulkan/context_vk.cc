@@ -499,11 +499,14 @@ ContextVK::ContextVK(
   transfer_queue_ =
       device_->getQueue(transfer_queue->family, transfer_queue->index);
 
-  device_capabilities_ = DeviceCapabilitiesBuilder()
-                             .SetHasThreadingRestrictions(false)
-                             .SetSupportsOffscreenMSAA(true)
-                             .SetSupportsSSBO(false)
-                             .Build();
+  device_capabilities_ =
+      DeviceCapabilitiesBuilder()
+          .SetHasThreadingRestrictions(false)
+          .SetSupportsOffscreenMSAA(true)
+          .SetSupportsSSBO(false)
+          .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
+          .SetDefaultStencilFormat(PixelFormat::kS8UInt)
+          .Build();
 
   is_valid_ = true;
 }

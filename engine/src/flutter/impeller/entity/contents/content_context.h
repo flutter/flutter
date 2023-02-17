@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include "flutter/fml/hash_combine.h"
@@ -265,7 +266,7 @@ struct ContentContextOptions {
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
-  PixelFormat color_attachment_pixel_format = PixelFormat::kDefaultColor;
+  std::optional<PixelFormat> color_attachment_pixel_format;
   bool has_stencil_attachment = true;
 
   struct Hash {
