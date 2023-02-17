@@ -1644,7 +1644,7 @@ void main() {
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
   });
 
-  testWidgets('swapping viewport does not crash', (WidgetTester tester) async {
+  testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final GlobalKey key1 = GlobalKey();
     Widget buildScrollable(bool withViewPort) {
