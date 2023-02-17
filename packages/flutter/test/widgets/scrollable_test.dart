@@ -1643,6 +1643,46 @@ void main() {
     await tester.pump(const Duration(milliseconds: 4800));
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
   });
+
+  testWidgets('swapping viewport does not crash', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final GlobalKey key1 = GlobalKey();
+    Widget buildScrollable(bool withViewPort) {
+      return Scrollable(
+        key: key,
+        viewportBuilder: (BuildContext context, ViewportOffset position) {
+          if (withViewPort) {
+            return Viewport(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: Semantics(key: key1, container: true, child: const Text('text1')))
+              ],
+              offset: ViewportOffset.zero(),
+            );
+          }
+          return Semantics(key: key1, container: true, child: const Text('text1'));
+        },
+      );
+    }
+    // This should cache the inner node in Scrollable with the children text1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    // This does not use two panel, this should clear cached inner node.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(false),
+      ),
+    );
+    // If the inner node was cleared in the previous step, this should not crash.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 // ignore: must_be_immutable

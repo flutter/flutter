@@ -1659,6 +1659,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+      _innerNode = null;
       super.assembleSemanticsNode(node, config, children);
       return;
     }
