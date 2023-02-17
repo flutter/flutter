@@ -27,8 +27,8 @@ typedef _HandleMessageCallBack = Future<bool> Function();
 /// When set to true, all platform messages will be printed to the console.
 const bool debugPrintPlatformMessages = false;
 
-/// The view ID for a singleton flutter window.
-const int kSingletonViewId = 0;
+/// The view ID for the implicit flutter view provided by the platform.
+const int kImplicitViewId = 0;
 
 /// Whether [_customUrlStrategy] has been set or not.
 ///
@@ -349,7 +349,7 @@ class EngineSingletonFlutterWindow extends EngineFlutterWindow {
 /// API surface, providing Web-specific functionality that the standard
 /// `dart:ui` version does not.
 final EngineSingletonFlutterWindow window =
-    EngineSingletonFlutterWindow(kSingletonViewId, EnginePlatformDispatcher.instance);
+    EngineSingletonFlutterWindow(kImplicitViewId, EnginePlatformDispatcher.instance);
 
 /// The Web implementation of [ui.WindowPadding].
 class WindowPadding implements ui.WindowPadding {

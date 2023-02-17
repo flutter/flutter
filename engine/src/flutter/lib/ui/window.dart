@@ -896,6 +896,7 @@ enum Brightness {
 /// * [PlatformDispatcher.views], contains the current list of Flutter windows
 ///   belonging to the application, including top level application windows like
 ///   this one.
+/// * [PlatformDispatcher.implicitView], this window's view.
 final SingletonFlutterWindow window = SingletonFlutterWindow._(0, PlatformDispatcher.instance);
 
 /// Additional data available on each flutter frame.
