@@ -110,6 +110,11 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(${tokens['md.comp.checkbox.container.shape']}),
+  );
 }
 ''';
 }
