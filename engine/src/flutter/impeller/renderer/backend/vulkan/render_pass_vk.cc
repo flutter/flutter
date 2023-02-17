@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/render_pass_vk.h"
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "fml/logging.h"
@@ -71,7 +72,9 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   const auto& stencil0 = render_target.GetStencilAttachment();
 
   auto& texture = TextureVK::Cast(*color0.texture);
+  const auto& size = texture.GetTextureDescriptor().size;
   vk::Framebuffer framebuffer = CreateFrameBuffer(texture);
+  uint32_t mip_count = texture.GetTextureDescriptor().mip_count;
 
   command_buffer_->GetDeletionQueue()->Push(
       [device = device_, fbo = framebuffer]() {
@@ -80,7 +83,8 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
 
   // layout transition.
   if (!TransitionImageLayout(texture.GetImage(), vk::ImageLayout::eUndefined,
-                             vk::ImageLayout::eColorAttachmentOptimal)) {
+                             vk::ImageLayout::eColorAttachmentOptimal,
+                             mip_count)) {
     return false;
   }
 
@@ -88,7 +92,6 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   clear_value.color =
       vk::ClearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0, 0.0f});
 
-  const auto& size = texture.GetTextureDescriptor().size;
   vk::Rect2D render_area =
       vk::Rect2D()
           .setOffset(vk::Offset2D(0, 0))
@@ -124,7 +127,8 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   }
 
   if (!TransitionImageLayout(texture.GetImage(), vk::ImageLayout::eUndefined,
-                             vk::ImageLayout::eColorAttachmentOptimal)) {
+                             vk::ImageLayout::eColorAttachmentOptimal,
+                             mip_count)) {
     return false;
   }
 
@@ -315,18 +319,19 @@ bool RenderPassVK::UpdateDescriptorSets(const char* label,
     const SamplerVK& sampler_vk = SamplerVK::Cast(sampler);
 
     const SampledImageSlot& slot = bindings.sampled_images.at(index);
+    uint32_t mip_levels = texture_vk.GetTextureDescriptor().mip_count;
 
-    if (!TransitionImageLayout(texture_vk.GetImage(),
-                               vk::ImageLayout::eUndefined,
-                               vk::ImageLayout::eTransferDstOptimal)) {
+    if (!TransitionImageLayout(
+            texture_vk.GetImage(), vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eTransferDstOptimal, mip_levels)) {
       return false;
     }
 
     CopyBufferToImage(texture_vk);
 
-    if (!TransitionImageLayout(texture_vk.GetImage(),
-                               vk::ImageLayout::eTransferDstOptimal,
-                               vk::ImageLayout::eShaderReadOnlyOptimal)) {
+    if (!TransitionImageLayout(
+            texture_vk.GetImage(), vk::ImageLayout::eTransferDstOptimal,
+            vk::ImageLayout::eShaderReadOnlyOptimal, mip_levels)) {
       return false;
     }
 
@@ -394,9 +399,10 @@ vk::Framebuffer RenderPassVK::CreateFrameBuffer(
 
 bool RenderPassVK::TransitionImageLayout(vk::Image image,
                                          vk::ImageLayout layout_old,
-                                         vk::ImageLayout layout_new) const {
+                                         vk::ImageLayout layout_new,
+                                         uint32_t mip_levels) const {
   auto transition_cmd =
-      TransitionImageLayoutCommandVK(image, layout_old, layout_new);
+      TransitionImageLayoutCommandVK(image, layout_old, layout_new, mip_levels);
   return transition_cmd.Submit(command_buffer_.get());
 }
 

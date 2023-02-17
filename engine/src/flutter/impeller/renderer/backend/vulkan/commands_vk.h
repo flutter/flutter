@@ -14,7 +14,8 @@ class TransitionImageLayoutCommandVK {
  public:
   TransitionImageLayoutCommandVK(vk::Image image,
                                  vk::ImageLayout old_layout,
-                                 vk::ImageLayout new_layout);
+                                 vk::ImageLayout new_layout,
+                                 uint32_t mip_levels);
 
   ~TransitionImageLayoutCommandVK();
 
@@ -24,6 +25,7 @@ class TransitionImageLayoutCommandVK {
   vk::Image image_;
   vk::ImageLayout old_layout_;
   vk::ImageLayout new_layout_;
+  uint32_t mip_levels_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TransitionImageLayoutCommandVK);
 };

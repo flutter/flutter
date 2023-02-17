@@ -9,8 +9,12 @@ namespace impeller {
 TransitionImageLayoutCommandVK::TransitionImageLayoutCommandVK(
     vk::Image image,
     vk::ImageLayout old_layout,
-    vk::ImageLayout new_layout)
-    : image_(image), old_layout_(old_layout), new_layout_(new_layout) {}
+    vk::ImageLayout new_layout,
+    uint32_t mip_levels)
+    : image_(image),
+      old_layout_(old_layout),
+      new_layout_(new_layout),
+      mip_levels_(mip_levels) {}
 
 TransitionImageLayoutCommandVK::~TransitionImageLayoutCommandVK() = default;
 
@@ -35,7 +39,7 @@ bool TransitionImageLayoutCommandVK::Submit(
               vk::ImageSubresourceRange()
                   .setAspectMask(vk::ImageAspectFlagBits::eColor)
                   .setBaseMipLevel(0)
-                  .setLevelCount(1)
+                  .setLevelCount(mip_levels_)
                   .setBaseArrayLayer(0)
                   .setLayerCount(1));
 

@@ -116,6 +116,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   image_create_info.initialLayout = vk::ImageLayout::eUndefined;
   image_create_info.usage = vk::ImageUsageFlagBits::eSampled |
                             vk::ImageUsageFlagBits::eColorAttachment |
+                            vk::ImageUsageFlagBits::eTransferSrc |
                             vk::ImageUsageFlagBits::eTransferDst;
 
   VmaAllocationCreateInfo alloc_create_info = {};
