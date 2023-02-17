@@ -4645,23 +4645,23 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
@@ -4669,38 +4669,38 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    return textStyle.copyWith(color:_colors.error);
+    return textStyle.copyWith(color: _colors.error);
   });
 }
 
