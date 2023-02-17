@@ -29,7 +29,7 @@ class ProtocolDiscovery {
     );
   }
 
-  factory ProtocolDiscovery.vmService(
+  factory ProtocolDiscovery.observatory(
     DeviceLogReader logReader, {
     DevicePortForwarder? portForwarder,
     Duration? throttleDuration,
@@ -38,10 +38,10 @@ class ProtocolDiscovery {
     required bool ipv6,
     required Logger logger,
   }) {
-    const String kVmServiceService = 'VM Service';
+    const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
       logReader,
-      kVmServiceService,
+      kObservatoryService,
       portForwarder: portForwarder,
       throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
       hostPort: hostPort,
@@ -59,7 +59,7 @@ class ProtocolDiscovery {
   final bool ipv6;
   final Logger _logger;
 
-  /// The time to wait before forwarding a new VM Service URIs from [logReader].
+  /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
 
   StreamSubscription<String>? _deviceLogSubscription;
@@ -81,12 +81,12 @@ class ProtocolDiscovery {
 
   /// The discovered service URLs.
   ///
-  /// When a new VM Service URL: is available in [logReader],
+  /// When a new observatory URL: is available in [logReader],
   /// the URLs are forwarded at most once every [throttleDuration].
   /// Returns when no event has been observed for [throttleTimeout].
   ///
   /// Port forwarding is only attempted when this is invoked,
-  /// for each VM Service URL in the stream.
+  /// for each observatory URL in the stream.
   Stream<Uri> get uris {
     final Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
@@ -107,7 +107,7 @@ class ProtocolDiscovery {
     return globals.kVMServiceMessageRegExp.firstMatch(line);
   }
 
-  Uri? _getVmServiceUri(String line) {
+  Uri? _getObservatoryUri(String line) {
     final Match? match = _getPatternMatch(line);
     if (match != null) {
       return Uri.parse(match[1]!);
@@ -118,7 +118,7 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri? uri;
     try {
-      uri = _getVmServiceUri(line);
+      uri = _getObservatoryUri(line);
     } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
@@ -126,7 +126,7 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      _logger.printTrace('skipping potential VM Service $uri due to device port mismatch');
+      _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);

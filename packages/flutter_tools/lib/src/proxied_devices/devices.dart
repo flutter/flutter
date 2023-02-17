@@ -245,12 +245,12 @@ class ProxiedDevice extends Device {
       'userIdentifier': userIdentifier,
     }));
     final bool started = _cast<bool>(result['started']);
-    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']);
-    final Uri? vmServiceUri = vmServiceUriStr == null ? null : Uri.parse(vmServiceUriStr);
+    final String? observatoryUriStr = _cast<String?>(result['observatoryUri']);
+    final Uri? observatoryUri = observatoryUriStr == null ? null : Uri.parse(observatoryUriStr);
     if (started) {
-      if (vmServiceUri != null) {
-        final int hostPort = await proxiedPortForwarder.forward(vmServiceUri.port);
-        return LaunchResult.succeeded(vmServiceUri: vmServiceUri.replace(port: hostPort));
+      if (observatoryUri != null) {
+        final int hostPort = await proxiedPortForwarder.forward(observatoryUri.port);
+        return LaunchResult.succeeded(observatoryUri: observatoryUri.replace(port: hostPort));
       } else {
         return LaunchResult.succeeded();
       }
