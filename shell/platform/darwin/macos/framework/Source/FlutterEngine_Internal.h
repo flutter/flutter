@@ -48,6 +48,11 @@
 @property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
 
 /**
+ * The command line arguments array for the engine.
+ */
+@property(nonatomic, readonly) std::vector<std::string> switches;
+
+/**
  * Attach a view controller to the engine as its default controller.
  *
  * Practically, since FlutterEngine can only be attached with one controller,
