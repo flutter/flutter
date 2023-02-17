@@ -7,6 +7,7 @@
 #include "flutter/flow/layers/display_list_layer.h"
 
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "flutter/fml/macros.h"
@@ -249,6 +250,8 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
   display_list_layer->Preroll(preroll_context());
   display_list_layer->Preroll(preroll_context());
   display_list_layer->Preroll(preroll_context());
+  LayerTree::TryToRasterCache(*preroll_context()->raster_cached_entries,
+                              &paint_context(), false);
 
   int opacity_alpha = 0x7F;
   SkPoint opacity_offset = SkPoint::Make(10, 10);
@@ -514,6 +517,70 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   ASSERT_GT(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
             size_t(0));
   ASSERT_TRUE(raster_cache_item->Draw(paint_context(), nullptr));
+}
+
+TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
+  use_mock_raster_cache();
+  PrerollContext* context = preroll_context();
+  int per_frame =
+      RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame;
+  int layer_count = per_frame + 1;
+  SkPoint opacity_offset = {10, 10};
+  auto opacity_layer = std::make_shared<OpacityLayer>(0.5f, opacity_offset);
+  std::shared_ptr<DisplayListLayer> layers[layer_count];
+  for (int i = 0; i < layer_count; i++) {
+    DisplayListBuilder builder(false);
+    builder.drawRect({0, 0, 100, 100});
+    builder.drawRect({50, 50, 100, 100});
+    auto display_list = builder.Build();
+    ASSERT_FALSE(display_list->can_apply_group_opacity());
+    SkPoint offset = {i * 200.0f, 0};
+
+    layers[i] = std::make_shared<DisplayListLayer>(
+        offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+    opacity_layer->Add(layers[i]);
+  }
+  for (size_t j = 0; j < context->raster_cache->access_threshold(); j++) {
+    context->raster_cache->BeginFrame();
+    for (int i = 0; i < layer_count; i++) {
+      context->renderable_state_flags = 0;
+      layers[i]->Preroll(context);
+      ASSERT_EQ(context->renderable_state_flags, 0) << "pass " << (j + 1);
+    }
+  }
+  opacity_layer->Preroll(context);
+  ASSERT_FALSE(opacity_layer->children_can_accept_opacity());
+  LayerTree::TryToRasterCache(*context->raster_cached_entries, &paint_context(),
+                              false);
+  context->raster_cached_entries->clear();
+  context->raster_cache->BeginFrame();
+  for (int i = 0; i < per_frame; i++) {
+    context->renderable_state_flags = 0;
+    layers[i]->Preroll(context);
+    ASSERT_EQ(context->renderable_state_flags,
+              LayerStateStack::kCallerCanApplyOpacity)
+        << "layer " << (i + 1);
+  }
+  for (int i = per_frame; i < layer_count; i++) {
+    context->renderable_state_flags = 0;
+    layers[i]->Preroll(context);
+    ASSERT_EQ(context->renderable_state_flags, 0) << "layer " << (i + 1);
+  }
+  opacity_layer->Preroll(context);
+  ASSERT_FALSE(opacity_layer->children_can_accept_opacity());
+  LayerTree::TryToRasterCache(*context->raster_cached_entries, &paint_context(),
+                              false);
+  context->raster_cached_entries->clear();
+  context->raster_cache->BeginFrame();
+  for (int i = 0; i < layer_count; i++) {
+    context->renderable_state_flags = 0;
+    layers[i]->Preroll(context);
+    ASSERT_EQ(context->renderable_state_flags,
+              LayerStateStack::kCallerCanApplyOpacity)
+        << "layer " << (i + 1);
+  }
+  opacity_layer->Preroll(context);
+  ASSERT_TRUE(opacity_layer->children_can_accept_opacity());
 }
 
 }  // namespace testing

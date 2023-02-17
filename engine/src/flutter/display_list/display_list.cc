@@ -294,9 +294,7 @@ static bool CompareOps(uint8_t* ptrA,
   return true;
 }
 
-void DisplayList::RenderTo(DisplayListBuilder* builder,
-                           SkScalar opacity) const {
-  // TODO(100983): Opacity is not respected and attributes are not reset.
+void DisplayList::RenderTo(DisplayListBuilder* builder) const {
   if (!builder) {
     return;
   }
@@ -308,6 +306,7 @@ void DisplayList::RenderTo(DisplayListBuilder* builder,
 }
 
 void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {
+  FML_DCHECK(can_apply_group_opacity() || opacity >= SK_Scalar1);
   DisplayListCanvasDispatcher dispatcher(canvas, opacity);
   if (has_rtree()) {
     Dispatch(dispatcher, canvas->getLocalClipBounds());
