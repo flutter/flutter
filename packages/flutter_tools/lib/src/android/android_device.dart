@@ -599,12 +599,12 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    ProtocolDiscovery? vmServiceDiscovery;
+    ProtocolDiscovery? observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      vmServiceDiscovery = ProtocolDiscovery.vmService(
+      observatoryDiscovery = ProtocolDiscovery.observatory(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // VM Service discovery will dipose at the end. creating a new logger here allows
+        // observatory discovery will dipose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
@@ -687,13 +687,13 @@ class AndroidDevice extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "VM Service is listening on...".
-    _logger.printTrace('Waiting for VM Service port to be available...');
+    // device has printed "Observatory is listening on...".
+    _logger.printTrace('Waiting for observatory port to be available...');
     try {
-      Uri? vmServiceUri;
+      Uri? observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
-        vmServiceUri = await vmServiceDiscovery?.uri;
-        if (vmServiceUri == null) {
+        observatoryUri = await observatoryDiscovery?.uri;
+        if (observatoryUri == null) {
           _logger.printError(
             'Error waiting for a debug connection: '
             'The log reader stopped unexpectedly',
@@ -701,12 +701,12 @@ class AndroidDevice extends Device {
           return LaunchResult.failed();
         }
       }
-      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+      return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
-      await vmServiceDiscovery?.cancel();
+      await observatoryDiscovery?.cancel();
     }
   }
 
