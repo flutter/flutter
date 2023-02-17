@@ -246,9 +246,9 @@ class _MyHomePageState extends State<MyHomePage> {
       case Setup.blur:
         imageWidget = Stack(
           children: <Widget>[
-            ColoredBox(
-              color: const Color(0xff00ff00),
-              child: const SizedBox(
+            const ColoredBox(
+              color: Color(0xff00ff00),
+              child: SizedBox(
                 width: 100,
                 height: 100,
               ),
