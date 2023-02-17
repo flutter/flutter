@@ -161,8 +161,8 @@ void main() {
       final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
       applicationPackageFactory.applicationPackage = applicationPackage;
 
-      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
-      fakeDevice.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+      final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
+      fakeDevice.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
 
       final LaunchResult launchResult = await device.startApp(
         prebuiltApplicationPackage,
@@ -170,8 +170,8 @@ void main() {
       );
 
       expect(launchResult.started, true);
-      // The returned vmServiceUri was a forwarded port, so we cannot compare them directly.
-      expect(launchResult.vmServiceUri!.path, vmServiceUri.path);
+      // The returned observatoryUri was a forwarded port, so we cannot compare them directly.
+      expect(launchResult.observatoryUri!.path, observatoryUri.path);
 
       expect(applicationPackageFactory.applicationBinaryRequested!.readAsStringSync(), 'dummy content');
       expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
