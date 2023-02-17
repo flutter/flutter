@@ -263,16 +263,21 @@ class AssembleCommand extends FlutterCommand {
       dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
     }
     if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
+      final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPaths.isNotEmpty && configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+        for (final String path in configJsonPaths) {
+          final String configJsonRaw = globals.fs.file(path)
+              .readAsStringSync();
+          try {
+            (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((
+                String key, dynamic value) {
+              dartDefines.add('$key=$value');
+            });
+          } on FormatException catch (err) {
+            throwToolExit('Json config define file "--${FlutterOptions
+                .kDartDefineFromFileOption}=$path" format err, '
+                'please fix first! format err:\n$err');
+          }
         }
       }
     }
