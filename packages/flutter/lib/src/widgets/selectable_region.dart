@@ -993,7 +993,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
         _copy();
-        _clearSelection();
+        hideToolbar(false);
       },
       onSelectAll: () {
         selectAll(SelectionChangedCause.toolbar);
