@@ -485,6 +485,7 @@ class ResidentWebRunner extends ResidentRunner {
     final Status devFSStatus = _logger.startProgress(
       'Waiting for connection from debug service on ${device!.device!.name}...',
     );
+    flutterDevices.first.generator!.addFileSystemRoot(projectRootPath);
     final UpdateFSReport report = await device!.devFS!.update(
       mainUri: await _generateEntrypoint(
         _fileSystem.file(mainPath).absolute.uri,
