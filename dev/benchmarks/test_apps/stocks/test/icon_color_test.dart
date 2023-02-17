@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show FlutterView;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
@@ -60,9 +58,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    final ui.FlutterView view = tester.widget<View>(find.byType(View)).view;
-    final Offset left = Offset(0.0, (view.physicalSize / view.devicePixelRatio).height / 2.0);
-    final Offset right = Offset((view.physicalSize / view.devicePixelRatio).width, left.dy);
+    final Offset left = Offset(0.0, (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio).height / 2.0);
+    final Offset right = Offset((WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio).width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);
