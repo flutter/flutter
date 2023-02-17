@@ -1868,7 +1868,10 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          error: Text('errorText'),
+          error: Text(
+            'error',
+            style: TextStyle(fontSize: 22.0),
+          ),
         ),
       ),
     );
@@ -1876,11 +1879,16 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
-          error: Text('errorText'),
+          error: Text(
+            'error',
+            style: TextStyle(fontSize: 22.0),
+          ),
           errorText: 'errorText',
         ),
       ),
     );
+
+    expect(tester.getSize(find.text('error')).height, 22.0);
   });
 
   testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
