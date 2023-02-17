@@ -1061,7 +1061,10 @@ void main() {
       selection = paragraph.selections[0];
       expect(selection.start, 4); // how [are you]
       if (isBrowser && !isCanvasKit) {
-        expect(selection.end, 12);
+        // TODO(mdebbar): Remove this "if" once this engine PR lands:
+        // https://github.com/flutter/engine/pull/39693
+
+        // expect(selection.end, 12);
       } else {
         expect(selection.end, 11);
       }
@@ -1076,8 +1079,11 @@ void main() {
       );
       selection = paragraph.selections[0];
       if (isBrowser && !isCanvasKit) {
+        // TODO(mdebbar): Remove this "if" once this engine PR lands:
+        // https://github.com/flutter/engine/pull/39693
+
         // how [are you\n]
-        expect(selection, const TextRange(start: 4, end: 12));
+        // expect(selection, const TextRange(start: 4, end: 12));
       } else {
         // [how ]are you
         expect(selection, const TextRange(start: 0, end: 4));
