@@ -11,16 +11,6 @@
 
 G_BEGIN_DECLS
 
-/**
- * fl_dart_project_get_switches:
- * @project: an #FlDartProject.
- *
- * Determines the engine switches that should be passed to the Flutter engine.
- *
- * Returns: an array of switches to pass to the Flutter engine.
- */
-GPtrArray* fl_dart_project_get_switches(FlDartProject* project);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_PRIVATE_H_
