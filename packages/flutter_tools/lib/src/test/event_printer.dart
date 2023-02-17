@@ -17,10 +17,10 @@ class EventPrinter extends TestWatcher {
   final TestWatcher? _parent;
 
   @override
-  void handleStartedDevice(Uri? vmServiceUri) {
+  void handleStartedDevice(Uri? observatoryUri) {
     _sendEvent('test.startedProcess',
-        <String, dynamic>{'vmServiceUri': vmServiceUri?.toString()});
-    _parent?.handleStartedDevice(vmServiceUri);
+        <String, dynamic>{'observatoryUri': observatoryUri?.toString()});
+    _parent?.handleStartedDevice(observatoryUri);
   }
 
   @override
