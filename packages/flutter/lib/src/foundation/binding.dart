@@ -183,7 +183,7 @@ abstract class BindingBase {
   /// been created yet or if the first view has been removed again.
   ///
   /// The following options exists to migrate code that relies on accessing
-  /// this property:
+  /// this deprecated property:
   ///
   /// If a [BuildContext] is available, consider looking up the current
   /// [FlutterView] associated with that context via [View.of]. It gives access
@@ -199,6 +199,15 @@ abstract class BindingBase {
   /// platform-specific functionality. It also maintains a list of all available
   /// [FlutterView]s in [PlatformDispatcher.views] to access view-specific
   /// functionality without a context.
+  ///
+  /// See also:
+  ///
+  /// * [View.of] to access view-specific functionality on the [FlutterView]
+  ///   associated with the provided [BuildContext].
+  /// * [FlutterView.platformDispatcher] to access platform-specific
+  ///   functionality from a given [FlutterView].
+  /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
+  ///   which provides platform-specific functionality.
   @Deprecated(
     'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
