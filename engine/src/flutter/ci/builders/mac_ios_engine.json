@@ -69,18 +69,77 @@
                 ]
             },
             "tests": []
+        },
+	{
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "mac_model=Macmini8,1",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "profile"
+            ],
+            "name": "ios_profile",
+            "ninja": {
+                "config": "ios_profile",
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ]
+            },
+            "tests": []
+        },
+	{
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "mac_model=Macmini8,1",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "release"
+            ],
+            "name": "ios_release",
+            "ninja": {
+                "config": "ios_release",
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ]
+            },
+            "tests": []
         }
     ],
     "tests": [],
     "generators": {
         "tasks": [
             {
-                "name": "Debug-FlutterMacOS.framework",
+                "name": "Debug-ios-Flutter.xcframework",
                 "parameters": [
                     "--dst",
                     "out/debug",
                     "--arm64-out-dir",
                     "out/ios_debug",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+	    {
+                "name": "Profile-ios-Flutter.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/profile",
+                    "--arm64-out-dir",
+                    "out/ios_profile",
                     "--simulator-x64-out-dir",
                     "out/ios_debug_sim",
                     "--simulator-arm64-out-dir",
@@ -95,6 +154,51 @@
                     "out/debug"
                 ],
                 "script": "flutter/tools/gen_objcdoc.sh"
+            },
+	    {
+                "name": "Release-ios-Flutter.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/release",
+                    "--arm64-out-dir",
+                    "out/ios_release",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "release-nobitcode-FlutterMacOS.framework",
+                "parameters": [
+                    "--dst",
+                    "out/release-nobitcode",
+                    "--arm64-out-dir",
+                    "out/ios_release",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "Release-macos-gen-snapshots",
+                "parameters": [
+                    "--dst",
+                    "out/release",
+                    "--arm64-out-dir",
+                    "out/ios_release"
+                ],
+                "script": "flutter/sky/tools/create_macos_gen_snapshots.py",
+                "language": "python3"
             }
         ]
     },
@@ -103,9 +207,29 @@
             "source": "out/debug/artifacts.zip",
             "destination": "ios/artifacts.zip"
         },
+	{
+            "source": "out/profile/artifacts.zip",
+            "destination": "ios-profile/artifacts.zip"
+        },
         {
             "source": "out/debug/ios-objcdoc.zip",
             "destination": "ios-objcdoc.zip"
+        },
+	{
+            "source": "out/release/artifacts.zip",
+            "destination": "ios-release/artifacts.zip"
+        },
+        {
+            "source": "out/release/Flutter.dSYM.zip",
+            "destination": "ios-release/Flutter.dSYM.zip"
+        },
+        {
+            "source": "out/release-nobitcode/artifacts.zip",
+            "destination": "ios-release-nobitcode/artifacts.zip"
+        },
+        {
+            "source": "out/release-nobitcode/Flutter.dSYM.zip",
+            "destination": "ios-release-nobitcode/Flutter.dSYM.zip"
         }
     ]
 }
