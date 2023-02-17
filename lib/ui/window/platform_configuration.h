@@ -50,6 +50,16 @@ enum class AccessibilityFeatureFlag : int32_t {
 class PlatformConfigurationClient {
  public:
   //--------------------------------------------------------------------------
+  /// @brief      Whether the platform provides an implicit view. If true,
+  ///             the Framework may assume that it can always render into
+  ///             the view with ID 0.
+  ///
+  ///             This value must not change for the lifetime of the
+  ///             application.
+  ///
+  virtual bool ImplicitViewEnabled() = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      The route or path that the embedder requested when the
   ///             application was launched.
   ///
@@ -71,7 +81,7 @@ class PlatformConfigurationClient {
   virtual void Render(Scene* scene) = 0;
 
   //--------------------------------------------------------------------------
-  /// @brief      Receives a updated semantics tree from the Framework.
+  /// @brief      Receives an updated semantics tree from the Framework.
   ///
   /// @param[in] update The updated semantic tree to apply.
   ///
@@ -469,6 +479,8 @@ class PlatformMessageHandlerStorage {
 //----------------------------------------------------------------------------
 class PlatformConfigurationNativeApi {
  public:
+  static Dart_Handle ImplicitViewEnabled();
+
   static std::string DefaultRouteName();
 
   static void ScheduleFrame();

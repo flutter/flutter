@@ -95,6 +95,7 @@ typedef CanvasPath Path;
   V(IsolateNameServerNatives::RemovePortNameMapping, 1)               \
   V(NativeStringAttribute::initLocaleStringAttribute, 4)              \
   V(NativeStringAttribute::initSpellOutStringAttribute, 3)            \
+  V(PlatformConfigurationNativeApi::ImplicitViewEnabled, 0)           \
   V(PlatformConfigurationNativeApi::DefaultRouteName, 0)              \
   V(PlatformConfigurationNativeApi::ScheduleFrame, 0)                 \
   V(PlatformConfigurationNativeApi::Render, 1)                        \

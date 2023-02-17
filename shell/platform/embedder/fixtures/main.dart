@@ -45,8 +45,15 @@ void executableNameNotNull() {
   notifyStringValue(Platform.executable);
 }
 
+@pragma('vm:entry-point')
+void implicitViewNotNull() {
+  notifyBoolValue(PlatformDispatcher.instance.implicitView != null);
+}
+
 @pragma('vm:external-name', 'NotifyStringValue')
 external void notifyStringValue(String value);
+@pragma('vm:external-name', 'NotifyBoolValue')
+external void notifyBoolValue(bool value);
 
 @pragma('vm:entry-point')
 void invokePlatformTaskRunner() {

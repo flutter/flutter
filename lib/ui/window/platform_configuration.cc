@@ -22,6 +22,8 @@
 namespace flutter {
 namespace {
 
+constexpr int kImplicitViewId = 0;
+
 Dart_Handle ToByteData(const fml::Mapping& buffer) {
   return tonic::DartByteData::Create(buffer.GetMapping(), buffer.GetSize());
 }
@@ -67,8 +69,13 @@ void PlatformConfiguration::DidCreateIsolate() {
                   Dart_GetField(library, tonic::ToDart("_drawFrame")));
   report_timings_.Set(tonic::DartState::Current(),
                       Dart_GetField(library, tonic::ToDart("_reportTimings")));
-  windows_.insert(std::make_pair(
-      0, std::make_unique<Window>(0, ViewportMetrics{1.0, 0.0, 0.0, -1})));
+
+  // TODO(loicsharma): This should only be created if the embedder enables the
+  // implicit view.
+  // See: https://github.com/flutter/flutter/issues/120306
+  windows_.emplace(kImplicitViewId,
+                   std::make_unique<Window>(
+                       kImplicitViewId, ViewportMetrics{1.0, 0.0, 0.0, -1}));
 }
 
 void PlatformConfiguration::UpdateLocales(
@@ -425,6 +432,16 @@ Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(
            ->ComputePlatformResolvedLocale(supportedLocales);
 
   return tonic::DartConverter<std::vector<std::string>>::ToDart(results);
+}
+
+Dart_Handle PlatformConfigurationNativeApi::ImplicitViewEnabled() {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  bool enabled = UIDartState::Current()
+                     ->platform_configuration()
+                     ->client()
+                     ->ImplicitViewEnabled();
+
+  return Dart_NewBoolean(enabled);
 }
 
 std::string PlatformConfigurationNativeApi::DefaultRouteName() {

@@ -33,6 +33,8 @@ abstract class PlatformDispatcher {
 
   Iterable<FlutterView> get views;
 
+  FlutterView? get implicitView;
+
   VoidCallback? get onMetricsChanged;
   set onMetricsChanged(VoidCallback? callback);
 
