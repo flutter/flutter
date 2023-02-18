@@ -2039,6 +2039,7 @@
 ../../../third_party/icu/DIR_METADATA
 ../../../third_party/icu/OWNERS
 ../../../third_party/icu/README.chromium
+../../../third_party/icu/README.fuchsia
 ../../../third_party/icu/codereview.settings
 ../../../third_party/icu/filters
 ../../../third_party/icu/flutter/README.md
