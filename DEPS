@@ -272,7 +272,7 @@ deps = {
    Var('github_git') + '/google/flatbuffers.git' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '266a46937f05303da1ac4c68f2c94f9a1caa3f76',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c6b68522318204f795a8f04caebf6c0beb679cc4',
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '676d544d2b8f48903b7da9fceffaa534a5613978',
