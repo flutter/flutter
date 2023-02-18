@@ -7,6 +7,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 
 @class FlutterEngine;
@@ -94,6 +95,8 @@ class AccessibilityBridgeMac : public AccessibilityBridge {
 
   __weak FlutterEngine* flutter_engine_;
   __weak FlutterViewController* view_controller_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeMac);
 };
 
 }  // namespace flutter
