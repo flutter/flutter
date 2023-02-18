@@ -9,6 +9,9 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+// The FlutterView into which this example will draw; set in the main method.
+late final ui.FlutterView view;
+
 ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
@@ -29,8 +32,8 @@ ui.Picture paint(ui.Rect paintBounds) {
   final ui.Offset mid = size.center(ui.Offset.zero);
   final double radius = size.shortestSide / 2.0;
 
-  final double devicePixelRatio = ui.window.devicePixelRatio;
-  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
+  final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
 
   // Saves a copy of current transform onto the save stack.
   canvas.save();
@@ -101,7 +104,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 }
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
-  final double devicePixelRatio = ui.window.devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
   final Float64List deviceTransform = Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -115,13 +118,17 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
-  ui.window.render(scene);
+  view.render(scene);
 }
 
 void main() {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  view = ui.PlatformDispatcher.instance.implicitView!;
+
   ui.PlatformDispatcher.instance
     ..onBeginFrame = beginFrame
     ..scheduleFrame();
