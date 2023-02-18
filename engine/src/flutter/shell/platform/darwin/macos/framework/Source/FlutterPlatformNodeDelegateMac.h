@@ -9,6 +9,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/common/flutter_platform_node_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -56,6 +57,8 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
       const gfx::RectF& local_bounds) const;
   gfx::RectF ConvertBoundsFromScreenToGlobal(
       const gfx::RectF& window_bounds) const;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformNodeDelegateMac);
 };
 
 }  // namespace flutter
