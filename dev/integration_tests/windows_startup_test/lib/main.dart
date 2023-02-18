@@ -10,7 +10,7 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'windows.dart';
 
-void drawHelloWorld() {
+void drawHelloWorld(ui.FlutterView view) {
   final ui.ParagraphStyle style = ui.ParagraphStyle();
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)
     ..addText('Hello world');
@@ -28,10 +28,14 @@ void drawHelloWorld() {
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
-  ui.window.render(sceneBuilder.build());
+  view.render(sceneBuilder.build());
 }
 
 void main() async {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  final ui.FlutterView view = ui.PlatformDispatcher.instance.implicitView!;
+
   // Create a completer to send the window visibility result back to the
   // integration test.
   final Completer<String> visibilityCompleter = Completer<String>();
@@ -81,7 +85,7 @@ void main() async {
 
       // Draw something to trigger the first frame callback that displays the
       // window.
-      drawHelloWorld();
+      drawHelloWorld(view);
       firstFrame = false;
     };
 

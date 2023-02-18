@@ -67,11 +67,11 @@ class BenchDrawRect extends SceneBuilderRecorder {
   void onDrawFrame(SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Size windowSize = window.physicalSize;
+    final Size viewSize = view.physicalSize;
 
     final Size cellSize = Size(
-      windowSize.width / kColumns,
-      windowSize.height / kRows,
+      viewSize.width / kColumns,
+      viewSize.height / kRows,
     );
     final Size rectSize = cellSize * 0.8;
 

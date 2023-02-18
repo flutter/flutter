@@ -51,12 +51,12 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     const Color black = Color.fromARGB(255, 0, 0, 0);
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    screenSize = window.physicalSize / window.devicePixelRatio;
+    viewSize = view.physicalSize / view.devicePixelRatio;
     clipSize = Size(
-      screenSize.width / 2,
-      screenSize.height / 5,
+      viewSize.width / 2,
+      viewSize.height / 5,
     );
-    final double cellWidth = screenSize.width / kColumns;
+    final double cellWidth = viewSize.width / kColumns;
 
     final List<Paragraph> paragraphs = generateLaidOutParagraphs(
       paragraphCount: 500,
@@ -93,7 +93,7 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
 
   static const String benchmarkName = 'dynamic_clip_on_static_picture';
 
-  late Size screenSize;
+  late Size viewSize;
   late Size clipSize;
   late Picture picture;
   double pictureVerticalOffset = 0.0;

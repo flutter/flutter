@@ -298,7 +298,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this property
+  ///  * [FlutterView], which provides some additional detail about this property
   ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
@@ -317,7 +317,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [viewInsets] and [viewPadding].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
@@ -341,7 +341,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
