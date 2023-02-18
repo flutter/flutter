@@ -2394,12 +2394,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = 0.0;
 
   /// Creates a box with the specified size.
-  SizedBox.fromSize({ super.key, super.child, Size? size })
+  SizedBox.fromSize({ super.key, Size? size, super.child})
     : width = size?.width,
       height = size?.height;
 
   /// Creates a box whose [width] and [height] are equal.
-  const SizedBox.square({super.key, super.child, double? dimension})
+  const SizedBox.square({super.key, double? dimension, super.child})
     : width = dimension,
       height = dimension;
 
