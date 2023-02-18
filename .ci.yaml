@@ -229,6 +229,7 @@ targets:
       - "**.cc"
       - "**.fbs"
       - "**.frag"
+      - "**.py"
       - "**.vert"
 
   - name: Linux Android clang-tidy
