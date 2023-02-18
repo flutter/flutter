@@ -1727,7 +1727,6 @@
 ../../../third_party/dart/third_party/firefox_jsshell
 ../../../third_party/dart/third_party/mdn/browser-compat-data/README.google
 ../../../third_party/dart/third_party/pkg
-../../../third_party/dart/third_party/protobuf/src/test
 ../../../third_party/dart/third_party/requirejs
 ../../../third_party/dart/third_party/tcmalloc/.gitignore
 ../../../third_party/dart/third_party/tcmalloc/OWNERS
