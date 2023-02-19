@@ -130,7 +130,7 @@ class ReorderableList extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.scrollVelocityScalar,
+    this.scrollVelocityScalar = 7,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -446,7 +446,7 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
-    this.scrollVelocityScalar,
+    this.scrollVelocityScalar = 7,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
