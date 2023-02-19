@@ -207,6 +207,13 @@ class ReorderableList extends StatefulWidget {
   /// {@endtemplate}
   final EdgeInsetsGeometry? padding;
 
+  /// {@template flutter.widgets.reorderable_list.scrollVelocityScalar}
+  /// An eyeballed value for a smooth scrolling experience.
+  ///
+  /// The default value is 7.
+  /// {@endtemplate}
+  final double scrollVelocityScalar;
+
   /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
@@ -252,9 +259,6 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
-
-  /// {@macro flutter.widgets.reorderable_list.scrollVelocityScalar}
-  final double scrollVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
