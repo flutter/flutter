@@ -130,6 +130,7 @@ class ReorderableList extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollVelocityScalar,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -251,6 +252,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.reorderable_list.scrollVelocityScalar}
+  final double scrollVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -442,6 +446,7 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
+    this.scrollVelocityScalar,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -474,6 +479,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.reorderable_list.scrollVelocityScalar}
+  final double scrollVelocityScalar;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -611,13 +619,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _autoScroller = EdgeDraggingAutoScroller(
         _scrollable,
         onScrollViewScrolled: _handleScrollableAutoScrolled,
-        velocityScalar: _kDefaultSelectToScrollVelocityScalar
+        velocityScalar: widget.scrollVelocityScalar
       );
     }
   }
-
-  // An eye-balled value for a smooth scrolling speed.
-  static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
