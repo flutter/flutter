@@ -296,8 +296,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   }
 
   @override
-  WindowPadding get viewInsets => _viewInsets;
-  WindowPadding _viewInsets = ui.WindowPadding.zero as WindowPadding;
+  ViewPadding get viewInsets => _viewInsets;
+  ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
   /// Lazily populated and cleared at the end of the frame.
   ui.Size? _physicalSize;
@@ -351,9 +351,9 @@ class EngineSingletonFlutterWindow extends EngineFlutterWindow {
 final EngineSingletonFlutterWindow window =
     EngineSingletonFlutterWindow(kImplicitViewId, EnginePlatformDispatcher.instance);
 
-/// The Web implementation of [ui.WindowPadding].
-class WindowPadding implements ui.WindowPadding {
-  const WindowPadding({
+/// The Web implementation of [ui.ViewPadding].
+class ViewPadding implements ui.ViewPadding {
+  const ViewPadding({
     required this.left,
     required this.top,
     required this.right,

@@ -74,11 +74,11 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   }
 
   @override
-  WindowPadding computeKeyboardInsets(
+  ViewPadding computeKeyboardInsets(
     double physicalHeight,
     bool isEditingOnMobile,
   ) {
-    return const WindowPadding(
+    return const ViewPadding(
       top: 0,
       right: 0,
       bottom: 0,

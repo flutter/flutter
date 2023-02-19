@@ -48,8 +48,8 @@ abstract class DimensionsProvider {
   /// pending DOM writes.
   ui.Size computePhysicalSize();
 
-  /// Returns the [WindowPadding] of the keyboard insets (if present).
-  WindowPadding computeKeyboardInsets(
+  /// Returns the [ViewPadding] of the keyboard insets (if present).
+  ViewPadding computeKeyboardInsets(
     double physicalHeight,
     bool isEditingOnMobile,
   );
