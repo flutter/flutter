@@ -202,10 +202,10 @@ class ViewConfiguration {
     this.devicePixelRatio = 1.0,
     this.geometry = Rect.zero,
     this.visible = false,
-    this.viewInsets = WindowPadding.zero,
-    this.viewPadding = WindowPadding.zero,
-    this.systemGestureInsets = WindowPadding.zero,
-    this.padding = WindowPadding.zero,
+    this.viewInsets = ViewPadding.zero,
+    this.viewPadding = ViewPadding.zero,
+    this.systemGestureInsets = ViewPadding.zero,
+    this.padding = ViewPadding.zero,
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
   }) : assert(window == null || view == null),
@@ -222,10 +222,10 @@ class ViewConfiguration {
     double? devicePixelRatio,
     Rect? geometry,
     bool? visible,
-    WindowPadding? viewInsets,
-    WindowPadding? viewPadding,
-    WindowPadding? systemGestureInsets,
-    WindowPadding? padding,
+    ViewPadding? viewInsets,
+    ViewPadding? viewPadding,
+    ViewPadding? systemGestureInsets,
+    ViewPadding? padding,
     GestureSettings? gestureSettings,
     List<DisplayFeature>? displayFeatures,
   }) {
@@ -255,10 +255,10 @@ class ViewConfiguration {
   final double devicePixelRatio;
   final Rect geometry;
   final bool visible;
-  final WindowPadding viewInsets;
-  final WindowPadding viewPadding;
-  final WindowPadding systemGestureInsets;
-  final WindowPadding padding;
+  final ViewPadding viewInsets;
+  final ViewPadding viewPadding;
+  final ViewPadding systemGestureInsets;
+  final ViewPadding padding;
   final GestureSettings gestureSettings;
   final List<DisplayFeature> displayFeatures;
 
@@ -375,25 +375,27 @@ enum AppLifecycleState {
   detached,
 }
 
-abstract class WindowPadding {
-  const factory WindowPadding._(
+abstract class ViewPadding {
+  const factory ViewPadding._(
       {required double left,
       required double top,
       required double right,
-      required double bottom}) = engine.WindowPadding;
+      required double bottom}) = engine.ViewPadding;
 
   double get left;
   double get top;
   double get right;
   double get bottom;
 
-  static const WindowPadding zero = WindowPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
+  static const ViewPadding zero = ViewPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
 
   @override
   String toString() {
-    return 'WindowPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
+    return 'ViewPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
   }
 }
+
+typedef WindowPadding = ViewPadding;
 
 class DisplayFeature {
   const DisplayFeature({

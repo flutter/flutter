@@ -153,7 +153,7 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism for the same.
   ///  * [Scaffold], which automatically applies the view insets in material
   ///    design applications.
-  WindowPadding get viewInsets => viewConfiguration.viewInsets;
+  ViewPadding get viewInsets => viewConfiguration.viewInsets;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but which may be partially obscured by system
@@ -179,7 +179,7 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism for the same.
   ///  * [Scaffold], which automatically applies the padding in material design
   ///    applications.
-  WindowPadding get viewPadding => viewConfiguration.viewPadding;
+  ViewPadding get viewPadding => viewConfiguration.viewPadding;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but where the operating system will consume
@@ -196,7 +196,7 @@ class FlutterView {
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
   ///  * [MediaQuery.of], a simpler mechanism for the same.
-  WindowPadding get systemGestureInsets => viewConfiguration.systemGestureInsets;
+  ViewPadding get systemGestureInsets => viewConfiguration.systemGestureInsets;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but which may be partially obscured by system
@@ -224,7 +224,7 @@ class FlutterView {
   /// * [MediaQuery.of], a simpler mechanism for the same.
   /// * [Scaffold], which automatically applies the padding in material design
   ///   applications.
-  WindowPadding get padding => viewConfiguration.padding;
+  ViewPadding get padding => viewConfiguration.padding;
 
   /// {@macro dart.ui.ViewConfiguration.displayFeatures}
   ///
