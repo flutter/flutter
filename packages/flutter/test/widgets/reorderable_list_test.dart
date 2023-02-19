@@ -779,6 +779,74 @@ void main() {
     ), throwsAssertionError);
   });
 
+  testWidgets('scrollVelocityScalar can change in ReorderableList', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    )
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                prototypeItem: const SizedBox(),
+                onReorder: (int fromIndex, int toIndex) { },
+                scrollVelocityScalar: 30,
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    expect(scrollVelocityScalar, 30);
+  });
+
+  testWidgets('scrollVelocityScalar can change in SliverReorderableList', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SliverReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    )
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                prototypeItem: const SizedBox(),
+                onReorder: (int fromIndex, int toIndex) { },
+                scrollVelocityScalar: 30,
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    expect(scrollVelocityScalar, 30);
+  });
+
   testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 
