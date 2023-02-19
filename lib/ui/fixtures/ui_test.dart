@@ -534,7 +534,7 @@ void hooksTests() async {
     expectEquals(x.countryCode, y.countryCode);
   });
 
-  await test('Window padding/insets/viewPadding/systemGestureInsets', () {
+  await test('View padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
       20,

@@ -53,7 +53,7 @@ void doTests() {
           (domWindow.visualViewport!.height! + keyboardGap) * dpr;
       const double expectedBottom = keyboardGap * dpr;
 
-      final WindowPadding computed =
+      final ViewPadding computed =
           provider.computeKeyboardInsets(physicalHeight, false);
 
       expect(computed.top, 0);
