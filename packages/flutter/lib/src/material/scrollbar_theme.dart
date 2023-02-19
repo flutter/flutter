@@ -299,7 +299,7 @@ bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 ///
 ///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
-class ScrollbarTheme extends InheritedWidget {
+class ScrollbarTheme extends InheritedTheme {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({
@@ -322,6 +322,11 @@ class ScrollbarTheme extends InheritedWidget {
   static ScrollbarThemeData of(BuildContext context) {
     final ScrollbarTheme? scrollbarTheme = context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
     return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return ScrollbarTheme(data: data, child: child);
   }
 
   @override

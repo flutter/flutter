@@ -458,6 +458,7 @@ void main() {
             'LANG': 'en_US.UTF-8',
           },
           exitCode: 1,
+          // This output is the output that a real CocoaPods install would generate.
           stdout: '''
 [!] Unable to satisfy the following requirements:
 
@@ -481,8 +482,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       ), throwsToolExit());
       expect(
         logger.errorText,
-        contains(
-            "CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
+        contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
       );
     });
 

@@ -296,7 +296,7 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
-  testUsingContext('Pipes enable-vmService', () async {
+  testUsingContext('Pipes enable-observatory', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
@@ -311,7 +311,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       true,
     );
 
@@ -324,7 +324,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       true,
     );
 
@@ -335,7 +335,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       false,
     );
   }, overrides: <Type, Generator>{
@@ -811,7 +811,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
   int exitCode;
   Duration? leastRunTime;
-  bool? lastEnableVmServiceValue;
+  bool? lastEnableObservatoryValue;
   late DebuggingOptions lastDebuggingOptionsValue;
   String? lastReporterOption;
 
@@ -824,7 +824,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableVmService = false,
+    bool enableObservatory = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -847,7 +847,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
   }) async {
-    lastEnableVmServiceValue = enableVmService;
+    lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
     lastReporterOption = reporter;
 

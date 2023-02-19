@@ -430,8 +430,8 @@ void main() {
         final String? applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
         // Try starting the app.
-        final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
-        device.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+        final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
+        device.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
         daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
           'id': 1,
           'method': 'device.startApp',
@@ -446,7 +446,7 @@ void main() {
         expect(device.startAppPackage, applicationPackage);
         final Map<String, Object?> startAppResult = startAppResponse.data['result']! as Map<String, Object?>;
         expect(startAppResult['started'], true);
-        expect(startAppResult['vmServiceUri'], vmServiceUri.toString());
+        expect(startAppResult['observatoryUri'], observatoryUri.toString());
 
         // Try stopping the app.
         daemonStreams.inputs.add(DaemonMessage(<String, Object?>{

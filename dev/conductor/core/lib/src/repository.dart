@@ -129,8 +129,7 @@ abstract class Repository {
           'Fetch ${upstreamRemote.name} to ensure we have latest refs',
           workingDirectory: _checkoutDirectory!.path,
         );
-        // Note: if [initialRef] is a remote ref the checkout will be left in a
-        // detached HEAD state.
+        // If [initialRef] is a remote ref, the checkout will be left in a detached HEAD state.
         await git.run(
           <String>['checkout', initialRef!],
           'Checking out initialRef $initialRef',
