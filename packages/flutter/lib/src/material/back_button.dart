@@ -41,7 +41,7 @@ class BackButtonIcon extends StatelessWidget {
         break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        data = Icons.arrow_back_ios;
+        data = Icons.arrow_back_ios_new;
         break;
     }
     // This can't use the platform from Theme because it is the Android OS that
