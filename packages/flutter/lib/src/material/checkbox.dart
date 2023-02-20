@@ -874,7 +874,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   VisualDensity get visualDensity => _theme.visualDensity;
 
   @override
-  OutlinedBorder get shape => RoundedRectangleBorder(
+  OutlinedBorder get shape => const RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(2.0),
   );
 }
