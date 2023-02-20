@@ -2575,6 +2575,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2612,10 +2613,10 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-    this.error,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
+       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2857,6 +2858,13 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int? hintMaxLines;
 
+  /// Optional widget that appears below the [InputDecorator.child] and the border.
+  /// If non-null, the border's color animates to red and the [helperText] is
+  /// not shown.
+  ///
+  /// Only one of [error] and [errorText] can be specified.
+  final Widget? error;
+
   /// Text that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
@@ -2864,6 +2872,8 @@ class InputDecoration {
   ///
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
+  /// If a more elaborate error is required, consider using [error] instead.
+  /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
@@ -3484,13 +3494,6 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
-  /// Optional widget that appears below the [InputDecorator.child] and the border.
-  /// If non-null, the border's color animates to red and the [helperText] is
-  /// not shown.
-  ///
-  /// If both [errorText] and [error] are specified, then [error]
-  /// is shown.
-  final Widget? error;
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
@@ -3508,6 +3511,7 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
+    Widget? error,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3545,7 +3549,6 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    Widget? error,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3561,6 +3564,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3598,7 +3602,6 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      error: error ?? this.error,
     );
   }
 
@@ -3661,6 +3664,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
+        && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3697,8 +3701,7 @@ class InputDecoration {
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
-        && other.constraints == constraints
-        && other.error == error;
+        && other.constraints == constraints;
   }
 
   @override
@@ -3717,6 +3720,7 @@ class InputDecoration {
       hintStyle,
       hintTextDirection,
       hintMaxLines,
+      error,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -3754,7 +3758,6 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
-      error,
     ];
     return Object.hashAll(values);
   }
@@ -3772,6 +3775,7 @@ class InputDecoration {
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (errorText != null) 'errorText: "$errorText"',
+      if (error != null) 'error: "$error"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
@@ -3808,7 +3812,6 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
-      if (error != null) 'error: "$error"',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
