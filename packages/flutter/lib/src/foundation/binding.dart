@@ -140,7 +140,9 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// observatory service extensions, if any.
   BindingBase() {
-    developer.Timeline.startSync('Framework initialization');
+    if (!kReleaseMode) {
+      developer.Timeline.startSync('Framework initialization');
+    }
     assert(() {
       _debugConstructed = true;
       return true;
@@ -156,7 +158,9 @@ abstract class BindingBase {
 
     developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
 
-    developer.Timeline.finishSync();
+    if (!kReleaseMode) {
+      developer.Timeline.finishSync();
+    }
   }
 
   bool _debugConstructed = false;
@@ -550,14 +554,17 @@ abstract class BindingBase {
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
+    developer.TimelineTask? timelineTask;
+    if (!kReleaseMode) {
+      timelineTask = developer.TimelineTask()..start('Lock events');
+    }
 
     _lockCount += 1;
     final Future<void> future = callback();
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        timelineTask.finish();
+        timelineTask?.finish();
         unlocked();
       }
     });
