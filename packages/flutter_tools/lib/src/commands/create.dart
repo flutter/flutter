@@ -776,11 +776,10 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
 }
 
 String displayPath(String path) {
-  if (path == ".") {
+  if (path == ".")
     return "\$ flutter run";
-  } else {
-    return "\$ cd $path\n  \$ flutter run";
-  }
+
+  return "\$ cd $path\n  \$ flutter run";
 }
 
 void _printWarningDisabledPlatform(List<String> platforms) {
