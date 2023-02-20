@@ -482,7 +482,7 @@ If you prefer video documentation, consider: https://www.youtube.com/c/flutterde
 
 In order to run your $application, type:
 
-  ${relativeAppPath != "." ? "\$ cd $relativeAppPath\n  \$ flutter run" : "\$ flutter run"}
+  ${displayPath(relativeAppPath)}
 
 Your $application code is in $relativeAppMain.
 ''');
@@ -773,6 +773,14 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
   ];
 
   return platformsToWarn;
+}
+
+String displayPath(String path) {
+  if (path == ".") {
+    return "\$ flutter run";
+  } else {
+    return "\$ cd $path\n  \$ flutter run";
+  }
 }
 
 void _printWarningDisabledPlatform(List<String> platforms) {
