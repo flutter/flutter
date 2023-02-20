@@ -3711,8 +3711,8 @@ class _WidgetFactory {
 /// factory. The framework will then instrument that function in the same way
 /// as it does for [Widget] constructors.
 ///
-/// Note that the function **must not** have optional positional parameters for
-/// tracking to work correctly.
+/// Tracking will not work correctly if the function has optional positional
+/// parameters.
 ///
 /// Currently this annotation is only supported on extension methods.
 ///
