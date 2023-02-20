@@ -580,7 +580,7 @@ void DisplayListDispatcher::setColorFilter(
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setInvertColors(bool invert) {
-  UNIMPLEMENTED;
+  paint_.invert_colors = invert;
 }
 
 // |flutter::Dispatcher|
