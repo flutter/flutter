@@ -821,6 +821,7 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
     testUsingContext('when set --file-reporter value is passed on', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
