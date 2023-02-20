@@ -121,14 +121,7 @@ class RenderWrap extends RenderBox
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
-  }) : assert(direction != null),
-       assert(alignment != null),
-       assert(spacing != null),
-       assert(runAlignment != null),
-       assert(runSpacing != null),
-       assert(crossAxisAlignment != null),
-       assert(clipBehavior != null),
-       _direction = direction,
+  }) : _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
        _runAlignment = runAlignment,
@@ -149,7 +142,6 @@ class RenderWrap extends RenderBox
   Axis get direction => _direction;
   Axis _direction;
   set direction (Axis value) {
-    assert(value != null);
     if (_direction == value) {
       return;
     }
@@ -173,7 +165,6 @@ class RenderWrap extends RenderBox
   WrapAlignment get alignment => _alignment;
   WrapAlignment _alignment;
   set alignment (WrapAlignment value) {
-    assert(value != null);
     if (_alignment == value) {
       return;
     }
@@ -195,7 +186,6 @@ class RenderWrap extends RenderBox
   double get spacing => _spacing;
   double _spacing;
   set spacing (double value) {
-    assert(value != null);
     if (_spacing == value) {
       return;
     }
@@ -220,7 +210,6 @@ class RenderWrap extends RenderBox
   WrapAlignment get runAlignment => _runAlignment;
   WrapAlignment _runAlignment;
   set runAlignment (WrapAlignment value) {
-    assert(value != null);
     if (_runAlignment == value) {
       return;
     }
@@ -241,7 +230,6 @@ class RenderWrap extends RenderBox
   double get runSpacing => _runSpacing;
   double _runSpacing;
   set runSpacing (double value) {
-    assert(value != null);
     if (_runSpacing == value) {
       return;
     }
@@ -267,7 +255,6 @@ class RenderWrap extends RenderBox
   WrapCrossAlignment get crossAxisAlignment => _crossAxisAlignment;
   WrapCrossAlignment _crossAxisAlignment;
   set crossAxisAlignment (WrapCrossAlignment value) {
-    assert(value != null);
     if (_crossAxisAlignment == value) {
       return;
     }
@@ -344,7 +331,6 @@ class RenderWrap extends RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -353,10 +339,6 @@ class RenderWrap extends RenderBox
   }
 
   bool get _debugHasNecessaryDirections {
-    assert(direction != null);
-    assert(alignment != null);
-    assert(runAlignment != null);
-    assert(crossAxisAlignment != null);
     if (firstChild != null && lastChild != firstChild) {
       // i.e. there's more than one child
       switch (direction) {
@@ -364,7 +346,6 @@ class RenderWrap extends RenderBox
           assert(textDirection != null, 'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
           break;
         case Axis.vertical:
-          assert(verticalDirection != null, 'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
           break;
       }
     }
@@ -374,14 +355,12 @@ class RenderWrap extends RenderBox
           assert(textDirection != null, 'Horizontal $runtimeType with alignment $alignment has a null textDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
-          assert(verticalDirection != null, 'Vertical $runtimeType with alignment $alignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
       }
     }
     if (runAlignment == WrapAlignment.start || runAlignment == WrapAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
-          assert(verticalDirection != null, 'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null, 'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the alignment cannot be resolved.');
@@ -391,7 +370,6 @@ class RenderWrap extends RenderBox
     if (crossAxisAlignment == WrapCrossAlignment.start || crossAxisAlignment == WrapCrossAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
-          assert(verticalDirection != null, 'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null, 'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
@@ -610,8 +588,6 @@ class RenderWrap extends RenderBox
         }
         break;
     }
-    assert(childConstraints != null);
-    assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
     final List<_RunMetrics> runMetrics = <_RunMetrics>[];

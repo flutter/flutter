@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'scene_importer.dart';
 import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
@@ -84,6 +85,12 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+  );
 
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
@@ -129,6 +136,12 @@ Future<Depfile> copyAssets(
                 outputPath: file.path,
                 target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
+              );
+              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: content.file as File,
+                outputPath: file.path,
               );
               break;
           }

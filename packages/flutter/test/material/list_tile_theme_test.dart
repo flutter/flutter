@@ -59,6 +59,9 @@ void main() {
     expect(themeData.selectedColor, null);
     expect(themeData.iconColor, null);
     expect(themeData.textColor, null);
+    expect(themeData.titleTextStyle, null);
+    expect(themeData.subtitleTextStyle, null);
+    expect(themeData.leadingAndTrailingTextStyle, null);
     expect(themeData.contentPadding, null);
     expect(themeData.tileColor, null);
     expect(themeData.selectedTileColor, null);
@@ -91,9 +94,12 @@ void main() {
       selectedColor: Color(0x00000001),
       iconColor: Color(0x00000002),
       textColor: Color(0x00000003),
+      titleTextStyle: TextStyle(color: Color(0x00000004)),
+      subtitleTextStyle: TextStyle(color: Color(0x00000005)),
+      leadingAndTrailingTextStyle: TextStyle(color: Color(0x00000006)),
       contentPadding: EdgeInsets.all(100),
-      tileColor: Color(0x00000004),
-      selectedTileColor: Color(0x00000005),
+      tileColor: Color(0x00000007),
+      selectedTileColor: Color(0x00000008),
       horizontalTitleGap: 200,
       minVerticalPadding: 300,
       minLeadingWidth: 400,
@@ -116,9 +122,12 @@ void main() {
         'selectedColor: Color(0x00000001)',
         'iconColor: Color(0x00000002)',
         'textColor: Color(0x00000003)',
+        'titleTextStyle: TextStyle(inherit: true, color: Color(0x00000004))',
+        'subtitleTextStyle: TextStyle(inherit: true, color: Color(0x00000005))',
+        'leadingAndTrailingTextStyle: TextStyle(inherit: true, color: Color(0x00000006))',
         'contentPadding: EdgeInsets.all(100.0)',
-        'tileColor: Color(0x00000004)',
-        'selectedTileColor: Color(0x00000005)',
+        'tileColor: Color(0x00000007)',
+        'selectedTileColor: Color(0x00000008)',
         'horizontalTitleGap: 200.0',
         'minVerticalPadding: 300.0',
         'minLeadingWidth: 400.0',
@@ -365,6 +374,99 @@ void main() {
     expect(textColor(trailingKey), theme.disabledColor);
   });
 
+  testWidgets(
+    "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
+    (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+        useMaterial3: true,
+        listTileTheme: const ListTileThemeData(
+        titleTextStyle: TextStyle(fontSize: 20.0),
+        subtitleTextStyle: TextStyle(fontSize: 17.5),
+        leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+      ),
+    );
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return const ListTile(
+                  leading: TestText('leading'),
+                  title: TestText('title'),
+                  subtitle: TestText('subtitle'),
+                  trailing: TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 15.0);
+    final RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 20.0);
+    final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 17.5);
+    final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 15.0);
+  });
+
+  testWidgets(
+    "ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
+    (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      listTileTheme: const ListTileThemeData(
+        titleTextStyle: TextStyle(fontSize: 20.0),
+        subtitleTextStyle: TextStyle(fontSize: 17.5),
+        leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+      ),
+    );
+
+    const TextStyle titleTextStyle = TextStyle(fontSize: 23.0);
+    const TextStyle subtitleTextStyle = TextStyle(fontSize: 20.0);
+    const TextStyle leadingAndTrailingTextStyle = TextStyle(fontSize: 18.0);
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return const ListTile(
+                  titleTextStyle: titleTextStyle,
+                  subtitleTextStyle: subtitleTextStyle,
+                  leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
+                  leading: TestText('leading'),
+                  title: TestText('title'),
+                  subtitle: TestText('subtitle'),
+                  trailing: TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 18.0);
+    final RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 23.0);
+    final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 20.0);
+    final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 18.0);
+  });
+
   testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
     late ListTileThemeData theme;
     bool isSelected = false;
@@ -479,4 +581,189 @@ void main() {
     // Test shape.
     expect(inkWellBorder, shapeBorder);
   });
+
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
+    bool enabled = false;
+    bool selected = false;
+    const Color defaultColor = Colors.blue;
+    const Color selectedColor = Colors.green;
+    const Color disabledColor = Colors.red;
+
+    final ThemeData theme = ThemeData(
+      listTileTheme: ListTileThemeData(
+        textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return disabledColor;
+          }
+          if (states.contains(MaterialState.selected)) {
+            return selectedColor;
+          }
+          return defaultColor;
+        }),
+      ),
+    );
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test disabled state.
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, disabledColor);
+
+    // Test enabled state.
+    enabled = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, defaultColor);
+
+    // Test selected state.
+    selected = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, selectedColor);
+  });
+
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
+    bool enabled = false;
+    bool selected = false;
+    const Color defaultColor = Colors.blue;
+    const Color selectedColor = Colors.green;
+    const Color disabledColor = Colors.red;
+    final Key leadingKey = UniqueKey();
+
+    final ThemeData theme = ThemeData(
+      listTileTheme: ListTileThemeData(
+        iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return disabledColor;
+          }
+          if (states.contains(MaterialState.selected)) {
+            return selectedColor;
+          }
+          return defaultColor;
+        }),
+      ),
+    );
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  leading: TestIcon(key: leadingKey),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+    // Test disabled state.
+    await tester.pumpWidget(buildFrame());
+    expect(iconColor(leadingKey), disabledColor);
+
+    // Test enabled state.
+    enabled = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(iconColor(leadingKey), defaultColor);
+
+    // Test selected state.
+    selected = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(iconColor(leadingKey), selectedColor);
+  });
+
+  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/119734
+
+    const ListTileThemeData original = ListTileThemeData(
+      dense: true,
+      shape: StadiumBorder(),
+      style: ListTileStyle.drawer,
+      selectedColor: Color(0x00000001),
+      iconColor: Color(0x00000002),
+      textColor: Color(0x00000003),
+      titleTextStyle: TextStyle(color: Color(0x00000004)),
+      subtitleTextStyle: TextStyle(color: Color(0x00000005)),
+      leadingAndTrailingTextStyle: TextStyle(color: Color(0x00000006)),
+      contentPadding: EdgeInsets.all(100),
+      tileColor: Color(0x00000007),
+      selectedTileColor: Color(0x00000008),
+      horizontalTitleGap: 200,
+      minVerticalPadding: 300,
+      minLeadingWidth: 400,
+      enableFeedback: true,
+    );
+
+    final ListTileThemeData copy = original.copyWith(
+      dense: false,
+      shape: const RoundedRectangleBorder(),
+      style: ListTileStyle.list,
+      selectedColor: const Color(0x00000009),
+      iconColor: const Color(0x0000000A),
+      textColor: const Color(0x0000000B),
+      titleTextStyle: const TextStyle(color: Color(0x0000000C)),
+      subtitleTextStyle: const TextStyle(color: Color(0x0000000D)),
+      leadingAndTrailingTextStyle: const TextStyle(color: Color(0x0000000E)),
+      contentPadding: const EdgeInsets.all(500),
+      tileColor: const Color(0x0000000F),
+      selectedTileColor: const Color(0x00000010),
+      horizontalTitleGap: 600,
+      minVerticalPadding: 700,
+      minLeadingWidth: 800,
+      enableFeedback: false,
+    );
+
+    expect(copy.dense, false);
+    expect(copy.shape, const RoundedRectangleBorder());
+    expect(copy.style, ListTileStyle.list);
+    expect(copy.selectedColor, const Color(0x00000009));
+    expect(copy.iconColor, const Color(0x0000000A));
+    expect(copy.textColor, const Color(0x0000000B));
+    expect(copy.titleTextStyle, const TextStyle(color: Color(0x0000000C)));
+    expect(copy.subtitleTextStyle, const TextStyle(color: Color(0x0000000D)));
+    expect(copy.leadingAndTrailingTextStyle, const TextStyle(color: Color(0x0000000E)));
+    expect(copy.contentPadding, const EdgeInsets.all(500));
+    expect(copy.tileColor, const Color(0x0000000F));
+    expect(copy.selectedTileColor, const Color(0x00000010));
+    expect(copy.horizontalTitleGap, 600);
+    expect(copy.minVerticalPadding, 700);
+    expect(copy.minLeadingWidth, 800);
+    expect(copy.enableFeedback, false);
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.descendant(
+    of: find.byType(ListTile),
+    matching: find.text(text),
+  ));
 }

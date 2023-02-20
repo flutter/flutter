@@ -340,9 +340,7 @@ class ColorItem extends StatelessWidget {
     required this.index,
     required this.color,
     this.prefix = '',
-  })  : assert(index != null),
-        assert(color != null),
-        assert(prefix != null);
+  });
 
   final int index;
   final Color color;

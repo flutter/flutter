@@ -21,8 +21,8 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
   // This value was extracted from a screenshot of iOS 16.0.3, as light mode
   // didn't appear in the Apple design resources assets linked above.
-  color: Color(0xEB202020),
-  darkColor: Color(0xEBF7F7F7),
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
 );
 
 const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
@@ -42,8 +42,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     super.key,
     this.onPressed,
     required Widget this.child,
-  }) : assert(child != null),
-       text = null,
+  }) : text = null,
        buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
@@ -62,8 +61,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   CupertinoTextSelectionToolbarButton.buttonItem({
     super.key,
     required ContextMenuButtonItem this.buttonItem,
-  }) : assert(buttonItem != null),
-       child = null,
+  }) : child = null,
        text = null,
        onPressed = buttonItem.onPressed;
 
@@ -107,6 +105,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.pasteButtonLabel;
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
     }
@@ -119,7 +118,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
        overflow: TextOverflow.ellipsis,
        style: _kToolbarButtonFontStyle.copyWith(
          color: onPressed != null
-             ? _kToolbarTextColor
+             ? _kToolbarTextColor.resolveFrom(context)
              : CupertinoColors.inactiveGray,
        ),
      );

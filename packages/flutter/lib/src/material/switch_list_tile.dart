@@ -57,7 +57,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: SwitchListTile(
@@ -89,6 +89,13 @@ enum _SwitchListTileType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how [SwitchListTile] positions the switch widget
+/// relative to the text in different configurations.
+///
+/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
+/// {@end-tool}
+///
 /// ## Semantics in SwitchListTile
 ///
 /// Since the entirety of the SwitchListTile is interactive, it should represent
@@ -113,7 +120,7 @@ enum _SwitchListTileType { material, adaptive }
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.1.dart **
+/// ** See code in examples/api/lib/material/switch_list_tile/custom_labeled_switch.0.dart **
 /// {@end-tool}
 ///
 /// ## SwitchListTile isn't exactly what I want
@@ -129,7 +136,7 @@ enum _SwitchListTileType { material, adaptive }
 /// Here is an example of a custom LabeledSwitch widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ** See code in examples/api/lib/material/switch_list_tile/switch_list_tile.2.dart **
+/// ** See code in examples/api/lib/material/switch_list_tile/custom_labeled_switch.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -179,12 +186,9 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.trackOutlineColor,
   }) : _switchListTileType = _SwitchListTileType.material,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -225,12 +229,9 @@ class SwitchListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
+    this.trackOutlineColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Whether this switch is checked.
   ///
@@ -266,7 +267,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
@@ -383,6 +384,16 @@ class SwitchListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// {@macro flutter.material.switch.trackOutlineColor}
+  ///
+  /// The [ListTile] will be focused when this [SwitchListTile] requests focus,
+  /// so the focused outline color of the switch will be ignored.
+  ///
+  /// In Material 3, the outline color defaults to transparent in the selected
+  /// state and [ColorScheme.outline] in the unselected state. In Material 2,
+  /// the [Switch] track has no outline.
+  final MaterialStateProperty<Color?>? trackOutlineColor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -400,6 +411,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          trackOutlineColor: trackOutlineColor,
         );
         break;
 
@@ -416,6 +428,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          trackOutlineColor: trackOutlineColor,
         );
     }
 

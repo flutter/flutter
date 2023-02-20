@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoSliverNavigationBar].
+// Flutter code sample for [CupertinoSliverNavigationBar].
 
 import 'package:flutter/cupertino.dart';
 
@@ -86,10 +86,10 @@ class NextPage extends StatelessWidget {
             // when the CupertinoSliverNavigationBar is fully expanded.
             largeTitle: const Text('Family'),
           ),
-          SliverFillRemaining(
+          const SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.

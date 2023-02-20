@@ -41,8 +41,8 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.installed));
+          // Check for a ValidationType.success result
+          expect(result.type, equals(ValidationType.success));
         }
       });
 
@@ -108,8 +108,8 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.installed));
+          // Check for a ValidationType.success result
+          expect(result.type, equals(ValidationType.success));
         }
       });
 
@@ -253,8 +253,8 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.installed));
+          // Check for a ValidationType.success result
+          expect(result.type, equals(ValidationType.success));
         }
       });
 
@@ -275,8 +275,8 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.installed));
+          // Check for a ValidationType.success result
+          expect(result.type, equals(ValidationType.success));
         }
       });
 
@@ -295,8 +295,8 @@ void main() {
           // Run the validation check and get the results
           final ValidationResult result = await httpHostValidator.validate();
 
-          // Check for a ValidationType.installed result
-          expect(result.type, equals(ValidationType.installed));
+          // Check for a ValidationType.success result
+          expect(result.type, equals(ValidationType.success));
         }
       });
     });

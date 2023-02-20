@@ -61,7 +61,7 @@ class CreateCommand extends CreateBase {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the "main.dart" for an application. Implies '
         '"--template=app". The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.dev/). An example can be found at: '
+        'documentation website (https://api.flutter.dev/). An example can be found at: '
         'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
     );
@@ -232,7 +232,7 @@ class CreateCommand extends CreateBase {
         'The "--platforms" argument is not supported in $template template.',
         exitCode: 2
       );
-    } else if (platforms == null || platforms.isEmpty) {
+    } else if (platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
     } else if (generateFfiPlugin && argResults!.wasParsed('platforms') && platforms.contains('web')) {
@@ -323,8 +323,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      // Enable null safety everywhere.
-      dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
+      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
       implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -415,6 +414,7 @@ class CreateCommand extends CreateBase {
         context: pubContext,
         project: project,
         offline: boolArgDeprecated('offline'),
+        outputMode: PubOutputMode.summaryOnly,
       );
       await project.ensureReadyForPlatformSpecificTooling(
         androidPlatform: includeAndroid,
@@ -596,7 +596,7 @@ Your $application code is in $relativeAppMain.
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
     generatedCount += await generateApp(
-      <String>['app', 'app_test_widget'],
+      <String>['app', 'app_test_widget', 'app_integration_test'],
       project.example.directory,
       templateContext,
       overwrite: overwrite,
@@ -731,7 +731,7 @@ Your plugin code is in $relativePluginMain.
 Your example app code is in $relativeExampleMain.
 
 ''');
-  if (platformsString != null && platformsString.isNotEmpty) {
+  if (platformsString.isNotEmpty) {
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.

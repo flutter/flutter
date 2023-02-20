@@ -385,7 +385,6 @@ mixin SchedulerBinding on BindingBase {
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    assert(state != null);
     _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
@@ -1026,7 +1025,6 @@ mixin SchedulerBinding on BindingBase {
   /// presentation time, and can be used to ensure that animations running in
   /// different processes are synchronized.
   Duration get currentSystemFrameTimeStamp {
-    assert(_lastRawTimeStamp != null);
     return _lastRawTimeStamp;
   }
 
@@ -1275,11 +1273,10 @@ mixin SchedulerBinding on BindingBase {
   // Calls the given [callback] with [timestamp] as argument.
   //
   // Wraps the callback in a try/catch and forwards any error to
-  // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
+  // [debugSchedulerExceptionHandler], if set. If not set, prints
   // the error.
   @pragma('vm:notify-debugger-on-exception')
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {
-    assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     assert(() {
       _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack;

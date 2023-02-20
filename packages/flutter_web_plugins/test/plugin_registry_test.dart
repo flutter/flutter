@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
+library;
 
 import 'dart:ui' as ui;
 

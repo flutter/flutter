@@ -29,7 +29,7 @@ class _TestState extends State<Test> {
     if (!_triggered) {
       return const SizedBox.shrink();
     }
-    return Row(children: const <Widget>[
+    return const Row(children: <Widget>[
       SizedBox(width: 10000.0),
       SizedBox(width: 10000.0),
       SizedBox(width: 10000.0),

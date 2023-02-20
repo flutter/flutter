@@ -134,7 +134,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   void _determineMagnifierPositionAndFocalPoint() {
     final MagnifierInfo selectionInfo =
         widget.magnifierInfo.value;
-    final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
+    final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
 
     // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes

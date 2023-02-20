@@ -24,6 +24,7 @@
 
 // This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -518,7 +519,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:12$')),
+        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),
@@ -547,6 +548,7 @@ void main() {
         '  verticalDirection: down',
         '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
         '════════════════════════════════════════════════════════════════════════════════════════════════════',
+        '',
         startsWith('Reloaded 0 libraries in '),
         '',
         'Application finished.',

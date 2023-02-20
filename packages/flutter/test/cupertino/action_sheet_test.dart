@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -362,7 +363,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          screenHeight = MediaQuery.of(context).size.height;
+          screenHeight = MediaQuery.sizeOf(context).height;
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(

@@ -901,7 +901,7 @@ void main() {
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
-        Container(color: Colors.green, child: SizedBox(key: key)),
+        ColoredBox(color: Colors.green, child: SizedBox(key: key)),
       ],
     );
     await tester.pumpWidget(stack);
@@ -1183,13 +1183,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1216,13 +1216,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1234,7 +1234,7 @@ void main() {
       children: <Widget>[
         Container(),
         Container(key: GlobalKey()),
-        Container(color: Colors.green, child: Container()),
+        ColoredBox(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
         Container(),
       ],
@@ -1252,11 +1252,10 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├Container(bg: MaterialColor(primary value: Color(0xff4caf50)))\n'
-        '│└ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
-        '│ └Container\n'
-        '│  └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
-        '│   └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
+        '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '│└Container\n'
+        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
+        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
@@ -1811,9 +1810,7 @@ class Decorate extends StatefulWidget {
     super.key,
     required this.didChangeDependencies,
     required this.build,
-  }) :
-    assert(didChangeDependencies != null),
-    assert(build != null);
+  });
 
   final void Function(bool isInBuild) didChangeDependencies;
   final void Function(bool isInBuild) build;
@@ -1975,7 +1972,7 @@ class StatelessWidgetSpy extends StatelessWidget {
   const StatelessWidgetSpy({
     super.key,
     required this.onBuild,
-  })  : assert(onBuild != null);
+  });
 
   final void Function(BuildContext) onBuild;
 

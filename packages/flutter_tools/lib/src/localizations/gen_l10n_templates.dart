@@ -179,14 +179,14 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));

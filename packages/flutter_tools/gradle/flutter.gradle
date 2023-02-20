@@ -27,16 +27,20 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
-/** For apps only. Provides the flutter extension used in app/build.gradle. */
+/** For apps only. Provides the flutter extension used in app/build.gradle.
+ * The versions specified here should match the values used in
+ * ../lib/src/android/gradle_utils.dart, so when bumping, make sure to update
+ * the versions specified there.
+*/
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 31
+    static int compileSdkVersion = 33
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
 
     /** Sets the targetSdkVersion used by default in Flutter app projects. */
-    static int targetSdkVersion = 31
+    static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
@@ -61,7 +65,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        /* When bumping, also update ndkVersion above. */
+        /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
+         * version in ../lib/src/android/gradle_utils.dart.
+         */
         classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
@@ -612,10 +618,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean shouldSplitPerAbi() {
-        if (project.hasProperty('split-per-abi')) {
-            return project.property('split-per-abi').toBoolean()
-        }
-        return false;
+        return project.findProperty('split-per-abi')?.toBoolean() ?: false;
     }
 
     private Boolean useLocalEngine() {
@@ -623,18 +626,12 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean isVerbose() {
-        if (project.hasProperty('verbose')) {
-            return project.property('verbose').toBoolean()
-        }
-        return false
+        return project.findProperty('verbose')?.toBoolean() ?: false;
     }
 
     /** Whether to build the debug app in "fast-start" mode. */
     private Boolean isFastStart() {
-        if (project.hasProperty("fast-start")) {
-            return project.property("fast-start").toBoolean()
-        }
-        return false
+        return project.findProperty("fast-start")?.toBoolean() ?: false;
     }
 
     private static Boolean isBuiltAsApp(Project project) {
@@ -871,6 +868,12 @@ class FlutterPlugin implements Plugin<Project> {
             }
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            // Be careful when configuring task below, Groovy has bizarre
+            // scoping rules: writing `verbose isVerbose()` means calling
+            // `isVerbose` on the task itself - which would return `verbose`
+            // original value. You either need to hoist the value
+            // into a separate variable `verbose verboseValue` or prefix with
+            // `this` (`verbose this.isVerbose()`).
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
@@ -878,8 +881,8 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
-                verbose isVerbose()
-                fastStart isFastStart()
+                verbose this.isVerbose()
+                fastStart this.isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -1083,7 +1086,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean fastStart
     @Input
     String targetPath
-    @Optional @Internal
+    @Optional @Input
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots

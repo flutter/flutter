@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -172,10 +173,10 @@ void main() {
         home: const Scaffold(body: BottomAppBar()),
       ));
 
-      final PhysicalShape widget = _getBabRenderObject(tester);
+      final Material material = tester.widget(find.byType(Material).at(1));
 
-      expect(widget.color, theme.colorScheme.surface);
-      expect(widget.elevation, equals(3.0));
+      expect(material.color, theme.colorScheme.surface);
+      expect(material.elevation, equals(3.0));
     });
 
     testWidgets('BAB theme overrides surfaceTintColor - M3', (WidgetTester tester) async {
@@ -252,9 +253,9 @@ Widget _withTheme(BottomAppBarTheme theme, [bool useMaterial3 = false]) {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: RepaintBoundary(
         key: _painterKey,
-        child: BottomAppBar(
+        child: const BottomAppBar(
           child: Row(
-            children: const <Widget>[
+            children: <Widget>[
               Icon(Icons.add),
               Expanded(child: SizedBox()),
               Icon(Icons.add),

@@ -778,7 +778,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
         final List<Widget> children = <Widget>[];
-        if (information!.location! != null) {
+        if (information!.location != null) {
           children.add(Text(information.location!));
         }
         if (information.state != null) {

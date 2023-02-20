@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -229,7 +230,7 @@ void main() {
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
-            width = MediaQuery.of(context).size.width;
+            width = MediaQuery.sizeOf(context).width;
 
             return GestureDetector(
               key: tapTarget,
@@ -811,7 +812,7 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + widgetWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 2)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -850,6 +851,110 @@ void main() {
     if (textWidget is Text) {
       final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
       expect(effectiveStyle.color, Colors.lightBlue);
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('Snackbar labels can be colored as MaterialColor (Material 3)',
+      (WidgetTester tester) async {
+    const MaterialColor usedColor = Colors.teal;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: usedColor,
+                        label: 'ACTION',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextButton =
+        tester.element(find.widgetWithText(TextButton, 'ACTION'));
+    final Widget textButton = actionTextButton.widget;
+    if (textButton is TextButton) {
+      final ButtonStyle buttonStyle = textButton.style!;
+      if (buttonStyle.foregroundColor is MaterialStateColor) {
+        // Same color when resolved
+        expect(buttonStyle.foregroundColor!.resolve(<MaterialState>{}), usedColor);
+      } else {
+        expect(false, true);
+      }
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)',
+      (WidgetTester tester) async {
+    const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: usedColor,
+                        label: 'ACTION',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextButton =
+        tester.element(find.widgetWithText(TextButton, 'ACTION'));
+    final Widget textButton = actionTextButton.widget;
+    if (textButton is TextButton) {
+      final ButtonStyle buttonStyle = textButton.style!;
+      if (buttonStyle.foregroundColor is MaterialStateColor) {
+        // Exactly the same object
+        expect(buttonStyle.foregroundColor, usedColor);
+      } else {
+        expect(false, true);
+      }
     } else {
       expect(false, true);
     }
@@ -1276,6 +1381,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getSemantics(find.text('snack')), matchesSemantics(
+      isLiveRegion: true,
+      hasDismissAction: true,
+      hasScrollDownAction: true,
+      hasScrollUpAction: true,
       label: 'snack',
       textDirection: TextDirection.ltr,
     ));
@@ -1525,70 +1634,70 @@ void main() {
           expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
         },
       );
-
-      testWidgets(
-        'Padding of $behavior is not consumed by viewInsets',
-        (WidgetTester tester) async {
-          final Widget child = MaterialApp(
-            home: Scaffold(
-              resizeToAvoidBottomInset: false,
-              floatingActionButton: FloatingActionButton(
-                child: const Icon(Icons.send),
-                onPressed: () {},
-              ),
-              body: Builder(
-                builder: (BuildContext context) {
-                  return GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('I am a snack bar.'),
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                          behavior: behavior,
-                        ),
-                      );
-                    },
-                    child: const Text('X'),
-                  );
-                },
-              ),
-            ),
-          );
-
-          await tester.pumpWidget(
-            MediaQuery(
-              data: const MediaQueryData(
-                padding: EdgeInsets.only(bottom: 20.0),
-              ),
-              child: child,
-            ),
-          );
-          await tester.tap(find.text('X'));
-          await tester.pumpAndSettle(); // Show snackbar
-          final Offset initialBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
-          final Offset initialBottomRight = tester.getBottomRight(find.byType(SnackBar));
-          // Consume bottom padding - as if by the keyboard opening
-          await tester.pumpWidget(
-            MediaQuery(
-              data: const MediaQueryData(
-                viewPadding: EdgeInsets.all(20),
-                viewInsets: EdgeInsets.all(100),
-              ),
-              child: child,
-            ),
-          );
-          await tester.tap(find.text('X'));
-          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
-
-          final Offset finalBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
-          final Offset finalBottomRight = tester.getBottomRight(find.byType(SnackBar));
-
-          expect(initialBottomLeft, finalBottomLeft);
-          expect(initialBottomRight, finalBottomRight);
-        },
-      );
     }
+
+    testWidgets(
+      'Padding of ${SnackBarBehavior.fixed} is not consumed by viewInsets',
+          (WidgetTester tester) async {
+        final Widget child = MaterialApp(
+          home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.send),
+              onPressed: () {},
+            ),
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                        behavior: SnackBarBehavior.fixed,
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle(); // Show snackbar
+        final Offset initialBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+        final Offset initialBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.all(20),
+              viewInsets: EdgeInsets.all(100),
+            ),
+            child: child,
+          ),
+        );
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset finalBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+        final Offset finalBottomRight = tester.getBottomRight(find.byType(SnackBar));
+
+        expect(initialBottomLeft, finalBottomLeft);
+        expect(initialBottomRight, finalBottomRight);
+      },
+    );
 
     testWidgets(
       '${SnackBarBehavior.fixed} should align SnackBar with the bottom of Scaffold '
@@ -2582,4 +2691,20 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   }
 
   return dragGestures;
+}
+
+class _TestMaterialStateColor extends MaterialStateColor {
+  const _TestMaterialStateColor() : super(_colorRed);
+
+  static const int _colorRed = 0xFFF44336;
+  static const int _colorBlue = 0xFF2196F3;
+
+  @override
+  Color resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return const Color(_colorBlue);
+    }
+
+    return const Color(_colorRed);
+  }
 }

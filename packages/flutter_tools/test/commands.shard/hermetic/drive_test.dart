@@ -21,6 +21,8 @@ import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -406,6 +408,94 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('Port publication not disabled for network device', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+    );
+
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Device networkDevice = FakeIosDevice()
+      ..interfaceType = IOSDeviceConnectionInterface.network;
+    fakeDeviceManager.devices = <Device>[networkDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+    expect(options.disablePortPublication, false);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('Port publication is disabled for wired device', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+    );
+
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+    ]), throwsToolExit());
+
+    final Device usbDevice = FakeIosDevice()
+      ..interfaceType = IOSDeviceConnectionInterface.usb;
+    fakeDeviceManager.devices = <Device>[usbDevice];
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+    expect(options.disablePortPublication, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('Port publication does not default to enabled for network device if flag manually added', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+    );
+
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Device networkDevice = FakeIosDevice()
+      ..interfaceType = IOSDeviceConnectionInterface.network;
+    fakeDeviceManager.devices = <Device>[networkDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'drive',
+      '--no-publish-port'
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+    expect(options.disablePortPublication, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => fakeDeviceManager,
+  });
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -480,14 +570,13 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     PubContext? context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }
 
@@ -577,4 +666,15 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeIosDevice extends Fake implements IOSDevice {
+  @override
+  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 }

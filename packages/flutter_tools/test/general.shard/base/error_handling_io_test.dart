@@ -1051,6 +1051,7 @@ void main() {
   group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
+    const int ebadarch = 86;
 
     testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
@@ -1108,6 +1109,28 @@ void main() {
       r'  sudo chown -R $(whoami) /path/to/dart && chmod u+rx /path/to/dart';
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when bad CPU type', () async {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter requires the Rosetta translation environment';
+
+      expect(() async => processManager.start(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.run(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo']),
+          throwsToolExit(message: expectedMessage));
     });
   });
 

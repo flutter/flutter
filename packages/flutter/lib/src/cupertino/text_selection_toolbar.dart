@@ -19,9 +19,6 @@ const double _kToolbarHeight = 43.0;
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
-const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
@@ -73,7 +70,7 @@ typedef CupertinoToolbarBuilder = Widget Function(
 class _CupertinoToolbarButtonDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    return SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
   }
 }
 
@@ -123,7 +120,17 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
-  // Add the visial vertical line spacer between children buttons.
+  /// Minimal padding from all edges of the selection toolbar to all edges of the
+  /// viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
+  ///    padding from the edges of the viewport.
+  ///  * [TextSelectionToolbar], which uses this same value as well.
+  static const double kToolbarScreenPadding = 8.0;
+
+  // Add the visual vertical line spacer between children buttons.
   static List<Widget> _addChildrenSpacers(List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
     for (int i = 0; i < children.length; i++) {
@@ -143,8 +150,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: _kToolbarDividerColor,
+        decoration: BoxDecoration(
+          color: _kToolbarDividerColor.resolveFrom(context),
         ),
         child: child,
       ),
@@ -161,9 +168,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
-    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryPadding.top + kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -171,8 +178,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
     // The arrow, which points to the anchor, has some margin so it can't get
     // too close to the horizontal edges of the screen.
-    final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
-    final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
+    final double leftMargin = _kArrowScreenPadding + mediaQueryPadding.left;
+    final double rightMargin = MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
       clampDouble(anchorAbove.dx, leftMargin, rightMargin),
@@ -180,15 +187,15 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     );
     final Offset anchorBelowAdjusted = Offset(
       clampDouble(anchorBelow.dx, leftMargin, rightMargin),
-      anchorBelow.dy - _kToolbarContentDistance + paddingAbove,
+      anchorBelow.dy + _kToolbarContentDistance - paddingAbove,
     );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
+        kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
@@ -426,8 +433,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
-  }) : assert(children != null),
-       assert(children.length > 0);
+  }) : assert(children.length > 0);
 
   final Offset anchor;
   final List<Widget> children;
@@ -508,7 +514,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handlePreviousPage,
           text: '◀',
         ),
-        dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
+        dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
         nextButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handleNextPage,
           text: '▶',
@@ -533,13 +539,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
     required this.dividerWidth,
     required this.nextButton,
     required this.nextButtonDisabled,
-  }) : assert(children != null),
-       assert(children.isNotEmpty),
-       assert(backButton != null),
-       assert(dividerWidth != null),
-       assert(nextButton != null),
-       assert(nextButtonDisabled != null),
-       assert(page != null);
+  }) : assert(children.isNotEmpty);
 
   final Widget backButton;
   final List<Widget> children;
@@ -732,9 +732,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   _RenderCupertinoTextSelectionToolbarItems({
     required double dividerWidth,
     required int page,
-  }) : assert(dividerWidth != null),
-       assert(page != null),
-       _dividerWidth = dividerWidth,
+  }) : _dividerWidth = dividerWidth,
        _page = page,
        super();
 
@@ -829,8 +827,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       double paginationButtonsWidth = 0.0;
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
+        // Note childCount doesn't include slotted children which come before the list ones.
         paginationButtonsWidth =
-            i == childCount - 1 ? 0.0 : _nextButton!.size.width;
+            i == childCount + 2 ? 0.0 : _nextButton!.size.width;
       } else {
         paginationButtonsWidth = subsequentPageButtonsWidth;
       }

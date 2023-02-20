@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/android/application_package.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -83,6 +84,7 @@ void main() {
     group('with one device and no specified target file', () {
       const int devicePort = 499;
       const int hostPort = 42;
+      final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
       late FakeDeviceLogReader fakeLogReader;
       late RecordingPortForwarder portForwarder;
@@ -102,17 +104,17 @@ void main() {
         fakeLogReader.dispose();
       });
 
-      testUsingContext('succeeds with iOS device', () async {
+      testUsingContext('succeeds with iOS device with protocol discovery', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
+          majorSdkVersion: 12,
           onGetLogReader: () {
             fakeLogReader.addLine('Foo');
             fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
             return fakeLogReader;
           },
         );
-
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -121,7 +123,20 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForObservatory = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
           artifacts: artifacts,
           stdio: stdio,
           logger: logger,
@@ -137,15 +152,309 @@ void main() {
         expect(portForwarder.hostPort, hostPort);
 
         await fakeLogReader.dispose();
-        await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
+      });
+
+      testUsingContext('succeeds with iOS device with mDNS', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 16,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForObservatory = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach']);
+        await fakeLogReader.dispose();
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
+        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[
+              PtrResourceRecord('foo', future, domainName: 'bar'),
+            ],
+            <String, List<SrvResourceRecord>>{
+              'bar': <SrvResourceRecord>[
+                SrvResourceRecord('bar', future, port: devicePort, weight: 1, priority: 1, target: 'appId'),
+              ],
+            },
+            txtResponse: <String, List<TxtResourceRecord>>{
+              'bar': <TxtResourceRecord>[
+                TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
+              ],
+            },
+          ),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
+      });
+
+      testUsingContext('succeeds with iOS device with mDNS network device', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 16,
+          interfaceType: IOSDeviceConnectionInterface.network,
+        );
+        testDeviceManager.devices = <Device>[device];
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForObservatory = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach']);
+        await fakeLogReader.dispose();
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
+
+        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            ],
+            <String, List<SrvResourceRecord>>{
+              'srv-foo': <SrvResourceRecord>[
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              ],
+            },
+            ipResponse: <String, List<IPAddressResourceRecord>>{
+              'target-foo': <IPAddressResourceRecord>[
+                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
+              ],
+            },
+            txtResponse: <String, List<TxtResourceRecord>>{
+              'srv-foo': <TxtResourceRecord>[
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+              ],
+            },
+          ),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
+      });
+
+      testUsingContext('succeeds with iOS device with mDNS network device with debug-port', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 16,
+          interfaceType: IOSDeviceConnectionInterface.network,
+        );
+        testDeviceManager.devices = <Device>[device];
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForObservatory = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach', '--debug-port', '123']);
+        await fakeLogReader.dispose();
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
+
+        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[
+              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            ],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
+              ],
+              'srv-foo': <SrvResourceRecord>[
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              ],
+            },
+            ipResponse: <String, List<IPAddressResourceRecord>>{
+              'target-foo': <IPAddressResourceRecord>[
+                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
+              ],
+            },
+            txtResponse: <String, List<TxtResourceRecord>>{
+              'srv-foo': <TxtResourceRecord>[
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+              ],
+            },
+          ),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
+      });
+
+      testUsingContext('succeeds with iOS device with mDNS network device with debug-url', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 16,
+          interfaceType: IOSDeviceConnectionInterface.network,
+        );
+        testDeviceManager.devices = <Device>[device];
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForObservatory = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
+        await fakeLogReader.dispose();
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
+
+        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+        final Uri? observatoryUri = await flutterDevice.observatoryUris?.first;
+        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[
+              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            ],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
+              ],
+              'srv-foo': <SrvResourceRecord>[
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              ],
+            },
+            ipResponse: <String, List<IPAddressResourceRecord>>{
+              'target-foo': <IPAddressResourceRecord>[
+                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
+              ],
+            },
+            txtResponse: <String, List<TxtResourceRecord>>{
+              'srv-foo': <TxtResourceRecord>[
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+              ],
+            },
+          ),
           logger: logger,
           flutterUsage: TestUsage(),
         ),
@@ -947,7 +1256,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    AndroidApk? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) {
     if (onGetLogReader == null) {
@@ -979,9 +1288,16 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     DevicePortForwarder? portForwarder,
     DeviceLogReader? logReader,
     this.onGetLogReader,
+    this.interfaceType = IOSDeviceConnectionInterface.none,
+    this.majorSdkVersion = 0,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
   final DevicePortForwarder? _portForwarder;
+  @override
+  int majorSdkVersion;
+
+  @override
+  final IOSDeviceConnectionInterface interfaceType;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
@@ -1029,12 +1345,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 class FakeMDnsClient extends Fake implements MDnsClient {
   FakeMDnsClient(this.ptrRecords, this.srvResponse, {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
+    this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
   });
 
   final List<PtrResourceRecord> ptrRecords;
   final Map<String, List<SrvResourceRecord>> srvResponse;
   final Map<String, List<TxtResourceRecord>> txtResponse;
+  final Map<String, List<IPAddressResourceRecord>> ipResponse;
   final bool osErrorOnStart;
 
   @override
@@ -1054,7 +1372,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {
@@ -1064,6 +1382,10 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
       return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+    }
+    if (T == IPAddressResourceRecord) {
+      final String key = query.fullyQualifiedName;
+      return Stream<IPAddressResourceRecord>.fromIterable(ipResponse[key] ?? <IPAddressResourceRecord>[]) as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }
