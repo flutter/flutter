@@ -483,8 +483,8 @@ class ChipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),

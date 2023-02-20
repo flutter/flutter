@@ -99,7 +99,7 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 
   /// The current [TestDefaultBinaryMessengerBinding], if one has been created.
-  static TestDefaultBinaryMessengerBinding? get instance => _instance;
+  static TestDefaultBinaryMessengerBinding get instance => BindingBase.checkInstance(_instance);
   static TestDefaultBinaryMessengerBinding? _instance;
 
   @override
@@ -775,10 +775,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
 
     // Set the handler only if there is currently none.
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
       _announcementHandler = _handleAnnouncementMessage;
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, _announcementHandler);
     }
@@ -1067,10 +1067,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _parentZone = null;
     buildOwner!.focusManager.dispose();
 
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(
             SystemChannels.accessibility.name, _announcementHandler)) {
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
       _announcementHandler = null;
     }

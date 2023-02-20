@@ -680,7 +680,7 @@ class KeyEventSimulator {
   static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> buildKeyData) async {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
         (ByteData? data) {

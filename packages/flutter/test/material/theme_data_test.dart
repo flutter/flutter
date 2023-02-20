@@ -186,8 +186,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -238,8 +236,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -287,8 +283,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -337,8 +331,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -387,8 +379,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -406,7 +396,6 @@ void main() {
 
     expect(theme.brightness, equals(Brightness.light));
     expect(theme.primaryColor, equals(lightColors.primary));
-    expect(theme.accentColor, equals(lightColors.secondary));
     expect(theme.cardColor, equals(lightColors.surface));
     expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
@@ -423,7 +412,6 @@ void main() {
     expect(theme.brightness, equals(Brightness.dark));
     // in dark theme's the color used for main components is surface instead of primary
     expect(theme.primaryColor, equals(darkColors.surface));
-    expect(theme.accentColor, equals(darkColors.secondary));
     expect(theme.cardColor, equals(darkColors.surface));
     expect(theme.backgroundColor, equals(darkColors.background));
     expect(theme.canvasColor, equals(darkColors.background));
@@ -813,10 +801,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: Colors.black,
-      accentColorBrightness: Brightness.dark,
-      accentTextTheme: ThemeData.dark().textTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
@@ -935,10 +919,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: Colors.white,
-      accentColorBrightness: Brightness.light,
-      accentIconTheme: ThemeData.light().iconTheme,
-      accentTextTheme: ThemeData.light().textTheme,
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -1040,10 +1020,6 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: otherTheme.accentColor,
-      accentColorBrightness: otherTheme.accentColorBrightness,
-      accentIconTheme: otherTheme.accentIconTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
@@ -1146,10 +1122,6 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
-    expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
-    expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
@@ -1188,7 +1160,6 @@ void main() {
     expect(theme.brightness, equals(Brightness.dark));
     expect(theme.colorScheme.brightness, equals(Brightness.dark));
     expect(theme.primaryColor, equals(lightColors.primary));
-    expect(theme.accentColor, equals(lightColors.secondary));
     expect(theme.cardColor, equals(lightColors.surface));
     expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
@@ -1284,10 +1255,6 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'accentColor',
-      'accentColorBrightness',
-      'accentTextTheme',
-      'accentIconTheme',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',

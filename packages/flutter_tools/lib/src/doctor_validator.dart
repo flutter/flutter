@@ -207,6 +207,11 @@ class ValidationResult {
         return 'partial';
     }
   }
+
+  @override
+  String toString() {
+    return '$runtimeType($type, $messages, $statusInfo)';
+  }
 }
 
 /// A status line for the flutter doctor validation to display.
