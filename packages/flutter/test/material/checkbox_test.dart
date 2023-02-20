@@ -1698,7 +1698,7 @@ void main() {
         paints
         ..drrect(
           color: borderColor,
-          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(2)),
           inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
@@ -1734,6 +1734,41 @@ void main() {
     expectBorder();
     await gestureLongPress.up();
     await tester.pump();
+  });
+
+  testWidgets('Checkbox has correct default shape - M3', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+
+    Widget buildApp() {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    final OutlinedBorder? expectedShape = themeData.checkboxTheme.shape;
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, expectedShape);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(2)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
+        ),
+    );
   });
 }
 
