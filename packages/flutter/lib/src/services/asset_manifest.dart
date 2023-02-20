@@ -32,7 +32,7 @@ abstract class AssetManifest {
 
   /// Retrieves metadata about an asset and its variants.
   ///
-  /// Note that this method considers a main asset to be a variant of itself and
+  /// This method considers a main asset to be a variant of itself and
   /// includes it in the returned list.
   ///
   /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To

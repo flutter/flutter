@@ -784,7 +784,7 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
-  test('Generated service worker is empty with none-strategy', () {
+  test('Generated service worker is empty with none-strategy', () => testbed.run(() {
     final String fileGeneratorsPath =
         environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String result = generateServiceWorker(
@@ -795,9 +795,9 @@ void main() {
     );
 
     expect(result, '');
-  });
+  }));
 
-  test('Generated service worker correctly inlines file hashes', () {
+  test('Generated service worker correctly inlines file hashes', () => testbed.run(() {
     final String fileGeneratorsPath =
         environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String result = generateServiceWorker(
@@ -808,9 +808,9 @@ void main() {
     );
 
     expect(result, contains('{"/foo": "abcd"};'));
-  });
+  }));
 
-  test('Generated service worker includes core files', () {
+  test('Generated service worker includes core files', () => testbed.run(() {
     final String fileGeneratorsPath =
         environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String result = generateServiceWorker(
@@ -821,7 +821,7 @@ void main() {
     );
 
     expect(result, contains('"foo",\n"bar"'));
-  });
+  }));
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
     environment.outputDir.childDirectory('a').childFile('a.txt')
@@ -874,7 +874,7 @@ void main() {
       contains('"main.dart.js"'));
   }));
 
-  test('flutter.js sanity checks', () {
+  test('flutter.js sanity checks', () => testbed.run(() {
     final String fileGeneratorsPath = environment.artifacts
         .getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String flutterJsContents =
@@ -887,7 +887,7 @@ void main() {
     expect(flutterJsContents, contains('const baseUri = '));
     expect(flutterJsContents, contains('document.querySelector("base")'));
     expect(flutterJsContents, contains('.getAttribute("href")'));
-  });
+  }));
 
   test('flutter.js is not dynamically generated', () => testbed.run(() async {
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
