@@ -492,23 +492,24 @@ class Parser {
     ST.other: 'other',
   };
 
-  // Compress the syntax tree. Note that after
-  // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr,
-  // ST.pluralExpr, and ST.selectExpr) are structured as a linked list See diagram
-  // below. This
-  // function compresses these parts into a single children array (and does this
-  // for ST.pluralParts and ST.selectParts as well). Then it checks extra syntax
-  // rules. Essentially, it converts
+  // Compress the syntax tree.
   //
-  //            Message
-  //            /     \
-  //    PluralExpr  Message
-  //                /     \
-  //            String  Message
-  //                    /     \
-  //            SelectExpr   ...
+  // After `parse(lex(message))`, the individual parts (`ST.string`,
+  // `ST.placeholderExpr`, `ST.pluralExpr`, and `ST.selectExpr`) are structured
+  // as a linked list (see diagram below). This function compresses these parts
+  // into a single children array (and does this for `ST.pluralParts` and
+  // `ST.selectParts` as well). Then it checks extra syntax rules. Essentially, it
+  // converts:
   //
-  // to
+  //             Message
+  //             /     \
+  //     PluralExpr  Message
+  //                 /     \
+  //             String  Message
+  //                     /     \
+  //             SelectExpr   ...
+  //
+  // ...to:
   //
   //                Message
   //               /   |   \
@@ -587,17 +588,8 @@ class Parser {
   }
 
   Node parse() {
-    try {
-      final Node syntaxTree = compress(parseIntoTree());
-      checkExtraRules(syntaxTree);
-      return syntaxTree;
-    } on L10nParserException catch (error) {
-      // For debugging purposes.
-      if (logger == null) {
-        rethrow;
-      }
-      logger?.printError(error.toString());
-      return Node(ST.empty, 0, value: '');
-    }
+    final Node syntaxTree = compress(parseIntoTree());
+    checkExtraRules(syntaxTree);
+    return syntaxTree;
   }
 }

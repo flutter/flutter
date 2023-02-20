@@ -118,7 +118,7 @@ GOTO :after_subroutine
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
     ECHO Downloading Dart SDK from Flutter engine %dart_required_version%... 1>&2
-    %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
+    %powershell_executable% -ExecutionPolicy Bypass -NoProfile -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )

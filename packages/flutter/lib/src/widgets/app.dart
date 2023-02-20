@@ -252,8 +252,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
-///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -1623,6 +1621,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         debugLabel: 'Navigator Scope',
         autofocus: true,
         child: Navigator(
+          clipBehavior: Clip.none,
           restorationScopeId: 'nav',
           key: _navigator,
           initialRoute: _initialRouteName,

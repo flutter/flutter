@@ -194,10 +194,13 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     await resume().timeout(defaultTimeout)
-        .catchError((Object e) {
-          _debugPrint('Ignoring failure to resume during shutdown');
-          return null;
-        });
+        .then(
+          (Isolate? isolate) => isolate,
+          onError: (Object e) {
+            _debugPrint('Ignoring failure to resume during shutdown');
+            return null;
+          },
+        );
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid!);
@@ -272,13 +275,13 @@ abstract class FlutterTestDriver {
   ///
   /// Returns a future that completes when the [kind] event is received.
   ///
-  /// Note that this method should be called before the command that triggers
+  /// This method should be called before the command that triggers
   /// the event to subscribe to the event in time, for example:
   ///
-  /// ```
-  ///  var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
-  ///  ...                                             // Code that pauses the app.
-  ///  await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
+  /// ```dart
+  /// var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
+  /// ...                                             // Code that pauses the app.
+  /// await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
   /// ```
   Future<Event> subscribeToDebugEvent(String kind, String isolateId) {
     _debugPrint('Start listening for $kind events');
@@ -472,13 +475,16 @@ abstract class FlutterTestDriver {
     });
     final Future<T> future = callback().whenComplete(longWarning.cancel);
 
-    return future.catchError((Object error) {
-      if (!timeoutExpired) {
-        timeoutExpired = true;
-        _debugPrint(messages.toString());
-      }
-      throw error; // ignore: only_throw_errors
-    }).whenComplete(() => subscription.cancel());
+    return future.then(
+      (T t) => t,
+      onError: (Object error) {
+        if (!timeoutExpired) {
+          timeoutExpired = true;
+          _debugPrint(messages.toString());
+        }
+        throw error; // ignore: only_throw_errors
+      },
+    ).whenComplete(() => subscription.cancel());
   }
 }
 
@@ -499,6 +505,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool singleWidgetReloads = false,
+    bool serveObservatory = true,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -509,6 +516,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
         if (chrome)
@@ -537,6 +545,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
+    bool serveObservatory = true,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -547,6 +556,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance)
           '--no-dds',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',

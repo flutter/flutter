@@ -329,6 +329,9 @@ class Typography with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Typography lerp(Typography a, Typography b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return Typography._(
       TextTheme.lerp(a.black, b.black, t),
       TextTheme.lerp(a.white, b.white, t),
@@ -750,7 +753,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _M3Typography {
   _M3Typography._();
