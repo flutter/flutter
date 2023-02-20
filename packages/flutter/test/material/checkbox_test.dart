@@ -1698,7 +1698,7 @@ void main() {
         paints
         ..drrect(
           color: borderColor,
-          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(2)),
           inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
       );
@@ -1766,7 +1766,7 @@ void main() {
       paints
         ..drrect(
           outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(2)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, const Radius.zero),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
         ),
     );
   });
