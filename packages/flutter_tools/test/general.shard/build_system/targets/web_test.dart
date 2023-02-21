@@ -881,6 +881,8 @@ void main() {
         flutter_js.generateFlutterJsFile(fileGeneratorsPath);
     expect(flutterJsContents, contains('"use strict";'));
     expect(flutterJsContents, contains('main.dart.js'));
+    expect(flutterJsContents, contains('if (!("serviceWorker" in navigator))'));
+    expect(flutterJsContents, contains(r'/\.js$/,'));
     expect(flutterJsContents, contains('flutter_service_worker.js?v='));
     expect(flutterJsContents, contains('document.createElement("script")'));
     expect(flutterJsContents, contains('"application/javascript"'));
