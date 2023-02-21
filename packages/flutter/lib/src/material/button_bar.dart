@@ -146,15 +146,14 @@ class ButtonBar extends StatelessWidget {
 
   /// The spacing between buttons when the button bar overflows.
   ///
-  /// If the [children] do not fit into a single row, they are
-  /// arranged into a column. This parameter provides additional
-  /// vertical space in between buttons when it does overflow.
+  /// If the [children] do not fit into a single row, they are arranged into a
+  /// column. This parameter provides additional vertical space in between
+  /// buttons when it does overflow.
   ///
-  /// Note that the button spacing may appear to be more than
-  /// the value provided. This is because most buttons adhere to the
-  /// [MaterialTapTargetSize] of 48px. So, even though a button
-  /// might visually be 36px in height, it might still take up to
-  /// 48px vertically.
+  /// The button spacing may appear to be more than the value provided. This is
+  /// because most buttons adhere to the [MaterialTapTargetSize] of 48px. So,
+  /// even though a button might visually be 36px in height, it might still take
+  /// up to 48px vertically.
   ///
   /// If null then no spacing will be added in between buttons in
   /// an overflow state.
