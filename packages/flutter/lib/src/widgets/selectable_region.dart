@@ -83,6 +83,10 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// themselves to the [SelectionRegistrar] from the
 /// [SelectionContainer.maybeOf] if they want to participate in the
 /// selection.
+/// 
+/// A [SelectableRegion] will defer to a [SelectionContainer] above it in the
+/// widget tree if one exists. This allows nested [SelectableRegion]s to
+/// coordinate their selection behavior.
 ///
 /// An example selection tree will look like:
 ///
