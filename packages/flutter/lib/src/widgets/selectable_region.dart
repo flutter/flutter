@@ -1264,7 +1264,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableRegionContainerDelegate({required super.separator});
+  _SelectableRegionContainerDelegate({super.separator});
 
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
