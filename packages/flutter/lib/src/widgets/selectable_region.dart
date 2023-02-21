@@ -1156,11 +1156,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = SelectionContainer(
-      registrar: SelectionContainer.maybeOf(context) ?? this,
+      registrar: registrar ?? this,
       delegate: _selectionDelegate,
       child: widget.child,
     );
+    if (registrar != null) {
+      return result;
+    }
     if (kIsWeb) {
       result = PlatformSelectableRegionContextMenu(
         child: result,
