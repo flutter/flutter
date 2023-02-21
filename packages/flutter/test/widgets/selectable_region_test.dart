@@ -621,6 +621,49 @@ void main() {
       expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
+    testWidgets('can copy nested selectable regions with different separators', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            separator: '\n',
+            child: Column(
+              children: <Widget>[
+                const Text('How are you?'),
+                SelectableRegion(
+                  focusNode: FocusNode(),
+                  selectionControls: materialTextSelectionControls,
+                  separator: ' ',
+                  child: const Column(
+                    children: <Widget>[
+                      Text('Good, and you?'),
+                      Text('Fine, thank you.'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      // Select from offset 2 of paragraph 1 to offset 6 of paragraph3.
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+      await gesture.up();
+
+      // keyboard copy.
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'w are you?\nGood, and you? Fine, ');
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
       (WidgetTester tester) async {
