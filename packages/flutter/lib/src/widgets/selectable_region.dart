@@ -1431,8 +1431,8 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates a [MultiSelectableSelectionContainerDelegate].
-  /// 
-  /// The [separator] is used to separate the text of each selectable in 
+  ///
+  /// The [separator] is used to separate the text of each selectable in
   /// [selectables].
   MultiSelectableSelectionContainerDelegate({
      this.separator = '',
