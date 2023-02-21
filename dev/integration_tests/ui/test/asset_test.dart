@@ -14,6 +14,6 @@ void main() {
 
     // If this asset couldn't be loaded, the exception message would be
     // "asset failed to load"
-    expect(tester.takeException().toString(), contains('Invalid image data'));
+    expect(tester.takeException().toString(), contains('The key was not found in the asset manifest'));
   });
 }

@@ -71,7 +71,7 @@ class _AssetManifestBin implements AssetManifest {
     if (!_typeCastedData.containsKey(key)) {
       final Object? variantData = _data[key];
       if (variantData == null) {
-        throw ArgumentError('Asset key $key was not found within the asset manifest.');
+        throw ArgumentError('Asset key "$key" was not found.');
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
