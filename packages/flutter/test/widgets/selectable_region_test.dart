@@ -1710,6 +1710,7 @@ void main() {
     buttonItems[0].onPressed.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
     expect(regionState.selectionOverlay, isNotNull);
     expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
     expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
