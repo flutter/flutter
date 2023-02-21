@@ -62,6 +62,9 @@ class SegmentedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolates between two segmented button themes.
   static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return SegmentedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
       selectedIcon: t < 0.5 ? a?.selectedIcon : b?.selectedIcon,

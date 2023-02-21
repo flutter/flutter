@@ -1082,7 +1082,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _doRequestFocus(findFirstFocus: true);
   }
 
-  // Note that this is overridden in FocusScopeNode.
+  // This is overridden in FocusScopeNode.
   void _doRequestFocus({required bool findFirstFocus}) {
     if (!canRequestFocus) {
       assert(_focusDebug(() => 'Node NOT requesting focus because canRequestFocus is false: $this'));

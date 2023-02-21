@@ -109,7 +109,6 @@ void main() {
         'url_launcher_android',
         'archive',
         'path_provider_android',
-        'intl',
       ]),
     );
   });

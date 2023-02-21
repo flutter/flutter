@@ -46,9 +46,15 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  test('ListTileThemeData copyWith, ==, hashCode basics', () {
+  test('ListTileThemeData copyWith, ==, hashCode, basics', () {
     expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
     expect(const ListTileThemeData().hashCode, const ListTileThemeData().copyWith().hashCode);
+  });
+
+  test('ListTileThemeData lerp special cases', () {
+    expect(ListTileThemeData.lerp(null, null, 0), null);
+    const ListTileThemeData data = ListTileThemeData();
+    expect(identical(ListTileThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ListTileThemeData defaults', () {
@@ -71,6 +77,7 @@ void main() {
     expect(themeData.enableFeedback, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.visualDensity, null);
+    expect(themeData.titleAlignment, null);
   });
 
   testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
@@ -106,6 +113,7 @@ void main() {
       enableFeedback: true,
       mouseCursor: MaterialStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
+      titleAlignment: ListTileTitleAlignment.top,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -134,6 +142,7 @@ void main() {
         'enableFeedback: true',
         'mouseCursor: MaterialStateMouseCursor(clickable)',
         'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
+        'titleAlignment: ListTileTitleAlignment.top',
       ]),
     );
   });
@@ -215,6 +224,7 @@ void main() {
                 selectedColor: selectedColor,
                 iconColor: iconColor,
                 textColor: textColor,
+                minVerticalPadding: 25.0,
                 mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
@@ -223,6 +233,7 @@ void main() {
                   return SystemMouseCursors.click;
                 }),
                 visualDensity: VisualDensity.compact,
+                titleAlignment: ListTileTitleAlignment.bottom,
               ),
               child: Builder(
                 builder: (BuildContext context) {
@@ -311,7 +322,14 @@ void main() {
 
     // VisualDensity is respected
     final RenderBox box = tester.renderObject(find.byKey(listTileKey));
-    expect(box.size, equals(const Size(800, 64.0)));
+    expect(box.size, equals(const Size(800, 80.0)));
+
+    // titleAlignment is respected.
+    final Offset titleOffset = tester.getTopLeft(find.text('title'));
+    final Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+    expect(leadingOffset.dy - titleOffset.dy, 6);
+    expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
   testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
@@ -721,6 +739,7 @@ void main() {
       minVerticalPadding: 300,
       minLeadingWidth: 400,
       enableFeedback: true,
+      titleAlignment: ListTileTitleAlignment.bottom,
     );
 
     final ListTileThemeData copy = original.copyWith(
@@ -740,6 +759,7 @@ void main() {
       minVerticalPadding: 700,
       minLeadingWidth: 800,
       enableFeedback: false,
+      titleAlignment: ListTileTitleAlignment.top,
     );
 
     expect(copy.dense, false);
@@ -758,6 +778,43 @@ void main() {
     expect(copy.minVerticalPadding, 700);
     expect(copy.minLeadingWidth, 800);
     expect(copy.enableFeedback, false);
+    expect(copy.titleAlignment, ListTileTitleAlignment.top);
+  });
+
+  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const String titleText = '\nHeadline Text\n';
+    const String subtitleText = '\nSupporting Text\n';
+
+    Widget buildFrame({ ListTileTitleAlignment? alignment }) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          listTileTheme: const ListTileThemeData(
+            titleAlignment: ListTileTitleAlignment.center,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.top,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
+              title: const Text(titleText),
+              subtitle: const Text(subtitleText),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    final Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+    expect(leadingOffset.dy - tileOffset.dy, 8.0);
+    expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
 }
 
