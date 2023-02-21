@@ -214,7 +214,10 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
                         );
                       });
 
-                  // Show the background platform view in 1 second.
+                  // XCUITest fails to query the background platform view,
+                  // Since it is covered by the dialog prompt, which removes
+                  // semantic nodes underneath.
+                  // As a workaround, we show the background with a delay.
                   Future<void>.delayed(const Duration(seconds: 1)).then((void value) {
                     setState(() {
                       _showBackground = true;

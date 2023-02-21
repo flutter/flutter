@@ -82,10 +82,10 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCTAssertTrue([platformButton waitForExistenceWithTimeout:kStandardTimeOut]);
   XCTAssertTrue([platformButton.label isEqualToString:@"Initial Button Title"]);
 
-  // The `app.otherElements` query fails to query `platform_view[1]`,
-  // which is likely a bug in XCUITest since it is present in the UI debugger.
-  // So set a manual delay here (must be longer than the corresponding
-  // delay to show background view on the dart side).
+  // The `app.otherElements` query fails to query `platform_view[1]` (the background),
+  // because it is covered by a dialog prompt, which removes semantic nodes underneath.
+  // The workaround is to set a manual delay here (must be longer than the delay used to
+  // show the background view on the dart side).
   [NSThread sleepForTimeInterval:3];
 
   for (int i = 1; i <= 5; i++) {
