@@ -1400,7 +1400,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _masterPanel(context),
+          body: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _masterPanel(context),
+          ),
         ),
         // Detail view stacked above main scaffold and master view.
         SafeArea(
