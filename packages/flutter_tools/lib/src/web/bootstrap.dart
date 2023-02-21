@@ -158,7 +158,7 @@ String generateMainModule({
   String bootstrapModule = 'main_module.bootstrap',
 }) {
   return '''
-/* ENTRYPOINT_EXTENTION_MARKER */
+/* ENTRYPOINT_EXTENSION_MARKER */
 // Disable require module timeout
 require.config({
   waitSeconds: 0

@@ -983,13 +983,13 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   /// {@endtemplate}
-  void showMagnifier(MagnifierInfo initalMagnifierInfo) {
+  void showMagnifier(MagnifierInfo initialMagnifierInfo) {
     if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any rememnant values.
-    _magnifierInfo.value = initalMagnifierInfo;
+    // Start from empty, so we don't utilize any remnant values.
+    _magnifierInfo.value = initialMagnifierInfo;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -3076,7 +3076,7 @@ enum ClipboardStatus {
   /// waiting to receive the clipboard contents for the first time.
   unknown,
 
-  /// The content on the clipboard is not pastable, such as when it is empty.
+  /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
 }
 

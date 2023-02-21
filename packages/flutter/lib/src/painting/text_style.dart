@@ -1077,7 +1077,7 @@ class TextStyle with Diagnosticable {
   /// implementation uses the non-null value throughout the transition for
   /// lerpable fields such as colors (for example, if one [TextStyle] specified
   /// `fontSize` but the other didn't, the returned [TextStyle] will use the
-  /// `fontSize` from the [TextStyle] that specified it, regarless of the `t`
+  /// `fontSize` from the [TextStyle] that specified it, regardless of the `t`
   /// value).
   ///
   /// This method throws when the given [TextStyle]s don't have the same

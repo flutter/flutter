@@ -18,7 +18,7 @@ import 'common.dart';
 void expectExitCode(ProcessResult result, int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
     fail(
-      'Process ${result.pid} exitted with the wrong exit code.\n'
+      'Process ${result.pid} exited with the wrong exit code.\n'
       '\n'
       'EXPECTED: exit code $expectedExitCode\n'
       'ACTUAL: exit code ${result.exitCode}\n'

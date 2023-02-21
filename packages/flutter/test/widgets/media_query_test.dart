@@ -300,7 +300,7 @@ void main() {
     expect(data.displayFeatures, view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no sourrounding MediaQuery exists', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
     final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(platformDispatcher: tester.binding.platformDispatcher);
     platformDispatcher
       ..textScaleFactorTestValue = 123

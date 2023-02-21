@@ -1531,7 +1531,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('OultinedButton.icon icon,label layout', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon icon,label layout', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
     final Key labelKey = UniqueKey();
