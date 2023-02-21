@@ -61,9 +61,9 @@ typedef void (*FlEngineUpdateSemanticsNodeHandler)(
 /**
  * FlEngineOnPreEngineRestartHandler:
  * @engine: an #FlEngine.
- * @user_data: semantic node information.
- *
  * @user_data: (closure): data provided when registering this handler.
+ *
+ * Function called right before the engine is restarted.
  */
 typedef void (*FlEngineOnPreEngineRestartHandler)(FlEngine* engine,
                                                   gpointer user_data);
