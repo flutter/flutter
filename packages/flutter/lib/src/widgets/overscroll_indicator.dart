@@ -201,6 +201,11 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+    if (notification.metrics.axis != widget.axis) {
+      // This widget is explicitly configured to one axis. If a notification
+      // from a different axis bubbles up, do nothing.
+      return false;
+    }
 
     // Update the paint offset with the current scroll position. This makes
     // sure that the glow effect correctly scrolls in line with the current
@@ -236,7 +241,6 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
       assert(controller != null);
-      assert(notification.metrics.axis == widget.axis);
       if (_accepted[isLeading]!) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
