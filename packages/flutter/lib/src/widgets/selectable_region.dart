@@ -1153,7 +1153,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     Widget result = SelectionContainer(
-      registrar: this,
+      registrar: SelectionContainer.maybeOf(context) ?? this,
       delegate: _selectionDelegate,
       child: widget.child,
     );
