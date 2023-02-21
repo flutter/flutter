@@ -18,13 +18,13 @@
 # * Fixes in this file are [for CLASS] from the <XXX> library. *
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/28602
-  - title: "Rename to 'fromMouseEvent'"
-    date: 2020-12-15
+  # Changes made in https://github.com/flutter/flutter/pull/121152
+  - title: "Rename to 'fromViewPadding'"
+    date: 2022-02-21
     element:
-      uris: [ 'gestures.dart' ]
-      constructor: 'fromHoverEvent'
-      inClass: 'PointerEnterEvent'
+      uris: [ 'painting.dart' ]
+      constructor: 'fromWindowPadding'
+      inClass: 'EdgeInsets'
     changes:
       - kind: 'rename'
-        newName: 'fromMouseEvent'
+        newName: 'fromViewPadding'
