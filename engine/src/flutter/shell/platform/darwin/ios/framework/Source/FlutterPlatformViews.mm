@@ -771,29 +771,16 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
 void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   FML_DCHECK(flutter_view_);
   UIView* flutter_view = flutter_view_.get();
-  auto zIndex = 0;
   // Clear the `active_composition_order_`, which will be populated down below.
   active_composition_order_.clear();
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t platform_view_id = composition_order_[i];
     std::vector<std::shared_ptr<FlutterPlatformViewLayer>> layers = layer_map[platform_view_id];
     UIView* platform_view_root = root_views_[platform_view_id].get();
-
-    if (platform_view_root.superview != flutter_view) {
-      [flutter_view addSubview:platform_view_root];
-    }
-    // Make sure the platform_view_root is higher than the last platform_view_root in
-    // composition_order_.
-    platform_view_root.layer.zPosition = zIndex++;
-
+    // `addSubview` will automatically reorder subview if it is already added.
+    [flutter_view addSubview:platform_view_root];
     for (const std::shared_ptr<FlutterPlatformViewLayer>& layer : layers) {
-      if ([layer->overlay_view_wrapper.get() superview] != flutter_view) {
-        [flutter_view addSubview:layer->overlay_view_wrapper];
-      }
-      // Make sure all the overlays are higher than the platform view.
-      layer->overlay_view_wrapper.get().layer.zPosition = zIndex++;
-      FML_DCHECK(layer->overlay_view_wrapper.get().layer.zPosition >
-                 platform_view_root.layer.zPosition);
+      [flutter_view addSubview:layer->overlay_view_wrapper];
     }
     active_composition_order_.push_back(platform_view_id);
   }

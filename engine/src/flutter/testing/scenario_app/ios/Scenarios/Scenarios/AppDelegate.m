@@ -60,6 +60,8 @@
     @"--gesture-reject-after-touches-ended" : @"platform_view_gesture_reject_after_touches_ended",
     @"--gesture-reject-eager" : @"platform_view_gesture_reject_eager",
     @"--gesture-accept" : @"platform_view_gesture_accept",
+    @"--gesture-accept-with-overlapping-platform-views" :
+        @"platform_view_gesture_accept_with_overlapping_platform_views",
     @"--tap-status-bar" : @"tap_status_bar",
     @"--animated-color-square" : @"animated_color_square",
     @"--platform-view-with-continuous-texture" : @"platform_view_with_continuous_texture",

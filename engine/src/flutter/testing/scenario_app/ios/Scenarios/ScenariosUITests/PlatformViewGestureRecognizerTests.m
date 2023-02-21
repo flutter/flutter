@@ -165,4 +165,32 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   return coordinate;
 }
 
+- (void)testGestureWithOverlappingPlatformViews {
+  XCUIApplication* app = [[XCUIApplication alloc] init];
+  app.launchArguments = @[ @"--gesture-accept-with-overlapping-platform-views" ];
+  [app launch];
+
+  XCUIElement* foreground = app.otherElements[@"platform_view[0]"];
+  XCTAssertEqual(foreground.frame.origin.x, 50);
+  XCTAssertEqual(foreground.frame.origin.y, 50);
+  XCTAssertEqual(foreground.frame.size.width, 50);
+  XCTAssertEqual(foreground.frame.size.height, 50);
+  XCTAssertTrue([foreground waitForExistenceWithTimeout:kSecondsToWaitForPlatformView]);
+
+  XCUIElement* background = app.otherElements[@"platform_view[1]"];
+  XCTAssertEqual(background.frame.origin.x, 0);
+  XCTAssertEqual(background.frame.origin.y, 0);
+  XCTAssertEqual(background.frame.size.width, 150);
+  XCTAssertEqual(background.frame.size.height, 150);
+  XCTAssertTrue([background waitForExistenceWithTimeout:kSecondsToWaitForPlatformView]);
+
+  XCUIElement* textView = foreground.textViews.firstMatch;
+  XCTAssertTrue(textView.exists);
+
+  XCTAssertTrue(foreground.isHittable);
+  [foreground tap];
+
+  XCTAssertEqualObjects(textView.label,
+                        @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped");
+}
 @end
