@@ -19,9 +19,9 @@ number of commits in the framework is equal to the number of engine
 commits in the pull request. The latter method makes it easier to
 detect regressions but costs more test resources.
 
-Ths `bin/internal/flutter_plugins.version` file specifies the version
-of the `flutter/plugins` repository to be used for testing. The
-`flutter/plugins` repository isn't an upstream dependency of
+The `bin/internal/flutter_packages.version` file specifies the version
+of the `flutter/packages` repository to be used for testing. The
+`flutter/packages` repository isn't an upstream dependency of
 `flutter/flutter`; it is only used as part of the test suite for
 verification, and the pinned version here makes sure that tests are
 deterministic at each `flutter/flutter` commit.
