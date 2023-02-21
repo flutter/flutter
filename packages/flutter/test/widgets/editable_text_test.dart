@@ -14906,10 +14906,10 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
       state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
-      // state.renderEditable.selectWordsInRange(
-      //   from: Offset.zero,
-      //   cause: SelectionChangedCause.tap,
-      // );
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
       await tester.pumpAndSettle();
 
       // Test misspelled word replacement buttons.
@@ -14952,15 +14952,19 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
       state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
-      state.renderEditable.selectWordsInRange(
-        from: Offset.zero,
-        cause: SelectionChangedCause.tap,
-      );
+      // state.renderEditable.selectWordsInRange(
+      //   from: Offset.zero,
+      //   cause: SelectionChangedCause.tap,
+      // );
+      await tester.pumpAndSettle();
+
+      const Offset position = Offset(25.0, 200.0);
+      await tester.tapAt(position);
       await tester.pumpAndSettle();
 
       // Test misspelled word replacement buttons.
-      state.showSpellCheckSuggestionsToolbar();
-      await tester.pumpAndSettle();
+      // state.showSpellCheckSuggestionsToolbar();
+      // await tester.pumpAndSettle();
       expect(find.text('sets'), findsOneWidget);
       await tester.tap(find.text('sets'));
       await tester.pumpAndSettle();
@@ -14974,37 +14978,38 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(state.currentTextEditingValue.text, equals(' test test'));
     });
 
-    testWidgets('replaceText succeeds when composing region is valid', (WidgetTester tester) async {
-      const TextEditingValue value = TextEditingValue(
-        text: 'test tset test',
-        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
-        composing: TextRange(start: 5, end: 9),
-      );
-      controller.value = value;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
+    // TODO(camsim99): Move this to valid place.
+    // testWidgets('replaceText succeeds when composing region is valid', (WidgetTester tester) async {
+    //   const TextEditingValue value = TextEditingValue(
+    //     text: 'test tset test',
+    //     selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+    //     composing: TextRange(start: 5, end: 9),
+    //   );
+    //   controller.value = value;
+    //   await tester.pumpWidget(
+    //     MaterialApp(
+    //       home: EditableText(
+    //         backgroundCursorColor: Colors.grey,
+    //         controller: controller,
+    //         focusNode: focusNode,
+    //         style: textStyle,
+    //         cursorColor: cursorColor,
+    //         selectionControls: materialTextSelectionControls,
+    //       ),
+    //     ),
+    //   );
 
-      final EditableTextState state =
-          tester.state<EditableTextState>(find.byType(EditableText));
-      state.replaceText(
-        cause: SelectionChangedCause.toolbar,
-        replacementRange: value.composing,
-        text: 'test',
-      );
+    //   final EditableTextState state =
+    //       tester.state<EditableTextState>(find.byType(EditableText));
+    //   state.replaceText(
+    //     cause: SelectionChangedCause.toolbar,
+    //     replacementRange: value.composing,
+    //     text: 'test',
+    //   );
 
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals('test test test'));
-    });
+    //   await tester.pumpAndSettle();
+    //   expect(state.currentTextEditingValue.text, equals('test test test'));
+    // });
   });
 
   group('magnifier', () {

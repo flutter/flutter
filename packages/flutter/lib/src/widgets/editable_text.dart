@@ -3882,14 +3882,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
+    print('HELLO, WE ARE RUNNING THE METHOD!');
     if (!spellCheckEnabled
         || widget.readOnly
         || _selectionOverlay == null
         || !_spellCheckResultsReceived) {
+      print(spellCheckEnabled);
+      print(widget.readOnly);
+      print(_selectionOverlay);
+      print(_spellCheckResultsReceived);
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;
     }
+
+    print('HELLO! PASSED FIRST ASSERTION BEBE');
 
     assert(
       _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder != null,
@@ -3898,9 +3905,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       'suggestions',
     );
 
+    print('HELLO! TECHNICALLY RUNNING SOMETHING HERE :)');
     _selectionOverlay!
       .showSpellCheckSuggestionsToolbar(
         (BuildContext context) {
+          print(_spellCheckConfiguration
+            .spellCheckSuggestionsToolbarBuilder);
+          print('HELLO FROM A GALAXY FAR FAR AWAY');
           return _spellCheckConfiguration
             .spellCheckSuggestionsToolbarBuilder!(
               context,
