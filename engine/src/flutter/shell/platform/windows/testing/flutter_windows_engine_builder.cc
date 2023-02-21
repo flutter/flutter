@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 namespace testing {
 
@@ -16,10 +18,6 @@ class TestFlutterWindowsEngine : public FlutterWindowsEngine {
       : FlutterWindowsEngine(project),
         get_key_state_(std::move(get_key_state)),
         map_vk_to_scan_(std::move(map_vk_to_scan)) {}
-
-  // Prevent copying.
-  TestFlutterWindowsEngine(TestFlutterWindowsEngine const&) = delete;
-  TestFlutterWindowsEngine& operator=(TestFlutterWindowsEngine const&) = delete;
 
  protected:
   std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
@@ -41,6 +39,8 @@ class TestFlutterWindowsEngine : public FlutterWindowsEngine {
  private:
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state_;
   KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TestFlutterWindowsEngine);
 };
 
 FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(

@@ -5,9 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOWS_PROC_TABLE_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOWS_PROC_TABLE_H_
 
-#include "flutter/fml/native_library.h"
-
 #include <optional>
+
+#include "flutter/fml/macros.h"
+#include "flutter/fml/native_library.h"
 
 namespace flutter {
 

@@ -10,6 +10,7 @@
 #include <map>
 #include <optional>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
 namespace flutter {
@@ -20,11 +21,6 @@ class WindowProcDelegateManager {
  public:
   explicit WindowProcDelegateManager();
   ~WindowProcDelegateManager();
-
-  // Prevent copying.
-  WindowProcDelegateManager(WindowProcDelegateManager const&) = delete;
-  WindowProcDelegateManager& operator=(WindowProcDelegateManager const&) =
-      delete;
 
   // Adds |delegate| as a delegate to be called for |OnTopLevelWindowProc|.
   //
@@ -50,6 +46,8 @@ class WindowProcDelegateManager {
  private:
   std::map<FlutterDesktopWindowProcCallback, void*>
       top_level_window_proc_handlers_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(WindowProcDelegateManager);
 };
 
 }  // namespace flutter

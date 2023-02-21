@@ -18,7 +18,8 @@
 #include <wrl/client.h>
 #include <memory>
 
-#include "window_binding_handler.h"
+#include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/window_binding_handler.h"
 
 namespace flutter {
 
@@ -28,10 +29,6 @@ class AngleSurfaceManager {
  public:
   static std::unique_ptr<AngleSurfaceManager> Create();
   ~AngleSurfaceManager();
-
-  // Disallow copy/move.
-  AngleSurfaceManager(const AngleSurfaceManager&) = delete;
-  AngleSurfaceManager& operator=(const AngleSurfaceManager&) = delete;
 
   // Creates an EGLSurface wrapper and backing DirectX 11 SwapChain
   // associated with window, in the appropriate format for display.
@@ -125,6 +122,8 @@ class AngleSurfaceManager {
 
   // Number of active instances of AngleSurfaceManager
   static int instance_count_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AngleSurfaceManager);
 };
 
 }  // namespace flutter

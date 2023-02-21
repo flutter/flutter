@@ -10,6 +10,7 @@
 #include <functional>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/wm_builders.h"
@@ -99,6 +100,8 @@ class MockKeyResponseController {
                                    ResponseCallback callback) {
     callback(false);
   }
+
+  FML_DISALLOW_COPY_AND_ASSIGN(MockKeyResponseController);
 };
 
 void MockEmbedderApiForKeyboard(

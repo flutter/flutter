@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cwchar>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "gtest/gtest.h"
 
@@ -13,7 +14,8 @@ namespace testing {
 
 class MockWindowsRegistry : public WindowsRegistry {
  public:
-  virtual ~MockWindowsRegistry() {}
+  MockWindowsRegistry() = default;
+  virtual ~MockWindowsRegistry() = default;
 
   virtual LSTATUS GetRegistryValue(HKEY hkey,
                                    LPCWSTR key,
@@ -37,6 +39,9 @@ class MockWindowsRegistry : public WindowsRegistry {
     }
     return ERROR_SUCCESS;
   }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsRegistry);
 };
 
 TEST(SystemUtils, GetPreferredLanguageInfo) {

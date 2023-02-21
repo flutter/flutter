@@ -8,6 +8,7 @@
 #include <atomic>
 #include <mutex>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_messenger.h"
 
 namespace flutter {
@@ -68,16 +69,15 @@ class FlutterDesktopMessenger {
   /// |FlutterDesktopMessenger| (ie |engine|).
   std::mutex& GetMutex() { return mutex_; }
 
-  FlutterDesktopMessenger(const FlutterDesktopMessenger& value) = delete;
-  FlutterDesktopMessenger& operator=(const FlutterDesktopMessenger& value) =
-      delete;
-
  private:
   // The engine that owns this state object.
   flutter::FlutterWindowsEngine* engine = nullptr;
   std::mutex mutex_;
   std::atomic<int32_t> ref_count_ = 0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterDesktopMessenger);
 };
+
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_STATE_H_

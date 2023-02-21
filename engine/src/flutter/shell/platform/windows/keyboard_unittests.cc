@@ -115,6 +115,8 @@ class TestKeyboardManager : public KeyboardManager {
 
  private:
   bool during_redispatch_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TestKeyboardManager);
 };
 
 // Injecting this kind of keyboard change means that a key state (the true
@@ -314,6 +316,8 @@ class MockKeyboardManagerDelegate : public KeyboardManager::WindowDelegate,
   MapVirtualKeyToChar map_vk_to_char_;
   TestKeystate key_state_;
   std::list<Win32Message> redispatched_messages_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(MockKeyboardManagerDelegate);
 };
 
 typedef struct {
@@ -353,6 +357,9 @@ class TestFlutterWindowsView : public FlutterWindowsView {
         .text = text,
     });
   }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(TestFlutterWindowsView);
 };
 
 class KeyboardTester {
@@ -515,9 +522,19 @@ class KeyboardTester {
       callback(value);
     };
   }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(KeyboardTester);
 };
 
-class KeyboardTest : public WindowsTest {};
+class KeyboardTest : public WindowsTest {
+ public:
+  KeyboardTest() = default;
+  virtual ~KeyboardTest() = default;
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(KeyboardTest);
+};
 
 }  // namespace
 

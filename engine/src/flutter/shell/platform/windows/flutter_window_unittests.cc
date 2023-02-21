@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/testing/flutter_window_test.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
@@ -27,10 +28,6 @@ class MockFlutterWindow : public FlutterWindow {
         .WillByDefault(Return(this->FlutterWindow::GetDpiScale()));
   }
   virtual ~MockFlutterWindow() {}
-
-  // Prevent copying.
-  MockFlutterWindow(MockFlutterWindow const&) = delete;
-  MockFlutterWindow& operator=(MockFlutterWindow const&) = delete;
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
@@ -73,6 +70,9 @@ class MockFlutterWindow : public FlutterWindow {
                              LPARAM lParam) override {
     return kWmResultDefault;
   }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindow);
 };
 
 class MockFlutterWindowsView : public FlutterWindowsView {
@@ -83,6 +83,9 @@ class MockFlutterWindowsView : public FlutterWindowsView {
 
   MOCK_METHOD2(NotifyWinEventWrapper,
                void(ui::AXPlatformNodeWin*, ax::mojom::Event));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);
 };
 
 }  // namespace

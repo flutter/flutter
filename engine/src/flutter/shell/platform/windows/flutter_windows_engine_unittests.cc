@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -570,6 +571,9 @@ class MockFlutterWindowsView : public FlutterWindowsView {
 
   MOCK_METHOD2(NotifyWinEventWrapper,
                void(ui::AXPlatformNodeWin*, ax::mojom::Event));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);
 };
 
 TEST_F(FlutterWindowsEngineTest, AlertPlatformMessage) {

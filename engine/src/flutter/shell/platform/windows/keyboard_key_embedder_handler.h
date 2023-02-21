@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
 
@@ -191,6 +192,8 @@ class KeyboardKeyEmbedderHandler
 
   // The plane value for the private keys defined by the GTK embedding.
   static const uint64_t windowsPlane;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(KeyboardKeyEmbedderHandler);
 };
 
 }  // namespace flutter
