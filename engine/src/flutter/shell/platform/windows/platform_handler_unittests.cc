@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
@@ -69,15 +70,24 @@ class MockPlatformHandler : public PlatformHandler {
   MOCK_METHOD2(SystemSoundPlay,
                void(const std::string&,
                     std::unique_ptr<MethodResult<rapidjson::Document>>));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockPlatformHandler);
 };
 
 // A test version of the private ScopedClipboard.
 class MockScopedClipboard : public ScopedClipboardInterface {
  public:
+  MockScopedClipboard() = default;
+  virtual ~MockScopedClipboard() = default;
+
   MOCK_METHOD(int, Open, (HWND window), (override));
   MOCK_METHOD(bool, HasString, (), (override));
   MOCK_METHOD((std::variant<std::wstring, int>), GetString, (), (override));
   MOCK_METHOD(int, SetString, (const std::wstring string), (override));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockScopedClipboard);
 };
 
 std::string SimulatePlatformMessage(TestBinaryMessenger* messenger,
@@ -98,6 +108,10 @@ std::string SimulatePlatformMessage(TestBinaryMessenger* messenger,
 }  // namespace
 
 class PlatformHandlerTest : public WindowsTest {
+ public:
+  PlatformHandlerTest() = default;
+  virtual ~PlatformHandlerTest() = default;
+
  protected:
   FlutterWindowsEngine* engine() { return engine_.get(); }
 
@@ -120,6 +134,8 @@ class PlatformHandlerTest : public WindowsTest {
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
   std::unique_ptr<FlutterWindowsView> view_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformHandlerTest);
 };
 
 TEST_F(PlatformHandlerTest, GetClipboardData) {

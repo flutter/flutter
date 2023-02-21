@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_result_functions.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
@@ -53,6 +54,10 @@ void SimulateCursorMessage(TestBinaryMessenger* messenger,
 }  // namespace
 
 class CursorHandlerTest : public WindowsTest {
+ public:
+  CursorHandlerTest() = default;
+  virtual ~CursorHandlerTest() = default;
+
  protected:
   FlutterWindowsEngine* engine() { return engine_.get(); }
   FlutterWindowsView* view() { return view_.get(); }
@@ -83,6 +88,8 @@ class CursorHandlerTest : public WindowsTest {
   std::unique_ptr<FlutterWindowsEngine> engine_;
   std::unique_ptr<FlutterWindowsView> view_;
   MockWindowBindingHandler* window_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CursorHandlerTest);
 };
 
 TEST_F(CursorHandlerTest, ActivateSystemCursor) {

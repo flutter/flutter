@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
@@ -37,6 +38,8 @@ class CursorHandler {
 
   // The cache map for custom cursors.
   std::unordered_map<std::string, HCURSOR> custom_cursors_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CursorHandler);
 };
 
 // Create a cursor from a rawBGRA buffer and the cursor info.

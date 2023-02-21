@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <unordered_map>
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 
 // This is used to generate a series of sequential ID numbers in a way that a
@@ -52,6 +54,8 @@ class SequentialIdGenerator {
   const uint32_t min_id_;
   const uint32_t max_id_;
   uint32_t min_available_id_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SequentialIdGenerator);
 };
 
 }  // namespace flutter

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/direct_manipulation.h"
-#include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 
+#include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "gtest/gtest.h"
 
 using testing::_;
@@ -16,11 +17,6 @@ class MockIDirectManipulationViewport : public IDirectManipulationViewport {
  public:
   MockIDirectManipulationViewport() {}
 
-  // Prevent copying.
-  MockIDirectManipulationViewport(MockIDirectManipulationViewport const&) =
-      delete;
-  MockIDirectManipulationViewport& operator=(
-      MockIDirectManipulationViewport const&) = delete;
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, AddRef, ULONG());
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, Release, ULONG());
   MOCK_METHOD2_WITH_CALLTYPE(STDMETHODCALLTYPE,
@@ -101,17 +97,15 @@ class MockIDirectManipulationViewport : public IDirectManipulationViewport {
       STDMETHODCALLTYPE,
       ZoomToRect,
       HRESULT(const float, const float, const float, const float, BOOL));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockIDirectManipulationViewport);
 };
 
 class MockIDirectManipulationContent : public IDirectManipulationContent {
  public:
   MockIDirectManipulationContent() {}
 
-  // Prevent copying.
-  MockIDirectManipulationContent(MockIDirectManipulationContent const&) =
-      delete;
-  MockIDirectManipulationContent& operator=(
-      MockIDirectManipulationContent const&) = delete;
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, AddRef, ULONG());
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, Release, ULONG());
   MOCK_METHOD2_WITH_CALLTYPE(STDMETHODCALLTYPE,
@@ -139,6 +133,9 @@ class MockIDirectManipulationContent : public IDirectManipulationContent {
   MOCK_METHOD2_WITH_CALLTYPE(STDMETHODCALLTYPE,
                              SyncContentTransform,
                              HRESULT(const float*, DWORD));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockIDirectManipulationContent);
 };
 
 TEST(DirectManipulationTest, TestGesture) {

@@ -10,6 +10,7 @@
 #include <optional>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -55,10 +56,6 @@ class ScopedGlobalMemory {
     }
   }
 
-  // Prevent copying.
-  ScopedGlobalMemory(ScopedGlobalMemory const&) = delete;
-  ScopedGlobalMemory& operator=(ScopedGlobalMemory const&) = delete;
-
   // Returns the memory pointer, which will be nullptr if allocation failed.
   void* get() { return memory_; }
 
@@ -70,6 +67,8 @@ class ScopedGlobalMemory {
 
  private:
   HGLOBAL memory_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedGlobalMemory);
 };
 
 // A scoped wrapper for GlobalLock/GlobalUnlock.
@@ -98,10 +97,6 @@ class ScopedGlobalLock {
     }
   }
 
-  // Prevent copying.
-  ScopedGlobalLock(ScopedGlobalLock const&) = delete;
-  ScopedGlobalLock& operator=(ScopedGlobalLock const&) = delete;
-
   // Returns the locked memory pointer, which will be nullptr if acquiring the
   // lock failed.
   void* get() { return locked_memory_; }
@@ -109,6 +104,8 @@ class ScopedGlobalLock {
  private:
   HGLOBAL source_;
   void* locked_memory_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedGlobalLock);
 };
 
 // A Clipboard wrapper that automatically closes the clipboard when it goes out
@@ -117,10 +114,6 @@ class ScopedClipboard : public ScopedClipboardInterface {
  public:
   ScopedClipboard();
   virtual ~ScopedClipboard();
-
-  // Prevent copying.
-  ScopedClipboard(ScopedClipboard const&) = delete;
-  ScopedClipboard& operator=(ScopedClipboard const&) = delete;
 
   int Open(HWND window) override;
 
@@ -132,6 +125,8 @@ class ScopedClipboard : public ScopedClipboardInterface {
 
  private:
   bool opened_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedClipboard);
 };
 
 ScopedClipboard::ScopedClipboard() {}

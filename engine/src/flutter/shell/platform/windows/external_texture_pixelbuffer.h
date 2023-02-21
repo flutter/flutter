@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_EXTERNAL_TEXTURE_PIXELBUFFER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_EXTERNAL_TEXTURE_PIXELBUFFER_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
 #include "flutter/shell/platform/windows/external_texture.h"
 
@@ -38,6 +39,8 @@ class ExternalTexturePixelBuffer : public ExternalTexture {
   void* const user_data_ = nullptr;
   const GlProcs& gl_;
   GLuint gl_texture_ = 0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ExternalTexturePixelBuffer);
 };
 
 }  // namespace flutter

@@ -7,6 +7,8 @@
 
 #include "flutter/shell/platform/windows/flutter_window.h"
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 namespace testing {
 
@@ -16,9 +18,8 @@ class FlutterWindowTest : public FlutterWindow {
   FlutterWindowTest(int width, int height);
   virtual ~FlutterWindowTest();
 
-  // Prevent copying.
-  FlutterWindowTest(FlutterWindowTest const&) = delete;
-  FlutterWindowTest& operator=(FlutterWindowTest const&) = delete;
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowTest);
 };
 
 }  // namespace testing

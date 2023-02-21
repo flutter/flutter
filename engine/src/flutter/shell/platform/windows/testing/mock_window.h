@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/window.h"
 #include "gmock/gmock.h"
@@ -19,10 +20,6 @@ class MockWindow : public Window {
   MockWindow(std::unique_ptr<WindowsProcTable> windows_proc_table,
              std::unique_ptr<TextInputManager> text_input_manager);
   virtual ~MockWindow();
-
-  // Prevent copying.
-  MockWindow(MockWindow const&) = delete;
-  MockWindow& operator=(MockWindow const&) = delete;
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi();
@@ -75,6 +72,9 @@ class MockWindow : public Window {
 
  protected:
   LRESULT Win32DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockWindow);
 };
 
 }  // namespace testing

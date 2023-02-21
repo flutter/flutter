@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_DIRECT_MANIPULATION_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_DIRECT_MANIPULATION_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "gmock/gmock.h"
 

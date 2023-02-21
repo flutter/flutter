@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "rapidjson/document.h"
@@ -121,6 +122,8 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
   // The sequence_id attached to the last event sent to the framework.
   uint64_t last_sequence_id_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(KeyboardKeyHandler);
 };
 
 }  // namespace flutter

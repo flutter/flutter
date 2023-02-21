@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 
 // Hidden HWND responsible for processing flutter tasks on main thread
@@ -58,6 +60,8 @@ class TaskRunnerWindow {
   HWND window_handle_;
   std::wstring window_class_name_;
   std::vector<Delegate*> delegates_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };
 }  // namespace flutter
 

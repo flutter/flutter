@@ -102,8 +102,7 @@ class TaskRunner : public TaskRunnerWindow::Delegate {
   DWORD main_thread_id_;
   std::shared_ptr<TaskRunnerWindow> task_runner_window_;
 
-  TaskRunner(const TaskRunner&) = delete;
-  TaskRunner& operator=(const TaskRunner&) = delete;
+  FML_DISALLOW_COPY_AND_ASSIGN(TaskRunner);
 };
 
 }  // namespace flutter

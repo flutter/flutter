@@ -6,10 +6,13 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_MANAGER_H_
 
 #include <windows.h>
+
 #include <atomic>
 #include <deque>
 #include <functional>
 #include <map>
+
+#include "flutter/fml/macros.h"
 
 namespace flutter {
 
@@ -225,6 +228,8 @@ class KeyboardManager {
   // The queue of messages that have been redispatched to the system but have
   // not yet been received for a second time.
   std::deque<Win32Message> pending_redispatches_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(KeyboardManager);
 };
 
 }  // namespace flutter

@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
@@ -83,10 +84,6 @@ class FlutterWindowsEngine {
       : FlutterWindowsEngine(project, std::make_unique<WindowsRegistry>()) {}
 
   virtual ~FlutterWindowsEngine();
-
-  // Prevent copying.
-  FlutterWindowsEngine(FlutterWindowsEngine const&) = delete;
-  FlutterWindowsEngine& operator=(FlutterWindowsEngine const&) = delete;
 
   // Starts running the entrypoint function specifed in the project bundle. If
   // unspecified, defaults to main().
@@ -396,6 +393,8 @@ class FlutterWindowsEngine {
 
   // Wrapper providing Windows registry access.
   std::unique_ptr<WindowsRegistry> windows_registry_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };
 
 }  // namespace flutter

@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/common/geometry.h"
@@ -107,6 +108,8 @@ class TextInputPlugin {
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0};
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };
 
 }  // namespace flutter

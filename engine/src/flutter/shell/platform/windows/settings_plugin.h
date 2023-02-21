@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/windows/event_watcher.h"
@@ -71,8 +72,7 @@ class SettingsPlugin {
 
   TaskRunner* task_runner_;
 
-  SettingsPlugin(const SettingsPlugin&) = delete;
-  SettingsPlugin& operator=(const SettingsPlugin&) = delete;
+  FML_DISALLOW_COPY_AND_ASSIGN(SettingsPlugin);
 };
 
 }  // namespace flutter

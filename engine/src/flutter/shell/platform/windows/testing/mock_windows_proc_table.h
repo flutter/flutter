@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOWS_PROC_TABLE_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOWS_PROC_TABLE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/windows_proc_table.h"
 #include "gmock/gmock.h"
 

@@ -10,6 +10,7 @@
 
 #include <vector>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_platform_node_delegate_windows.h"
@@ -66,6 +67,8 @@ class AccessibilityBridgeWindowsSpy : public AccessibilityBridgeWindows {
  private:
   std::vector<MsaaEvent> dispatched_events_;
   std::vector<int32_t> focused_nodes_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeWindowsSpy);
 };
 
 // A FlutterWindowsEngine whose accessibility bridge is a
@@ -81,6 +84,9 @@ class FlutterWindowsEngineSpy : public FlutterWindowsEngine {
       FlutterWindowsView* view) override {
     return std::make_shared<AccessibilityBridgeWindowsSpy>(engine, view);
   }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngineSpy);
 };
 
 // Returns an engine instance configured with dummy project path values, and

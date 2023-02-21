@@ -10,6 +10,7 @@
 #include <string>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 
 namespace flutter {
@@ -27,10 +28,6 @@ class TestBinaryMessenger : public BinaryMessenger {
       : send_handler_(std::move(send_handler)) {}
 
   virtual ~TestBinaryMessenger() = default;
-
-  // Prevent copying.
-  TestBinaryMessenger(TestBinaryMessenger const&) = delete;
-  TestBinaryMessenger& operator=(TestBinaryMessenger const&) = delete;
 
   // Simulates a message from the engine on the given channel.
   //
@@ -73,6 +70,8 @@ class TestBinaryMessenger : public BinaryMessenger {
 
   // Mapping of channel name to registered handlers.
   std::map<std::string, BinaryMessageHandler> registered_handlers_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TestBinaryMessenger);
 };
 
 }  // namespace flutter

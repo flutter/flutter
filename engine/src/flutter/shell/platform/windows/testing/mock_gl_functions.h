@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_FUNCTIONS_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_GL_FUNCTIONS_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/external_texture.h"
 
 namespace flutter {
@@ -46,6 +47,8 @@ class MockGlFunctions {
 
  private:
   GlProcs gl_procs_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(MockGlFunctions);
 };
 
 }  // namespace testing
