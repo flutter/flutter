@@ -101,16 +101,20 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex = 0, Duration? animationDuration, required this.length, required TickerProvider vsync})
-    : assert(length >= 0),
-      assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
-      _index = initialIndex,
-      _previousIndex = initialIndex,
-      _animationDuration = animationDuration ?? kTabScrollDuration,
-      _animationController = AnimationController.unbounded(
-        value: initialIndex.toDouble(),
-        vsync: vsync,
-      );
+  TabController({
+    int initialIndex = 0,
+    Duration? animationDuration,
+    required this.length,
+    required TickerProvider vsync,
+  }) : assert(length >= 0),
+       assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
+       _index = initialIndex,
+       _previousIndex = initialIndex,
+       _animationDuration = animationDuration ?? kTabScrollDuration,
+       _animationController = AnimationController.unbounded(
+         value: initialIndex.toDouble(),
+         vsync: vsync,
+       );
 
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
