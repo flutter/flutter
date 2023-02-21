@@ -1352,7 +1352,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
-  @protected
   @Deprecated(
     'Implement loadImage for faster image loading. '
     'This feature was deprecated after v2.13.0-1.0.pre.',
@@ -1374,7 +1373,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
-  @protected
   @Deprecated(
     'Implement loadImage for image loading. '
     'This feature was deprecated after v3.7.0-1.4.pre.',
@@ -1397,7 +1395,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
-  @protected
   ImageStreamCompleter loadImage(ResizeImageKey key, ImageDecoderCallback decode) {
     Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
       assert(
