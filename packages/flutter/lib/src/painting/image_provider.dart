@@ -1316,11 +1316,18 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   final ImageProvider imageProvider;
 
   /// The width the image should decode to and cache.
+  ///
+  /// At least one of this and [height] must be non-null.
   final int? width;
 
   /// The height the image should decode to and cache.
+  ///
+  /// At least one of this and [width] must be non-null.
   final int? height;
 
+  /// The policy that determines how [width] and [height] are interpreted.
+  ///
+  /// Defaults to [ResizeImagePolicy.exact].
   final ResizeImagePolicy policy;
 
   /// Whether the [width] and [height] parameters should be clamped to the
