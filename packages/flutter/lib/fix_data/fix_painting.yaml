@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are [for CLASS] from the <XXX> library. *
+# * Fixes in this file are from the Painting library. *
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/121152
@@ -28,3 +28,5 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'fromViewPadding'
+
+# Before adding a new fix: read instructions at the top of this file.
