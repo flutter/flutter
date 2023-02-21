@@ -1056,6 +1056,133 @@ class PlatformViewForTouchIOSScenario extends Scenario
   }
 }
 
+/// Scenario for verifying overlapping platform views can accept touch gesture.
+/// See: https://github.com/flutter/flutter/issues/118366.
+///
+/// Renders the first frame with a foreground platform view.
+/// Then renders the second frame with the foreground platform view covering
+/// a new background platform view.
+///
+class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
+    with _BasePlatformViewScenarioMixin {
+
+  /// Creates the PlatformViewForOverlappingPlatformViewsScenario.
+  ///
+  /// The [dispatcher] parameter must not be null.
+  PlatformViewForOverlappingPlatformViewsScenario(
+      PlatformDispatcher dispatcher, {
+        required this.foregroundId,
+        required this.backgroundId,
+      })  : super(dispatcher) {
+    _nextFrame = _firstFrame;
+  }
+
+  /// The id for a foreground platform view that covers another background platform view.
+  /// A good example is a dialog prompt in a real app.
+  final int foregroundId;
+
+  /// The id for a background platform view that is covered by a foreground platform view.
+  final int backgroundId;
+
+  late void Function() _nextFrame;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    _nextFrame();
+  }
+
+  void _firstFrame() {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(100, 100);
+    addPlatformView(
+      foregroundId,
+      width: 100,
+      height: 100,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+      text: 'Foreground',
+    );
+    builder.pop();
+
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+  }
+
+  void _secondFrame() {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0, 0);
+    addPlatformView(
+      backgroundId,
+      width: 300,
+      height: 300,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+      text: 'Background',
+    );
+    builder.pop();
+
+    builder.pushOffset(100, 100);
+    addPlatformView(
+      foregroundId,
+      width: 100,
+      height: 100,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+      text: 'Foreground',
+    );
+    builder.pop();
+
+    final Scene scene = builder.build();
+    window.render(scene);
+    scene.dispose();
+  }
+
+  int _frameCount = 0;
+
+  @override
+  void onDrawFrame() {
+    _frameCount += 1;
+    // TODO(hellohuanlin): Need further investigation - the first 2 frames are dropped for some reason.
+    // Wait for 60 frames to ensure the first frame has actually been rendered
+    // (Minimum required is 3 frames, but just to be safe)
+    if (_nextFrame == _firstFrame && _frameCount == 60) {
+      _nextFrame = _secondFrame;
+    }
+    window.scheduleFrame();
+    super.onDrawFrame();
+  }
+
+  @override
+  void onPointerDataPacket(PointerDataPacket packet) {
+    final PointerData data = packet.data.first;
+    final double x = data.physicalX;
+    final double y = data.physicalY;
+    if (data.change == PointerChange.up && 100 <= x && x < 200 && 100 <= y && y < 200) {
+      const int valueString = 7;
+      const int valueInt32 = 3;
+      const int valueMap = 13;
+      final Uint8List message = Uint8List.fromList(<int>[
+        valueString,
+        ..._encodeString('acceptGesture'),
+        valueMap,
+        1,
+        valueString,
+        ..._encodeString('id'),
+        valueInt32,
+        ..._to32(foregroundId),
+      ]);
+      window.sendPlatformMessage(
+        'flutter/platform_views',
+        message.buffer.asByteData(),
+            (ByteData? response) {},
+      );
+    }
+  }
+}
+
 /// A simple platform view for testing platform view with a continuous texture layer.
 /// For example, it simulates a video being played.
 class PlatformViewWithContinuousTexture extends PlatformViewScenario {
