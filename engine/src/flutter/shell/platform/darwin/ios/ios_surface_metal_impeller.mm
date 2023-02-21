@@ -8,9 +8,19 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 
+namespace {
+impeller::PixelFormat InferOffscreenLayerPixelFormat(impeller::PixelFormat pixel_format) {
+  switch (pixel_format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+      return impeller::PixelFormat::kB10G10R10A10XR;
+    default:
+      return pixel_format;
+  }
+}
+}  // namespace
+
 namespace impeller {
 namespace {
-
 // This appears to be the only safe way to override the
 // GetColorAttachmentPixelFormat method.  It is assumed in the Context that
 // there will be one pixel format for the whole app which is not true.  So, it
@@ -96,7 +106,8 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
   auto context = std::make_shared<CustomColorAttachmentPixelFormatContext>(
-      impeller_context_, FromMTLPixelFormat(layer_.get().pixelFormat));
+      impeller_context_,
+      InferOffscreenLayerPixelFormat(FromMTLPixelFormat(layer_.get().pixelFormat)));
   return std::make_unique<GPUSurfaceMetalImpeller>(this,    //
                                                    context  //
   );
