@@ -906,12 +906,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 150,
   ///   height: 150,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -926,12 +926,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 150,
-  ///   height: null,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -946,12 +945,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
-  ///   width: null,
   ///   height: 150,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -966,12 +964,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 400,
   ///   height: 400,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -986,12 +984,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 400,
-  ///   height: null,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1006,12 +1003,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
-  ///   width: null,
   ///   height: 400,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1026,12 +1022,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 400,
   ///   height: 400,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
@@ -1046,12 +1042,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
   ///   width: 400,
-  ///   height: null,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
@@ -1066,12 +1061,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.exact,
-  ///   width: null,
   ///   height: 400,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
@@ -1108,12 +1102,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 150,
   ///   height: 150,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1128,12 +1122,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 150,
-  ///   height: null,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1148,12 +1141,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
-  ///   width: null,
   ///   height: 150,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1168,12 +1160,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 400,
   ///   height: 400,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1188,12 +1180,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 400,
-  ///   height: null,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1208,12 +1199,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
-  ///   width: null,
   ///   height: 400,
-  ///   allowResizing: false,
+  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
@@ -1228,12 +1218,12 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 400,
   ///   height: 400,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
@@ -1248,12 +1238,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
   ///   width: 400,
-  ///   height: null,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
@@ -1268,12 +1257,11 @@ enum ResizeImagePolicy {
   /// <td>
   ///
   /// ```dart
-  /// ResizeImage(
-  ///   const AssetImage('dragon_cake.jpg'),
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
   ///   policy: ResizeImagePolicy.fit,
-  ///   width: null,
   ///   height: 400,
-  ///   allowResizing: true,
+  ///   allowUpscaling: true,
   /// )
   /// ```
   ///
