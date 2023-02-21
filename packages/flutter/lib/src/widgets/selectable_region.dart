@@ -208,6 +208,7 @@ class SelectableRegion extends StatefulWidget {
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
+    this.separator = '',
   });
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -239,6 +240,9 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// The separator to use when concatenating the selected text.
+  final String separator;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -306,7 +310,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
+  late final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate(separator: widget.separator);
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1260,6 +1264,8 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectableRegionContainerDelegate({required super.separator});
+
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
@@ -1424,6 +1430,18 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+  /// Creates a [MultiSelectableSelectionContainerDelegate].
+  /// 
+  /// The [separator] is used to separate the text of each selectable in 
+  /// [selectables].
+  MultiSelectableSelectionContainerDelegate({
+     this.separator = '',
+  });
+
+  /// The separator used to separate the text of each selectable in
+  /// [selectables].
+  final String separator;
+
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
@@ -1826,12 +1844,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (selections.isEmpty) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
-      buffer.write(selection.plainText);
-    }
     return SelectedContent(
-      plainText: buffer.toString(),
+      plainText: selections.map((SelectedContent e) => e.plainText).join(separator),
     );
   }
 
