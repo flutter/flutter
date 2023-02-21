@@ -910,7 +910,6 @@ enum ResizeImagePolicy {
   ///   AssetImage('dragon_cake.jpg'),
   ///   width: 150,
   ///   height: 150,
-  ///   allowUpscaling: false,
   /// )
   /// ```
   ///
