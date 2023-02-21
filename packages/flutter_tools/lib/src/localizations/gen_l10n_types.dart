@@ -353,13 +353,20 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(
-        resourceId,
-        bundle.file.basename,
-        translation,
-        useEscaping: useEscaping,
-        logger: logger
-      ).parse();
+      try {
+        parsedMessages[bundle.locale] = translation == null ? null : Parser(
+          resourceId,
+          bundle.file.basename,
+          translation,
+          useEscaping: useEscaping,
+          logger: logger
+        ).parse();
+      } on L10nParserException catch (error) {
+        logger?.printError(error.toString());
+        // Treat it as an untranslated message in case we can't parse.
+        parsedMessages[bundle.locale] = null;
+        hadErrors = true;
+      }
     }
     // Infer the placeholders
     _inferPlaceholders(filenames);
@@ -373,6 +380,7 @@ class Message {
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
   final Logger? logger;
+  bool hadErrors = false;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 

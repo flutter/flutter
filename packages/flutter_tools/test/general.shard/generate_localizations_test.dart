@@ -1663,6 +1663,47 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         ).readAsStringSync();
         expect(localizationsFile, contains('String helloWorld(Object name) {'));
       });
+
+      testWithoutContext('placeholder parameter list should be consistent between languages', () {
+        const String messageEn = '''
+{
+  "helloWorld": "Hello {name}",
+  "@helloWorld": {
+    "placeholders": {
+      "name": {}
+    }
+  }
+}''';
+        const String messageEs = '''
+{
+  "helloWorld": "Hola"
+}
+''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(messageEn);
+        l10nDirectory.childFile('app_es.arb')
+          .writeAsStringSync(messageEs);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        final String localizationsFileEn = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        final String localizationsFileEs = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_es.dart'),
+        ).readAsStringSync();
+        expect(localizationsFileEn, contains('String helloWorld(Object name) {'));
+        expect(localizationsFileEs, contains('String helloWorld(Object name) {'));
+      });
     });
 
     group('DateTime tests', () {
@@ -2185,6 +2226,93 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     {gender, select,}
                     ^''')
           );
+        }
+      });
+    });
+
+    // All error handling for messages should collect errors on a per-error
+    // basis and log them out individually. Then, it will throw an L10nException.
+    group('error handling tests', () {
+      testWithoutContext('syntax/code-gen errors properly logs errors per message', () {
+        // TODO(thkim1011): Fix error handling so that long indents don't get truncated.
+        // See https://github.com/flutter/flutter/issues/120490.
+        const String messagesWithSyntaxErrors = '''
+{
+  "hello": "Hello { name",
+  "plural": "This is an incorrectly formatted plural: { count, plural, zero{No frog} one{One frog} other{{count} frogs}",
+  "explanationWithLexingError": "The 'string above is incorrect as it forgets to close the brace",
+  "pluralWithInvalidCase": "{ count, plural, woohoo{huh?} other{lol} }"
+}''';
+        try {
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(messagesWithSyntaxErrors);
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useEscaping: true,
+            logger: logger,
+          )
+            ..loadResources()
+            ..writeOutputFiles();
+        } on L10nException {
+          expect(logger.errorText, contains('''
+[app_en.arb:hello] ICU Syntax Error: Expected "}" but found no tokens.
+    Hello { name
+                 ^
+[app_en.arb:plural] ICU Syntax Error: Expected "}" but found no tokens.
+    This is an incorrectly formatted plural: { count, plural, zero{No frog} one{One frog} other{{count} frogs}
+                                                                                          ^
+[app_en.arb:explanationWithLexingError] ICU Lexing Error: Unmatched single quotes.
+    The 'string above is incorrect as it forgets to close the brace
+        ^
+[app_en.arb:pluralWithInvalidCase] ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
+    { count, plural, woohoo{huh?} other{lol} }
+                     ^'''));
+        }
+      });
+
+      testWithoutContext('errors thrown in multiple languages are all shown', () {
+        const String messageEn = '''
+{
+  "hello": "Hello { name"
+}''';
+        const String messageEs = '''
+{
+  "hello": "Hola { name"
+}''';
+        try {
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(messageEn);
+          l10nDirectory.childFile('app_es.arb')
+            .writeAsStringSync(messageEs);
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            useEscaping: true,
+            logger: logger,
+          )
+            ..loadResources()
+            ..writeOutputFiles();
+        } on L10nException {
+          expect(logger.errorText, contains('''
+[app_en.arb:hello] ICU Syntax Error: Expected "}" but found no tokens.
+    Hello { name
+                 ^
+[app_es.arb:hello] ICU Syntax Error: Expected "}" but found no tokens.
+    Hola { name
+                ^'''));
         }
       });
     });
