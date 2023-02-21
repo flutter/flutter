@@ -804,6 +804,41 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+
+  group('File Reporter', () {
+    testUsingContext('defaults to unset null value', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+      expect(testRunner.lastFileReporterValue, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when set --file-reporter value is passed on', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--file-reporter=json:out.jsonl'
+      ]);
+      expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -813,6 +848,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   Duration? leastRunTime;
   bool? lastEnableObservatoryValue;
   late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastFileReporterValue;
   String? lastReporterOption;
 
   @override
@@ -839,6 +875,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -849,6 +886,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
 
     if (leastRunTime != null) {
