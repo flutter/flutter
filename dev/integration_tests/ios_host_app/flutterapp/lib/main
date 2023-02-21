@@ -21,9 +21,9 @@ const String hybridRouteName = 'hybrid';
 /// Channel used to let the Flutter app know to reset the app to a specific
 /// route.  See the [run] method.
 ///
-/// Note that we shouldn't use the `setInitialRoute` method on the system
-/// navigation channel, as that never gets propagated back to Flutter after the
-/// initial call.
+/// We shouldn't use the `setInitialRoute` method on the system
+/// navigation channel, as that never gets propagated back to Flutter
+/// after the initial call.
 const String _kReloadChannelName = 'reload';
 const BasicMessageChannel<String> _kReloadChannel =
     BasicMessageChannel<String>(_kReloadChannelName, StringCodec());

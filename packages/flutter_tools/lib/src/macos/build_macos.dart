@@ -24,8 +24,10 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 /// Passing this regexp to trace moves the stdout output to stderr.
 ///
 /// Filter out xcodebuild logging unrelated to macOS builds:
+/// ```
 /// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 /// note: Using new build system
+/// ```
 final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extension point with identifier|note\:).)*$');
 
 /// Builds the macOS project through xcodebuild.
