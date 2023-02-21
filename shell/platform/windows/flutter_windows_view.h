@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -372,6 +373,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
   // True when flutter's semantics tree is enabled.
   bool semantics_enabled_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };
 
 }  // namespace flutter

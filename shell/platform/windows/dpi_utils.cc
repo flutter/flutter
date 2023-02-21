@@ -4,6 +4,8 @@
 
 #include "dpi_utils.h"
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 
 namespace {
@@ -58,6 +60,8 @@ class DpiHelper {
   HMODULE shlib_module_ = nullptr;
   bool dpi_for_window_supported_ = false;
   bool dpi_for_monitor_supported_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DpiHelper);
 };
 
 DpiHelper::DpiHelper() {

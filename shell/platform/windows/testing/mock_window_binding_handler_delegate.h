@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOW_BINDING_HANDLER_DELEGATE_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOW_BINDING_HANDLER_DELEGATE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 #include "gmock/gmock.h"
 
@@ -14,12 +15,6 @@ namespace testing {
 class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
  public:
   MockWindowBindingHandlerDelegate() {}
-
-  // Prevent copying.
-  MockWindowBindingHandlerDelegate(MockWindowBindingHandlerDelegate const&) =
-      delete;
-  MockWindowBindingHandlerDelegate& operator=(
-      MockWindowBindingHandlerDelegate const&) = delete;
 
   MOCK_METHOD2(OnWindowSizeChanged, void(size_t, size_t));
   MOCK_METHOD0(OnWindowRepaint, void());
@@ -65,6 +60,9 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
   MOCK_METHOD1(UpdateHighContrastEnabled, void(bool enabled));
 
   MOCK_METHOD0(GetAxFragmentRootDelegate, ui::AXFragmentRootDelegateWin*());
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandlerDelegate);
 };
 
 }  // namespace testing

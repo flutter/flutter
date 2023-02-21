@@ -11,6 +11,7 @@
 #include <optional>
 #include <string>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/geometry.h"
 
 namespace flutter {
@@ -29,9 +30,6 @@ class TextInputManager {
  public:
   TextInputManager() noexcept = default;
   virtual ~TextInputManager() = default;
-
-  TextInputManager(const TextInputManager&) = delete;
-  TextInputManager& operator=(const TextInputManager&) = delete;
 
   // Sets the window handle with which the IME is associated.
   void SetWindowHandle(HWND window_handle);
@@ -100,6 +98,8 @@ class TextInputManager {
 
   // The system caret rect.
   Rect caret_rect_ = {{0, 0}, {0, 0}};
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TextInputManager);
 };
 
 }  // namespace flutter

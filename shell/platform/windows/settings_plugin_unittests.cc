@@ -1,8 +1,10 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 #include "flutter/shell/platform/windows/settings_plugin.h"
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
 #include "gmock/gmock.h"
@@ -30,6 +32,9 @@ class MockSettingsPlugin : public SettingsPlugin {
 
   MOCK_METHOD0(WatchPreferredBrightnessChanged, void());
   MOCK_METHOD0(WatchTextScaleFactorChanged, void());
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockSettingsPlugin);
 };
 
 }  // namespace

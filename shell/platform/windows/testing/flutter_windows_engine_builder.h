@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -30,11 +31,6 @@ class FlutterWindowsEngineBuilder {
 
   std::unique_ptr<FlutterWindowsEngine> Build();
 
-  // Prevent copying.
-  FlutterWindowsEngineBuilder(FlutterWindowsEngineBuilder const&) = delete;
-  FlutterWindowsEngineBuilder& operator=(FlutterWindowsEngineBuilder const&) =
-      delete;
-
  private:
   WindowsTestContext& context_;
   FlutterDesktopEngineProperties properties_ = {};
@@ -42,6 +38,8 @@ class FlutterWindowsEngineBuilder {
   std::vector<std::string> dart_entrypoint_arguments_;
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state_;
   KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngineBuilder);
 };
 
 }  // namespace testing

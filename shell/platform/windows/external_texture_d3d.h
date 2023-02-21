@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_EXTERNAL_TEXTURE_D3D_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_EXTERNAL_TEXTURE_D3D_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/external_texture.h"
 
@@ -42,6 +43,8 @@ class ExternalTextureD3d : public ExternalTexture {
   GLuint gl_texture_ = 0;
   EGLSurface egl_surface_ = EGL_NO_SURFACE;
   void* last_surface_handle_ = nullptr;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ExternalTextureD3d);
 };
 
 }  // namespace flutter

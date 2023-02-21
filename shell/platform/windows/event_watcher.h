@@ -9,6 +9,8 @@
 
 #include <functional>
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 
 // A win32 `HANDLE` wrapper for use as a one-time callback.
@@ -28,8 +30,7 @@ class EventWatcher {
   HANDLE handle_;
   HANDLE handle_for_wait_;
 
-  EventWatcher(const EventWatcher&) = delete;
-  EventWatcher& operator=(const EventWatcher&) = delete;
+  FML_DISALLOW_COPY_AND_ASSIGN(EventWatcher);
 };
 
 }  // namespace flutter

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOW_BINDING_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOW_BINDING_HANDLER_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 #include "gmock/gmock.h"
@@ -17,10 +18,6 @@ class MockWindowBindingHandler : public WindowBindingHandler {
  public:
   MockWindowBindingHandler();
   virtual ~MockWindowBindingHandler();
-
-  // Prevent copying.
-  MockWindowBindingHandler(MockWindowBindingHandler const&) = delete;
-  MockWindowBindingHandler& operator=(MockWindowBindingHandler const&) = delete;
 
   MOCK_METHOD1(SetView, void(WindowBindingHandlerDelegate* view));
   MOCK_METHOD0(GetRenderTarget, WindowsRenderTarget());
@@ -39,6 +36,9 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD0(SendInitialAccessibilityFeatures, void());
   MOCK_METHOD0(GetAlertDelegate, AlertPlatformNodeDelegate*());
   MOCK_METHOD0(GetAlert, ui::AXPlatformNodeWin*());
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandler);
 };
 
 }  // namespace testing

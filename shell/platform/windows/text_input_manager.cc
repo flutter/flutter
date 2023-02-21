@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/macros.h"
 
 namespace flutter {
 
@@ -27,10 +28,6 @@ class ImmContext {
     }
   }
 
-  // Prevent copying.
-  ImmContext(const ImmContext& other) = delete;
-  ImmContext& operator=(const ImmContext& other) = delete;
-
   // Returns true if a valid IMM context has been obtained.
   bool IsValid() const { return context_ != nullptr; }
 
@@ -43,6 +40,8 @@ class ImmContext {
  private:
   HWND window_handle_;
   HIMC context_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ImmContext);
 };
 
 void TextInputManager::SetWindowHandle(HWND window_handle) {

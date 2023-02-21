@@ -9,6 +9,8 @@
 
 #include <chrono>
 
+#include "flutter/fml/macros.h"
+
 namespace flutter {
 
 // A test utility class providing the ability to access and alter various
@@ -66,6 +68,8 @@ class EngineModifier {
 
  private:
   FlutterWindowsEngine* engine_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EngineModifier);
 };
 
 }  // namespace flutter

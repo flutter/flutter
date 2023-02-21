@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
 #include "flutter/shell/platform/windows/external_texture.h"
 
@@ -56,6 +57,8 @@ class FlutterWindowsTextureRegistrar {
   std::mutex map_mutex_;
 
   int64_t EmplaceTexture(std::unique_ptr<ExternalTexture> texture);
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsTextureRegistrar);
 };
 
 };  // namespace flutter

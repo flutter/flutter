@@ -12,6 +12,7 @@
 #include <optional>
 #include <variant>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "rapidjson/document.h"
@@ -76,6 +77,8 @@ class PlatformHandler {
   // unnecessarily. See flutter/flutter#103205.
   std::function<std::unique_ptr<ScopedClipboardInterface>()>
       scoped_clipboard_provider_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformHandler);
 };
 
 // A public interface for ScopedClipboard, so that it can be injected into
