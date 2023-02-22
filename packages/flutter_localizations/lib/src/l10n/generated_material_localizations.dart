@@ -66,6 +66,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Maak toe';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Vou uit';
 
   @override
@@ -123,7 +126,16 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigasiekieslys';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Vou in';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Eerste bladsy';
@@ -523,6 +535,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ዝጋ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ዘርጋ';
 
   @override
@@ -580,7 +595,16 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get drawerLabel => 'የዳሰሳ ምናሌ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ሰብስብ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'የመጀመሪያው ገጽ';
@@ -980,6 +1004,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'إغلاق';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'توسيع';
 
   @override
@@ -1037,7 +1064,16 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'قائمة تنقل';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'تصغير';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'الصفحة الأولى';
@@ -1437,6 +1473,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'বন্ধ কৰক';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'বিস্তাৰ কৰক';
 
   @override
@@ -1494,7 +1533,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'নেভিগেশ্বন মেনু';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'সংকোচন কৰক';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'প্রথম পৃষ্ঠা';
@@ -1894,6 +1942,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Bağlayın';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Genişləndirin';
 
   @override
@@ -1951,7 +2002,16 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Naviqasiya menyusu';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Yığcamlaşdırın';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Birinci səhifə';
@@ -2351,6 +2411,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Закрыць';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Разгарнуць';
 
   @override
@@ -2408,7 +2471,16 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Меню навігацыі';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Згарнуць';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'На першую старонку';
@@ -2808,6 +2880,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Затваряне';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Разгъване';
 
   @override
@@ -2865,7 +2940,16 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Меню за навигация';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Свиване';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Първа страница';
@@ -3265,6 +3349,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'বন্ধ করুন';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'বড় করুন';
 
   @override
@@ -3322,7 +3409,16 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get drawerLabel => 'নেভিগেশান মেনু';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'আড়াল করুন';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'প্রথম পৃষ্ঠা';
@@ -3722,6 +3818,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zatvaranje';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Proširi';
 
   @override
@@ -3779,7 +3878,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Meni za navigaciju';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Suzi';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prva stranica';
@@ -4179,6 +4287,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Tanca';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Desplega';
 
   @override
@@ -4236,7 +4347,16 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menú de navegació';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Replega';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Primera pàgina';
@@ -4636,6 +4756,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zavřít';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Rozbalit';
 
   @override
@@ -4693,7 +4816,16 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigační nabídka';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Sbalit';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'První stránka';
@@ -5093,6 +5225,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Luk';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Udvid';
 
   @override
@@ -5150,7 +5285,16 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigationsmenu';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Første side';
@@ -5550,6 +5694,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Schließen';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Maximieren';
 
   @override
@@ -5607,7 +5754,16 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigationsmenü';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Minimieren';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Erste Seite';
@@ -6044,6 +6200,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Κλείσιμο';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Ανάπτυξη';
 
   @override
@@ -6101,7 +6260,16 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Μενού πλοήγησης';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Σύμπτυξη';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Πρώτη σελίδα';
@@ -6501,6 +6669,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Close';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Expand';
 
   @override
@@ -6558,7 +6729,16 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigation menu';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'First page';
@@ -7815,6 +7995,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Cerrar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Mostrar';
 
   @override
@@ -7872,7 +8055,16 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menú de navegación';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Ocultar';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Primera página';
@@ -11475,6 +11667,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Sule';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Laienda';
 
   @override
@@ -11532,7 +11727,16 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigeerimismenüü';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Ahenda';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Esimene leht';
@@ -11932,6 +12136,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Itxi';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Zabaldu';
 
   @override
@@ -11989,7 +12196,16 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Nabigazio-menua';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Tolestu';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Lehenengo orria';
@@ -12389,6 +12605,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'بستن';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'بزرگ کردن';
 
   @override
@@ -12446,7 +12665,16 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'منوی پیمایش';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'کوچک کردن';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'صفحه اول';
@@ -12846,6 +13074,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Sulje';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Laajenna';
 
   @override
@@ -12903,7 +13134,16 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigointivalikko';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Tiivistä';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Ensimmäinen sivu';
@@ -13303,6 +13543,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Isara';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'I-expand';
 
   @override
@@ -13360,7 +13603,16 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu ng navigation';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'I-collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Unang page';
@@ -13760,6 +14012,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Fermer';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Développer';
 
   @override
@@ -13817,7 +14072,16 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu de navigation';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Réduire';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Première page';
@@ -14353,6 +14617,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Pechar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Despregar';
 
   @override
@@ -14410,7 +14677,16 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menú de navegación';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Contraer';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Primeira páxina';
@@ -14810,6 +15086,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Schließen';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Maximieren';
 
   @override
@@ -14867,7 +15146,16 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigationsmenü';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Minimieren';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Erste Seite';
@@ -15267,6 +15555,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'બંધ કરો';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'વિસ્તૃત કરો';
 
   @override
@@ -15324,7 +15615,16 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get drawerLabel => 'નૅવિગેશન મેનૂ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'સંકુચિત કરો';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'પહેલું પેજ';
@@ -15724,6 +16024,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'סגירה';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'הרחבה';
 
   @override
@@ -15781,7 +16084,16 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get drawerLabel => 'תפריט ניווט';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'כיווץ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'לדף הראשון';
@@ -16181,6 +16493,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'बंद करें';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'बड़ा करें';
 
   @override
@@ -16238,7 +16553,16 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get drawerLabel => 'नेविगेशन मेन्यू';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'छोटा करें';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'पहला पेज';
@@ -16638,6 +16962,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zatvaranje';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Proširi';
 
   @override
@@ -16695,7 +17022,16 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigacijski izbornik';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Sažmi';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prva stranica';
@@ -17095,6 +17431,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Bezárás';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Kibontás';
 
   @override
@@ -17152,7 +17491,16 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigációs menü';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Összecsukás';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Első oldal';
@@ -17552,6 +17900,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Փակել';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Ծավալել';
 
   @override
@@ -17609,7 +17960,16 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Նավիգացիայի ընտրացանկ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Ծալել';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Առաջին էջ';
@@ -18009,6 +18369,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Tutup';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Luaskan';
 
   @override
@@ -18066,7 +18429,16 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu navigasi';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Ciutkan';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Halaman pertama';
@@ -18466,6 +18838,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Loka';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Stækka';
 
   @override
@@ -18523,7 +18898,16 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Yfirlitsvalmynd';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Draga saman';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Fyrsta síða';
@@ -18923,6 +19307,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Chiudi';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Espandi';
 
   @override
@@ -18980,7 +19367,16 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu di navigazione';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Comprimi';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prima pagina';
@@ -19380,6 +19776,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => '閉じる';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => '展開';
 
   @override
@@ -19437,7 +19836,16 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ナビゲーション メニュー';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => '折りたたむ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => '最初のページ';
@@ -19837,6 +20245,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'დახურვა';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'გაშლა';
 
   @override
@@ -19894,7 +20305,16 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ნავიგაციის მენიუ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ჩაკეცვა';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'პირველი გვერდი';
@@ -20294,6 +20714,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Жабу';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Жаю';
 
   @override
@@ -20351,7 +20774,16 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Навигация мәзірі';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Жию';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Бірінші бет';
@@ -20751,6 +21183,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'បិទ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ពង្រីក';
 
   @override
@@ -20808,7 +21243,16 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ម៉ឺនុយរុករក';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'បង្រួម';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ទំព័រ​ដំបូង';
@@ -21208,6 +21652,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
@@ -21265,7 +21712,16 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get drawerLabel => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => '\u{cae}\u{cca}\u{ca6}\u{cb2}\u{20}\u{caa}\u{cc1}\u{c9f}';
@@ -21665,6 +22121,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => '닫기';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => '펼치기';
 
   @override
@@ -21722,7 +22181,16 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get drawerLabel => '탐색 메뉴';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => '접기';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => '첫 페이지';
@@ -22122,6 +22590,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Жабуу';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Жайып көрсөтүү';
 
   @override
@@ -22179,7 +22650,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Чабыттоо менюсу';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Жыйыштыруу';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Биринчи бет';
@@ -22579,6 +23059,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ປິດ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ຂະຫຍາຍ';
 
   @override
@@ -22636,7 +23119,16 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ເມນູນຳທາງ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ຫຍໍ້ເຂົ້າ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ໜ້າທຳອິດ';
@@ -23036,6 +23528,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Uždaryti';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Išskleisti';
 
   @override
@@ -23093,7 +23588,16 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Naršymo meniu';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Sutraukti';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Pirmas puslapis';
@@ -23493,6 +23997,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Aizvērt';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Izvērst';
 
   @override
@@ -23550,7 +24057,16 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigācijas izvēlne';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Sakļaut';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Pirmā lapa';
@@ -23950,6 +24466,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Затвори';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Прошири';
 
   @override
@@ -24007,7 +24526,16 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Мени за навигација';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Собери';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Прва страница';
@@ -24407,6 +24935,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'അടയ്‌ക്കുക';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'വികസിപ്പിക്കുക';
 
   @override
@@ -24464,7 +24995,16 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'നാവിഗേഷൻ മെനു';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ചുരുക്കുക';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ആദ്യ പേജ്';
@@ -24864,6 +25404,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Хаах';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Дэлгэх';
 
   @override
@@ -24921,7 +25464,16 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Навигацын цэс';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Буулгах';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Эхний хуудас';
@@ -25321,6 +25873,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'बंद करा';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'विस्तार करा';
 
   @override
@@ -25378,7 +25933,16 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'नेव्हिगेशन मेनू';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'कोलॅप्स करा';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'पहिले पेज';
@@ -25778,6 +26342,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Tutup';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Kembangkan';
 
   @override
@@ -25835,7 +26402,16 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu navigasi';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Runtuhkan';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Halaman pertama';
@@ -26235,6 +26811,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ပိတ်ရန်';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ချဲ့ရန်';
 
   @override
@@ -26292,7 +26871,16 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get drawerLabel => 'လမ်းညွှန် မီနူး';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'လျှော့ပြရန်';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ပထမ စာမျက်နှာ';
@@ -26692,6 +27280,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Lukk';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Vis';
 
   @override
@@ -26749,7 +27340,16 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigasjonsmeny';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Første side';
@@ -27149,6 +27749,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'बन्द गर्नुहोस्';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'विस्तार गर्नुहोस्';
 
   @override
@@ -27206,7 +27809,16 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get drawerLabel => 'नेभिगेसन मेनु';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'प्रथम पेज';
@@ -27606,6 +28218,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Sluiten';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Uitvouwen';
 
   @override
@@ -27663,7 +28278,16 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigatiemenu';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Samenvouwen';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Eerste pagina';
@@ -28063,6 +28687,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Lukk';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Vis';
 
   @override
@@ -28120,7 +28747,16 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigasjonsmeny';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Første side';
@@ -28520,6 +29156,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ବନ୍ଦ କରନ୍ତୁ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ପ୍ରସାରିତ କରନ୍ତୁ';
 
   @override
@@ -28577,7 +29216,16 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ନେଭିଗେସନ୍ ମେନୁ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ପ୍ରଥମ ପୃଷ୍ଠା';
@@ -28977,6 +29625,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ਬੰਦ ਕਰੋ';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ਵਿਸਤਾਰ ਕਰੋ';
 
   @override
@@ -29034,7 +29685,16 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ਸਮੇਟੋ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'ਪਹਿਲਾ ਪੰਨਾ';
@@ -29434,6 +30094,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zamknij';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Rozwiń';
 
   @override
@@ -29491,7 +30154,16 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu nawigacyjne';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Zwiń';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Pierwsza strona';
@@ -29891,6 +30563,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'بنده';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Expand';
 
   @override
@@ -29948,7 +30623,16 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get drawerLabel => 'د نیویگیشن مینو';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'First page';
@@ -30348,6 +31032,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Fechar';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Abrir';
 
   @override
@@ -30405,7 +31092,16 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu de navegação';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Recolher';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Primeira página';
@@ -30944,6 +31640,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Închideți';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Extindeți';
 
   @override
@@ -31001,7 +31700,16 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Meniu de navigare';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Restrângeți';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prima pagină';
@@ -31401,6 +32109,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Закрыть';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Развернуть';
 
   @override
@@ -31458,7 +32169,16 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Меню навигации';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Свернуть';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Первая страница';
@@ -31858,6 +32578,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'වසන්න';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'දිග හරින්න';
 
   @override
@@ -31915,7 +32638,16 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get drawerLabel => 'සංචාලන මෙනුව';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'හකුළන්න';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'පළමු පිටුව';
@@ -32315,6 +33047,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zavrieť';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Rozbaliť';
 
   @override
@@ -32372,7 +33107,16 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigačná ponuka';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Zbaliť';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prvá strana';
@@ -32772,6 +33516,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Zapiranje';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Razširiti';
 
   @override
@@ -32829,7 +33576,16 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Meni za krmarjenje';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Strniti';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Prva stran';
@@ -33229,6 +33985,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Mbyll';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Zgjero';
 
   @override
@@ -33286,7 +34045,16 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menyja e navigimit';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Palos';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Faqja e parë';
@@ -33686,6 +34454,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Затворите';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Прошири';
 
   @override
@@ -33743,7 +34514,16 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Мени за навигацију';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Скупи';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Прва страница';
@@ -34445,6 +35225,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Stäng';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Utöka';
 
   @override
@@ -34502,7 +35285,16 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigeringsmeny';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Dölj';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Första sidan';
@@ -34902,6 +35694,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Funga';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Panua';
 
   @override
@@ -34959,7 +35754,16 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menyu ya kusogeza';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Kunja';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Ukurasa wa kwanza';
@@ -35359,6 +36163,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'மூடுக';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'விரிக்கும்';
 
   @override
@@ -35416,7 +36223,16 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get drawerLabel => 'வழிசெலுத்தல் மெனு';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'சுருக்கும்';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'முதல் பக்கத்திற்குச் செல்லும்';
@@ -35816,6 +36632,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'మూసివేయి';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'విస్తరించు';
 
   @override
@@ -35873,7 +36692,16 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get drawerLabel => 'నావిగేషన్ మెనూ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'కుదించు';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'మొదటి పేజీ';
@@ -36273,6 +37101,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'ปิด';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'ขยาย';
 
   @override
@@ -36330,7 +37161,16 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get drawerLabel => 'เมนูการนำทาง';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'ยุบ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'หน้าแรก';
@@ -36730,6 +37570,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Isara';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'I-expand';
 
   @override
@@ -36787,7 +37630,16 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu ng navigation';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'I-collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Unang page';
@@ -37187,6 +38039,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Kapat';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Genişlet';
 
   @override
@@ -37244,7 +38099,16 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Gezinme menüsü';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Daralt';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'İlk sayfa';
@@ -37644,6 +38508,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Закрити';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Розгорнути';
 
   @override
@@ -37701,7 +38568,16 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Меню навігації';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Згорнути';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Перша сторінка';
@@ -38101,6 +38977,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'بند کریں';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'پھیلائیں';
 
   @override
@@ -38158,7 +39037,16 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get drawerLabel => 'نیویگیشن مینو';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'سکیڑیں';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'پہلا صفحہ';
@@ -38558,6 +39446,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Yopish';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Yoyish';
 
   @override
@@ -38615,7 +39506,16 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Navigatsiya menyusi';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Kichraytirish';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Birinchi sahifa';
@@ -39015,6 +39915,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Đóng';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Mở rộng';
 
   @override
@@ -39072,7 +39975,16 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu di chuyển';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Thu gọn';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Trang đầu';
@@ -39472,6 +40384,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => '关闭';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => '展开';
 
   @override
@@ -39529,7 +40444,16 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get drawerLabel => '导航菜单';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => '收起';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => '第一页';
@@ -40392,6 +41316,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => 'Vala';
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get collapsedIconTapHint => 'Nweba';
 
   @override
@@ -40449,7 +41376,16 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Imenyu yokuzulazula';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
   String get expandedIconTapHint => 'Goqa';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get firstPageTooltip => 'Ikhasi lokuqala';
