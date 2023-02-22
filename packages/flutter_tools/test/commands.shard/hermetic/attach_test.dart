@@ -1138,6 +1138,7 @@ class StreamLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
@@ -1238,7 +1239,14 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
+  @override
   bool isSupported() => true;
+
+  @override
+  bool get isConnected => true;
 
   @override
   bool get supportsHotRestart => true;
@@ -1300,6 +1308,17 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final IOSDeviceConnectionInterface interfaceType;
 
   @override
+  DeviceConnectionInterface get connectionInterface {
+    return interfaceType == IOSDeviceConnectionInterface.network
+        ? DeviceConnectionInterface.wireless
+        : DeviceConnectionInterface.attached;
+  }
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
+
+  @override
   DevicePortForwarder get portForwarder => _portForwarder!;
 
   @override
@@ -1340,6 +1359,12 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool get ephemeral => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {

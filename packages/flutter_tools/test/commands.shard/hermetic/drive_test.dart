@@ -68,7 +68,7 @@ void main() {
 
     final Device screenshotDevice = ThrowingScreenshotDevice()
       ..supportsScreenshot = false;
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -104,7 +104,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -142,7 +142,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -184,7 +184,7 @@ void main() {
     fileSystem.file('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -222,7 +222,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
     bool caughtToolExit = false;
@@ -293,7 +293,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
 
@@ -421,9 +421,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -456,7 +456,7 @@ void main() {
 
     final Device usbDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.usb;
-    fakeDeviceManager.devices = <Device>[usbDevice];
+    fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
     expect(options.disablePortPublication, true);
@@ -479,9 +479,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -544,6 +544,9 @@ class ScreenshotDevice extends Fake implements Device {
   bool supportsScreenshot = true;
 
   @override
+  bool get isConnected => true;
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
       String? mainPath,
@@ -578,19 +581,6 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
-}
-
-class FakeDeviceManager extends Fake implements DeviceManager {
-  List<Device> devices = <Device>[];
-
-  @override
-  String? specifiedDeviceId;
-
-  @override
-  Future<List<Device>> getDevices() async => devices;
-
-  @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
 }
 
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
@@ -676,5 +666,18 @@ class FakeIosDevice extends Fake implements IOSDevice {
   IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb;
 
   @override
+  DeviceConnectionInterface get connectionInterface {
+    return interfaceType == IOSDeviceConnectionInterface.network
+        ? DeviceConnectionInterface.wireless
+        : DeviceConnectionInterface.attached;
+  }
+
+  @override
+  bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  bool get ephemeral => true;
 }

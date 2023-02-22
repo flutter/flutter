@@ -103,6 +103,9 @@ abstract class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// A minimum duration to use when discovering wireless iOS devices.
+  static const Duration minimumWirelessTimeout = Duration(seconds: 5);
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -110,15 +113,22 @@ abstract class DeviceManager {
   /// specifiedDeviceId = 'all'.
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
-  Future<List<Device>> getDevicesById(String deviceId) async {
-    final String lowerDeviceId = deviceId.toLowerCase();
-    bool exactlyMatchesDeviceId(Device device) =>
-        device.id.toLowerCase() == lowerDeviceId ||
-        device.name.toLowerCase() == lowerDeviceId;
-    bool startsWithDeviceId(Device device) =>
-        device.id.toLowerCase().startsWith(lowerDeviceId) ||
-        device.name.toLowerCase().startsWith(lowerDeviceId);
-
+  /// Get devices filtered by [filter] that match the given device id/name.
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  ///
+  /// If an exact match is found, return it immediately. Otherwise wait for all
+  /// discoverers to complete and return any partial matches.
+  ///
+  /// (iOS devices only) If [waitForDeviceToConnect] is true and a single match
+  /// is found but the device is not connected, wait for the device to connect.
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    filter ??= DeviceDiscoveryFilter();
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
@@ -133,23 +143,20 @@ abstract class DeviceManager {
     final Completer<Device> exactMatchCompleter = Completer<Device>();
     final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
-          discoverer
-          .devices
-          .then((List<Device> devices) {
-            for (final Device device in devices) {
-              if (exactlyMatchesDeviceId(device)) {
-                exactMatchCompleter.complete(device);
-                return null;
-              }
-              if (startsWithDeviceId(device)) {
-                prefixMatches.add(device);
-              }
+        if (!hasWellKnownId || discoverer.wellKnownIds.contains(deviceId))
+          discoverer.getDevicesById(
+            deviceId,
+            _logger,
+            filter: filter,
+            waitForDeviceToConnect: waitForDeviceToConnect,
+          ).then((DeviceDiscoveryMatchByIdResult matchingDevices) {
+            if (matchingDevices.isExactMatch) {
+              exactMatchCompleter.complete(matchingDevices.devices.first);
+              return null;
+            } else {
+              prefixMatches.addAll(matchingDevices.devices);
             }
             return null;
-          }, onError: (dynamic error, StackTrace stackTrace) {
-            // Return matches from other discoverers even if one fails.
-            _logger.printTrace('Ignored error discovering $deviceId: $error');
           }),
     ];
 
@@ -159,40 +166,98 @@ abstract class DeviceManager {
       Future.wait<List<Device>?>(futureDevices),
     ]);
 
+    if (waitForDeviceToConnect == true) {
+      for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+        discoverer.cancelWaitForDeviceToConnect();
+      }
+    }
+
     if (exactMatchCompleter.isCompleted) {
       return <Device>[await exactMatchCompleter.future];
     }
     return prefixMatches;
   }
 
-  /// Returns the list of connected devices, filtered by any user-specified device id.
-  Future<List<Device>> getDevices() {
+  /// Returns a list of devices filtered by the user-specified device
+  /// id/name (if applicable) and [filter].
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  ///
+  /// (iOS devices only) If [waitForDeviceToConnect] is true and an exact match
+  /// is found but the device is not connected, wait for the device to connect.
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) {
     final String? id = specifiedDeviceId;
+    filter ??= DeviceDiscoveryFilter();
     if (id == null) {
-      return getAllConnectedDevices();
+      return getAllDevices(filter: filter);
     }
-    return getDevicesById(id);
+    return getDevicesById(
+      id,
+      filter: filter,
+      waitForDeviceToConnect: waitForDeviceToConnect,
+    );
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
     return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
-  /// Returns the list of all connected devices.
-  Future<List<Device>> getAllConnectedDevices() async {
+  /// Returns a list of devices filtered by [filter].
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    filter ??= DeviceDiscoveryFilter();
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        discoverer.devices,
+        discoverer.devices(filter: filter),
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
-  /// Returns the list of all connected devices. Discards existing cache of devices.
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async {
+  /// Returns a list of devices filtered by [filter]. Discards existing cache of devices.
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  ///
+  /// Search for devices to populate the cache for no longer than [timeout].
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    filter ??= DeviceDiscoveryFilter();
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        discoverer.discoverDevices(timeout: timeout),
+        discoverer.discoverDevices(filter: filter, timeout: timeout),
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Returns a list of devices filtered by [filter]. Discards existing cache
+  /// of discovers that support wireless devices.
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  ///
+  /// Search for devices to populate the cache for no longer than [timeout].
+  Future<List<Device>> refreshWirelesslyConnectedDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    // return refreshAllDevices(timeout: timeout, filter: filter);
+    filter ??= DeviceDiscoveryFilter();
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        if (discoverer.supportsWirelessDevices)
+          discoverer.discoverDevices(filter: filter, timeout: timeout),
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
@@ -210,103 +275,133 @@ abstract class DeviceManager {
         ...await discoverer.getDiagnostics(),
     ];
   }
+}
 
-  /// Find and return all target [Device]s based upon currently connected
-  /// devices, the current project, and criteria entered by the user on
-  /// the command line.
-  ///
-  /// If no device can be found that meets specified criteria,
-  /// then print an error message and return null.
-  ///
-  /// Returns a list of devices specified by the user.
-  ///
-  /// * If the user specified '-d all', then return all connected devices which
-  /// support the current project, except for fuchsia and web.
-  ///
-  /// * If the user specified a device id, then do nothing as the list is already
-  /// filtered by [getDevices].
-  ///
-  /// * If the user did not specify a device id and there is more than one
-  /// device connected, then filter out unsupported devices and prioritize
-  /// ephemeral devices.
-  ///
-  /// * If [promptUserToChooseDevice] is true, and there are more than one
-  /// device after the aforementioned filters, and the user is connected to a
-  /// terminal, then show a prompt asking the user to choose one.
-  Future<List<Device>> findTargetDevices(
-    FlutterProject? flutterProject, {
-    Duration? timeout,
-  }) async {
-    if (timeout != null) {
-      // Reset the cache with the specified timeout.
-      await refreshAllConnectedDevices(timeout: timeout);
+/// A class for determining how to filter devices based on if they are supported.
+///
+/// If [mustBeSupportedByFlutter] is true, only devices supported by Flutter
+/// will be included.
+///
+/// If [mustBeSupportedForProject] is true, only devices supported by Flutter
+/// and supported for the provided [flutterProject] will be included.
+///
+/// If [mustBeSupportedForAll] is true, only devices supported by Flutter,
+/// supported for the provided [flutterProject], and supported for
+/// `--device all` will be included.
+class DeviceDiscoverySupportFilter {
+  DeviceDiscoverySupportFilter({
+    required this.flutterProject,
+    this.mustBeSupportedByFlutter = false,
+    this.mustBeSupportedForProject = false,
+    this.mustBeSupportedForAll = false,
+  });
+
+  final FlutterProject? flutterProject;
+  final bool mustBeSupportedByFlutter;
+  final bool mustBeSupportedForProject;
+  final bool mustBeSupportedForAll;
+
+  Future<bool> matchesRequirements(Device device) async {
+    if ((mustBeSupportedByFlutter && !device.isSupported()) ||
+        (mustBeSupportedForProject && !isDeviceSupportedForProject(device)) ||
+        (mustBeSupportedForAll && !await isDeviceSupportedForAll(device))) {
+      return false;
     }
+    return true;
+  }
 
-    List<Device> devices = (await getDevices())
-        .where((Device device) => device.isSupported()).toList();
-
-    if (hasSpecifiedAllDevices) {
-      // User has specified `--device all`.
-      //
-      // Always remove web and fuchsia devices from `--all`. This setting
-      // currently requires devices to share a frontend_server and resident
-      // runner instance. Both web and fuchsia require differently configured
-      // compilers, and web requires an entirely different resident runner.
-      devices = <Device>[
-        for (final Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
-              await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
-              await device.targetPlatform != TargetPlatform.web_javascript &&
-              isDeviceSupportedForProject(device, flutterProject))
-            device,
-      ];
-    } else if (!hasSpecifiedDeviceId) {
-      // User did not specify the device.
-
-      // Remove all devices which are not supported by the current application.
-      // For example, if there was no 'android' folder then don't attempt to
-      // launch with an Android device.
-      devices = <Device>[
-        for (final Device device in devices)
-          if (isDeviceSupportedForProject(device, flutterProject))
-            device,
-      ];
-
-      if (devices.length > 1) {
-        // If there are still multiple devices and the user did not specify to run
-        // all, then attempt to prioritize ephemeral devices. For example, if the
-        // user only typed 'flutter run' and both an Android device and desktop
-        // device are available, choose the Android device.
-
-        // Ephemeral is nullable for device types where this is not well
-        // defined.
-        final List<Device> ephemeralDevices = <Device>[
-          for (final Device device in devices)
-            if (device.ephemeral == true)
-              device,
-        ];
-
-        if (ephemeralDevices.length == 1) {
-          devices = ephemeralDevices;
-        }
-      }
+  Future<bool> isDeviceSupportedForAll(Device device) async {
+    // User has specified `--device all`.
+    //
+    // Always remove web and fuchsia devices from `--all`. This setting
+    // currently requires devices to share a frontend_server and resident
+    // runner instance. Both web and fuchsia require differently configured
+    // compilers, and web requires an entirely different resident runner.
+    final TargetPlatform devicePlatform = await device.targetPlatform;
+    if (device.isSupported() &&
+        devicePlatform != TargetPlatform.fuchsia_arm64 &&
+        devicePlatform != TargetPlatform.fuchsia_x64 &&
+        devicePlatform != TargetPlatform.web_javascript &&
+        isDeviceSupportedForProject(device)) {
+      return true;
     }
-
-    return devices;
+    return false;
   }
 
   /// Returns whether the device is supported for the project.
   ///
-  /// This exists to allow the check to be overridden for google3 clients. If
+  /// A device can be supported by Flutter but not supported for the project
+  /// (e.g. when the user has removed the iOS directory from their project).
+  ///
+  /// This also exists to allow the check to be overridden for google3 clients. If
   /// [flutterProject] is null then return true.
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
+  bool isDeviceSupportedForProject(Device device) {
+    if (!device.isSupported()) {
+      return false;
+    }
     if (flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(flutterProject);
+    return device.isSupportedForProject(flutterProject!);
   }
 }
 
+/// A class for filtering devices.
+///
+/// If [mustBeConnected] is true, only devices detected as connected will be included.
+///
+/// If [supportFilter] is provided, only devices matching the requirements will be included.
+///
+/// If [deviceConnectionFilter] is provided, only devices matching the DeviceConnectionInterface will be included.
+class DeviceDiscoveryFilter {
+  DeviceDiscoveryFilter({
+    this.mustBeConnected = true,
+    this.supportFilter,
+    this.deviceConnectionFilter,
+  });
+
+  final bool mustBeConnected;
+  final DeviceDiscoverySupportFilter? supportFilter;
+  final DeviceConnectionInterface? deviceConnectionFilter;
+
+  Future<bool> matchesRequirements(Device device) async {
+    final DeviceDiscoverySupportFilter? localSupportFilter = supportFilter;
+    if ((mustBeConnected && !device.isConnected) ||
+        (localSupportFilter != null &&
+            !await localSupportFilter.matchesRequirements(device)) ||
+        !matchesDeviceConnectionInterface(device, deviceConnectionFilter)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<List<Device>> filterDevices(List<Device> devices) async {
+    devices = <Device>[
+      for (final Device device in devices)
+        if (await matchesRequirements(device)) device,
+    ];
+    return devices;
+  }
+
+  bool matchesDeviceConnectionInterface(
+    Device device,
+    DeviceConnectionInterface? deviceConnectionFilter,
+  ) {
+    if (deviceConnectionFilter == null) {
+      return true;
+    }
+    return device.connectionInterface == deviceConnectionFilter;
+  }
+}
+
+/// A class to hold results for when getting a device by id/name.
+class DeviceDiscoveryMatchByIdResult {
+  DeviceDiscoveryMatchByIdResult(this.devices, {this.isExactMatch = false});
+
+  final List<Device> devices;
+  final bool isExactMatch;
+}
 
 /// An abstract class to discover and enumerate a specific type of devices.
 abstract class DeviceDiscovery {
@@ -316,11 +411,16 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  bool get supportsWirelessDevices => false;
+
   /// Return all connected devices, cached on subsequent calls.
-  Future<List<Device>> get devices;
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
   /// Return all connected devices. Discards existing cache of devices.
-  Future<List<Device>> discoverDevices({ Duration? timeout });
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -334,6 +434,56 @@ abstract class DeviceDiscovery {
   ///
   /// For example, 'windows' or 'linux'.
   List<String> get wellKnownIds;
+
+  bool exactlyMatchesDeviceId(String deviceId, Device device) {
+    final String lowerDeviceId = deviceId.toLowerCase();
+    return device.id.toLowerCase() == lowerDeviceId ||
+        device.name.toLowerCase() == lowerDeviceId;
+  }
+
+  bool startsWithDeviceId(String deviceId, Device device) {
+    final String lowerDeviceId = deviceId.toLowerCase();
+    return device.id.toLowerCase().startsWith(lowerDeviceId) ||
+        device.name.toLowerCase().startsWith(lowerDeviceId);
+  }
+
+  /// Get devices filtered by [filter] that match the given device id/name.
+  ///
+  /// If an exact match is found, return it immediately. Otherwise check all
+  /// devices and return all that begin with the given device id/name.
+  ///
+  /// [waitForDeviceToConnect] is used for iOS device discovery only.
+  Future<DeviceDiscoveryMatchByIdResult> getDevicesById(
+    String deviceId,
+    Logger logger, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    final List<Device> foundDevices = await devices(
+      filter: filter,
+    ).onError((dynamic error, StackTrace stackTrace) {
+      // Fail quietly so other discovers can find matches, even if this one fails.
+      logger.printTrace('Ignored error discovering $deviceId: $error');
+      return <Device>[];
+    });
+
+    final List<Device> prefixMatches = <Device>[];
+    for (final Device device in foundDevices) {
+      if (exactlyMatchesDeviceId(deviceId, device)) {
+        return DeviceDiscoveryMatchByIdResult(
+          <Device>[device],
+          isExactMatch: true,
+        );
+      }
+      if (startsWithDeviceId(deviceId, device)) {
+        prefixMatches.add(device);
+      }
+    }
+
+    return DeviceDiscoveryMatchByIdResult(prefixMatches);
+  }
+
+  void cancelWaitForDeviceToConnect() => VoidCallback;
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -352,7 +502,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   Timer? _timer;
 
-  Future<List<Device>> pollingGetDevices({ Duration? timeout });
+  Future<List<Device>> pollingGetDevices({Duration? timeout});
 
   void startPolling() {
     if (_timer == null) {
@@ -380,19 +530,51 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer = null;
   }
 
+  /// Get devices from cache filtered by [filter].
+  ///
+  /// If the cache is empty, populate the cache.
   @override
-  Future<List<Device>> get devices {
-    return _populateDevices();
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) {
+    return _populateDevices(filter: filter);
   }
 
+
+  /// Empty the cache and repopulate it before getting devices from cache filtered by [filter].
+  ///
+  /// Search for devices to populate the cache for no longer than [timeout].
   @override
-  Future<List<Device>> discoverDevices({ Duration? timeout }) {
-    deviceNotifier = null;
-    return _populateDevices(timeout: timeout);
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
+    return _populateDevices(timeout: timeout, filter: filter, resetCache: true);
   }
 
-  Future<List<Device>> _populateDevices({ Duration? timeout }) async {
-    deviceNotifier ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
+  /// Get devices from cache filtered by [filter].
+  ///
+  /// If the cache is empty or [resetCache] is true, populate the cache.
+  ///
+  /// Search for devices to populate the cache for no longer than [timeout].
+  Future<List<Device>> _populateDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool resetCache = false,
+  }) async {
+    if (deviceNotifier == null || resetCache) {
+      final List<Device> devices = await pollingGetDevices(timeout: timeout);
+      // If the cache was populated while the polling was ongoing, do not
+      // overwrite the cache unless it's explicitly refreshing the cache.
+      if (resetCache) {
+        deviceNotifier = ItemListNotifier<Device>.from(devices);
+      } else {
+        deviceNotifier ??= ItemListNotifier<Device>.from(devices);
+      }
+    }
+
+    // If a filter is provided, filter cache to only return devices matching.
+    if (filter != null) {
+      return filter.filterDevices(deviceNotifier!.items);
+    }
     return deviceNotifier!.items;
   }
 
@@ -410,6 +592,12 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   String toString() => '$name device discovery';
+}
+
+/// How a device is connected.
+enum DeviceConnectionInterface {
+  attached,
+  wireless,
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -433,6 +621,14 @@ abstract class Device {
 
   /// Whether this is an ephemeral device.
   final bool ephemeral;
+
+  bool get isConnected => true;
+
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   String get name;
 

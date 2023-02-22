@@ -22,9 +22,45 @@ import '../ios/mac.dart';
 import '../reporting/reporting.dart';
 import 'xcode.dart';
 
-enum XCDeviceEvent {
+class XCDeviceEventNotification {
+  XCDeviceEventNotification(
+    this.eventType,
+    this.eventInterface,
+    this.deviceIdentifier,
+  );
+
+  final XCDeviceEventType eventType;
+  final XCDeviceEventInterface eventInterface;
+  final String deviceIdentifier;
+}
+
+enum XCDeviceEventType {
   attach,
   detach,
+}
+
+enum XCDeviceEventInterface {
+  usb,
+  wifi,
+}
+
+String getXCDeviceEventInterface(XCDeviceEventInterface eventInterface) {
+  switch (eventInterface) {
+    case XCDeviceEventInterface.usb:
+      return 'usb';
+    case XCDeviceEventInterface.wifi:
+      return 'wifi';
+  }
+}
+
+IOSDeviceConnectionInterface getIOSDeviceConnectionInterfaceFromEventInterface(
+    XCDeviceEventInterface eventInterface) {
+  switch (eventInterface) {
+    case XCDeviceEventInterface.usb:
+      return IOSDeviceConnectionInterface.usb;
+    case XCDeviceEventInterface.wifi:
+      return IOSDeviceConnectionInterface.network;
+  }
 }
 
 /// A utility class for interacting with Xcode xcdevice command line tools.
@@ -54,12 +90,12 @@ class XCDevice {
       ),
       _iProxy = iproxy,
       _xcode = xcode {
-
     _setupDeviceIdentifierByEventStream();
   }
 
   void dispose() {
-    _deviceObservationProcess?.kill();
+    _usbDeviceObservationProcess?.kill();
+    _wifiDeviceObservationProcess?.kill();
   }
 
   final ProcessUtils _processUtils;
@@ -70,13 +106,18 @@ class XCDevice {
   final IProxy _iProxy;
 
   List<Object>? _cachedListResults;
-  Process? _deviceObservationProcess;
-  StreamController<Map<XCDeviceEvent, String>>? _deviceIdentifierByEvent;
+
+  Process? _usbDeviceObservationProcess;
+  Process? _wifiDeviceObservationProcess;
+  StreamController<XCDeviceEventNotification>? _deviceIdentifierByEvent;
+
+  Process? _usbDeviceWaitProcess;
+  Process? _wifiDeviceWaitProcess;
 
   void _setupDeviceIdentifierByEventStream() {
     // _deviceIdentifierByEvent Should always be available for listeners
     // in case polling needs to be stopped and restarted.
-    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
+    _deviceIdentifierByEvent = StreamController<XCDeviceEventNotification>.broadcast(
       onListen: _startObservingTetheredIOSDevices,
       onCancel: _stopObservingTetheredIOSDevices,
     );
@@ -86,7 +127,7 @@ class XCDevice {
 
   Future<List<Object>?> _getAllDevices({
     bool useCache = false,
-    required Duration timeout
+    required Duration timeout,
   }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -131,9 +172,9 @@ class XCDevice {
 
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
-  /// Each attach and detach event is a tuple of one event type
-  /// and identifier.
-  Stream<Map<XCDeviceEvent, String>>? observedDeviceEvents() {
+  /// Each attach and detach event contains information on the event type,
+  /// the event interface, and the device identifer.
+  Stream<XCDeviceEventNotification>? observedDeviceEvents() {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
@@ -148,13 +189,14 @@ class XCDevice {
 
   Future<void> _startObservingTetheredIOSDevices() async {
     try {
-      if (_deviceObservationProcess != null) {
+      if (_usbDeviceObservationProcess != null ||
+          _wifiDeviceObservationProcess != null) {
         throw Exception('xcdevice observe restart failed');
       }
 
       // Run in interactive mode (via script) to convince
       // xcdevice it has a terminal attached in order to redirect stdout.
-      _deviceObservationProcess = await _processUtils.start(
+      _usbDeviceObservationProcess = await _processUtils.start(
         <String>[
           'script',
           '-t',
@@ -163,56 +205,83 @@ class XCDevice {
           ..._xcode.xcrunCommand(),
           'xcdevice',
           'observe',
-          '--both',
+          '--${getXCDeviceEventInterface(XCDeviceEventInterface.usb)}',
         ],
       );
 
-      final StreamSubscription<String> stdoutSubscription = _deviceObservationProcess!.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
+      _wifiDeviceObservationProcess = await _processUtils.start(
+        <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          ..._xcode.xcrunCommand(),
+          'xcdevice',
+          'observe',
+          '--${getXCDeviceEventInterface(XCDeviceEventInterface.wifi)}',
+        ],
+      );
 
-        // xcdevice observe example output of UDIDs:
-        //
-        // Listening for all devices, on both interfaces.
-        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-        // Attach: 00008027-00192736010F802E
-        // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-        final RegExpMatch? match = _observationIdentifierPattern.firstMatch(line);
-        if (match != null && match.groupCount == 2) {
-          final String verb = match.group(1)!.toLowerCase();
-          final String identifier = match.group(2)!;
-          if (verb.startsWith('attach')) {
-            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.attach: identifier,
-            });
-          } else if (verb.startsWith('detach')) {
-            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.detach: identifier,
-            });
-          }
-        }
-      });
-      final StreamSubscription<String> stderrSubscription = _deviceObservationProcess!.stderr
+      final StreamSubscription<String> usbStdoutSubscription = _processObserveStdOut(
+        _usbDeviceObservationProcess!,
+        XCDeviceEventInterface.usb,
+      );
+      final StreamSubscription<String> wifiStdoutSubscription = _processObserveStdOut(
+        _wifiDeviceObservationProcess!,
+        XCDeviceEventInterface.wifi,
+      );
+
+      final StreamSubscription<String> usbStderrSubscription = _usbDeviceObservationProcess!.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
-      unawaited(_deviceObservationProcess?.exitCode.then((int status) {
-        _logger.printTrace('xcdevice exited with code $exitCode');
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
-      }).whenComplete(() async {
-        if (_deviceIdentifierByEvent?.hasListener ?? false) {
-          // Tell listeners the process died.
-          await _deviceIdentifierByEvent?.close();
-        }
-        _deviceObservationProcess = null;
+      final StreamSubscription<String> wifiStderrSubscription = _wifiDeviceObservationProcess!.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        _logger.printTrace('xcdevice observe error: $line');
+      });
 
-        // Reopen it so new listeners can resume polling.
-        _setupDeviceIdentifierByEventStream();
+      unawaited(_usbDeviceObservationProcess!.exitCode.then((int status) {
+        _logger.printTrace('xcdevice observe --usb exited with code $exitCode');
+        // Kill other process in case only one was killed
+        _wifiDeviceObservationProcess?.kill();
+        unawaited(usbStdoutSubscription.cancel());
+        unawaited(usbStderrSubscription.cancel());
+      }).whenComplete(() async {
+        _usbDeviceObservationProcess = null;
+        // Only close stream and reopen stream after both processes
+        // are exited.
+        if (_wifiDeviceObservationProcess == null) {
+          if (_deviceIdentifierByEvent?.hasListener ?? false) {
+            // Tell listeners the process died.
+            await _deviceIdentifierByEvent?.close();
+          }
+          // Reopen it so new listeners can resume polling.
+          _setupDeviceIdentifierByEventStream();
+        }
+      }));
+
+      unawaited(_wifiDeviceObservationProcess!.exitCode.then((int status) {
+        _logger.printTrace('xcdevice observe --wifi exited with code $exitCode');
+        // Kill other process in case only one was killed
+        _usbDeviceObservationProcess?.kill();
+        unawaited(wifiStdoutSubscription.cancel());
+        unawaited(wifiStderrSubscription.cancel());
+      }).whenComplete(() async {
+        _wifiDeviceObservationProcess = null;
+        // Only close stream and reopen stream after both processes
+        // are exited.
+        if (_usbDeviceObservationProcess == null) {
+          if (_deviceIdentifierByEvent?.hasListener ?? false) {
+            // Tell listeners the process died.
+            await _deviceIdentifierByEvent?.close();
+          }
+          // Reopen it so new listeners can resume polling.
+          _setupDeviceIdentifierByEventStream();
+        }
       }));
     } on ProcessException catch (exception, stackTrace) {
       _deviceIdentifierByEvent?.addError(exception, stackTrace);
@@ -221,10 +290,211 @@ class XCDevice {
     }
   }
 
-  void _stopObservingTetheredIOSDevices() {
-    _deviceObservationProcess?.kill();
+  StreamSubscription<String> _processObserveStdOut(
+    Process process,
+    XCDeviceEventInterface eventInterface,
+  ) {
+    return process.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+      final XCDeviceEventNotification? event = _processXCDeviceStdOut(
+        line,
+        eventInterface,
+      );
+      if (event != null) {
+        _deviceIdentifierByEvent?.add(event);
+      }
+    });
   }
 
+  XCDeviceEventNotification? _processXCDeviceStdOut(
+    String line,
+    XCDeviceEventInterface eventInterface,
+  ) {
+    // xcdevice observe example output of UDIDs:
+    //
+    // Listening for all devices, on both interfaces.
+    // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+    // Attach: 00008027-00192736010F802E
+    // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+    // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+    final RegExpMatch? match = _observationIdentifierPattern.firstMatch(line);
+    if (match != null && match.groupCount == 2) {
+      final String verb = match.group(1)!.toLowerCase();
+      final String identifier = match.group(2)!;
+      if (verb.startsWith('attach')) {
+        return XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          eventInterface,
+          identifier,
+        );
+      } else if (verb.startsWith('detach')) {
+        return XCDeviceEventNotification(
+          XCDeviceEventType.detach,
+          eventInterface,
+          identifier,
+        );
+      }
+    }
+    return null;
+  }
+
+  void _stopObservingTetheredIOSDevices() {
+    _usbDeviceObservationProcess?.kill();
+    _wifiDeviceObservationProcess?.kill();
+  }
+
+  /// Wait for a connect event for a specific device. Must use device's exact UDID.
+  ///
+  /// To cancel this process, call [cancelWaitForDeviceToConnect].
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(
+    String deviceId,
+  ) async {
+    try {
+      if (_usbDeviceWaitProcess != null || _wifiDeviceWaitProcess != null) {
+        throw Exception('xcdevice wait restart failed');
+      }
+
+      final StreamController<XCDeviceEventNotification> waitStreamController =
+          StreamController<XCDeviceEventNotification>();
+
+      // Run in interactive mode (via script) to convince
+      // xcdevice it has a terminal attached in order to redirect stdout.
+      _usbDeviceWaitProcess = await _processUtils.start(
+        <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          ..._xcode.xcrunCommand(),
+          'xcdevice',
+          'wait',
+          '--${getXCDeviceEventInterface(XCDeviceEventInterface.usb)}',
+          deviceId,
+        ],
+      );
+
+      _wifiDeviceWaitProcess = await _processUtils.start(
+        <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          ..._xcode.xcrunCommand(),
+          'xcdevice',
+          'wait',
+          '--${getXCDeviceEventInterface(XCDeviceEventInterface.wifi)}',
+          deviceId,
+        ],
+      );
+
+      final StreamSubscription<String> usbStdoutSubscription = _processWaitStdOut(
+        waitStreamController,
+        _usbDeviceWaitProcess!,
+        XCDeviceEventInterface.usb,
+      );
+      final StreamSubscription<String> wifiStdoutSubscription = _processWaitStdOut(
+        waitStreamController,
+        _wifiDeviceWaitProcess!,
+        XCDeviceEventInterface.wifi,
+      );
+
+      final StreamSubscription<String> usbStderrSubscription = _usbDeviceWaitProcess!.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        _logger.printTrace('xcdevice wait --usb error: $line');
+      });
+      final StreamSubscription<String> wifiStderrSubscription = _wifiDeviceWaitProcess!.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        _logger.printTrace('xcdevice wait --wifi error: $line');
+      });
+
+      final Completer<XCDeviceEventNotification?> cancelledCompleter =
+          Completer<XCDeviceEventNotification?>();
+
+      unawaited(_usbDeviceWaitProcess!.exitCode.then((int status) {
+        _logger.printTrace('xcdevice wait --usb exited with code $exitCode');
+        // Kill other process in case only one was killed
+        _wifiDeviceWaitProcess?.kill();
+        unawaited(usbStdoutSubscription.cancel());
+        unawaited(usbStderrSubscription.cancel());
+      }).whenComplete(() async {
+        _usbDeviceWaitProcess = null;
+        if (_wifiDeviceWaitProcess == null) {
+          cancelledCompleter.complete(null);
+          await waitStreamController.close();
+        }
+      }));
+
+      unawaited(_wifiDeviceWaitProcess!.exitCode.then((int status) {
+        _logger.printTrace('xcdevice wait --wifi exited with code $exitCode');
+        // Kill other process in case only one was killed
+        _usbDeviceWaitProcess?.kill();
+        unawaited(wifiStdoutSubscription.cancel());
+        unawaited(wifiStderrSubscription.cancel());
+      }).whenComplete(() async {
+        _wifiDeviceWaitProcess = null;
+        if (_usbDeviceWaitProcess == null) {
+          cancelledCompleter.complete(null);
+          await waitStreamController.close();
+        }
+      }));
+
+      return await Future.any(
+        <Future<XCDeviceEventNotification?>>[
+          cancelledCompleter.future,
+          waitStreamController.stream.first.whenComplete(() {
+            cancelWaitForDeviceToConnect();
+          }),
+        ],
+      );
+    } on ProcessException catch (exception, stackTrace) {
+      _logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
+    } on ArgumentError catch (exception, stackTrace) {
+      _logger.printTrace('Process exception running xcdevice wait:\n$exception\n$stackTrace');
+    } on StateError {
+      _logger.printTrace('Stream broke before first was found');
+      return null;
+    }
+    return null;
+  }
+
+  StreamSubscription<String> _processWaitStdOut(
+    StreamController<XCDeviceEventNotification> waitStreamController,
+    Process process,
+    XCDeviceEventInterface eventInterface,
+  ) {
+    return process.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+      final XCDeviceEventNotification? event = _processXCDeviceStdOut(
+        line,
+        eventInterface,
+      );
+      if (event != null && event.eventType == XCDeviceEventType.attach) {
+        waitStreamController.add(event);
+      }
+    });
+  }
+
+  void cancelWaitForDeviceToConnect() {
+    _usbDeviceWaitProcess?.kill();
+    _wifiDeviceWaitProcess?.kill();
+  }
+
+  /// A list of [IOSDevice]s. This list includes connected devices and
+  /// disconnected wireless devices.
+  ///
+  /// Sometimes devices may have incorrect connection information
+  /// (`isConnected`, `interfaceType`) if it timed out before it could get the
+  /// information. Wireless devices can take longer to get the correct
+  /// information.
+  ///
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
     final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
@@ -283,6 +553,9 @@ class XCDevice {
           continue;
         }
 
+        final IOSDeviceConnectionInterface interface = _interfaceType(device);
+        bool isConnected = true;
+
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
@@ -299,11 +572,9 @@ class XCDevice {
           // Sometimes the app launch will fail on these devices until Xcode is done setting up the device.
           // Other times this is a false positive and the app will successfully launch despite the error.
           if (code != -10) {
-            continue;
+            isConnected = false;
           }
         }
-
-        final IOSDeviceConnectionInterface interface = _interfaceType(device);
 
         String? sdkVersion = _sdkVersion(device);
 
@@ -319,6 +590,7 @@ class XCDevice {
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
           interfaceType: interface,
+          isConnected: isConnected,
           sdkVersion: sdkVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
@@ -330,7 +602,6 @@ class XCDevice {
       }
     }
     return devices;
-
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.

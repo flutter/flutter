@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -181,7 +180,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  List<Device> devices = <Device>[];
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 
@@ -207,24 +207,37 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
-    return devices.where((Device device) => device.id == deviceId).toList();
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    return filteredDevices(filter).where((Device device) => device.id == deviceId || device.id.startsWith(deviceId)).toList();
   }
 
   @override
-  Future<List<Device>> getDevices() {
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId!)
-        : getAllConnectedDevices();
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
   }
 
-  void addDevice(Device device) => devices.add(device);
+  void addAttachedDevice(Device device) => attachedDevices.add(device);
+  void addWirelessDevice(Device device) => wirelessDevices.add(device);
 
   @override
   bool get canListAnything => true;
@@ -236,13 +249,21 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    return device.isSupportedForProject(flutterProject!);
+  Future<List<Device>> refreshWirelesslyConnectedDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    return filteredDevices(filter);
   }
 
-  @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout, bool promptUserToChooseDevice = true }) async {
-    return devices;
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionFilter == DeviceConnectionInterface.attached) {
+      return attachedDevices;
+    }
+    if (filter?.deviceConnectionFilter == DeviceConnectionInterface.wireless) {
+      return wirelessDevices;
+    }
+    return attachedDevices + wirelessDevices;
   }
 }
 

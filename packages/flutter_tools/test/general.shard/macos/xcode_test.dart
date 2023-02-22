@@ -341,32 +341,56 @@ void main() {
               'xcrun',
               'xcdevice',
               'observe',
-              '--both',
+              '--usb',
             ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
               'Attach: 00008027-00192736010F802E\n'
               'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
             stderr: 'Some error',
           ));
 
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--wifi',
+            ], stdout: 'Attach: 00000001-0000000000000000\n'
+              'Detach: 00000001-0000000000000000',
+            stderr: 'Some error',
+          ));
+
           final Completer<void> attach1 = Completer<void>();
           final Completer<void> attach2 = Completer<void>();
           final Completer<void> detach1 = Completer<void>();
+          final Completer<void> attach3 = Completer<void>();
+          final Completer<void> detach2 = Completer<void>();
 
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
           // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-          xcdevice.observedDeviceEvents()!.listen((Map<XCDeviceEvent, String> event) {
-            expect(event.length, 1);
-            if (event.containsKey(XCDeviceEvent.attach)) {
-              if (event[XCDeviceEvent.attach] == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
+          xcdevice.observedDeviceEvents()!.listen((XCDeviceEventNotification event) {
+            // expect(event.length, 1);
+            if (event.eventType == XCDeviceEventType.attach) {
+              if (event.deviceIdentifier == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
                 attach1.complete();
               } else
-              if (event[XCDeviceEvent.attach] == '00008027-00192736010F802E') {
+              if (event.deviceIdentifier == '00008027-00192736010F802E') {
                 attach2.complete();
               }
-            } else if (event.containsKey(XCDeviceEvent.detach)) {
-              expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
-              detach1.complete();
+              if (event.deviceIdentifier == '00000001-0000000000000000') {
+                attach3.complete();
+              }
+            } else if (event.eventType == XCDeviceEventType.detach) {
+              if (event.deviceIdentifier == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
+                detach1.complete();
+              }
+              if (event.deviceIdentifier == '00000001-0000000000000000') {
+                detach2.complete();
+              }
             } else {
               fail('Unexpected event');
             }
@@ -374,7 +398,165 @@ void main() {
           await attach1.future;
           await attach2.future;
           await detach1.future;
+          await attach3.future;
+          await detach2.future;
           expect(logger.traceText, contains('xcdevice observe error: Some error'));
+        });
+
+        testUsingContext('handles exit code', () async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--usb',
+            ],
+          ));
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--wifi',
+            ],
+            exitCode: 1,
+          ));
+
+          final Completer<void> doneCompleter = Completer<void>();
+          xcdevice.observedDeviceEvents()!.listen(null, onDone: () {
+            doneCompleter.complete();
+          });
+          await doneCompleter.future;
+          expect(logger.traceText, contains('xcdevice observe --usb exited with code 0'));
+          expect(logger.traceText, contains('xcdevice observe --wifi exited with code 0'));
+        });
+
+      });
+
+      group('wait device events', () {
+        testUsingContext('relays events', () async {
+          const String deviceId = '00000001-0000000000000000';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--usb',
+              deviceId,
+            ],
+          ));
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--wifi',
+              deviceId,
+            ],
+            stdout: 'Attach: 00000001-0000000000000000\n',
+          ));
+
+          // Attach: 00000001-0000000000000000
+
+          final XCDeviceEventNotification? event = await xcdevice.waitForDeviceToConnect(deviceId);
+
+          expect(event?.deviceIdentifier, deviceId);
+          expect(event?.eventInterface, XCDeviceEventInterface.wifi);
+          expect(event?.eventType, XCDeviceEventType.attach);
+        });
+
+        testUsingContext('handles exit code', () async {
+          const String deviceId = '00000001-0000000000000000';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--usb',
+              deviceId,
+            ],
+            exitCode: 1,
+          ));
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--wifi',
+              deviceId,
+            ],
+          ));
+
+          final XCDeviceEventNotification? event = await xcdevice.waitForDeviceToConnect(deviceId);
+
+          expect(event, isNull);
+          expect(logger.traceText, contains('xcdevice wait --usb exited with code 0'));
+          expect(logger.traceText, contains('xcdevice wait --wifi exited with code 0'));
+        });
+
+        testUsingContext('handles cancel', () async {
+          const String deviceId = '00000001-0000000000000000';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--usb',
+              deviceId,
+            ],
+          ));
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'wait',
+              '--wifi',
+              deviceId,
+            ],
+          ));
+
+          final Future<XCDeviceEventNotification?> futureEvent = xcdevice.waitForDeviceToConnect(deviceId);
+          xcdevice.cancelWaitForDeviceToConnect();
+          final XCDeviceEventNotification? event = await futureEvent;
+
+          expect(event, isNull);
+          expect(logger.traceText, contains('xcdevice wait --usb exited with code 0'));
+          expect(logger.traceText, contains('xcdevice wait --wifi exited with code 0'));
         });
       });
 
@@ -479,23 +661,37 @@ void main() {
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-          expect(devices, hasLength(4));
+          expect(devices, hasLength(5));
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
           expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[0].interfaceType, IOSDeviceConnectionInterface.usb);
+          expect(devices[0].isConnected, true);
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
           expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
+          expect(devices[1].interfaceType, IOSDeviceConnectionInterface.usb);
+          expect(devices[1].isConnected, true);
           expect(devices[2].id, '234234234234234234345445687594e089dede3c44');
           expect(devices[2].name, 'A networked iPad');
           expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
+          expect(devices[2].interfaceType, IOSDeviceConnectionInterface.network);
+          expect(devices[2].isConnected, true);
           expect(devices[3].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
           expect(devices[3].name, 'iPad 2');
           expect(await devices[3].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[3].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
+          expect(devices[3].interfaceType, IOSDeviceConnectionInterface.usb);
+          expect(devices[3].isConnected, true);
+          expect(devices[4].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
+          expect(devices[4].name, 'iPhone');
+          expect(await devices[4].sdkNameAndVersion, 'iOS 13.3 17C54');
+          expect(devices[4].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[4].interfaceType, IOSDeviceConnectionInterface.usb);
+          expect(devices[4].isConnected, false);
           expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,

@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -35,19 +36,24 @@ import 'mac.dart';
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
     required Platform platform,
-    required XCDevice xcdevice,
+    required this.xcdevice,
     required IOSWorkflow iosWorkflow,
     required Logger logger,
   }) : _platform = platform,
-       _xcdevice = xcdevice,
        _iosWorkflow = iosWorkflow,
        _logger = logger,
        super('iOS devices');
 
   final Platform _platform;
-  final XCDevice _xcdevice;
   final IOSWorkflow _iosWorkflow;
   final Logger _logger;
+
+  @visibleForTesting
+  final XCDevice xcdevice;
+
+  final Map<String, IOSDevice> _cachedObserveredDevices = <String, IOSDevice>{};
+  final Map<String, Map<XCDeviceEventInterface, bool>> _observedDevices =
+      <String, Map<XCDeviceEventInterface, bool>>{};
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -55,7 +61,11 @@ class IOSDevices extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => _iosWorkflow.canListDevices;
 
-  StreamSubscription<Map<XCDeviceEvent, String>>? _observedDeviceEventsSubscription;
+  @override
+  bool get supportsWirelessDevices => true;
+
+  StreamSubscription<XCDeviceEventNotification>?
+      _observedDeviceEventsSubscription;
 
   @override
   Future<void> startPolling() async {
@@ -64,19 +74,20 @@ class IOSDevices extends PollingDeviceDiscovery {
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
-    if (!_xcdevice.isInstalled) {
+    if (!xcdevice.isInstalled) {
       return;
     }
 
     deviceNotifier ??= ItemListNotifier<Device>();
 
     // Start by populating all currently attached devices.
-    deviceNotifier!.updateWithNewList(await pollingGetDevices());
+    _updateCachedDevices(await pollingGetDevices());
+    _updateNotifierFromCache();
 
     // cancel any outstanding subscriptions.
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents()?.listen(
-      _onDeviceEvent,
+    _observedDeviceEventsSubscription = xcdevice.observedDeviceEvents()?.listen(
+      onDeviceEvent,
       onError: (Object error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
       }, onDone: () {
@@ -90,29 +101,85 @@ class IOSDevices extends PollingDeviceDiscovery {
     );
   }
 
-  Future<void> _onDeviceEvent(Map<XCDeviceEvent, String> event) async {
-    final XCDeviceEvent eventType = event.containsKey(XCDeviceEvent.attach) ? XCDeviceEvent.attach : XCDeviceEvent.detach;
-    final String? deviceIdentifier = event[eventType];
+  @visibleForTesting
+  Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
     final ItemListNotifier<Device>? notifier = deviceNotifier;
     if (notifier == null) {
       return;
     }
     Device? knownDevice;
     for (final Device device in notifier.items) {
-      if (device.id == deviceIdentifier) {
+      if (device.id == event.deviceIdentifier) {
         knownDevice = device;
       }
     }
 
-    // Ignore already discovered devices (maybe populated at the beginning).
-    if (eventType == XCDeviceEvent.attach && knownDevice == null) {
-      // There's no way to get details for an individual attached device,
-      // so repopulate them all.
-      final List<Device> devices = await pollingGetDevices();
-      notifier.updateWithNewList(devices);
-    } else if (eventType == XCDeviceEvent.detach && knownDevice != null) {
-      notifier.removeItem(knownDevice);
+    final Map<XCDeviceEventInterface, bool> deviceObservedConnections =
+        _observedDevices[event.deviceIdentifier] ??
+            <XCDeviceEventInterface, bool>{
+              XCDeviceEventInterface.usb: false,
+              XCDeviceEventInterface.wifi: false,
+            };
+    if (event.eventType == XCDeviceEventType.attach) {
+      // Update device's observed connections.
+      deviceObservedConnections[event.eventInterface] = true;
+      _observedDevices[event.deviceIdentifier] = deviceObservedConnections;
+
+      // If device was not already in notifier, add it.
+      if (knownDevice == null) {
+        if (_cachedObserveredDevices[event.deviceIdentifier] == null) {
+          // If device is not found in cache, there's no way to get details
+          // for an individual attached device, so repopulate them all.
+          _updateCachedDevices(await pollingGetDevices());
+        }
+        _updateNotifierFromCache();
+      }
+    } else {
+      // Update device's observed connections.
+      deviceObservedConnections[event.eventInterface] = false;
+      _observedDevices[event.deviceIdentifier] = deviceObservedConnections;
+
+      // If device is in the notifier and does not have other observed
+      // connections, remove it.
+      if (knownDevice != null &&
+          !_deviceHasObserveredConnection(deviceObservedConnections)) {
+        deviceNotifier!.removeItem(knownDevice);
+      }
     }
+  }
+
+  /// Adds or updates devices in cache. Does not remove devices from cache.
+  void _updateCachedDevices(List<Device> devices) {
+    for (final Device device in devices) {
+      if (device is! IOSDevice) {
+        continue;
+      }
+      _cachedObserveredDevices[device.id] = device;
+    }
+  }
+
+  /// Updates notifier with devices from cache that were determined to be connected.
+  void _updateNotifierFromCache() {
+    final List<Device> connectedDevices = <Device>[];
+    for (final Device device in _cachedObserveredDevices.values) {
+      final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
+          _observedDevices[device.id];
+      // Device is connected if it has either an observed usb or wifi connection
+      // or it has not been observed but was found as connected in the cache.
+      if ((deviceObservedConnections != null &&
+              _deviceHasObserveredConnection(deviceObservedConnections)) ||
+          (deviceObservedConnections == null && device.isConnected)) {
+        connectedDevices.add(device);
+      }
+    }
+    deviceNotifier!.updateWithNewList(connectedDevices);
+  }
+
+  bool _deviceHasObserveredConnection(
+    Map<XCDeviceEventInterface, bool> deviceObservedConnections,
+  ) {
+    return (deviceObservedConnections[XCDeviceEventInterface.usb] ?? false) ||
+        (deviceObservedConnections[XCDeviceEventInterface.wifi] ?? false);
   }
 
   @override
@@ -121,14 +188,136 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!_platform.isMacOS) {
       throw UnsupportedError(
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
 
-    return _xcdevice.getAvailableIOSDevices(timeout: timeout);
+    return xcdevice.getAvailableIOSDevices(timeout: timeout);
+  }
+
+  /// Get devices filtered by [filter] that match the given device id/name.
+  ///
+  /// If an exact match is found, return it immediately. Otherwise check all
+  /// devices and return all that begin with the given device id/name.
+  ///
+  /// If [waitForDeviceToConnect] is true and an exact match or only one
+  /// partial match is found, wait for the device to connect.
+  @override
+  Future<DeviceDiscoveryMatchByIdResult> getDevicesById(
+    String deviceId,
+    Logger logger, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    final DeviceDiscoveryFilter? filterToUse;
+    if (waitForDeviceToConnect) {
+      // If going to wait for device to connect, ignore the found device's
+      // connection status and interface since they might change.
+      filterToUse = DeviceDiscoveryFilter(
+        mustBeConnected: false,
+        supportFilter: filter?.supportFilter,
+      );
+    } else {
+      filterToUse = filter;
+    }
+
+    final List<Device> foundDevices = await devices(
+      filter: filterToUse,
+    ).onError((dynamic error, StackTrace stackTrace) {
+      logger.printTrace('Ignored error discovering $deviceId: $error');
+      return <Device>[];
+    });
+
+    final List<Device> prefixMatches = <Device>[];
+    IOSDevice? exactMatchDevice;
+    for (final Device device in foundDevices) {
+      if (device is! IOSDevice) {
+        continue;
+      }
+      if (exactlyMatchesDeviceId(deviceId, device)) {
+        if (waitForDeviceToConnect) {
+          // Since when waitForDeviceToConnect is true, the original filter is
+          // not used, if device is connected, check if it matches all original
+          // filter requirements. If it does, return it, otherwise continue
+          // checking for other matching devices.
+          // If device is not connected, continue to process to wait for it to
+          // connect.
+          if (device.isConnected) {
+            if (filter == null || await filter.matchesRequirements(device)) {
+              return DeviceDiscoveryMatchByIdResult(
+                <Device>[device],
+                isExactMatch: true,
+              );
+            } else {
+              continue;
+            }
+          }
+          exactMatchDevice = device;
+          break;
+        } else {
+          return DeviceDiscoveryMatchByIdResult(
+            <Device>[device],
+            isExactMatch: true,
+          );
+        }
+      }
+      if (startsWithDeviceId(deviceId, device)) {
+        prefixMatches.add(device);
+      }
+    }
+
+    if (waitForDeviceToConnect) {
+      // Only wait to connect if it's an exact match
+      if (exactMatchDevice != null) {
+        final Device? connectedDevice =
+            await _waitForDeviceToConnect(exactMatchDevice, logger);
+
+        // Only return device if it also matches filter requirements.
+        if (connectedDevice != null &&
+            (filter == null ||
+                await filter.matchesRequirements(connectedDevice))) {
+          return DeviceDiscoveryMatchByIdResult(
+            <Device>[connectedDevice],
+            isExactMatch: exactMatchDevice != null,
+          );
+        }
+      }
+    }
+
+    return DeviceDiscoveryMatchByIdResult(prefixMatches);
+  }
+
+  @override
+  void cancelWaitForDeviceToConnect() {
+    xcdevice.cancelWaitForDeviceToConnect();
+  }
+
+  Future<Device?> _waitForDeviceToConnect(
+    IOSDevice device,
+    Logger logger,
+  ) async {
+    logger.printStatus('Waiting for ${device.name} to connect...');
+    final Status waitingStatus = logger.startSpinner(
+      timeout: const Duration(seconds: 30),
+      warningColor: TerminalColor.red,
+      slowWarningCallback: () {
+        return 'The device was unable to connect after 30 seconds. Ensure the device is paired and unlocked.';
+      },
+    );
+    final XCDeviceEventNotification? eventDetails =
+        await xcdevice.waitForDeviceToConnect(device.id);
+    waitingStatus.stop();
+    if (eventDetails != null) {
+      device.isConnected = true;
+      device.interfaceType = getIOSDeviceConnectionInterfaceFromEventInterface(
+        eventDetails.eventInterface,
+      );
+      return device;
+    }
+    return null;
   }
 
   @override
@@ -139,7 +328,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       ];
     }
 
-    return _xcdevice.getDiagnostics();
+    return xcdevice.getDiagnostics();
   }
 
   @override
@@ -152,6 +341,7 @@ class IOSDevice extends Device {
     required this.name,
     required this.cpuArchitecture,
     required this.interfaceType,
+    required this.isConnected,
     String? sdkVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
@@ -185,6 +375,13 @@ class IOSDevice extends Device {
   final IMobileDevice _iMobileDevice;
   final IProxy _iproxy;
 
+  @override
+  DeviceConnectionInterface get connectionInterface {
+    return interfaceType == IOSDeviceConnectionInterface.network
+        ? DeviceConnectionInterface.wireless
+        : DeviceConnectionInterface.attached;
+  }
+
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
     final String? majorVersionString = _sdkVersion?.split('.').first.trim();
@@ -199,7 +396,10 @@ class IOSDevice extends Device {
 
   final DarwinArch cpuArchitecture;
 
-  final IOSDeviceConnectionInterface interfaceType;
+  IOSDeviceConnectionInterface interfaceType;
+
+  @override
+  bool isConnected;
 
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
@@ -311,7 +511,7 @@ class IOSDevice extends Device {
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
     String? packageId;
-    if (interfaceType == IOSDeviceConnectionInterface.network &&
+    if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
         debuggingOptions.disablePortPublication) {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
@@ -378,10 +578,10 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
+        // Don't port foward if debugging with a wireless device.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
-          portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,
+          portForwarder: isWirelesslyConnected ? null : portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
@@ -414,13 +614,16 @@ class IOSDevice extends Device {
 
       _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
 
-      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 45 : 30;
+      final int defaultTimeout = isWirelesslyConnected ? 45 : 30;
+
+      final Duration printDuration = discoveryTimeout ?? Duration(seconds: defaultTimeout);
+      _logger.printTrace('check for ${printDuration.inSeconds}');
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError('The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
 
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
-        if (interfaceType == IOSDeviceConnectionInterface.network) {
+        if (isWirelesslyConnected) {
           _logger.printError(
             '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
             'This is required for wireless debugging. If you selected "Don\'t Allow", '
@@ -433,7 +636,7 @@ class IOSDevice extends Device {
       });
 
       Uri? localUri;
-      if (interfaceType == IOSDeviceConnectionInterface.network) {
+      if (isWirelesslyConnected) {
         // Wait for Dart VM Service to start up.
         final Uri? serviceURL = await observatoryDiscovery?.uri;
         if (serviceURL == null) {
@@ -458,7 +661,7 @@ class IOSDevice extends Device {
           this,
           usesIpv6: ipv6,
           deviceVmservicePort: serviceURL.port,
-          isNetworkDevice: true,
+          useDeviceIP: true,
         );
 
         mDNSLookupTimer.cancel();

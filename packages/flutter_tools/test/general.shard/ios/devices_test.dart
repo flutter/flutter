@@ -75,6 +75,7 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
       expect(device.isSupported(), isTrue);
     });
@@ -91,6 +92,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.armv7,
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
       expect(device.isSupported(), isFalse);
     });
@@ -108,6 +110,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -121,6 +124,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -134,6 +138,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -147,6 +152,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -160,6 +166,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       ).majorSdkVersion, 0);
     });
 
@@ -176,6 +183,7 @@ void main() {
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -194,6 +202,7 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -218,6 +227,7 @@ void main() {
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
               interfaceType: IOSDeviceConnectionInterface.usb,
+              isConnected: true,
             );
           },
           throwsAssertionError,
@@ -308,6 +318,7 @@ void main() {
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
           interfaceType: IOSDeviceConnectionInterface.usb,
+          isConnected: true,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -369,6 +380,7 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
 
       device2 = IOSDevice(
@@ -383,6 +395,7 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
       );
     });
 
@@ -400,7 +413,7 @@ void main() {
     });
 
     testWithoutContext('start polling', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final TestIOSDevices iosDevices = TestIOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -434,25 +447,68 @@ void main() {
       expect(iosDevices.deviceNotifier!.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
-      });
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.usb,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
       await added.future;
       expect(iosDevices.deviceNotifier!.items.length, 2);
       expect(iosDevices.deviceNotifier!.items, contains(device1));
       expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 1);
 
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
-      });
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.wifi,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.deviceNotifier!.items.length, 2);
+      expect(iosDevices.deviceNotifier!.items, contains(device1));
+      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 2);
+
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEventType.detach,
+          XCDeviceEventInterface.usb,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.deviceNotifier!.items.length, 2);
+      expect(iosDevices.deviceNotifier!.items, contains(device1));
+      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 3);
+
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEventType.detach,
+          XCDeviceEventInterface.wifi,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
       await removed.future;
       expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
+      expect(iosDevices.eventsReceived, 4);
 
-      // Remove stream will throw over-completion if called more than once
-      // which proves this is ignored.
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'bogus',
-      });
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEventType.detach,
+          XCDeviceEventInterface.usb,
+          'bogus'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.eventsReceived, 5);
 
       expect(addedCount, 2);
 
@@ -472,7 +528,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
+      final StreamController<XCDeviceEventNotification> rescheduledStream = StreamController<XCDeviceEventNotification>();
 
       unawaited(xcdevice.deviceEventController.done.whenComplete(() {
         xcdevice.deviceEventController = rescheduledStream;
@@ -547,6 +603,345 @@ void main() {
     });
   });
 
+  group('getDevicesById', () {
+    late FakeXcdevice xcdevice;
+    late Cache cache;
+    late FakeProcessManager fakeProcessManager;
+    late BufferLogger logger;
+    late IOSDeploy iosDeploy;
+    late IMobileDevice iMobileDevice;
+    late IOSWorkflow iosWorkflow;
+    late IOSDevice usbConnected1;
+    late IOSDevice usbConnected2;
+    late IOSDevice notConnected1;
+
+    setUp(() {
+      xcdevice = FakeXcdevice();
+      final Artifacts artifacts = Artifacts.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
+      logger = BufferLogger.test();
+      iosWorkflow = FakeIOSWorkflow();
+      fakeProcessManager = FakeProcessManager.any();
+      iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: macPlatform,
+        processManager: fakeProcessManager,
+      );
+      iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        processManager: fakeProcessManager,
+        logger: logger,
+      );
+
+      usbConnected1 = IOSDevice(
+        'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
+        name: 'iPhone',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        logger: logger,
+        platform: macPlatform,
+        fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
+      );
+
+      usbConnected2 = IOSDevice(
+        '00008027-00192736010F802E',
+        name: 'iPad Pro',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        logger: logger,
+        platform: macPlatform,
+        fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: true,
+      );
+
+      notConnected1 = IOSDevice(
+        '00000001-0000000000000000',
+        name: 'iPad',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        logger: logger,
+        platform: macPlatform,
+        fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceConnectionInterface.usb,
+        isConnected: false,
+      );
+    });
+
+    testWithoutContext('find exact match', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices
+        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+        '00008027-00192736010F802E',
+        logger,
+      );
+
+      expect(result.devices, <Device>[usbConnected2]);
+      expect(result.isExactMatch, isTrue);
+    });
+
+    testWithoutContext('find multiple partial matches', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices
+        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+        'iP',
+        logger,
+      );
+
+      expect(result.devices, <Device>[usbConnected1, usbConnected2, notConnected1]);
+      expect(result.isExactMatch, isFalse);
+    });
+
+    testWithoutContext('with must be connected filter', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices
+        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+        'iP',
+        logger,
+        filter: DeviceDiscoveryFilter(),
+      );
+
+      expect(result.devices, <Device>[usbConnected1, usbConnected2]);
+      expect(result.isExactMatch, isFalse);
+    });
+
+    testWithoutContext('with connection interface filter', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices
+        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+        'iP',
+        logger,
+        filter: DeviceDiscoveryFilter(deviceConnectionFilter: DeviceConnectionInterface.wireless),
+      );
+
+      expect(result.devices, isEmpty);
+    });
+
+
+    group('and waitForDeviceToConnect', () {
+      testWithoutContext('find exact match that is already connected', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          '00008027-00192736010F802E',
+          logger,
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[usbConnected2]);
+        expect(result.isExactMatch, isTrue);
+      });
+
+      testWithoutContext('find exact match that is not connected', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.wifi,
+          '00000001-0000000000000000'
+        );
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          '00000001-0000000000000000',
+          logger,
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[notConnected1]);
+        expect(result.devices.first.isConnected, true);
+        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
+        expect(result.isExactMatch, isTrue);
+      });
+
+      testWithoutContext('find multiple partial matches', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          'iP',
+          logger,
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[usbConnected1, usbConnected2, notConnected1]);
+        expect(result.isExactMatch, isFalse);
+      });
+
+      testWithoutContext('with must be connected filter', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.wifi,
+          '00000001-0000000000000000'
+        );
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          '00000001-0000000000000000',
+          logger,
+          filter: DeviceDiscoveryFilter(),
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[notConnected1]);
+        expect(result.devices.first.isConnected, true);
+        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
+        expect(result.isExactMatch, isTrue);
+      });
+
+      testWithoutContext('with mismatching connection interface filter', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.wifi,
+          '00000001-0000000000000000'
+        );
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          '00000001-0000000000000000',
+          logger,
+          filter: DeviceDiscoveryFilter(deviceConnectionFilter: DeviceConnectionInterface.attached),
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, isEmpty);
+      });
+
+      testWithoutContext('with matching connection interface filter', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+          XCDeviceEventType.attach,
+          XCDeviceEventInterface.wifi,
+          '00000001-0000000000000000'
+        );
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          '00000001-0000000000000000',
+          logger,
+          filter: DeviceDiscoveryFilter(deviceConnectionFilter: DeviceConnectionInterface.wireless),
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[notConnected1]);
+        expect(result.devices.first.isConnected, true);
+        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
+        expect(result.isExactMatch, isTrue);
+      });
+
+      testWithoutContext('find exact match and partials but wait fails', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: macPlatform,
+          xcdevice: xcdevice,
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+        );
+        xcdevice.isInstalled = true;
+        xcdevice.devices
+          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+        xcdevice.waitForDeviceEvent = null;
+        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+          'iPad',
+          logger,
+          waitForDeviceToConnect: true,
+        );
+
+        expect(result.devices, <Device>[usbConnected2]);
+      });
+    });
+  });
+
   group('getDiagnostics', () {
     late FakeXcdevice xcdevice;
     late IOSWorkflow iosWorkflow;
@@ -596,13 +991,37 @@ class FakeIOSApp extends Fake implements IOSApp {
   final String name;
 }
 
+class TestIOSDevices extends IOSDevices {
+  TestIOSDevices({required super.platform, required super.xcdevice, required super.iosWorkflow, required super.logger,});
+
+  Completer<void> receivedEvent = Completer<void>();
+  int eventsReceived = 0;
+
+  void resetEventCompleter() {
+    receivedEvent = Completer<void>();
+  }
+
+  @override
+  Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
+    await super.onDeviceEvent(event);
+    if (!receivedEvent.isCompleted) {
+      receivedEvent.complete();
+    }
+    eventsReceived++;
+    return;
+  }
+}
 class FakeIOSWorkflow extends Fake implements IOSWorkflow { }
+
+typedef VoidCallback = void Function();
 
 class FakeXcdevice extends Fake implements XCDevice {
   int getAvailableIOSDevicesCount = 0;
   final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
   final List<String> diagnostics = <String>[];
-  StreamController<Map<XCDeviceEvent, String>> deviceEventController = StreamController<Map<XCDeviceEvent, String>>();
+  StreamController<XCDeviceEventNotification> deviceEventController = StreamController<XCDeviceEventNotification>();
+
+  XCDeviceEventNotification? waitForDeviceEvent;
 
   @override
   bool isInstalled = true;
@@ -613,7 +1032,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   }
 
   @override
-  Stream<Map<XCDeviceEvent, String>> observedDeviceEvents() {
+  Stream<XCDeviceEventNotification> observedDeviceEvents() {
     return deviceEventController.stream;
   }
 
@@ -621,6 +1040,19 @@ class FakeXcdevice extends Fake implements XCDevice {
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
     return devices[getAvailableIOSDevicesCount++];
   }
+
+  @override
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+    final XCDeviceEventNotification? waitEvent = waitForDeviceEvent;
+    if (waitEvent != null) {
+      return XCDeviceEventNotification(waitEvent.eventType, waitEvent.eventInterface, waitEvent.deviceIdentifier);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  void cancelWaitForDeviceToConnect() => VoidCallback;
 }
 
 class FakeProcess extends Fake implements Process {

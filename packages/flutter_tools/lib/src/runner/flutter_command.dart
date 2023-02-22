@@ -31,6 +31,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
+import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
@@ -111,6 +112,7 @@ class FlutterOptions {
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
+  static const String kDeviceConnection = 'device-connection';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
@@ -183,6 +185,17 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   FlutterCommandRunner? get runner => super.runner as FlutterCommandRunner?;
+
+  TargetDevices? _targetDevices;
+  TargetDevices get targetDevices {
+    _targetDevices ??= TargetDevices(
+      platform: globals.platform,
+      deviceManager: globals.deviceManager!,
+      logger: globals.logger,
+      deviceConnectionInterface: deviceConnectionInterface,
+    );
+    return _targetDevices!;
+  }
 
   bool _requiresPubspecYaml = false;
 
@@ -665,6 +678,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDeviceConnectionOption() {
+    argParser.addOption(FlutterOptions.kDeviceConnection,
+      defaultsTo: 'both',
+      help: 'Discover devices based on connection type.',
+      allowed: <String>['attached', 'wireless', 'both'],
+      allowedHelp: <String, String>{
+        'both': 'Searches for both attached and wireless devices.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.'
+      },
+    );
+  }
+
   void usesApplicationBinaryOption() {
     argParser.addOption(
       FlutterOptions.kUseApplicationBinary,
@@ -692,6 +718,19 @@ abstract class FlutterCommand extends Command<void> {
     }
     return null;
   }();
+
+  DeviceConnectionInterface? get deviceConnectionInterface  {
+    if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
+        && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
+      final String? connectionType = stringArgDeprecated(FlutterOptions.kDeviceConnection);
+      if (connectionType == 'attached') {
+        return DeviceConnectionInterface.attached;
+      } else if (connectionType == 'wireless') {
+        return DeviceConnectionInterface.wireless;
+      }
+    }
+    return null;
+  }
 
   void addBuildModeFlags({
     required bool verboseHelp,
@@ -1387,6 +1426,9 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    startFindingWirelessDevices();
+
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1479,113 +1521,10 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeUnsupportedDevices = false,
   }) async {
-    if (!globals.doctor!.canLaunchAnything) {
-      globals.printError(userMessages.flutterNoDevelopmentDevice);
-      return null;
-    }
-    final DeviceManager deviceManager = globals.deviceManager!;
-    List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
-      timeout: deviceDiscoveryTimeout,
+    return targetDevices.findAllTargetDevices(
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+      flutterProject: includeUnsupportedDevices ? null : FlutterProject.current(),
     );
-
-    if (devices.isEmpty) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
-        if (allDevices.isNotEmpty) {
-          globals.logger.printStatus('');
-          globals.logger.printStatus('The following devices were found:');
-          await Device.printDevices(allDevices, globals.logger);
-        }
-        return null;
-      } else if (deviceManager.hasSpecifiedAllDevices) {
-        globals.logger.printStatus(userMessages.flutterNoDevicesFound);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      } else {
-        globals.logger.printStatus(userMessages.flutterNoSupportedDevices);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      }
-    } else if (devices.length > 1) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
-        return null;
-      } else if (!deviceManager.hasSpecifiedAllDevices) {
-        if (globals.terminal.stdinHasTerminal) {
-          // If DeviceManager was not able to prioritize a device. For example, if the user
-          // has two active Android devices running, then we request the user to
-          // choose one. If the user has two nonEphemeral devices running, we also
-          // request input to choose one.
-          globals.logger.printStatus(userMessages.flutterMultipleDevicesFound);
-          await Device.printDevices(devices, globals.logger);
-          final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-
-          // Update the [DeviceManager.specifiedDeviceId] so that we will not be prompted again.
-          deviceManager.specifiedDeviceId = chosenDevice.id;
-
-          devices = <Device>[chosenDevice];
-        } else {
-          // Show an error message asking the user to specify `-d all` if they
-          // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
-          globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
-          globals.logger.printStatus('');
-          await Device.printDevices(allDevices, globals.logger);
-          return null;
-        }
-      }
-    }
-
-    return devices;
-  }
-
-  Future<void> _printUnsupportedDevice(DeviceManager deviceManager) async {
-    final List<Device> unsupportedDevices = await deviceManager.getDevices();
-    if (unsupportedDevices.isNotEmpty) {
-      final StringBuffer result = StringBuffer();
-      result.writeln(userMessages.flutterFoundButUnsupportedDevices);
-      result.writeAll(
-        (await Device.descriptions(unsupportedDevices))
-            .map((String desc) => desc)
-            .toList(),
-        '\n',
-      );
-      result.writeln();
-      result.writeln(userMessages.flutterMissPlatformProjects(
-        Device.devicesPlatformTypes(unsupportedDevices),
-      ));
-      globals.logger.printStatus(result.toString());
-    }
-  }
-
-  Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
-    _displayDeviceOptions(devices);
-    final String userInput =  await _readUserInput(devices.length);
-    if (userInput.toLowerCase() == 'q') {
-      throwToolExit('');
-    }
-    return devices[int.parse(userInput) - 1];
-  }
-
-  void _displayDeviceOptions(List<Device> devices) {
-    int count = 1;
-    for (final Device device in devices) {
-      globals.logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
-      count++;
-    }
-  }
-
-  Future<String> _readUserInput(int deviceCount) async {
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
-      displayAcceptedCharacters: false,
-      logger: globals.logger,
-      prompt: userMessages.flutterChooseOne,
-    );
-    return result;
   }
 
   /// Find and return the target [Device] based upon currently connected
@@ -1604,12 +1543,19 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;
     }
     return deviceList.single;
+  }
+
+  void startFindingWirelessDevices() {
+    // Start async process to find wireless devices since it can take longer.
+    targetDevices.startPollingWirelessDevices(
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+    );
   }
 
   @protected
@@ -1691,14 +1637,17 @@ abstract class FlutterCommand extends Command<void> {
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to an attached device.
+/// downloads artifacts corresponding to potentially connected devices.
 mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there are no attached devices, use the default configuration.
-    // Otherwise, only add development artifacts which correspond to a
-    // connected device.
-    final List<Device> devices = await globals.deviceManager!.getDevices();
+    // If there are no devices, use the default configuration.
+    // Otherwise, only add development artifacts corresponding to
+    // potentially connected devices. We might not be able to determine if a
+    // device is connected yet, so include it in case it becomes connected.
+    final List<Device> devices = await globals.deviceManager!.getDevices(
+      filter: DeviceDiscoveryFilter(mustBeConnected: false),
+    );
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }

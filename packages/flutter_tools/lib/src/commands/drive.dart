@@ -23,7 +23,6 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -212,16 +211,16 @@ class DriveCommand extends RunCommandBase {
     return findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
   }
 
-  // Network devices need `publish-port` to be enabled because it requires mDNS.
-  // If the flag wasn't provided as an actual argument and it's a network device,
+  // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a wireless iOS device,
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
-    final bool isNetworkDevice = device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
-    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
-      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+    final bool isIOSWirelessDevice = device is IOSDevice && device.isWirelesslyConnected;
+    if (isIOSWirelessDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('A wireless iOS device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
     return !boolArgDeprecated('publish-port');

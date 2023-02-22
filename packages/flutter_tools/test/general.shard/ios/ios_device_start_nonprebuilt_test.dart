@@ -338,6 +338,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceConnectionInterface.usb,
+    isConnected: true,
   );
 }
 

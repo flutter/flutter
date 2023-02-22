@@ -99,5 +99,6 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     cpuArchitecture: DarwinArch.arm64,
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     interfaceType: IOSDeviceConnectionInterface.usb,
+    isConnected: true,
   );
 }

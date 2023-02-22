@@ -358,5 +358,6 @@ IOSDevice setUpIOSDevice({
     ),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     interfaceType: interfaceType ?? IOSDeviceConnectionInterface.usb,
+    isConnected: true,
   );
 }

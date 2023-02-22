@@ -696,13 +696,68 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('device-connection option not given', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..usesDeviceConnectionOption();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['dummy']);
+      expect(command.deviceConnectionInterface, isNull);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('device-connection option set to attached', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..usesDeviceConnectionOption();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['dummy', '--device-connection', 'attached']);
+      expect(command.deviceConnectionInterface, DeviceConnectionInterface.attached);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('device-connection option set to wireless', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..usesDeviceConnectionOption();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['dummy', '--device-connection', 'wireless']);
+      expect(command.deviceConnectionInterface, DeviceConnectionInterface.wireless);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('device-connection option set to both', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..usesDeviceConnectionOption();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['dummy', '--device-connection', 'both']);
+      expect(command.deviceConnectionInterface, isNull);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('device-connection option set to bogus', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..usesDeviceConnectionOption();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      bool errorOnBogusValue = false;
+      try {
+        await runner.run(<String>['dummy', '--device-connection', 'bogus']);
+      } on UsageException {
+        errorOnBogusValue = true;
+      }
+      expect(errorOnBogusValue, isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
     group('findAllTargetDevices', () {
       final FakeDevice device1 = FakeDevice('device1', 'device1');
       final FakeDevice device2 = FakeDevice('device2', 'device2');
       group('when specified device id', () {
         testUsingContext('returns device when device is found', () async {
-          testDeviceManager.specifiedDeviceId = 'device-id';
-          testDeviceManager.addDevice(device1);
+          testDeviceManager.specifiedDeviceId = 'device1';
+          testDeviceManager.addAttachedDevice(device1);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, <Device>[device1]);
@@ -717,20 +772,20 @@ void main() {
         });
 
         testUsingContext('show error when multiple devices found', () async {
-          testDeviceManager.specifiedDeviceId = 'device-id';
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
+          testDeviceManager.specifiedDeviceId = 'device';
+          testDeviceManager.addAttachedDevice(device1);
+          testDeviceManager.addAttachedDevice(device2);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterFoundSpecifiedDevices(2, 'device-id')));
+          expect(testLogger.statusText, contains(UserMessages().flutterFoundSpecifiedDevices(2, 'device')));
         });
       });
 
       group('when specified all', () {
         testUsingContext('can return one device', () async {
           testDeviceManager.specifiedDeviceId = 'all';
-          testDeviceManager.addDevice(device1);
+          testDeviceManager.addAttachedDevice(device1);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, <Device>[device1]);
@@ -738,8 +793,8 @@ void main() {
 
         testUsingContext('can return multiple devices', () async {
           testDeviceManager.specifiedDeviceId = 'all';
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
+          testDeviceManager.addAttachedDevice(device1);
+          testDeviceManager.addAttachedDevice(device2);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, <Device>[device1, device2]);
@@ -756,7 +811,7 @@ void main() {
 
       group('when device not specified', () {
         testUsingContext('returns one device when only one device connected', () async {
-          testDeviceManager.addDevice(device1);
+          testDeviceManager.addAttachedDevice(device1);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, <Device>[device1]);
@@ -770,8 +825,8 @@ void main() {
         });
 
         testUsingContext('show error when multiple devices found and not connected to terminal', () async {
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
+          testDeviceManager.addAttachedDevice(device1);
+          testDeviceManager.addAttachedDevice(device2);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(devices, null);
@@ -788,8 +843,8 @@ void main() {
           });
 
           testUsingContext('choose first device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
+            testDeviceManager.addAttachedDevice(device1);
+            testDeviceManager.addAttachedDevice(device2);
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
             final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
             final List<Device>? devices = await flutterCommand.findAllTargetDevices();
@@ -800,8 +855,8 @@ void main() {
           });
 
           testUsingContext('choose second device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
+            testDeviceManager.addAttachedDevice(device1);
+            testDeviceManager.addAttachedDevice(device2);
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '2');
             final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
             final List<Device>? devices = await flutterCommand.findAllTargetDevices();
@@ -812,8 +867,8 @@ void main() {
           });
 
           testUsingContext('exits without choosing device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
+            testDeviceManager.addAttachedDevice(device1);
+            testDeviceManager.addAttachedDevice(device2);
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], 'q');
             final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
 

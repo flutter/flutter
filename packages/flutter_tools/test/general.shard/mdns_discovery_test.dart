@@ -367,7 +367,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIP: true,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
@@ -404,7 +404,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIP: true,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
       });
@@ -588,7 +588,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIP: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
@@ -625,7 +625,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIP: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
