@@ -195,7 +195,11 @@ bool Playground::OpenPlaygroundHere(
   fml::ScopedCleanupClosure destroy_imgui_context(
       []() { ImGui::DestroyContext(); });
   ImGui::StyleColorsDark();
-  ImGui::GetIO().IniFilename = nullptr;
+
+  auto& io = ImGui::GetIO();
+  io.IniFilename = nullptr;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.ConfigWindowsResizeFromEdges = true;
 
   auto window = reinterpret_cast<GLFWwindow*>(impl_->GetWindowHandle());
   if (!window) {
@@ -246,6 +250,8 @@ bool Playground::OpenPlaygroundHere(
         [render_callback,
          &renderer = renderer_](RenderTarget& render_target) -> bool {
       ImGui::NewFrame();
+      ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+                                   ImGuiDockNodeFlags_PassthruCentralNode);
       bool result = render_callback(render_target);
       ImGui::Render();
 
