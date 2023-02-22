@@ -1492,8 +1492,6 @@ flutter:
           commandHelp.c,
           commandHelp.q,
           '',
-          '💪 Running with sound null safety 💪',
-          '',
           'An Observatory debugger and profiler on FakeDevice is available at: null',
           '',
         ].join('\n')
@@ -1522,8 +1520,6 @@ flutter:
           commandHelp.hWithoutDetails,
           commandHelp.c,
           commandHelp.q,
-          '',
-          '💪 Running with sound null safety 💪',
           '',
           'An Observatory debugger and profiler on FakeDevice is available at: null',
           '',
@@ -2469,8 +2465,8 @@ flutter:
   }));
 }
 
-// NOTE: implements [dds.DartDevelopmentService] and NOT [DartDevelopmentService]
-// from package:flutter_tools.
+// This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
+// interface from package:flutter_tools.
 class FakeDartDevelopmentService extends Fake implements dds.DartDevelopmentService {
   @override
   Future<void> get done => Future<void>.value();

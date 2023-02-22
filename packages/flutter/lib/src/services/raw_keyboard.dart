@@ -432,10 +432,10 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Returns true if a ALT modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
   ///
-  /// Note that the ALTGR key that appears on some keyboards is considered to be
+  /// The `AltGr` key that appears on some keyboards is considered to be
   /// the same as [LogicalKeyboardKey.altRight] on some platforms (notably
   /// Android). On platforms that can distinguish between `altRight` and
-  /// `altGr`, a press of `altGr` will not return true here, and will need to be
+  /// `altGr`, a press of `AltGr` will not return true here, and will need to be
   /// tested for separately.
   ///
   /// Use [isKeyPressed] if you need to know which alt key was pressed.

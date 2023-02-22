@@ -251,7 +251,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The padding of the menu item.
   ///
-  /// Note that [height] may interact with the applied padding. For example,
+  /// The [height] property may interact with the applied padding. For example,
   /// If a [height] greater than the height of the sum of the padding and [child]
   /// is provided, then the padding's effect will not be visible.
   ///

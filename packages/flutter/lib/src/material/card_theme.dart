@@ -114,6 +114,9 @@ class CardTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return CardTheme(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),

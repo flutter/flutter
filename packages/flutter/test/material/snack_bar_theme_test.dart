@@ -12,6 +12,12 @@ void main() {
     expect(const SnackBarThemeData().hashCode, const SnackBarThemeData().copyWith().hashCode);
   });
 
+  test('SnackBarThemeData lerp special cases', () {
+    expect(SnackBarThemeData.lerp(null, null, 0), const SnackBarThemeData());
+    const SnackBarThemeData data = SnackBarThemeData();
+    expect(identical(SnackBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('SnackBarThemeData null fields by default', () {
     const SnackBarThemeData snackBarTheme = SnackBarThemeData();
     expect(snackBarTheme.backgroundColor, null);
@@ -25,6 +31,7 @@ void main() {
     expect(snackBarTheme.insetPadding, null);
     expect(snackBarTheme.showCloseIcon, null);
     expect(snackBarTheme.closeIconColor, null);
+    expect(snackBarTheme.actionOverflowThreshold, null);
   });
 
   test(
@@ -65,6 +72,7 @@ void main() {
       insetPadding: EdgeInsets.all(10.0),
       showCloseIcon: false,
       closeIconColor: Color(0xFF0000AA),
+      actionOverflowThreshold: 0.5,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -84,6 +92,7 @@ void main() {
       'insetPadding: EdgeInsets.all(10.0)',
       'showCloseIcon: false',
       'closeIconColor: Color(0xff0000aa)',
+      'actionOverflowThreshold: 0.5',
     ]);
   });
 
@@ -313,10 +322,14 @@ void main() {
     required SnackBarBehavior themedBehavior,
     EdgeInsetsGeometry? margin,
     double? width,
+    double? themedActionOverflowThreshold,
   }) {
     return MaterialApp(
       theme: ThemeData(
-        snackBarTheme: SnackBarThemeData(behavior: themedBehavior),
+        snackBarTheme: SnackBarThemeData(
+          behavior: themedBehavior,
+          actionOverflowThreshold: themedActionOverflowThreshold,
+        ),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -371,6 +384,16 @@ void main() {
           'was set by the inherited SnackBarThemeData.',
     );
   });
+
+  for (final double overflowThreshold in <double>[-1.0, -.0001, 1.000001, 5]) {
+    test('SnackBar theme will assert for actionOverflowThreshold outside of 0-1 range', () {
+      expect(
+        () => SnackBarThemeData(
+              actionOverflowThreshold: overflowThreshold,
+            ),
+        throwsAssertionError);
+   });
+  }
 
   testWidgets('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
     // SnackBarBehavior.floating set in theme does not assert with width
