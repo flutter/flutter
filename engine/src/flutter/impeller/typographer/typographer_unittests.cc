@@ -201,5 +201,23 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
   ASSERT_EQ(old_packer, new_packer);
 }
 
+TEST_P(TypographerTest, FontGlyphPairTypeChangesHashAndEquals) {
+  Font font = Font(nullptr, {});
+  FontGlyphPair pair_1 = {
+      .font = font,
+      .glyph = Glyph(0, Glyph::Type::kBitmap, Rect::MakeXYWH(0, 0, 1, 1))};
+  // Same glyph same type.
+  FontGlyphPair pair_2 = {
+      .font = font,
+      .glyph = Glyph(0, Glyph::Type::kBitmap, Rect::MakeXYWH(0, 0, 1, 1))};
+  // Same glyph different type.
+  FontGlyphPair pair_3 = {
+      .font = font,
+      .glyph = Glyph(0, Glyph::Type::kPath, Rect::MakeXYWH(0, 0, 1, 1))};
+
+  ASSERT_TRUE(FontGlyphPair::Equal{}(pair_1, pair_2));
+  ASSERT_FALSE(FontGlyphPair::Equal{}(pair_1, pair_3));
+}
+
 }  // namespace testing
 }  // namespace impeller
