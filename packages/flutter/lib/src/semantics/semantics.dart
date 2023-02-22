@@ -3129,9 +3129,9 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
-/// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
-/// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
-/// necessary.
+/// To listen for semantic updates, call [SemanticsBinding.ensureSemantics] or
+/// [PipelineOwner.ensureSemantics] to obtain a [SemanticsHandle]. This will
+/// create a [SemanticsOwner] if necessary.
 class SemanticsOwner extends ChangeNotifier {
   /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({
