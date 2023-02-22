@@ -14,7 +14,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, WindowPadding;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, ViewPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -142,8 +142,8 @@ class TestFormatter extends TextInputFormatter {
 
 // Used to set window.viewInsets since the real ui.WindowPadding has only a
 // private constructor.
-class _TestWindowPadding implements ui.WindowPadding {
-  const _TestWindowPadding({
+class _TestViewPadding implements ui.ViewPadding {
+  const _TestViewPadding({
     required this.bottom,
   });
 
@@ -3384,7 +3384,7 @@ void main() {
       // Add a viewInset tall enough to push the field to the top, where there
       // is no room to display the toolbar above. This is similar to when the
       // keyboard is shown.
-      tester.binding.window.viewInsetsTestValue = const _TestWindowPadding(
+      tester.binding.window.viewInsetsTestValue = const _TestViewPadding(
         bottom: 500.0,
       );
       addTearDown(tester.binding.window.clearViewInsetsTestValue);

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show window;
-import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher, SemanticsUpdate, SingletonFlutterWindow, Size, WindowPadding;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher, SemanticsUpdate, SingletonFlutterWindow, Size, ViewPadding;
 
 import 'package:flutter/semantics.dart' show SemanticsUpdateBuilder;
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
@@ -45,28 +45,28 @@ void main() {
   });
 
   testWidgets('TestWindow can fake view insets', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<WindowPadding>(
+    verifyThatTestWindowCanFakeProperty<ViewPadding>(
       tester: tester,
       realValue: ui.window.viewInsets,
-      fakeValue: const FakeWindowPadding(),
+      fakeValue: const FakeViewPadding(),
       propertyRetriever: () {
         return WidgetsBinding.instance.window.viewInsets;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
         binding.window.viewInsetsTestValue = fakeValue;
       },
     );
   });
 
   testWidgets('TestWindow can fake padding', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<WindowPadding>(
+    verifyThatTestWindowCanFakeProperty<ViewPadding>(
       tester: tester,
       realValue: ui.window.padding,
-      fakeValue: const FakeWindowPadding(),
+      fakeValue: const FakeViewPadding(),
       propertyRetriever: () {
         return WidgetsBinding.instance.window.padding;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
+      propertyFaker: (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
         binding.window.paddingTestValue = fakeValue;
       },
     );
@@ -245,8 +245,8 @@ TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   return testBinding;
 }
 
-class FakeWindowPadding implements WindowPadding {
-  const FakeWindowPadding({
+class FakeViewPadding implements ViewPadding {
+  const FakeViewPadding({
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,

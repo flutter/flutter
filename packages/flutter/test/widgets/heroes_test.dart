@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui' show WindowPadding;
+import 'dart:ui' show ViewPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -184,8 +184,8 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) => Text(widget.value);
 }
 
-class FakeWindowPadding implements WindowPadding {
-  const FakeWindowPadding({
+class FakeViewPadding implements ViewPadding {
+  const FakeViewPadding({
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,
@@ -3097,7 +3097,7 @@ Future<void> main() async {
       final TestImageProvider imageProvider = TestImageProvider(testImage);
       final TestWidgetsFlutterBinding testBinding = tester.binding;
 
-      testBinding.window.paddingTestValue = const FakeWindowPadding(top: 50);
+      testBinding.window.paddingTestValue = const FakeViewPadding(top: 50);
 
       await tester.pumpWidget(
         MaterialApp(

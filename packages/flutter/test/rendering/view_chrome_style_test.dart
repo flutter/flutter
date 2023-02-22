@@ -18,7 +18,7 @@ void main() {
 
     void setupTestDevice() {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      const FakeWindowPadding padding = FakeWindowPadding(
+      const FakeViewPadding padding = FakeViewPadding(
         top: statusBarHeight * devicePixelRatio,
         bottom: navigationBarHeight * devicePixelRatio,
       );
@@ -297,8 +297,8 @@ void main() {
   });
 }
 
-class FakeWindowPadding implements WindowPadding {
-  const FakeWindowPadding({
+class FakeViewPadding implements ViewPadding {
+  const FakeViewPadding({
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,
