@@ -44,7 +44,26 @@ class PlatformViewsRegistry {
   ///
   /// Typically a platform view identifier is passed to a platform view widget
   /// which creates the platform view and manages its lifecycle.
-  int getNextPlatformViewId() => _nextPlatformViewId++;
+  int getNextPlatformViewId() {
+    // On the Android side, the interface exposed to users uses 32-bit integers.
+    // See https://github.com/flutter/engine/pull/39476 for more details.
+
+    // We can safely assume that a Flutter application will not require more
+    // than MAX_INT32 platform views on the fly throughout its lifetime.
+    // Therefore, if the cumulative number of platform views exceeds MAX_INT32,
+    // we can reset the view IDs and start allocating them from zero again.
+    const int MAX_INT32 = 0x7FFFFFFF;
+    if (_nextPlatformViewId == MAX_INT32) {
+      _nextPlatformViewId = 0;
+    }
+    return _nextPlatformViewId++;
+  }
+
+  /// For testing purposes only, modify the unique identifier of the platform view.
+  @visibleForTesting
+  void setPlatformViewIdForTesting(int viewId) {
+    _nextPlatformViewId = viewId;
+  }
 }
 
 /// Callback signature for when a platform view was created.
