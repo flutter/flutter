@@ -49,8 +49,8 @@ class TextButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),

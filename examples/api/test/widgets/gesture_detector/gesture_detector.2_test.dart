@@ -28,7 +28,7 @@ void main() {
   }
 
   void expectInnerGestureDetectorBehavior(WidgetTester tester, HitTestBehavior behavior) {
-    // Note that there is a third GestureDetector added by Scaffold
+    // There is a third GestureDetector added by Scaffold.
     final Finder innerGestureDetectorFinder = find.byType(GestureDetector).at(1);
     final GestureDetector innerGestureDetector = tester.firstWidget<GestureDetector>(innerGestureDetectorFinder);
     expect(innerGestureDetector.behavior, behavior);
