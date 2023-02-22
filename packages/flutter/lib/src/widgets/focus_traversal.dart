@@ -1711,35 +1711,16 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return _FocusTraversalGroupScope(
-      policy: widget.policy,
+    return Focus(
       focusNode: focusNode,
-      child: Focus(
-        focusNode: focusNode,
-        canRequestFocus: false,
-        skipTraversal: true,
-        includeSemantics: false,
-        descendantsAreFocusable: widget.descendantsAreFocusable,
-        descendantsAreTraversable: widget.descendantsAreTraversable,
-        child: widget.child,
-      ),
+      canRequestFocus: false,
+      skipTraversal: true,
+      includeSemantics: false,
+      descendantsAreFocusable: widget.descendantsAreFocusable,
+      descendantsAreTraversable: widget.descendantsAreTraversable,
+      child: widget.child,
     );
   }
-}
-
-// A "marker" inherited widget to make the group faster to find.
-class _FocusTraversalGroupScope extends InheritedWidget {
-  const _FocusTraversalGroupScope({
-    required this.policy,
-    required this.focusNode,
-    required super.child,
-  });
-
-  final FocusTraversalPolicy policy;
-  final FocusNode focusNode;
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => false;
 }
 
 /// An intent for use with the [RequestFocusAction], which supplies the
