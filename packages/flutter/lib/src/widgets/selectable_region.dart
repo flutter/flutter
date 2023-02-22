@@ -993,7 +993,21 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
         _copy();
-        hideToolbar(false);
+
+        // in Android copy should clear the selection
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            _clearSelection();
+            break;
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            break;
+        }
       },
       onSelectAll: () {
         selectAll(SelectionChangedCause.toolbar);

@@ -1708,7 +1708,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  testWidgets('hide selection overlay when clicking `Copy` item', (WidgetTester tester) async {
+  testWidgets('the selection behavior when clicking `Copy` item', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1742,15 +1742,22 @@ void main() {
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
-    expect(regionState.selectionOverlay, isNotNull);
-    expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
-    expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+    // In Android copy should clear the selection
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      expect(regionState.selectionOverlay, isNull);
+      expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+      expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      expect(regionState.selectionOverlay, isNotNull);
+      expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+      expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+    }
   },
     skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  testWidgets('the handles are not disappear when clicking `Select all` item', (WidgetTester tester) async {
+  testWidgets('the handles do not disappear when clicking `Select all` item', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
