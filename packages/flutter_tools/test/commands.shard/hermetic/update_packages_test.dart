@@ -299,7 +299,7 @@ packages:
     source: hosted
     version: "2.8.2"
 sdks:
-  dart: ">=2.14.0 <4.0.0"
+  dart: ">=2.14.0 <3.0.0"
 ''');
     fileSystem.currentDirectory
         .childDirectory('.dart_tool')
