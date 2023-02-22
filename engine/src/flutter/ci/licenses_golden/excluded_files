@@ -20,6 +20,7 @@
 ../../../flutter/.gitignore
 ../../../flutter/.style.yapf
 ../../../flutter/AUTHORS
+../../../flutter/CODEOWNERS
 ../../../flutter/CONTRIBUTING.md
 ../../../flutter/DEPS
 ../../../flutter/Doxyfile
