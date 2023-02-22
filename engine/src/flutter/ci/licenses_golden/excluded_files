@@ -2660,6 +2660,7 @@
 ../../../third_party/skia/modules/canvaskit/package.json
 ../../../third_party/skia/modules/canvaskit/tests
 ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/.gitignore
+../../../third_party/skia/modules/jetski/BUILD.bazel
 ../../../third_party/skia/modules/jetski/README
 ../../../third_party/skia/modules/particles/BUILD.bazel
 ../../../third_party/skia/modules/particles/include/BUILD.bazel
