@@ -52,6 +52,8 @@ FlutterPlatform installHook({
   required String shellPath,
   required DebuggingOptions debuggingOptions,
   TestWatcher? watcher,
+  // TODO(bkonyi): remove after roll into google3.
+  bool enableObservatory = false,
   bool enableVmService = false,
   bool machine = false,
   String? precompiledDillPath,
@@ -68,7 +70,7 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
 }) {
-  assert(enableVmService || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
+  assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
@@ -84,7 +86,7 @@ FlutterPlatform installHook({
     debuggingOptions: debuggingOptions,
     watcher: watcher,
     machine: machine,
-    enableVmService: enableVmService,
+    enableVmService: enableVmService || enableObservatory,
     host: _kHosts[serverType],
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
