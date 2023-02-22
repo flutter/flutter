@@ -821,6 +821,8 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
     return layer;
   }
   SkCanvas* overlay_canvas = frame->SkiaCanvas();
+  int restore_count = overlay_canvas->getSaveCount();
+  overlay_canvas->save();
   overlay_canvas->clipRect(rect);
   overlay_canvas->clear(SK_ColorTRANSPARENT);
   if (frame->GetDisplayListBuilder()) {
@@ -828,6 +830,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   } else {
     slice->render_into(overlay_canvas);
   }
+  overlay_canvas->restoreToCount(restore_count);
 
   layer->did_submit_last_frame = frame->Submit();
   return layer;
