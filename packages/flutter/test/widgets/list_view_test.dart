@@ -662,7 +662,6 @@ void main() {
     final ScrollController controller = ScrollController();
 
     Widget buildListView({ required Axis scrollDirection }) {
-      assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(

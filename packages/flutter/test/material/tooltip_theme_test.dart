@@ -37,6 +37,12 @@ void main() {
     expect(const TooltipThemeData().hashCode, const TooltipThemeData().copyWith().hashCode);
   });
 
+  test('TooltipThemeData lerp special cases', () {
+    expect(TooltipThemeData.lerp(null, null, 0), null);
+    const TooltipThemeData data = TooltipThemeData();
+    expect(identical(TooltipThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TooltipThemeData defaults', () {
     const TooltipThemeData theme = TooltipThemeData();
     expect(theme.height, null);
@@ -1075,9 +1081,6 @@ void main() {
                       tooltip: 'Foo',
                       label: 'Bar',
                       textDirection: TextDirection.ltr,
-                      actions: <SemanticsAction>[
-                        SemanticsAction.longPress,
-                      ],
                     ),
                   ],
                 ),
@@ -1121,9 +1124,6 @@ void main() {
                       tooltip: 'Foo',
                       label: 'Bar',
                       textDirection: TextDirection.ltr,
-                      actions: <SemanticsAction>[
-                        SemanticsAction.longPress,
-                      ],
                     ),
                   ],
                 ),

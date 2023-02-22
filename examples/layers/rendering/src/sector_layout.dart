@@ -110,10 +110,7 @@ abstract class RenderSector extends RenderObject {
 
   @override
   void debugAssertDoesMeetConstraints() {
-    assert(constraints != null);
-    assert(deltaRadius != null);
     assert(deltaRadius < double.infinity);
-    assert(deltaTheta != null);
     assert(deltaTheta < double.infinity);
     assert(constraints.minDeltaRadius <= deltaRadius);
     assert(deltaRadius <= math.max(constraints.minDeltaRadius, constraints.maxDeltaRadius));
@@ -174,8 +171,6 @@ abstract class RenderDecoratedSector extends RenderSector {
   // offset must point to the center of the circle
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(deltaRadius != null);
-    assert(deltaTheta != null);
     assert(parentData is SectorParentData);
 
     if (_decoration == null) {
@@ -242,7 +237,6 @@ class RenderSectorRing extends RenderSectorWithChildren {
   double _desiredDeltaRadius;
   double get desiredDeltaRadius => _desiredDeltaRadius;
   set desiredDeltaRadius(double value) {
-    assert(value != null);
     assert(value >= 0);
     if (_desiredDeltaRadius != value) {
       _desiredDeltaRadius = value;
@@ -254,7 +248,6 @@ class RenderSectorRing extends RenderSectorWithChildren {
   double get padding => _padding;
   set padding(double value) {
     // TODO(ianh): avoid code duplication
-    assert(value != null);
     if (_padding != value) {
       _padding = value;
       markNeedsLayout();
@@ -360,7 +353,6 @@ class RenderSectorSlice extends RenderSectorWithChildren {
   double _desiredDeltaTheta;
   double get desiredDeltaTheta => _desiredDeltaTheta;
   set desiredDeltaTheta(double value) {
-    assert(value != null);
     if (_desiredDeltaTheta != value) {
       _desiredDeltaTheta = value;
       markNeedsLayout();
@@ -371,7 +363,6 @@ class RenderSectorSlice extends RenderSectorWithChildren {
   double get padding => _padding;
   set padding(double value) {
     // TODO(ianh): avoid code duplication
-    assert(value != null);
     if (_padding != value) {
       _padding = value;
       markNeedsLayout();
@@ -519,8 +510,6 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }) {
     assert(child is RenderSector);
     assert(child!.parentData is SectorParentData);
-    assert(width != null);
-    assert(height != null);
     if (!width.isFinite && !height.isFinite) {
       return Size.zero;
     }
@@ -649,9 +638,7 @@ class SectorHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [radius] and [theta] argument must not be null.
-  SectorHitTestEntry(RenderSector super.target, { required this.radius,  required this.theta })
-      : assert(radius != null),
-        assert(theta != null);
+  SectorHitTestEntry(RenderSector super.target, { required this.radius,  required this.theta });
 
   @override
   RenderSector get target => super.target as RenderSector;

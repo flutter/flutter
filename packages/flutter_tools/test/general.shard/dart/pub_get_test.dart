@@ -555,9 +555,10 @@ exit code: 66
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
       ),
-      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', toolExitMessage)),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', null)),
     );
-    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
+    expect(logger.statusText, isEmpty);
+    expect(logger.traceText, contains(toolExitMessage));
     expect(
       mockStdio.stdout.writes.map(utf8.decode),
       <String>[
@@ -634,10 +635,61 @@ exit code: 66
         ),
       ),
     );
-    expect(logger.statusText,
-      'Running "flutter pub get" in /...\n'
-    );
+    expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/116627
+  testWithoutContext('pub get suppresses progress output', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
+    final FakeStdio mockStdio = FakeStdio();
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      usage: TestUsage(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: mockStdio,
+    );
+
+    try {
+      await pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+        outputMode: PubOutputMode.none,
+      );
+    } on ToolExit {
+      // Ignore.
+    }
+
+    expect(
+      mockStdio.stdout.writes.map(utf8.decode),
+      isNot(
+        <String>[
+          'out1\nout2\nout3\n',
+        ]
+      )
+    );
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -1021,7 +1073,6 @@ exit code: 66
       context: PubContext.flutterTests,
     ); // pub sets date of .packages to 2002
 
-    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
     logger.clear();
@@ -1036,7 +1087,7 @@ exit code: 66
       context: PubContext.flutterTests,
     ); // pub does nothing
 
-    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
+    expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
     logger.clear();

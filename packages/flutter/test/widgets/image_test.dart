@@ -2000,10 +2000,9 @@ void main() {
     );
     expect(
       tester.takeException().toString(),
-      equals(
-        'Unable to load asset: "missing-asset".\n'
-        'The asset does not exist or has empty data.',
-      ),
+      equals('Unable to load asset with key "missing-asset".\n'
+            'The key was not found in the asset manifest.\n'
+            'Make sure the key is correct and the appropriate file or folder is specified in pubspec.yaml.'),
     );
     await tester.pump();
     await expectLater(
@@ -2031,9 +2030,7 @@ void main() {
 
 @immutable
 class _ConfigurationAwareKey {
-  const _ConfigurationAwareKey(this.provider, this.configuration)
-    : assert(provider != null),
-      assert(configuration != null);
+  const _ConfigurationAwareKey(this.provider, this.configuration);
 
   final ImageProvider provider;
   final ImageConfiguration configuration;
@@ -2175,7 +2172,7 @@ class _DebouncingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  ImageStreamCompleter loadBuffer(Object key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 }
 
 class _FailingImageProvider extends ImageProvider<int> {
@@ -2184,11 +2181,7 @@ class _FailingImageProvider extends ImageProvider<int> {
     this.failOnLoad = false,
     required this.throws,
     required this.image,
-  }) : assert(failOnLoad != null),
-       assert(failOnObtainKey != null),
-       assert(failOnLoad == true || failOnObtainKey == true),
-       assert(throws != null),
-       assert(image != null);
+  }) : assert(failOnLoad == true || failOnObtainKey == true);
 
   final bool failOnObtainKey;
   final bool failOnLoad;

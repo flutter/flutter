@@ -184,8 +184,6 @@ void showAboutDialog({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -230,8 +228,6 @@ void showLicensePage({
   String? applicationLegalese,
   bool useRootNavigator = false,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
@@ -486,8 +482,7 @@ class _AboutProgram extends StatelessWidget {
     required this.version,
     this.icon,
     this.legalese,
-  })  : assert(name != null),
-        assert(version != null);
+  });
 
   final String name;
   final String version;
@@ -542,8 +537,7 @@ class _PackagesView extends StatefulWidget {
     required this.about,
     required this.isLateral,
     required this.selectedId,
-  })  : assert(about != null),
-        assert(isLateral != null);
+  });
 
   final Widget about;
   final bool isLateral;
@@ -756,7 +750,7 @@ class _DetailArguments {
   final List<LicenseEntry> licenseEntries;
 
   @override
-  bool operator ==(final dynamic other) {
+  bool operator ==(final Object other) {
     if (other is _DetailArguments) {
       return other.packageName == packageName;
     }
@@ -878,7 +872,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           title: _PackageLicensePageTitle(
             title,
             subtitle,
-            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
+            theme.primaryTextTheme,
+            theme.appBarTheme.titleTextStyle,
           ),
         ),
         body: Center(
@@ -894,7 +889,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
                   // A Scrollbar is built-in below.
                   behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: Scrollbar(
-                    child: ListView(padding: padding, children: listWidgets),
+                    child: ListView(
+                      primary: true,
+                      padding: padding,
+                      children: listWidgets,
+                    ),
                   ),
                 ),
               ),
@@ -910,7 +909,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             automaticallyImplyLeading: false,
             pinned: true,
             backgroundColor: theme.cardColor,
-            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
+            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme, theme.textTheme.titleLarge),
           ),
           SliverPadding(
             padding: padding,
@@ -940,21 +939,24 @@ class _PackageLicensePageTitle extends StatelessWidget {
     this.title,
     this.subtitle,
     this.theme,
+    this.titleTextStyle,
   );
 
   final String title;
   final String subtitle;
   final TextTheme theme;
+  final TextStyle? titleTextStyle;
 
   @override
   Widget build(BuildContext context) {
     final Color? color = Theme.of(context).appBarTheme.foregroundColor;
+    final TextStyle? effectiveTitleTextStyle = titleTextStyle ?? theme.titleLarge;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.titleLarge?.copyWith(color: color)),
+        Text(title, style: effectiveTitleTextStyle?.copyWith(color: color)),
         Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
       ],
     );
@@ -1044,14 +1046,11 @@ class _MasterDetailFlow extends StatefulWidget {
   const _MasterDetailFlow({
     required this.detailPageBuilder,
     required this.masterViewBuilder,
-    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyLeading = true, // ignore: unused_element
     this.detailPageFABlessGutterWidth,
-    this.displayMode = _LayoutMode.auto,
+    this.displayMode = _LayoutMode.auto, // ignore: unused_element
     this.title,
-  })  : assert(masterViewBuilder != null),
-        assert(automaticallyImplyLeading != null),
-        assert(detailPageBuilder != null),
-        assert(displayMode != null);
+  });
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -1312,8 +1311,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.title,
     required this.automaticallyImplyLeading,
     this.detailPageFABlessGutterWidth,
-  })  : assert(detailPageBuilder != null),
-        assert(masterViewBuilder != null);
+  });
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1402,7 +1400,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _masterPanel(context),
+          body: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _masterPanel(context),
+          ),
         ),
         // Detail view stacked above main scaffold and master view.
         SafeArea(
@@ -1462,8 +1463,7 @@ class _DetailView extends StatelessWidget {
   const _DetailView({
     required _DetailPageBuilder builder,
     Object? arguments,
-  })  : assert(builder != null),
-        _builder = builder,
+  })  : _builder = builder,
         _arguments = arguments;
 
   final _DetailPageBuilder _builder;

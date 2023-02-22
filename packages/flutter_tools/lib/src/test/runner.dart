@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
@@ -46,6 +45,7 @@ abstract class FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -83,6 +83,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -104,6 +105,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['-r', 'json']
       else if (reporter != null)
         ...<String>['-r', reporter],
+      if (fileReporter != null)
+        '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
@@ -144,9 +147,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testFiles: testFiles,
         buildInfo: debuggingOptions.buildInfo,
       );
-      if (result == null) {
-        throwToolExit('Failed to compile tests');
-      }
       testArgs
         ..add('--platform=chrome')
         ..add('--')

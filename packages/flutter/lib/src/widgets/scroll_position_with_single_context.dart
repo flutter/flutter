@@ -162,7 +162,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @protected
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }

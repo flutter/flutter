@@ -1753,6 +1753,30 @@ The findRenderObject() method was called for the following element:
     child.dependOnInheritedElement(ancestor);
     expect(child.doesDependOnInheritedElement(ancestor), isTrue);
   });
+
+  testWidgets(
+      'MultiChildRenderObjectElement.updateChildren test',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120762.
+    final GlobalKey globalKey = GlobalKey();
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        const SizedBox(),
+        SizedBox(key: globalKey),
+        const SizedBox(),
+      ],
+    ));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        const SizedBox(),
+        const SizedBox(),
+        SizedBox(child: SizedBox(key: globalKey)),
+      ],
+    ));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -1810,9 +1834,7 @@ class Decorate extends StatefulWidget {
     super.key,
     required this.didChangeDependencies,
     required this.build,
-  }) :
-    assert(didChangeDependencies != null),
-    assert(build != null);
+  });
 
   final void Function(bool isInBuild) didChangeDependencies;
   final void Function(bool isInBuild) build;
@@ -1974,7 +1996,7 @@ class StatelessWidgetSpy extends StatelessWidget {
   const StatelessWidgetSpy({
     super.key,
     required this.onBuild,
-  })  : assert(onBuild != null);
+  });
 
   final void Function(BuildContext) onBuild;
 

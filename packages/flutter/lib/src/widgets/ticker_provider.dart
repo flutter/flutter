@@ -26,7 +26,7 @@ class TickerMode extends StatefulWidget {
     super.key,
     required this.enabled,
     required this.child,
-  }) : assert(enabled != null);
+  });
 
   /// The requested ticker mode for this subtree.
   ///
@@ -151,7 +151,7 @@ class _EffectiveTickerMode extends InheritedWidget {
     required this.enabled,
     required this.notifier,
     required super.child,
-  }) : assert(enabled != null);
+  });
 
   final bool enabled;
   final ValueNotifier<bool> notifier;

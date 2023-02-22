@@ -55,6 +55,12 @@ class TabBarTheme with Diagnosticable {
   final Color? dividerColor;
 
   /// Overrides the default value for [TabBar.labelColor].
+  ///
+  /// If [labelColor] is a [MaterialStateColor], then the effective color will
+  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// resolved color will be used even if [TabBar.unselectedLabelColor] or
+  /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
 
   /// Overrides the default value for [TabBar.labelPadding].
@@ -127,9 +133,9 @@ class TabBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
+    if (identical(a, b)) {
+      return a;
+    }
     return TabBarTheme(
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),

@@ -6,9 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class TestTextInputFormatter extends TextInputFormatter {
+  const TestTextInputFormatter();
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
+}
+
 void main() {
   TextEditingValue testOldValue = TextEditingValue.empty;
   TextEditingValue testNewValue = TextEditingValue.empty;
+
+  test('test const constructor', () {
+    const TestTextInputFormatter testValue1 = TestTextInputFormatter();
+    const TestTextInputFormatter testValue2 = TestTextInputFormatter();
+
+    expect(testValue1, same(testValue2));
+  });
 
   test('withFunction wraps formatting function', () {
     testOldValue = TextEditingValue.empty;

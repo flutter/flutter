@@ -701,7 +701,7 @@ void main() {
           appBar: AppBar(
             title: const Text('X'),
           ),
-          drawer: Column(), // Doesn't really matter. Triggers a hamburger regardless.
+          drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
         ),
       ),
     );
@@ -2509,15 +2509,13 @@ void main() {
   });
 
   testWidgets('Default status bar color', (WidgetTester tester) async {
-    Future<void> pumpBoilerplate({required bool useMaterial3, required bool backwardsCompatibility}) async {
+    Future<void> pumpBoilerplate({required bool useMaterial3}) async {
       await tester.pumpWidget(
         MaterialApp(
           key: GlobalKey(),
           theme: ThemeData.light().copyWith(
             useMaterial3: useMaterial3,
-            appBarTheme: AppBarTheme(
-              backwardsCompatibility: backwardsCompatibility,
-            ),
+            appBarTheme: const AppBarTheme(),
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -2528,14 +2526,10 @@ void main() {
       );
     }
 
-    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: false);
+    await pumpBoilerplate(useMaterial3: false);
     expect(SystemChrome.latestStyle!.statusBarColor, null);
-    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: true);
-    expect(SystemChrome.latestStyle!.statusBarColor, null);
-    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: false);
+    await pumpBoilerplate(useMaterial3: true);
     expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
-    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: true);
-    expect(SystemChrome.latestStyle!.statusBarColor, null);
   });
 
   testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
@@ -3195,53 +3189,185 @@ void main() {
       expect(actionIconColor(), actionsIconColor);
       expect(actionIconButtonColor(), actionsIconColor);
     });
-  });
 
-  testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
-    const Color foregroundColor = Color(0xff00ff00);
-    final Key leadingIconKey = UniqueKey();
-    final Key actionIconKey = UniqueKey();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light().copyWith(
-          useMaterial3: false,
-          appBarTheme: const AppBarTheme(
-            backwardsCompatibility: false,
+    testWidgets('AppBar.iconTheme should override any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
           ),
         ),
-        home: Scaffold(
-          appBar: AppBar(
-            foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
-            leading: Icon(Icons.add_circle, key: leadingIconKey),
-            title: const Text('title'),
-            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
+        useMaterial3: true,
+      );
+
+      const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: overallIconTheme,
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              title: const Text('title'),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
-      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
-    ).style;
-    expect(titleTextStyle.color, foregroundColor);
+      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
+      double? leadingIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      double? actionIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
 
-    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
-    expect(leadingIconTheme.color, foregroundColor);
+      expect(leadingIconButtonColor(), Colors.yellow);
+      expect(leadingIconButtonSize(), 30.0);
+      expect(actionIconButtonColor(), Colors.yellow);
+      expect(actionIconButtonSize(), 30.0);
+    });
 
-    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
-      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
-    ).data;
-    expect(actionIconTheme.color, foregroundColor);
+    testWidgets('AppBar.iconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
+          ),
+        ),
+        useMaterial3: true,
+      );
 
-    // Test icon color
-    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: overallIconTheme,
+              leading: BackButton(onPressed: () {}),
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
 
-    expect(leadingIconColor(), foregroundColor);
-    expect(actionIconColor(), foregroundColor);
+      Color? leadingIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
+      double? leadingIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+
+      expect(leadingIconButtonColor(), Colors.yellow);
+      expect(leadingIconButtonSize(), 30.0);
+
+    });
+
+    testWidgets('AppBar.actionsIconTheme should override any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
+          ),
+        ),
+        useMaterial3: true,
+      );
+
+      const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: actionsIconTheme,
+              title: const Text('title'),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
+      double? leadingIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      double? actionIconButtonSize() => iconStyle(tester, Icons.add)?.fontSize;
+
+      // The leading icon button uses the style in the IconButtonTheme because only actionsIconTheme is provided.
+      expect(leadingIconButtonColor(), Colors.red);
+      expect(leadingIconButtonSize(), 32.0);
+      expect(actionIconButtonColor(), Colors.yellow);
+      expect(actionIconButtonSize(), 30.0);
+    });
+
+    testWidgets('AppBar.actionsIconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
+          ),
+        ),
+        useMaterial3: true,
+      );
+
+      const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: actionsIconTheme,
+              title: const Text('title'),
+              actions: <Widget>[
+                BackButton(onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
+      double? actionIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+
+      expect(actionIconButtonColor(), Colors.yellow);
+      expect(actionIconButtonSize(), 30.0);
+    });
+
+    testWidgets('The foregroundColor property of the AppBar overrides any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+          ),
+        ),
+        useMaterial3: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              foregroundColor: Colors.purple,
+              title: const Text('title'),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconButtonColor(), Colors.purple);
+      expect(actionIconButtonColor(), Colors.purple);
+    });
   });
 
   group('MaterialStateColor scrolledUnder', () {

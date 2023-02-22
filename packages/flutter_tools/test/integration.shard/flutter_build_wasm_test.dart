@@ -47,11 +47,11 @@ void main() {
       'web_wasm'
     ));
     for (final String filename in const <String>[
-      'dart2wasm_runtime.mjs',
       'flutter.js',
       'flutter_service_worker.js',
       'index.html',
       'main.dart.wasm',
+      'main.dart.mjs',
       'main.dart.js',
     ]) {
       expect(appBuildDir.childFile(filename), exists);
