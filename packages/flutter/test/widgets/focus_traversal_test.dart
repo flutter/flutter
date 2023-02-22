@@ -309,8 +309,12 @@ void main() {
 
       expect(nodes[2].hasPrimaryFocus, isTrue);
 
+      debugDumpFocusTree();
+
       primaryFocus!.nextFocus();
       await tester.pump();
+
+      debugDumpFocusTree();
 
       expect(nodes[6].hasPrimaryFocus, isTrue);
 
