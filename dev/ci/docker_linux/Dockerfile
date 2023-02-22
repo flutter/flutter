@@ -84,17 +84,17 @@ RUN wget --progress=dot:giga "${ANDROID_SDK_URL}" -O "${ANDROID_SDK_ARCHIVE}"
 RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "patcher;v4" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "platforms;android-30" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "platform-tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin/sdkmanager" "patcher;v4" > /dev/null
 RUN rm "${ANDROID_SDK_ARCHIVE}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools:${PATH}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools/bin:${PATH}"
 # Silence warnings when accepting android licenses.
 RUN mkdir -p ~/.android
 RUN touch ~/.android/repositories.cfg
