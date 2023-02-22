@@ -52,7 +52,7 @@ RUN echo 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bullse
 
 # Install the dependencies needed for the rest of the build.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  adoptopenjdk-8-hotspot \
+  adoptopenjdk-11-hotspot \
   build-essential \
   default-jdk-headless \
   gcc \
@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-dev && \
   apt-get clean
 
-ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
 
 # Install the Android SDK Dependency.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
