@@ -82,10 +82,9 @@ RUN touch ~/.android/repositories.cfg
 ENV ANDROID_SDK_ARCHIVE="${ANDROID_TOOLS_ROOT}/archive"
 RUN wget --progress=dot:giga "${ANDROID_SDK_URL}" -O "${ANDROID_SDK_ARCHIVE}"
 RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
-RUN ls "${ANDROID_TOOLS_ROOT}"
 
 RUN mkdir "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
-RUN ls "${ANDROID_TOOLS_ROOT}/cmdline-tools"
+
 RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/NOTICE.txt" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/lib" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
