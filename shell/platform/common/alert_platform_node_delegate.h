@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_ALERT_PLATFORM_NODE_DELEGATE_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_ALERT_PLATFORM_NODE_DELEGATE_H_
 
+#include "flutter/fml/macros.h"
 #include "flutter/third_party/accessibility/ax/ax_node_data.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.h"
 
@@ -19,10 +20,6 @@ class AlertPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   explicit AlertPlatformNodeDelegate(
       ui::AXPlatformNodeDelegate& parent_delegate);
   ~AlertPlatformNodeDelegate();
-
-  AlertPlatformNodeDelegate(const AlertPlatformNodeDelegate& other) = delete;
-  AlertPlatformNodeDelegate operator=(const AlertPlatformNodeDelegate& other) =
-      delete;
 
   // Set the alert text of the node for which this is the delegate.
   void SetText(const std::u16string& text);
@@ -44,6 +41,8 @@ class AlertPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
 
   // A unique ID used to identify this node. Returned by GetUniqueId.
   ui::AXUniqueId id_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AlertPlatformNodeDelegate);
 };
 
 }  // namespace flutter

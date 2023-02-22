@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 
 namespace flutter {
