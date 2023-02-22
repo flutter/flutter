@@ -395,6 +395,10 @@ abstract class ViewPadding {
   }
 }
 
+@Deprecated(
+  'Use ViewPadding instead. '
+  'This feature was deprecated after v3.8.0-14.0.pre.',
+)
 typedef WindowPadding = ViewPadding;
 
 class DisplayFeature {
