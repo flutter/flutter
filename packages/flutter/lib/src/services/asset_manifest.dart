@@ -32,7 +32,7 @@ abstract class AssetManifest {
 
   /// Retrieves metadata about an asset and its variants.
   ///
-  /// Note that this method considers a main asset to be a variant of itself and
+  /// This method considers a main asset to be a variant of itself and
   /// includes it in the returned list.
   ///
   /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To
@@ -71,7 +71,7 @@ class _AssetManifestBin implements AssetManifest {
     if (!_typeCastedData.containsKey(key)) {
       final Object? variantData = _data[key];
       if (variantData == null) {
-        throw ArgumentError('Asset key $key was not found within the asset manifest.');
+        throw ArgumentError('Asset key "$key" was not found.');
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()

@@ -497,10 +497,7 @@ void main() {
             time.elapse(timeLapse);
 
             List<String> lines = outputStdout();
-            expect(
-              lines.join(),
-              contains(warningMessage),
-            );
+            expect(lines.join(), '⣽\ba warning message.⣻');
 
             spinner.stop();
             lines = outputStdout();

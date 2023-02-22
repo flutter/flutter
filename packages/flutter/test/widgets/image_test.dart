@@ -2000,10 +2000,9 @@ void main() {
     );
     expect(
       tester.takeException().toString(),
-      equals(
-        'Unable to load asset: "missing-asset".\n'
-        'The asset does not exist or has empty data.',
-      ),
+      equals('Unable to load asset with key "missing-asset".\n'
+            'The key was not found in the asset manifest.\n'
+            'Make sure the key is correct and the appropriate file or folder is specified in pubspec.yaml.'),
     );
     await tester.pump();
     await expectLater(
