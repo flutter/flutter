@@ -90,7 +90,10 @@ class AndroidDevice extends Device {
   final String? deviceCodeName;
 
   @override
-  DeviceConnectionInterface get connectionInterface => id.contains('_adb-tls-connect') ? DeviceConnectionInterface.wireless : DeviceConnectionInterface.attached;
+  DeviceConnectionInterface get connectionInterface =>
+      id.contains('_adb-tls-connect')
+          ? DeviceConnectionInterface.wireless
+          : DeviceConnectionInterface.attached;
 
   late final Future<Map<String, String>> _properties = () async {
     Map<String, String> properties = <String, String>{};
