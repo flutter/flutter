@@ -2605,6 +2605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_tickersEnabled && _cursorActive) {
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
+        // Cannot use _stopCursorBlink because it would reset _cursorActive.
         _cursorTimer!.cancel();
         _cursorTimer = null;
       }
