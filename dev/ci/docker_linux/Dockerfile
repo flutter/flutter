@@ -73,7 +73,7 @@ ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
 RUN export CLASSPATH='/usr/share/jaxb/lib'
 
 # Install the Android SDK Dependency.
-ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
+ENV ANDROID_SDK_URL="wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
 ENV ANDROID_TOOLS_ROOT="/opt/android_sdk"
 RUN mkdir -p "${ANDROID_TOOLS_ROOT}"
 RUN mkdir -p ~/.android
