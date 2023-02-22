@@ -229,7 +229,7 @@ class ButtonBar extends StatelessWidget {
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
 /// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the column of
 /// buttons would align to the horizontal start of the button bar.
-class _ButtonBarRow extends Flex {
+class _ButtonBarRow extends FlexRenderObject {
   /// Creates a button bar that attempts to display in a row, but displays in
   /// a column if there is insufficient horizontal space.
   const _ButtonBarRow({

@@ -1857,6 +1857,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   const MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
 
+  /// {@template flutter.widgets.multiChildRenderObjectWidget.children}
   /// The widgets below this widget in the tree.
   ///
   /// If this list is going to be mutated, it is usually wise to put a [Key] on
@@ -1909,6 +1910,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///   }
   /// }
   /// ```
+  /// {@endtemplate}
   final List<Widget> children;
 
   @override

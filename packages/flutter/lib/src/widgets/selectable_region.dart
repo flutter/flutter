@@ -306,7 +306,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
+  final SelectableRegionContainerDelegate _selectionDelegate = SelectableRegionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1259,8 +1259,8 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
   }
 }
 
-class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableRegionContainerDelegate(): super(selectionSeparator: '');
+class SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  SelectableRegionContainerDelegate({super.selectionSeparator = ''});
 
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
@@ -1447,7 +1447,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// The [selectionSeparator] is used to separate the text of each selectable in
   /// [selectables].
   MultiSelectableSelectionContainerDelegate({
-     required this.selectionSeparator,
+     this.selectionSeparator = '',
   });
 
   /// The separator used to separate the text of each selectable in
