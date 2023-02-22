@@ -85,6 +85,7 @@ RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 RUN ls "${ANDROID_TOOLS_ROOT}"
 
 RUN mkdir "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN ls "${ANDROID_TOOLS_ROOT}/cmdline-tools"
 RUN mv -i "${ANDROID_TOOLS_ROOT}/cmdline-tools/*" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 
 # Suppressing output of sdkmanager to keep log size down
