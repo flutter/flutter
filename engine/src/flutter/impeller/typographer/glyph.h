@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/rect.h"
 
@@ -43,7 +44,15 @@ struct Glyph {
 template <>
 struct std::hash<impeller::Glyph> {
   constexpr std::size_t operator()(const impeller::Glyph& g) const {
-    return g.index;
+    return fml::HashCombine(g.index, g.type);
+  }
+};
+
+template <>
+struct std::equal_to<impeller::Glyph> {
+  constexpr bool operator()(const impeller::Glyph& lhs,
+                            const impeller::Glyph& rhs) const {
+    return lhs.index == rhs.index && lhs.type == rhs.type;
   }
 };
 
