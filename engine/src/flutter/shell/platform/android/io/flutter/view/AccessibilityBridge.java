@@ -2731,7 +2731,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         if (transform == null) {
           if (BuildConfig.DEBUG) {
-            throw new AssertionError("transform has not been initialized");
+            Log.e(TAG, "transform has not been initialized for id = " + id);
+            accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
           }
           transform = new float[16];
         }
