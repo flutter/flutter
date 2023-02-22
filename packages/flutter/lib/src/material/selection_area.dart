@@ -45,7 +45,6 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
-    this.separator = '',
     required this.child,
   });
 
@@ -87,9 +86,6 @@ class SelectionArea extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
-
-  /// The separator to use when concatenating the selected text.
-  final String separator;
 
   /// The child widget this selection area applies to.
   ///
@@ -149,7 +145,6 @@ class _SelectionAreaState extends State<SelectionArea> {
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
-      separator: widget.separator,
       child: widget.child,
     );
   }

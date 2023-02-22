@@ -84,10 +84,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// [SelectionContainer.maybeOf] if they want to participate in the
 /// selection.
 ///
-/// A [SelectableRegion] will defer to a [SelectionContainer] above it in the
-/// widget tree if one exists. This allows nested [SelectableRegion]s to
-/// coordinate their selection behavior.
-///
 /// An example selection tree will look like:
 ///
 /// {@tool snippet}
@@ -212,7 +208,6 @@ class SelectableRegion extends StatefulWidget {
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
-    this.separator = '',
   });
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
@@ -244,9 +239,6 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
-
-  /// The separator to use when concatenating the selected text.
-  final String separator;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -314,7 +306,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  late final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate(separator: widget.separator);
+  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1156,15 +1148,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = SelectionContainer(
-      registrar: registrar ?? this,
+      registrar: this,
       delegate: _selectionDelegate,
       child: widget.child,
     );
-    if (registrar != null) {
-      return result;
-    }
     if (kIsWeb) {
       result = PlatformSelectableRegionContextMenu(
         child: result,
@@ -1272,8 +1260,6 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableRegionContainerDelegate({super.separator});
-
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
