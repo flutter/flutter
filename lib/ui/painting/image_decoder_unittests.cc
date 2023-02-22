@@ -333,6 +333,28 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
+TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
+  auto data = OpenFixtureAsSkData("Horizontal.jpg");
+  auto image = SkImage::MakeFromEncoded(data);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
+
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> generator =
+      registry.CreateCompatibleGenerator(data);
+  ASSERT_TRUE(generator);
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                                         std::move(generator));
+
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<SkBitmap> bitmap = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), SkISize::Make(600, 200), {600, 200},
+      /*supports_wide_gamut=*/true);
+  ASSERT_EQ(bitmap->colorType(), kRGBA_8888_SkColorType);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
 TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label

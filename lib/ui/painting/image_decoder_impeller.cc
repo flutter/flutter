@@ -49,7 +49,8 @@ float CalculateArea(SkPoint abc[3]) {
                       b.fX * a.fY);
 }
 
-static constexpr float kSrgbD50GamutArea = 0.084f;
+// Note: This was calculated from SkColorSpace::MakeSRGB().
+static constexpr float kSrgbGamutArea = 0.0982f;
 
 // Source:
 // https://source.chromium.org/chromium/_/skia/skia.git/+/393fb1ec80f41d8ad7d104921b6920e69749fda1:src/codec/SkAndroidCodec.cpp;l=67;drc=46572b4d445f41943059d0e377afc6d6748cd5ca;bpv=1;bpt=0
@@ -58,7 +59,8 @@ bool IsWideGamut(const SkColorSpace& color_space) {
   color_space.toXYZD50(&xyzd50);
   SkPoint rgb[3];
   LoadGamut(rgb, xyzd50);
-  return CalculateArea(rgb) > kSrgbD50GamutArea;
+  float area = CalculateArea(rgb);
+  return area > kSrgbGamutArea;
 }
 }  // namespace
 
