@@ -519,4 +519,15 @@ void main() {
         contains(expectedError3),
     )));
   });
+
+  testWithoutContext('parser allows select cases with numbers', () {
+    final Node node = Parser('numberSelect', 'app_en.arb', '{ count, select, 0{none} 100{perfect} other{required!} }').parse();
+    final Node selectExpr = node.children[0];
+    final Node selectParts = selectExpr.children[5];
+    final Node selectPart = selectParts.children[0];
+    expect(selectPart.children[0].value, equals('0'));
+    expect(selectPart.children[1].value, equals('{'));
+    expect(selectPart.children[2].type, equals(ST.message));
+    expect(selectPart.children[3].value, equals('}'));
+  });
 }

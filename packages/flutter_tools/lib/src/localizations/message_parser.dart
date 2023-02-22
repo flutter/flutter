@@ -70,6 +70,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ],
   ST.selectPart: <List<ST>>[
     <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.number, ST.openBrace, ST.message, ST.closeBrace],
     <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
 };
@@ -341,7 +342,7 @@ class Parser {
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all
-      // all the children it is expecting.
+      // the children it is expecting.
       parent.children.add(node);
       if (parent.isFull) {
         treeTraversalStack.removeLast();
@@ -415,6 +416,7 @@ class Parser {
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
+            tokens[0].type == ST.number ||
             tokens[0].type == ST.other
           )) {
             parseAndConstructNode(ST.selectParts, 0);
@@ -425,8 +427,10 @@ class Parser {
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
-          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.number) {
             parseAndConstructNode(ST.selectPart, 1);
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+            parseAndConstructNode(ST.selectPart, 2);
           } else {
             throw L10nParserException(
               'ICU Syntax Error: Select parts must be of the form "identifier { message }"',
@@ -583,13 +587,8 @@ class Parser {
   }
 
   Node parse() {
-    try {
-      final Node syntaxTree = compress(parseIntoTree());
-      checkExtraRules(syntaxTree);
-      return syntaxTree;
-    } on L10nParserException catch (error) {
-      logger?.printError(error.toString());
-      return Node(ST.empty, 0, value: '');
-    }
+    final Node syntaxTree = compress(parseIntoTree());
+    checkExtraRules(syntaxTree);
+    return syntaxTree;
   }
 }
