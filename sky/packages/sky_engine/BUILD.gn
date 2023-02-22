@@ -19,6 +19,7 @@ import("//third_party/dart/sdk/lib/internal/internal_sources.gni")
 import("//third_party/dart/sdk/lib/io/io_sources.gni")
 import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
 import("//third_party/dart/sdk/lib/js/js_sources.gni")
+import("//third_party/dart/sdk/lib/js_interop/js_interop_sources.gni")
 import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
@@ -122,6 +123,14 @@ copy("js") {
   lib_path = rebase_path("js", "", dart_sdk_lib_path)
   sources = rebase_path(js_sdk_sources, "", lib_path)
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/js/{{source_file_part}}" ]
+}
+
+copy("js_interop") {
+  lib_path = rebase_path("js_interop", "", dart_sdk_lib_path)
+  sources = rebase_path(js_interop_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/js_interop/{{source_file_part}}",
+  ]
 }
 
 copy("js_util") {
