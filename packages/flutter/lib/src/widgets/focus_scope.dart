@@ -422,7 +422,7 @@ class Focus extends StatefulWidget {
   /// {@template flutter.widgets.focus_scope.Focus.maybeOf}
   /// If `createDependency` is true (which is the default), calling this
   /// function creates a dependency that will rebuild the given context when the
-  /// focus changes.
+  /// focus node gains or loses focus.
   /// {@endtemplate}
   ///
   /// See also:

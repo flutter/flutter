@@ -1564,17 +1564,12 @@ class FocusTraversalGroup extends StatefulWidget {
   /// into the widget tree, which will associate a policy with the focus tree
   /// under the nearest ancestor [Focus] widget.
   ///
-  /// This function differs from [maybeOf] in that it only traverses the focus
-  /// tree to determine the policy in effect. Unlike this function, the
-  /// [maybeOf] function first walks up the widget tree, to find the nearest
-  /// ancestor [Focus] or [FocusScope] widget, and then calls this function with
-  /// the focus node associated with that widget to determine the policy in
-  /// effect.
-  ///
-  /// See also:
-  ///
-  /// * [maybeOf] for a similar function that will return null if no
-  ///   [FocusTraversalGroup] widget ancestor is found in the widget tree.
+  /// This function differs from [maybeOf] in that it takes a [FocusNode] and
+  /// only traverses the focus tree to determine the policy in effect. Unlike
+  /// this function, the [maybeOf] function takes a [BuildContext] and first
+  /// walks up the widget tree to find the nearest ancestor [Focus] or
+  /// [FocusScope] widget, and then calls this function with the focus node
+  /// associated with that widget to determine the policy in effect.
   static FocusTraversalPolicy? maybeOfNode(FocusNode node) {
     return _getGroupNode(node)?.policy;
   }
@@ -1690,16 +1685,10 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   // group with. It's a special subclass of FocusNode just so that it can be
   // identified when walking the focus tree during traversal, and hold the
   // current policy.
-  late final _FocusTraversalGroupNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = _FocusTraversalGroupNode(
-      debugLabel: 'FocusTraversalGroup',
-      policy: widget.policy,
-    );
-  }
+  late final _FocusTraversalGroupNode focusNode = _FocusTraversalGroupNode(
+    debugLabel: 'FocusTraversalGroup',
+    policy: widget.policy,
+  );
 
   @override
   void dispose() {
