@@ -702,8 +702,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     addAll(children);
   }
 
-  bool _hasVisualOverflow = false;
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData) {
@@ -827,8 +825,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void performLayout() {
-    _hasVisualOverflow = false;
-
     if (_onstageChildCount == 0) {
       return;
     }
@@ -847,7 +843,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         child.layout(nonPositionedConstraints, parentUsesSize: true);
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!);
       }
 
       assert(child.parentData == childParentData);
@@ -889,7 +885,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+    if (clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
@@ -930,7 +926,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       case Clip.hardEdge:
       case Clip.antiAlias:
       case Clip.antiAliasWithSaveLayer:
-        return _hasVisualOverflow ? Offset.zero & size : null;
+        return Offset.zero & size;
     }
   }
 

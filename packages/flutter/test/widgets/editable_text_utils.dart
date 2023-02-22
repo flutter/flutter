@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// On web, the context menu (aka toolbar) is provided by the browser.
 const bool isContextMenuProvidedByPlatform = isBrowser;
 
-// Returns the first RenderEditable.
-RenderEditable findRenderEditable(WidgetTester tester) {
-  final RenderObject root = tester.renderObject(find.byType(EditableText));
+// Returns the RenderEditable at the given index, or the first if not given.
+RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
+  final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
   expect(root, isNotNull);
 
   late RenderEditable renderEditable;
@@ -37,8 +37,8 @@ List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBo
   }).toList();
 }
 
-Offset textOffsetToPosition(WidgetTester tester, int offset) {
-  final RenderEditable renderEditable = findRenderEditable(tester);
+Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
+  final RenderEditable renderEditable = findRenderEditable(tester, index: index);
   final List<TextSelectionPoint> endpoints = globalize(
     renderEditable.getEndpointsForSelection(
       TextSelection.collapsed(offset: offset),

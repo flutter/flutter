@@ -298,10 +298,13 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) {
-    // ignore errors here, they will be reported on the next line
-    return -1; // discarded
-  }));
+  }).then(
+    (int i) => i,
+    onError: (Object error) {
+      // ignore errors here, they will be reported on the next line
+      return -1; // discarded
+    },
+  ));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -591,8 +594,6 @@ void main() {
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
       '',
-      contains('Running with sound null safety'),
-      '',
       startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
@@ -619,8 +620,6 @@ void main() {
       'd Detach (terminate "flutter run" but leave application running).',
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
-      '',
-      contains('Running with sound null safety'),
       '',
       startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),

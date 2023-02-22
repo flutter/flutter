@@ -1215,7 +1215,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _sliderTheme = value;
-    markNeedsPaint();
+    _updateLabelPainter();
   }
 
   double get textScaleFactor => _textScaleFactor;
@@ -1878,7 +1878,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)

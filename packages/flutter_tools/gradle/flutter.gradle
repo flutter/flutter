@@ -279,9 +279,8 @@ class FlutterPlugin implements Plugin<Project> {
                     // Enables code shrinking, obfuscation, and optimization for only
                     // your project's release build type.
                     minifyEnabled true
-                    // Enables resource shrinking, which is performed by the
-                    // Android Gradle plugin.
-                    // NOTE: The resource shrinker can't be used for libraries.
+                    // Enables resource shrinking, which is performed by the Android Gradle plugin.
+                    // The resource shrinker can't be used for libraries.
                     shrinkResources isBuiltAsApp(project)
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
@@ -682,7 +681,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
-     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
+     * The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
      * @return "debug", "profile", or "release" (fall-back).
      */

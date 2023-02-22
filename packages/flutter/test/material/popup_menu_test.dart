@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -3098,6 +3099,94 @@ void main() {
     expect(nodeA().hasFocus, true);
     expect(nodeB().hasFocus, false);
   });
+
+  testWidgets('Popup menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
+      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      height: 1000,
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Test Scrollbar thumb color.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xffff0000)),
+    );
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Test local ScrollbarTheme overrides global ScrollbarTheme.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              ScrollbarTheme(
+                data: scrollbarTheme.copyWith(
+                  thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff0000ff)),
+                ),
+                child: PopupMenuButton<void>(
+                  key: popupButtonKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<void>>[
+                      const PopupMenuItem<void>(
+                        height: 1000,
+                        child: Text('Example'),
+                      ),
+                    ];
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Scrollbar thumb color should be updated.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xff0000ff)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }
 
 class TestApp extends StatelessWidget {

@@ -42,7 +42,7 @@ class _${blockName}DefaultsM3 extends ListTileThemeData {
   Color? get selectedColor => ${componentColor('md.comp.list.list-item.selected.trailing-icon')};
 
   @override
-  Color? get iconColor => ${componentColor('md.comp.list.list-item.unselected.trailing-icon')};
+  Color? get iconColor => ${componentColor('md.comp.list.list-item.trailing-icon')};
 }
 ''';
 }
