@@ -881,21 +881,28 @@ enum ResizeImagePolicy {
   /// [ResizeImage.width] and [ResizeImage.height].
   ///
   /// If [ResizeImage.width] and [ResizeImage.height] are both non-null, the
-  /// output image will have the specified width and height, stretching the
-  /// aspect ratio of the image if necessary. If only one of `width` and
-  /// `height` is non-null, then the output image will be scaled to the
-  /// associated width or height, and the other dimension will take whatever
-  /// value is needed to maintain the image's original aspect ratio.
+  /// output image will have the specified width and height (with the
+  /// corresponding aspect ratio) regardless of whether it matches the source
+  /// image's intrinsic aspect ratio. This case is similar to [BoxFit.fill].
   ///
-  /// If [ResizeImage.allowUpscaling] is false, the width and the height of the
-  /// output image will each be clamped to the intrinsic width and height of the
-  /// image.
+  /// If only one of `width` and `height` is non-null, then the output image
+  /// will be scaled to the associated width or height, and the other dimension
+  /// will take whatever value is needed to maintain the image's original aspect
+  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// [BoxFit.fitHeight], respectively.
+  ///
+  /// If [ResizeImage.allowUpscaling] is false (the default), the width and the
+  /// height of the output image will each be clamped to the intrinsic width and
+  /// height of the image. This may result in a different aspect ratio than the
+  /// aspect ratio specified by the target width and height (e.g. if the height
+  /// gets clamped downwards but the width does not).
   ///
   /// ## Examples
   ///
   /// The examples below show how [ResizeImagePolicy.exact] works in various
-  /// scenarios. In each example, the source image has a size of 300x200, and
-  /// the red box is 150x150, and the green box is 400x400.
+  /// scenarios. In each example, the source image has a size of 300x200
+  /// (landscape orientation), the red box is a 150x150 square, and the green
+  /// box is a 400x400 square.
   ///
   /// <table>
   /// <tr>
@@ -1072,11 +1079,14 @@ enum ResizeImagePolicy {
   /// down to best fit the bounding box; otherwise it will only ever be scaled
   /// down.
   ///
+  /// This is conceptually similar to [BoxFit.contain].
+  ///
   /// ## Examples
   ///
   /// The examples below show how [ResizeImagePolicy.fit] works in various
-  /// scenarios. In each example, the source image has a size of 300x200, and
-  /// the red box is 150x150, and the green box is 400x400.
+  /// scenarios. In each example, the source image has a size of 300x200
+  /// (landscape orientation), the red box is a 150x150 square, and the green
+  /// box is a 400x400 square.
   ///
   /// <table>
   /// <tr>
