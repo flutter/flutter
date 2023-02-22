@@ -496,6 +496,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   });
 
   String? _currentRunningAppId;
+  String? _currentRunningDeviceId;
+  String? _currentRunningMode;
+
+  String? get currentRunningDeviceId => _currentRunningDeviceId;
+  String? get currentRunningMode => _currentRunningMode;
 
   Future<void> run({
     bool withDebugger = false,
@@ -611,6 +616,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
         // Set this up now, but we don't wait it yet. We want to make sure we don't
         // miss it while waiting for debugPort below.
+        final Future<Map<String, Object?>> start = _waitFor(event: 'app.start', timeout: appStartTimeout);
         final Future<Map<String, Object?>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
 
         if (withDebugger) {
@@ -630,9 +636,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           _attachPort = attachPort;
         }
 
-        // Now await the started event; if it had already happened the future will
+        // Now await the start/started events; if it had already happened the future will
         // have already completed.
-        _currentRunningAppId = ((await started)['params'] as Map<String, Object?>?)?['appId'] as String?;
+        final Map<String, Object?>? startParams = (await start)['params'] as Map<String, Object?>?;
+        final Map<String, Object?>? startedParams = (await started)['params'] as Map<String, Object?>?;
+        _currentRunningAppId = startedParams?['appId'] as String?;
+        _currentRunningDeviceId = startParams?['deviceId'] as String?;
+        _currentRunningMode = startParams?['mode'] as String?;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(Exception(error.toString()), stackTrace);

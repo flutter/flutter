@@ -108,14 +108,16 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     // would usually write to stdout.
     if (simulateAppStarted) {
       simulateStdoutMessage(<String, Object?>{
-        'event': 'app.started',
-      });
-      simulateStdoutMessage(<String, Object?>{
         'event': 'app.start',
         'params': <String, Object?>{
           'appId': 'TEST',
           'supportsRestart': supportsRestart,
+          'deviceId': 'flutter-tester',
+          'mode': 'debug',
         }
+      });
+      simulateStdoutMessage(<String, Object?>{
+        'event': 'app.started',
       });
     }
   }
