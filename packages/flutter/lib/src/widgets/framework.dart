@@ -2221,9 +2221,9 @@ abstract class BuildContext {
   ///
   /// The widget found will be a concrete [InheritedWidget] subclass, and
   /// calling [dependOnInheritedWidgetOfExactType] registers this build context
-  /// with the returned widget such that when that widget changes (or a new
-  /// widget of that type is introduced, or the widget goes away), this build
-  /// context is rebuilt so that it can obtain new values from that widget.
+  /// with the returned widget. When that widget changes (or a new widget of
+  /// that type is introduced, or the widget goes away), this build context is
+  /// rebuilt so that it can obtain new values from that widget.
   ///
   /// {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
   /// This is typically called implicitly from `of()` static methods, e.g.
@@ -4381,12 +4381,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   T? getInheritedWidgetOfExactType<T extends InheritedWidget>() {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
-    if (ancestor != null) {
-      return ancestor.widget as T;
-    }
-    return null;
+    return getElementForInheritedWidgetOfExactType<T>()?.widget as T?;
   }
 
   @override
