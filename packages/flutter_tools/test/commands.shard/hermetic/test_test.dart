@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -682,6 +683,7 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
+    Platform: () => FakePlatform(operatingSystem: 'windows'),
   });
 
   testUsingContext('Integration tests given flavor', () async {
@@ -920,8 +922,34 @@ class _FakeDeviceManager extends DeviceManager {
   @override
   Future<List<Device>> getAllDevices({
     DeviceDiscoveryFilter? filter,
-  }) async => _connectedDevices;
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> refreshWirelesslyConnectedDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+   List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionFilter == DeviceConnectionInterface.attached) {
+      return _connectedDevices.where((Device device) {
+        return device.connectionInterface == DeviceConnectionInterface.attached;
+      }).toList();
+    }
+    if (filter?.deviceConnectionFilter == DeviceConnectionInterface.wireless) {
+      return _connectedDevices.where((Device device) {
+        return device.connectionInterface == DeviceConnectionInterface.wireless;
+      }).toList();
+    }
+    return _connectedDevices;
+  }
 }
