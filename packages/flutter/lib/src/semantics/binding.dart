@@ -182,7 +182,7 @@ mixin SemanticsBinding on BindingBase {
 /// An event to request a [SemanticsAction] of [type] to be performed on the
 /// [SemanticsNode] identified by [nodeId].
 ///
-/// Used by [SemanticsBinding.performAction].
+/// Used by [SemanticsBinding.performSemanticsAction].
 @immutable
 class SemanticsActionEvent {
   /// Creates a [SemanticsActionEvent].
