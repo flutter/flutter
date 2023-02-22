@@ -82,22 +82,22 @@ RUN touch ~/.android/repositories.cfg
 ENV ANDROID_SDK_ARCHIVE="${ANDROID_TOOLS_ROOT}/archive"
 RUN wget --progress=dot:giga "${ANDROID_SDK_URL}" -O "${ANDROID_SDK_ARCHIVE}"
 RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
-RUN mkdir "${ANDROID_TOOLS_ROOT}/tools"
-RUN mv -i "${ANDROID_TOOLS_ROOT}" "${ANDROID_TOOLS_ROOT}/tools"
+RUN mkdir "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv -i "${ANDROID_TOOLS_ROOT}/cmdline-tools/*" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "patcher;v4" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "platform-tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "patcher;v4" > /dev/null
 RUN rm "${ANDROID_SDK_ARCHIVE}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools:${PATH}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools/tools:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin:${PATH}"
 # Silence warnings when accepting android licenses.
 RUN mkdir -p ~/.android
 RUN touch ~/.android/repositories.cfg
