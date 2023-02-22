@@ -139,16 +139,16 @@ class PreviewDevice extends Device {
     _process = process;
     _logReader.initializeProcess(process);
 
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_logReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Error waiting for a debug connection: '
@@ -157,7 +157,7 @@ class PreviewDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery.cancel();
+      await vmServiceDiscovery.cancel();
     }
     return LaunchResult.failed();
   }
