@@ -850,7 +850,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   ASSERT_FALSE(stack_50.is_empty());
 
   auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
-  auto mutator = *external_view_embedder->GetStack(50).Begin();
+  auto mutator = *stack_50.Begin();
   ASSERT_EQ(mutator->GetType(), MutatorType::kBackdropFilter);
   ASSERT_EQ(mutator->GetFilterMutation().GetFilter(), filter);
   // Make sure the filterRect is in global coordinates (contains the (1,1)
