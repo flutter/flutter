@@ -96,6 +96,8 @@ static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
       return impeller::PixelFormat::kR8G8B8A8UNormInt;
     case kRGBA_F16_SkColorType:
       return impeller::PixelFormat::kR16G16B16A16Float;
+    case kBGR_101010x_XR_SkColorType:
+      return impeller::PixelFormat::kB10G10R10XR;
     default:
       return std::nullopt;
   }
@@ -137,11 +139,9 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   SkImageInfo image_info;
   if (is_wide_gamut) {
-    // TODO(gaaclarke): Branch on alpha_type so it's 32bpp for opaque images.
-    //                  I tried using kBGRA_1010102_SkColorType and
-    //                  kBGR_101010x_SkColorType but Skia fails to decode the
-    //                  image that way.
-    SkColorType color_type = kRGBA_F16_SkColorType;
+    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
+                                 ? kBGR_101010x_XR_SkColorType
+                                 : kRGBA_F16_SkColorType;
     image_info =
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(color_type)
