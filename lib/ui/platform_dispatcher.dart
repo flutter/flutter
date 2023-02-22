@@ -1792,7 +1792,10 @@ class ViewPadding {
 /// Deprecated. Will be removed in a future version of Flutter.
 ///
 /// Use [ViewPadding] instead.
-// TODO(goderbauer): deprecate this when framework has been migrated to ViewPadding.
+@Deprecated(
+  'Use ViewPadding instead. '
+  'This feature was deprecated after v3.8.0-14.0.pre.',
+)
 typedef WindowPadding = ViewPadding;
 
 /// Area of the display that may be obstructed by a hardware feature.
