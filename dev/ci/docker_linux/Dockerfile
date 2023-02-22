@@ -86,7 +86,10 @@ RUN ls "${ANDROID_TOOLS_ROOT}"
 
 RUN mkdir "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 RUN ls "${ANDROID_TOOLS_ROOT}/cmdline-tools"
-RUN mv -i "${ANDROID_TOOLS_ROOT}/cmdline-tools/*" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/NOTICE.txt" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/lib" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/source.properties" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
 
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
