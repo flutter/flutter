@@ -302,20 +302,20 @@ class _HelperError extends StatefulWidget {
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.error,
   });
 
   final TextAlign? textAlign;
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
+  final Widget? error;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
-  final Widget? error;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -2377,10 +2377,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration.helperMaxLines,
+      error: decoration.error,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
-      error: decoration.error,
     );
 
     Widget? counter;
@@ -2614,9 +2614,9 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
+       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2859,8 +2859,8 @@ class InputDecoration {
   final int? hintMaxLines;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
-  /// If non-null, the border's color animates to red and the [helperText] is
-  /// not shown.
+  ///
+  /// If non-null, the border's color animates to red and the [helperText] is not shown.
   ///
   /// Only one of [error] and [errorText] can be specified.
   final Widget? error;
@@ -2872,7 +2872,9 @@ class InputDecoration {
   ///
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
+  ///
   /// If a more elaborate error is required, consider using [error] instead.
+  ///
   /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
 
@@ -3494,7 +3496,6 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
-
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3774,8 +3775,8 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
-      if (errorText != null) 'errorText: "$errorText"',
       if (error != null) 'error: "$error"',
+      if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',

@@ -1637,6 +1637,39 @@ void main() {
     expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
+    // when error is defined
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          error: Text(
+            'error',
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
+    expect(tester.getSize(find.text('error')).height, 20.0);
+    expect(tester.getTopLeft(find.text('error')), const Offset(0.0, 56.0));
+
+    // when errorText is defined
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          errorText: 'errorText'
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
+    expect(tester.getSize(find.text('errorText')).height, 12.0);
+    expect(tester.getTopLeft(find.text('errorText')), const Offset(0.0, 56.0));
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1861,43 +1894,6 @@ void main() {
     // layout is a row: [prefix text suffix]
     expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
     expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
-  });
-
-  testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
-    // when error is defined
-    await tester.pumpWidget(
-      buildInputDecorator(
-        useMaterial3: useMaterial3,
-        decoration: const InputDecoration(
-          error: Text(
-            'error',
-            style: TextStyle(fontSize: 20.0),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
-    expect(tester.getSize(find.text('error')).height, 20.0);
-    expect(tester.getTopLeft(find.text('error')), const Offset(0.0, 56.0));
-    //When errorText and error is defined then error will be shown
-    await tester.pumpWidget(
-      buildInputDecorator(
-        useMaterial3: useMaterial3,
-        decoration: const InputDecoration(
-          error: Text(
-            'error',
-            style: TextStyle(fontSize: 22.0),
-          ),
-          errorText: 'errorText',
-        ),
-      ),
-    );
-
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 78.0));
-    expect(tester.getSize(find.text('error')).height, 22.0);
-    expect(tester.getTopLeft(find.text('error')), const Offset(0.0, 56.0));
-    expect(find.text('errorText'), findsNothing);
   });
 
   testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
