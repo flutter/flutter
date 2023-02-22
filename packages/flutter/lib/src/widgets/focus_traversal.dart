@@ -1565,10 +1565,11 @@ class FocusTraversalGroup extends StatefulWidget {
   /// under the nearest ancestor [Focus] widget.
   ///
   /// This function differs from [maybeOf] in that it only traverses the focus
-  /// tree to determine the policy in effect. The [maybeOf] function first walks
-  /// up the widget tree, to find the nearest ancestor [Focus] or [FocusScope]
-  /// widget, and then calls this function with the focus node associated with
-  /// that widget to determine the policy in effect.
+  /// tree to determine the policy in effect. Unlike this function, the
+  /// [maybeOf] function first walks up the widget tree, to find the nearest
+  /// ancestor [Focus] or [FocusScope] widget, and then calls this function with
+  /// the focus node associated with that widget to determine the policy in
+  /// effect.
   ///
   /// See also:
   ///
@@ -1595,7 +1596,7 @@ class FocusTraversalGroup extends StatefulWidget {
   /// nearest ancestor [Focus] widget, given a [BuildContext].
   ///
   /// Will throw a [FlutterError] in debug mode, and throw a null check
-  /// exception in release mode, if no [Focus] ancestor is found, or no
+  /// exception in release mode, if no [Focus] ancestor is found, or if no
   /// [FocusTraversalPolicy] applies to the associated [FocusNode].
   ///
   /// {@template flutter.widgets.focus_traversal.FocusTraversalGroup.of}
@@ -1603,8 +1604,9 @@ class FocusTraversalGroup extends StatefulWidget {
   /// widget, and uses its [FocusNode] (or [FocusScopeNode]) to walk up the
   /// focus tree to find the applicable [FocusTraversalPolicy] for that node.
   ///
-  /// Calling this function creates a rebuild dependency on the nearest ancestor
-  /// [Focus] or [FocusScope] widget.
+  /// Calling this function does not create a rebuild dependency because
+  /// changing the traversal order doesn't change the widget tree, so nothing
+  /// needs to be rebuilt as a result of an order change.
   ///
   /// The [FocusTraversalPolicy] is set by introducing a [FocusTraversalGroup]
   /// into the widget tree, which will associate a policy with the focus tree
@@ -1653,11 +1655,11 @@ class FocusTraversalGroup extends StatefulWidget {
   /// * [of] for a similar function that will throw if no [FocusTraversalPolicy]
   ///   applies.
   static FocusTraversalPolicy? maybeOf(BuildContext context) {
-    final FocusNode? inherited = Focus.maybeOf(context, scopeOk: true);
-    if (inherited == null) {
+    final FocusNode? node = Focus.maybeOf(context, scopeOk: true, createDependency: false);
+    if (node == null) {
       return null;
     }
-    return FocusTraversalGroup.maybeOfNode(inherited);
+    return FocusTraversalGroup.maybeOfNode(node);
   }
 
   @override
@@ -1670,6 +1672,9 @@ class FocusTraversalGroup extends StatefulWidget {
   }
 }
 
+// A special focus node subclass that only FocusTraversalGroup uses so that it
+// can be used to cache the policy in the focus tree, and so that the traversal
+// code can find groups in the focus tree.
 class _FocusTraversalGroupNode extends FocusNode {
   _FocusTraversalGroupNode({
     super.debugLabel,
@@ -1683,7 +1688,8 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   // The internal focus node used to collect the children of this node into a
   // group, and to provide a context for the traversal algorithm to sort the
   // group with. It's a special subclass of FocusNode just so that it can be
-  // identified when walking the focus tree during traversal.
+  // identified when walking the focus tree during traversal, and hold the
+  // current policy.
   late final _FocusTraversalGroupNode focusNode;
 
   @override
