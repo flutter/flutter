@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,7 +20,6 @@ import 'package:test/fake.dart';
 
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
-import '../ios/devices_test.dart';
 
 void main() {
   testUsingContext('Ensure factory returns MacPlatformTargetDevices on macos', () async {
@@ -3103,6 +3103,47 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeFlutterProject extends Fake implements FlutterProject {}
+
+
+class FakeXcdevice extends Fake implements XCDevice {
+  int getAvailableIOSDevicesCount = 0;
+  final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
+  final List<String> diagnostics = <String>[];
+  StreamController<XCDeviceEventNotification> deviceEventController = StreamController<XCDeviceEventNotification>();
+
+  XCDeviceEventNotification? waitForDeviceEvent;
+
+  @override
+  bool isInstalled = true;
+
+  @override
+  Future<List<String>> getDiagnostics() async {
+    return diagnostics;
+  }
+
+  @override
+  Stream<XCDeviceEventNotification> observedDeviceEvents() {
+    return deviceEventController.stream;
+  }
+
+  @override
+  Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
+    return devices[getAvailableIOSDevicesCount++];
+  }
+
+  @override
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+    final XCDeviceEventNotification? waitEvent = waitForDeviceEvent;
+    if (waitEvent != null) {
+      return XCDeviceEventNotification(waitEvent.eventType, waitEvent.eventInterface, waitEvent.deviceIdentifier);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  void cancelWaitForDeviceToConnect() => VoidCallback;
+}
 
 class TestMacPlatformTargetDevices extends MacPlatformTargetDevices {
   TestMacPlatformTargetDevices({
