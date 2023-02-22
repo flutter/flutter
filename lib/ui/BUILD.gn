@@ -206,6 +206,7 @@ if (enable_unittests) {
     fixtures = [
       "fixtures/DashInNooglerHat.jpg",
       "fixtures/DashInNooglerHat%20WithSpace.jpg",
+      "fixtures/DisplayP3Logo.jpg",
       "fixtures/DisplayP3Logo.png",
       "fixtures/Horizontal.jpg",
       "fixtures/Horizontal.png",
