@@ -46,8 +46,8 @@ class _MatchesMethodCall extends Matcher {
 
 // Used to set window.viewInsets since the real ui.WindowPadding has only a
 // private constructor.
-class _TestWindowPadding implements ui.WindowPadding {
-  const _TestWindowPadding({
+class _TestViewPadding implements ui.ViewPadding {
+  const _TestViewPadding({
     required this.bottom,
   });
 
@@ -164,7 +164,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
     addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
     textController.selection = TextSelection(
       baseOffset: 0,
@@ -215,7 +215,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
     addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
     await tester.pump();
 
