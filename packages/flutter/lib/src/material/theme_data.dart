@@ -7,6 +7,8 @@ import 'dart:ui' show Color, lerpDouble;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
+import 'action_buttons.dart';
+import 'action_icons_theme.dart';
 import 'app_bar_theme.dart';
 import 'badge_theme.dart';
 import 'banner_theme.dart';
@@ -337,6 +339,7 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     Typography? typography,
     // COMPONENT THEMES
+    ActionIconThemeData? actionIconTheme,
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
@@ -649,6 +652,7 @@ class ThemeData with Diagnosticable {
       typography: typography,
       primaryIconTheme: primaryIconTheme,
       // COMPONENT THEMES
+      actionIconTheme: actionIconTheme,
       appBarTheme: appBarTheme,
       badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
@@ -759,6 +763,7 @@ class ThemeData with Diagnosticable {
     required this.textTheme,
     required this.typography,
     // COMPONENT THEMES
+    required this.actionIconTheme,
     required this.appBarTheme,
     required this.badgeTheme,
     required this.bannerTheme,
@@ -1356,6 +1361,10 @@ class ThemeData with Diagnosticable {
 
   // COMPONENT THEMES
 
+  /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon],
+  /// [DrawerButtonIcon], or [EndDrawerButtonIcon].
+  final ActionIconThemeData? actionIconTheme;
+
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
@@ -1654,6 +1663,7 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     Typography? typography,
     // COMPONENT THEMES
+    ActionIconThemeData? actionIconTheme,
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
@@ -1787,6 +1797,7 @@ class ThemeData with Diagnosticable {
       textTheme: textTheme ?? this.textTheme,
       typography: typography ?? this.typography,
       // COMPONENT THEMES
+      actionIconTheme: actionIconTheme ?? this.actionIconTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
@@ -1980,6 +1991,7 @@ class ThemeData with Diagnosticable {
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       // COMPONENT THEMES
+      actionIconTheme: ActionIconThemeData.lerp(a.actionIconTheme, b.actionIconTheme, t),
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
@@ -2085,6 +2097,7 @@ class ThemeData with Diagnosticable {
         other.textTheme == textTheme &&
         other.typography == typography &&
         // COMPONENT THEMES
+        other.actionIconTheme == actionIconTheme &&
         other.appBarTheme == appBarTheme &&
         other.badgeTheme == badgeTheme &&
         other.bannerTheme == bannerTheme &&
@@ -2187,6 +2200,7 @@ class ThemeData with Diagnosticable {
       textTheme,
       typography,
       // COMPONENT THEMES
+      actionIconTheme,
       appBarTheme,
       badgeTheme,
       bannerTheme,
@@ -2291,6 +2305,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     // COMPONENT THEMES
+    properties.add(DiagnosticsProperty<ActionIconThemeData>('actionIconTheme', actionIconTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BadgeThemeData>('badgeTheme', badgeTheme, defaultValue: defaultData.badgeTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));

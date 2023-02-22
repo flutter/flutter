@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'action_buttons.dart';
 import 'app_bar_theme.dart';
-import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -21,7 +21,6 @@ import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
@@ -755,14 +754,6 @@ class _AppBarState extends State<AppBar> {
     super.dispose();
   }
 
-  void _handleDrawerButton() {
-    Scaffold.of(context).openDrawer();
-  }
-
-  void _handleDrawerButtonEnd() {
-    Scaffold.of(context).openEndDrawer();
-  }
-
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       final bool oldScrolledUnder = _scrolledUnder;
@@ -894,11 +885,8 @@ class _AppBarState extends State<AppBar> {
     Widget? leading = widget.leading;
     if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
-        leading = IconButton(
-          icon: const Icon(Icons.menu),
-          iconSize: overallIconTheme.size ?? 24,
-          onPressed: _handleDrawerButton,
-          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+        leading = DrawerButton(
+          style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
         );
         // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
         // are migrated.
@@ -1009,11 +997,8 @@ class _AppBarState extends State<AppBar> {
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {
-      actions = IconButton(
-        icon: const Icon(Icons.menu),
-        iconSize: overallIconTheme.size ?? 24,
-        onPressed: _handleDrawerButtonEnd,
-        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      actions = EndDrawerButton(
+        style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
       );
     }
 
