@@ -1260,6 +1260,8 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectableRegionContainerDelegate(): super(selectionSeparator: '');
+
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
@@ -1415,6 +1417,22 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   }
 }
 
+/// A mixin to standardize the usage of [selectionSeparator].
+mixin MultiSelectableSeparator {
+  /// The separator to use when concatenating the selected text.
+  String get selectionSeparator;
+
+  /// Return the default selection separator for the given [axis].
+  String selectionSeparatorForAxis(Axis axis) {
+    switch (axis) {
+      case Axis.horizontal:
+        return ' ';
+      case Axis.vertical:
+        return '\n';
+    }
+  }
+}
+
 /// An abstract base class for updating multiple selectable children.
 ///
 /// This class provide basic [SelectionEvent] handling and child [Selectable]
@@ -1423,18 +1441,19 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 ///
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
-abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier, MultiSelectableSeparator {
   /// Creates a [MultiSelectableSelectionContainerDelegate].
   ///
-  /// The [separator] is used to separate the text of each selectable in
+  /// The [selectionSeparator] is used to separate the text of each selectable in
   /// [selectables].
   MultiSelectableSelectionContainerDelegate({
-     this.separator = '',
+     required this.selectionSeparator,
   });
 
   /// The separator used to separate the text of each selectable in
   /// [selectables].
-  final String separator;
+  @override
+  final String selectionSeparator;
 
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
@@ -1839,7 +1858,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       return null;
     }
     return SelectedContent(
-      plainText: selections.map((SelectedContent e) => e.plainText).join(separator),
+      plainText: selections.map((SelectedContent e) => e.plainText).join(selectionSeparator),
     );
   }
 

@@ -83,12 +83,13 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 ///    child.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-class Scrollable extends StatefulWidget {
+class Scrollable extends StatefulWidget with MultiSelectableSeparator {
   /// Creates a widget that scrolls.
   ///
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     super.key,
+    String? selectionSeparator,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -100,7 +101,13 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
+  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
+        _selectionSeparator = selectionSeparator;
+
+  final String? _selectionSeparator;
+
+  @override
+  String get selectionSeparator => _selectionSeparator ?? selectionSeparatorForAxis(axis);
 
   /// The direction in which this widget scrolls.
   ///
@@ -893,6 +900,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     if (registrar != null) {
       result = _ScrollableSelectionHandler(
+        selectionSeparator: widget.selectionSeparator,
         state: this,
         position: position,
         registrar: registrar,
@@ -918,14 +926,17 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 ///
 /// This widget registers itself to the [registrar] and uses
 /// [SelectionContainer] to collect selectables from its subtree.
-class _ScrollableSelectionHandler extends StatefulWidget {
-  const _ScrollableSelectionHandler({
+class _ScrollableSelectionHandler extends StatefulWidget with MultiSelectableSeparator {
+   const _ScrollableSelectionHandler({
+    required this.selectionSeparator,
     required this.state,
     required this.position,
     required this.registrar,
     required this.child,
   });
 
+  @override
+  final String selectionSeparator;
   final ScrollableState state;
   final ScrollPosition position;
   final Widget child;
@@ -942,6 +953,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
   void initState() {
     super.initState();
     _selectionDelegate = _ScrollableSelectionContainerDelegate(
+      selectionSeparator: widget.selectionSeparator,
       state: widget.state,
       position: widget.position,
     );
@@ -1125,6 +1137,7 @@ class EdgeDraggingAutoScroller {
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
+    required super.selectionSeparator,
     required this.state,
     required ScrollPosition position
   }) : _position = position,
