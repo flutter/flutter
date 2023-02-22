@@ -183,7 +183,7 @@ class BottomSheetThemeData with Diagnosticable {
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null))
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('modalBarrierColor', modalBarrierColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
