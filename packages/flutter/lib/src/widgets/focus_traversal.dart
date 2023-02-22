@@ -318,8 +318,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
-  Map<FocusNode?, _FocusTraversalGroupInfo> _findGroups(FocusScopeNode scope, _FocusTraversalGroupNode? scopeGroupMarker) {
-    final FocusTraversalPolicy defaultPolicy = scopeGroupMarker?.policy ?? ReadingOrderTraversalPolicy();
+  Map<FocusNode?, _FocusTraversalGroupInfo> _findGroups(FocusScopeNode scope, _FocusTraversalGroupNode? scopeGroupNode) {
+    final FocusTraversalPolicy defaultPolicy = scopeGroupNode?.policy ?? ReadingOrderTraversalPolicy();
     final Map<FocusNode?, _FocusTraversalGroupInfo> groups = <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
       final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(node);
@@ -329,8 +329,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       // of the parent group.
       if (node == groupNode) {
         // To find the parent of the group node, we need to skip over the parent
-        // of the Focus node in _FocusTraversalGroupState.build, and start
-        // looking with that node's parent, since _getMarker will return the
+        // of the Focus node added in _FocusTraversalGroupState.build, and start
+        // looking with that node's parent, since _getGroupNode will return the
         // node it was called on if it matches the type.
         final _FocusTraversalGroupNode? parentGroup = FocusTraversalGroup._getGroupNode(groupNode!.parent!);
         groups[parentGroup] ??= _FocusTraversalGroupInfo(parentGroup, members: <FocusNode>[], defaultPolicy: defaultPolicy);
