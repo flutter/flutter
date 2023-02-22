@@ -9,6 +9,12 @@ import 'package:process/process.dart';
 import './globals.dart';
 
 /// A wrapper around git process calls that can be mocked for unit testing.
+/// The `Git` class is a relatively (compared to `Repository`) lightweight
+/// abstraction over invocations to the `git` cli tool. I believe the main
+/// motivation for creating the class was so that it could be overridden in
+/// tests by a fake that would allow the test to verify calls made to it.
+/// However, later I imported the FakeProcessManager that the Flutter CLI tool
+/// uses and this abstraction became redundant.
 class Git {
   const Git(this.processManager);
 

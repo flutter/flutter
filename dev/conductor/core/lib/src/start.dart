@@ -34,6 +34,28 @@ const String kVersionOverrideOption = 'version-override';
 const String kGithubUsernameOption = 'github-username';
 
 /// Command to print the status of the current Flutter release.
+/// The `conductor start` sub-command is how releases are started. This command
+/// has many required options which the user must provide via command line
+/// arguments (or optionally environment variables). In order, it:
+
+/// 1. Validates the user's inputs
+/// 2. Creates a `ConductorState` object for all of the state that needs to be
+/// persisted between invocations of the conductor and initializes it with the
+/// user's inputs
+/// 3. Clones the framework and engine repos into the conductor managed checkout
+/// directory
+/// 4. Tries to apply the engine cherrypicks
+/// 5. Updates the `state.currentPhase` field to be the next phase (so that the
+/// next time we call the conductor it will know what to do next)
+/// 6. Writes the `ConductorState` object to disk so that the next invocation
+/// can read it
+
+/// This command is the one with the worst user experience (as the user has to
+/// carefully type out many different options into their terminal) and the one
+/// that would benefit the most from a GUI frontend. This command will
+/// optionally read its options from an environment variable because I found
+/// that editing a bash script that set environment variables was easier to use
+/// than typing the options into a terminal: conductor.sh.
 class StartCommand extends Command<void> {
   StartCommand({
     required this.checkouts,
