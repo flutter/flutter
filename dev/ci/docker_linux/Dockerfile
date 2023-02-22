@@ -70,6 +70,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
 
+ENV CLASSPATH='/usr/share/jaxb/lib'
+
 # Install the Android SDK Dependency.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
 ENV ANDROID_TOOLS_ROOT="/opt/android_sdk"
