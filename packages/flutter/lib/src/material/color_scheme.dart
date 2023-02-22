@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
@@ -240,6 +244,158 @@ class ColorScheme with Diagnosticable {
       surfaceTint: surfaceTint ?? Color(scheme.primary),
       brightness: brightness,
     );
+  }
+
+  /// Generate a [ColorScheme] derived from the given `image`.
+  ///
+  /// Material Color Utilities extracts the dominant color from the
+  /// supplied image. Using this color, a a set of tonal palettes are
+  /// constructed. These tonal palettes are based on the Material 3 Color
+  /// system and provide all the needed colors for a [ColorScheme]. These
+  /// colors are designed to work well together and meet contrast
+  /// requirements for accessibility.
+  ///
+  /// If any of the optional color parameters are non-null, they will be
+  /// used in place of the generated colors for that field in the resulting
+  /// color scheme. This allows apps to override specific colors for their
+  /// needs.
+  ///
+  /// Given the nature of the algorithm, the seedColor may not wind up as
+  /// one of the ColorScheme colors.
+  ///
+  /// See also:
+  ///
+  ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
+  ///    Material 3 Color system specification.
+  ///  * <https://pub.dev/packages/material_color_utilities>, the package
+  ///    used to generate the base color and tonal palettes needed for the scheme.
+  static Future<ColorScheme> fromImage({
+    required Image image,
+    Brightness brightness = Brightness.light,
+    Color? primary,
+    Color? onPrimary,
+    Color? primaryContainer,
+    Color? onPrimaryContainer,
+    Color? secondary,
+    Color? onSecondary,
+    Color? secondaryContainer,
+    Color? onSecondaryContainer,
+    Color? tertiary,
+    Color? onTertiary,
+    Color? tertiaryContainer,
+    Color? onTertiaryContainer,
+    Color? error,
+    Color? onError,
+    Color? errorContainer,
+    Color? onErrorContainer,
+    Color? outline,
+    Color? outlineVariant,
+    Color? background,
+    Color? onBackground,
+    Color? surface,
+    Color? onSurface,
+    Color? surfaceVariant,
+    Color? onSurfaceVariant,
+    Color? inverseSurface,
+    Color? onInverseSurface,
+    Color? inversePrimary,
+    Color? shadow,
+    Color? scrim,
+    Color? surfaceTint,
+  }) async {
+    final pixels = await bloop(image);
+
+// to test: white background, 10% color square
+// transparency effects
+// what the heck is going on with england rugby color
+    final QuantizerResult result = await QuantizerCelebi().quantize(pixels, 256);
+    print((result.colorToCount.keys).map((key) => Color(key)));
+    final Color baseColor = Color((result.colorToCount.keys.toList())[0]);
+    print('baseColor: $baseColor');
+    final Scheme scheme;
+
+    switch (brightness) {
+      case Brightness.light:
+        scheme = Scheme.light(baseColor.value);
+        break;
+      case Brightness.dark:
+        scheme = Scheme.dark(baseColor.value);
+        break;
+    }
+    return ColorScheme(
+      primary: primary ?? Color(scheme.primary),
+      onPrimary: onPrimary ?? Color(scheme.onPrimary),
+      primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      secondary: secondary ?? Color(scheme.secondary),
+      onSecondary: onSecondary ?? Color(scheme.onSecondary),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      tertiary: tertiary ?? Color(scheme.tertiary),
+      onTertiary: onTertiary ?? Color(scheme.onTertiary),
+      tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      error: error ?? Color(scheme.error),
+      onError: onError ?? Color(scheme.onError),
+      errorContainer: errorContainer ?? Color(scheme.errorContainer),
+      onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
+      outline: outline ?? Color(scheme.outline),
+      outlineVariant: outlineVariant ?? Color(scheme.outlineVariant),
+      background: background ?? Color(scheme.background),
+      onBackground: onBackground ?? Color(scheme.onBackground),
+      surface: surface ?? Color(scheme.surface),
+      onSurface: onSurface ?? Color(scheme.onSurface),
+      surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
+      onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
+      inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
+      onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
+      inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
+      shadow: shadow ?? Color(scheme.shadow),
+      scrim: scrim ?? Color(scheme.scrim),
+      surfaceTint: surfaceTint ?? Color(scheme.primary),
+      brightness: brightness,
+    );
+  }
+
+static Future<Iterable<int>> bloop(Image input) async {
+    ImageStream stream = input.image.resolve(const ImageConfiguration(size: Size(112, 112)));
+  final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+  final Duration timeout = Duration(seconds: 15);
+    Timer? loadFailureTimeout;
+    late ImageStreamListener listener;
+    listener = ImageStreamListener((ImageInfo info, sync) async {
+      stream.removeListener(listener);
+      imageCompleter.complete(info.image);
+    });
+    // if (timeout != Duration.zero) {
+    //   loadFailureTimeout = Timer(timeout, () {
+    //     stream.removeListener(listener);
+    //     imageCompleter.completeError(
+    //       TimeoutException(
+    //           'Timeout occurred trying to load from ${input.image}'),
+    //     );
+    //   });
+    // }
+    stream.addListener(listener);
+    final ui.Image image = await imageCompleter.future;
+    final inputPixels = (await image.toByteData())!
+      .buffer
+      .asUint32List()
+      //.map((e) => getArgbFromAbgr(e))
+      .toList();
+      //print(inputPixels);
+      stream.removeListener(listener);
+      return inputPixels;
+  }
+
+  static int getArgbFromAbgr(int abgr) {
+    final int EXCEPT_R_MASK = 0xFF00FFFF;
+    final int ONLY_R_MASK = ~EXCEPT_R_MASK;
+    final int EXCEPT_B_MASK = 0xFFFFFF00;
+    final int ONLY_B_MASK = ~EXCEPT_B_MASK;
+    int r = (abgr & ONLY_R_MASK) >> 16;
+    int b = abgr & ONLY_B_MASK;
+    return (abgr & EXCEPT_R_MASK & EXCEPT_B_MASK) | (b << 16) | r;
   }
 
   /// Create a ColorScheme based on a purple primary color that matches the
