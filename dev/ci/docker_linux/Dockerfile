@@ -57,6 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   default-jdk-headless \
   gcc \
   google-chrome-stable \
+  jaxb \
   lib32stdc++6 \
   libglu1-mesa \
   libstdc++6 \
