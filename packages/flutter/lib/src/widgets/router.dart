@@ -68,11 +68,6 @@ class RouteInformation {
     if (_location != null) {
       return _location!;
     }
-    return _getLocationFromUri(_uri!);
-  }
-  final String? _location;
-
-  static String _getLocationFromUri(Uri uri) {
     return Uri.decodeComponent(
       Uri(
         path: uri.path.isEmpty ? '/' : uri.path,
@@ -81,6 +76,7 @@ class RouteInformation {
       ).toString(),
     );
   }
+  final String? _location;
 
   /// The uri location of the application.
   ///
@@ -1474,14 +1470,13 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final String newLocation = RouteInformation._getLocationFromUri(routeInformation.uri);
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-       RouteInformation._getLocationFromUri(_valueInEngine.uri) == newLocation);
+       _valueInEngine.uri == routeInformation.uri);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
-      location: newLocation,
+      location: routeInformation.uri.toString(),
       state: routeInformation.state,
       replace: replace,
     );
@@ -1536,13 +1531,6 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(hasListeners);
     _platformReportsNewRouteInformation(routeInformation);
-    return true;
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    assert(hasListeners);
-    _platformReportsNewRouteInformation(RouteInformation(uri: Uri.parse(route)));
     return true;
   }
 }

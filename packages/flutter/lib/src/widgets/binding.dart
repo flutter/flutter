@@ -72,6 +72,10 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
+  @Deprecated(
+    'Use didPushRouteInformation instead. '
+    'This feature was deprecated after v3.8.0-14.0.pre.'
+  )
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new
@@ -86,16 +90,18 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// The default implementation is to call the [didPushRoute] directly with the
   /// string constructed from [RouteInformation.uri]'s path and query parameters.
+  // TODO(chunhtai): remove the default implementation once `didPushRoute` is
+  // removed.
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
     final Uri uri = routeInformation.uri;
     return didPushRoute(
-        Uri.decodeComponent(
-          Uri(
-            path: uri.path.isEmpty ? '/' : uri.path,
-            queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-            fragment: uri.fragment.isEmpty ? null : uri.fragment,
-          ).toString(),
-        ),
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
     );
   }
 
@@ -682,7 +688,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRoute(route)) {
+      if (
+        await observer.didPushRouteInformation(
+          RouteInformation(
+            uri: Uri.parse(route),
+          ),
+        )
+      ) {
         return;
       }
     }
