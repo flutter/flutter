@@ -281,7 +281,7 @@ class IOSDevices extends PollingDeviceDiscovery {
                 await filter.matchesRequirements(connectedDevice))) {
           return DeviceDiscoveryMatchByIdResult(
             <Device>[connectedDevice],
-            isExactMatch: exactMatchDevice != null,
+            isExactMatch: true,
           );
         }
       }

@@ -755,7 +755,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIP: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -792,7 +792,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIP: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -829,7 +829,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIP: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
