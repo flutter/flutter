@@ -1537,4 +1537,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, 700.0);
   });
+
+  group('gestures', () {
+    testWidgets('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100,
+            children: children
+                .map((int index) => GestureDetector(
+                  key: ValueKey<int>(index),
+                  onTap: () {
+                    tappedChildren.add(index);
+                  },
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CustomPaint(
+                      painter: TestCallbackPainter(onPaint: () {
+                        paintedChildren.add(index);
+                      }),
+                    ),
+                  ),
+                ))
+                .toList(),
+          ),
+        ),
+      );
+
+      // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
+      expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
+
+      const Size testScreenSize = Size(800.0, 600.0);
+      for (double i = 0; i < testScreenSize.height; i += 10) {
+        // For some reason, tester.getCenter returns coordinates of the target item without accounting
+        // for paint transform.
+        //
+        // Therefore tester.tap also doesn't work, so we just go through all the coordinates
+        // and check that all visible elements were hit.
+        //
+        // TODO(nt4f04und): use tester.tap when https://github.com/flutter/flutter/issues/121343 is fixed
+        await tester.tapAt(Offset(testScreenSize.width / 2, i));
+      }
+      expect(tappedChildren, paintedChildren);
+    });
+
+    testWidgets('ListWheelScrollView allows for horizontal drags on its children', (WidgetTester tester) async {
+      final PageController pageController = PageController();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            itemExtent: 100,
+            children: <Widget>[
+              PageView(
+                controller: pageController,
+                children: List<int>.generate(100, (int index) => index)
+                  .map((int index) => Text(index.toString()))
+                  .toList(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(pageController.page, 0.0);
+
+      await tester.drag(find.byType(PageView), const Offset(-800, 0));
+
+      expect(pageController.page, 1.0);
+    });
+  });
 }

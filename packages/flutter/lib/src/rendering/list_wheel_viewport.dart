@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
@@ -55,6 +56,12 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   ///
   /// This must be maintained by the [ListWheelChildManager].
   int? index;
+
+  /// Transform applied to this child during painting.
+  ///
+  /// Can be used to find the local bounds of this child in the viewport,
+  /// and then use it, for example, in hit testing.
+  Matrix4? transform;
 }
 
 /// Render, onto a wheel, a bigger sequential set of objects inside this viewport.
@@ -964,12 +971,14 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
+    final Offset paintOriginOffset = offset + offsetToCenter;
+
     // Paint child cylindrically, without [overAndUnderCenterOpacity].
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
-        offset + offsetToCenter,
+        paintOriginOffset,
       );
     }
 
@@ -985,6 +994,12 @@ class RenderListWheelViewport
       // Pre-transform painting function.
       overAndUnderCenterOpacity == 1 ? painter : opacityPainter,
     );
+
+    final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+    // Save the final transform that accounts both for the offset and cylindrical transform.
+    final Matrix4 transform = _centerOriginTransform(cylindricalTransform)
+      ..translate(paintOriginOffset.dx, paintOriginOffset.dy);
+    childParentData.transform = transform;
   }
 
   /// Return the Matrix4 transformation that would zoom in content in the
@@ -1031,7 +1046,35 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+      final Matrix4? transform = childParentData.transform;
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(() {
+            if (transform == null) {
+              return transformed == position;
+            }
+            final Matrix4? inverted = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
+            if (inverted == null) {
+              return transformed == position;
+            }
+            return transformed == MatrixUtils.transformPoint(inverted, position);
+          }());
+          return child!.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
+  }
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
