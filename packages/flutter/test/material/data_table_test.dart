@@ -756,10 +756,10 @@ void main() {
             label: Text('MultiRowColumn'),
           ),
         ],
-        rows: <DataRow>[
+        rows: const <DataRow>[
           DataRow(cells: <DataCell>[
-            const DataCell(Text('Data')),
-            DataCell(Column(children: const <Widget>[
+            DataCell(Text('Data')),
+            DataCell(Column(children: <Widget>[
                   Text(multilineText),
                 ])),
           ]),
