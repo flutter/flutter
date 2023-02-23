@@ -142,6 +142,7 @@
 ../../../flutter/impeller/renderer/device_buffer_unittests.cc
 ../../../flutter/impeller/renderer/host_buffer_unittests.cc
 ../../../flutter/impeller/renderer/pipeline_descriptor_unittests.cc
+../../../flutter/impeller/renderer/renderer_dart_unittests.cc
 ../../../flutter/impeller/renderer/renderer_unittests.cc
 ../../../flutter/impeller/runtime_stage/runtime_stage_unittests.cc
 ../../../flutter/impeller/scene/README.md
