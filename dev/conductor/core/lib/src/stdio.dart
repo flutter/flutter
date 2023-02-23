@@ -6,13 +6,14 @@ import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
-/// The `Stdio` class abstracts all output from the conductor tool. Although
-/// this could have been simplified by simply calling `print()` from the tool,
-/// this abstraction allows unit tests to verify output and allows a GUI
-/// frontend to provide an alternative implementation.
-/// User input probably should be part of this class–however, for reasons I
-/// can't remember it is instead part of the lib/src/context.dart, which was
-/// added when the desktop version was being implemented.
+/// An interface for presenting text output to the user.
+///
+/// Although this could have been simplified by simply calling `print()`
+/// from the tool, this abstraction allows unit tests to verify output
+/// and allows a GUI frontend to provide an alternative implementation.
+///
+/// User input probably should be part of this class–however it is currently
+/// part of context.dart.
 abstract class Stdio {
   final List<String> logs = <String>[];
 
