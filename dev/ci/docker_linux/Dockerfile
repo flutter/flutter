@@ -57,7 +57,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   default-jdk-headless \
   gcc \
   google-chrome-stable \
-  jaxb \
   lib32stdc++6 \
   libglu1-mesa \
   libstdc++6 \
@@ -69,8 +68,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   apt-get clean
 
 ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
-
-ENV CLASSPATH="/usr/share/jaxb/lib"
 
 # Install the Android SDK Dependency.
 # In the event of an update you can visit this page: https://developer.android.com/studio and scroll to the bottom to find
