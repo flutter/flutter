@@ -377,7 +377,7 @@ void main() {
 
   test('BorderRadiusGeometry.lerp identical a,b', () {
     expect(BorderRadiusDirectional.lerp(null, null, 0), null);
-    const BorderRadiusGeometry border = BorderRadius.only();
+    const BorderRadiusGeometry border = BorderRadius.zero;
     expect(identical(BorderRadiusGeometry.lerp(border, border, 0.5), border), true);
   });
 
