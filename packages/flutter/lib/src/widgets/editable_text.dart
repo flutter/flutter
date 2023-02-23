@@ -2605,7 +2605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_tickersEnabled && _cursorActive) {
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
-        // Cannot use _stopCursorTimer because it would reset _cursorActive.
+        // Cannot use _stopCursorBlink because it would reset _cursorActive.
         _cursorTimer!.cancel();
         _cursorTimer = null;
       }
@@ -5385,8 +5385,8 @@ class _UndoStack<T> {
 
   final List<T> _list = <T>[];
 
-  // The index of the current value, or null if the list is emtpy.
-  late int _index;
+  // The index of the current value, or -1 if the list is empty.
+  int _index = -1;
 
   /// Returns the current value of the stack.
   T? get currentValue => _list.isEmpty ? null : _list[_index];
