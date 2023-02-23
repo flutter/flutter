@@ -1405,57 +1405,45 @@ class ViewConfiguration {
   /// Whether or not the view is currently visible on the screen.
   final bool visible;
 
-  /// The view insets, as it intersects with [Screen.viewInsets] for the screen
-  /// it is on.
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the view can render, but over which the operating system will likely
+  /// place system UI, such as the keyboard, that fully obscures any content.
   ///
-  /// For instance, if the view doesn't overlap the
-  /// [ScreenConfiguration.viewInsets] area, [viewInsets] will be
-  /// [ViewPadding.zero].
-  ///
-  /// The number of physical pixels on each side of this view rectangle into
-  /// which the application can draw, but over which the operating system will
-  /// likely place system UI, such as the keyboard or system menus, that fully
-  /// obscures any content.
+  /// The relationship between this [viewInsets], [viewPadding], and [padding]
+  /// are described in more detail in the documentation for [FlutterView].
   final ViewPadding viewInsets;
 
-  /// The view insets, as it intersects with [ScreenConfiguration.viewPadding]
-  /// for the screen it is on.
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the view can render, but which may be partially obscured by system
+  /// UI (such as the system notification area), or physical intrusions in
+  /// the display (e.g. overscan regions on television screens or phone sensor
+  /// housings).
   ///
-  /// For instance, if the view doesn't overlap the
-  /// [ScreenConfiguration.viewPadding] area, [viewPadding] will be
-  /// [ViewPadding.zero].
+  /// Unlike [padding], this value does not change relative to [viewInsets].
+  /// For example, on an iPhone X, it will not change in response to the soft
+  /// keyboard being visible or hidden, whereas [padding] will.
   ///
-  /// The number of physical pixels on each side of this screen rectangle into
-  /// which the application can place a view, but which may be partially
-  /// obscured by system UI (such as the system notification area), or physical
-  /// intrusions in the display (e.g. overscan regions on television screens or
-  /// phone sensor housings).
+  /// The relationship between this [viewInsets], [viewPadding], and [padding]
+  /// are described in more detail in the documentation for [FlutterView].
   final ViewPadding viewPadding;
 
-  /// The view insets, as it intersects with
-  /// [ScreenConfiguration.systemGestureInsets] for the screen it is on.
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the view can render, but where the operating system will consume
+  /// input gestures for the sake of system navigation.
   ///
-  /// For instance, if the view doesn't overlap the
-  /// [ScreenConfiguration.systemGestureInsets] area, [systemGestureInsets] will
-  /// be [ViewPadding.zero].
-  ///
-  /// The number of physical pixels on each side of this screen rectangle into
-  /// which the application can place a view, but where the operating system
-  /// will consume input gestures for the sake of system navigation.
+  /// For example, an operating system might use the vertical edges of the
+  /// screen, where swiping inwards from the edges takes users backward
+  /// through the history of screens they previously visited.
   final ViewPadding systemGestureInsets;
 
-  /// The view insets, as it intersects with [ScreenConfiguration.padding] for
-  /// the screen it is on.
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the view can render, but which may be partially obscured by system
+  /// UI (such as the system notification area), or physical intrusions in
+  /// the display (e.g. overscan regions on television screens or phone sensor
+  /// housings).
   ///
-  /// For instance, if the view doesn't overlap the
-  /// [ScreenConfiguration.padding] area, [padding] will be
-  /// [ViewPadding.zero].
-  ///
-  /// The number of physical pixels on each side of this screen rectangle into
-  /// which the application can place a view, but which may be partially
-  /// obscured by system UI (such as the system notification area), or physical
-  /// intrusions in the display (e.g. overscan regions on television screens or
-  /// phone sensor housings).
+  /// The relationship between this [viewInsets], [viewPadding], and [padding]
+  /// are described in more detail in the documentation for [FlutterView].
   final ViewPadding padding;
 
   /// Additional configuration for touch gestures performed on this view.
