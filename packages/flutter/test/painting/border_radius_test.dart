@@ -141,7 +141,7 @@ void main() {
 
   test('BorderRadius.lerp identical a,b', () {
     expect(BorderRadius.lerp(null, null, 0), null);
-    const BorderRadius border = BorderRadius.only();
+    const BorderRadius border = BorderRadius.zero;
     expect(identical(BorderRadius.lerp(border, border, 0.5), border), true);
   });
 
@@ -322,7 +322,7 @@ void main() {
 
   test('BorderRadiusDirectional.lerp identical a,b', () {
     expect(BorderRadiusDirectional.lerp(null, null, 0), null);
-    const BorderRadiusDirectional border = BorderRadiusDirectional.only();
+    const BorderRadiusDirectional border = BorderRadiusDirectional.zero;
     expect(identical(BorderRadiusDirectional.lerp(border, border, 0.5), border), true);
   });
 
