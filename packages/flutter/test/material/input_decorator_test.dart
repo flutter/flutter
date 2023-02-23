@@ -31,7 +31,7 @@ Widget buildInputDecorator({
   VisualDensity? visualDensity,
   Widget child = const Text(
     'text',
-    style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
+    style: TextStyle(fontSize: 16.0),
   ),
 }) {
   return MaterialApp(
@@ -43,7 +43,7 @@ Widget buildInputDecorator({
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               useMaterial3: useMaterial3,
-              textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Ahem', fontSize: 16.0)),
+              textTheme: const TextTheme(bodyLarge: TextStyle(fontSize: 16.0)),
             ),
             child: Align(
               alignment: Alignment.topLeft,
@@ -1836,7 +1836,7 @@ void main() {
         // Set the fontSize so that everything works out to whole numbers.
         child: const Text(
           'text',
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
         ),
       ),
     );
@@ -1846,16 +1846,16 @@ void main() {
     // overlapping the input a bit.
     //   12 - top padding
     //  100 - total height of prefix
-    //  -16 - input prefix overlap (distance input top to baseline, not exact)
-    //   20 - input text (ahem font size 16dps)
+    //  -15 - input prefix overlap (distance input top to baseline = 20 * 0.75)
+    //   20 - input text (font size 16dps)
     //    0 - bottom prefix/suffix padding
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, moreOrLessEquals(128.0, epsilon: .0001));
+    expect(tester.getSize(find.byType(InputDecorator)).height, 129.0);
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, moreOrLessEquals(96, epsilon: .0001)); // 12 + 100 - 16
+    expect(tester.getTopLeft(find.text('text')).dy, 97); // 12 + 100 - 15
     expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
 
     // layout is a row: [prefix text suffix]
