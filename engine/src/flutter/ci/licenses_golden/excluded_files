@@ -2664,9 +2664,6 @@
 ../../../third_party/skia/modules/canvaskit/wasm_tools/SIMD/.gitignore
 ../../../third_party/skia/modules/jetski/BUILD.bazel
 ../../../third_party/skia/modules/jetski/README
-../../../third_party/skia/modules/particles/BUILD.bazel
-../../../third_party/skia/modules/particles/include/BUILD.bazel
-../../../third_party/skia/modules/particles/src/BUILD.bazel
 ../../../third_party/skia/modules/pathkit/.gitignore
 ../../../third_party/skia/modules/pathkit/CHANGELOG.md
 ../../../third_party/skia/modules/pathkit/Makefile
