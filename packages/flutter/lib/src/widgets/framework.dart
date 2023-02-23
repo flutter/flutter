@@ -2216,10 +2216,13 @@ abstract class BuildContext {
   /// be called apply to this method as well.
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect });
 
-  /// Obtains the nearest widget of the given type `T`, which must be the type of a
-  /// concrete [InheritedWidget] subclass, and registers this build context with
-  /// that widget such that when that widget changes (or a new widget of that
-  /// type is introduced, or the widget goes away), this build context is
+  /// Returns the nearest widget of the given type `T` and creates a dependency
+  /// on it, or null if no appropriate widget is found.
+  ///
+  /// The widget found will be a concrete [InheritedWidget] subclass, and
+  /// calling [dependOnInheritedWidgetOfExactType] registers this build context
+  /// with the returned widget. When that widget changes (or a new widget of
+  /// that type is introduced, or the widget goes away), this build context is
   /// rebuilt so that it can obtain new values from that widget.
   ///
   /// {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
@@ -2230,8 +2233,8 @@ abstract class BuildContext {
   /// [State.initState] methods, because those methods would not get called
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
-  /// (directly or indirectly) from build methods, layout and paint callbacks, or
-  /// from [State.didChangeDependencies].
+  /// (directly or indirectly) from build methods, layout and paint callbacks,
+  /// or from [State.didChangeDependencies].
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
@@ -2240,8 +2243,8 @@ abstract class BuildContext {
   /// whenever the widget is removed from the tree.
   ///
   /// It is also possible to call this method from interaction event handlers
-  /// (e.g. gesture callbacks) or timers, to obtain a value once, if that value
-  /// is not going to be cached and reused later.
+  /// (e.g. gesture callbacks) or timers, to obtain a value once, as long as
+  /// that value is not cached and/or reused later.
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
@@ -2252,12 +2255,33 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when `T` is an
-  /// [InheritedWidget] subclasses that supports partial updates, like
-  /// [InheritedModel]. It specifies what "aspect" of the inherited
-  /// widget this context depends on.
+  /// The [aspect] parameter is only used when `T` is an [InheritedWidget]
+  /// subclass that supports partial updates, like [InheritedModel]. It
+  /// specifies what "aspect" of the inherited widget this context depends on,
+  /// where the meaning of the aspect is determined by the specific subclass.
   /// {@endtemplate}
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
+
+  /// Returns the nearest widget of the given [InheritedWidget] subclass `T` or
+  /// null if an appropriate ancestor is not found.
+  ///
+  /// This method does not introduce a dependency the way that the more typical
+  /// [dependOnInheritedWidgetOfExactType] does, so this context will not be
+  /// rebuilt if the [InheritedWidget] changes. This function is meant for those
+  /// uncommon use cases where a dependency is undesirable.
+  ///
+  /// This method should not be called from [State.dispose] because the element
+  /// tree is no longer stable at that time. To refer to an ancestor from that
+  /// method, save a reference to the ancestor in [State.didChangeDependencies].
+  /// It is safe to use this method from [State.deactivate], which is called
+  /// whenever the widget is removed from the tree.
+  ///
+  /// It is also possible to call this method from interaction event handlers
+  /// (e.g. gesture callbacks) or timers, to obtain a value once, as long as
+  /// that value is not cached and/or reused later.
+  ///
+  /// Calling this method is O(1) with a small constant factor.
+  T? getInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -4111,7 +4135,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // implementation to decide whether to rebuild based on whether we had
       // dependencies here.
     }
-    _inheritedWidgets = null;
+    _inheritedElements = null;
     _lifecycleState = _ElementLifecycle.inactive;
   }
 
@@ -4306,7 +4330,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  PersistentHashMap<Type, InheritedElement>? _inheritedWidgets;
+  PersistentHashMap<Type, InheritedElement>? _inheritedElements;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4347,7 +4371,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4356,9 +4380,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
+  T? getInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    return getElementForInheritedWidgetOfExactType<T>()?.widget as T?;
+  }
+
+  @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
     return ancestor;
   }
 
@@ -4378,7 +4407,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedWidgets = _parent?._inheritedWidgets;
+    _inheritedElements = _parent?._inheritedElements;
   }
 
   @override
@@ -5374,8 +5403,8 @@ class InheritedElement extends ProxyElement {
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     final PersistentHashMap<Type, InheritedElement> incomingWidgets =
-        _parent?._inheritedWidgets ?? const PersistentHashMap<Type, InheritedElement>.empty();
-    _inheritedWidgets = incomingWidgets.put(widget.runtimeType, this);
+        _parent?._inheritedElements ?? const PersistentHashMap<Type, InheritedElement>.empty();
+    _inheritedElements = incomingWidgets.put(widget.runtimeType, this);
   }
 
   @override
