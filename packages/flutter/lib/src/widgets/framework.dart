@@ -2255,10 +2255,10 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when `T` is an [InheritedWidget]
-  /// subclass that supports partial updates, like [InheritedModel]. It
-  /// specifies what "aspect" of the inherited widget this context depends on,
-  /// where the meaning of the aspect is determined by the specific subclass.
+  /// The [aspect] parameter is only used when `T` is an
+  /// [InheritedWidget] subclasses that supports partial updates, like
+  /// [InheritedModel]. It specifies what "aspect" of the inherited
+  /// widget this context depends on.
   /// {@endtemplate}
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
 
