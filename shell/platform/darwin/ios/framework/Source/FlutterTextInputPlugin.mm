@@ -2440,6 +2440,13 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (![inputView isDescendantOfView:_inputHider]) {
     [_inputHider addSubview:inputView];
   }
+
+  if (_viewController.view == nil) {
+    // If view controller's view has detached from flutter engine, we don't add _inputHider
+    // in parent view to fallback and avoid crash.
+    // https://github.com/flutter/flutter/issues/106404.
+    return;
+  }
   UIView* parentView = self.hostView;
   if (_inputHider.superview != parentView) {
     [parentView addSubview:_inputHider];
