@@ -146,7 +146,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    assert(_debugInitializedType == null);
+    assert(_debugInitializedType == null, 'Binding is already initialized to $_debugInitializedType');
     initInstances();
     assert(_debugInitializedType != null);
 
