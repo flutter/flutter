@@ -434,10 +434,10 @@ void main() {
         File(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
@@ -461,6 +461,7 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
+        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
         final File releaseFile = File(jsonPath);
@@ -534,10 +535,10 @@ void main() {
         File(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
@@ -561,6 +562,7 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
+        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
         final File releaseFile = File(jsonPath);
@@ -598,10 +600,10 @@ void main() {
         File(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
@@ -625,6 +627,7 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
+        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
         final File releaseFile = File(jsonPath);
@@ -678,10 +681,10 @@ void main() {
         File(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
@@ -705,6 +708,7 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
+        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
         final File releaseFile = File(jsonPath);
@@ -799,14 +803,15 @@ void main() {
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
         assert(tempDir.existsSync());
+        await publisher.generateLocalMetadata();
         await publisher.publishArchive(true);
       });
     });

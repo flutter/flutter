@@ -130,5 +130,10 @@
   "keyboardKeySpace": "Бос орын",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Мәзір жолағының мәзірі"
+  "menuBarMenuLabel": "Мәзір жолағының мәзірі",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

@@ -60,7 +60,7 @@ void main() {
     pubspecFile.writeAsStringSync('''
   name: foo_project
   environment:
-    sdk: '>=2.10.0 <3.0.0'
+    sdk: '>=2.10.0 <4.0.0'
   ''');
 
     final File dartFile = fileSystem.file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
@@ -77,7 +77,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       createSampleProject(tempDir);
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -92,7 +92,7 @@ void main() {
       );
 
       final AnalysisServer server = AnalysisServer(
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -117,7 +117,7 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     createSampleProject(tempDir, brokenCode: true);
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -132,7 +132,7 @@ void main() {
     );
 
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -159,7 +159,7 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -185,13 +185,13 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'HostArtifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'HostArtifact.engineDartSdkPath',
+            'Artifact.engineDartSdkPath',
           ],
           stdin: IOSink(stdin.sink),
         ),
@@ -228,13 +228,13 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'HostArtifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'HostArtifact.engineDartSdkPath',
+            'Artifact.engineDartSdkPath',
           ],
           stdin: IOSink(stdin.sink),
           stdout: '''
@@ -281,13 +281,13 @@ void main() {
         <FakeCommand>[
           FakeCommand(
               command: const <String>[
-                'HostArtifact.engineDartSdkPath/bin/dart',
+                'Artifact.engineDartSdkPath/bin/dart',
                 '--disable-dart-dev',
-                'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+                'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
                 '--disable-server-feature-completion',
                 '--disable-server-feature-search',
                 '--sdk',
-                'HostArtifact.engineDartSdkPath',
+                'Artifact.engineDartSdkPath',
               ],
               stdin: IOSink(stdin.sink),
               stdout: '''

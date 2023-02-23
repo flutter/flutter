@@ -26,14 +26,17 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
-  String? baseHref,
+  bool isWasm, {
   String? dart2jsOptimization,
-  {String? outputDirectoryPath}
-) async {
+  String? baseHref,
+  bool dumpInfo = false,
+  bool noFrequencyBasedMinification = false,
+  String? outputDirectoryPath,
+}) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
-      ? globals.fs.directory(getWebBuildDirectory())
+      ? globals.fs.directory(getWebBuildDirectory(isWasm))
       : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
@@ -48,40 +51,43 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs, globals.cache), Environment(
-      projectDir: globals.fs.currentDirectory,
-      outputDir: outputDirectory,
-      buildDir: flutterProject.directory
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build'),
-      defines: <String, String>{
-        kTargetFile: target,
-        kHasWebPlugins: hasWebPlugins.toString(),
-        kCspMode: csp.toString(),
-        if (baseHref != null)
-          kBaseHref : baseHref,
-        kSourceMapsEnabled: sourceMaps.toString(),
-        kNativeNullAssertions: nativeNullAssertions.toString(),
-        if (serviceWorkerStrategy != null)
-         kServiceWorkerStrategy: serviceWorkerStrategy,
-        if (dart2jsOptimization != null)
-         kDart2jsOptimization: dart2jsOptimization,
-        ...buildInfo.toBuildSystemEnvironment(),
-      },
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      platform: globals.platform,
-      usage: globals.flutterUsage,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.artifacts!.isLocalEngine
-        ? null
-        : globals.flutterVersion.engineRevision,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      // Web uses a different Dart plugin registry.
-      // https://github.com/flutter/flutter/issues/80406
-      generateDartPluginRegistry: false,
+    final BuildResult result = await globals.buildSystem.build(
+      WebServiceWorker(globals.fs, globals.cache, buildInfo.webRenderer, isWasm),
+      Environment(
+        projectDir: globals.fs.currentDirectory,
+        outputDir: outputDirectory,
+        buildDir: flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build'),
+        defines: <String, String>{
+          kTargetFile: target,
+          kHasWebPlugins: hasWebPlugins.toString(),
+          kCspMode: csp.toString(),
+          if (baseHref != null)
+            kBaseHref : baseHref,
+          kSourceMapsEnabled: sourceMaps.toString(),
+          kNativeNullAssertions: nativeNullAssertions.toString(),
+          kServiceWorkerStrategy: serviceWorkerStrategy,
+          if (dart2jsOptimization != null)
+            kDart2jsOptimization: dart2jsOptimization,
+          kDart2jsDumpInfo: dumpInfo.toString(),
+          kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
+          ...buildInfo.toBuildSystemEnvironment(),
+        },
+        artifacts: globals.artifacts!,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        usage: globals.flutterUsage,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.artifacts!.isLocalEngine
+          ? null
+          : globals.flutterVersion.engineRevision,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        // Web uses a different Dart plugin registry.
+        // https://github.com/flutter/flutter/issues/80406
+        generateDartPluginRegistry: false,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {

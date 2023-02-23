@@ -366,7 +366,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     // This call takes 400ms - 600ms.
@@ -388,14 +388,14 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(AndroidApk app) async {
+  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
     final String installedSha1 = await _getDeviceApkSha1(app);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
   Future<bool> installApp(
-    AndroidApk app, {
+    covariant AndroidApk app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -478,7 +478,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -519,7 +519,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    AndroidApk package, {
+    AndroidApk? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -626,7 +626,8 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-dart-profiling', 'true',
+      if (debuggingOptions.enableDartProfiling)
+        ...<String>['--ez', 'enable-dart-profiling', 'true'],
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)
@@ -720,11 +721,11 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
-  }) {
+  }) async {
     if (app == null) {
-      return Future<bool>.value(false);
+      return false;
     }
     final List<String> command = adbCommandForDevice(<String>[
       'shell',
@@ -766,7 +767,7 @@ class AndroidDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    AndroidApk? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) async {
     // The Android log reader isn't app-specific. The `app` parameter isn't used.

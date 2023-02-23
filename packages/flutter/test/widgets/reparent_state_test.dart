@@ -59,11 +59,11 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(
+          ColoredBox(
             color: Colors.green,
             child: StateMarker(key: left),
           ),
-          Container(
+          ColoredBox(
             color: Colors.green,
             child: StateMarker(
               key: right,
@@ -88,14 +88,14 @@ void main() {
       Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Container(
+          ColoredBox(
             color: Colors.green,
             child: StateMarker(
               key: right,
               child: newGrandchild,
             ),
           ),
-          Container(
+          ColoredBox(
             color: Colors.green,
             child: StateMarker(key: left),
           ),
@@ -115,7 +115,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: ColoredBox(
           color: Colors.green,
           child: StateMarker(
             key: left,
@@ -183,7 +183,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: ColoredBox(
           color: Colors.green,
           child: StateMarker(
             key: left,

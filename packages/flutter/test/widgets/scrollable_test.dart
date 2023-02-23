@@ -11,18 +11,24 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 Future<void> pumpTest(
   WidgetTester tester,
   TargetPlatform? platform, {
   bool scrollable = true,
   bool reverse = false,
+  Set<LogicalKeyboardKey>? axisModifier,
+  Axis scrollDirection = Axis.vertical,
   ScrollController? controller,
   bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
-      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
-      : null,
+    scrollBehavior: const NoScrollbarBehavior().copyWith(
+      dragDevices: enableMouseDrag
+        ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+        : null,
+      pointerAxisModifiers: axisModifier,
     ),
     theme: ThemeData(
       platform: platform,
@@ -30,9 +36,13 @@ Future<void> pumpTest(
     home: CustomScrollView(
       controller: controller,
       reverse: reverse,
+      scrollDirection: scrollDirection,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-      slivers: const <Widget>[
-        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      slivers: <Widget>[
+        SliverToBoxAdapter(child: SizedBox(
+          height: scrollDirection == Axis.vertical ? 2000.0 : null,
+          width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+        )),
       ],
     ),
   ));
@@ -398,6 +408,118 @@ void main() {
 
     expect(getScrollOffset(tester), 20.0);
   });
+
+  testWidgets('Scrolls horizontally when shift is pressed by default', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not flipped.
+    expect(getScrollOffset(tester), 0.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input flipped to horizontal and accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{ LogicalKeyboardKey.altLeft },
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
@@ -1351,6 +1473,40 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
+  testWidgets("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
+      return MaterialApp(
+        scrollBehavior: const NoScrollbarBehavior().copyWith(
+          dragDevices: dragDevices,
+        ),
+        home: ListView.builder(
+          itemCount: 1000,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.stylus}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Non-matching device should not allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.stylus);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 200.0);
+  });
+
   testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
@@ -1429,6 +1585,51 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Two panel semantics is added to the sibling nodes of direct children', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          key: key,
+          children: const <Widget>[
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                prefixText: 'prefix',
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+    // Wait for focus.
+    await tester.pumpAndSettle();
+
+    final SemanticsNode scrollableNode = tester.getSemantics(find.byKey(key));
+    SemanticsNode? intermediateNode;
+    scrollableNode.visitChildren((SemanticsNode node) {
+      intermediateNode = node;
+      return true;
+    });
+    SemanticsNode? syntheticScrollableNode;
+    intermediateNode!.visitChildren((SemanticsNode node) {
+      syntheticScrollableNode = node;
+      return true;
+    });
+    expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
+
+    int numberOfChild = 0;
+    syntheticScrollableNode!.visitChildren((SemanticsNode node) {
+      expect(node.isTagged(RenderViewport.useTwoPaneSemantics), isTrue);
+      numberOfChild += 1;
+      return true;
+    });
+    expect(numberOfChild, 2);
+
+    handle.dispose();
+  });
+
   testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
     await pumpTest(tester, null);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
@@ -1443,6 +1644,51 @@ void main() {
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
     await tester.pump(const Duration(milliseconds: 4800));
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+  });
+
+  testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey key = GlobalKey();
+    final GlobalKey key1 = GlobalKey();
+    Widget buildScrollable(bool withViewPort) {
+      return Scrollable(
+        key: key,
+        viewportBuilder: (BuildContext context, ViewportOffset position) {
+          if (withViewPort) {
+            return Viewport(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: Semantics(key: key1, container: true, child: const Text('text1')))
+              ],
+              offset: ViewportOffset.zero(),
+            );
+          }
+          return Semantics(key: key1, container: true, child: const Text('text1'));
+        },
+      );
+    }
+    // This should cache the inner node in Scrollable with the children text1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
+    // This does not use two panel, this should clear cached inner node.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(false),
+      ),
+    );
+    expect(semantics, isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics})));
+    // If the inner node was cleared in the previous step, this should not crash.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }
 

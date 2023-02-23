@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Convenience methods for Flutter application driving on Fuchsia. Can
-/// be run on either a host machine (making a remote connection to a Fuchsia
-/// device), or on the target Fuchsia machine.
 import 'dart:io';
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';

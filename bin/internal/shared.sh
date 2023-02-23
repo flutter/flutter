@@ -200,7 +200,7 @@ function shared::execute() {
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
-    MINGW*)
+    MINGW* | MSYS* )
       DART="$DART.exe"
       ;;
   esac

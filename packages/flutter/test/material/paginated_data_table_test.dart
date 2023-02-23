@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -770,7 +771,7 @@ void main() {
   testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
-    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // 800 is wide enough to ensure that all of the columns fit in the
     // Card. The test makes sure that the DataTable is exactly as wide
     // as the Card, minus the Card's margin.
     const double originalWidth = 800;

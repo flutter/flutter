@@ -28,10 +28,7 @@ class FlutterLogo extends StatelessWidget {
     this.style = FlutterLogoStyle.markOnly,
     this.duration = const Duration(milliseconds: 750),
     this.curve = Curves.fastOutSlowIn,
-  }) : assert(textColor != null),
-       assert(style != null),
-       assert(duration != null),
-       assert(curve != null);
+  });
 
   /// The size of the logo in logical pixels.
   ///

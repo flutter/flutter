@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void startApp() => runApp(const MyWebApp());
 
 class MyWebApp extends StatefulWidget {
-  const MyWebApp({Key? key}) : super(key: key);
+  const MyWebApp({super.key});
 
   @override
   State<MyWebApp> createState() => _MyWebAppState();

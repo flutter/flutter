@@ -21,8 +21,6 @@ import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
 const List<String> kDartCompilerExperiments = <String>[
-  // improve AOT code size.
-  '--compact-async',
 ];
 
 /// The target model describes the set of core libraries that are available within
@@ -248,14 +246,16 @@ class KernelCompiler {
     required List<String> dartDefines,
     required PackageConfig packageConfig,
   }) async {
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: platform,
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -590,8 +590,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : assert(sdkRoot != null),
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
@@ -654,7 +653,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
   }) async {
-    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -740,11 +738,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? outputPath,
     {String? additionalSourceUri}
   ) async {
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: platform,
     );
     final List<String> command = <String>[
-      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
@@ -775,11 +775,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
-      if (fileSystemRoots != null)
-        for (final String root in fileSystemRoots) ...<String>[
-          '--filesystem-root',
-          root,
-        ],
+      for (final String root in fileSystemRoots) ...<String>[
+        '--filesystem-root',
+        root,
+      ],
       if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
         fileSystemScheme!,

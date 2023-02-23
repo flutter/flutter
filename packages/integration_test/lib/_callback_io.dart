@@ -86,7 +86,8 @@ class IOCallbackManager implements CallbackManager {
   }
 
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
+  Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]) async {
+    assert(args == null, '[args] handling has not been implemented for this platform');
     if (Platform.isAndroid && !_isSurfaceRendered) {
       throw StateError('Call convertFlutterSurfaceToImage() before taking a screenshot');
     }

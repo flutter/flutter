@@ -235,8 +235,7 @@ class _LocalizationsScope extends InheritedWidget {
     required this.localizationsState,
     required this.typeToResources,
     required super.child,
-  }) : assert(localizationsState != null),
-       assert(typeToResources != null);
+  });
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -319,8 +318,8 @@ class _LocalizationsScope extends InheritedWidget {
 /// }
 /// ```
 ///
-/// Each delegate can be viewed as a factory for objects that encapsulate a
-/// a set of localized resources. These objects are retrieved with
+/// Each delegate can be viewed as a factory for objects that encapsulate a set
+/// of localized resources. These objects are retrieved with
 /// by runtime type with [Localizations.of].
 ///
 /// The [WidgetsApp] class creates a [Localizations] widget so most apps
@@ -366,9 +365,7 @@ class Localizations extends StatefulWidget {
     required this.locale,
     required this.delegates,
     this.child,
-  }) : assert(locale != null),
-       assert(delegates != null),
-       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
+  }) : assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -434,7 +431,6 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception.
   static Locale localeOf(BuildContext context) {
-    assert(context != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
@@ -460,7 +456,6 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then this function will return
   /// null.
   static Locale? maybeLocaleOf(BuildContext context) {
-    assert(context != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.locale;
   }
@@ -468,7 +463,6 @@ class Localizations extends StatefulWidget {
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
-    assert(context != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
@@ -490,8 +484,6 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
-    assert(context != null);
-    assert(type != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.resourcesFor<T?>(type);
   }
@@ -539,17 +531,14 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.locale != old.locale
-        || (widget.delegates == null)
-        || (widget.delegates != null && old.delegates == null)
-        || (widget.delegates != null && _anyDelegatesShouldReload(old))) {
+    if (widget.locale != old.locale || (_anyDelegatesShouldReload(old))) {
       load(widget.locale);
     }
   }
 
   void load(Locale locale) {
     final Iterable<LocalizationsDelegate<dynamic>> delegates = widget.delegates;
-    if (delegates == null || delegates.isEmpty) {
+    if (delegates.isEmpty) {
       _locale = locale;
       return;
     }
@@ -583,14 +572,12 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   T resourcesFor<T>(Type type) {
-    assert(type != null);
     final T resources = _typeToResources[type] as T;
     return resources;
   }
 
   TextDirection get _textDirection {
     final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
-    assert(resources != null);
     return resources.textDirection;
   }
 

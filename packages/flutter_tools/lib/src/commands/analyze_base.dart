@@ -84,7 +84,7 @@ abstract class AnalyzeBase {
     if (dartSdk != null) {
       return dartSdk;
     }
-    return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    return artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   }
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;

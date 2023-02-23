@@ -12,9 +12,6 @@ import 'package:platform/platform.dart' as platform;
 
 import 'package:process/process.dart';
 
-const String kDocsRoot = 'dev/docs';
-const String kPublishRoot = '$kDocsRoot/doc';
-
 class CommandException implements Exception {}
 
 Future<void> main() async {

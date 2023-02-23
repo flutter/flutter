@@ -38,6 +38,8 @@ const double _kDefaultFontSize = 14.0;
 
 /// An immutable style describing how to format and paint text.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1z6YP7YmvwA}
+///
 /// ### Bold
 ///
 /// {@tool snippet}
@@ -502,7 +504,6 @@ class TextStyle with Diagnosticable {
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
-       assert(inherit != null),
        assert(color == null || foreground == null, _kColorForegroundWarning),
        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
@@ -895,7 +896,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: decorationThickness ?? this.decorationThickness,
       debugLabel: newDebugLabel,
       fontFamily: fontFamily ?? _fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       package: package ?? _package,
       overflow: overflow ?? this.overflow,
     );
@@ -959,21 +960,10 @@ class TextStyle with Diagnosticable {
     String? package,
     TextOverflow? overflow,
   }) {
-    assert(fontSizeFactor != null);
-    assert(fontSizeDelta != null);
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
-    assert(fontWeightDelta != null);
     assert(fontWeight != null || fontWeightDelta == 0.0);
-    assert(letterSpacingFactor != null);
-    assert(letterSpacingDelta != null);
     assert(letterSpacing != null || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
-    assert(wordSpacingFactor != null);
-    assert(wordSpacingDelta != null);
     assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
-    assert(heightFactor != null);
-    assert(heightDelta != null);
-    assert(decorationThicknessFactor != null);
-    assert(decorationThicknessDelta != null);
     assert(decorationThickness != null || (decorationThicknessFactor == 1.0 && decorationThicknessDelta == 0.0));
 
     String? modifiedDebugLabel;
@@ -989,7 +979,7 @@ class TextStyle with Diagnosticable {
       color: foreground == null ? color ?? this.color : null,
       backgroundColor: background == null ? backgroundColor ?? this.backgroundColor : null,
       fontFamily: fontFamily ?? _fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)], // ignore_clamp_double_lint
       fontStyle: fontStyle ?? this.fontStyle,
@@ -1104,7 +1094,6 @@ class TextStyle with Diagnosticable {
   /// as if they have a [background] paint (creating a new [Paint] if necessary
   /// based on the [backgroundColor] property).
   static TextStyle? lerp(TextStyle? a, TextStyle? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -1330,7 +1319,6 @@ class TextStyle with Diagnosticable {
     double? height,
     StrutStyle? strutStyle,
   }) {
-    assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
     final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior

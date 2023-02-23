@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -786,6 +787,101 @@ void main() {
 
     expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
+
+  testWidgets(
+    'Transform.flip does flip child correctly',
+    (WidgetTester tester) async {
+      const Offset topRight = Offset(60, 20);
+      const Offset bottomLeft = Offset(20, 60);
+      const Offset bottomRight = Offset(60, 60);
+
+      bool tappedRed = false;
+
+      const Widget square = SizedBox.square(dimension: 40);
+      final Widget child = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget> [
+          Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            GestureDetector(
+              onTap: () => tappedRed = true,
+              child: const ColoredBox(color: Color(0xffff0000), child: square),
+            ),
+            const ColoredBox(color: Color(0xff00ff00), child: square),
+          ]),
+          const Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            ColoredBox(color: Color(0xff0000ff), child: square),
+            ColoredBox(color: Color(0xffeeff00), child: square),
+          ]),
+        ],
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipX: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(topRight);
+
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipX');
+
+      tappedRed = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipY: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(bottomLeft);
+
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipY');
+
+      tappedRed = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipX: true,
+              flipY: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(bottomRight);
+
+      expect(
+        tappedRed,
+        isTrue,
+        reason: 'Transform.flip cannot flipX and flipY together',
+      );
+    },
+  );
 }
 
 class TestRectPainter extends CustomPainter {

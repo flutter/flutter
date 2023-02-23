@@ -567,4 +567,170 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(Drawer));
     expect(box.size.width, equals(smallWidth));
   });
+
+  testWidgets('Drawer default shape (ltr)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Drawer default shape (rtl)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Drawer default shape', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      );
+
+      final Finder drawerMaterial = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(Material),
+      );
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+      // Open the drawer.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the drawer shape.
+      Material material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+
+      // Close the opened drawer.
+      await tester.tapAt(const Offset(750, 300));
+      await tester.pumpAndSettle();
+
+      // Open the end drawer.
+      state.openEndDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the end drawer shape.
+      material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+    });
+  });
 }

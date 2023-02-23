@@ -29,6 +29,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -122,6 +123,7 @@ class FlutterOptions {
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
+  static const String kWebRendererFlag = 'web-renderer';
 }
 
 /// flutter command categories for usage.
@@ -149,17 +151,25 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
-  /// The map used to convert web-renderer option to a List of dart-defines.
-  static const Map<String, Iterable<String>> _webRendererDartDefines =
-  <String, Iterable<String>> {
-    'auto': <String>[
+  /// Maps command line web renderer strings to the corresponding web renderer mode
+  static const Map<String, WebRendererMode> _webRendererModeMap =
+  <String, WebRendererMode> {
+    'auto': WebRendererMode.autoDetect,
+    'canvaskit': WebRendererMode.canvaskit,
+    'html': WebRendererMode.html,
+  };
+
+  /// The map used to convert web renderer mode to a List of dart-defines.
+  static const Map<WebRendererMode, Iterable<String>> _webRendererDartDefines =
+  <WebRendererMode, Iterable<String>> {
+    WebRendererMode.autoDetect: <String>[
       'FLUTTER_WEB_AUTO_DETECT=true',
     ],
-    'canvaskit': <String>[
+    WebRendererMode.canvaskit: <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=true',
     ],
-    'html': <String>[
+    WebRendererMode.html: <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=false',
     ],
@@ -448,6 +458,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addServeObservatoryOptions({required bool verboseHelp}) {
+    argParser.addFlag('serve-observatory',
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Serve the legacy Observatory developer tooling through the VM service.',
+    );
+  }
+
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -559,7 +577,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -620,7 +638,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebRendererOption() {
-    argParser.addOption('web-renderer',
+    argParser.addOption(
+      FlutterOptions.kWebRendererFlag,
       defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web.',
@@ -1078,10 +1097,15 @@ abstract class FlutterCommand extends Command<void> {
         );
         // Extra frontend options are only provided if explicitly
         // requested.
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+        if ((languageVersion.major > nullSafeVersion.major) ||
+            (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
-          nullSafetyMode = NullSafetyMode.unsound;
+          throwToolExit(
+            'This application does not support sound null-safety (its language version is $languageVersion).\n'
+            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
+            'support sound null safety, see https://dart.dev/null-safety.',
+          );
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
@@ -1144,8 +1168,13 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer')) {
-      dartDefines = updateDartDefines(dartDefines, stringArgDeprecated('web-renderer')!);
+    WebRendererMode webRenderer = WebRendererMode.autoDetect;
+    if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
+      final WebRendererMode? mappedMode = _webRendererModeMap[stringArgDeprecated(FlutterOptions.kWebRendererFlag)!];
+      if (mappedMode != null) {
+        webRenderer = mappedMode;
+      }
+      dartDefines = updateDartDefines(dartDefines, webRenderer);
     }
 
     Map<String, Object>? defineConfigJsonMap;
@@ -1192,6 +1221,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: dartDefines,
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
+      webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
       dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
@@ -1269,20 +1299,23 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  @visibleForOverriding
+  String get deprecationWarning {
+    return '${globals.logger.terminal.warningMark} The "$name" command is '
+           'deprecated and will be removed in a future version of Flutter. '
+           'See https://flutter.dev/docs/development/tools/sdk/releases '
+           'for previous releases of Flutter.\n';
+  }
+
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printWarning(
-        '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
-        'will be removed in a future version of Flutter. '
-        'See https://flutter.dev/docs/development/tools/sdk/releases '
-        'for previous releases of Flutter.\n',
-      );
+      globals.printWarning(deprecationWarning);
     }
   }
 
   /// Updates dart-defines based on [webRenderer].
   @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, String webRenderer) {
+  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
     final Set<String> dartDefinesSet = dartDefines.toSet();
     if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
         && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
@@ -1319,17 +1352,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1727,4 +1755,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

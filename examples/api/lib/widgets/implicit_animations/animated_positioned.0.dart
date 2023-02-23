@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AnimatedPositioned].
+// Flutter code sample for [AnimatedPositioned].
 
 import 'package:flutter/material.dart';
 
@@ -56,9 +56,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   selected = !selected;
                 });
               },
-              child: Container(
+              child: const ColoredBox(
                 color: Colors.blue,
-                child: const Center(child: Text('Tap me')),
+                child: Center(child: Text('Tap me')),
               ),
             ),
           ),

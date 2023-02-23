@@ -285,12 +285,19 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
-    // It is safe to ignore this error because we expect an error to be
-    // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      .then<vm_service.Success?>((vm_service.Success success) => success)
-      .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
+      .then<vm_service.Success?>(
+        (vm_service.Success success) => success,
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're already subscribed.
+        onError: (Object error, StackTrace stackTrace) {
+          if (error is vm_service.RPCError) {
+            return null;
+          }
+          return Future<vm_service.Success?>.error(error, stackTrace);
+        },
+      ),
     );
   }
 
@@ -739,6 +746,18 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterEvictScene(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeScene',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
 
   /// Exit the application by calling [exit] from `dart:io`.
   ///
@@ -959,14 +978,16 @@ class FlutterVmService {
   /// been collected.
   Future<vm_service.Isolate?> getIsolateOrNull(String isolateId) async {
     return service.getIsolate(isolateId)
-      // The .then() call is required to cast from Future<Isolate> to Future<Isolate?>
-      .then<vm_service.Isolate?>((vm_service.Isolate isolate) => isolate)
-      .catchError((Object? error, StackTrace stackTrace) {
-        return null;
-      }, test: (Object? error) {
-        return (error is vm_service.SentinelException) ||
-          (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared);
-      });
+      .then<vm_service.Isolate?>(
+        (vm_service.Isolate isolate) => isolate,
+        onError: (Object? error, StackTrace stackTrace) {
+          if (error is vm_service.SentinelException ||
+            error == null ||
+            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            return null;
+          }
+          return Future<vm_service.Isolate?>.error(error, stackTrace);
+        });
   }
 
   /// Create a new development file system on the device.
@@ -997,7 +1018,6 @@ class FlutterVmService {
 
   /// Set the VM timeline flags.
   Future<void> setTimelineFlags(List<String> recordedStreams) async {
-    assert(recordedStreams != null);
     await _checkedCallServiceExtension(
       'setVMTimelineFlags',
       args: <String, Object?>{

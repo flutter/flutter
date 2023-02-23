@@ -877,7 +877,6 @@ class BufferLogger extends Logger {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(progressIndicatorPadding != null);
     printStatus(message);
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
@@ -1020,7 +1019,6 @@ class VerboseLogger extends DelegatingLogger {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(progressIndicatorPadding != null);
     printStatus(message);
     final Stopwatch timer = _stopwatchFactory.createStopwatch()..start();
     return SilentStatus(
@@ -1356,14 +1354,15 @@ class AnonymousSpinnerStatus extends Status {
 
   void _callback(Timer timer) {
     assert(this.timer == timer);
-    assert(timer != null);
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
     ticks += 1;
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        _clear(_currentLineLength);
+        if (_currentLineLength > _lastAnimationFrameLength) {
+          _clear(_currentLineLength - _lastAnimationFrameLength);
+        }
       }
       if (_slowWarning == '' && slowWarningCallback != null) {
         _slowWarning = slowWarningCallback!();
@@ -1401,7 +1400,8 @@ class AnonymousSpinnerStatus extends Status {
     assert(timer!.isActive);
     timer?.cancel();
     timer = null;
-    _clear(_lastAnimationFrameLength);
+    _clear(_lastAnimationFrameLength + _slowWarning.length);
+    _slowWarning = '';
     _lastAnimationFrameLength = 0;
     super.finish();
   }

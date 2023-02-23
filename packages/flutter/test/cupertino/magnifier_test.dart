@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
@@ -117,14 +118,14 @@ void main() {
               caretRect: reasonableTextField,
               // The tap position is far out of the right side of the app.
               globalGesturePosition:
-                  Offset(MediaQuery.of(context).size.width + 100, 0),
+                  Offset(MediaQuery.sizeOf(context).width + 100, 0),
             ),
           ),
         );
 
         // Should be less than the right edge, since we have padding.
         expect(getMagnifierPosition(tester).dx,
-            lessThan(MediaQuery.of(context).size.width));
+            lessThan(MediaQuery.sizeOf(context).width));
       });
 
       testWidgets('should have some vertical drag', (WidgetTester tester) async {
@@ -150,7 +151,7 @@ void main() {
               caretRect: reasonableTextField,
               // The tap position is dragBelow units below the text field.
               globalGesturePosition: Offset(
-                  MediaQuery.of(context).size.width / 2,
+                  MediaQuery.sizeOf(context).width / 2,
                   dragPositionBelowTextField),
             ),
           ),
@@ -184,7 +185,7 @@ void main() {
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
             globalGesturePosition: Offset(
-                MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+                MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
 
@@ -223,7 +224,7 @@ void main() {
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
-            globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
 
@@ -247,7 +248,7 @@ void main() {
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2,
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2,
                 reasonableTextField.top));
         await tester.pumpAndSettle();
 

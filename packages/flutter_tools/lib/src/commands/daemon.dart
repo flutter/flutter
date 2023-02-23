@@ -123,10 +123,12 @@ class _DaemonServer {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        });
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            logger.printError('Socket error: $error');
+            logger.printTrace('$stackTrace');
+          });
         final Daemon daemon = Daemon(
           DaemonConnection(
             daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
@@ -210,7 +212,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -279,7 +280,7 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
       return null;
     });
@@ -1417,7 +1418,9 @@ class ProxyDomain extends Domain {
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+    unawaited(socket.done.then<Object?>(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     }).then((Object? _) {
@@ -1529,7 +1532,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);
@@ -1565,14 +1568,11 @@ class LogMessage {
 }
 
 /// The method by which the Flutter app was launched.
-class LaunchMode {
+enum LaunchMode {
+  run._('run'),
+  attach._('attach');
+
   const LaunchMode._(this._value);
-
-  /// The app was launched via `flutter run`.
-  static const LaunchMode run = LaunchMode._('run');
-
-  /// The app was launched via `flutter attach`.
-  static const LaunchMode attach = LaunchMode._('attach');
 
   final String _value;
 

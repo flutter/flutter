@@ -298,8 +298,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
-            null,
-            null,
+            false,
           );
         }
         await device!.device!.startApp(
@@ -372,8 +371,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
-          kBaseHref,
-          null,
+          false,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -610,10 +608,8 @@ class ResidentWebRunner extends ResidentRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
-      _logger.printStatus('');
-      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-      } else {
+      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+        _logger.printStatus('');
         _logger.printStatus(
           'Running without sound null safety ⚠️',
           emphasis: true,

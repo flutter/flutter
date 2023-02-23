@@ -165,7 +165,7 @@ void main() {
         userMessages.visualStudioVersion(fakeVisualStudio.displayName!, fakeVisualStudio.fullVersion!));
 
       expect(result.messages.contains(expectedDisplayNameMessage), true);
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
     });
 
     testWithoutContext('Emits missing status when Visual Studio is not installed', () async {
