@@ -629,14 +629,16 @@ void main() {
     Widget buildCustomTable({
       int? sortColumnIndex,
       bool sortAscending = true,
-      double dataRowHeight = 48.0,
+      double? dataRowMinHeight,
+      double? dataRowMaxHeight,
       double headingRowHeight = 56.0,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
         onSelectAll: (bool? value) {},
-        dataRowHeight: dataRowHeight,
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
         headingRowHeight: headingRowHeight,
         columns: <DataColumn>[
           const DataColumn(
@@ -712,7 +714,7 @@ void main() {
     Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
 
     expect(tester.getSize(findFirstContainerFor('Name')).height, 56.0);
-    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 48.0);
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, kMinInteractiveDimension);
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
@@ -726,14 +728,105 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Name')).height, 64.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
+      home: Material(child: buildCustomTable(dataRowMinHeight: 30.0, dataRowMaxHeight: 30.0)),
     ));
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(dataRowHeight: 56.0)),
+      home: Material(child: buildCustomTable(dataRowMinHeight: 0.0, dataRowMaxHeight: double.infinity)),
     ));
-    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 56.0);
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, greaterThan(0.0));
+  });
+
+  testWidgets('DataTable custom row height one row taller than others', (WidgetTester tester) async {
+    const String multilineText = 'Line one.\nLine two.\nLine three.\nLine four.';
+
+    Widget buildCustomTable({
+      double? dataRowMinHeight,
+      double? dataRowMaxHeight,
+    }) {
+      return DataTable(
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('SingleRowColumn'),
+          ),
+          DataColumn(
+            label: Text('MultiRowColumn'),
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(cells: <DataCell>[
+            DataCell(Text('Data')),
+            DataCell(Column(children: <Widget>[
+                  Text(multilineText),
+                ])),
+          ]),
+        ],
+      );
+    }
+
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowMinHeight: 0.0, dataRowMaxHeight: double.infinity)),
+    ));
+
+    final double singleLineRowHeight = tester.getSize(findFirstContainerFor('Data')).height;
+    final double multilineRowHeight = tester.getSize(findFirstContainerFor(multilineText)).height;
+
+    expect(multilineRowHeight, greaterThan(singleLineRowHeight));
+  });
+
+  testWidgets('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+    Widget buildCustomTable({
+      double dataRowHeight = 48.0,
+    }) {
+      return DataTable(
+        onSelectAll: (bool? value) {},
+        dataRowHeight: dataRowHeight,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            onSelectChanged: (bool? selected) {},
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // The finder matches with the Container of the cell content, as well as the
+    // Container wrapping the whole table. The first one is used to test row
+    // heights.
+    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
+    ));
+    expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
   });
 
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
@@ -1945,5 +2038,38 @@ void main() {
     material = tester.widget<Material>(find.byType(Material).last);
     expect(material.clipBehavior, Clip.hardEdge);
     expect(material.borderRadius, borderRadius);
+  });
+
+  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
+    DataTable createDataTable() =>
+      DataTable(
+        columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
+        rows: const <DataRow>[],
+        dataRowMinHeight: 2.0,
+        dataRowMaxHeight: 1.0,
+      );
+
+    expect(() => createDataTable(), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
+  });
+
+  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
+    DataTable createDataTable({double? dataRowHeight, double? dataRowMinHeight, double? dataRowMaxHeight}) =>
+      DataTable(
+        columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
+        rows: const <DataRow>[],
+        dataRowHeight: dataRowHeight,
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
+      );
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
+
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
+      e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
 }
