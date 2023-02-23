@@ -1066,7 +1066,10 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.vmServiceUri }) : started = true;
+  LaunchResult.succeeded({ Uri? vmServiceUri, Uri? observatoryUri }) : 
+    started = true,
+    vmServiceUri = vmServiceUri ?? observatoryUri;
+
   LaunchResult.failed()
     : started = false,
       vmServiceUri = null;
