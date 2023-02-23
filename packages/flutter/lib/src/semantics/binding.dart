@@ -114,7 +114,7 @@ mixin SemanticsBinding on BindingBase {
     ));
   }
 
-  /// Called  whenever the platform requests an action to be performed on a
+  /// Called whenever the platform requests an action to be performed on a
   /// [SemanticsNode].
   ///
   /// This callback is invoked when a user interacts with the app via an
