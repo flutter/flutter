@@ -695,7 +695,7 @@ class FrameworkRepository extends Repository {
 
   /// Create a release candidate branch version file.
   ///
-  /// This file allows for easily traversing what candidadate branch was used
+  /// This file allows for easily traversing what candidate branch was used
   /// from a release channel.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.

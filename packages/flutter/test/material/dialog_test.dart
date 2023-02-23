@@ -1513,7 +1513,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,

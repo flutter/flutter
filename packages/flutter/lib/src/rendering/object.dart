@@ -2370,7 +2370,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// needing to paint and needing a composited layer update, this method is only
   /// called once.
   // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/102102 revisit the
-  // contraint that the instance/type of layer cannot be changed at runtime.
+  // constraint that the instance/type of layer cannot be changed at runtime.
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
     return oldLayer ?? OffsetLayer();

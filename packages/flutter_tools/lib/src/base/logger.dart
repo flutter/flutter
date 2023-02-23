@@ -625,7 +625,7 @@ class StdoutLogger extends Logger {
   }
 }
 
-typedef _Writter = void Function(String message);
+typedef _Writer = void Function(String message);
 
 /// Wraps the message in a box, and writes the bytes by calling [write].
 ///
@@ -643,7 +643,7 @@ typedef _Writter = void Function(String message);
 void _generateBox({
   required String message,
   required int wrapColumn,
-  required _Writter write,
+  required _Writer write,
   required Terminal terminal,
   String? title,
 }) {
