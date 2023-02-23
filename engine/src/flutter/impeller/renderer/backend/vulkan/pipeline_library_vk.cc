@@ -275,7 +275,7 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   vk::PipelineRasterizationStateCreateInfo rasterization_state;
   rasterization_state.setFrontFace(vk::FrontFace::eClockwise);
   rasterization_state.setCullMode(vk::CullModeFlagBits::eNone);
-  rasterization_state.setPolygonMode(vk::PolygonMode::eFill);
+  rasterization_state.setPolygonMode(ToVKPolygonMode(desc.GetPolygonMode()));
   // requires GPU extensions to change.
   {
     rasterization_state.setLineWidth(1.0f);

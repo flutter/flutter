@@ -336,6 +336,16 @@ constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
   FML_UNREACHABLE();
 }
 
+constexpr vk::PolygonMode ToVKPolygonMode(PolygonMode mode) {
+  switch (mode) {
+    case PolygonMode::kFill:
+      return vk::PolygonMode::eFill;
+    case PolygonMode::kLine:
+      return vk::PolygonMode::eLine;
+  }
+  FML_UNREACHABLE();
+}
+
 constexpr vk::PrimitiveTopology ToVKPrimitiveTopology(PrimitiveType primitive) {
   switch (primitive) {
     case PrimitiveType::kTriangle:

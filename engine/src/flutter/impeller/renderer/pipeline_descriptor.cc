@@ -41,6 +41,7 @@ std::size_t PipelineDescriptor::GetHash() const {
   fml::HashCombineSeed(seed, winding_order_);
   fml::HashCombineSeed(seed, cull_mode_);
   fml::HashCombineSeed(seed, primitive_type_);
+  fml::HashCombineSeed(seed, polygon_mode_);
   return seed;
 }
 
@@ -59,7 +60,8 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
              other.back_stencil_attachment_descriptor_ &&
          winding_order_ == other.winding_order_ &&
          cull_mode_ == other.cull_mode_ &&
-         primitive_type_ == other.primitive_type_;
+         primitive_type_ == other.primitive_type_ &&
+         polygon_mode_ == other.polygon_mode_;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetLabel(std::string label) {
@@ -257,6 +259,14 @@ void PipelineDescriptor::SetPrimitiveType(PrimitiveType type) {
 
 PrimitiveType PipelineDescriptor::GetPrimitiveType() const {
   return primitive_type_;
+}
+
+void PipelineDescriptor::SetPolygonMode(PolygonMode mode) {
+  polygon_mode_ = mode;
+}
+
+PolygonMode PipelineDescriptor::GetPolygonMode() const {
+  return polygon_mode_;
 }
 
 }  // namespace impeller

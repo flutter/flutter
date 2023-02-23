@@ -125,6 +125,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PrimitiveType GetPrimitiveType() const;
 
+  void SetPolygonMode(PolygonMode mode);
+
+  PolygonMode GetPolygonMode() const;
+
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -142,6 +146,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::optional<StencilAttachmentDescriptor>
       back_stencil_attachment_descriptor_;
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
+  PolygonMode polygon_mode_ = PolygonMode::kFill;
 };
 
 }  // namespace impeller
