@@ -305,9 +305,7 @@ class ColorScheme with Diagnosticable {
   }) async {
     final pixels = await bloop(image);
 
-// to test: white background, 10% color square
-// transparency effects
-// what the heck is going on with england rugby color
+
     final QuantizerResult result = await QuantizerCelebi().quantize(pixels, 256);
     print((result.colorToCount.keys).map((key) => Color(key)));
     final Color baseColor = Color((result.colorToCount.keys.toList())[0]);
@@ -389,14 +387,14 @@ static Future<Iterable<int>> bloop(Image input) async {
   }
 
   static int getArgbFromAbgr(int abgr) {
-    final int EXCEPT_R_MASK = 0xFF00FFFF;
-    final int ONLY_R_MASK = ~EXCEPT_R_MASK;
-    final int EXCEPT_B_MASK = 0xFFFFFF00;
-    final int ONLY_B_MASK = ~EXCEPT_B_MASK;
-    int r = (abgr & ONLY_R_MASK) >> 16;
-    int b = abgr & ONLY_B_MASK;
-    return (abgr & EXCEPT_R_MASK & EXCEPT_B_MASK) | (b << 16) | r;
-  }
+  //   final int EXCEPT_R_MASK = 0xFF00FFFF;
+  //   final int ONLY_R_MASK = ~EXCEPT_R_MASK;
+  //   final int EXCEPT_B_MASK = 0xFFFFFF00;
+  //   final int ONLY_B_MASK = ~EXCEPT_B_MASK;
+  //   int r = (abgr & ONLY_R_MASK) >> 16;
+  //   int b = abgr & ONLY_B_MASK;
+  //   return (abgr & EXCEPT_R_MASK & EXCEPT_B_MASK) | (b << 16) | r;
+  // }
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
