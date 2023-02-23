@@ -2125,7 +2125,7 @@ void main() {
             ),
             const Text(
               'abc',
-              style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
             ),
             Expanded(
               child: SelectableText(
