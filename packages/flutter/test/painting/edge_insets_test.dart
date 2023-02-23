@@ -117,7 +117,6 @@ void main() {
     expect(EdgeInsets.lerp(null, null, 0), null);
     const EdgeInsets insets = EdgeInsets.zero;
     expect(identical(EdgeInsets.lerp(insets, insets, 0.5), insets), true);
-
   });
 
   test('EdgeInsets.resolve()', () {
