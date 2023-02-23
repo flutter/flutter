@@ -92,3 +92,13 @@ impeller_component("impeller_unittests") {
     ]
   }
 }
+
+if (impeller_supports_rendering) {
+  impeller_component("impeller_dart_unittests") {
+    target_type = "executable"
+
+    testonly = true
+
+    deps = [ "renderer:renderer_dart_unittests" ]
+  }
+}
