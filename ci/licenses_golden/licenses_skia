@@ -1,4 +1,4 @@
-Signature: 61baf5f6e09e4e6f2be354e4945ddb23
+Signature: 5518d75b61a27cc1556f2f3b7efeaf4e
 
 ====================================================================================================
 LIBRARY: etc1
@@ -359,7 +359,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/matrix.js
 FILE: ../../../third_party/skia/modules/canvaskit/memory.js
 FILE: ../../../third_party/skia/modules/canvaskit/package-lock.json
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph.js
-FILE: ../../../third_party/skia/modules/canvaskit/particles.js
 FILE: ../../../third_party/skia/modules/canvaskit/pathops.js
 FILE: ../../../third_party/skia/modules/canvaskit/postamble.js
 FILE: ../../../third_party/skia/modules/canvaskit/preamble.js
@@ -6130,18 +6129,7 @@ ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypesPriv.h + .
 ORIGIN: ../../../third_party/skia/modules/canvaskit/WasmCommon.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/debugger_bindings.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkParticleBinding.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkParticleData.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/include/SkReflected.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/src/SkParticleBinding.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/particles/src/SkReflected.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skresources/include/SkResources.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skresources/src/SkResources.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkImageFilterTypes.cpp + ../../../third_party/skia/LICENSE
@@ -6181,9 +6169,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAssembleWebGLInterfaceAu
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLTypesPriv.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/mock/GrMockCaps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/mock/GrMockTypes.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunction.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionCall.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionReference.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/utils/SkShaderUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/utils/SkShaderUtils.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -6204,18 +6189,7 @@ FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmCommon.h
 FILE: ../../../third_party/skia/modules/canvaskit/debugger_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
-FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleBinding.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
-FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
-FILE: ../../../third_party/skia/modules/particles/src/SkParticleBinding.cpp
-FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
-FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
-FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/modules/skresources/include/SkResources.h
 FILE: ../../../third_party/skia/modules/skresources/src/SkResources.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.cpp
@@ -6255,9 +6229,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAssembleWebGLInterfaceAuto
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/mock/GrMockCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/mock/GrMockTypes.cpp
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunction.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionCall.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionReference.h
 FILE: ../../../third_party/skia/src/utils/SkShaderUtils.cpp
 FILE: ../../../third_party/skia/src/utils/SkShaderUtils.h
 ----------------------------------------------------------------------------------------------------
@@ -7547,7 +7518,6 @@ ORIGIN: ../../../third_party/skia/gm/graphitestart.cpp + ../../../third_party/sk
 ORIGIN: ../../../third_party/skia/gm/hardstop_gradients_many.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/lazytiling.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/mesh.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/particles.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkBlender.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkMesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/effects/SkBlenders.h + ../../../third_party/skia/LICENSE
@@ -7772,7 +7742,6 @@ FILE: ../../../third_party/skia/gm/graphitestart.cpp
 FILE: ../../../third_party/skia/gm/hardstop_gradients_many.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/mesh.cpp
-FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
 FILE: ../../../third_party/skia/include/core/SkMesh.h
 FILE: ../../../third_party/skia/include/effects/SkBlenders.h
