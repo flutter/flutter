@@ -981,8 +981,7 @@ class PlatformDispatcher {
   /// This option is used by [EditableTextState] to define its
   /// [SpellCheckConfiguration] when a default spell check service
   /// is requested.
-  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefined;
-  bool _nativeSpellCheckServiceDefined = false;
+  bool get nativeSpellCheckServiceDefined => configuration.nativeSpellCheckServiceDefined;
 
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
@@ -991,8 +990,7 @@ class PlatformDispatcher {
   ///
   ///  * [EditableText.obscureText], which when set to true hides the text in
   ///    the text field.
-  bool get brieflyShowPassword => _brieflyShowPassword;
-  bool _brieflyShowPassword = true;
+  bool get brieflyShowPassword => configuration.brieflyShowPassword;
 
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to
@@ -1046,16 +1044,8 @@ class PlatformDispatcher {
     final double textScaleFactor = (data['textScaleFactor']! as num).toDouble();
     final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
     final bool? nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
-    if (nativeSpellCheckServiceDefined != null) {
-      _nativeSpellCheckServiceDefined = nativeSpellCheckServiceDefined;
-    } else {
-      _nativeSpellCheckServiceDefined = false;
-    }
     // This field is optional.
     final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
-    if (brieflyShowPassword != null) {
-      _brieflyShowPassword = brieflyShowPassword;
-    }
     final Brightness platformBrightness =
     data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
     final String? systemFontFamily = data['systemFontFamily'] as String?;
@@ -1072,6 +1062,8 @@ class PlatformDispatcher {
     _configuration = previousConfiguration.copyWith(
       textScaleFactor: textScaleFactor,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      nativeSpellCheckServiceDefined: nativeSpellCheckServiceDefined ?? false,
+      brieflyShowPassword: brieflyShowPassword,
       platformBrightness: platformBrightness,
       systemFontFamily: systemFontFamily,
     );
@@ -1259,6 +1251,8 @@ class PlatformConfiguration {
     this.semanticsEnabled = false,
     this.platformBrightness = Brightness.light,
     this.textScaleFactor = 1.0,
+    this.nativeSpellCheckServiceDefined = false,
+    this.brieflyShowPassword = true,
     this.locales = const <Locale>[],
     this.defaultRouteName,
     this.systemFontFamily,
@@ -1271,6 +1265,8 @@ class PlatformConfiguration {
     bool? semanticsEnabled,
     Brightness? platformBrightness,
     double? textScaleFactor,
+    bool? nativeSpellCheckServiceDefined,
+    bool? brieflyShowPassword,
     List<Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
@@ -1281,6 +1277,8 @@ class PlatformConfiguration {
       semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
       platformBrightness: platformBrightness ?? this.platformBrightness,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      nativeSpellCheckServiceDefined: nativeSpellCheckServiceDefined ?? this.nativeSpellCheckServiceDefined,
+      brieflyShowPassword: brieflyShowPassword ?? this.brieflyShowPassword,
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
@@ -1305,6 +1303,22 @@ class PlatformConfiguration {
 
   /// The system-reported text scale.
   final double textScaleFactor;
+
+  /// Whether the spell check service is supported on the current platform.
+  ///
+  /// This option is used by [EditableTextState] to define its
+  /// [SpellCheckConfiguration] when a default spell check service
+  /// is requested.
+  final bool nativeSpellCheckServiceDefined;
+
+  /// Whether briefly displaying the characters as you type in obscured text
+  /// fields is enabled in system settings.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText.obscureText], which when set to true hides the text in
+  ///    the text field.
+  final bool brieflyShowPassword;
 
   /// The full system-reported supported locales of the device.
   final List<Locale> locales;
