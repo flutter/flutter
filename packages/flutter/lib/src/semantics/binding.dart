@@ -21,7 +21,7 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction
-      ..onAccessibilityFeaturesChanged = _handleAccessibilityFeaturesChanged;
+      ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     _handleSemanticsEnabledChanged();
   }
 
@@ -129,11 +129,6 @@ mixin SemanticsBinding on BindingBase {
   @protected
   void performSemanticsAction(SemanticsActionEvent action);
 
-  void _handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
-    handleAccessibilityFeaturesChanged();
-  }
-
   /// The currently active set of [AccessibilityFeatures].
   ///
   /// This is set when the binding is first initialized and updated whenever a
@@ -149,8 +144,9 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// See [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
+  @mustCallSuper
   void handleAccessibilityFeaturesChanged() {
-    // Nothing to do by default.
+    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
   }
 
   /// Creates an empty semantics update builder.
