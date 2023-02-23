@@ -1748,7 +1748,6 @@ void main() {
               return Checkbox(
                 value: false,
                 onChanged: (bool? newValue) {},
-
               );
             }),
           ),
