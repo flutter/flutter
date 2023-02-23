@@ -49,20 +49,10 @@ class PlatformViewsRegistry {
     // See https://github.com/flutter/engine/pull/39476 for more details.
 
     // We can safely assume that a Flutter application will not require more
-    // than MAX_INT32 platform views on the fly throughout its lifetime.
-    // Therefore, if the cumulative number of platform views exceeds MAX_INT32,
-    // we can reset the view IDs and start allocating them from zero again.
+    // than MAX_INT32 platform views during its lifetime.
     const int MAX_INT32 = 0x7FFFFFFF;
-    if (_nextPlatformViewId == MAX_INT32) {
-      _nextPlatformViewId = 0;
-    }
+    assert(_nextPlatformViewId <= MAX_INT32);
     return _nextPlatformViewId++;
-  }
-
-  /// For testing purposes only, modify the unique identifier of the platform view.
-  @visibleForTesting
-  void setPlatformViewIdForTesting(int viewId) {
-    _nextPlatformViewId = viewId;
   }
 }
 

@@ -47,40 +47,6 @@ void main() {
       );
     });
 
-    testWidgets('Create an Android view with the ID set to the maximum 32-bit integer value', (WidgetTester tester) async {
-      const int MAX_INT32 = 0x7FFFFFFF;
-      platformViewsRegistry.setPlatformViewIdForTesting(MAX_INT32 - 1);
-
-      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      // The next view id is the maximum 32-bit integer value now.
-      expect(currentViewId, MAX_INT32 - 1);
-
-      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
-      viewsController.registerViewType('webview');
-
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
-          ),
-        ),
-      );
-
-      expect(
-        viewsController.views,
-        unorderedEquals(<FakeAndroidPlatformView>[
-          FakeAndroidPlatformView(
-            0, // Reallocate from zero since the current view ID has exceeded MAX_INT32.
-            'webview',
-            const Size(200.0, 100.0),
-            AndroidViewController.kAndroidLayoutDirectionLtr,
-          ),
-        ]),
-      );
-    });
-
     testWidgets('Create Android view with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
