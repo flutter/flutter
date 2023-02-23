@@ -142,6 +142,9 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom VM Service port.
   static const String vmServicePortOption = 'vm-service-port';
 
+  /// The option name for a custom VM Service port.
+  static const String observatoryPortOption = 'observatory-port';
+
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
 
@@ -382,13 +385,20 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({ required bool verboseHelp }) {
     argParser.addOption(vmServicePortOption,
-        aliases: const <String>['observatory-port'],
         help: '(deprecated; use host-vmservice-port instead) '
               'Listen to the given port for a Dart VM Service connection.\n'
               'Specifying port 0 (the default) will find a random free port.\n '
               'if the Dart Development Service (DDS) is enabled, this will not be the port '
               'of the VmService instance advertised on the command line.',
         hide: !verboseHelp,
+    );
+    argParser.addOption(observatoryPortOption,
+        help: '(deprecated; use host-vmservice-port instead) '
+              'Listen to the given port for a Dart VM Service connection.\n'
+              'Specifying port 0 (the default) will find a random free port.\n '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the VmService instance advertised on the command line.',
+        hide: true,
     );
     argParser.addOption('device-vmservice-port',
       help: 'Look for vmservice connections only from the specified port.\n'
@@ -491,11 +501,13 @@ abstract class FlutterCommand extends Command<void> {
     return ddsEnabled;
   }();
 
-  bool get _hostVmServicePortProvided => (argResults?.wasParsed('vm-service-port') ?? false)
+  bool get _hostVmServicePortProvided => (argResults?.wasParsed(vmServicePortOption) ?? false)
+      || (argResults?.wasParsed(observatoryPortOption) ?? false)
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort = stringArgDeprecated('vm-service-port');
+    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
+                                  stringArgDeprecated(observatoryPortOption);
     final String? hostPort = stringArgDeprecated('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
@@ -540,7 +552,8 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if ((argResults?.wasParsed('vm-service-port') ?? false)
+    if ((argResults?.wasParsed(vmServicePortOption) ?? false)
+        && (argResults?.wasParsed(observatoryPortOption) ?? false)
         && (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit('Only one of "--vm-service-port" and '
         '"--host-vmservice-port" may be specified.');
