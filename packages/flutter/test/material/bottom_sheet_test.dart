@@ -942,14 +942,8 @@ void main() {
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          builder: (_, ScrollController controller) {
-            return SingleChildScrollView(
-              controller: controller,
-              child: const Text('BottomSheet'),
-            );
-          },
+        return const SingleChildScrollView(
+          child: Text('BottomSheet'),
         );
       },
     );
@@ -1519,7 +1513,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder();
+          return const Placeholder(fallbackHeight: 200);
         },
         anchorPoint: const Offset(1000, 0),
       );
@@ -1560,7 +1554,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder();
+          return const Placeholder(fallbackHeight: 200);
         },
       );
       await tester.pumpAndSettle();
@@ -1597,7 +1591,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder();
+          return const Placeholder(fallbackHeight: 200);
         },
       );
       await tester.pumpAndSettle();
@@ -1674,7 +1668,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       expect(
-        tester.getRect(find.text('BottomSheet')),
+        tester.getRect(find.byType(BottomSheet)),
         const Rect.fromLTRB(0, 586, 800, 600),
       );
     });
