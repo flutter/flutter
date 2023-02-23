@@ -2,6 +2,7 @@
 const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
+const BASE_HREF = (self.location.pathname.split('/').slice(0, -1).join('/') + '/').substring(1);
 
 const RESOURCES = $$RESOURCES_MAP;
 // The application shell files that are downloaded before a service worker can
@@ -93,6 +94,13 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
     key = '/';
   }
+
+  // In order to get the actual asset key, it must remove the base-href from the requested URL
+  // but only if the URL is from the same origin
+  if(event.request.url.startsWith(origin)) {
+    key = key.substring(BASE_HREF.length);
+  }
+
   // If the URL is not the RESOURCE list then return to signal that the
   // browser should take over.
   if (!RESOURCES[key]) {
