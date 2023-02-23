@@ -139,6 +139,12 @@ void main() {
     expect(BorderRadius.lerp(a, null, 0.25), equals(a * 0.75));
   });
 
+  test('BorderRadius.lerp identical a,b', () {
+    expect(BorderRadius.lerp(null, null, 0), null);
+    const BorderRadius border = BorderRadius.zero;
+    expect(identical(BorderRadius.lerp(border, border, 0.5), border), true);
+  });
+
   test('BorderRadius.lerp() crazy', () {
     const BorderRadius a = BorderRadius.only(
       topLeft: Radius.elliptical(10.0, 20.0),
@@ -314,6 +320,12 @@ void main() {
     expect(BorderRadiusDirectional.lerp(a, null, 0.25), equals(a * 0.75));
   });
 
+  test('BorderRadiusDirectional.lerp identical a,b', () {
+    expect(BorderRadiusDirectional.lerp(null, null, 0), null);
+    const BorderRadiusDirectional border = BorderRadiusDirectional.zero;
+    expect(identical(BorderRadiusDirectional.lerp(border, border, 0.5), border), true);
+  });
+
   test('BorderRadiusDirectional.lerp() crazy', () {
     const BorderRadiusDirectional a = BorderRadiusDirectional.only(
       topStart: Radius.elliptical(10.0, 20.0),
@@ -361,6 +373,12 @@ void main() {
     expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.rtl), rtl);
     expect(BorderRadiusGeometry.lerp(a, b, 0.0)!.resolve(TextDirection.ltr), a);
     expect(BorderRadiusGeometry.lerp(a, b, 1.0)!.resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
+  });
+
+  test('BorderRadiusGeometry.lerp identical a,b', () {
+    expect(BorderRadiusDirectional.lerp(null, null, 0), null);
+    const BorderRadiusGeometry border = BorderRadius.zero;
+    expect(identical(BorderRadiusGeometry.lerp(border, border, 0.5), border), true);
   });
 
   test('BorderRadiusGeometry subtract', () {

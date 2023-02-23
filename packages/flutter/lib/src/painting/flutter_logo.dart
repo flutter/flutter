@@ -101,8 +101,8 @@ class FlutterLogoDecoration extends Decoration {
   static FlutterLogoDecoration? lerp(FlutterLogoDecoration? a, FlutterLogoDecoration? b, double t) {
     assert(a == null || a.debugAssertIsValid());
     assert(b == null || b.debugAssertIsValid());
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return FlutterLogoDecoration._(
