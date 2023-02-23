@@ -135,7 +135,7 @@ void main() {
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -168,7 +168,7 @@ void main() {
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -360,7 +360,7 @@ void main() {
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -415,7 +415,7 @@ void main() {
   testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const TextStyle textStyle = TextStyle(fontSize: 200);
     const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
@@ -483,7 +483,7 @@ void main() {
 
   testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       SizedBox(
         height: 10,
@@ -534,7 +534,7 @@ void main() {
 
   testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -592,7 +592,7 @@ void main() {
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       RichText(
         text: TextSpan(
@@ -673,7 +673,7 @@ void main() {
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -713,7 +713,7 @@ void main() {
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -787,7 +787,7 @@ void main() {
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(

@@ -797,7 +797,7 @@ void main() {
           child: SelectableText(
             'abc def ghi',
             dragStartBehavior: DragStartBehavior.down,
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            style: TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -2444,7 +2444,7 @@ void main() {
   testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const TextStyle textStyle = TextStyle(fontSize: 200);
     const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();

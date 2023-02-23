@@ -2241,7 +2241,7 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
