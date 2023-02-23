@@ -221,8 +221,7 @@ RasterStatus Rasterizer::Draw(
   }
 
   // EndFrame should perform cleanups for the external_view_embedder.
-  if (surface_ && external_view_embedder_ &&
-      external_view_embedder_->GetUsedThisFrame()) {
+  if (external_view_embedder_ && external_view_embedder_->GetUsedThisFrame()) {
     external_view_embedder_->SetUsedThisFrame(false);
     external_view_embedder_->EndFrame(should_resubmit_frame,
                                       raster_thread_merger_);
