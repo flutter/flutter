@@ -2311,7 +2311,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
-      completer.complete();
+      completer.complete(null as T);
     }
 
     final LocalHistoryEntry? entry = isPersistent
