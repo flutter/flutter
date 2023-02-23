@@ -9,6 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 const bool skipTestsWithKnownBugs = true;
 const bool skipExpectsWithKnownBugs = false;
 
+final String charRLO = String.fromCharCode(Unicode.RLO);
+final String charLRO = String.fromCharCode(Unicode.LRO);
+final String charPDF = String.fromCharCode(Unicode.PDF);
+
+String lro(String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
+String rlo(String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';
+
 void main() {
   test('TextPainter - basic words', () {
     final TextPainter painter = TextPainter()
@@ -39,10 +46,10 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    painter.text = const TextSpan(
-      text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
+    painter.text = TextSpan(
+      text: '${charRLO}HEBREW1 ${charLRO}english2$charPDF HEBREW3$charPDF',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
@@ -173,7 +180,7 @@ void main() {
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
-      text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
+      text: '${charRLO}HEBREW1 ${charLRO}english2${charPDF} HEBREW3${charPDF}',
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
@@ -692,6 +699,3 @@ void main() {
     painter.dispose();
   });
 }
-
-String lro(String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
-String rlo(String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';

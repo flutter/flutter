@@ -10,6 +10,9 @@ import 'package:flutter/scheduler.dart';
 
 int seed = 0;
 
+final String charRLO = String.fromCharCode(Unicode.RLO);
+final String charLRO = String.fromCharCode(Unicode.LRO);
+
 void main() {
   runApp(MaterialApp(
     title: 'Text tester',
@@ -393,32 +396,32 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 19:
         return '\r';
       case 20:
-        return Unicode.RLE;
+        return String.fromCharCode(Unicode.RLE);
       case 21:
-        return Unicode.LRE;
+        return String.fromCharCode(Unicode.LRE);
       case 22:
-        return Unicode.LRO;
+        return charLRO;
       case 23:
-        return Unicode.RLO;
+        return charRLO;
       case 24:
       case 25:
       case 26:
       case 27:
-        return Unicode.PDF;
+        return String.fromCharCode(Unicode.PDF);
       case 28:
-        return Unicode.LRM;
+        return String.fromCharCode(Unicode.LRM);
       case 29:
-        return Unicode.RLM;
+        return String.fromCharCode(Unicode.RLM);
       case 30:
-        return Unicode.RLI;
+        return String.fromCharCode(Unicode.RLI);
       case 31:
-        return Unicode.LRI;
+        return String.fromCharCode(Unicode.LRI);
       case 32:
-        return Unicode.FSI;
+        return String.fromCharCode(Unicode.FSI);
       case 33:
       case 34:
       case 35:
-        return Unicode.PDI;
+        return String.fromCharCode(Unicode.PDI);
       case 36:
       case 37:
       case 38:
@@ -775,11 +778,11 @@ class _BidiState extends State<Bidi> {
           RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(text: '${Unicode.LRO}abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
-                TextSpan(text: '${Unicode.RLO}DEF', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
-                TextSpan(text: '${Unicode.LRO}ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
-                TextSpan(text: '${Unicode.RLO}JKL', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
-                TextSpan(text: '${Unicode.LRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
+                TextSpan(text: '${charLRO}abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                TextSpan(text: '${charRLO}DEF', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+                TextSpan(text: '${charLRO}ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                TextSpan(text: '${charRLO}JKL', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                TextSpan(text: '${charLRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
               ],
             ),
             textAlign: TextAlign.center,
@@ -789,9 +792,9 @@ class _BidiState extends State<Bidi> {
           RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(text: '${Unicode.LRO}abc${Unicode.RLO}D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
-                TextSpan(text: 'EF${Unicode.LRO}gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
-                TextSpan(text: 'i${Unicode.RLO}JKL${Unicode.LRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                TextSpan(text: '${charLRO}abc${charRLO}D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                TextSpan(text: 'EF${charLRO}gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                TextSpan(text: 'i${charRLO}JKL${charLRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
               ],
             ),
             textAlign: TextAlign.center,

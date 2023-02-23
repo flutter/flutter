@@ -4739,10 +4739,14 @@ AttributedString _concatAttributedString({
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
     switch (otherTextDirection) {
       case TextDirection.rtl:
-        otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
+        otherAttributedString = AttributedString(String.fromCharCode(Unicode.RLE))
+            + otherAttributedString
+            + AttributedString(String.fromCharCode(Unicode.PDF));
         break;
       case TextDirection.ltr:
-        otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
+        otherAttributedString = AttributedString(String.fromCharCode(Unicode.LRE))
+            + otherAttributedString
+            + AttributedString(String.fromCharCode(Unicode.PDF));
         break;
     }
   }

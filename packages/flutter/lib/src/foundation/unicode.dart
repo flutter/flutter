@@ -19,19 +19,19 @@ class Unicode {
   /// Treat the following text as embedded left-to-right.
   ///
   /// Use [PDF] to end the embedding.
-  static const String LRE = '\u202A';
+  static const int LRE = 0x202A;
 
   /// `U+202B RIGHT-TO-LEFT EMBEDDING`
   ///
   /// Treat the following text as embedded right-to-left.
   ///
   /// Use [PDF] to end the embedding.
-  static const String RLE = '\u202B';
+  static const int RLE = 0x202B;
 
   /// `U+202C POP DIRECTIONAL FORMATTING`
   ///
   /// End the scope of the last [LRE], [RLE], [RLO], or [LRO].
-  static const String PDF = '\u202C';
+  static const int PDF = 0x202C;
 
   /// `U+202A LEFT-TO-RIGHT OVERRIDE`
   ///
@@ -40,7 +40,7 @@ class Unicode {
   /// For example, this causes Hebrew text to render backwards.
   ///
   /// Use [PDF] to end the override.
-  static const String LRO = '\u202D';
+  static const int LRO = 0x202D;
 
   /// `U+202B RIGHT-TO-LEFT OVERRIDE`
   ///
@@ -49,21 +49,21 @@ class Unicode {
   /// For example, this causes English text to render backwards.
   ///
   /// Use [PDF] to end the override.
-  static const String RLO = '\u202E';
+  static const int RLO = 0x202E;
 
   /// `U+2066 LEFT-TO-RIGHT ISOLATE`
   ///
   /// Treat the following text as isolated and left-to-right.
   ///
   /// Use [PDI] to end the isolated scope.
-  static const String LRI = '\u2066';
+  static const int LRI = 0x2066;
 
   /// `U+2067 RIGHT-TO-LEFT ISOLATE`
   ///
   /// Treat the following text as isolated and right-to-left.
   ///
   /// Use [PDI] to end the isolated scope.
-  static const String RLI = '\u2067';
+  static const int RLI = 0x2067;
 
   /// `U+2068 FIRST STRONG ISOLATE`
   ///
@@ -76,25 +76,25 @@ class Unicode {
   /// weird order.
   ///
   /// Use [PDI] to end the isolated scope.
-  static const String FSI = '\u2068';
+  static const int FSI = 0x2068;
 
   /// `U+2069 POP DIRECTIONAL ISOLATE`
   ///
   /// End the scope of the last [LRI], [RLI], or [FSI].
-  static const String PDI = '\u2069';
+  static const int PDI = 0x2069;
 
   /// `U+200E LEFT-TO-RIGHT MARK`
   ///
   /// Left-to-right zero-width character.
-  static const String LRM = '\u200E';
+  static const int LRM = 0x200E;
 
   /// `U+200F RIGHT-TO-LEFT MARK`
   ///
   /// Right-to-left zero-width non-Arabic character.
-  static const String RLM = '\u200F';
+  static const int RLM = 0x200F;
 
   /// `U+061C ARABIC LETTER MARK`
   ///
   /// Right-to-left zero-width Arabic character.
-  static const String ALM = '\u061C';
+  static const int ALM = 0x061C;
 }

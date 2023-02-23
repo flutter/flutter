@@ -226,8 +226,10 @@ class WordBoundary extends TextBoundary {
     // WB1 & WB2: always break at the start or the end of the text.
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
-                                  || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
-    return hardBreakRulesApply || !RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true).hasMatch(String.fromCharCode(innerCodePoint));
+        || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
+    return hardBreakRulesApply
+        || !RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true)
+            .hasMatch(String.fromCharCode(innerCodePoint));
   }
 
   /// Returns a [TextBoundary] suitable for handling keyboard navigation
@@ -440,8 +442,10 @@ class TextPainter {
     if (_paragraph == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Text layout not available'),
-        if (_debugMarkNeedsLayoutCallStack != null) DiagnosticsStackTrace('The calls that first invalidated the text layout were', _debugMarkNeedsLayoutCallStack)
-        else ErrorDescription('The TextPainter has never been laid out.')
+        if (_debugMarkNeedsLayoutCallStack != null)
+          DiagnosticsStackTrace('The calls that first invalidated the text layout were', _debugMarkNeedsLayoutCallStack)
+        else
+          ErrorDescription('The TextPainter has never been laid out.')
       ]);
     }
     return true;
@@ -727,7 +731,8 @@ class TextPainter {
   ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
-    assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
+    assert(textDirection != null || defaultTextDirection != null,
+        'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text!.style?.getParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
@@ -996,10 +1001,8 @@ class TextPainter {
 
   // Checks if the glyph is either [Unicode.RLM] or [Unicode.LRM]. These values take
   // up zero space and do not have valid bounding boxes around them.
-  //
-  // We do not directly use the [Unicode] constants since they are strings.
   static bool _isUnicodeDirectionality(int value) {
-    return value == 0x200F || value == 0x200E;
+    return value == Unicode.RLM || value == Unicode.LRM;
   }
 
   /// Returns the closest offset after `offset` at which the input cursor can be
@@ -1009,7 +1012,8 @@ class TextPainter {
     if (nextCodeUnit == null) {
       return null;
     }
-    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one
+    // Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isHighSurrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
@@ -1020,7 +1024,8 @@ class TextPainter {
     if (prevCodeUnit == null) {
       return null;
     }
-    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one
+    // Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isLowSurrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
@@ -1040,7 +1045,10 @@ class TextPainter {
     const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
-    final bool needsSearch = _isHighSurrogate(prevCodeUnit) || _isLowSurrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
+    final bool needsSearch = _isHighSurrogate(prevCodeUnit)
+        || _isLowSurrogate(prevCodeUnit)
+        || _text!.codeUnitAt(offset) == _zwjUtf16
+        || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
@@ -1090,7 +1098,10 @@ class TextPainter {
     final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isHighSurrogate(nextCodeUnit) || _isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
+    final bool needsSearch = _isHighSurrogate(nextCodeUnit)
+        || _isLowSurrogate(nextCodeUnit)
+        || nextCodeUnit == _zwjUtf16
+        || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {

@@ -302,12 +302,12 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     } else {
       final String effectivelabel;
       if (data.textDirection == null) {
-        effectivelabel = '${Unicode.FSI}$tooltipAndLabel${Unicode.PDI}';
+        effectivelabel = '${String.fromCharCode(Unicode.FSI)}$tooltipAndLabel${String.fromCharCode(Unicode.PDI)}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
         switch (data.textDirection!) {
           case TextDirection.rtl:
-            effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
+            effectivelabel = '${String.fromCharCode(Unicode.RLI)}$tooltipAndLabel${String.fromCharCode(Unicode.PDF)}';
             break;
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;

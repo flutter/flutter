@@ -13,6 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
+final String charRLO = String.fromCharCode(Unicode.RLO);
+final String charLRO = String.fromCharCode(Unicode.LRO);
+final String charRLE = String.fromCharCode(Unicode.RLE);
+final String charLRE = String.fromCharCode(Unicode.LRE);
+final String charPDF = String.fromCharCode(Unicode.PDF);
+
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
@@ -598,17 +604,17 @@ void main() {
         text: TextSpan(
           style: textStyle,
           children: <TextSpan>[
-            const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
+            const TextSpan(text: 'hello world${charRLE}${charRLO} '),
             TextSpan(
               text: 'BOY',
               recognizer: LongPressGestureRecognizer()..onLongPress = () { },
             ),
-            const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
+            const TextSpan(text: ' HOW DO${charPDF} you ${charRLO} DO '),
             TextSpan(
               text: 'SIR',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
-            const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
+            const TextSpan(text: '${charPDF}${charPDF} good bye'),
           ],
         ),
         textDirection: TextDirection.ltr,
@@ -630,7 +636,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
-              label: 'hello world${Unicode.RLE}${Unicode.RLO} ',
+              label: 'hello world${charRLE}${charRLO} ',
               textDirection: TextDirection.ltr,
             ),
             TestSemantics(
@@ -641,7 +647,7 @@ void main() {
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
-              label: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO ',
+              label: ' HOW DO$charPDF you $charRLO DO ',
               textDirection: TextDirection.rtl,
             ),
             TestSemantics(
@@ -653,7 +659,7 @@ void main() {
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
-              label: '${Unicode.PDF}${Unicode.PDF} good bye',
+              label: '$charPDF$charPDF good bye',
               textDirection: TextDirection.rtl,
             ),
           ],
