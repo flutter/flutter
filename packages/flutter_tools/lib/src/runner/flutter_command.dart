@@ -398,7 +398,7 @@ abstract class FlutterCommand extends Command<void> {
               'Specifying port 0 (the default) will find a random free port.\n '
               'if the Dart Development Service (DDS) is enabled, this will not be the port '
               'of the VmService instance advertised on the command line.',
-        hide: true,
+        hide: !verboseHelp,
     );
     argParser.addOption('device-vmservice-port',
       help: 'Look for vmservice connections only from the specified port.\n'
