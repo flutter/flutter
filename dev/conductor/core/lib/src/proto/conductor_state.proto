@@ -29,22 +29,6 @@ enum ReleasePhase {
   RELEASE_COMPLETED = 6;
 }
 
-enum CherrypickState {
-  // The cherrypick has not yet been applied.
-  PENDING = 0;
-
-  // The cherrypick has not been applied and will require manual resolution.
-  PENDING_WITH_CONFLICT = 1;
-
-  // The cherrypick has been successfully applied to the local checkout.
-  //
-  // This state requires Cherrypick.appliedRevision to also be set.
-  COMPLETED = 2;
-
-  // The cherrypick will NOT be applied in this release.
-  ABANDONED = 3;
-}
-
 // The type of release that is being created.
 //
 // This determines how the version will be calculated.
@@ -61,16 +45,6 @@ enum ReleaseType {
 
   // Increment n.
   BETA_HOTFIX = 3;
-}
-
-message Cherrypick {
-  // The revision on trunk to cherrypick.
-  string trunkRevision = 1;
-
-  // Once applied, the actual commit revision of the cherrypick.
-  string appliedRevision = 2;
-
-  CherrypickState state = 3;
 }
 
 message Repository {
@@ -97,35 +71,32 @@ message Repository {
   // This should be a mirror owned by the user conducting the release.
   Remote mirror = 6;
 
-  // Desired cherrypicks.
-  repeated Cherrypick cherrypicks = 7;
-
   // Only for engine repositories.
-  string dartRevision = 8;
+  string dartRevision = 7;
 
-  // Name of local and remote branch for applying cherrypicks.
+  // Name of local and remote branch for creating pull requests.
   //
   // When the pull request is merged, all commits here will be squashed to a
   // single commit on the [candidateBranch].
-  string workingBranch = 9;
+  string workingBranch = 8;
 }
 
 message ConductorState {
-  // One of 'stable', 'beta', or 'dev'
+  // One of 'stable' or 'beta'
   string releaseChannel = 1;
 
   // The name of the release.
   string releaseVersion = 2;
 
-  Repository engine = 4;
-  Repository framework = 5;
-  int64 createdDate = 6;
-  int64 lastUpdatedDate = 7;
+  Repository engine = 3;
+  Repository framework = 4;
+  int64 createdDate = 5;
+  int64 lastUpdatedDate = 6;
 
-  repeated string logs = 8;
+  repeated string logs = 7;
 
   // The current [ReleasePhase] that has yet to be completed.
-  ReleasePhase currentPhase = 9;
+  ReleasePhase currentPhase = 8;
 
   // A string used to validate that the current conductor is the same version
   // that created the [ConductorState] object.

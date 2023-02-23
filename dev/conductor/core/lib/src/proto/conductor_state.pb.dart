@@ -89,98 +89,6 @@ class Remote extends $pb.GeneratedMessage {
   void clearUrl() => clearField(2);
 }
 
-class Cherrypick extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Cherrypick',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trunkRevision',
-        protoName: 'trunkRevision')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appliedRevision',
-        protoName: 'appliedRevision')
-    ..e<CherrypickState>(
-        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'state', $pb.PbFieldType.OE,
-        defaultOrMaker: CherrypickState.PENDING, valueOf: CherrypickState.valueOf, enumValues: CherrypickState.values)
-    ..hasRequiredFields = false;
-
-  Cherrypick._() : super();
-  factory Cherrypick({
-    $core.String? trunkRevision,
-    $core.String? appliedRevision,
-    CherrypickState? state,
-  }) {
-    final _result = create();
-    if (trunkRevision != null) {
-      _result.trunkRevision = trunkRevision;
-    }
-    if (appliedRevision != null) {
-      _result.appliedRevision = appliedRevision;
-    }
-    if (state != null) {
-      _result.state = state;
-    }
-    return _result;
-  }
-  factory Cherrypick.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory Cherrypick.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-      'Will be removed in next major version')
-  Cherrypick clone() => Cherrypick()..mergeFromMessage(this);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-      'Will be removed in next major version')
-  Cherrypick copyWith(void Function(Cherrypick) updates) =>
-      super.copyWith((message) => updates(message as Cherrypick)) as Cherrypick; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Cherrypick create() => Cherrypick._();
-  Cherrypick createEmptyInstance() => create();
-  static $pb.PbList<Cherrypick> createRepeated() => $pb.PbList<Cherrypick>();
-  @$core.pragma('dart2js:noInline')
-  static Cherrypick getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Cherrypick>(create);
-  static Cherrypick? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get trunkRevision => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set trunkRevision($core.String v) {
-    $_setString(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasTrunkRevision() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTrunkRevision() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get appliedRevision => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set appliedRevision($core.String v) {
-    $_setString(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasAppliedRevision() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearAppliedRevision() => clearField(2);
-
-  @$pb.TagNumber(3)
-  CherrypickState get state => $_getN(2);
-  @$pb.TagNumber(3)
-  set state(CherrypickState v) {
-    setField(3, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasState() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearState() => clearField(3);
-}
-
 class Repository extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Repository',
@@ -199,12 +107,9 @@ class Repository extends $pb.GeneratedMessage {
         subBuilder: Remote.create)
     ..aOM<Remote>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mirror',
         subBuilder: Remote.create)
-    ..pc<Cherrypick>(
-        7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks', $pb.PbFieldType.PM,
-        subBuilder: Cherrypick.create)
-    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dartRevision',
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dartRevision',
         protoName: 'dartRevision')
-    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'workingBranch',
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'workingBranch',
         protoName: 'workingBranch')
     ..hasRequiredFields = false;
 
@@ -216,7 +121,6 @@ class Repository extends $pb.GeneratedMessage {
     $core.String? checkoutPath,
     Remote? upstream,
     Remote? mirror,
-    $core.Iterable<Cherrypick>? cherrypicks,
     $core.String? dartRevision,
     $core.String? workingBranch,
   }) {
@@ -238,9 +142,6 @@ class Repository extends $pb.GeneratedMessage {
     }
     if (mirror != null) {
       _result.mirror = mirror;
-    }
-    if (cherrypicks != null) {
-      _result.cherrypicks.addAll(cherrypicks);
     }
     if (dartRevision != null) {
       _result.dartRevision = dartRevision;
@@ -349,31 +250,28 @@ class Repository extends $pb.GeneratedMessage {
   Remote ensureMirror() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  $core.List<Cherrypick> get cherrypicks => $_getList(6);
+  $core.String get dartRevision => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set dartRevision($core.String v) {
+    $_setString(6, v);
+  }
+
+  @$pb.TagNumber(7)
+  $core.bool hasDartRevision() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearDartRevision() => clearField(7);
 
   @$pb.TagNumber(8)
-  $core.String get dartRevision => $_getSZ(7);
+  $core.String get workingBranch => $_getSZ(7);
   @$pb.TagNumber(8)
-  set dartRevision($core.String v) {
+  set workingBranch($core.String v) {
     $_setString(7, v);
   }
 
   @$pb.TagNumber(8)
-  $core.bool hasDartRevision() => $_has(7);
+  $core.bool hasWorkingBranch() => $_has(7);
   @$pb.TagNumber(8)
-  void clearDartRevision() => clearField(8);
-
-  @$pb.TagNumber(9)
-  $core.String get workingBranch => $_getSZ(8);
-  @$pb.TagNumber(9)
-  set workingBranch($core.String v) {
-    $_setString(8, v);
-  }
-
-  @$pb.TagNumber(9)
-  $core.bool hasWorkingBranch() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearWorkingBranch() => clearField(9);
+  void clearWorkingBranch() => clearField(8);
 }
 
 class ConductorState extends $pb.GeneratedMessage {
@@ -386,17 +284,17 @@ class ConductorState extends $pb.GeneratedMessage {
         protoName: 'releaseChannel')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseVersion',
         protoName: 'releaseVersion')
-    ..aOM<Repository>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'engine',
+    ..aOM<Repository>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'engine',
         subBuilder: Repository.create)
-    ..aOM<Repository>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'framework',
+    ..aOM<Repository>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'framework',
         subBuilder: Repository.create)
-    ..aInt64(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdDate',
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdDate',
         protoName: 'createdDate')
-    ..aInt64(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastUpdatedDate',
+    ..aInt64(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastUpdatedDate',
         protoName: 'lastUpdatedDate')
-    ..pPS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
+    ..pPS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
     ..e<ReleasePhase>(
-        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
+        8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
         protoName: 'currentPhase',
         defaultOrMaker: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
         valueOf: ReleasePhase.valueOf,
@@ -504,72 +402,72 @@ class ConductorState extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearReleaseVersion() => clearField(2);
 
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(3)
   Repository get engine => $_getN(2);
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(3)
   set engine(Repository v) {
+    setField(3, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasEngine() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEngine() => clearField(3);
+  @$pb.TagNumber(3)
+  Repository ensureEngine() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  Repository get framework => $_getN(3);
+  @$pb.TagNumber(4)
+  set framework(Repository v) {
     setField(4, v);
   }
 
   @$pb.TagNumber(4)
-  $core.bool hasEngine() => $_has(2);
-  @$pb.TagNumber(4)
-  void clearEngine() => clearField(4);
-  @$pb.TagNumber(4)
-  Repository ensureEngine() => $_ensure(2);
-
-  @$pb.TagNumber(5)
-  Repository get framework => $_getN(3);
-  @$pb.TagNumber(5)
-  set framework(Repository v) {
-    setField(5, v);
-  }
-
-  @$pb.TagNumber(5)
   $core.bool hasFramework() => $_has(3);
-  @$pb.TagNumber(5)
-  void clearFramework() => clearField(5);
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(4)
+  void clearFramework() => clearField(4);
+  @$pb.TagNumber(4)
   Repository ensureFramework() => $_ensure(3);
 
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(5)
   $fixnum.Int64 get createdDate => $_getI64(4);
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(5)
   set createdDate($fixnum.Int64 v) {
     $_setInt64(4, v);
   }
 
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(5)
   $core.bool hasCreatedDate() => $_has(4);
-  @$pb.TagNumber(6)
-  void clearCreatedDate() => clearField(6);
+  @$pb.TagNumber(5)
+  void clearCreatedDate() => clearField(5);
 
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   $fixnum.Int64 get lastUpdatedDate => $_getI64(5);
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   set lastUpdatedDate($fixnum.Int64 v) {
     $_setInt64(5, v);
   }
 
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   $core.bool hasLastUpdatedDate() => $_has(5);
-  @$pb.TagNumber(7)
-  void clearLastUpdatedDate() => clearField(7);
+  @$pb.TagNumber(6)
+  void clearLastUpdatedDate() => clearField(6);
 
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(7)
   $core.List<$core.String> get logs => $_getList(6);
 
-  @$pb.TagNumber(9)
+  @$pb.TagNumber(8)
   ReleasePhase get currentPhase => $_getN(7);
-  @$pb.TagNumber(9)
+  @$pb.TagNumber(8)
   set currentPhase(ReleasePhase v) {
-    setField(9, v);
+    setField(8, v);
   }
 
-  @$pb.TagNumber(9)
+  @$pb.TagNumber(8)
   $core.bool hasCurrentPhase() => $_has(7);
-  @$pb.TagNumber(9)
-  void clearCurrentPhase() => clearField(9);
+  @$pb.TagNumber(8)
+  void clearCurrentPhase() => clearField(8);
 
   @$pb.TagNumber(10)
   $core.String get conductorVersion => $_getSZ(8);

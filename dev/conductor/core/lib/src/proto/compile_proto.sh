@@ -7,7 +7,7 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Ensure dart-sdk is cached
-"$DIR/../../../../bin/dart" --version
+# "$DIR/../../../../bin/dart" --version
 
 if ! type protoc >/dev/null 2>&1; then
   PROTOC_LINK='https://grpc.io/docs/protoc-installation/'
