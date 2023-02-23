@@ -1492,7 +1492,7 @@ abstract class FlutterCommand extends Command<void> {
     if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
         globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        final List<Device> allDevices = await deviceManager.getAllDevices();
         if (allDevices.isNotEmpty) {
           globals.logger.printStatus('');
           globals.logger.printStatus('The following devices were found:');
@@ -1529,7 +1529,7 @@ abstract class FlutterCommand extends Command<void> {
         } else {
           // Show an error message asking the user to specify `-d all` if they
           // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          final List<Device> allDevices = await deviceManager.getAllDevices();
           globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
           globals.logger.printStatus('');
           await Device.printDevices(allDevices, globals.logger);
@@ -1604,7 +1604,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;

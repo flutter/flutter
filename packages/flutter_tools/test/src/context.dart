@@ -207,21 +207,31 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+  }) async {
     return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
-  Future<List<Device>> getDevices() {
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+  }) {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId!)
-        : getAllConnectedDevices();
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
   }
 
   void addDevice(Device device) => devices.add(device);
@@ -234,11 +244,6 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
-
-  @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    return device.isSupportedForProject(flutterProject!);
-  }
 
   @override
   Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout, bool promptUserToChooseDevice = true }) async {
