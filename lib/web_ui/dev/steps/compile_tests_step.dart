@@ -140,17 +140,21 @@ Future<void> copyDart2WasmTestScript() async {
   await sourceFile.copy(targetDir.path);
 }
 
+final io.Directory _localCanvasKitDir = io.Directory(pathlib.join(
+  environment.wasmReleaseOutDir.path,
+  'canvaskit',
+));
+final io.File _localCanvasKitWasm = io.File(pathlib.join(
+  _localCanvasKitDir.path,
+  'canvaskit.wasm',
+));
+
 Future<void> copyCanvasKitFiles({bool useLocalCanvasKit = false}) async {
   // If CanvasKit has been built locally, use that instead of the CIPD version.
-  final io.File localCanvasKitWasm = io.File(pathlib.join(
-    environment.wasmReleaseOutDir.path,
-    'canvaskit',
-    'canvaskit.wasm',
-  ));
-  final bool builtLocalCanvasKit = localCanvasKitWasm.existsSync();
-  if (useLocalCanvasKit && !builtLocalCanvasKit) {
+  final bool localCanvasKitExists = _localCanvasKitWasm.existsSync();
+  if (useLocalCanvasKit && !localCanvasKitExists) {
     throw ArgumentError('Requested to use local CanvasKit but could not find the '
-        'built CanvasKit at ${localCanvasKitWasm.path}. Falling back to '
+        'built CanvasKit at ${_localCanvasKitWasm.path}. Falling back to '
         'CanvasKit from CIPD.');
   }
 
@@ -160,19 +164,17 @@ Future<void> copyCanvasKitFiles({bool useLocalCanvasKit = false}) async {
   ));
 
   if (useLocalCanvasKit) {
-    final List<io.File> canvasKitFiles = <io.File>[
-      localCanvasKitWasm,
-      io.File(pathlib.join(
-        environment.wasmReleaseOutDir.path,
-        'canvaskit',
-        'canvaskit.js',
-      )),
-    ];
+    final Iterable<io.File> canvasKitFiles =
+        _localCanvasKitDir.listSync(recursive: true).whereType<io.File>();
     for (final io.File file in canvasKitFiles) {
-      final io.File normalTargetFile = io.File(pathlib.join(
-        targetDir.path,
-        pathlib.basename(file.path),
-      ));
+      if (!file.path.endsWith('.wasm') && !file.path.endsWith('.js')) {
+        // We only need the .wasm and .js files.
+        continue;
+      }
+      final String relativePath =
+          pathlib.relative(file.path, from: _localCanvasKitDir.path);
+      final io.File normalTargetFile =
+          io.File(pathlib.join(targetDir.path, relativePath));
       await normalTargetFile.create(recursive: true);
       await file.copy(normalTargetFile.path);
     }
