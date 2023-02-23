@@ -166,6 +166,24 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Tests
 
+- (void)testWillNotCrashWhenViewControllerIsNil {
+  FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
+  FlutterTextInputPlugin* inputPlugin =
+      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
+  XCTAssertNil(inputPlugin.viewController);
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
+                                                                    arguments:nil];
+  XCTestExpectation* expectation = [[XCTestExpectation alloc] initWithDescription:@"result called"];
+
+  [inputPlugin handleMethodCall:methodCall
+                         result:^(id _Nullable result) {
+                           XCTAssertNil(result);
+                           [expectation fulfill];
+                         }];
+  XCTAssertNil(inputPlugin.activeView);
+  [self waitForExpectations:@[ expectation ] timeout:1.0];
+}
+
 - (void)testInvokeStartLiveTextInput {
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"TextInput.startLiveTextInput" arguments:nil];
