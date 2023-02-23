@@ -319,7 +319,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
   _FocusTraversalGroupScope? _getMarker(BuildContext? context) {
-    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupScope>()?.widget as _FocusTraversalGroupScope?;
+    return context?.getInheritedWidgetOfExactType<_FocusTraversalGroupScope>();
   }
 
   // Sort all descendants, taking into account the FocusTraversalGroup
@@ -941,7 +941,7 @@ class _ReadingOrderSortData with Diagnosticable {
   // Find the directionality in force for a build context without creating a
   // dependency.
   static TextDirection? _findDirectionality(BuildContext context) {
-    return (context.getElementForInheritedWidgetOfExactType<Directionality>()?.widget as Directionality?)?.textDirection;
+    return context.getInheritedWidgetOfExactType<Directionality>()?.textDirection;
   }
 
   /// Finds the common Directional ancestor of an entire list of groups.
@@ -1439,7 +1439,7 @@ class FocusTraversalOrder extends InheritedWidget {
   /// If no [FocusTraversalOrder] ancestor exists, or the order is null, this
   /// will assert in debug mode, and throw an exception in release mode.
   static FocusOrder of(BuildContext context) {
-    final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
+    final FocusTraversalOrder? marker = context.getInheritedWidgetOfExactType<FocusTraversalOrder>();
     assert(() {
       if (marker == null) {
         throw FlutterError(
@@ -1464,7 +1464,7 @@ class FocusTraversalOrder extends InheritedWidget {
   ///
   /// If no [FocusTraversalOrder] ancestor exists, or the order is null, returns null.
   static FocusOrder? maybeOf(BuildContext context) {
-    final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
+    final FocusTraversalOrder? marker = context.getInheritedWidgetOfExactType<FocusTraversalOrder>();
     return marker?.order;
   }
 

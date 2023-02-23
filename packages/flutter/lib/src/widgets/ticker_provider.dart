@@ -95,7 +95,7 @@ class TickerMode extends StatefulWidget {
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
   static ValueNotifier<bool> getNotifier(BuildContext context) {
-    final _EffectiveTickerMode? widget = context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;
+    final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? ValueNotifier<bool>(true);
   }
 
