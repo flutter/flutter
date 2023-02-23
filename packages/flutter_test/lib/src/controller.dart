@@ -23,7 +23,7 @@ const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
-/// Class that programatically interacts with the [Semantics] tree.
+/// Class that programmatically interacts with the [Semantics] tree.
 ///
 /// Allows for testing of the [Semantics] tree, which is used by assistive
 /// technology, search engines, and other analysis software to determine the
@@ -187,7 +187,7 @@ class SemanticsController {
   }
 
   /// Whether or not the node is important for semantics. Should match most cases
-  /// on the platforms, but certain edge cases will be inconsisent.
+  /// on the platforms, but certain edge cases will be inconsistent.
   ///
   /// Based on:
   ///

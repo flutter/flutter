@@ -319,7 +319,7 @@ class Focus extends StatefulWidget {
   /// {@template flutter.widgets.Focus.descendantsAreTraversable}
   /// If false, will make this widget's descendants untraversable.
   ///
-  /// Defaults to true. Does not affect traversablility of this node (just its
+  /// Defaults to true. Does not affect traversability of this node (just its
   /// descendants): for that, use [FocusNode.skipTraversal].
   ///
   /// Does not affect the value of [FocusNode.skipTraversal] on the

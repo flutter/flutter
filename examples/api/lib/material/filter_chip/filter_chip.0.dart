@@ -45,7 +45,7 @@ class _FilterChipExampleState extends State<FilterChipExample> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Choose an execise', style: textTheme.labelLarge),
+            Text('Choose an exercise', style: textTheme.labelLarge),
             const SizedBox(height: 5.0),
             Wrap(
               spacing: 5.0,

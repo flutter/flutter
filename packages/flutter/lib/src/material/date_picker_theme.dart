@@ -152,7 +152,7 @@ class DatePickerThemeData with Diagnosticable {
   /// day labels in the grid of the date picker.
   final MaterialStateProperty<Color?>? dayBackgroundColor;
 
-  /// Overriddes the default highlight color that's typically used to
+  /// Overrides the default highlight color that's typically used to
   /// indicate that a day in the grid is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? dayOverlayColor;
 

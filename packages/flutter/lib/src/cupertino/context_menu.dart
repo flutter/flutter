@@ -277,7 +277,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// opened in the default way to match a native iOS 16.0 app. The behavior
   /// will match what will happen if the simple child image was passed as just
   /// the [child] parameter, instead of [builder]. This can be manipulated to
-  /// add more custamizability to the widget's animation.
+  /// add more customizability to the widget's animation.
   ///
   /// ```dart
   /// CupertinoContextMenu.builder(

@@ -2621,7 +2621,7 @@ void main() {
     expect(feedback.hapticCount, 2);
   });
 
-  testWidgets('Draging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
+  testWidgets('Dragging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
     final TextEditingController controller = TextEditingController();

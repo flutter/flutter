@@ -2412,7 +2412,7 @@ void main() {
                                                   - contentPadding.vertical;
 
         // TextAlignVertical.center is specified so `child` needs to be centered
-        // in the avaiable space.
+        // in the available space.
         final double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
         final double childTop = visualDensity.baseSizeAdjustment.dy / 2.0
                               + contentPadding.top

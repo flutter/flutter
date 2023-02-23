@@ -185,7 +185,7 @@ class Matrix4Tween extends Tween<Matrix4> {
     end!.decompose(endTranslation, endRotation, endScale);
     final Vector3 lerpTranslation =
         beginTranslation * (1.0 - t) + endTranslation * t;
-    // TODO(alangardner): Implement slerp for constant rotation
+    // TODO(alangardner): Implement lerp for constant rotation
     final Quaternion lerpRotation =
         (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
     final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;

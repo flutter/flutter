@@ -869,19 +869,19 @@ void main() {
       layout(paragraph);
       final MockPaintingContext paintingContext = MockPaintingContext();
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, isNull);
-      expect(paintingContext.canvas.drawedRectPaint, isNull);
+      expect(paintingContext.canvas.drawnRect, isNull);
+      expect(paintingContext.canvas.drawnRectPaint, isNull);
       selectionParagraph(paragraph, const TextPosition(offset: 1), const TextPosition(offset: 5));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
 
       selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 4));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
     });
 
     test('getPositionForOffset works', () async {
@@ -1357,13 +1357,13 @@ void main() {
 }
 
 class MockCanvas extends Fake implements Canvas {
-  Rect? drawedRect;
-  Paint? drawedRectPaint;
+  Rect? drawnRect;
+  Paint? drawnRectPaint;
 
   @override
   void drawRect(Rect rect, Paint paint) {
-    drawedRect = rect;
-    drawedRectPaint = paint;
+    drawnRect = rect;
+    drawnRectPaint = paint;
   }
 
   @override

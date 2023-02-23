@@ -287,7 +287,7 @@ class ArchiveCreator {
   /// Used when an output filename is not given.
   Future<String> get _archiveName async {
     final String os = platform.operatingSystem.toLowerCase();
-    // Include the intended host archetecture in the file name for non-x64.
+    // Include the intended host architecture in the file name for non-x64.
     final String arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
     // We don't use .tar.xz on Mac because although it can unpack them
     // on the command line (with tar), the "Archive Utility" that runs
@@ -330,7 +330,7 @@ class ArchiveCreator {
   /// Validates the integrity of the release package.
   ///
   /// Currently only checks that macOS binaries are codesigned. Will throw a
-  /// [PreparePackageException] if the test failes.
+  /// [PreparePackageException] if the test fails.
   Future<void> _validate() async {
     // Only validate in strict mode, which means `--publish`
     if (!strict || !platform.isMacOS) {

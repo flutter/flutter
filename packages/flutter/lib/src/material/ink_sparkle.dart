@@ -203,7 +203,7 @@ class InkSparkle extends InteractiveInkFeature {
       ],
     ).animate(_animationController);
 
-    // Creates an element of randomness so that ink eminating from the same
+    // Creates an element of randomness so that ink emanating from the same
     // pixel have slightly different rings and sparkles.
     _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }

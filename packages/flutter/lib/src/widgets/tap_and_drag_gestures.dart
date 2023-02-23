@@ -335,7 +335,7 @@ class TapDragUpdateDetails with Diagnosticable {
   /// coordinates (the present [globalPosition]) when this callback is triggered.
   ///
   /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
-  /// this offset is associated with the most recent [PointerDownEvent] that occured.
+  /// this offset is associated with the most recent [PointerDownEvent] that occurred.
   final Offset offsetFromOrigin;
 
   /// A local delta offset from the point where the drag initially contacted
@@ -343,7 +343,7 @@ class TapDragUpdateDetails with Diagnosticable {
   /// coordinates (the present [localPosition]) when this callback is triggered.
   ///
   /// When considering a [GestureRecognizer] that tracks the number of consecutive taps,
-  /// this offset is associated with the most recent [PointerDownEvent] that occured.
+  /// this offset is associated with the most recent [PointerDownEvent] that occurred.
   final Offset localOffsetFromOrigin;
 
   /// If this tap is in a series of taps, then this value represents
@@ -678,7 +678,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
 /// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
-/// [TapAndDragGestureRecognizer] will not aggresively declare victory when it detects
+/// [TapAndDragGestureRecognizer] will not aggressively declare victory when it detects
 /// a tap, so when it is competing with those gesture recognizers and others it has a chance
 /// of losing.
 ///

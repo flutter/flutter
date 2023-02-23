@@ -7,7 +7,7 @@
 // Builds an adaptive navigation widget layout. When the screen width is less than
 // 450, A [NavigationBar] will be displayed. Otherwise, a [NavigationRail] will be
 // displayed on the left side, and also a button to open the [NavigationDrawer].
-// All of these navigation widgets are built from an indentical list of data.
+// All of these navigation widgets are built from an identical list of data.
 
 import 'package:flutter/material.dart';
 

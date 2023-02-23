@@ -396,7 +396,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _thumbRect;
   // The current scroll position + _leadingThumbMainAxisOffset
   late double _thumbOffset;
-  // The fraction visible in relation to the trversable length of the track.
+  // The fraction visible in relation to the traversable length of the track.
   late double _thumbExtent;
   // Thumb Offsets
   // The thumb is offset by padding and margins.

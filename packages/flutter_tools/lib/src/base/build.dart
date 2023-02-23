@@ -169,7 +169,7 @@ class AOTSnapshotter {
       ]);
     }
 
-    // When buiding for iOS and splitting out debug info, we want to strip
+    // When building for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
     final bool stripAfterBuild;
     if (targetingApplePlatform) {

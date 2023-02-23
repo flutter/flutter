@@ -75,7 +75,7 @@ class SpellCheckConfiguration {
   spell check enabled   : $_spellCheckEnabled
   spell check service   : $spellCheckService
   misspelled text style : $misspelledTextStyle
-  spell check suggesstions toolbar builder: $spellCheckSuggestionsToolbarBuilder
+  spell check suggestions toolbar builder: $spellCheckSuggestionsToolbarBuilder
 '''
         .trim();
   }

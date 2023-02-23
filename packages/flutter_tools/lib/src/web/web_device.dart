@@ -135,7 +135,7 @@ abstract class ChromiumDevice extends Device {
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;

@@ -114,7 +114,7 @@ enum TraversalEdgeBehavior {
   /// current [FlutterView]. For example, [NextFocusAction] invoked via keyboard
   /// (typically the TAB key) would receive [KeyEventResult.skipRemainingHandlers]
   /// allowing the embedder handle the shortcut. On the web, typically the
-  /// control is transfered to the browser, allowing the user to reach the
+  /// control is transferred to the browser, allowing the user to reach the
   /// address bar, escape an `iframe`, or focus on HTML elements other than
   /// those managed by Flutter.
   leaveFlutterView,

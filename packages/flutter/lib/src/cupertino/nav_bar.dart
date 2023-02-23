@@ -967,8 +967,8 @@ class _RenderLargeTitle extends RenderShiftedBox {
       return;
     }
 
-    final BoxConstraints childConstriants = constraints.widthConstraints().loosen();
-    child.layout(childConstriants, parentUsesSize: true);
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    child.layout(childConstraints, parentUsesSize: true);
 
     final double maxScale = child.size.width != 0.0
       ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)

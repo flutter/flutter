@@ -74,7 +74,7 @@ class CommonFinders {
   /// [Text] and [Text.rich] widgets) are matched by comparing the
   /// [InlineSpan.toPlainText] with the given `pattern`.
   ///
-  /// For [EditableText] widgets, the `pattern` is always compared to the currentt
+  /// For [EditableText] widgets, the `pattern` is always compared to the current
   /// value of the [EditableText.controller].
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips

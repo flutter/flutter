@@ -140,7 +140,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('enable-dart-profiling',
         defaultsTo: true,
         help: 'Whether the Dart VM sampling CPU profiler is enabled. This flag '
-              'is only meaningnful in debug and profile builds.',
+              'is only meaningful in debug and profile builds.',
       )
       ..addFlag('enable-software-rendering',
         negatable: false,

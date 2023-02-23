@@ -38,20 +38,20 @@ void main() {
   test('addListener and removeListener add and remove listeners.', () {
 
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    ObjectEvent? recievedEvent;
-    void listener(ObjectEvent event) => recievedEvent = event;
+    ObjectEvent? receivedEvent;
+    void listener(ObjectEvent event) => receivedEvent = event;
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
     _checkSdkHandlersSet();
     ma.dispatchObjectEvent(event);
-    expect(recievedEvent, equals(event));
+    expect(receivedEvent, equals(event));
     expect(ma.hasListeners, isTrue);
-    recievedEvent = null;
+    receivedEvent = null;
 
     ma.removeListener(listener);
     ma.dispatchObjectEvent(event);
-    expect(recievedEvent, isNull);
+    expect(receivedEvent, isNull);
     expect(ma.hasListeners, isFalse);
     _checkSdkHandlersNotSet();
   });

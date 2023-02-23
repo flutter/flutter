@@ -864,7 +864,7 @@ class RawKeyboard {
     // exist in the modifier list. Enforce the pressing state.
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      // This inconsistancy is found on Linux GTK for AltRight:
+      // This inconsistency is found on Linux GTK for AltRight:
       // https://github.com/flutter/flutter/issues/93278
       // And also on Android and iOS:
       // https://github.com/flutter/flutter/issues/101090

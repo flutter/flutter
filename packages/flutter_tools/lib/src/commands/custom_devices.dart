@@ -281,9 +281,9 @@ If a file already exists at the backup location, it will be overwritten.
 
     logger.printStatus(
         wasBackedUp
-        ? 'Successfully resetted the custom devices config file and created a '
+        ? 'Successfully reset the custom devices config file and created a '
           'backup at "$configBackupPath".'
-        : 'Successfully resetted the custom devices config file.'
+        : 'Successfully reset the custom devices config file.'
     );
     return FlutterCommandResult.success();
   }

@@ -531,9 +531,9 @@ class SystemChrome {
   /// to configure the system styles when an app bar is not used. When an app
   /// bar is used, apps should not enclose the app bar in an annotated region
   /// because one is automatically created. If an app bar is used and the app
-  /// bar is enclosed in an annotated region, the app bar overlay style supercedes
+  /// bar is enclosed in an annotated region, the app bar overlay style supersedes
   /// the status bar properties defined in the enclosing annotated region overlay
-  /// style and the enclosing annotated region overlay style supercedes the app bar
+  /// style and the enclosing annotated region overlay style supersedes the app bar
   /// overlay style navigation bar properties.
   ///
   /// {@tool sample}

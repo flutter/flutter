@@ -2368,7 +2368,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
     if (!_spellCheckResultsReceived
         || spellCheckResults!.suggestionSpans.last.range.end < cursorIndex) {
-      // No spell check results have been recieved or the cursor index is out
+      // No spell check results have been received or the cursor index is out
       // of range that suggestionSpans covers.
       return null;
     }
@@ -2533,7 +2533,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// * [EditableText.getEditableButtonItems], which performs a similar role,
   ///   but for any editable field, not just specifically EditableText.
-  /// * [SelectableRegionState.contextMenuButtonItems], which peforms a similar
+  /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
   ///   role but for content that is selectable but not editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.
@@ -2789,7 +2789,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Wherever the value is changed by the user, schedule a showCaretOnScreen
-    // to make sure the user can see the changes they just made. Programmatical
+    // to make sure the user can see the changes they just made. Programmatic
     // changes to `textEditingValue` do not trigger the behavior even if the
     // text field is focused.
     _scheduleShowCaretOnScreen(withAnimation: true);
@@ -4565,14 +4565,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      // Newer verions of iOS (iOS 15+) no longer reveal the most recently
+      // Newer versions of iOS (iOS 15+) no longer reveal the most recently
       // entered character.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
         TargetPlatform.android, TargetPlatform.fuchsia,
       };
-      final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
+      final bool brieflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
-      if (breiflyShowPassword) {
+      if (brieflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));

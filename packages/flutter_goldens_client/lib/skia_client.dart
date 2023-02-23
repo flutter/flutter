@@ -427,7 +427,7 @@ class SkiaGoldClient {
         }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
-        // Ideally we'd use something like package:test's printOnError, but best reliabilty
+        // Ideally we'd use something like package:test's printOnError, but best reliability
         // in getting logs on CI for now we're just using print.
         // See also: https://github.com/flutter/flutter/issues/91285
         print( // ignore: avoid_print

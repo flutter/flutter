@@ -465,7 +465,7 @@ void main() {
     mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
     expect(mode, equals(DartPerformanceMode.latency));
 
-    // end of transitio, go back to no requests active.
+    // end of transition, go back to no requests active.
     await tester.pump(const Duration(milliseconds: 500));
     mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
     expect(mode, isNull);

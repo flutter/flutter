@@ -467,7 +467,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           color: headerForegroundColor,
         )
       // Material2 has support for landscape and the current M3 spec doesn't
-      // address this layout, so handling it seperately here.
+      // address this layout, so handling it separately here.
       : (orientation == Orientation.landscape
         ? textTheme.headlineSmall?.copyWith(color: headerForegroundColor)
         : textTheme.headlineMedium?.copyWith(color: headerForegroundColor));

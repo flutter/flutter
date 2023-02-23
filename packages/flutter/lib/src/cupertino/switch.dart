@@ -364,7 +364,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             activeColor: activeColor,
             trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
             thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            // Opacity, lightness, and saturation values were aproximated with
+            // Opacity, lightness, and saturation values were approximated with
             // color pickers on the switches in the macOS settings.
             focusColor: CupertinoDynamicColor.resolve(
               widget.focusColor ??

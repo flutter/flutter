@@ -327,7 +327,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targts', () async {
+  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[

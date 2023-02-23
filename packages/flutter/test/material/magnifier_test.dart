@@ -354,7 +354,7 @@ void main() {
         return animatedPositioned.duration.compareTo(Duration.zero) != 0;
       }
 
-      testWidgets('should not be animated on the inital state',
+      testWidgets('should not be animated on the initial state',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
