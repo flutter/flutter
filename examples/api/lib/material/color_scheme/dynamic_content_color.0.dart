@@ -18,6 +18,12 @@ class DynamicColorExample extends StatefulWidget {
 
 final List<Image> images = [
     // convert directly to ImageProvider instead of Image?
+   
+// what the heck is going on with england rugby color
+    Image.asset('assets/yellow.png', height: 150,),
+    Image.asset('assets/yellow_transparent.png', height: 150,),
+    Image.asset('assets/yellow_full.png', height: 150,),
+    Image.asset('assets/squares.png', height: 150,),
     Image.asset('assets/material_3_base.png', height: 150,),
     Image.asset('assets/rugby_japan.png', height: 150,),
     Image.asset('assets/football_leeds.png', height: 150,),
@@ -29,7 +35,7 @@ final List<Image> images = [
 }
 
 class _DynamicColorExampleState extends State<DynamicColorExample> {
-
+    final TextEditingController _textFieldController = TextEditingController();
     late ColorScheme currentColorScheme;
 
     void initState() {
@@ -38,14 +44,58 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
     void _updateImage(Image image) async {
         print('generating new colorScheme');
+        // TODO add fail handling.
         final newColorScheme = await ColorScheme.fromImage(image: image);
         print('calling setState');
-        setState(() { currentColorScheme = newColorScheme; print('colorschemeUpdated via setState: ${currentColorScheme.primary}'); });
+        setState(() { currentColorScheme = newColorScheme;
+        print('colorschemeUpdated via setState: ${currentColorScheme.primary}');
+    });
+    }
+
+
+    Future<void> networkAssetDialog(BuildContext context) async {
+            late String input = 'url';
+     showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Image URL'),
+          content: TextField(
+            onChanged: (value) { input = value;},
+            controller: _textFieldController,
+            decoration: InputDecoration(hintText: input),
+            ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                    Navigator.pop(context, 'Cancel');
+                 },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+                child: const Text('Submit'),
+                onPressed: () async {
+                    print('input: $input');
+                 try {
+                    // https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png
+                    // wiki links seem to work but general URLs do not
+                    final newColorScheme = await ColorScheme.fromImage(image: Image.network(input));
+                    setState(() {
+                        currentColorScheme = newColorScheme;
+                        Navigator.pop(context, 'Submit');
+                    });
+                } on Exception catch (exception) {
+                print('image load failed');
+                input = 'not a valid url';
+                }
+              },
+            ),
+          ],
+          ),
+        );
     }
 
     @override
     Widget build(BuildContext context) {
-
         print('rebuilding!');
         final colorScheme = currentColorScheme;
         final selectedColor = colorScheme.primary;
@@ -78,30 +128,39 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
         );
         }
 
+
+
         return  MaterialApp(
                 title: 'Content Based Dynamic Color',
                 theme: ThemeData(
                     useMaterial3: true,
                     colorScheme: colorScheme
                 ),
-                home: Scaffold(
+                home: Builder(
+                    builder: (BuildContext context) => Scaffold(
                     appBar: AppBar(
                         title: const Text('Content Based Dynamic Color'),
                         backgroundColor: colorScheme.primary,
                         foregroundColor: colorScheme.onPrimary,
                     ),
                     body: Center(
-
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                                 Row(mainAxisAlignment: MainAxisAlignment.center,
-                                    children: widget.images.map((image) =>
+                                    children: [...widget.images.map((image) =>
                                     GestureDetector(
                                         onTap: () => _updateImage(image),
                                         child: Card(
                                             child: Padding(padding: EdgeInsets.all(10.0), child: image,),
-                                        ))).toList(),),
+                                        ))).toList(),
+                                        GestureDetector(
+                                            onTap: () => networkAssetDialog(context),
+                                            child: Card(child: Padding(padding: EdgeInsets.all(10.0), child: Container(height: 150, child:Icon(Icons.link, size: 96.0)))
+                                            ,),
+                                        ),
+                                        ],
+                                        ),
                                     Expanded(
       child: LayoutBuilder(builder: (context, constraints) {
         if (constraints.maxWidth < narrowScreenWidthThreshold) {
@@ -155,7 +214,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                     ),
                 ),
             ),
-
+                ),
     );
   }
 }
