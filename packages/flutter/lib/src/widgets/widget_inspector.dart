@@ -932,7 +932,7 @@ mixin WidgetInspectorService {
         groupName: _consoleObjectGroup,
         subtreeDepth: 5,
         includeProperties: true,
-        maxDescendentsTruncatableNode: 5,
+        maxDescendantsTruncatableNode: 5,
         service: this,
       ),
     )!;
@@ -3566,7 +3566,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   InspectorSerializationDelegate({
     this.groupName,
     this.summaryTree = false,
-    this.maxDescendentsTruncatableNode = -1,
+    this.maxDescendantsTruncatableNode = -1,
     this.expandPropertyValues = true,
     this.subtreeDepth = 1,
     this.includeProperties = false,
@@ -3588,7 +3588,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   final bool summaryTree;
 
   /// Maximum descendents of [DiagnosticsNode] before truncating.
-  final int maxDescendentsTruncatableNode;
+  final int maxDescendantsTruncatableNode;
 
   @override
   final bool includeProperties;
@@ -3663,10 +3663,10 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
-    if (maxDescendentsTruncatableNode >= 0 &&
+    if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate == true &&
-        nodes.length > maxDescendentsTruncatableNode) {
-      nodes = service._truncateNodes(nodes, maxDescendentsTruncatableNode);
+        nodes.length > maxDescendantsTruncatableNode) {
+      nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }
     return nodes;
   }
@@ -3676,7 +3676,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     return InspectorSerializationDelegate(
       groupName: groupName,
       summaryTree: summaryTree,
-      maxDescendentsTruncatableNode: maxDescendentsTruncatableNode,
+      maxDescendantsTruncatableNode: maxDescendantsTruncatableNode,
       expandPropertyValues: expandPropertyValues ?? this.expandPropertyValues,
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
       includeProperties: includeProperties ?? this.includeProperties,
