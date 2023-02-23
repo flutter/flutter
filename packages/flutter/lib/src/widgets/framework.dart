@@ -1830,34 +1830,8 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
 }
 
-/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
-/// that have a single list of children. (This superclass only provides the
-/// storage for that child list, it doesn't actually provide the updating
-/// logic.)
-///
-/// Subclasses must return a [RenderObject] that mixes in
-/// [ContainerRenderObjectMixin], which provides the necessary functionality to
-/// visit the children of the container render object (the render object
-/// belonging to the [children] widgets). Typically, subclasses will return a
-/// [RenderBox] that mixes in both [ContainerRenderObjectMixin] and
-/// [RenderBoxContainerDefaultsMixin].
-///
-/// See also:
-///
-///  * [Stack], which uses [MultiChildRenderObjectWidget].
-///  * [RenderStack], for an example implementation of the associated render
-///    object.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
-///    [RenderObject] that instead of having a single list of children organizes
-///    its children in named slots.
-abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  /// Initializes fields for subclasses.
-  ///
-  /// The [children] argument must not be null and must not contain any null
-  /// objects.
-  const MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
-
-  /// {@template flutter.widgets.multiChildRenderObjectWidget.children}
+/// Mixin to allow sharing the required properties of [MultiChildRenderObjectWidget]
+mixin MultiChildRenderObjectWidgetMixin {
   /// The widgets below this widget in the tree.
   ///
   /// If this list is going to be mutated, it is usually wise to put a [Key] on
@@ -1910,7 +1884,37 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///   }
   /// }
   /// ```
-  /// {@endtemplate}
+  List<Widget> get children;
+}
+
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
+/// that have a single list of children. (This superclass only provides the
+/// storage for that child list, it doesn't actually provide the updating
+/// logic.)
+///
+/// Subclasses must return a [RenderObject] that mixes in
+/// [ContainerRenderObjectMixin], which provides the necessary functionality to
+/// visit the children of the container render object (the render object
+/// belonging to the [children] widgets). Typically, subclasses will return a
+/// [RenderBox] that mixes in both [ContainerRenderObjectMixin] and
+/// [RenderBoxContainerDefaultsMixin].
+///
+/// See also:
+///
+///  * [Stack], which uses [MultiChildRenderObjectWidget].
+///  * [RenderStack], for an example implementation of the associated render
+///    object.
+///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
+///    [RenderObject] that instead of having a single list of children organizes
+///    its children in named slots.
+abstract class MultiChildRenderObjectWidget extends RenderObjectWidget with MultiChildRenderObjectWidgetMixin {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [children] argument must not be null and must not contain any null
+  /// objects.
+  const MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
+
+  @override
   final List<Widget> children;
 
   @override

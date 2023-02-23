@@ -3707,6 +3707,116 @@ class ListBody extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Mixin to allow sharing the required properties of [StackRenderObject]
+mixin StackMixin {
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
+  ///
+  /// The non-positioned children are placed relative to each other such that
+  /// the points determined by [alignment] are co-located. For example, if the
+  /// [alignment] is [Alignment.topLeft], then the top left corner of
+  /// each non-positioned child will be located at the same global coordinate.
+  ///
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
+  AlignmentGeometry get alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  TextDirection? get textDirection;
+
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// The constraints passed into the [Stack] from its parent are either
+  /// loosened ([StackFit.loose]) or tightened to their biggest size
+  /// ([StackFit.expand]).
+  StackFit get fit;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  Clip get clipBehavior;
+}
+
+/// The render object used by [Stack].
+class StackRenderObject extends MultiChildRenderObjectWidget with StackMixin {
+  /// Create a [StackRenderObject].
+  const StackRenderObject({
+    super.key,
+    this.alignment = AlignmentDirectional.topStart,
+    this.textDirection,
+    this.fit = StackFit.loose,
+    this.clipBehavior = Clip.hardEdge,
+    super.children,
+  });
+
+  @override
+  final AlignmentGeometry alignment;
+
+  @override
+  final TextDirection? textDirection;
+
+  @override
+  final StackFit fit;
+
+  @override
+  final Clip clipBehavior;
+
+  bool _debugCheckHasDirectionality(BuildContext context) {
+    if (alignment is AlignmentDirectional && textDirection == null) {
+      assert(debugCheckHasDirectionality(
+        context,
+        why: "to resolve the 'alignment' argument",
+        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
+        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
+      ));
+    }
+    return true;
+  }
+
+  @override
+  RenderStack createRenderObject(BuildContext context) {
+    assert(_debugCheckHasDirectionality(context));
+    return RenderStack(
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.maybeOf(context),
+      fit: fit,
+      clipBehavior: clipBehavior,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderStack renderObject) {
+    assert(_debugCheckHasDirectionality(context));
+    renderObject
+      ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.maybeOf(context)
+      ..fit = fit
+      ..clipBehavior = clipBehavior;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(EnumProperty<StackFit>('fit', fit));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+  }
+}
+
 /// A widget that positions its children relative to the edges of its box.
 ///
 /// This class is useful if you want to overlap several children in a simple
@@ -3822,100 +3932,60 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Stack extends MultiChildRenderObjectWidget {
+class Stack extends StatelessWidget with MultiChildRenderObjectWidgetMixin, StackMixin, MultiSelectableSeparator {
   /// Creates a stack layout widget.
   ///
   /// By default, the non-positioned children of the stack are aligned by their
   /// top left corners.
   const Stack({
     super.key,
+    this.selectionSeparator = '',
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
     this.clipBehavior = Clip.hardEdge,
-    super.children,
+    this.children = const <Widget>[],
   });
 
-  /// How to align the non-positioned and partially-positioned children in the
-  /// stack.
-  ///
-  /// The non-positioned children are placed relative to each other such that
-  /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [Alignment.topLeft], then the top left corner of
-  /// each non-positioned child will be located at the same global coordinate.
-  ///
-  /// Partially-positioned children, those that do not specify an alignment in a
-  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
-  /// alignment to determine how they should be positioned in that
-  /// under-specified axis.
-  ///
-  /// Defaults to [AlignmentDirectional.topStart].
-  ///
-  /// See also:
-  ///
-  ///  * [Alignment], a class with convenient constants typically used to
-  ///    specify an [AlignmentGeometry].
-  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
-  ///    relative to text direction.
+  @override
+  final String selectionSeparator;
+
+  @override
   final AlignmentGeometry alignment;
 
-  /// The text direction with which to resolve [alignment].
-  ///
-  /// Defaults to the ambient [Directionality].
+  @override
   final TextDirection? textDirection;
 
-  /// How to size the non-positioned children in the stack.
-  ///
-  /// The constraints passed into the [Stack] from its parent are either
-  /// loosened ([StackFit.loose]) or tightened to their biggest size
-  /// ([StackFit.expand]).
+  @override
   final StackFit fit;
 
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.hardEdge].
+  @override
   final Clip clipBehavior;
 
-  bool _debugCheckHasDirectionality(BuildContext context) {
-    if (alignment is AlignmentDirectional && textDirection == null) {
-      assert(debugCheckHasDirectionality(
-        context,
-        why: "to resolve the 'alignment' argument",
-        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
-        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
-      ));
-    }
-    return true;
-  }
-
   @override
-  RenderStack createRenderObject(BuildContext context) {
-    assert(_debugCheckHasDirectionality(context));
-    return RenderStack(
+  final List<Widget> children;
+  
+  @override
+  Widget build(BuildContext context) {
+    Widget result = StackRenderObject(
       alignment: alignment,
-      textDirection: textDirection ?? Directionality.maybeOf(context),
+      textDirection: textDirection,
       fit: fit,
       clipBehavior: clipBehavior,
+      children: children,
     );
-  }
 
-  @override
-  void updateRenderObject(BuildContext context, RenderStack renderObject) {
-    assert(_debugCheckHasDirectionality(context));
-    renderObject
-      ..alignment = alignment
-      ..textDirection = textDirection ?? Directionality.maybeOf(context)
-      ..fit = fit
-      ..clipBehavior = clipBehavior;
-  }
+    // Selection is only enabled when there is a parent registrar.
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    if (registrar != null) {
+      result = SelectionContainer(
+        registrar: registrar,
+        delegate: SelectableRegionContainerDelegate(selectionSeparator: selectionSeparator),
+        child: result,
+      );
+    }
 
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    return result;
   }
 }
 
@@ -3939,7 +4009,7 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 ///  * [Stack], for more details about stacks.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends Stack {
+class IndexedStack extends StackRenderObject {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
@@ -4362,9 +4432,8 @@ class PositionedDirectional extends StatelessWidget {
   }
 }
 
-/// Mixin to allow sharing the properties required by [FlexRenderObject] with
-/// [Flex]
-mixin _FlexMixin {
+/// Mixin to allow sharing the required properties of [FlexRenderObject]
+mixin FlexMixin {
   /// The direction to use as the main axis.
   ///
   /// If you know the axis in advance, then consider using a [Row] (if it's
@@ -4459,13 +4528,10 @@ mixin _FlexMixin {
   ///
   /// Defaults to [Clip.none].
   Clip get clipBehavior;
-
-  /// {@macro flutter.widgets.multiChildRenderObjectWidget.children}
-  List<Widget> get children;
 }
 
 /// The render object used by [Flex].
-class FlexRenderObject extends MultiChildRenderObjectWidget with _FlexMixin {
+class FlexRenderObject extends MultiChildRenderObjectWidget with FlexMixin {
   /// Create a [FlexRenderObject].
   const FlexRenderObject({
     super.key,
@@ -4646,7 +4712,7 @@ class FlexRenderObject extends MultiChildRenderObjectWidget with _FlexMixin {
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Flex extends StatelessWidget with _FlexMixin, MultiSelectableSeparator {
+class Flex extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMixin, MultiSelectableSeparator {
   /// Creates a flex layout.
   ///
   /// The [direction] is required.
@@ -4733,7 +4799,6 @@ class Flex extends StatelessWidget with _FlexMixin, MultiSelectableSeparator {
     return result;
   }
 }
-
 
 /// A widget that displays its children in a horizontal array.
 ///
