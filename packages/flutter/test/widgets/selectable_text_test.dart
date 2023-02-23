@@ -146,7 +146,7 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -156,7 +156,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -2707,14 +2707,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText throws when not descended from a MediaQuery widget', (WidgetTester tester) async {
-    const Widget selectableText = SelectableText('something');
-    await tester.pumpWidget(selectableText);
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
-  });
-
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
@@ -5087,11 +5079,11 @@ void main() {
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
@@ -5139,11 +5131,11 @@ void main() {
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
@@ -5366,5 +5358,44 @@ void main() {
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.fontSize, textStyle.fontSize);
+  });
+
+  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+    TextSelection? selection;
+    int count = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableText(
+          'I love Flutter!',
+          onSelectionChanged: (TextSelection s, _) {
+            selection = s;
+            count++;
+          },
+        ),
+      ),
+    );
+
+    expect(selection, null);
+    expect(count, 0);
+
+    // Tap to put the cursor before the "F".
+    const int index = 7;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      selection,
+      const TextSelection.collapsed(offset: index),
+    );
+    expect(count, 1); // The `onSelectionChanged` will be triggered one time.
+
+    // Tap on the same location again.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      selection,
+      const TextSelection.collapsed(offset: index),
+    );
+    expect(count, 1); // The `onSelectionChanged` will not be triggered.
   });
 }

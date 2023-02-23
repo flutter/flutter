@@ -164,9 +164,11 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       elevation: elevation,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: wrappedChildren,
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          children: wrappedChildren,
+        ),
       ),
     );
   }
@@ -486,7 +488,7 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// "Tab 1 of 3", for example.
   final int index;
 
-  /// How many total destinations are are in this navigation drawer.
+  /// How many total destinations are in this navigation drawer.
   ///
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 4", for example.
@@ -656,7 +658,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_158
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)

@@ -22,8 +22,7 @@ class ProtocolDiscovery {
     this.devicePort,
     required this.ipv6,
     required Logger logger,
-  }) : _logger = logger,
-       assert(logReader != null) {
+  }) : _logger = logger {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
       onDone: _stopScrapingLogs,
@@ -217,7 +216,6 @@ class _BufferedStreamController<T> {
 StreamTransformer<S, S> _throttle<S>({
   required Duration waitDuration,
 }) {
-  assert(waitDuration != null);
 
   S latestLine;
   int? lastExecution;

@@ -90,14 +90,13 @@ class SnackBarAction extends StatefulWidget {
     this.disabledTextColor,
     required this.label,
     required this.onPressed,
-  }) : assert(label != null),
-       assert(onPressed != null);
+  });
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   ///
   /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -141,15 +140,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
     MaterialStateColor resolveForegroundColor() {
-      if (widget.textColor is MaterialStateColor) {
-        return widget.textColor! as MaterialStateColor;
+      if (widget.textColor != null) {
+        if (widget.textColor is MaterialStateColor) {
+          return widget.textColor! as MaterialStateColor;
+        }
+      } else if (snackBarTheme.actionTextColor != null) {
+        if (snackBarTheme.actionTextColor is MaterialStateColor) {
+          return snackBarTheme.actionTextColor! as MaterialStateColor;
+        }
+      } else if (defaults.actionTextColor != null) {
+        if (defaults.actionTextColor is MaterialStateColor) {
+          return defaults.actionTextColor! as MaterialStateColor;
+        }
       }
-      if (snackBarTheme.actionTextColor is MaterialStateColor) {
-        return snackBarTheme.actionTextColor! as MaterialStateColor;
-      }
-      if (defaults.actionTextColor is MaterialStateColor) {
-        return defaults.actionTextColor! as MaterialStateColor;
-      }
+
       return MaterialStateColor.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return widget.disabledTextColor ??
@@ -235,6 +239,7 @@ class SnackBar extends StatefulWidget {
     this.shape,
     this.behavior,
     this.action,
+    this.actionOverflowThreshold,
     this.showCloseIcon,
     this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
@@ -243,13 +248,11 @@ class SnackBar extends StatefulWidget {
     this.dismissDirection = DismissDirection.down,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(
-         width == null || margin == null,
+       assert(width == null || margin == null,
          'Width and margin can not be used together',
        ),
-       assert(duration != null),
-       assert(clipBehavior != null);
+       assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+        'Action overflow threshold must be between 0 and 1 inclusive');
 
   /// The primary content of the snack bar.
   ///
@@ -357,6 +360,18 @@ class SnackBar extends StatefulWidget {
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction? action;
 
+  /// (optional) The percentage threshold for action widget's width before it overflows
+  /// to a new line.
+  ///
+  /// Must be between 0 and 1. If the width of the snackbar's [content] is greater
+  /// than this percentage of the width of the snackbar less the width of its [action],
+  /// then the [action] will appear below the [content].
+  ///
+  /// At a value of 0, the action will not overflow to a new line.
+  ///
+  /// Defaults to 0.25.
+  final double? actionOverflowThreshold;
+
   /// (optional) Whether to include a "close" icon widget.
   ///
   /// Tapping the icon will close the snack bar.
@@ -370,7 +385,7 @@ class SnackBar extends StatefulWidget {
   /// inverse surface.
   ///
   /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;
@@ -430,6 +445,7 @@ class SnackBar extends StatefulWidget {
       shape: shape,
       behavior: behavior,
       action: action,
+      actionOverflowThreshold: actionOverflowThreshold,
       showCloseIcon: showCloseIcon,
       closeIconColor: closeIconColor,
       duration: duration,
@@ -600,10 +616,11 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
     final double snackBarWidth = widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
-    // Action and Icon will overflow to a new line if their width is greater
-    // than one quarter of the total Snack Bar width.
-    final bool actionLineOverflow =
-        actionAndIconWidth / snackBarWidth > 0.25;
+    final double actionOverflowThreshold = widget.actionOverflowThreshold
+      ?? snackBarTheme.actionOverflowThreshold
+      ?? defaults.actionOverflowThreshold!;
+
+    final bool willOverflowAction = actionAndIconWidth / snackBarWidth > actionOverflowThreshold;
 
     final List<Widget> maybeActionAndIcon = <Widget>[
       if (widget.action != null)
@@ -644,18 +661,17 @@ class _SnackBarState extends State<SnackBar> {
                     ),
                   ),
                 ),
-                if(!actionLineOverflow) ...maybeActionAndIcon,
-                if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
+                if (!willOverflowAction) ...maybeActionAndIcon,
+                if (willOverflowAction) SizedBox(width: snackBarWidth * 0.4),
               ],
             ),
-            if(actionLineOverflow) Padding(
-              padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end,
-              children: maybeActionAndIcon),
-            ),
-          ],
-
-      ),
+            if (willOverflowAction)
+              Padding(
+                padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: maybeActionAndIcon),
+              ),
+            ],
+        ),
     );
 
     if (!isFloatingSnackBar) {
@@ -819,6 +835,9 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   Color get closeIconColor => _colors.onSurface;
+
+  @override
+  double get actionOverflowThreshold => 0.25;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Snackbar
@@ -828,7 +847,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_158
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);
@@ -883,6 +902,12 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   bool get showCloseIcon => false;
+
+  @override
+  Color? get closeIconColor => _colors.onInverseSurface;
+
+  @override
+  double get actionOverflowThreshold => 0.25;
 }
 
 // END GENERATED TOKEN PROPERTIES - Snackbar

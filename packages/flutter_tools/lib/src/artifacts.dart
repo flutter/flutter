@@ -9,6 +9,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -62,6 +63,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  /// The location of file generators.
+  flutterToolsFileGenerators,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -107,6 +111,8 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc,
+  // The Impeller Scene 3D model importer.
+  scenec,
   // Impeller's tessellation library.
   libtessellator,
 }
@@ -200,6 +206,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterToolsFileGenerators:
+      return '';
   }
 }
 
@@ -252,6 +260,8 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'dart_sdk.js.map';
     case HostArtifact.impellerc:
       return 'impellerc$exe';
+    case HostArtifact.scenec:
+      return 'scenec$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
   }
@@ -432,6 +442,7 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final String engineDir = _getEngineArtifactsPath(_currentHostPlatform(_platform, _operatingSystemUtils))!;
@@ -520,6 +531,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -557,6 +570,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -606,6 +621,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -620,7 +637,6 @@ class CachedArtifacts implements Artifacts {
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
-    assert(platform != null);
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -681,6 +697,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -866,6 +884,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final File file = _fileSystem.file(_fileSystem.path.join(_hostEngineOutPath, artifactFileName));
@@ -947,6 +966,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -1094,6 +1115,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.constFinder:
+        case Artifact.flutterToolsFileGenerators:
           break;
       }
     }
@@ -1151,6 +1173,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }
@@ -1220,7 +1243,7 @@ class OverrideArtifacts implements Artifacts {
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
-  }) : assert(parent != null);
+  });
 
   final Artifacts parent;
   final File? frontendServer;
@@ -1292,6 +1315,11 @@ class _TestArtifacts implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
+    // The path to file generators is the same even in the test environment.
+    if (artifact == Artifact.flutterToolsFileGenerators) {
+      return _getFileGeneratorsPath();
+    }
+
     final StringBuffer buffer = StringBuffer();
     buffer.write(artifact);
     if (platform != null) {
@@ -1333,4 +1361,21 @@ class _TestLocalEngine extends _TestArtifacts {
 
   @override
   final LocalEngineInfo localEngineInfo;
+}
+
+String _getFileGeneratorsPath() {
+  final String flutterRoot = Cache.defaultFlutterRoot(
+    fileSystem: globals.localFileSystem,
+    platform: const LocalPlatform(),
+    userMessages: UserMessages(),
+  );
+  return globals.localFileSystem.path.join(
+    flutterRoot,
+    'packages',
+    'flutter_tools',
+    'lib',
+    'src',
+    'web',
+    'file_generators',
+  );
 }

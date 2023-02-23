@@ -104,9 +104,6 @@ class CoverageCollector extends TestWatcher {
     _logMessage('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(
         observatoryUri, libraryNames, branchCoverage: branchCoverage);
-    if (data == null) {
-      throw Exception('Failed to collect coverage.');
-    }
 
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
@@ -132,11 +129,16 @@ class CoverageCollector extends TestWatcher {
 
     final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
-    final Future<void> processComplete = testDevice.finished.catchError(
-      (Object error) => throw Exception(
-          'Failed to collect coverage, test device terminated prematurely with '
-          'error: ${(error as TestDeviceException).message}.'),
-      test: (Object error) => error is TestDeviceException,
+    final Future<void> processComplete = testDevice.finished.then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (error is TestDeviceException) {
+          throw Exception(
+            'Failed to collect coverage, test device terminated prematurely with '
+            'error: ${error.message}.\n$stackTrace');
+        }
+        return Future<Object?>.error(error, stackTrace);
+      }
     );
 
     final Future<void> collectionComplete = testDevice.observatoryUri
@@ -146,9 +148,6 @@ class CoverageCollector extends TestWatcher {
             observatoryUri!, libraryNames, serviceOverride: serviceOverride,
             branchCoverage: branchCoverage)
           .then<void>((Map<String, dynamic> result) {
-            if (result == null) {
-              throw Exception('Failed to collect coverage.');
-            }
             _logMessage('Collected coverage data.');
             data = result;
           });

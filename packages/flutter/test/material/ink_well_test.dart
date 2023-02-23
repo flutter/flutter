@@ -1722,6 +1722,56 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(hover, false);
   });
 
+  testWidgets('hovered ink well draws a transparent highlight when disabled', (WidgetTester tester) async {
+    Widget buildFrame({ required bool enabled }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                onTap: enabled ? () { } : null,
+                onHover: (bool value) { },
+                hoverColor: const Color(0xff00ff00),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    // Hover the enabled InkWell.
+    await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Material),
+      paints
+        ..rect(
+            color: const Color(0xff00ff00),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
+    );
+
+    // Disable the hovered InkWell.
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Material),
+      paints
+        ..rect(
+            color: const Color(0x0000ff00),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
+    );
+  });
+
+
   testWidgets('Changing InkWell.enabled should not trigger TextButton setState()', (WidgetTester tester) async {
     Widget buildFrame({ required bool enabled }) {
       return Material(

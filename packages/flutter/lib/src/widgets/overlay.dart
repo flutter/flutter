@@ -72,10 +72,7 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
-  }) : assert(builder != null),
-       assert(opaque != null),
-       assert(maintainState != null),
-       _opaque = opaque,
+  }) : _opaque = opaque,
        _maintainState = maintainState;
 
   /// This entry will include the widget built by this builder in the overlay at
@@ -119,7 +116,6 @@ class OverlayEntry implements Listenable {
   bool _maintainState;
   set maintainState(bool value) {
     assert(!_disposedByOwner);
-    assert(_maintainState != null);
     if (_maintainState == value) {
       return;
     }
@@ -227,10 +223,7 @@ class _OverlayEntryWidget extends StatefulWidget {
     required Key key,
     required this.entry,
     this.tickerEnabled = true,
-  }) : assert(key != null),
-       assert(entry != null),
-       assert(tickerEnabled != null),
-       super(key: key);
+  }) : super(key: key);
 
   final OverlayEntry entry;
   final bool tickerEnabled;
@@ -315,8 +308,7 @@ class Overlay extends StatefulWidget {
     super.key,
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(initialEntries != null),
-       assert(clipBehavior != null);
+  });
 
   /// The entries to include in the overlay initially.
   ///
@@ -645,15 +637,12 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 ///
 /// The first [skipCount] children are considered "offstage".
 class _Theatre extends MultiChildRenderObjectWidget {
-  _Theatre({
+  const _Theatre({
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,
     super.children,
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(children != null),
-       assert(children.length >= skipCount),
-       assert(clipBehavior != null);
+  }) : assert(skipCount >= 0),
+       assert(children.length >= skipCount);
 
   final int skipCount;
 
@@ -706,17 +695,12 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     required TextDirection textDirection,
     int skipCount = 0,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(textDirection != null),
-       assert(clipBehavior != null),
+  }) : assert(skipCount >= 0),
        _textDirection = textDirection,
        _skipCount = skipCount,
        _clipBehavior = clipBehavior {
     addAll(children);
   }
-
-  bool _hasVisualOverflow = false;
 
   @override
   void setupParentData(RenderBox child) {
@@ -752,7 +736,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   int get skipCount => _skipCount;
   int _skipCount;
   set skipCount(int value) {
-    assert(value != null);
     if (_skipCount != value) {
       _skipCount = value;
       markNeedsLayout();
@@ -765,7 +748,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -843,8 +825,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void performLayout() {
-    _hasVisualOverflow = false;
-
     if (_onstageChildCount == 0) {
       return;
     }
@@ -863,7 +843,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         child.layout(nonPositionedConstraints, parentUsesSize: true);
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!);
       }
 
       assert(child.parentData == childParentData);
@@ -905,7 +885,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+    if (clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
@@ -946,7 +926,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       case Clip.hardEdge:
       case Clip.antiAlias:
       case Clip.antiAliasWithSaveLayer:
-        return _hasVisualOverflow ? Offset.zero & size : null;
+        return Offset.zero & size;
     }
   }
 

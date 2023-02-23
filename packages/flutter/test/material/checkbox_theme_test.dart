@@ -15,6 +15,12 @@ void main() {
     expect(const CheckboxThemeData().hashCode, const CheckboxThemeData().copyWith().hashCode);
   });
 
+  test('CheckboxThemeData lerp special cases', () {
+    expect(CheckboxThemeData.lerp(null, null, 0), const CheckboxThemeData());
+    const CheckboxThemeData data = CheckboxThemeData();
+    expect(identical(CheckboxThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('CheckboxThemeData defaults', () {
     const CheckboxThemeData themeData = CheckboxThemeData();
     expect(themeData.mouseCursor, null);
@@ -390,6 +396,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor));
     expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor)..path(color: localThemeCheckColor));
+  });
+
+  test('CheckboxThemeData lerp with null parameters', () {
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(null, null, 0.25);
+
+    expect(lerped.mouseCursor, null);
+    expect(lerped.fillColor, null);
+    expect(lerped.checkColor, null);
+    expect(lerped.overlayColor, null);
+    expect(lerped.splashRadius, null);
+    expect(lerped.materialTapTargetSize, null);
+    expect(lerped.visualDensity, null);
+    expect(lerped.shape, null);
+    expect(lerped.side, null);
+  });
+
+  test('CheckboxThemeData lerp from populated to null parameters', () {
+    final CheckboxThemeData theme = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      splashRadius: 3.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      side: const BorderSide(width: 4.0),
+    );
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(theme, null, 0.5);
+
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), const Color(0x80fffff0));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), const Color(0x80fffff1));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), const Color(0x80fffff2));
+    expect(lerped.splashRadius, 1.5);
+    expect(lerped.materialTapTargetSize, null);
+    expect(lerped.visualDensity, null);
+    expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
+    // Returns null if either lerp value is null.
+    expect(lerped.side, null);
+  });
+
+  test('CheckboxThemeData lerp from populated parameters', () {
+    final CheckboxThemeData themeA = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      splashRadius: 3.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      side: const BorderSide(width: 4.0),
+    );
+    final CheckboxThemeData themeB = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff3)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff4)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff5)),
+      splashRadius: 9.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 2.0, horizontal: 2.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(1.0))),
+      side: const BorderSide(width: 3.0),
+    );
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(themeA, themeB, 0.5);
+
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), const Color(0xfffffff1));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), const Color(0xfffffff2));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), const Color(0xfffffff3));
+    expect(lerped.splashRadius, 6);
+    expect(lerped.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+    expect(lerped.visualDensity,  const VisualDensity(vertical: 2.0, horizontal: 2.0));
+    expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.5))));
+    expect(lerped.side, const BorderSide(width: 3.5));
   });
 }
 

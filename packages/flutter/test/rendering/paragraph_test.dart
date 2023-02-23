@@ -1059,12 +1059,8 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 4); // how [are you]
-      if (isBrowser && !isCanvasKit) {
-        expect(selection.end, 12);
-      } else {
-        expect(selection.end, 11);
-      }
+      // how [are you]
+      expect(selection, const TextRange(start: 4, end: 11));
 
       // Equivalent to sending shift + meta + arrow-left.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1075,8 +1071,8 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 0); // [how ]are you
-      expect(selection.end, 4);
+      // [how ]are you
+      expect(selection, const TextRange(start: 0, end: 4));
     });
 
     test('can granularly extend selection - document', () async {
