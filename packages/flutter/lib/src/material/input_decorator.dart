@@ -2645,6 +2645,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       error = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2673,9 +2674,7 @@ class InputDecoration {
        enabledBorder = null,
        semanticCounterText = null,
        alignLabelWithHint = false,
-       constraints = null,
-       error = null;
-
+       constraints = null;
   /// An icon to show before the input field and outside of the decoration's
   /// container.
   ///
