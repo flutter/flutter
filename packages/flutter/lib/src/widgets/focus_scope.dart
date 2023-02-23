@@ -434,7 +434,7 @@ class Focus extends StatefulWidget {
     if (createDependency) {
       scope = context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>();
     } else {
-      scope = context.getElementForInheritedWidgetOfExactType<_FocusInheritedScope>()?.widget as _FocusInheritedScope?;
+      scope = context.getInheritedWidgetOfExactType<_FocusInheritedScope>();
     }
     final FocusNode? node = scope?.notifier;
     if (node == null) {
