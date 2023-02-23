@@ -262,7 +262,8 @@ pb.ConductorState readStateFromFile(File file) {
   return state;
 }
 
-// TODO(kevinjchisholm): https://github.com/flutter/flutter/issues/121234.
+// TODO(kevinjchisholm): https://github.com/flutter/flutter/issues/121234
+// could we check that engine head has changed since the last release?
 ///
 /// This release will require a new Framework PR.
 bool requiresEnginePR(pb.ConductorState state) {
