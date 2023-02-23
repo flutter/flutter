@@ -60,22 +60,24 @@ class Remote {
 }
 
 /// A source code repository.
-/// The `repository.dart` library is probably the most complicated in the
-/// conductor codebase. The `Repository` class is an abstraction over a git
+///
+/// This class is an abstraction over a git
 /// repository on the local disk. Ideally this abstraction would hide from
 /// the outside libraries what git calls were needed to either read or update
 /// data in the underlying repository. In practice, most of the bugs in the
 /// conductor codebase are related to the git calls made from this and its
 /// subclasses.
+///
 /// Two factors that make this code more complicated than it would otherwise
 /// need to be are:
 /// 1. That any particular invocation of the conductor may or may not already
 /// have the git checkout present on disk, depending on what commands were
 /// previously run; and
-/// 2. The need to provide overrides for integration tests (off the top of my
-/// head, the ability to mark a `Repository` instance as a `localUpstream` made
+/// 2. The need to provide overrides for integration tests (in particular
+/// the ability to mark a [Repository] instance as a [localUpstream] made
 /// integration tests more hermetic, at the cost of complexity in the
 /// implementation).
+///
 /// The only way to simplify the first factor would be to change the behavior of
 /// the conductor tool to be a long-lived dart process that keeps all of its
 /// state in memory and blocks on user input. This would add the constraint that
@@ -84,6 +86,7 @@ class Remote {
 /// manually change the state of the release process (via editing the JSON
 /// config file). However, these may be reasonable trade-offs to make the
 /// codebase simpler and easier to reason about.
+///
 /// The way to simplify the second factor would be to not put any special
 /// handling in this library for integration tests. This would make integration
 /// tests more difficult/less hermetic, but the production code more reliable.
