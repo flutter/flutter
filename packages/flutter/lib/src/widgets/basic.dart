@@ -3964,7 +3964,7 @@ class Stack extends StatelessWidget with MultiChildRenderObjectWidgetMixin, Stac
 
   @override
   final List<Widget> children;
-  
+
   @override
   Widget build(BuildContext context) {
     Widget result = StackRenderObject(

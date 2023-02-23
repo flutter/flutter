@@ -586,7 +586,7 @@ void main() {
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
-  
+
     testWidgets('can copy row, column, stack with separators', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

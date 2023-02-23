@@ -1263,7 +1263,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 /// children.
 class SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   /// Create a [SelectableRegionContainerDelegate]
-  /// 
+  ///
   /// The [selectionSeparator] is the string that will be used to separate
   /// the selected text of the children of this delegate.
   SelectableRegionContainerDelegate({super.selectionSeparator = ''});
