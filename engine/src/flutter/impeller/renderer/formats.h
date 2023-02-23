@@ -215,6 +215,11 @@ enum class PrimitiveType {
   // checks. Hence, they are not supported here.
 };
 
+enum class PolygonMode {
+  kFill,
+  kLine,
+};
+
 struct DepthRange {
   Scalar z_near = 0.0;
   Scalar z_far = 1.0;
