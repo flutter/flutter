@@ -54,9 +54,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
   desc->SetSampleCount(SampleCount::kCount4);
-  auto box_pipeline =
-      context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
-  ASSERT_TRUE(box_pipeline);
 
   // Vertex buffer.
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
@@ -79,9 +76,19 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
   SinglePassCallback callback = [&](RenderPass& pass) {
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    static bool wireframe;
+    ImGui::Checkbox("Wireframe", &wireframe);
+    ImGui::End();
+
+    desc->SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
+    auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+
+    assert(pipeline && pipeline->IsValid());
+
     Command cmd;
     cmd.label = "Box";
-    cmd.pipeline = box_pipeline;
+    cmd.pipeline = pipeline;
 
     cmd.BindVertices(vertex_buffer);
 

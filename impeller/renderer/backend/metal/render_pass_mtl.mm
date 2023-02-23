@@ -468,6 +468,8 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                                        ? MTLWindingClockwise
                                        : MTLWindingCounterClockwise];
     [encoder setCullMode:ToMTLCullMode(pipeline_desc.GetCullMode())];
+    [encoder setTriangleFillMode:ToMTLTriangleFillMode(
+                                     pipeline_desc.GetPolygonMode())];
     [encoder setStencilReferenceValue:command.stencil_reference];
 
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
