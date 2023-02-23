@@ -8,8 +8,7 @@
 ///
 /// See also:
 ///
-///  * <http://unicode.org/reports/tr9/>, which describes the Unicode
-///    bidirectional text algorithm.
+///  * <https://unicode.org/charts/>, which lists all Unicode code points.
 class Unicode {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
@@ -97,4 +96,10 @@ class Unicode {
   ///
   /// Right-to-left zero-width Arabic character.
   static const int ALM = 0x061C;
+
+  /// `U+FFFC Object Replacement Character`
+  static const int OBJECTREPLACEMENTCHAR = 0xFFFC;
+
+  /// `U+FFFD Replacement Character`
+  static const int REPLACEMENTCHAR = 0xFFFD;
 }

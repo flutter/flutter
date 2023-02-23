@@ -122,7 +122,7 @@ void main() {
         TextSpan(text: 'c'),
       ],
     );
-    expect(textSpan.toPlainText(), 'ab\uFFFCc');
+    expect(textSpan.toPlainText(), 'ab${String.fromCharCode(Unicode.OBJECTREPLACEMENTCHAR)}c');
   });
 
   test('TextSpan toPlainText with semanticsLabel', () {

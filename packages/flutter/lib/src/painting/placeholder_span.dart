@@ -40,9 +40,6 @@ abstract class PlaceholderSpan extends InlineSpan {
     super.style,
   });
 
-  /// The unicode character to represent a placeholder.
-  static const int placeholderCodeUnit = 0xFFFC;
-
   /// How the placeholder aligns vertically with the text.
   ///
   /// See [ui.PlaceholderAlignment] for details on each mode.
@@ -54,12 +51,13 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// This is ignored when using other alignment modes.
   final TextBaseline? baseline;
 
-  /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
-  /// plain text representation when `includePlaceholders` is true.
+  /// [PlaceholderSpan]s are flattened to an object replacement character
+  /// (Unicode.OBJECTREPLACEMENTCHAR) in the plain text representation
+  /// when `includePlaceholders` is true.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.writeCharCode(placeholderCodeUnit);
+      buffer.writeCharCode(Unicode.OBJECTREPLACEMENTCHAR);
     }
   }
 
@@ -72,7 +70,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// to be able to construct a [SemanticsNode].
   ///
   /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
+  /// replacement character (Unicode.OBJECTREPLACEMENTCHAR) that is inserted to represent it.
   ///
   /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {

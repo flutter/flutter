@@ -60,11 +60,13 @@ class InlineSpanSemanticsInformation {
     this.semanticsLabel,
     this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
-  }) : assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(isPlaceholder == false
+          || (text == String.fromCharCode(Unicode.OBJECTREPLACEMENTCHAR) && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
-  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
+  static const InlineSpanSemanticsInformation placeholder =
+      InlineSpanSemanticsInformation(String.fromCharCode(Unicode.OBJECTREPLACEMENTCHAR), isPlaceholder: true);
 
   /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
@@ -257,7 +259,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// instead of the text contents for [TextSpan]s.
   ///
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
-  /// represented as a 0xFFFC 'object replacement character'.
+  /// represented as an 'object replacement character' (Unicode.OBJECTREPLACEMENTCHAR).
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
@@ -295,7 +297,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// instead of the text contents for [TextSpan]s.
   ///
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
-  /// represented as a 0xFFFC 'object replacement character'.
+  /// represented as an 'object replacement character' (Unicode.OBJECTREPLACEMENTCHAR).
   ///
   /// The plain-text representation of this [InlineSpan] is written into the `buffer`.
   /// This method will then recursively call [computeToPlainText] on its children
