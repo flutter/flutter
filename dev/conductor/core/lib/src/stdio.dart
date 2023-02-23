@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 /// An interface for presenting text output to the user.
 ///
-/// Although this could have been simplified by simply calling `print()`
+/// Although this could have been simplified by calling `print()`
 /// from the tool, this abstraction allows unit tests to verify output
 /// and allows a GUI frontend to provide an alternative implementation.
 ///
