@@ -13,7 +13,6 @@ typedef SemanticsActionCallback = void Function(int nodeId, SemanticsAction acti
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback = void Function(
     String name, ByteData? data, PlatformMessageResponseCallback? callback);
-typedef PlatformConfigurationChangedCallback = void Function(PlatformConfiguration configuration);
 typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 
 // ignore: avoid_classes_with_only_static_members

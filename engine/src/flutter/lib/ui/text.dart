@@ -340,7 +340,7 @@ class FontFeature {
   /// U+2044 FRACTION SLASH (⁄) are replaced by ligatures that
   /// represent the corresponding fraction.
   ///
-  /// This feature may imply the [FontFeature.numerator] and
+  /// This feature may imply the [FontFeature.numerators] and
   /// [FontFeature.denominator] features.
   ///
   /// {@tool sample}
@@ -2818,7 +2818,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   ///
   /// Characters not part of a word, such as spaces, symbols, and punctuation,
   /// have word breaks on both sides. In such cases, this method will return
-  /// [offset, offset+1]. Word boundaries are defined more precisely in Unicode
+  /// (offset, offset+1). Word boundaries are defined more precisely in Unicode
   /// Standard Annex #29 http://www.unicode.org/reports/tr29/#Word_Boundaries
   ///
   /// The [TextPosition] is treated as caret position, its [TextPosition.affinity]

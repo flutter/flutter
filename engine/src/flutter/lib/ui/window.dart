@@ -86,7 +86,7 @@ class FlutterView {
   /// The Flutter framework operates in logical pixels, so it is rarely
   /// necessary to directly deal with this property.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// See also:
   ///
@@ -97,7 +97,7 @@ class FlutterView {
   /// The dimensions and location of the rectangle into which the scene rendered
   /// in this view will be drawn on the screen, in physical pixels.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// At startup, the size and location of the view may not be known before Dart
   /// code runs. If this value is observed early in the application lifecycle,
@@ -116,7 +116,7 @@ class FlutterView {
   /// The dimensions of the rectangle into which the scene rendered in this view
   /// will be drawn on the screen, in physical pixels.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// At startup, the size of the view may not be known before Dart code runs.
   /// If this value is observed early in the application lifecycle, it may
@@ -140,7 +140,7 @@ class FlutterView {
   /// which the view can render, but over which the operating system will likely
   /// place system UI, such as the keyboard, that fully obscures any content.
   ///
-  /// When this property changes, [onMetricsChanged] is called.
+  /// When this property changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// The relationship between this [viewInsets],
   /// [viewPadding], and [padding] are described in
@@ -166,7 +166,7 @@ class FlutterView {
   /// change in response to the soft keyboard being visible or hidden, whereas
   /// [padding] will.
   ///
-  /// When this property changes, [onMetricsChanged] is called.
+  /// When this property changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// The relationship between this [viewInsets],
   /// [viewPadding], and [padding] are described in
@@ -189,7 +189,7 @@ class FlutterView {
   /// screen, where swiping inwards from the edges takes users backward
   /// through the history of screens they previously visited.
   ///
-  /// When this property changes, [onMetricsChanged] is called.
+  /// When this property changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// See also:
   ///
@@ -212,7 +212,7 @@ class FlutterView {
   /// not drawn (to account for the bottom soft button area), but will be `0.0`
   /// when the soft keyboard is visible.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// The relationship between this [viewInsets], [viewPadding], and [padding]
   /// are described in more detail in the documentation for [FlutterView].
@@ -228,7 +228,7 @@ class FlutterView {
 
   /// {@macro dart.ui.ViewConfiguration.displayFeatures}
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
   /// See also:
   ///
@@ -943,7 +943,7 @@ class GestureSettings {
   /// instead.
   final double? physicalDoubleTapSlop;
 
-  /// Create a new [GestureSetting]s object from an existing value, overwriting
+  /// Create a new [GestureSettings] object from an existing value, overwriting
   /// all of the provided fields.
   GestureSettings copyWith({
     double? physicalTouchSlop,
