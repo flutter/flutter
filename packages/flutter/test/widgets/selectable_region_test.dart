@@ -584,7 +584,51 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
+      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+  
+    testWidgets('can copy row, column, stack with separators', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Row(
+                  children: <Widget>[
+                    Text('Good, you?'),
+                    Text('Fine.'),
+                  ],
+                ),
+                Stack(
+                  selectionSeparator: '🫥',
+                  children: <Widget>[
+                    Text('🍎'),
+                    Text('🍌'),
+                    Text('🍇'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      // Select from offset 2 of paragraph 1 to offset 6 of paragraph3.
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+
+      // keyboard select all.
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
+      // keyboard copy.
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'How are you?\nGood, you? Fine.\n🍎🫥🍌🫥🍇');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets(
