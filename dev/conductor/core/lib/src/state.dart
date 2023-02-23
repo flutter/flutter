@@ -81,14 +81,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
       '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
-  if (state.engine.cherrypicks.isNotEmpty) {
-    buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
-    for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-      buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
-    }
-  } else {
-    buffer.writeln('0 Engine cherrypicks.');
-  }
+
   if (state.engine.dartRevision.isNotEmpty) {
     buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
   }
@@ -99,16 +92,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
   buffer.writeln(
       '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
-  if (state.framework.cherrypicks.isNotEmpty) {
-    buffer.writeln(
-        '${state.framework.cherrypicks.length} Framework Cherrypicks:');
-    for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
-      buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
-    }
-  } else {
-    buffer.writeln('0 Framework cherrypicks.');
-  }
   buffer.writeln();
+
   if (state.currentPhase == ReleasePhase.VERIFY_RELEASE) {
     buffer.writeln(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
@@ -144,26 +129,17 @@ String presentPhases(ReleasePhase currentPhase) {
   return buffer.toString();
 }
 
+// TODO(kevinjchisholm): Rename the release phase and change the user experience
 String phaseInstructions(pb.ConductorState state) {
   switch (state.currentPhase) {
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-      if (state.engine.cherrypicks.isEmpty) {
         return <String>[
-          'There are no engine cherrypicks, so issue `conductor next` to continue',
-          'to the next step.',
+          'Issue `conductor next` to continue to the next step.',
           '\n',
           '******************************************************',
           '* Create a new entry in http://go/release-eng-retros *',
           '******************************************************',
         ].join('\n');
-      }
-      return <String>[
-        'You must now manually apply the following engine cherrypicks to the checkout',
-        'at ${state.engine.checkoutPath} in order:',
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
-          '\t${cherrypick.trunkRevision}',
-        'See ${globals.kReleaseDocumentationUrl} for more information.',
-      ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       if (!requiresEnginePR(state)) {
         return 'You must now codesign the engine binaries for commit '
@@ -183,24 +159,10 @@ String phaseInstructions(pb.ConductorState state) {
         'validate post-submit CI, and then codesign the binaries on the merge commit.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      final List<pb.Cherrypick> outstandingCherrypicks =
-          state.framework.cherrypicks.where(
-        (pb.Cherrypick cp) {
-          return cp.state == pb.CherrypickState.PENDING ||
-              cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
-        },
-      ).toList();
-      if (outstandingCherrypicks.isNotEmpty) {
         return <String>[
           'You must now manually apply the following framework cherrypicks to the checkout',
           'at ${state.framework.checkoutPath} in order:',
-          for (final pb.Cherrypick cherrypick in outstandingCherrypicks)
-            '\t${cherrypick.trunkRevision}',
         ].join('\n');
-      }
-      return <String>[
-        'Either all cherrypicks have been auto-applied or there were none.',
-      ].join('\n');
     case ReleasePhase.PUBLISH_VERSION:
       if (!requiresFrameworkPR(state)) {
         return 'Since there are no code changes in this release, no Framework '
@@ -300,31 +262,18 @@ pb.ConductorState readStateFromFile(File file) {
   return state;
 }
 
-/// This release will require a new Engine PR.
+// TODO(kevinjchisholm): https://github.com/flutter/flutter/issues/121234.
 ///
-/// The logic is if there are engine cherrypicks that have not been abandoned OR
-/// there is a new Dart revision, then return true, else false.
+/// This release will require a new Framework PR.
 bool requiresEnginePR(pb.ConductorState state) {
-  final bool hasRequiredCherrypicks = state.engine.cherrypicks.any(
-    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED,
-  );
-  if (hasRequiredCherrypicks) {
-    return true;
-  }
   return state.engine.dartRevision.isNotEmpty;
 }
 
-/// This release will require a new Framework PR.
+// TODO(kevinjchisholm): https://github.com/flutter/flutter/issues/121234.
 ///
-/// The logic is if there was an Engine PR OR there are framework cherrypicks
-/// that have not been abandoned.
+/// This release will require a new Framework PR.
 bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
-    return true;
-  }
-  final bool hasRequiredCherrypicks = state.framework.cherrypicks
-      .any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
-  if (hasRequiredCherrypicks) {
     return true;
   }
   return false;
