@@ -1,4 +1,4 @@
-Signature: 806dc69ef83327dd6f0745b68f993ba9
+Signature: cd411d8244917fac91361fe615bae8e0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9006,6 +9006,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/ReadWriteSwizzle.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.cpp + ../../../third_party/skia/LICENSE
@@ -9038,6 +9039,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ReadWriteSwizzle.h
 FILE: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.h
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.cpp
