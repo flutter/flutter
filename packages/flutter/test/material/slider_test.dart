@@ -3522,7 +3522,7 @@ void main() {
     final TestGesture gesture = await tester
         .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
 
-    // Intentioanlly not calling `await tester.pumpAndSettle()` to allow drag
+    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
     // event performed on `Slider` before it is about to get unmounted.
     shouldShowSliderListenable.value = false;
 
