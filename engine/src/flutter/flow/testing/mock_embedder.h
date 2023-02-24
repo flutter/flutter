@@ -16,11 +16,10 @@ class MockViewEmbedder : public ExternalViewEmbedder {
 
   ~MockViewEmbedder();
 
-  void AddCanvas(SkCanvas* canvas);
-  void AddRecorder(DisplayListCanvasRecorder* recorder);
+  void AddCanvas(DlCanvas* canvas);
 
   // |ExternalViewEmbedder|
-  SkCanvas* GetRootCanvas() override;
+  DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
   void CancelFrame() override;
@@ -38,19 +37,13 @@ class MockViewEmbedder : public ExternalViewEmbedder {
       std::unique_ptr<EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override;
-
-  // |ExternalViewEmbedder|
-  std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
-
-  // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
+  DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   std::vector<int64_t> prerolled_views() const { return prerolled_views_; }
   std::vector<int64_t> painted_views() const { return painted_views_; }
 
  private:
-  std::deque<EmbedderPaintContext> contexts_;
+  std::deque<DlCanvas*> contexts_;
   std::vector<int64_t> prerolled_views_;
   std::vector<int64_t> painted_views_;
 };

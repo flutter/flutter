@@ -9,8 +9,8 @@
 
 namespace flutter {
 
-PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
-                                       SkColor shadow_color,
+PhysicalShapeLayer::PhysicalShapeLayer(DlColor color,
+                                       DlColor shadow_color,
                                        float elevation,
                                        const SkPath& path,
                                        Clip clip_behavior)
@@ -81,17 +81,17 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   if (elevation_ != 0) {
-    DisplayListCanvasDispatcher::DrawShadow(
-        context.canvas, path_, shadow_color_, elevation_,
-        SkColorGetA(color_) != 0xff, context.frame_device_pixel_ratio);
+    context.canvas->DrawShadow(path_, shadow_color_, elevation_,
+                               SkColorGetA(color_) != 0xff,
+                               context.frame_device_pixel_ratio);
   }
 
   // Call drawPath without clip if possible for better performance.
-  SkPaint paint;
+  DlPaint paint;
   paint.setColor(color_);
   paint.setAntiAlias(true);
   if (clip_behavior_ != Clip::antiAliasWithSaveLayer) {
-    context.canvas->drawPath(path_, paint);
+    context.canvas->DrawPath(path_, paint);
   }
 
   auto mutator = context.state_stack.save();
@@ -116,7 +116,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
     // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
     // using saveLayer, we have to call drawPaint instead of drawPath as
     // anti-aliased drawPath will always have such artifacts.
-    context.canvas->drawPaint(paint);
+    context.canvas->DrawPaint(paint);
   }
 
   PaintChildren(context);

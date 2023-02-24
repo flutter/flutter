@@ -24,15 +24,15 @@ namespace testing {
 // verify the data against expected values.
 class MockLayer : public Layer {
  public:
-  explicit MockLayer(const SkPath& path, SkPaint paint = SkPaint());
+  explicit MockLayer(const SkPath& path, DlPaint paint = DlPaint());
 
   static std::shared_ptr<MockLayer> Make(SkPath path,
-                                         SkPaint paint = SkPaint()) {
+                                         DlPaint paint = DlPaint()) {
     return std::make_shared<MockLayer>(path, paint);
   }
 
   static std::shared_ptr<MockLayer> MakeOpacityCompatible(SkPath path) {
-    auto mock_layer = std::make_shared<MockLayer>(path, SkPaint());
+    auto mock_layer = std::make_shared<MockLayer>(path, DlPaint());
     mock_layer->set_fake_opacity_compatible(true);
     return mock_layer;
   }
@@ -111,7 +111,7 @@ class MockLayer : public Layer {
   SkMatrix parent_matrix_;
   SkRect parent_cull_rect_ = SkRect::MakeEmpty();
   SkPath fake_paint_path_;
-  SkPaint fake_paint_;
+  DlPaint fake_paint_;
   std::optional<SkMatrix> expected_paint_matrix_;
 
   static constexpr int kParentHasPlatformView = 1 << 0;
@@ -153,7 +153,7 @@ class MockLayerCacheableItem : public LayerRasterCacheItem {
 class MockCacheableLayer : public MockLayer {
  public:
   explicit MockCacheableLayer(SkPath path,
-                              SkPaint paint = SkPaint(),
+                              DlPaint paint = DlPaint(),
                               int render_limit = 3)
       : MockLayer(path, paint) {
     raster_cache_item_ =

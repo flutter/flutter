@@ -68,8 +68,8 @@ TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
   child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPath child_path2;
   child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
-  SkPaint child_paint1(SkColors::kGray);
-  SkPaint child_paint2(SkColors::kGreen);
+  DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  DlPaint child_paint2 = DlPaint(DlColor::kGreen());
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   mock_layer1->set_fake_has_texture_layer(true);
@@ -93,7 +93,7 @@ TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
 TEST_F(ContainerLayerTest, Simple) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPaint child_paint(SkColors::kGreen);
+  DlPaint child_paint = DlPaint(DlColor::kGreen());
   SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
@@ -122,8 +122,8 @@ TEST_F(ContainerLayerTest, Multiple) {
   child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPath child_path2;
   child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
-  SkPaint child_paint1(SkColors::kGray);
-  SkPaint child_paint2(SkColors::kGreen);
+  DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
@@ -163,8 +163,8 @@ TEST_F(ContainerLayerTest, Multiple) {
 TEST_F(ContainerLayerTest, MultipleWithEmpty) {
   SkPath child_path1;
   child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPaint child_paint1(SkColors::kGray);
-  SkPaint child_paint2(SkColors::kGreen);
+  DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
@@ -199,8 +199,8 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
   child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPath child_path2;
   child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
-  SkPaint child_paint1(SkColors::kGray);
-  SkPaint child_paint2(SkColors::kGreen);
+  DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
@@ -241,9 +241,9 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   const SkPath child_path1 = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path2 = SkPath().addRect(21.0f, 6.0f, 25.5f, 21.5f);
   const SkPath child_path3 = SkPath().addRect(26.0f, 6.0f, 30.5f, 21.5f);
-  const SkPaint child_paint1(SkColors::kGray);
-  const SkPaint child_paint2(SkColors::kGreen);
-  const SkPaint paint;
+  const DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  const DlPaint child_paint2 = DlPaint(DlColor::kGreen());
+  const DlPaint paint;
   auto cacheable_container_layer1 =
       MockCacheableContainerLayer::CacheLayerOrChildren();
   auto cacheable_container_layer2 =
@@ -286,8 +286,8 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   layer->Add(mock_layer2);
   layer->Add(cacheable_container_layer2);
 
-  SkCanvas cache_canvas;
-  cache_canvas.setMatrix(SkMatrix::I());
+  DisplayListBuilder cache_canvas;
+  cache_canvas.TransformReset();
 
   // Initial Preroll for check the layer paint bounds
   layer->Preroll(preroll_context());
@@ -510,7 +510,7 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
 TEST_F(ContainerLayerTest, CollectionCacheableLayer) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPaint child_paint(SkColors::kGreen);
+  DlPaint child_paint = DlPaint(DlColor::kGreen());
   SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(SkPath(), child_paint);

@@ -53,7 +53,7 @@ FLUTTER_ASSERT_ARC
 - (void)paintContext:(flutter::Texture::PaintContext&)context
               bounds:(const SkRect&)bounds
               freeze:(BOOL)freeze
-            sampling:(const SkSamplingOptions&)sampling {
+            sampling:(const flutter::DlImageSampling)sampling {
   const bool needsUpdatedTexture = (!freeze && _textureFrameAvailable) || !_externalImage;
 
   if (needsUpdatedTexture) {
@@ -61,25 +61,12 @@ FLUTTER_ASSERT_ARC
   }
 
   if (_externalImage) {
-    if (_enableImpeller) {
-      context.builder->drawImageRect(
-          _externalImage,                                       // image
-          SkRect::Make(_externalImage->bounds()),               // source rect
-          bounds,                                               // destination rect
-          flutter::ToDl(sampling),                              // sampling
-          context.dl_paint,                                     // paint
-          SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
-      );
-      return;
-    }
-
-    context.canvas->drawImageRect(
-        _externalImage->skia_image(),                         // image
-        SkRect::Make(_externalImage->bounds()),               // source rect
-        bounds,                                               // destination rect
-        sampling,                                             // sampling
-        context.sk_paint,                                     // paint
-        SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
+    context.canvas->DrawImageRect(_externalImage,                          // image
+                                  SkRect::Make(_externalImage->bounds()),  // source rect
+                                  bounds,                                  // destination rect
+                                  sampling,                                // sampling
+                                  context.paint,                           // paint
+                                  false                                    // enforce edges
     );
   }
 }

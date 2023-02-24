@@ -8,14 +8,12 @@
 #include <memory>
 #include <unordered_map>
 
-#include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_complexity.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/flow/raster_cache_util.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/trace_event.h"
-#include "include/core/SkCanvas.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkRect.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -29,24 +27,24 @@ enum class RasterCacheLayerStrategy { kLayer, kLayerChildren };
 
 class RasterCacheResult {
  public:
-  RasterCacheResult(sk_sp<SkImage> image,
+  RasterCacheResult(sk_sp<DlImage> image,
                     const SkRect& logical_rect,
                     const char* type);
 
   virtual ~RasterCacheResult() = default;
 
-  virtual void draw(SkCanvas& canvas, const SkPaint* paint) const;
+  virtual void draw(DlCanvas& canvas, const DlPaint* paint) const;
 
   virtual SkISize image_dimensions() const {
     return image_ ? image_->dimensions() : SkISize::Make(0, 0);
   };
 
   virtual int64_t image_bytes() const {
-    return image_ ? image_->imageInfo().computeMinByteSize() : 0;
+    return image_ ? image_->GetApproximateByteSize() : 0;
   };
 
  private:
-  sk_sp<SkImage> image_;
+  sk_sp<DlImage> image_;
   SkRect logical_rect_;
   fml::tracing::TraceFlow flow_;
 };
@@ -128,8 +126,8 @@ class RasterCache {
 
   std::unique_ptr<RasterCacheResult> Rasterize(
       const RasterCache::Context& context,
-      const std::function<void(SkCanvas*)>& draw_function,
-      const std::function<void(SkCanvas*, const SkRect& rect)>&
+      const std::function<void(DlCanvas*)>& draw_function,
+      const std::function<void(DlCanvas*, const SkRect& rect)>&
           draw_checkerboard) const;
 
   explicit RasterCache(
@@ -145,8 +143,8 @@ class RasterCache {
   // or if the attempt to populate the entry failed due to bounds overflow
   // conditions.
   bool Draw(const RasterCacheKeyID& id,
-            SkCanvas& canvas,
-            const SkPaint* paint) const;
+            DlCanvas& canvas,
+            const DlPaint* paint) const;
 
   bool HasEntry(const RasterCacheKeyID& id, const SkMatrix&) const;
 
@@ -238,7 +236,7 @@ class RasterCache {
   bool UpdateCacheEntry(
       const RasterCacheKeyID& id,
       const Context& raster_cache_context,
-      const std::function<void(SkCanvas*)>& render_function) const;
+      const std::function<void(DlCanvas*)>& render_function) const;
 
  private:
   struct Entry {

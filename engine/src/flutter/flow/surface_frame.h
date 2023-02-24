@@ -9,7 +9,8 @@
 #include <optional>
 
 #include "flutter/common/graphics/gl_context_switch.h"
-#include "flutter/display_list/display_list_canvas_recorder.h"
+#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_point.h"
 
@@ -23,7 +24,7 @@ namespace flutter {
 class SurfaceFrame {
  public:
   using SubmitCallback =
-      std::function<bool(SurfaceFrame& surface_frame, SkCanvas* canvas)>;
+      std::function<bool(SurfaceFrame& surface_frame, DlCanvas* canvas)>;
 
   // Information about the underlying framebuffer
   struct FramebufferInfo {
@@ -87,7 +88,7 @@ class SurfaceFrame {
 
   sk_sp<SkSurface> SkiaSurface() const;
 
-  SkCanvas* SkiaCanvas();
+  DlCanvas* Canvas();
 
   const FramebufferInfo& framebuffer_info() const { return framebuffer_info_; }
 
@@ -103,9 +104,10 @@ class SurfaceFrame {
  private:
   bool submitted_ = false;
 
-  sk_sp<DisplayListCanvasRecorder> dl_recorder_;
+  DlSkCanvasAdapter adapter_;
+  sk_sp<DisplayListBuilder> dl_builder_;
   sk_sp<SkSurface> surface_;
-  SkCanvas* canvas_ = nullptr;
+  DlCanvas* canvas_ = nullptr;
   FramebufferInfo framebuffer_info_;
   SubmitInfo submit_info_;
   SubmitCallback submit_callback_;

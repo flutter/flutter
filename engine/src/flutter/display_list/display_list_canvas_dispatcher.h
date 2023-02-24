@@ -24,7 +24,9 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
  public:
   explicit DisplayListCanvasDispatcher(SkCanvas* canvas,
                                        SkScalar opacity = SK_Scalar1)
-      : SkPaintDispatchHelper(opacity), canvas_(canvas) {}
+      : SkPaintDispatchHelper(opacity),
+        canvas_(canvas),
+        original_transform_(canvas->getLocalToDevice()) {}
 
   const SkPaint* safe_paint(bool use_attributes);
 
@@ -51,9 +53,9 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
   // clang-format on
   void transformReset() override;
 
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
+  void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
   void drawPaint() override;
   void drawColor(DlColor color, DlBlendMode mode) override;
@@ -68,9 +70,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                SkScalar start,
                SkScalar sweep,
                bool useCenter) override;
-  void drawPoints(SkCanvas::PointMode mode,
-                  uint32_t count,
-                  const SkPoint pts[]) override;
+  void drawPoints(PointMode mode, uint32_t count, const SkPoint pts[]) override;
   void drawSkVertices(const sk_sp<SkVertices> vertices,
                       SkBlendMode mode) override;
   void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
@@ -130,6 +130,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
 
  private:
   SkCanvas* canvas_;
+  const SkM44 original_transform_;
   SkPaint temp_paint_;
 };
 

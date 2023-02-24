@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/frame_timings.h"
 #include "flutter/flow/layer_snapshot_store.h"
@@ -28,8 +29,8 @@ LayerTree::LayerTree(const SkISize& frame_size, float device_pixel_ratio)
   FML_CHECK(device_pixel_ratio_ != 0.0f);
 }
 
-inline SkColorSpace* GetColorSpace(SkCanvas* canvas) {
-  return canvas ? canvas->imageInfo().colorSpace() : nullptr;
+inline SkColorSpace* GetColorSpace(DlCanvas* canvas) {
+  return canvas ? canvas->GetImageInfo().colorSpace() : nullptr;
 }
 
 bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
@@ -116,12 +117,8 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
     state_stack.set_checkerboard_func(DrawCheckerboard);
   }
 
-  DisplayListBuilder* builder = frame.display_list_builder();
-  if (builder) {
-    state_stack.set_delegate(builder);
-  } else {
-    state_stack.set_delegate(frame.canvas());
-  }
+  DlCanvas* canvas = frame.canvas();
+  state_stack.set_delegate(canvas);
 
   // clear the previous snapshots.
   LayerSnapshotStore* snapshot_store = nullptr;
@@ -136,8 +133,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   PaintContext context = {
       // clang-format off
       .state_stack                   = state_stack,
-      .canvas                        = frame.canvas(),
-      .builder                       = builder,
+      .canvas                        = canvas,
       .gr_context                    = frame.gr_context(),
       .dst_color_space               = color_space,
       .view_embedder                 = frame.view_embedder(),
@@ -168,7 +164,7 @@ sk_sp<DisplayList> LayerTree::Flatten(
     GrDirectContext* gr_context) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
-  DisplayListCanvasRecorder recorder(bounds);
+  DisplayListBuilder builder(bounds);
 
   const FixedRefreshRateStopwatch unused_stopwatch;
 
@@ -191,12 +187,11 @@ sk_sp<DisplayList> LayerTree::Flatten(
   };
 
   LayerStateStack paint_state_stack;
-  paint_state_stack.set_delegate(recorder);
+  paint_state_stack.set_delegate(&builder);
   PaintContext paint_context = {
       // clang-format off
       .state_stack                   = paint_state_stack,
-      .canvas                        = &recorder,
-      .builder                       = recorder.builder().get(),
+      .canvas                        = &builder,
       .gr_context                    = gr_context,
       .dst_color_space               = nullptr,
       .view_embedder                 = nullptr,
@@ -221,7 +216,7 @@ sk_sp<DisplayList> LayerTree::Flatten(
     }
   }
 
-  return recorder.Build();
+  return builder.Build();
 }
 
 }  // namespace flutter

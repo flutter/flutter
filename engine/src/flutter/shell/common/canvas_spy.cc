@@ -14,11 +14,16 @@ CanvasSpy::CanvasSpy(SkCanvas* target_canvas) {
                                                      canvas_size.height());
   n_way_canvas_->addCanvas(target_canvas);
   n_way_canvas_->addCanvas(did_draw_canvas_.get());
+  adapter_.set_canvas(n_way_canvas_.get());
 }
 
-SkCanvas* CanvasSpy::GetSpyingCanvas() {
-  return n_way_canvas_.get();
+DlCanvas* CanvasSpy::GetSpyingCanvas() {
+  return &adapter_;
 }
+
+SkCanvas* CanvasSpy::GetRawSpyingCanvas() {
+  return n_way_canvas_.get();
+};
 
 DidDrawCanvas::DidDrawCanvas(int width, int height)
     : SkCanvasVirtualEnforcer<SkNoDrawCanvas>(width, height) {}

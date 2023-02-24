@@ -55,12 +55,7 @@ void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int64_t view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
   SkRect view_bounds = SkRect::Make(frame_size_);
-  std::unique_ptr<EmbedderViewSlice> view;
-  if (params->display_list_enabled()) {
-    view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
-  } else {
-    view = std::make_unique<SkPictureEmbedderViewSlice>(view_bounds);
-  }
+  auto view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
   slices_.insert_or_assign(view_id, std::move(view));
 }
 
@@ -69,17 +64,6 @@ PostPrerollResult ShellTestExternalViewEmbedder::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   FML_DCHECK(raster_thread_merger);
   return post_preroll_result_;
-}
-
-// |ExternalViewEmbedder|
-std::vector<SkCanvas*> ShellTestExternalViewEmbedder::GetCurrentCanvases() {
-  return {};
-}
-
-// |ExternalViewEmbedder|
-std::vector<DisplayListBuilder*>
-ShellTestExternalViewEmbedder::GetCurrentBuilders() {
-  return {};
 }
 
 // |ExternalViewEmbedder|
@@ -99,9 +83,9 @@ void ShellTestExternalViewEmbedder::PushFilterToVisitedPlatformViews(
   }
 }
 
-EmbedderPaintContext ShellTestExternalViewEmbedder::CompositeEmbeddedView(
+DlCanvas* ShellTestExternalViewEmbedder::CompositeEmbeddedView(
     int64_t view_id) {
-  return {slices_[view_id]->canvas(), slices_[view_id]->builder()};
+  return slices_[view_id]->canvas();
 }
 
 // |ExternalViewEmbedder|
@@ -129,7 +113,7 @@ void ShellTestExternalViewEmbedder::EndFrame(
 }
 
 // |ExternalViewEmbedder|
-SkCanvas* ShellTestExternalViewEmbedder::GetRootCanvas() {
+DlCanvas* ShellTestExternalViewEmbedder::GetRootCanvas() {
   return nullptr;
 }
 

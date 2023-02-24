@@ -6,6 +6,7 @@
 
 #include <algorithm>
 
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -152,7 +153,7 @@ void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {
   cache_canvas->drawPath(path, paint);
 }
 
-void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
+void Stopwatch::Visualize(DlCanvas* canvas, const SkRect& rect) const {
   // Initialize visualize cache if it has not yet been initialized.
   InitVisualizeSurface(rect);
 
@@ -241,7 +242,9 @@ void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   prev_drawn_sample_index_ = current_sample_;
 
   // Draw the cached surface onto the output canvas.
-  visualize_cache_surface_->draw(canvas, rect.x(), rect.y());
+  auto image = DlImage::Make(visualize_cache_surface_->makeImageSnapshot());
+  canvas->DrawImage(image, {rect.x(), rect.y()},
+                    DlImageSampling::kNearestNeighbor);
 }
 
 fml::Milliseconds Stopwatch::GetFrameBudget() const {

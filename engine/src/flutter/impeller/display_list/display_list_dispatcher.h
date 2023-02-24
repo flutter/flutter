@@ -123,13 +123,13 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void transformReset() override;
 
   // |flutter::Dispatcher|
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
+  void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
@@ -165,7 +165,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                bool use_center) override;
 
   // |flutter::Dispatcher|
-  void drawPoints(SkCanvas::PointMode mode,
+  void drawPoints(PointMode mode,
                   uint32_t count,
                   const SkPoint points[]) override;
 
@@ -239,6 +239,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
  private:
   Paint paint_;
   Canvas canvas_;
+  Matrix initial_matrix_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DisplayListDispatcher);
 };

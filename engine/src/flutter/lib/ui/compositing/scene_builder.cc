@@ -24,7 +24,6 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -209,7 +208,7 @@ void SceneBuilder::pushPhysicalShape(Dart_Handle layer_handle,
                                      int clipBehavior,
                                      const fml::RefPtr<EngineLayer>& oldLayer) {
   auto layer = std::make_shared<flutter::PhysicalShapeLayer>(
-      static_cast<SkColor>(color), static_cast<SkColor>(shadow_color),
+      static_cast<DlColor>(color), static_cast<DlColor>(shadow_color),
       static_cast<float>(elevation), path->path(),
       static_cast<flutter::Clip>(clipBehavior));
   PushLayer(layer);

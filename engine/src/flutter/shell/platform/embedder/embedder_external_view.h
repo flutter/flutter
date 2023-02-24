@@ -105,7 +105,7 @@ class EmbedderExternalView {
 
   RenderTargetDescriptor CreateRenderTargetDescriptor() const;
 
-  SkCanvas* GetCanvas() const;
+  DlCanvas* GetCanvas();
 
   SkISize GetRenderSurfaceSize() const;
 

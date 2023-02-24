@@ -4,6 +4,7 @@
 
 #include "flutter/flow/testing/mock_texture.h"
 
+#include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -26,10 +27,10 @@ TEST(MockTextureTest, Callbacks) {
 }
 
 TEST(MockTextureTest, PaintCalls) {
-  SkCanvas canvas;
+  MockCanvas canvas;
   const SkRect paint_bounds1 = SkRect::MakeWH(1.0f, 1.0f);
   const SkRect paint_bounds2 = SkRect::MakeWH(2.0f, 2.0f);
-  const SkSamplingOptions sampling;
+  const DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   const auto expected_paint_calls = std::vector{
       MockTexture::PaintCall{canvas, paint_bounds1, false, nullptr, sampling},
       MockTexture::PaintCall{canvas, paint_bounds2, true, nullptr, sampling}};
@@ -43,10 +44,10 @@ TEST(MockTextureTest, PaintCalls) {
 }
 
 TEST(MockTextureTest, PaintCallsWithLinearSampling) {
-  SkCanvas canvas;
+  MockCanvas canvas;
   const SkRect paint_bounds1 = SkRect::MakeWH(1.0f, 1.0f);
   const SkRect paint_bounds2 = SkRect::MakeWH(2.0f, 2.0f);
-  const auto sampling = SkSamplingOptions(SkFilterMode::kLinear);
+  const auto sampling = DlImageSampling::kLinear;
   const auto expected_paint_calls = std::vector{
       MockTexture::PaintCall{canvas, paint_bounds1, false, nullptr, sampling},
       MockTexture::PaintCall{canvas, paint_bounds2, true, nullptr, sampling}};

@@ -14,7 +14,7 @@
 namespace flutter {
 namespace {
 
-void VisualizeStopWatch(SkCanvas* canvas,
+void VisualizeStopWatch(DlCanvas* canvas,
                         const Stopwatch& stopwatch,
                         SkScalar x,
                         SkScalar y,
@@ -35,9 +35,9 @@ void VisualizeStopWatch(SkCanvas* canvas,
   if (show_labels) {
     auto text = PerformanceOverlayLayer::MakeStatisticsText(
         stopwatch, label_prefix, font_path);
-    SkPaint paint;
-    paint.setColor(SK_ColorGRAY);
-    canvas->drawTextBlob(text, x + label_x, y + height + label_y, paint);
+    // Historically SK_ColorGRAY (== 0xFF888888) was used here
+    DlPaint paint(0xFF888888);
+    canvas->DrawTextBlob(text, x + label_x, y + height + label_y, paint);
   }
 }
 

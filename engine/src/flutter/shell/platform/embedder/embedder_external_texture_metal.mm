@@ -35,25 +35,26 @@ EmbedderExternalTextureMetal::~EmbedderExternalTextureMetal() = default;
 void EmbedderExternalTextureMetal::Paint(PaintContext& context,
                                          const SkRect& bounds,
                                          bool freeze,
-                                         const SkSamplingOptions& sampling) {
+                                         const DlImageSampling sampling) {
   if (last_image_ == nullptr) {
     last_image_ =
         ResolveTexture(Id(), context.gr_context, SkISize::Make(bounds.width(), bounds.height()));
   }
 
-  SkCanvas& canvas = *context.canvas;
-  const SkPaint* paint = context.sk_paint;
+  DlCanvas* canvas = context.canvas;
+  const DlPaint* paint = context.paint;
 
   if (last_image_) {
-    if (bounds != SkRect::Make(last_image_->bounds())) {
-      canvas.drawImageRect(last_image_, bounds, sampling, paint);
+    SkRect image_bounds = SkRect::Make(last_image_->bounds());
+    if (bounds != image_bounds) {
+      canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
     } else {
-      canvas.drawImage(last_image_, bounds.x(), bounds.y(), sampling, paint);
+      canvas->DrawImage(last_image_, {bounds.x(), bounds.y()}, sampling, paint);
     }
   }
 }
 
-sk_sp<SkImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
+sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
                                                             GrDirectContext* context,
                                                             const SkISize& size) {
   std::unique_ptr<FlutterMetalExternalTexture> texture =
@@ -99,7 +100,7 @@ sk_sp<SkImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
     FML_LOG(ERROR) << "Could not create external texture: " << texture_id;
   }
 
-  return image;
+  return DlImage::Make(std::move(image));
 }
 
 // |flutter::Texture|

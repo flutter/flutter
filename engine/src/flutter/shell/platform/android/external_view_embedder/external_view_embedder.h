@@ -42,16 +42,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
-
-  // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override;
-
-  // |ExternalViewEmbedder|
-  // Similar call to GetCurrentCanvases but will return the array of
-  // builders being used by PlatformViews on platforms that provide
-  // optional DisplayListBuilder objects for rendering.
-  std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
+  DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
@@ -62,7 +53,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  SkCanvas* GetRootCanvas() override;
+  DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
   void BeginFrame(

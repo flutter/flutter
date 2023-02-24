@@ -414,7 +414,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawArc(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
-    SkCanvas::PointMode mode,
+    DlCanvas::PointMode mode,
     uint32_t count,
     const SkPoint points[]) {
   if (IsComplex()) {
@@ -423,7 +423,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
   unsigned int complexity;
 
   if (IsAntiAliased()) {
-    if (mode == SkCanvas::kPoints_PointMode) {
+    if (mode == DlCanvas::PointMode::kPoints) {
       if (IsHairline()) {
         // This is a special case, it triggers an extremely fast path.
         // m = 1/4500
@@ -434,7 +434,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
         // c = 0
         complexity = count * 400;
       }
-    } else if (mode == SkCanvas::kLines_PointMode) {
+    } else if (mode == DlCanvas::PointMode::kLines) {
       if (IsHairline()) {
         // m = 1/750
         // c = 0
@@ -456,12 +456,12 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
       }
     }
   } else {
-    if (mode == SkCanvas::kPoints_PointMode) {
+    if (mode == DlCanvas::PointMode::kPoints) {
       // Hairline vs non hairline makes no difference for points without AA.
       // m = 1/18000
       // c = 0.25
       complexity = (count + 4500) * 100 / 9;
-    } else if (mode == SkCanvas::kLines_PointMode) {
+    } else if (mode == DlCanvas::PointMode::kLines) {
       if (IsHairline()) {
         // m = 1/8500
         // c = 0.25

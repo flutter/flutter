@@ -74,9 +74,9 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
     // Try drawing the layer cache item from the cache before applying the
     // color filter if it was cached with the filter applied.
     if (!layer_raster_cache_item_->IsCacheChildren()) {
-      SkPaint sk_paint;
+      DlPaint paint;
       if (layer_raster_cache_item_->Draw(context,
-                                         context.state_stack.fill(sk_paint))) {
+                                         context.state_stack.fill(paint))) {
         return;
       }
     }
@@ -87,9 +87,9 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   mutator.applyColorFilter(paint_bounds(), filter_);
 
   if (context.raster_cache && layer_raster_cache_item_->IsCacheChildren()) {
-    SkPaint sk_paint;
+    DlPaint paint;
     if (layer_raster_cache_item_->Draw(context,
-                                       context.state_stack.fill(sk_paint))) {
+                                       context.state_stack.fill(paint))) {
       return;
     }
   }

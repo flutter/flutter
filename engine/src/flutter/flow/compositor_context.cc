@@ -76,7 +76,7 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
 
 std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     GrDirectContext* gr_context,
-    SkCanvas* canvas,
+    DlCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
@@ -94,7 +94,7 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
 CompositorContext::ScopedFrame::ScopedFrame(
     CompositorContext& context,
     GrDirectContext* gr_context,
-    SkCanvas* canvas,
+    DlCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
@@ -146,28 +146,26 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     return RasterStatus::kSkipAndRetry;
   }
 
-  SkAutoCanvasRestore restore(canvas(), clip_rect.has_value());
+  DlAutoCanvasRestore restore(canvas(), clip_rect.has_value());
 
   // Clearing canvas after preroll reduces one render target switch when preroll
   // paints some raster cache.
   if (canvas()) {
     if (clip_rect) {
-      canvas()->clipRect(*clip_rect);
+      canvas()->ClipRect(*clip_rect);
     }
 
     if (needs_save_layer) {
       TRACE_EVENT0("flutter", "Canvas::saveLayer");
       SkRect bounds = SkRect::Make(layer_tree.frame_size());
-      SkPaint paint;
-      paint.setBlendMode(SkBlendMode::kSrc);
-      canvas()->saveLayer(&bounds, &paint);
+      DlPaint paint;
+      paint.setBlendMode(DlBlendMode::kSrc);
+      canvas()->SaveLayer(&bounds, &paint);
     }
-    canvas()->clear(SK_ColorTRANSPARENT);
+    canvas()->Clear(DlColor::kTransparent());
   }
   layer_tree.Paint(*this, ignore_raster_cache);
-  if (canvas() && needs_save_layer) {
-    canvas()->restore();
-  }
+  // The canvas()->Restore() is taken care of by the DlAutoCanvasRestore
   return RasterStatus::kSuccess;
 }
 

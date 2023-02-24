@@ -24,6 +24,9 @@
 namespace flutter {
 namespace testing {
 
+using ClipOp = DlCanvas::ClipOp;
+using PointMode = DlCanvas::PointMode;
+
 constexpr int kTestWidth = 200;
 constexpr int kTestHeight = 200;
 constexpr int kRenderWidth = 100;
@@ -394,10 +397,10 @@ struct DlRenderJob : public JobRenderer {
       DisplayListBuilder builder(SkRect::MakeWH(info.width, info.height));
       dl_setup_(builder);
       if (setup_matrix) {
-        *setup_matrix = builder.getTransform();
+        *setup_matrix = builder.GetTransform();
       }
       if (setup_clip_bounds) {
-        *setup_clip_bounds = builder.getDestinationClipBounds().roundOut();
+        *setup_clip_bounds = builder.GetDestinationClipBounds().roundOut();
       }
       dl_render_(builder);
       dl_restore_(builder);
@@ -940,7 +943,7 @@ class CanvasCompareTester {
                    },
                    [=](DisplayListBuilder& b) {
                      b.save();
-                     b.clipRect(clip, SkClipOp::kIntersect, false);
+                     b.clipRect(clip, ClipOp::kIntersect, false);
                      b.drawRect(rect);
                      b.setBlendMode(DlBlendMode::kClear);
                      b.drawRect(rect);
@@ -1076,7 +1079,7 @@ class CanvasCompareTester {
                      },
                      [=](DisplayListBuilder& b) {
                        dl_backdrop_setup(b);
-                       b.clipRect(layer_bounds, SkClipOp::kIntersect, false);
+                       b.clipRect(layer_bounds, ClipOp::kIntersect, false);
                        b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes,
                                    &backdrop);
                      })
@@ -1920,7 +1923,7 @@ class CanvasCompareTester {
                      c->clipRect(r_clip, SkClipOp::kIntersect, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRect(r_clip, SkClipOp::kIntersect, false);
+                     b.clipRect(r_clip, ClipOp::kIntersect, false);
                    }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
@@ -1929,7 +1932,7 @@ class CanvasCompareTester {
                      c->clipRect(r_clip, SkClipOp::kIntersect, true);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRect(r_clip, SkClipOp::kIntersect, true);
+                     b.clipRect(r_clip, ClipOp::kIntersect, true);
                    }));
     RenderWith(testP, env, diff_tolerance,
                CaseParameters(
@@ -1938,7 +1941,7 @@ class CanvasCompareTester {
                      c->clipRect(r_clip, SkClipOp::kDifference, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRect(r_clip, SkClipOp::kDifference, false);
+                     b.clipRect(r_clip, ClipOp::kDifference, false);
                    })
                    .with_diff_clip());
     // This test RR clip used to use very small radii, but due to
@@ -1954,7 +1957,7 @@ class CanvasCompareTester {
                      c->clipRRect(rr_clip, SkClipOp::kIntersect, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRRect(rr_clip, SkClipOp::kIntersect, false);
+                     b.clipRRect(rr_clip, ClipOp::kIntersect, false);
                    }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
@@ -1963,7 +1966,7 @@ class CanvasCompareTester {
                      c->clipRRect(rr_clip, SkClipOp::kIntersect, true);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRRect(rr_clip, SkClipOp::kIntersect, true);
+                     b.clipRRect(rr_clip, ClipOp::kIntersect, true);
                    }));
     RenderWith(testP, env, diff_tolerance,
                CaseParameters(
@@ -1972,7 +1975,7 @@ class CanvasCompareTester {
                      c->clipRRect(rr_clip, SkClipOp::kDifference, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipRRect(rr_clip, SkClipOp::kDifference, false);
+                     b.clipRRect(rr_clip, ClipOp::kDifference, false);
                    })
                    .with_diff_clip());
     SkPath path_clip = SkPath();
@@ -1986,7 +1989,7 @@ class CanvasCompareTester {
                      c->clipPath(path_clip, SkClipOp::kIntersect, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipPath(path_clip, SkClipOp::kIntersect, false);
+                     b.clipPath(path_clip, ClipOp::kIntersect, false);
                    }));
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
@@ -1995,7 +1998,7 @@ class CanvasCompareTester {
                      c->clipPath(path_clip, SkClipOp::kIntersect, true);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipPath(path_clip, SkClipOp::kIntersect, true);
+                     b.clipPath(path_clip, ClipOp::kIntersect, true);
                    }));
     RenderWith(testP, env, diff_tolerance,
                CaseParameters(
@@ -2004,7 +2007,7 @@ class CanvasCompareTester {
                      c->clipPath(path_clip, SkClipOp::kDifference, false);
                    },
                    [=](DisplayListBuilder& b) {
-                     b.clipPath(path_clip, SkClipOp::kDifference, false);
+                     b.clipPath(path_clip, ClipOp::kDifference, false);
                    })
                    .with_diff_clip());
   }
@@ -2841,7 +2844,7 @@ TEST_F(DisplayListCanvas, DrawPointsAsPoints) {
             canvas->drawPoints(SkCanvas::kPoints_PointMode, count, points, p);
           },
           [=](DisplayListBuilder& builder) {  //
-            builder.drawPoints(SkCanvas::kPoints_PointMode, count, points);
+            builder.drawPoints(PointMode::kPoints, count, points);
           },
           kDrawPointsAsPointsFlags)
           .set_draw_line()
@@ -2891,7 +2894,7 @@ TEST_F(DisplayListCanvas, DrawPointsAsLines) {
             canvas->drawPoints(SkCanvas::kLines_PointMode, count, points, p);
           },
           [=](DisplayListBuilder& builder) {  //
-            builder.drawPoints(SkCanvas::kLines_PointMode, count, points);
+            builder.drawPoints(PointMode::kLines, count, points);
           },
           kDrawPointsAsLinesFlags));
 }
@@ -2923,7 +2926,7 @@ TEST_F(DisplayListCanvas, DrawPointsAsPolygon) {
                                p);
           },
           [=](DisplayListBuilder& builder) {  //
-            builder.drawPoints(SkCanvas::kPolygon_PointMode, count1, points1);
+            builder.drawPoints(PointMode::kPolygon, count1, points1);
           },
           kDrawPointsAsPolygonFlags));
 }
@@ -3633,18 +3636,18 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
   }
 
   auto render_content = [](DisplayListBuilder& builder) {
-    builder.drawRect(
+    builder.DrawRect(
         SkRect{kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY},
-        DlPaint().setColor(DlColor::kYellow()));
-    builder.drawRect(
+        DlPaint(DlColor::kYellow()));
+    builder.DrawRect(
         SkRect{kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY},
-        DlPaint().setColor(DlColor::kRed()));
-    builder.drawRect(
+        DlPaint(DlColor::kRed()));
+    builder.DrawRect(
         SkRect{kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom},
-        DlPaint().setColor(DlColor::kBlue()));
-    builder.drawRect(
+        DlPaint(DlColor::kBlue()));
+    builder.DrawRect(
         SkRect{kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom},
-        DlPaint().setColor(DlColor::kRed().modulateOpacity(0.5f)));
+        DlPaint(DlColor::kRed().modulateOpacity(0.5f)));
   };
 
   auto test_attributes_env =
@@ -3653,19 +3656,19 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
                        const std::string& desc1, const std::string& desc2,
                        const RenderEnvironment* env) {
         DisplayListBuilder nested_builder;
-        nested_builder.saveLayer(&kTestBounds, &paint1);
-        nested_builder.saveLayer(&kTestBounds, &paint2);
+        nested_builder.SaveLayer(&kTestBounds, &paint1);
+        nested_builder.SaveLayer(&kTestBounds, &paint2);
         render_content(nested_builder);
         auto nested_results = env->getResult(nested_builder.Build());
 
         DisplayListBuilder reverse_builder;
-        reverse_builder.saveLayer(&kTestBounds, &paint2);
-        reverse_builder.saveLayer(&kTestBounds, &paint1);
+        reverse_builder.SaveLayer(&kTestBounds, &paint2);
+        reverse_builder.SaveLayer(&kTestBounds, &paint1);
         render_content(reverse_builder);
         auto reverse_results = env->getResult(reverse_builder.Build());
 
         DisplayListBuilder combined_builder;
-        combined_builder.saveLayer(&kTestBounds, &paint_both);
+        combined_builder.SaveLayer(&kTestBounds, &paint_both);
         render_content(combined_builder);
         auto combined_results = env->getResult(combined_builder.Build());
 

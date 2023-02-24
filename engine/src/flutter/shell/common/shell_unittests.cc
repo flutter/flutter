@@ -35,11 +35,11 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "flutter/shell/version/version.h"
+#include "flutter/testing/mock_canvas.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 #ifdef SHELL_ENABLE_VULKAN
@@ -279,10 +279,10 @@ static void PostSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
 }
 
 static sk_sp<DisplayList> MakeSizedDisplayList(int width, int height) {
-  DisplayListCanvasRecorder recorder(SkRect::MakeXYWH(0, 0, width, height));
-  recorder.drawRect(SkRect::MakeXYWH(0, 0, width, height),
-                    SkPaint(SkColor4f::FromColor(SK_ColorRED)));
-  return recorder.Build();
+  DisplayListBuilder builder(SkRect::MakeXYWH(0, 0, width, height));
+  builder.DrawRect(SkRect::MakeXYWH(0, 0, width, height),
+                   DlPaint(DlColor::kRed()));
+  return builder.Build();
 }
 
 TEST_F(ShellTest, InitializeWithInvalidThreads) {
@@ -1835,7 +1835,7 @@ class MockTexture : public Texture {
   void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             const SkSamplingOptions&) override {}
+             const DlImageSampling) override {}
 
   void OnGrContextCreated() override {}
 
@@ -2453,11 +2453,11 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
 
         // 2.1. Rasterize the picture. Call Draw multiple times to pass the
         // access threshold (default to 3) so a cache can be generated.
-        SkCanvas dummy_canvas;
-        SkPaint paint;
+        MockCanvas dummy_canvas;
+        DlPaint paint;
         bool picture_cache_generated;
         DisplayListRasterCacheItem display_list_raster_cache_item(
-            display_list.get(), SkPoint(), true, false);
+            display_list, SkPoint(), true, false);
         for (int i = 0; i < 4; i += 1) {
           SkMatrix matrix = SkMatrix::I();
           state_stack.set_preroll_delegate(matrix);
@@ -2496,8 +2496,8 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);
   std::string expected_json =
-      "{\"type\":\"EstimateRasterCacheMemory\",\"layerBytes\":40000,\"picture"
-      "Bytes\":400}";
+      "{\"type\":\"EstimateRasterCacheMemory\",\"layerBytes\":40024,\"picture"
+      "Bytes\":424}";
   std::string actual_json = buffer.GetString();
   ASSERT_EQ(actual_json, expected_json);
 

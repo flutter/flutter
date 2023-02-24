@@ -4,6 +4,8 @@
 
 #include "flutter/flow/layers/platform_view_layer.h"
 
+#include "flutter/display_list/skia/dl_sk_canvas.h"
+
 namespace flutter {
 
 PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
@@ -39,15 +41,9 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
                       "does not support embedding";
     return;
   }
-  EmbedderPaintContext embedder_context =
-      context.view_embedder->CompositeEmbeddedView(view_id_);
-  context.canvas = embedder_context.canvas;
-  context.builder = embedder_context.builder;
-  if (context.builder) {
-    context.state_stack.set_delegate(context.builder);
-  } else {
-    context.state_stack.set_delegate(context.canvas);
-  }
+  DlCanvas* canvas = context.view_embedder->CompositeEmbeddedView(view_id_);
+  context.canvas = canvas;
+  context.state_stack.set_delegate(canvas);
 }
 
 }  // namespace flutter

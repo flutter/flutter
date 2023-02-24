@@ -38,11 +38,15 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_EQ(DlPaint::kDefaultMiter, 4.0);
 
   EXPECT_EQ(paint, DlPaint());
+  EXPECT_EQ(paint, DlPaint(DlColor::kBlack()));
+  EXPECT_EQ(paint, DlPaint(0xFF000000));
 
   EXPECT_NE(paint, DlPaint().setAntiAlias(true));
   EXPECT_NE(paint, DlPaint().setDither(true));
   EXPECT_NE(paint, DlPaint().setInvertColors(true));
   EXPECT_NE(paint, DlPaint().setColor(DlColor::kGreen()));
+  EXPECT_NE(paint, DlPaint(DlColor::kGreen()));
+  EXPECT_NE(paint, DlPaint(0xFF00FF00));
   EXPECT_NE(paint, DlPaint().setAlpha(0x7f));
   EXPECT_NE(paint, DlPaint().setBlendMode(DlBlendMode::kDstIn));
   EXPECT_NE(paint, DlPaint().setDrawStyle(DlDrawStyle::kStrokeAndFill));

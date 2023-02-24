@@ -93,8 +93,8 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{
            1, MockCanvas::ConcatMatrixData{SkM44(layer_offset_matrix)}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::DrawRectData{picture_bounds, SkPaint()}},
+       MockCanvas::DrawCall{1,
+                            MockCanvas::DrawDisplayListData{display_list, 1}},
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
@@ -156,6 +156,7 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
             expected_builder.drawDisplayList(child_display_list);
           }
           expected_builder.restore();
+          expected_builder.setColor(DlColor::kBlack());
         }
         expected_builder.restore();
       }

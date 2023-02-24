@@ -629,7 +629,8 @@ struct TransformResetOp final : TransformClipOpBase {
                                                                            \
     void dispatch(DispatchContext& ctx) const {                            \
       if (op_needed(ctx)) {                                                \
-        ctx.dispatcher.clip##shapetype(shape, SkClipOp::k##clipop, is_aa); \
+        ctx.dispatcher.clip##shapetype(shape, DlCanvas::ClipOp::k##clipop, \
+                                       is_aa);                             \
       }                                                                    \
     }                                                                      \
   };
@@ -639,27 +640,27 @@ DEFINE_CLIP_SHAPE_OP(Rect, Difference)
 DEFINE_CLIP_SHAPE_OP(RRect, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
-#define DEFINE_CLIP_PATH_OP(clipop)                                      \
-  struct Clip##clipop##PathOp final : TransformClipOpBase {              \
-    static const auto kType = DisplayListOpType::kClip##clipop##Path;    \
-                                                                         \
-    Clip##clipop##PathOp(SkPath path, bool is_aa)                        \
-        : is_aa(is_aa), path(path) {}                                    \
-                                                                         \
-    const bool is_aa;                                                    \
-    const SkPath path;                                                   \
-                                                                         \
-    void dispatch(DispatchContext& ctx) const {                          \
-      if (op_needed(ctx)) {                                              \
-        ctx.dispatcher.clipPath(path, SkClipOp::k##clipop, is_aa);       \
-      }                                                                  \
-    }                                                                    \
-                                                                         \
-    DisplayListCompare equals(const Clip##clipop##PathOp* other) const { \
-      return is_aa == other->is_aa && path == other->path                \
-                 ? DisplayListCompare::kEqual                            \
-                 : DisplayListCompare::kNotEqual;                        \
-    }                                                                    \
+#define DEFINE_CLIP_PATH_OP(clipop)                                        \
+  struct Clip##clipop##PathOp final : TransformClipOpBase {                \
+    static const auto kType = DisplayListOpType::kClip##clipop##Path;      \
+                                                                           \
+    Clip##clipop##PathOp(SkPath path, bool is_aa)                          \
+        : is_aa(is_aa), path(path) {}                                      \
+                                                                           \
+    const bool is_aa;                                                      \
+    const SkPath path;                                                     \
+                                                                           \
+    void dispatch(DispatchContext& ctx) const {                            \
+      if (op_needed(ctx)) {                                                \
+        ctx.dispatcher.clipPath(path, DlCanvas::ClipOp::k##clipop, is_aa); \
+      }                                                                    \
+    }                                                                      \
+                                                                           \
+    DisplayListCompare equals(const Clip##clipop##PathOp* other) const {   \
+      return is_aa == other->is_aa && path == other->path                  \
+                 ? DisplayListCompare::kEqual                              \
+                 : DisplayListCompare::kNotEqual;                          \
+    }                                                                      \
   };
 DEFINE_CLIP_PATH_OP(Intersect)
 DEFINE_CLIP_PATH_OP(Difference)
@@ -808,13 +809,13 @@ struct DrawArcOp final : DrawOpBase {
     void dispatch(DispatchContext& ctx) const {                           \
       if (op_needed(ctx)) {                                               \
         const SkPoint* pts = reinterpret_cast<const SkPoint*>(this + 1);  \
-        ctx.dispatcher.drawPoints(SkCanvas::PointMode::mode, count, pts); \
+        ctx.dispatcher.drawPoints(DlCanvas::PointMode::mode, count, pts); \
       }                                                                   \
     }                                                                     \
   };
-DEFINE_DRAW_POINTS_OP(Points, kPoints_PointMode);
-DEFINE_DRAW_POINTS_OP(Lines, kLines_PointMode);
-DEFINE_DRAW_POINTS_OP(Polygon, kPolygon_PointMode);
+DEFINE_DRAW_POINTS_OP(Points, kPoints);
+DEFINE_DRAW_POINTS_OP(Lines, kLines);
+DEFINE_DRAW_POINTS_OP(Polygon, kPolygon);
 #undef DEFINE_DRAW_POINTS_OP
 
 // 4 byte header + 4 byte payload packs efficiently into 8 bytes
@@ -1143,7 +1144,7 @@ struct DrawDisplayListOp final : DrawOpBase {
   explicit DrawDisplayListOp(const sk_sp<DisplayList> display_list)
       : display_list(std::move(display_list)) {}
 
-  sk_sp<DisplayList> display_list;
+  const sk_sp<DisplayList> display_list;
 
   void dispatch(DispatchContext& ctx) const {
     if (op_needed(ctx)) {

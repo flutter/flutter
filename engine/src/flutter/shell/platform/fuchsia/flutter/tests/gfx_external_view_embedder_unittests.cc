@@ -28,7 +28,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -449,10 +448,10 @@ std::vector<FakeResource> ExtractLayersFromSceneGraph(
 void DrawSimpleFrame(GfxExternalViewEmbedder& external_view_embedder,
                      SkISize frame_size,
                      float frame_dpr,
-                     std::function<void(SkCanvas*)> draw_callback) {
+                     std::function<void(flutter::DlCanvas*)> draw_callback) {
   external_view_embedder.BeginFrame(frame_size, nullptr, frame_dpr, nullptr);
   {
-    SkCanvas* root_canvas = external_view_embedder.GetRootCanvas();
+    flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PostPrerollAction(nullptr);
     draw_callback(root_canvas);
   }
@@ -462,26 +461,27 @@ void DrawSimpleFrame(GfxExternalViewEmbedder& external_view_embedder,
       nullptr, std::make_unique<flutter::SurfaceFrame>(
                    nullptr, framebuffer_info,
                    [](const flutter::SurfaceFrame& surface_frame,
-                      SkCanvas* canvas) { return true; },
+                      flutter::DlCanvas* canvas) { return true; },
                    frame_size));
 }
 
-void DrawFrameWithView(GfxExternalViewEmbedder& external_view_embedder,
-                       SkISize frame_size,
-                       float frame_dpr,
-                       int view_id,
-                       flutter::EmbeddedViewParams& view_params,
-                       std::function<void(SkCanvas*)> background_draw_callback,
-                       std::function<void(SkCanvas*)> overlay_draw_callback) {
+void DrawFrameWithView(
+    GfxExternalViewEmbedder& external_view_embedder,
+    SkISize frame_size,
+    float frame_dpr,
+    int view_id,
+    flutter::EmbeddedViewParams& view_params,
+    std::function<void(flutter::DlCanvas*)> background_draw_callback,
+    std::function<void(flutter::DlCanvas*)> overlay_draw_callback) {
   external_view_embedder.BeginFrame(frame_size, nullptr, frame_dpr, nullptr);
   {
-    SkCanvas* root_canvas = external_view_embedder.GetRootCanvas();
+    flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PrerollCompositeEmbeddedView(
         view_id, std::make_unique<flutter::EmbeddedViewParams>(view_params));
     external_view_embedder.PostPrerollAction(nullptr);
     background_draw_callback(root_canvas);
-    SkCanvas* overlay_canvas =
-        external_view_embedder.CompositeEmbeddedView(view_id).canvas;
+    flutter::DlCanvas* overlay_canvas =
+        external_view_embedder.CompositeEmbeddedView(view_id);
     overlay_draw_callback(overlay_canvas);
   }
   external_view_embedder.EndFrame(false, nullptr);
@@ -490,7 +490,7 @@ void DrawFrameWithView(GfxExternalViewEmbedder& external_view_embedder,
       nullptr, std::make_unique<flutter::SurfaceFrame>(
                    nullptr, framebuffer_info,
                    [](const flutter::SurfaceFrame& surface_frame,
-                      SkCanvas* canvas) { return true; },
+                      flutter::DlCanvas* canvas) { return true; },
                    frame_size));
 }
 
@@ -627,20 +627,20 @@ TEST_F(GfxExternalViewEmbedderTest, SimpleScene) {
   // Draw the scene.  The scene graph shouldn't change yet.
   const SkISize frame_size = SkISize::Make(512, 512);
   SkRect paint_region;
-  DrawSimpleFrame(
-      external_view_embedder, frame_size, 1.f,
-      [&paint_region](SkCanvas* canvas) {
-        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
-                                                canvas->imageInfo().height());
-        SkPaint rect_paint;
-        rect_paint.setColor(SK_ColorGREEN);
+  DrawSimpleFrame(external_view_embedder, frame_size, 1.f,
+                  [&paint_region](flutter::DlCanvas* canvas) {
+                    const SkISize layer_size = canvas->GetBaseLayerSize();
+                    const SkSize canvas_size =
+                        SkSize::Make(layer_size.width(), layer_size.height());
+                    flutter::DlPaint rect_paint(flutter::DlColor::kGreen());
 
-        paint_region = SkRect::MakeXYWH(
-            canvas_size.width() / 4.f, canvas_size.height() / 2.f,
-            canvas_size.width() / 32.f, canvas_size.height() / 32.f);
+                    paint_region = SkRect::MakeXYWH(
+                        canvas_size.width() / 4.f, canvas_size.height() / 2.f,
+                        canvas_size.width() / 32.f,
+                        canvas_size.height() / 32.f);
 
-        canvas->drawRect(paint_region, rect_paint);
-      });
+                    canvas->DrawRect(paint_region, rect_paint);
+                  });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
 
@@ -690,28 +690,28 @@ TEST_F(GfxExternalViewEmbedderTest, SceneWithOneView) {
 
   DrawFrameWithView(
       external_view_embedder, frame_size, 1.f, child_view_id, child_view_params,
-      [&main_surface_paint_region](SkCanvas* canvas) {
-        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
-                                                canvas->imageInfo().height());
+      [&main_surface_paint_region](flutter::DlCanvas* canvas) {
+        const SkISize layer_size = canvas->GetBaseLayerSize();
+        const SkSize canvas_size =
+            SkSize::Make(layer_size.width(), layer_size.height());
 
         main_surface_paint_region = SkRect::MakeXYWH(
             canvas_size.width() / 4.f, canvas_size.width() / 2.f,
             canvas_size.width() / 32.f, canvas_size.height() / 32.f);
 
-        SkPaint rect_paint;
-        rect_paint.setColor(SK_ColorGREEN);
-        canvas->drawRect(main_surface_paint_region, rect_paint);
+        flutter::DlPaint rect_paint(flutter::DlColor::kGreen());
+        canvas->DrawRect(main_surface_paint_region, rect_paint);
       },
-      [&overlay_paint_region](SkCanvas* canvas) {
-        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
-                                                canvas->imageInfo().height());
+      [&overlay_paint_region](flutter::DlCanvas* canvas) {
+        const SkISize layer_size = canvas->GetBaseLayerSize();
+        const SkSize canvas_size =
+            SkSize::Make(layer_size.width(), layer_size.height());
         overlay_paint_region = SkRect::MakeXYWH(
             canvas_size.width() * 3.f / 4.f, canvas_size.height() / 2.f,
             canvas_size.width() / 32.f, canvas_size.height() / 32.f);
 
-        SkPaint rect_paint;
-        rect_paint.setColor(SK_ColorRED);
-        canvas->drawRect(overlay_paint_region, rect_paint);
+        flutter::DlPaint rect_paint(flutter::DlColor::kRed());
+        canvas->DrawRect(overlay_paint_region, rect_paint);
       });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
@@ -765,24 +765,24 @@ TEST_F(GfxExternalViewEmbedderTest, SimpleSceneDisjointHitRegions) {
   const SkISize frame_size = SkISize::Make(512, 512);
   DrawSimpleFrame(
       external_view_embedder, frame_size, 1.f,
-      [&paint_region_1, &paint_region_2](SkCanvas* canvas) {
-        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
-                                                canvas->imageInfo().height());
+      [&paint_region_1, &paint_region_2](flutter::DlCanvas* canvas) {
+        const SkISize layer_size = canvas->GetBaseLayerSize();
+        const SkSize canvas_size =
+            SkSize::Make(layer_size.width(), layer_size.height());
 
         paint_region_1 = SkRect::MakeXYWH(
             canvas_size.width() / 4.f, canvas_size.height() / 2.f,
             canvas_size.width() / 32.f, canvas_size.height() / 32.f);
 
-        SkPaint rect_paint;
-        rect_paint.setColor(SK_ColorGREEN);
-        canvas->drawRect(paint_region_1, rect_paint);
+        flutter::DlPaint rect_paint(flutter::DlColor::kGreen());
+        canvas->DrawRect(paint_region_1, rect_paint);
 
         paint_region_2 = SkRect::MakeXYWH(
             canvas_size.width() * 3.f / 4.f, canvas_size.height() / 2.f,
             canvas_size.width() / 32.f, canvas_size.height() / 32.f);
 
-        rect_paint.setColor(SK_ColorRED);
-        canvas->drawRect(paint_region_2, rect_paint);
+        rect_paint.setColor(flutter::DlColor::kRed());
+        canvas->DrawRect(paint_region_2, rect_paint);
       });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
@@ -822,28 +822,28 @@ TEST_F(GfxExternalViewEmbedderTest, SimpleSceneOverlappingHitRegions) {
   // Draw the scene.  The scene graph shouldn't change yet.
   SkRect joined_paint_region = SkRect::MakeEmpty();
   const SkISize frame_size = SkISize::Make(512, 512);
-  DrawSimpleFrame(
-      external_view_embedder, frame_size, 1.f,
-      [&joined_paint_region](SkCanvas* canvas) {
-        const SkSize canvas_size = SkSize::Make(canvas->imageInfo().width(),
-                                                canvas->imageInfo().height());
+  DrawSimpleFrame(external_view_embedder, frame_size, 1.f,
+                  [&joined_paint_region](flutter::DlCanvas* canvas) {
+                    const SkISize layer_size = canvas->GetBaseLayerSize();
+                    const SkSize canvas_size =
+                        SkSize::Make(layer_size.width(), layer_size.height());
 
-        auto paint_region_1 = SkRect::MakeXYWH(
-            canvas_size.width() / 4.f, canvas_size.height() / 4.f,
-            canvas_size.width() / 2.f, canvas_size.height() / 2.f);
-        SkPaint rect_paint;
-        rect_paint.setColor(SK_ColorGREEN);
-        canvas->drawRect(paint_region_1, rect_paint);
+                    auto paint_region_1 = SkRect::MakeXYWH(
+                        canvas_size.width() / 4.f, canvas_size.height() / 4.f,
+                        canvas_size.width() / 2.f, canvas_size.height() / 2.f);
+                    flutter::DlPaint rect_paint(flutter::DlColor::kGreen());
+                    canvas->DrawRect(paint_region_1, rect_paint);
 
-        auto paint_region_2 = SkRect::MakeXYWH(
-            canvas_size.width() * 3.f / 8.f, canvas_size.height() / 4.f,
-            canvas_size.width() / 2.f, canvas_size.height() / 2.f);
-        rect_paint.setColor(SK_ColorRED);
-        canvas->drawRect(paint_region_2, rect_paint);
+                    auto paint_region_2 = SkRect::MakeXYWH(
+                        canvas_size.width() * 3.f / 8.f,
+                        canvas_size.height() / 4.f, canvas_size.width() / 2.f,
+                        canvas_size.height() / 2.f);
+                    rect_paint.setColor(flutter::DlColor::kRed());
+                    canvas->DrawRect(paint_region_2, rect_paint);
 
-        joined_paint_region.join(paint_region_1);
-        joined_paint_region.join(paint_region_2);
-      });
+                    joined_paint_region.join(paint_region_1);
+                    joined_paint_region.join(paint_region_2);
+                  });
   ExpectRootSceneGraph(fake_session().SceneGraph(), debug_name,
                        view_holder_token, view_ref);
 

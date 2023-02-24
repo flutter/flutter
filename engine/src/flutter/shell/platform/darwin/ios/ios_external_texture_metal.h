@@ -29,7 +29,7 @@ class IOSExternalTextureMetal final : public Texture {
   void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             const SkSamplingOptions& sampling) override;
+             const DlImageSampling sampling) override;
 
   // |Texture|
   void OnGrContextCreated() override;

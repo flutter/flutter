@@ -27,12 +27,12 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
       context_result_(std::move(context_result)) {
   FML_DCHECK(submit_callback_);
   if (surface_) {
-    canvas_ = surface_->getCanvas();
+    adapter_.set_canvas(surface_->getCanvas());
+    canvas_ = &adapter_;
   } else if (display_list_fallback) {
     FML_DCHECK(!frame_size.isEmpty());
-    dl_recorder_ =
-        sk_make_sp<DisplayListCanvasRecorder>(SkRect::Make(frame_size));
-    canvas_ = dl_recorder_.get();
+    dl_builder_ = sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size));
+    canvas_ = dl_builder_.get();
   }
 }
 
@@ -51,7 +51,7 @@ bool SurfaceFrame::IsSubmitted() const {
   return submitted_;
 }
 
-SkCanvas* SurfaceFrame::SkiaCanvas() {
+DlCanvas* SurfaceFrame::Canvas() {
   return canvas_;
 }
 
@@ -64,7 +64,7 @@ bool SurfaceFrame::PerformSubmit() {
     return false;
   }
 
-  if (submit_callback_(*this, SkiaCanvas())) {
+  if (submit_callback_(*this, Canvas())) {
     return true;
   }
 
@@ -72,12 +72,12 @@ bool SurfaceFrame::PerformSubmit() {
 }
 
 sk_sp<DisplayListBuilder> SurfaceFrame::GetDisplayListBuilder() {
-  return dl_recorder_ ? dl_recorder_->builder() : nullptr;
+  return dl_builder_;
 }
 
 sk_sp<DisplayList> SurfaceFrame::BuildDisplayList() {
   TRACE_EVENT0("impeller", "SurfaceFrame::BuildDisplayList");
-  return dl_recorder_ ? dl_recorder_->Build() : nullptr;
+  return dl_builder_ ? dl_builder_->Build() : nullptr;
 }
 
 }  // namespace flutter

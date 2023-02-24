@@ -99,7 +99,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const SkISize& f
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
-        [](const SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; }, frame_size);
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; }, frame_size);
   }
 
   PrecompileKnownSkSLsIfNecessary();
@@ -150,7 +150,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
   }
 
   auto submit_callback = [this, drawable](const SurfaceFrame& surface_frame,
-                                          SkCanvas* canvas) -> bool {
+                                          DlCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
@@ -159,7 +159,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
 
     {
       TRACE_EVENT0("flutter", "SkCanvas::Flush");
-      canvas->flush();
+      canvas->Flush();
     }
 
     if (!disable_partial_repaint_) {
@@ -218,7 +218,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
   }
 
   auto submit_callback = [texture = texture, delegate = delegate_](
-                             const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
+                             const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::PresentTexture");
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
@@ -227,7 +227,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
 
     {
       TRACE_EVENT0("flutter", "SkCanvas::Flush");
-      canvas->flush();
+      canvas->Flush();
     }
 
     return delegate->PresentTexture(texture);

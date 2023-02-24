@@ -7,8 +7,7 @@
 
 #include <map>
 
-#include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -40,12 +39,10 @@ class ContextListener {
 class Texture : public ContextListener {
  public:
   struct PaintContext {
-    SkCanvas* canvas = nullptr;
-    DisplayListBuilder* builder = nullptr;
+    DlCanvas* canvas = nullptr;
     GrDirectContext* gr_context = nullptr;
     impeller::AiksContext* aiks_context = nullptr;
-    const SkPaint* sk_paint = nullptr;
-    const DlPaint* dl_paint = nullptr;
+    const DlPaint* paint = nullptr;
   };
 
   explicit Texture(int64_t id);  // Called from UI or raster thread.
@@ -55,7 +52,7 @@ class Texture : public ContextListener {
   virtual void Paint(PaintContext& context,
                      const SkRect& bounds,
                      bool freeze,
-                     const SkSamplingOptions& sampling) = 0;
+                     const DlImageSampling sampling) = 0;
 
   // Called on raster thread.
   virtual void MarkNewFrameAvailable() = 0;

@@ -320,17 +320,17 @@ TEST(DisplayListComplexity, DrawTextBlob) {
 TEST(DisplayListComplexity, DrawPoints) {
   auto points = GetTestPoints();
   DisplayListBuilder builder_lines;
-  builder_lines.drawPoints(SkCanvas::kLines_PointMode, points.size(),
+  builder_lines.drawPoints(DlCanvas::PointMode::kLines, points.size(),
                            points.data());
   auto display_list_lines = builder_lines.Build();
 
   DisplayListBuilder builder_points;
-  builder_points.drawPoints(SkCanvas::kPoints_PointMode, points.size(),
+  builder_points.drawPoints(DlCanvas::PointMode::kPoints, points.size(),
                             points.data());
   auto display_list_points = builder_points.Build();
 
   DisplayListBuilder builder_polygon;
-  builder_polygon.drawPoints(SkCanvas::kPolygon_PointMode, points.size(),
+  builder_polygon.drawPoints(DlCanvas::PointMode::kPolygon, points.size(),
                              points.data());
   auto display_list_polygon = builder_polygon.Build();
 

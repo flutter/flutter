@@ -60,9 +60,9 @@ class DummyDelegate : public LayerStateStack::Delegate {
   void transform(const SkMatrix& matrix) override {}
   void integralTransform() override {}
 
-  void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) override {}
-  void clipRRect(const SkRRect& rrect, SkClipOp op, bool is_aa) override {}
-  void clipPath(const SkPath& path, SkClipOp op, bool is_aa) override {}
+  void clipRect(const SkRect& rect, ClipOp op, bool is_aa) override {}
+  void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) override {}
+  void clipPath(const SkPath& path, ClipOp op, bool is_aa) override {}
 
  private:
   static void error() {
@@ -72,129 +72,64 @@ class DummyDelegate : public LayerStateStack::Delegate {
 const std::shared_ptr<DummyDelegate> DummyDelegate::kInstance =
     std::make_shared<DummyDelegate>();
 
-class SkCanvasDelegate : public LayerStateStack::Delegate {
+class DlCanvasDelegate : public LayerStateStack::Delegate {
  public:
-  explicit SkCanvasDelegate(SkCanvas* canvas)
-      : canvas_(canvas), initial_save_level_(canvas->getSaveCount()) {}
+  explicit DlCanvasDelegate(DlCanvas* canvas)
+      : canvas_(canvas), initial_save_level_(canvas->GetSaveCount()) {}
 
-  void decommission() override { canvas_->restoreToCount(initial_save_level_); }
+  void decommission() override { canvas_->RestoreToCount(initial_save_level_); }
 
-  SkCanvas* canvas() const override { return canvas_; }
+  DlCanvas* canvas() const override { return canvas_; }
 
   SkRect local_cull_rect() const override {
-    return canvas_->getLocalClipBounds();
+    return canvas_->GetLocalClipBounds();
   }
   SkRect device_cull_rect() const override {
-    return SkRect::Make(canvas_->getDeviceClipBounds());
-  }
-  SkM44 matrix_4x4() const override { return canvas_->getLocalToDevice(); }
-  SkMatrix matrix_3x3() const override {
-    return canvas_->getLocalToDeviceAs3x3();
-  }
-  bool content_culled(const SkRect& content_bounds) const override {
-    return canvas_->quickReject(content_bounds);
-  }
-
-  void save() override { canvas_->save(); }
-  void saveLayer(const SkRect& bounds,
-                 LayerStateStack::RenderingAttributes& attributes,
-                 DlBlendMode blend_mode,
-                 const DlImageFilter* backdrop) override {
-    TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    SkPaint paint;
-    sk_sp<SkImageFilter> backdrop_filter =
-        backdrop ? backdrop->skia_object() : nullptr;
-    canvas_->saveLayer(SkCanvas::SaveLayerRec(
-        &bounds, attributes.fill(paint, blend_mode), backdrop_filter.get(), 0));
-  }
-  void restore() override { canvas_->restore(); }
-
-  void translate(SkScalar tx, SkScalar ty) override {
-    canvas_->translate(tx, ty);
-  }
-  void transform(const SkM44& m44) override { canvas_->concat(m44); }
-  void transform(const SkMatrix& matrix) override { canvas_->concat(matrix); }
-  void integralTransform() override {
-    SkM44 matrix = RasterCacheUtil::GetIntegralTransCTM(matrix_4x4());
-    canvas_->setMatrix(matrix);
-  }
-
-  void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) override {
-    canvas_->clipRect(rect, op, is_aa);
-  }
-  void clipRRect(const SkRRect& rrect, SkClipOp op, bool is_aa) override {
-    canvas_->clipRRect(rrect, op, is_aa);
-  }
-  void clipPath(const SkPath& path, SkClipOp op, bool is_aa) override {
-    canvas_->clipPath(path, op, is_aa);
-  }
-
- private:
-  SkCanvas* canvas_;
-  const int initial_save_level_;
-};
-
-class DlBuilderDelegate : public LayerStateStack::Delegate {
- public:
-  explicit DlBuilderDelegate(DisplayListBuilder* builder)
-      : builder_(builder), initial_save_level_(builder->getSaveCount()) {}
-
-  void decommission() override {
-    builder_->restoreToCount(initial_save_level_);
-  }
-
-  DisplayListBuilder* builder() const override { return builder_; }
-
-  SkRect local_cull_rect() const override {
-    return builder_->getLocalClipBounds();
-  }
-  SkRect device_cull_rect() const override {
-    return builder_->getDestinationClipBounds();
+    return canvas_->GetDestinationClipBounds();
   }
   SkM44 matrix_4x4() const override {
-    return builder_->getTransformFullPerspective();
+    return canvas_->GetTransformFullPerspective();
   }
-  SkMatrix matrix_3x3() const override { return builder_->getTransform(); }
+  SkMatrix matrix_3x3() const override { return canvas_->GetTransform(); }
   bool content_culled(const SkRect& content_bounds) const override {
-    return builder_->quickReject(content_bounds);
+    return canvas_->QuickReject(content_bounds);
   }
 
-  void save() override { builder_->save(); }
+  void save() override { canvas_->Save(); }
   void saveLayer(const SkRect& bounds,
                  LayerStateStack::RenderingAttributes& attributes,
                  DlBlendMode blend_mode,
                  const DlImageFilter* backdrop) override {
     TRACE_EVENT0("flutter", "Canvas::saveLayer");
     DlPaint paint;
-    builder_->saveLayer(&bounds, attributes.fill(paint, blend_mode), backdrop);
+    canvas_->SaveLayer(&bounds, attributes.fill(paint, blend_mode), backdrop);
   }
-  void restore() override { builder_->restore(); }
+  void restore() override { canvas_->Restore(); }
 
   void translate(SkScalar tx, SkScalar ty) override {
-    builder_->translate(tx, ty);
+    canvas_->Translate(tx, ty);
   }
-  void transform(const SkM44& m44) override { builder_->transform(m44); }
+  void transform(const SkM44& m44) override { canvas_->Transform(m44); }
   void transform(const SkMatrix& matrix) override {
-    builder_->transform(matrix);
+    canvas_->Transform(matrix);
   }
   void integralTransform() override {
     SkM44 matrix = RasterCacheUtil::GetIntegralTransCTM(matrix_4x4());
-    builder_->transformReset();
-    builder_->transform(matrix);
+    canvas_->SetTransform(matrix);
   }
 
-  void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) override {
-    builder_->clipRect(rect, op, is_aa);
+  void clipRect(const SkRect& rect, ClipOp op, bool is_aa) override {
+    canvas_->ClipRect(rect, op, is_aa);
   }
-  void clipRRect(const SkRRect& rrect, SkClipOp op, bool is_aa) override {
-    builder_->clipRRect(rrect, op, is_aa);
+  void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) override {
+    canvas_->ClipRRect(rrect, op, is_aa);
   }
-  void clipPath(const SkPath& path, SkClipOp op, bool is_aa) override {
-    builder_->clipPath(path, op, is_aa);
+  void clipPath(const SkPath& path, ClipOp op, bool is_aa) override {
+    canvas_->ClipPath(path, op, is_aa);
   }
 
  private:
-  DisplayListBuilder* builder_;
+  DlCanvas* canvas_;
   const int initial_save_level_;
 };
 
@@ -241,13 +176,13 @@ class PrerollDelegate : public LayerStateStack::Delegate {
     }
   }
 
-  void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) override {
+  void clipRect(const SkRect& rect, ClipOp op, bool is_aa) override {
     tracker_.clipRect(rect, op, is_aa);
   }
-  void clipRRect(const SkRRect& rrect, SkClipOp op, bool is_aa) override {
+  void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) override {
     tracker_.clipRRect(rrect, op, is_aa);
   }
-  void clipPath(const SkPath& path, SkClipOp op, bool is_aa) override {
+  void clipPath(const SkPath& path, ClipOp op, bool is_aa) override {
     tracker_.clipPath(path, op, is_aa);
   }
 
@@ -287,8 +222,10 @@ class SaveLayerEntry : public LayerStateStack::StateEntry {
   }
   void restore(LayerStateStack* stack) const override {
     if (stack->checkerboard_func_) {
-      (*stack->checkerboard_func_)(stack->canvas_delegate(),
-                                   stack->builder_delegate(), bounds_);
+      DlCanvas* canvas = stack->canvas_delegate();
+      if (canvas != nullptr) {
+        (*stack->checkerboard_func_)(canvas, bounds_);
+      }
     }
     stack->delegate_->restore();
     stack->outstanding_ = old_attributes_;
@@ -499,7 +436,8 @@ class ClipRectEntry : public LayerStateStack::StateEntry {
       : clip_rect_(clip_rect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRect(clip_rect_, SkClipOp::kIntersect, is_aa_);
+    stack->delegate_->clipRect(clip_rect_, DlCanvas::ClipOp::kIntersect,
+                               is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRect(clip_rect_);
@@ -518,7 +456,8 @@ class ClipRRectEntry : public LayerStateStack::StateEntry {
       : clip_rrect_(clip_rrect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRRect(clip_rrect_, SkClipOp::kIntersect, is_aa_);
+    stack->delegate_->clipRRect(clip_rrect_, DlCanvas::ClipOp::kIntersect,
+                                is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRRect(clip_rrect_);
@@ -538,7 +477,8 @@ class ClipPathEntry : public LayerStateStack::StateEntry {
   ~ClipPathEntry() override = default;
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipPath(clip_path_, SkClipOp::kIntersect, is_aa_);
+    stack->delegate_->clipPath(clip_path_, DlCanvas::ClipOp::kIntersect,
+                               is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipPath(clip_path_);
@@ -554,34 +494,6 @@ class ClipPathEntry : public LayerStateStack::StateEntry {
 // ==============================================================
 // RenderingAttributes methods
 // ==============================================================
-
-SkPaint* LayerStateStack::RenderingAttributes::fill(SkPaint& paint,
-                                                    DlBlendMode mode) const {
-  SkPaint* ret = nullptr;
-  if (opacity < SK_Scalar1) {
-    paint.setAlphaf(std::max(opacity, 0.0f));
-    ret = &paint;
-  } else {
-    paint.setAlphaf(SK_Scalar1);
-  }
-  if (color_filter) {
-    paint.setColorFilter(color_filter->skia_object());
-    ret = &paint;
-  } else {
-    paint.setColorFilter(nullptr);
-  }
-  if (image_filter) {
-    paint.setImageFilter(image_filter->skia_object());
-    ret = &paint;
-  } else {
-    paint.setImageFilter(nullptr);
-  }
-  paint.setBlendMode(ToSk(mode));
-  if (mode != DlBlendMode::kSrcOver) {
-    ret = &paint;
-  }
-  return ret;
-}
 
 DlPaint* LayerStateStack::RenderingAttributes::fill(DlPaint& paint,
                                                     DlBlendMode mode) const {
@@ -705,7 +617,7 @@ void LayerStateStack::clear_delegate() {
   delegate_ = DummyDelegate::kInstance;
 }
 
-void LayerStateStack::set_delegate(SkCanvas* canvas) {
+void LayerStateStack::set_delegate(DlCanvas* canvas) {
   if (delegate_) {
     if (canvas == delegate_->canvas()) {
       return;
@@ -713,20 +625,7 @@ void LayerStateStack::set_delegate(SkCanvas* canvas) {
     clear_delegate();
   }
   if (canvas) {
-    delegate_ = std::make_shared<SkCanvasDelegate>(canvas);
-    reapply_all();
-  }
-}
-
-void LayerStateStack::set_delegate(DisplayListBuilder* builder) {
-  if (delegate_) {
-    if (builder == delegate_->builder()) {
-      return;
-    }
-    clear_delegate();
-  }
-  if (builder) {
-    delegate_ = std::make_shared<DlBuilderDelegate>(builder);
+    delegate_ = std::make_shared<DlCanvasDelegate>(canvas);
     reapply_all();
   }
 }
@@ -739,6 +638,7 @@ void LayerStateStack::set_preroll_delegate(const SkMatrix& matrix) {
 }
 void LayerStateStack::set_preroll_delegate(const SkRect& cull_rect,
                                            const SkMatrix& matrix) {
+  clear_delegate();
   delegate_ = std::make_shared<PrerollDelegate>(cull_rect, matrix);
   reapply_all();
 }

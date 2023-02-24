@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_complexity.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/raster_cache_item.h"
@@ -18,7 +19,7 @@
 namespace flutter {
 
 static bool IsDisplayListWorthRasterizing(
-    DisplayList* display_list,
+    const DisplayList* display_list,
     bool will_change,
     bool is_complex,
     DisplayListComplexityCalculator* complexity_calculator) {
@@ -46,7 +47,7 @@ static bool IsDisplayListWorthRasterizing(
 }
 
 DisplayListRasterCacheItem::DisplayListRasterCacheItem(
-    DisplayList* display_list,
+    const sk_sp<DisplayList>& display_list,
     const SkPoint& offset,
     bool is_complex,
     bool will_change)
@@ -59,7 +60,7 @@ DisplayListRasterCacheItem::DisplayListRasterCacheItem(
       will_change_(will_change) {}
 
 std::unique_ptr<DisplayListRasterCacheItem> DisplayListRasterCacheItem::Make(
-    DisplayList* display_list,
+    const sk_sp<DisplayList>& display_list,
     const SkPoint& offset,
     bool is_complex,
     bool will_change) {
@@ -75,7 +76,7 @@ void DisplayListRasterCacheItem::PrerollSetup(PrerollContext* context,
                                 context->gr_context->backend())
                           : DisplayListComplexityCalculator::GetForSoftware();
 
-  if (!IsDisplayListWorthRasterizing(display_list_, will_change_, is_complex_,
+  if (!IsDisplayListWorthRasterizing(display_list(), will_change_, is_complex_,
                                      complexity_calculator)) {
     // We only deal with display lists that are worthy of rasterization.
     return;
@@ -121,13 +122,13 @@ void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
 }
 
 bool DisplayListRasterCacheItem::Draw(const PaintContext& context,
-                                      const SkPaint* paint) const {
+                                      const DlPaint* paint) const {
   return Draw(context, context.canvas, paint);
 }
 
 bool DisplayListRasterCacheItem::Draw(const PaintContext& context,
-                                      SkCanvas* canvas,
-                                      const SkPaint* paint) const {
+                                      DlCanvas* canvas,
+                                      const DlPaint* paint) const {
   if (!context.raster_cache || !canvas) {
     return false;
   }
@@ -164,8 +165,8 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
   };
   return context.raster_cache->UpdateCacheEntry(
       GetId().value(), r_context,
-      [display_list = display_list_](SkCanvas* canvas) {
-        display_list->RenderTo(canvas);
+      [display_list = display_list_](DlCanvas* canvas) {
+        canvas->DrawDisplayList(display_list);
       });
 }
 }  // namespace flutter

@@ -17,12 +17,12 @@ namespace testing {
 class MockTexture : public Texture {
  public:
   struct PaintCall {
-    SkCanvas& canvas;
+    DlCanvas& canvas;
     SkRect bounds;
     bool freeze;
     GrDirectContext* context;
-    SkSamplingOptions sampling;
-    const SkPaint* paint;
+    DlImageSampling sampling;
+    const DlPaint* paint;
   };
 
   explicit MockTexture(int64_t textureId);
@@ -31,7 +31,7 @@ class MockTexture : public Texture {
   void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             const SkSamplingOptions& sampling) override;
+             const DlImageSampling sampling) override;
 
   void OnGrContextCreated() override { gr_context_created_ = true; }
   void OnGrContextDestroyed() override { gr_context_destroyed_ = true; }

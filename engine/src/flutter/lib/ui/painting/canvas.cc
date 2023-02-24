@@ -92,7 +92,7 @@ void Canvas::restore() {
 
 int Canvas::getSaveCount() {
   if (display_list_builder_) {
-    return builder()->getSaveCount();
+    return builder()->GetSaveCount();
   } else {
     return 0;
   }
@@ -144,7 +144,7 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
 
 void Canvas::getTransform(Dart_Handle matrix4_handle) {
   if (display_list_builder_) {
-    SkM44 sk_m44 = builder()->getTransformFullPerspective();
+    SkM44 sk_m44 = builder()->GetTransformFullPerspective();
     SkScalar m44_values[16];
     // The Float array stored by Dart Matrix4 is in column-major order
     sk_m44.getColMajor(m44_values);
@@ -159,7 +159,7 @@ void Canvas::clipRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      SkClipOp clipOp,
+                      DlCanvas::ClipOp clipOp,
                       bool doAntiAlias) {
   if (display_list_builder_) {
     builder()->clipRect(SkRect::MakeLTRB(left, top, right, bottom), clipOp,
@@ -169,7 +169,8 @@ void Canvas::clipRect(double left,
 
 void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
   if (display_list_builder_) {
-    builder()->clipRRect(rrect.sk_rrect, SkClipOp::kIntersect, doAntiAlias);
+    builder()->clipRRect(rrect.sk_rrect, DlCanvas::ClipOp::kIntersect,
+                         doAntiAlias);
   }
 }
 
@@ -180,14 +181,15 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
     return;
   }
   if (display_list_builder_) {
-    builder()->clipPath(path->path(), SkClipOp::kIntersect, doAntiAlias);
+    builder()->clipPath(path->path(), DlCanvas::ClipOp::kIntersect,
+                        doAntiAlias);
   }
 }
 
 void Canvas::getDestinationClipBounds(Dart_Handle rect_handle) {
   if (display_list_builder_) {
     auto rect = tonic::Float64List(rect_handle);
-    SkRect bounds = builder()->getDestinationClipBounds();
+    SkRect bounds = builder()->GetDestinationClipBounds();
     rect[0] = bounds.fLeft;
     rect[1] = bounds.fTop;
     rect[2] = bounds.fRight;
@@ -198,7 +200,7 @@ void Canvas::getDestinationClipBounds(Dart_Handle rect_handle) {
 void Canvas::getLocalClipBounds(Dart_Handle rect_handle) {
   if (display_list_builder_) {
     auto rect = tonic::Float64List(rect_handle);
-    SkRect bounds = builder()->getLocalClipBounds();
+    SkRect bounds = builder()->GetLocalClipBounds();
     rect[0] = bounds.fLeft;
     rect[1] = bounds.fTop;
     rect[2] = bounds.fRight;
@@ -481,7 +483,7 @@ void Canvas::drawPicture(Picture* picture) {
 
 void Canvas::drawPoints(Dart_Handle paint_objects,
                         Dart_Handle paint_data,
-                        SkCanvas::PointMode point_mode,
+                        DlCanvas::PointMode point_mode,
                         const tonic::Float32List& points) {
   Paint paint(paint_objects, paint_data);
 
@@ -491,13 +493,13 @@ void Canvas::drawPoints(Dart_Handle paint_objects,
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     switch (point_mode) {
-      case SkCanvas::kPoints_PointMode:
+      case DlCanvas::PointMode::kPoints:
         paint.sync_to(builder(), kDrawPointsAsPointsFlags);
         break;
-      case SkCanvas::kLines_PointMode:
+      case DlCanvas::PointMode::kLines:
         paint.sync_to(builder(), kDrawPointsAsLinesFlags);
         break;
-      case SkCanvas::kPolygon_PointMode:
+      case DlCanvas::PointMode::kPolygon:
         paint.sync_to(builder(), kDrawPointsAsPolygonFlags);
         break;
     }

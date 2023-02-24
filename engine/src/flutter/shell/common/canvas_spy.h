@@ -3,6 +3,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkCanvasVirtualEnforcer.h"
@@ -39,11 +40,17 @@ class CanvasSpy {
   /// @brief      The returned canvas delegate all operations to the target
   /// canvas
   ///             while spying on them.
-  SkCanvas* GetSpyingCanvas();
+  DlCanvas* GetSpyingCanvas();
+
+  //----------------------------------------------------------------------------
+  /// @brief      The underlying Skia canvas that implements the spying
+  ///             (mainly for testing)
+  SkCanvas* GetRawSpyingCanvas();
 
  private:
   std::unique_ptr<SkNWayCanvas> n_way_canvas_;
   std::unique_ptr<DidDrawCanvas> did_draw_canvas_;
+  DlSkCanvasAdapter adapter_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CanvasSpy);
 };

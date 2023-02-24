@@ -212,12 +212,12 @@ void DisplayListMatrixClipTracker::setTransform(const SkM44& m44) {
 }
 
 void DisplayListMatrixClipTracker::clipRRect(const SkRRect& rrect,
-                                             SkClipOp op,
+                                             ClipOp op,
                                              bool is_aa) {
   switch (op) {
-    case SkClipOp::kIntersect:
+    case ClipOp::kIntersect:
       break;
-    case SkClipOp::kDifference:
+    case ClipOp::kDifference:
       if (!rrect.isRect()) {
         return;
       }
@@ -226,27 +226,27 @@ void DisplayListMatrixClipTracker::clipRRect(const SkRRect& rrect,
   current_->clipBounds(rrect.getBounds(), op, is_aa);
 }
 void DisplayListMatrixClipTracker::clipPath(const SkPath& path,
-                                            SkClipOp op,
+                                            ClipOp op,
                                             bool is_aa) {
   // Map "kDifference of inverse path" to "kIntersect of the original path" and
   // map "kIntersect of inverse path" to "kDifference of the original path"
   if (path.isInverseFillType()) {
     switch (op) {
-      case SkClipOp::kIntersect:
-        op = SkClipOp::kDifference;
+      case ClipOp::kIntersect:
+        op = ClipOp::kDifference;
         break;
-      case SkClipOp::kDifference:
-        op = SkClipOp::kIntersect;
+      case ClipOp::kDifference:
+        op = ClipOp::kIntersect;
         break;
     }
   }
 
   SkRect bounds;
   switch (op) {
-    case SkClipOp::kIntersect:
+    case ClipOp::kIntersect:
       bounds = path.getBounds();
       break;
-    case SkClipOp::kDifference:
+    case ClipOp::kDifference:
       if (!path.isRect(&bounds)) {
         return;
       }
@@ -272,7 +272,7 @@ bool DisplayListMatrixClipTracker::Data::content_culled(
 }
 
 void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
-                                                    SkClipOp op,
+                                                    ClipOp op,
                                                     bool is_aa) {
   if (cull_rect_.isEmpty()) {
     // No point in intersecting further.
@@ -283,7 +283,7 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
     return;
   }
   switch (op) {
-    case SkClipOp::kIntersect: {
+    case ClipOp::kIntersect: {
       if (clip.isEmpty()) {
         cull_rect_.setEmpty();
         break;
@@ -298,7 +298,7 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
       }
       break;
     }
-    case SkClipOp::kDifference: {
+    case ClipOp::kDifference: {
       if (clip.isEmpty() || !clip.intersects(cull_rect_)) {
         break;
       }

@@ -90,7 +90,7 @@ TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
   EXPECT_EQ(mock_texture->paint_calls(),
             std::vector({MockTexture::PaintCall{
                 mock_canvas(), layer->paint_bounds(), false, nullptr,
-                SkSamplingOptions(SkFilterMode::kLinear)}}));
+                DlImageSampling::kLinear}}));
   EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
 }
 

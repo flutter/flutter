@@ -8,6 +8,7 @@
 
 #include <utility>
 
+#include "flutter/display_list/display_list_color_source.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
@@ -43,7 +44,7 @@ void AndroidExternalTextureGL::MarkNewFrameAvailable() {
 void AndroidExternalTextureGL::Paint(PaintContext& context,
                                      const SkRect& bounds,
                                      bool freeze,
-                                     const SkSamplingOptions& sampling) {
+                                     const DlImageSampling sampling) {
   if (state_ == AttachmentState::detached) {
     return;
   }
@@ -63,26 +64,27 @@ void AndroidExternalTextureGL::Paint(PaintContext& context,
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
   if (image) {
-    SkAutoCanvasRestore autoRestore(context.canvas, true);
+    DlAutoCanvasRestore autoRestore(context.canvas, true);
 
     // The incoming texture is vertically flipped, so we flip it
     // back. OpenGL's coordinate system has Positive Y equivalent to up, while
     // Skia's coordinate system has Negative Y equvalent to up.
-    context.canvas->translate(bounds.x(), bounds.y() + bounds.height());
-    context.canvas->scale(bounds.width(), -bounds.height());
+    context.canvas->Translate(bounds.x(), bounds.y() + bounds.height());
+    context.canvas->Scale(bounds.width(), -bounds.height());
 
+    auto dl_image = DlImage::Make(image);
     if (!transform.isIdentity()) {
-      sk_sp<SkShader> shader = image->makeShader(
-          SkTileMode::kRepeat, SkTileMode::kRepeat, sampling, transform);
+      DlImageColorSource source(dl_image, DlTileMode::kRepeat,
+                                DlTileMode::kRepeat, sampling, &transform);
 
-      SkPaint paintWithShader;
-      if (context.sk_paint) {
-        paintWithShader = *context.sk_paint;
+      DlPaint paintWithShader;
+      if (context.paint) {
+        paintWithShader = *context.paint;
       }
-      paintWithShader.setShader(shader);
-      context.canvas->drawRect(SkRect::MakeWH(1, 1), paintWithShader);
+      paintWithShader.setColorSource(&source);
+      context.canvas->DrawRect(SkRect::MakeWH(1, 1), paintWithShader);
     } else {
-      context.canvas->drawImage(image, 0, 0, sampling, context.sk_paint);
+      context.canvas->DrawImage(dl_image, {0, 0}, sampling, context.paint);
     }
   }
 }

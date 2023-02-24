@@ -108,7 +108,7 @@ class CompositorContext {
    public:
     ScopedFrame(CompositorContext& context,
                 GrDirectContext* gr_context,
-                SkCanvas* canvas,
+                DlCanvas* canvas,
                 ExternalViewEmbedder* view_embedder,
                 const SkMatrix& root_surface_transformation,
                 bool instrumentation_enabled,
@@ -119,7 +119,7 @@ class CompositorContext {
 
     virtual ~ScopedFrame();
 
-    SkCanvas* canvas() { return canvas_; }
+    DlCanvas* canvas() { return canvas_; }
 
     DisplayListBuilder* display_list_builder() const {
       return display_list_builder_;
@@ -146,7 +146,7 @@ class CompositorContext {
    private:
     CompositorContext& context_;
     GrDirectContext* gr_context_;
-    SkCanvas* canvas_;
+    DlCanvas* canvas_;
     DisplayListBuilder* display_list_builder_;
     impeller::AiksContext* aiks_context_;
     ExternalViewEmbedder* view_embedder_;
@@ -166,7 +166,7 @@ class CompositorContext {
 
   virtual std::unique_ptr<ScopedFrame> AcquireFrame(
       GrDirectContext* gr_context,
-      SkCanvas* canvas,
+      DlCanvas* canvas,
       ExternalViewEmbedder* view_embedder,
       const SkMatrix& root_surface_transformation,
       bool instrumentation_enabled,

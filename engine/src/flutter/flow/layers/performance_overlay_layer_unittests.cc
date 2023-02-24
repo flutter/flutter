@@ -55,14 +55,17 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
   sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
+  DlSkCanvasAdapter canvas(surface->getCanvas());
 
   ASSERT_TRUE(surface != nullptr);
 
   LayerStateStack state_stack;
+  state_stack.set_delegate(&canvas);
+
   flutter::PaintContext paint_context = {
       // clang-format off
       .state_stack                   = state_stack,
-      .canvas                        = surface->getCanvas(),
+      .canvas                        = &canvas,
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .raster_time                   = mock_stopwatch,
@@ -174,8 +177,8 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   auto overlay_text = PerformanceOverlayLayer::MakeStatisticsText(
       paint_context().raster_time, "Raster", "");
   auto overlay_text_data = overlay_text->serialize(SkSerialProcs{});
-  SkPaint text_paint;
-  text_paint.setColor(SK_ColorGRAY);
+  // Historically SK_ColorGRAY (== 0xFF888888) was used here
+  DlPaint text_paint(0xFF888888);
   SkPoint text_position = SkPoint::Make(16.0f, 22.0f);
 
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the

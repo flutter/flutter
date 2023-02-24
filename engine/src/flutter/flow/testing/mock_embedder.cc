@@ -11,17 +11,12 @@ MockViewEmbedder::MockViewEmbedder() = default;
 
 MockViewEmbedder::~MockViewEmbedder() = default;
 
-void MockViewEmbedder::AddCanvas(SkCanvas* canvas) {
-  contexts_.emplace_back(EmbedderPaintContext{canvas, nullptr});
-}
-
-void MockViewEmbedder::AddRecorder(DisplayListCanvasRecorder* recorder) {
-  contexts_.emplace_back(
-      EmbedderPaintContext{recorder, recorder->builder().get()});
+void MockViewEmbedder::AddCanvas(DlCanvas* canvas) {
+  contexts_.emplace_back(canvas);
 }
 
 // |ExternalViewEmbedder|
-SkCanvas* MockViewEmbedder::GetRootCanvas() {
+DlCanvas* MockViewEmbedder::GetRootCanvas() {
   return nullptr;
 }
 
@@ -43,21 +38,11 @@ void MockViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 // |ExternalViewEmbedder|
-std::vector<SkCanvas*> MockViewEmbedder::GetCurrentCanvases() {
-  return std::vector<SkCanvas*>({});
-}
-
-// |ExternalViewEmbedder|
-std::vector<DisplayListBuilder*> MockViewEmbedder::GetCurrentBuilders() {
-  return std::vector<DisplayListBuilder*>({});
-}
-
-// |ExternalViewEmbedder|
-EmbedderPaintContext MockViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
+DlCanvas* MockViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   painted_views_.emplace_back(view_id);
-  EmbedderPaintContext context = contexts_.front();
+  DlCanvas* canvas = contexts_.front();
   contexts_.pop_front();
-  return context;
+  return canvas;
 }
 
 }  // namespace testing

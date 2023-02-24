@@ -73,7 +73,8 @@ class DlPaint {
   static constexpr float kDefaultWidth = 0.0;
   static constexpr float kDefaultMiter = 4.0;
 
-  DlPaint();
+  DlPaint() : DlPaint(DlColor::kBlack()) {}
+  DlPaint(DlColor color);
 
   bool isAntiAlias() const { return isAntiAlias_; }
   DlPaint& setAntiAlias(bool isAntiAlias) {

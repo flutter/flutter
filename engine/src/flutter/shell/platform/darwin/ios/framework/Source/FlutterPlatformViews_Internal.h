@@ -203,6 +203,8 @@ class FlutterPlatformViewsController {
   void PrerollCompositeEmbeddedView(int64_t view_id,
                                     std::unique_ptr<flutter::EmbeddedViewParams> params);
 
+  size_t EmbeddedViewCount();
+
   // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
   //
   // If the `FlutterPlatformViewsController` does not contain any `FlutterPlatformView` object or
@@ -216,11 +218,7 @@ class FlutterPlatformViewsController {
   void EndFrame(bool should_resubmit_frame,
                 const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
 
-  std::vector<SkCanvas*> GetCurrentCanvases();
-
-  std::vector<DisplayListBuilder*> GetCurrentBuilders();
-
-  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id);
+  DlCanvas* CompositeEmbeddedView(int64_t view_id);
 
   // The rect of the platform view at index view_id. This rect has been translated into the
   // host view coordinate system. Units are device screen pixels.

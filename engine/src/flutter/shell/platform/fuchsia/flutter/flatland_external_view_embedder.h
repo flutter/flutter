@@ -21,7 +21,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/canvas_spy.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -60,13 +59,7 @@ class FlatlandExternalViewEmbedder final
   ~FlatlandExternalViewEmbedder();
 
   // |ExternalViewEmbedder|
-  SkCanvas* GetRootCanvas() override;
-
-  // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override;
-
-  // |ExternalViewEmbedder|
-  std::vector<flutter::DisplayListBuilder*> GetCurrentBuilders() override;
+  flutter::DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -74,7 +67,7 @@ class FlatlandExternalViewEmbedder final
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  flutter::EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
+  flutter::DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   flutter::PostPrerollResult PostPrerollAction(

@@ -25,7 +25,7 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
     bounds_ = display_list_.skia_object()->bounds().makeOffset(offset_.x(),
                                                                offset_.y());
     display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
-        display_list_.skia_object().get(), offset_, is_complex, will_change);
+        display_list_.skia_object(), offset_, is_complex, will_change);
   }
 }
 
@@ -118,7 +118,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     mutator.integralTransform();
 
     if (display_list_raster_cache_item_) {
-      SkPaint paint;
+      DlPaint paint;
       if (display_list_raster_cache_item_->Draw(
               context, context.state_stack.fill(paint))) {
         TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
@@ -130,21 +130,23 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   SkScalar opacity = context.state_stack.outstanding_opacity();
 
   if (context.enable_leaf_layer_tracing) {
-    const auto canvas_size = context.canvas->getBaseLayerSize();
+    const auto canvas_size = context.canvas->GetBaseLayerSize();
     auto offscreen_surface =
         std::make_unique<OffscreenSurface>(context.gr_context, canvas_size);
 
-    const auto& ctm = context.canvas->getTotalMatrix();
+    const auto& ctm = context.canvas->GetTransform();
 
     const auto start_time = fml::TimePoint::Now();
     {
       // render display list to offscreen surface.
       auto* canvas = offscreen_surface->GetCanvas();
-      SkAutoCanvasRestore save(canvas, true);
-      canvas->clear(SK_ColorTRANSPARENT);
-      canvas->setMatrix(ctm);
-      display_list()->RenderTo(canvas, opacity);
-      canvas->flush();
+      {
+        DlAutoCanvasRestore save(canvas, true);
+        canvas->Clear(DlColor::kTransparent());
+        canvas->SetTransform(ctm);
+        canvas->DrawDisplayList(display_list_.skia_object(), opacity);
+      }
+      canvas->Flush();
     }
     const fml::TimeDelta offscreen_render_time =
         fml::TimePoint::Now() - start_time;
@@ -157,13 +159,8 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     context.layer_snapshot_store->Add(snapshot_data);
   }
 
-  if (context.builder) {
-    auto display_list = display_list_.skia_object();
-    auto restore = context.state_stack.applyState(display_list->bounds(), 0);
-    context.builder->drawDisplayList(display_list);
-  } else {
-    display_list()->RenderTo(context.canvas, opacity);
-  }
+  auto display_list = display_list_.skia_object();
+  context.canvas->DrawDisplayList(display_list, opacity);
 }
 
 }  // namespace flutter

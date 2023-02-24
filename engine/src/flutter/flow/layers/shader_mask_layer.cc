@@ -54,35 +54,25 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   if (context.raster_cache) {
     mutator.integralTransform();
 
-    SkPaint sk_paint;
+    DlPaint paint;
     if (layer_raster_cache_item_->Draw(context,
-                                       context.state_stack.fill(sk_paint))) {
+                                       context.state_stack.fill(paint))) {
       return;
     }
   }
   auto shader_rect = SkRect::MakeWH(mask_rect_.width(), mask_rect_.height());
 
   mutator.saveLayer(paint_bounds());
-  if (context.builder) {
-    PaintChildren(context);
 
-    DlPaint dl_paint;
-    dl_paint.setBlendMode(blend_mode_);
-    if (color_source_) {
-      dl_paint.setColorSource(color_source_.get());
-    }
-    context.builder->translate(mask_rect_.left(), mask_rect_.top());
-    context.builder->drawRect(shader_rect, dl_paint);
-  } else {
-    PaintChildren(context);
-    SkPaint paint;
-    paint.setBlendMode(ToSk(blend_mode_));
-    if (color_source_) {
-      paint.setShader(color_source_->skia_object());
-    }
-    context.canvas->translate(mask_rect_.left(), mask_rect_.top());
-    context.canvas->drawRect(shader_rect, paint);
+  PaintChildren(context);
+
+  DlPaint dl_paint;
+  dl_paint.setBlendMode(blend_mode_);
+  if (color_source_) {
+    dl_paint.setColorSource(color_source_.get());
   }
+  context.canvas->Translate(mask_rect_.left(), mask_rect_.top());
+  context.canvas->DrawRect(shader_rect, dl_paint);
 }
 
 }  // namespace flutter
