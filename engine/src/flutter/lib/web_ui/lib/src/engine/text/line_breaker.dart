@@ -65,80 +65,83 @@ class FWLineBreakFragmenter extends TextFragmenter implements LineBreakFragmente
 /// An implementation of [LineBreakFragmenter] that uses V8's
 /// `v8BreakIterator` API to find line breaks in the given [text].
 class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmenter {
-  V8LineBreakFragmenter(super.text)
-      : assert(domIntl.v8BreakIterator != null);
+  V8LineBreakFragmenter(super.text) : assert(domIntl.v8BreakIterator != null);
+
+  final DomV8BreakIterator _v8BreakIterator = createV8BreakIterator();
 
   @override
   List<LineBreakFragment> fragment() {
-    final List<LineBreakFragment> breaks = <LineBreakFragment>[];
-    int fragmentStart = 0;
+    return breakLinesUsingV8BreakIterator(text, _v8BreakIterator);
+  }
+}
 
-    final DomV8BreakIterator iterator = createV8BreakIterator();
+List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, DomV8BreakIterator iterator) {
+  final List<LineBreakFragment> breaks = <LineBreakFragment>[];
+  int fragmentStart = 0;
 
-    iterator.adoptText(text);
-    iterator.first();
-    while (iterator.next() != -1) {
-      final LineBreakType type = _getBreakType(iterator);
+  iterator.adoptText(text);
+  iterator.first();
+  while (iterator.next() != -1) {
+    final LineBreakType type = _getV8BreakType(text, iterator);
 
-      final int fragmentEnd = iterator.current().toInt();
-      int trailingNewlines = 0;
-      int trailingSpaces = 0;
+    final int fragmentEnd = iterator.current().toInt();
+    int trailingNewlines = 0;
+    int trailingSpaces = 0;
 
-      // Calculate trailing newlines and spaces.
-      for (int i = fragmentStart; i < fragmentEnd; i++) {
-        final int codeUnit = text.codeUnitAt(i);
-        if (_kNewlines.contains(codeUnit)) {
-          trailingNewlines++;
-          trailingSpaces++;
-        } else if (_kSpaces.contains(codeUnit)) {
-          trailingSpaces++;
-        } else {
-          // Always break after a sequence of spaces.
-          if (trailingSpaces > 0) {
-            breaks.add(LineBreakFragment(
-              fragmentStart,
-              i,
-              LineBreakType.opportunity,
-              trailingNewlines: trailingNewlines,
-              trailingSpaces: trailingSpaces,
-            ));
-            fragmentStart = i;
-            trailingNewlines = 0;
-            trailingSpaces = 0;
-          }
+    // Calculate trailing newlines and spaces.
+    for (int i = fragmentStart; i < fragmentEnd; i++) {
+      final int codeUnit = text.codeUnitAt(i);
+      if (_kNewlines.contains(codeUnit)) {
+        trailingNewlines++;
+        trailingSpaces++;
+      } else if (_kSpaces.contains(codeUnit)) {
+        trailingSpaces++;
+      } else {
+        // Always break after a sequence of spaces.
+        if (trailingSpaces > 0) {
+          breaks.add(LineBreakFragment(
+            fragmentStart,
+            i,
+            LineBreakType.opportunity,
+            trailingNewlines: trailingNewlines,
+            trailingSpaces: trailingSpaces,
+          ));
+          fragmentStart = i;
+          trailingNewlines = 0;
+          trailingSpaces = 0;
         }
       }
-
-      breaks.add(LineBreakFragment(
-        fragmentStart,
-        fragmentEnd,
-        type,
-        trailingNewlines: trailingNewlines,
-        trailingSpaces: trailingSpaces,
-      ));
-      fragmentStart = fragmentEnd;
     }
 
-    if (breaks.isEmpty || breaks.last.type == LineBreakType.mandatory) {
-      breaks.add(LineBreakFragment(text.length, text.length, LineBreakType.endOfText, trailingNewlines: 0, trailingSpaces: 0));
-    }
-
-    return breaks;
+    breaks.add(LineBreakFragment(
+      fragmentStart,
+      fragmentEnd,
+      type,
+      trailingNewlines: trailingNewlines,
+      trailingSpaces: trailingSpaces,
+    ));
+    fragmentStart = fragmentEnd;
   }
 
-  /// Gets break type from v8BreakIterator.
-  LineBreakType _getBreakType(DomV8BreakIterator iterator) {
-    final int fragmentEnd = iterator.current().toInt();
-
-    // I don't know why v8BreakIterator uses the type "none" to mean "soft break".
-    if (iterator.breakType() != 'none') {
-      return LineBreakType.mandatory;
-    }
-    if (fragmentEnd == text.length) {
-      return LineBreakType.endOfText;
-    }
-    return LineBreakType.opportunity;
+  if (breaks.isEmpty || breaks.last.type == LineBreakType.mandatory) {
+    breaks.add(LineBreakFragment(text.length, text.length, LineBreakType.endOfText, trailingNewlines: 0, trailingSpaces: 0));
   }
+
+  return breaks;
+}
+
+/// Gets break type from v8BreakIterator.
+LineBreakType _getV8BreakType(String text, DomV8BreakIterator iterator) {
+  final int fragmentEnd = iterator.current().toInt();
+
+  // I don't know why v8BreakIterator uses the type "none" to mean "soft break".
+  if (iterator.breakType() != 'none') {
+    return LineBreakType.mandatory;
+  }
+  if (fragmentEnd == text.length) {
+    return LineBreakType.endOfText;
+  }
+  return LineBreakType.opportunity;
 }
 
 class LineBreakFragment extends TextFragment {

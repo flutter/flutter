@@ -93,6 +93,9 @@ external DomWindow get domWindow;
 @JS('Intl')
 external DomIntl get domIntl;
 
+@JS('Symbol')
+external DomSymbol get domSymbol;
+
 @JS()
 @staticInterop
 class DomNavigator {}
@@ -2036,7 +2039,7 @@ String? domGetConstructorName(Object o) {
 bool domInstanceOfString(Object? element, String objectType) =>
     js_util.instanceof(element, domGetConstructor(objectType)!);
 
-/// [_DomElementList] is the shared interface for APIs that return either
+/// This is the shared interface for APIs that return either
 /// `NodeList` or `HTMLCollection`. Do *not* add any API to this class that
 /// isn't support by both JS objects. Furthermore, this is an internal class and
 /// should only be returned as a wrapped object to Dart.
@@ -2135,15 +2138,121 @@ Iterable<T> createDomTouchListWrapper<T>(_DomTouchList list) =>
 
 @JS()
 @staticInterop
+class DomSymbol {}
+
+extension DomSymbolExtension on DomSymbol {
+  external Object get iterator;
+}
+
+@JS()
+@staticInterop
 class DomIntl {}
 
 extension DomIntlExtension on DomIntl {
+  // ignore: non_constant_identifier_names
+  external Object? get Segmenter;
+
   /// This is a V8-only API for segmenting text.
   ///
   /// See: https://code.google.com/archive/p/v8-i18n/wikis/BreakIterator.wiki
   external Object? get v8BreakIterator;
 }
 
+/// Similar to [js_util.callMethod] but allows for providing a non-string method
+/// name.
+T _jsCallMethod<T>(Object o, Object method, [List<Object?> args = const <Object?>[]]) {
+  final Object actualMethod = js_util.getProperty(o, method);
+  return js_util.callMethod<T>(actualMethod, 'apply', <Object?>[o, args]);
+}
+
+@JS()
+@staticInterop
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter
+class DomSegmenter {}
+
+extension DomSegmenterExtension on DomSegmenter {
+  external DomSegments segment(String text);
+}
+
+@JS()
+@staticInterop
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment/Segments
+class DomSegments {}
+
+extension DomSegmentsExtension on DomSegments {
+  DomIteratorWrapper<DomSegment> iterator() {
+    final DomIterator segmentIterator = _jsCallMethod(this, domSymbol.iterator) as DomIterator;
+    return DomIteratorWrapper<DomSegment>(segmentIterator);
+  }
+}
+
+@JS()
+@staticInterop
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
+class DomIterator {}
+
+extension DomIteratorExtension on DomIterator {
+  external DomIteratorResult next();
+}
+
+@JS()
+@staticInterop
+class DomIteratorResult {}
+
+extension DomIteratorResultExtension on DomIteratorResult {
+  external bool get done;
+  external Object get value;
+}
+
+/// Wraps a native JS iterator to provide a Dart [Iterator].
+class DomIteratorWrapper<T> implements Iterator<T> {
+  DomIteratorWrapper(this._iterator);
+
+  final DomIterator _iterator;
+  late T _current;
+
+  @override
+  T get current => _current;
+
+  @override
+  bool moveNext() {
+    final DomIteratorResult result = _iterator.next();
+    if (result.done) {
+      return false;
+    }
+    _current = result.value as T;
+    return true;
+  }
+}
+
+@JS()
+@staticInterop
+class DomSegment {}
+
+extension DomSegmentExtension on DomSegment {
+  @JS('index')
+  external double get _index;
+  int get index => _index.toInt();
+
+  external bool get isWordLike;
+  external String get segment;
+  external String get breakType;
+}
+
+DomSegmenter createIntlSegmenter({required String granularity}) {
+  final Object? segmenterConstructor = domIntl.Segmenter;
+  if (segmenterConstructor == null) {
+    throw UnimplementedError('Intl.Segmenter() is not supported.');
+  }
+
+  return js_util.callConstructor<DomSegmenter>(
+    segmenterConstructor,
+    <Object?>[
+      <String>[],
+      js_util.jsify(<String, String>{'granularity': granularity}),
+    ],
+  );
+}
 
 @JS()
 @staticInterop
