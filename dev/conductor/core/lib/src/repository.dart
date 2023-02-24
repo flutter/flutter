@@ -60,6 +60,39 @@ class Remote {
 }
 
 /// A source code repository.
+///
+/// This class is an abstraction over a git
+/// repository on the local disk. Ideally this abstraction would hide from
+/// the outside libraries what git calls were needed to either read or update
+/// data in the underlying repository. In practice, most of the bugs in the
+/// conductor codebase are related to the git calls made from this and its
+/// subclasses.
+///
+/// Two factors that make this code more complicated than it would otherwise
+/// need to be are:
+/// 1. That any particular invocation of the conductor may or may not already
+/// have the git checkout present on disk, depending on what commands were
+/// previously run; and
+/// 2. The need to provide overrides for integration tests (in particular
+/// the ability to mark a [Repository] instance as a [localUpstream] made
+/// integration tests more hermetic, at the cost of complexity in the
+/// implementation).
+///
+/// The only way to simplify the first factor would be to change the behavior of
+/// the conductor tool to be a long-lived dart process that keeps all of its
+/// state in memory and blocks on user input. This would add the constraint that
+/// the user would need to keep the process running for the duration of a
+/// release, which could potentially take multiple days and users could not
+/// manually change the state of the release process (via editing the JSON
+/// config file). However, these may be reasonable trade-offs to make the
+/// codebase simpler and easier to reason about.
+///
+/// The way to simplify the second factor would be to not put any special
+/// handling in this library for integration tests. This would make integration
+/// tests more difficult/less hermetic, but the production code more reliable.
+/// This is probably the right trade-off to make, as the integration tests were
+/// still not hermetic or reliable, and the main integration test was ultimately
+/// deleted in #84354.
 abstract class Repository {
   Repository({
     required this.name,
