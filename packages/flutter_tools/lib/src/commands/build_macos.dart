@@ -16,7 +16,6 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
-    required super.logger,
     required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
@@ -58,7 +57,6 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
-    displayNullSafetyMode(buildInfo);
     await buildMacOS(
       flutterProject: flutterProject,
       buildInfo: buildInfo,

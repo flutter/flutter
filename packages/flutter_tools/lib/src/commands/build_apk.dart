@@ -15,7 +15,7 @@ import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({
-    required super.logger, bool verboseHelp = false
+    bool verboseHelp = false
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -106,7 +106,6 @@ class BuildApkCommand extends BuildSubCommand {
       multidexEnabled: boolArgDeprecated('multidex'),
     );
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildApk(
       project: FlutterProject.current(),

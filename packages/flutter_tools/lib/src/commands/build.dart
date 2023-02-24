@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../android/android_sdk.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
@@ -60,13 +57,12 @@ class BuildCommand extends FlutterCommand {
       logger: logger,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildLinuxCommand(
-      logger: logger,
       operatingSystemUtils: osUtils,
       verboseHelp: verboseHelp
     ));
-    _addSubcommand(BuildWindowsCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
   }
 
   void _addSubcommand(BuildSubCommand command) {
@@ -95,9 +91,6 @@ abstract class BuildSubCommand extends FlutterCommand {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
-
-  @override
-  bool get reportNullSafety => true;
 
   bool get supported => true;
 }
