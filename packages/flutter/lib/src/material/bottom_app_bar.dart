@@ -202,7 +202,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: SafeArea(child: child),
     );
 
-    PhysicalShape physicalShape = isMaterial3
+    final PhysicalShape physicalShape = isMaterial3
         ? PhysicalShape(
             clipper: clipper,
             elevation: elevation,
