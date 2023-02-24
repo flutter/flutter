@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'all_elements.dart';
@@ -435,7 +435,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null) {
+    if (!SemanticsBinding.instance.semanticsEnabled) {
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');

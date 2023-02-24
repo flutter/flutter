@@ -184,8 +184,8 @@ void main() {
   );
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    RendererBinding.instance.setSemanticsEnabled(true);
+    final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
     await smokeGallery(tester);
-    RendererBinding.instance.setSemanticsEnabled(false);
+    handle.dispose();
   });
 }

@@ -260,7 +260,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
-    platformDispatcher.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
