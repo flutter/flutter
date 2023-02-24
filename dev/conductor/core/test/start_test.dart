@@ -183,7 +183,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -245,7 +245,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -392,7 +392,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -454,7 +454,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -578,7 +578,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -640,7 +640,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -787,7 +787,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -849,7 +849,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -996,7 +996,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -1054,7 +1054,7 @@ void main() {
             'git',
             'checkout',
             '-b',
-            'cherrypicks-$candidateBranch',
+            'release-$candidateBranch',
           ],
         ),
         const FakeCommand(
@@ -1143,10 +1143,8 @@ void main() {
         candidateBranch: candidateBranch,
         checkouts: checkouts,
         dartRevision: nextDartRevision,
-        engineCherrypickRevisions: <String>[],
         engineMirror: engineMirror,
         engineUpstream: EngineRepository.defaultUpstream,
-        frameworkCherrypickRevisions: <String>[],
         frameworkMirror: frameworkMirror,
         frameworkUpstream: FrameworkRepository.defaultUpstream,
         releaseChannel: releaseChannel,
