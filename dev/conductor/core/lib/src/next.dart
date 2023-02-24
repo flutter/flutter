@@ -97,7 +97,7 @@ class NextContext extends Context {
         );
         if (!state_import.requiresEnginePR(state)) {
           stdio.printStatus(
-            'This release has no engine cherrypicks. No Engine PR is necessary.\n',
+            'This release has no dart revision or new cherry-picks. No Engine PR is necessary.\n',
           );
           break;
         }

@@ -21,7 +21,7 @@ void main() {
   const String flutterRoot = '/flutter';
   const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
   const String candidateBranch = 'flutter-1.2-candidate.3';
-  const String workingBranch = 'cherrypicks-$candidateBranch';
+  const String workingBranch = 'release-$candidateBranch';
   const String remoteUrl = 'https://github.com/org/repo.git';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
   const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
@@ -135,61 +135,6 @@ void main() {
           contains('You must now codesign the engine binaries for commit $revision1'));
       });
 
-      test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
-        stdio.stdin.add('n');
-        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-            ..createSync(recursive: true);
-        _initializeCiYamlFile(ciYaml);
-        final FakeProcessManager processManager = FakeProcessManager.empty();
-        final FakePlatform platform = FakePlatform(
-          environment: <String, String>{
-            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-          },
-          operatingSystem: localOperatingSystem,
-          pathSeparator: localPathSeparator,
-        );
-        final pb.ConductorState state = pb.ConductorState(
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: 'abc123',
-                state: pb.CherrypickState.COMPLETED,
-              ),
-            ],
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
-            workingBranch: workingBranch,
-            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
-            mirror: pb.Remote(name: 'mirror', url: remoteUrl),
-          ),
-          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
-        );
-        writeStateToFile(
-          fileSystem.file(stateFile),
-          state,
-          <String>[],
-        );
-        final Checkouts checkouts = Checkouts(
-          fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        );
-        final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-        await runner.run(<String>[
-          'next',
-          '--$kStateOption',
-          stateFile,
-        ]);
-
-        expect(processManager, hasNoRemainingExpectations);
-        expect(
-          stdio.stdout,
-          contains('All engine cherrypicks have been auto-applied by the conductor'),
-        );
-      });
-
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://github.com/org/repo.git';
         const String releaseChannel = 'beta';
@@ -220,12 +165,6 @@ void main() {
           engine: pb.Repository(
             candidateBranch: candidateBranch,
             checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: revision2,
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
             workingBranch: workingBranch,
             upstream: pb.Remote(name: 'upstream', url: remoteUrl),
             mirror: pb.Remote(name: 'mirror', url: remoteUrl),
@@ -261,7 +200,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
         expect(
           stdio.stdout,
-          contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
+          contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:release-flutter-1.2-candidate.3?expand=1'));
         expect(stdio.stdout, contains(
                 'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
@@ -276,14 +215,7 @@ void main() {
 
       setUp(() {
         state = pb.ConductorState(
-          engine: pb.Repository(
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: 'abc123',
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
-          ),
+          engine: pb.Repository(),
           currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
         );
 
@@ -374,7 +306,6 @@ void main() {
       const String frameworkCheckoutPath = '$checkoutsParentDirectory/framework';
       const String engineCheckoutPath = '$checkoutsParentDirectory/engine';
       const String oldEngineVersion = '000000001';
-      const String frameworkCherrypick = '431ae69b4dd2dd48f7ba0153671e0311014c958b';
       late FakeProcessManager processManager;
       late FakePlatform platform;
       late pb.ConductorState state;
@@ -394,12 +325,6 @@ void main() {
           framework: pb.Repository(
             candidateBranch: candidateBranch,
             checkoutPath: frameworkCheckoutPath,
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: frameworkCherrypick,
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
             mirror: pb.Remote(name: 'mirror', url: mirrorRemoteUrl),
             upstream: pb.Remote(name: 'upstream', url: upstreamRemoteUrl),
             workingBranch: workingBranch,
