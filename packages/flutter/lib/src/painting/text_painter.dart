@@ -279,8 +279,8 @@ class _UntilTextBoundary extends TextBoundary {
 @immutable
 abstract class _CaretMetrics { }
 
-// The _CaretMetrics for carets located in a non-empty line. Carets located in a
-// non-empty line are associated with a glyph within the same line.
+/// The _CaretMetrics for carets located in a non-empty line. Carets located in a
+/// non-empty line are associated with a glyph within the same line.
 class _LineCaretMetrics implements _CaretMetrics {
   const _LineCaretMetrics({required this.offset, required this.writingDirection, required this.fullHeight});
   /// The offset of the top left corner of the caret from the top left
@@ -292,8 +292,8 @@ class _LineCaretMetrics implements _CaretMetrics {
   final double fullHeight;
 }
 
-// The _CaretMetrics for carets located in an empty line (when the text is
-// empty, or the caret is between two a newline characters).
+/// The _CaretMetrics for carets located in an empty line (when the text is
+/// empty, or the caret is between two a newline characters).
 class _EmptyLineCaretMetrics implements _CaretMetrics {
   const _EmptyLineCaretMetrics({ required this.lineVerticalOffset });
 
