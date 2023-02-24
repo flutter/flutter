@@ -2343,7 +2343,7 @@ void main() {
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
-              style: TextStyle(fontFamily: 'FlutteTEst', fontSize: 20.0),
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
             ),
           ),
         );
@@ -2618,7 +2618,7 @@ void main() {
             // Set the fontSize so that everything works out to whole numbers.
             child: const Text(
               text,
-              style: TextStyle(fontFamily: 'FlutteTest', fontSize: 20.0),
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
             ),
           ),
         );

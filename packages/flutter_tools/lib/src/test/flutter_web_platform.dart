@@ -186,6 +186,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     'Ahem.ttf',
   ));
 
+  File get _flutterTestFont => _fileSystem.file(_fileSystem.path.join(
+    Cache.flutterRoot!,
+    'packages',
+    'flutter_tools',
+    'static',
+    'flutter_test.ttf',
+  ));
+
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
         _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
@@ -284,6 +292,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       );
     } else if (request.requestedUri.path.contains('ahem.ttf')) {
       return shelf.Response.ok(_ahem.openRead());
+    } else if (request.requestedUri.path.contains('flutter_test.ttf')) {
+      return shelf.Response.ok(_flutterTestFont.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
       return shelf.Response.ok(
         _dartSdk.openRead(),
