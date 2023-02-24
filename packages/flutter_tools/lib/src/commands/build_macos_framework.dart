@@ -29,7 +29,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.flutterVersion,
     required super.buildSystem,
     required super.verboseHelp,
-    required super.logger,
     super.cache,
     super.platform,
   });
@@ -69,7 +68,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
 
     for (final BuildInfo buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${getNameForBuildMode(buildInfo.mode)} mode...');

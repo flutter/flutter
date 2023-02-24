@@ -167,12 +167,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       : WebRendererMode.html;
   }
 
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-      ? NullSafetyMode.sound
-      : NullSafetyMode.unsound;
-  }
-
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -205,10 +199,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]!));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]!));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(

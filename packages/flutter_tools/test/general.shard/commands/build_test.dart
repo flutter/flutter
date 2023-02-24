@@ -136,7 +136,8 @@ class FakeBuildSubCommand extends BuildSubCommand {
   String get name => throw UnimplementedError();
 
   void test(BuildInfo buildInfo) {
-    displayNullSafetyMode(buildInfo);
+    throw UnimplementedError('TODO what should we do here?');
+    //displayNullSafetyMode(buildInfo);
   }
 
   @override

@@ -133,7 +133,6 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
   ) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -188,8 +187,7 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    NullSafetyMode nullSafetyMode, {
+    ExpressionCompiler? expressionCompiler, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -226,7 +224,6 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      nullSafetyMode,
     );
     if (testMode) {
       return server;
@@ -562,12 +559,12 @@ class WebAssetServer implements AssetReader {
 
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts!.getHostArtifact(
-          kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!
+          kDartSdkJsArtifactMap[webRenderer]!
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts!.getHostArtifact(
-        kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!
+        kDartSdkJsMapArtifactMap[webRenderer]!
     ));
 
   @override
@@ -657,7 +654,6 @@ class WebDevFS implements DevFS {
   final bool nullAssertions;
   final bool nativeNullAssertions;
   final int? _port;
-  final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
 
@@ -753,7 +749,6 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
-      nullSafetyMode,
       testMode: testMode,
     );
 

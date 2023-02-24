@@ -16,7 +16,6 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    required super.logger,
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
@@ -166,7 +165,6 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
       target,

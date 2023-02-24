@@ -25,7 +25,6 @@ class BuildCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required BuildSystem buildSystem,
     required OperatingSystemUtils osUtils,
-    required Logger logger,
     required AndroidSdk? androidSdk,
     bool verboseHelp = false,
   }){
@@ -33,28 +32,24 @@ class BuildCommand extends FlutterCommand {
         BuildAarCommand(
           fileSystem: fileSystem,
           androidSdk: androidSdk,
-          logger: logger,
           verboseHelp: verboseHelp,
         )
     );
-    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSFrameworkCommand(
-      logger: logger,
       buildSystem: buildSystem,
       verboseHelp: verboseHelp,
     ));
     _addSubcommand(BuildMacOSFrameworkCommand(
-      logger: logger,
       buildSystem: buildSystem,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildWebCommand(
       fileSystem: fileSystem,
-      logger: logger,
       verboseHelp: verboseHelp,
     ));
     _addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));

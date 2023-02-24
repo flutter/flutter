@@ -33,7 +33,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
-    required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
@@ -177,7 +176,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 /// managers.
 class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   BuildIOSFrameworkCommand({
-    required super.logger,
     super.flutterVersion,
     required super.buildSystem,
     required bool verboseHelp,
@@ -236,7 +234,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
