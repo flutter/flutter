@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -113,7 +112,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockCoreProjectFiles();
@@ -135,7 +133,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -155,7 +152,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -175,7 +171,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -202,7 +197,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -225,7 +219,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -252,7 +245,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -283,7 +275,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -343,7 +334,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -377,7 +367,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -402,7 +391,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
     setUpMockProjectFilesForBuild();
@@ -426,7 +414,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -451,7 +438,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
     setUpMockProjectFilesForBuild();
@@ -475,7 +461,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
 
@@ -492,7 +477,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -585,7 +569,6 @@ set(BINARY_NAME "fizz_bar")
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -596,14 +579,14 @@ set(BINARY_NAME "fizz_bar")
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
-    expect(BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
+    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => notLinuxPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on Linux host', () {
-    expect(BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()).hidden, false);
+    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Platform: () => linuxPlatform,
@@ -614,7 +597,6 @@ set(BINARY_NAME "fizz_bar")
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     setUpMockProjectFilesForBuild();
@@ -665,7 +647,6 @@ set(BINARY_NAME "fizz_bar")
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
     setUpMockProjectFilesForBuild();
