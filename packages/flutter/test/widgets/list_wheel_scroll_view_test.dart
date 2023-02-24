@@ -170,14 +170,14 @@ void main() {
 
       // The first item is at the center of the viewport.
       expect(
-      tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-      const Offset(0.0, 250.0),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '9')),
-        const Offset(0.0, 150.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 150.0), epsilon: 15.0),
       );
 
       controller.jumpTo(1000.0);
@@ -186,7 +186,7 @@ void main() {
       // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -219,7 +219,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '-1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // Can be scrolled infinitely for positive indexes.
@@ -227,7 +227,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -1575,16 +1575,8 @@ void main() {
       // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
       expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
 
-      const Size testScreenSize = Size(800.0, 600.0);
-      for (double i = 0; i < testScreenSize.height; i += 10) {
-        // For some reason, tester.getCenter returns coordinates of the target item without accounting
-        // for paint transform.
-        //
-        // Therefore tester.tap also doesn't work, so we just go through all the coordinates
-        // and check that all visible elements were hit.
-        //
-        // TODO(nt4f04und): use tester.tap when https://github.com/flutter/flutter/issues/121343 is fixed
-        await tester.tapAt(Offset(testScreenSize.width / 2, i));
+      for (final int child in paintedChildren) {
+        await tester.tap(find.byKey(ValueKey<int>(child)));
       }
       expect(tappedChildren, paintedChildren);
     });

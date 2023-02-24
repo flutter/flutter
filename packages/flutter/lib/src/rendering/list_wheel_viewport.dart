@@ -1034,7 +1034,7 @@ class RenderListWheelViewport
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
+    transform.multiply(parentData.transform!);
   }
 
   @override
