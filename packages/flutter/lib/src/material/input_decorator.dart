@@ -2675,6 +2675,7 @@ class InputDecoration {
        semanticCounterText = null,
        alignLabelWithHint = false,
        constraints = null;
+
   /// An icon to show before the input field and outside of the decoration's
   /// container.
   ///
