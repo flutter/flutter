@@ -78,6 +78,7 @@ class BottomSheet extends StatefulWidget {
     this.onDragStart,
     this.onDragEnd,
     this.backgroundColor,
+    this.shadowColor,
     this.elevation,
     this.shape,
     this.clipBehavior,
@@ -133,6 +134,12 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to null and falls back to [Material]'s default.
   final Color? backgroundColor;
+
+  /// The color used as a drop-shadow, if the sheet is elevated.
+  ///
+  /// If this is null, the value will depend whether Material 3 is used - see [Material.shadowColor].
+  /// In Material 3, this value defaults to [Colors.transparent].
+  final Color? shadowColor;
 
   /// The z-coordinate at which to place this material relative to its parent.
   ///
@@ -275,6 +282,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
+    final Color? shadowColor = widget.shadowColor ?? bottomSheetTheme.shadowColor ?? defaults.shadowColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
@@ -284,6 +292,7 @@ class _BottomSheetState extends State<BottomSheet> {
       color: color,
       elevation: elevation,
       surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
       shape: shape,
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
@@ -1144,6 +1153,9 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

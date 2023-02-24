@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'colors.dart';
 import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -136,7 +137,7 @@ class BottomAppBar extends StatefulWidget {
   /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
   final Color? surfaceTintColor;
 
-  /// The color used as a drop-shadow, if the element is elevated.
+  /// The color used as a drop-shadow, if the app bar is elevated.
   ///
   /// If this is null, the value will depend whether Material 3 is used - see [Material.shadowColor].
   /// In Material 3, this value defaults to [Colors.transparent].
@@ -184,6 +185,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color? shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor;
 
     final Widget child = Padding(
       padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
@@ -195,6 +197,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: PhysicalShape(
         clipper: clipper,
         elevation: elevation,
+        shadowColor: shadowColor ?? Colors.transparent,
         color: effectiveColor,
         clipBehavior: widget.clipBehavior,
         child: Material(
@@ -203,6 +206,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
           elevation: elevation,
           color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
+          shadowColor: shadowColor,
           child: SafeArea(child: child),
         ),
       ),
@@ -293,6 +297,9 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
