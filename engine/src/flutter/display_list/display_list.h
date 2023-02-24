@@ -44,9 +44,9 @@
 // provides a nearly 1:1 translation between the records of the DisplayList
 // to method calls.
 //
-// A DisplayList can be created directly using a DisplayListBuilder and
-// the Dispatcher methods that it implements, or it can be created from
-// a sequence of SkCanvas calls using the DisplayListCanvasRecorder class.
+// A DisplayList must be created using a DisplayListBuilder using either its
+// stateful methods inherited from Dispatcher, or from its stateless methods
+// inherited from DlCanvas.
 //
 // A DisplayList can be read back by implementing the Dispatcher virtual
 // methods (with help from some of the classes in the utils file) and

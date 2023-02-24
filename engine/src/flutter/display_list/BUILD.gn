@@ -18,8 +18,6 @@ source_set("display_list") {
     "display_list_builder.h",
     "display_list_canvas_dispatcher.cc",
     "display_list_canvas_dispatcher.h",
-    "display_list_canvas_recorder.cc",
-    "display_list_canvas_recorder.h",
     "display_list_color.h",
     "display_list_color_filter.cc",
     "display_list_color_filter.h",

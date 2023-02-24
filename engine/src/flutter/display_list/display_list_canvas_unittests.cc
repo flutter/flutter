@@ -5,8 +5,8 @@
 #include <utility>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
-#include "flutter/display_list/display_list_canvas_recorder.h"
 #include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/display_list/display_list_sampling_options.h"
@@ -712,14 +712,6 @@ class TestParameters {
     dl_renderer_(builder);
   }
 
-  // If a test is using any shadow operations then we cannot currently
-  // record those in an SkCanvas and play it back into a DisplayList
-  // because internally the operation gets encapsulated in a Skia
-  // ShadowRec which is not exposed by their headers. For operations
-  // that use shadows, we can perform a lot of tests, but not the tests
-  // that require SkCanvas->DisplayList transfers.
-  // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-  bool is_draw_shadows() const { return is_draw_shadows_; }
   // Tests that call drawTextBlob with an sk_ref paint attribute will cause
   // those attributes to be stored in an internal Skia cache so we need
   // to expect that the |sk_ref.unique()| call will fail in those cases.
@@ -733,10 +725,6 @@ class TestParameters {
   bool is_vertical_line() const { return is_vertical_line_; }
   bool ignores_dashes() const { return ignores_dashes_; }
 
-  TestParameters& set_draw_shadows() {
-    is_draw_shadows_ = true;
-    return *this;
-  }
   TestParameters& set_draw_text_blob() {
     is_draw_text_blob_ = true;
     return *this;
@@ -775,7 +763,6 @@ class TestParameters {
   const DlRenderer& dl_renderer_;
   const DisplayListAttributeFlags& flags_;
 
-  bool is_draw_shadows_ = false;
   bool is_draw_text_blob_ = false;
   bool is_draw_display_list_ = false;
   bool is_draw_line_ = false;
@@ -2111,22 +2098,6 @@ class CanvasCompareTester {
         checkGroupOpacity(env, display_list, dl_result.get(),
                           info + " with Group Opacity", bg);
       }
-    }
-
-    // This test cannot work if the rendering is using shadows until
-    // we can access the Skia ShadowRec via public headers.
-    if (!testP.is_draw_shadows()) {
-      // This sequence renders SkCanvas calls to a DisplayList and then
-      // plays them back on SkCanvas to SkSurface
-      // SkCanvas calls => DisplayList => rendering
-      DisplayListCanvasRecorder dl_recorder(kTestBounds);
-      sk_job.Render(&dl_recorder, base_info);
-      DlRenderJob cv_dl_job(dl_recorder.Build());
-      auto cv_dl_result = env.getResult(base_info, cv_dl_job);
-      compareToReference(cv_dl_result.get(), sk_result.get(),
-                         info + " (Skia calls -> DisplayList -> surface)",
-                         nullptr, nullptr, bg,
-                         caseP.fuzzy_compare_components());
     }
 
     {
@@ -3529,8 +3500,7 @@ TEST_F(DisplayListCanvas, DrawShadow) {
           [=](DisplayListBuilder& builder) {  //
             builder.drawShadow(path, color, elevation, false, 1.0);
           },
-          kDrawShadowFlags)
-          .set_draw_shadows(),
+          kDrawShadowFlags),
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(3, 3));
 }
 
@@ -3556,8 +3526,7 @@ TEST_F(DisplayListCanvas, DrawShadowTransparentOccluder) {
           [=](DisplayListBuilder& builder) {  //
             builder.drawShadow(path, color, elevation, true, 1.0);
           },
-          kDrawShadowFlags)
-          .set_draw_shadows(),
+          kDrawShadowFlags),
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(3, 3));
 }
 
@@ -3583,8 +3552,7 @@ TEST_F(DisplayListCanvas, DrawShadowDpr) {
           [=](DisplayListBuilder& builder) {  //
             builder.drawShadow(path, color, elevation, false, 1.5);
           },
-          kDrawShadowFlags)
-          .set_draw_shadows(),
+          kDrawShadowFlags),
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(3, 3));
 }
 

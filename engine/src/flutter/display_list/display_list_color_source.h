@@ -811,6 +811,10 @@ class DlSceneColorSource final : public DlColorSource {
 };
 #endif  // IMPELLER_ENABLE_3D
 
+// Now that the DisplayListCanvasRecorder is deleted and the
+// Paragraph code talks directly to a DisplayListBuilder, there may be
+// no more reasons to maintain this sub-class.
+// See: https://github.com/flutter/flutter/issues/121389
 class DlUnknownColorSource final : public DlColorSource {
  public:
   DlUnknownColorSource(sk_sp<SkShader> shader)

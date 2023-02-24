@@ -255,11 +255,11 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
 
 // A wrapper class for a Skia ColorFilter of unknown type. The above 4 types
 // are the only types that can be constructed by Flutter using the
-// ui.ColorFilter class so this class should be rarely used. The main use
-// would come from the |DisplayListCanvasRecorder| recording Skia rendering
-// calls that originated outside of the Flutter dart code. This would
-// primarily happen in the Paragraph code that renders the text using the
-// SkCanvas interface which we capture into DisplayList data structures.
+// ui.ColorFilter class so this class should be rarely used.
+// In fact, now that the DisplayListCanvasRecorder is deleted and the
+// Paragraph code talks directly to a DisplayListBuilder, there may be
+// no more reasons to maintain this sub-class.
+// See: https://github.com/flutter/flutter/issues/121389
 class DlUnknownColorFilter final : public DlColorFilter {
  public:
   DlUnknownColorFilter(sk_sp<SkColorFilter> sk_filter)

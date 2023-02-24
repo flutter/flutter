@@ -136,6 +136,10 @@ class DlDashPathEffect final : public DlPathEffect {
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlDashPathEffect);
 };
 
+// Now that the DisplayListCanvasRecorder is deleted and the
+// Paragraph code talks directly to a DisplayListBuilder, there may be
+// no more reasons to maintain this sub-class.
+// See: https://github.com/flutter/flutter/issues/121389
 class DlUnknownPathEffect final : public DlPathEffect {
  public:
   DlUnknownPathEffect(sk_sp<SkPathEffect> effect)
