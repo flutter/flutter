@@ -220,7 +220,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;

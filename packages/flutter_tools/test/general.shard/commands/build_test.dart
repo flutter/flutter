@@ -46,78 +46,11 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  testUsingContext('All build commands support null safety options', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Platform platform = FakePlatform();
-    final BufferLogger logger = BufferLogger.test();
-    final List<FlutterCommand> commands = <FlutterCommand>[
-      BuildWindowsCommand(logger: BufferLogger.test()),
-      BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
-      BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
-      BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
-      BuildApkCommand(logger: BufferLogger.test()),
-      BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),
-      BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false),
-      BuildAppBundleCommand(logger: BufferLogger.test()),
-      BuildAarCommand(
-        logger: BufferLogger.test(),
-        androidSdk: FakeAndroidSdk(),
-        fileSystem: fileSystem,
-        verboseHelp: false,
-      ),
-      BuildIOSFrameworkCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-        buildSystem: FlutterBuildSystem(
-          fileSystem: fileSystem,
-          platform: platform,
-          logger: logger,
-        ),
-      ),
-      AttachCommand(
-        artifacts: Artifacts.test(),
-        stdio: FakeStdio(),
-        logger: logger,
-        terminal: FakeTerminal(),
-        signals: Signals.test(),
-        platform: platform,
-        processInfo: FakeProcessInfo(),
-        fileSystem: MemoryFileSystem.test(),
-      ),
-    ];
-
-    for (final FlutterCommand command in commands) {
-      final ArgResults results = command.argParser.parse(<String>[
-        '--sound-null-safety',
-        '--enable-experiment=non-nullable',
-      ]);
-
-      expect(results.wasParsed('sound-null-safety'), true);
-      expect(results.wasParsed('enable-experiment'), true);
-    }
-  });
-
-  testUsingContext('BuildSubCommand displays current null safety mode',
-      () async {
-    const BuildInfo unsound = BuildInfo(
-      BuildMode.debug,
-      '',
-      nullSafetyMode: NullSafetyMode.unsound,
-      treeShakeIcons: false,
-    );
-
-    final BufferLogger logger = BufferLogger.test();
-    FakeBuildSubCommand(logger).test(unsound);
-    expect(logger.statusText,
-        contains('Building without sound null safety ⚠️'));
-  });
-
   testUsingContext('Include only supported sub commands', () {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     for (final Command<void> x in command.subcommands.values) {
@@ -127,7 +60,7 @@ void main() {
 }
 
 class FakeBuildSubCommand extends BuildSubCommand {
-  FakeBuildSubCommand(Logger logger) : super(logger: logger, verboseHelp: false);
+  FakeBuildSubCommand() : super(verboseHelp: false);
 
   @override
   String get description => throw UnimplementedError();
