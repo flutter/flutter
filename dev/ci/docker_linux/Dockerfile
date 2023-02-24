@@ -57,7 +57,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   default-jdk-headless \
   gcc \
   google-chrome-stable \
-  jaxb \
   lib32stdc++6 \
   libglu1-mesa \
   libstdc++6 \
@@ -70,9 +69,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
 
-RUN export CLASSPATH='/usr/share/jaxb/lib'
-
 # Install the Android SDK Dependency.
+# In the event of an update you can visit this page: https://developer.android.com/studio and scroll to the bottom to find
+# the latest version to update. Be wary of any changes to the name of the package as you will need to adjust the paths below.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
 ENV ANDROID_TOOLS_ROOT="/opt/android_sdk"
 RUN mkdir -p "${ANDROID_TOOLS_ROOT}"
