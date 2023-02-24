@@ -412,7 +412,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = await cachedBuildInfo;
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
     final List<ValidationResult?> validationResults = <ValidationResult?>[];

@@ -4,7 +4,6 @@
 
 import '../android/android_sdk.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
