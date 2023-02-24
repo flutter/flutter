@@ -214,7 +214,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   List<String>? arguments,
 }) async {
-  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final BuildAppBundleCommand command = BuildAppBundleCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',
