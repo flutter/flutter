@@ -1,0 +1,123 @@
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+/// A callback type that is used by [AppLifecycleListener.onExitRequested] to
+/// ask the application if it wants to cancel application termination or not.
+typedef AppExitRequestCallback = Future<AppExitResponse> Function();
+
+/// A listener that can be used to listen to changes in the application
+/// lifecycle.
+///
+/// To listen for requests for the application to exit, and to decide whether or
+/// not the application should exit when requested, create an
+/// [AppLifecycleListener] and set the [onExitRequested] callback.
+///
+/// To listen for changes in the application lifecycle state, define an
+/// [onStateChange] callback. The most recent state seen by this
+/// [AppLifecycleListener] can be retrieved with the [lifecycleState] accessor.
+/// See the [AppLifecycleState] enum for details on the various states.
+///
+/// {@tool dartpad}
+/// This examples shows how an application can optionally decide to abort a
+/// request for quitting instead of obeying the request.
+///
+/// ** See code in examples/api/lib/widgets/application_lifecycle/application_lifecycle.0.dart **
+/// {@end-tool}
+class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
+  /// Creates an [AppLifecycleListener].
+  AppLifecycleListener({
+    required this.binding,
+    this.onExitRequested,
+    this.onStateChange,
+  }) : _lifecycleState = AppLifecycleState.detached {
+    binding.addObserver(this);
+  }
+
+  /// Returns the most recent lifecycle state seen by this
+  /// [AppLifecycleListener].
+  AppLifecycleState get lifecycleState => _lifecycleState;
+  AppLifecycleState _lifecycleState;
+
+  /// The [WidgetsBinding] to listen to for application lifecycle events.
+  ///
+  /// Typically, this is set to [WidgetsBinding.instance], but may be
+  /// substituted for testing or other specialized bindings.
+  final WidgetsBinding binding;
+
+  /// Called anytime the state changes, passing the new state.
+  ///
+  /// The [AppLifecycleListener] class is also a [ChangeNotifier], which
+  /// performs a similar function as this callback, but as a notifier that can
+  /// be supplied to another listener.
+  final ValueChanged<AppLifecycleState>? onStateChange;
+
+  /// A callback used to ask the application if it will allow exiting the
+  /// application for cases where the exit is cancelable.
+  ///
+  /// Exiting the application isn't always cancelable, but when it is, this
+  /// function will be called before exit occurs.
+  ///
+  /// Responding [AppExitResponse.exit] will continue termination, and
+  /// responding [AppExitResponse.cancel] will cancel it. If termination
+  /// is not canceled, the application will immediately exit.
+  ///
+  /// If there are multiple instances of [AppLifecycleListener] in the app, then
+  /// the first one to respond [AppExitResponse.cancel] will cancel the exit.
+  final AppExitRequestCallback? onExitRequested;
+
+  bool _debugDisposed = false;
+
+  /// Call when the listener is no longer in use.
+  ///
+  /// Do not use the object after calling [dispose].
+  ///
+  /// Subclasses must call this method in their overridden [dispose], if any.
+  @mustCallSuper
+  void dispose() {
+    assert(_debugAssertNotDisposed());
+    binding.removeObserver(this);
+    _debugDisposed = true;
+  }
+
+  bool _debugAssertNotDisposed() {
+  assert(() {
+    if (_debugDisposed) {
+      throw FlutterError(
+        'A $runtimeType was used after being disposed.\n'
+        'Once you have called dispose() on a $runtimeType, it '
+        'can no longer be used.',
+      );
+    }
+    return true;
+  }());
+  return true;
+}
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() async {
+    assert(_debugAssertNotDisposed());
+    if (onExitRequested == null) {
+      return AppExitResponse.exit;
+    }
+    return onExitRequested!();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    assert(_debugAssertNotDisposed());
+    if (state == _lifecycleState) {
+      return;
+    }
+    _lifecycleState = state;
+    onStateChange?.call(_lifecycleState);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<WidgetsBinding>('binding', binding));
+    properties.add(FlagProperty('onStateChange', value: onStateChange != null, ifTrue: 'onStateChange'));
+    properties.add(FlagProperty('onExitRequested', value: onExitRequested != null, ifTrue: 'onExitRequested'));
+  }
+}
