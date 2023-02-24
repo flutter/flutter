@@ -23,10 +23,8 @@
 namespace flutter {
 
 // The primary class used to build a display list. The list of methods
-// here matches the list of methods invoked on a |Dispatcher|.
-// If there is some code that already renders to an SkCanvas object,
-// those rendering commands can be captured into a DisplayList using
-// the DisplayListCanvasRecorder class.
+// here matches the list of methods invoked on a |Dispatcher| combined
+// with the list of methods invoked on a |DlCanvas|.
 class DisplayListBuilder final : public virtual DlCanvas,
                                  public SkRefCnt,
                                  virtual Dispatcher,
