@@ -81,7 +81,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         initialDateTime: date,
                         mode: CupertinoDatePickerMode.date,
                         use24hFormat: true,
-                        // This shows daya of week alongside day of month
+                        // This shows day of week alongside day of month
                         showDayOfWeek: true,
                         // This is called when the user changes the date.
                         onDateTimeChanged: (DateTime newDate) {

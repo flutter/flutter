@@ -297,7 +297,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultCupertinoLocalizations();
 
-  ///Short version of days of week.
+  /// Short version of days of week.
   static const List<String> shortWeekdays = <String>[
     'Mon',
     'Tue',
