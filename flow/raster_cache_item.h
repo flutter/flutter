@@ -8,11 +8,8 @@
 #include <memory>
 #include <optional>
 
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/flow/raster_cache_key.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkPoint.h"
 
 namespace flutter {
 
@@ -22,7 +19,6 @@ class DisplayList;
 class RasterCache;
 class LayerRasterCacheItem;
 class DisplayListRasterCacheItem;
-class SkPictureRasterCacheItem;
 
 class RasterCacheItem {
  public:
@@ -46,11 +42,11 @@ class RasterCacheItem {
                                const SkMatrix& matrix) = 0;
 
   virtual bool Draw(const PaintContext& context,
-                    const SkPaint* paint) const = 0;
+                    const DlPaint* paint) const = 0;
 
   virtual bool Draw(const PaintContext& context,
-                    SkCanvas* canvas,
-                    const SkPaint* paint) const = 0;
+                    DlCanvas* canvas,
+                    const DlPaint* paint) const = 0;
 
   virtual std::optional<RasterCacheKeyID> GetId() const { return key_id_; }
 

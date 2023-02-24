@@ -81,9 +81,9 @@ SkISize DlDeferredImageGPUSkia::dimensions() const {
 
 // |DlImage|
 size_t DlDeferredImageGPUSkia::GetApproximateByteSize() const {
-  return sizeof(this) + (image_wrapper_
-                             ? image_wrapper_->image_info().computeMinByteSize()
-                             : 0);
+  return sizeof(*this) +
+         (image_wrapper_ ? image_wrapper_->image_info().computeMinByteSize()
+                         : 0);
 }
 
 std::optional<std::string> DlDeferredImageGPUSkia::get_error() const {

@@ -9,7 +9,8 @@
 #include <variant>
 #include <vector>
 
-#include "flutter/testing/assertions_skia.h"
+#include "flutter/display_list/display_list_matrix_clip_tracker.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkCanvasVirtualEnforcer.h"
@@ -33,10 +34,12 @@ static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
 //
 // The |MockCanvas| stores a list of |DrawCall| that the test can later verify
 // against the expected list of primitives to be drawn.
-class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
+class MockCanvas final : public DlCanvas {
  public:
-  using SkCanvas::kHard_ClipEdgeStyle;
-  using SkCanvas::kSoft_ClipEdgeStyle;
+  enum ClipEdgeStyle {
+    kHard_ClipEdgeStyle,
+    kSoft_ClipEdgeStyle,
+  };
 
   struct SaveData {
     int save_to_layer;
@@ -44,8 +47,8 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
 
   struct SaveLayerData {
     SkRect save_bounds;
-    SkPaint restore_paint;
-    sk_sp<SkImageFilter> backdrop_filter;
+    DlPaint restore_paint;
+    std::shared_ptr<DlImageFilter> backdrop_filter;
     int save_to_layer;
   };
 
@@ -63,65 +66,68 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
 
   struct DrawRectData {
     SkRect rect;
-    SkPaint paint;
+    DlPaint paint;
   };
 
   struct DrawPathData {
     SkPath path;
-    SkPaint paint;
+    DlPaint paint;
   };
 
   struct DrawTextData {
     sk_sp<SkData> serialized_text;
-    SkPaint paint;
+    DlPaint paint;
     SkPoint offset;
   };
 
   struct DrawImageDataNoPaint {
-    sk_sp<SkImage> image;
+    sk_sp<DlImage> image;
     SkScalar x;
     SkScalar y;
-    SkSamplingOptions options;
+    DlImageSampling options;
   };
 
   struct DrawImageData {
-    sk_sp<SkImage> image;
+    sk_sp<DlImage> image;
     SkScalar x;
     SkScalar y;
-    SkSamplingOptions options;
-    SkPaint paint;
+    DlImageSampling options;
+    DlPaint paint;
   };
 
-  struct DrawPictureData {
-    sk_sp<SkData> serialized_picture;
-    SkPaint paint;
-    SkMatrix matrix;
+  struct DrawDisplayListData {
+    sk_sp<DisplayList> display_list;
+    SkScalar opacity;
   };
 
   struct DrawShadowData {
     SkPath path;
+    DlColor color;
+    SkScalar elevation;
+    bool transparent_occluder;
+    SkScalar dpr;
   };
 
   struct ClipRectData {
     SkRect rect;
-    SkClipOp clip_op;
+    ClipOp clip_op;
     ClipEdgeStyle style;
   };
 
   struct ClipRRectData {
     SkRRect rrect;
-    SkClipOp clip_op;
+    ClipOp clip_op;
     ClipEdgeStyle style;
   };
 
   struct ClipPathData {
     SkPath path;
-    SkClipOp clip_op;
+    ClipOp clip_op;
     ClipEdgeStyle style;
   };
 
-  struct DrawPaint {
-    SkPaint paint;
+  struct DrawPaintData {
+    DlPaint paint;
   };
 
   // Discriminated union of all the different |DrawCall| types.  It is roughly
@@ -136,12 +142,12 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                                     DrawTextData,
                                     DrawImageDataNoPaint,
                                     DrawImageData,
-                                    DrawPictureData,
+                                    DrawDisplayListData,
                                     DrawShadowData,
                                     ClipRectData,
                                     ClipRRectData,
                                     ClipPathData,
-                                    DrawPaint>;
+                                    DrawPaintData>;
 
   // A single call made against this canvas.
   struct DrawCall {
@@ -150,107 +156,134 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   };
 
   MockCanvas();
-  ~MockCanvas() override;
+  MockCanvas(int width, int height);
+  ~MockCanvas();
 
-  SkNWayCanvas* internal_canvas() { return &internal_canvas_; }
+  // SkNWayCanvas* internal_canvas() { return &internal_canvas_; }
 
   const std::vector<DrawCall>& draw_calls() const { return draw_calls_; }
   void reset_draw_calls() { draw_calls_.clear(); }
 
- protected:
-  // Save/restore/set operations that we track.
-  void willSave() override;
-  SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec& rec) override;
-  void willRestore() override;
-  void didRestore() override {}
-  void didConcat44(const SkM44&) override;
-  void didSetM44(const SkM44&) override;
-  void didScale(SkScalar x, SkScalar y) override;
-  void didTranslate(SkScalar x, SkScalar y) override;
+  SkISize GetBaseLayerSize() const override;
+  SkImageInfo GetImageInfo() const override;
 
-  // Draw and clip operations that we track.
-  void onDrawRect(const SkRect& rect, const SkPaint& paint) override;
-  void onDrawPath(const SkPath& path, const SkPaint& paint) override;
-  void onDrawTextBlob(const SkTextBlob* text,
-                      SkScalar x,
-                      SkScalar y,
-                      const SkPaint& paint) override;
-  void onDrawShadowRec(const SkPath& path, const SkDrawShadowRec& rec) override;
-  void onDrawPicture(const SkPicture* picture,
-                     const SkMatrix* matrix,
-                     const SkPaint* paint) override;
-  void onClipRect(const SkRect& rect,
-                  SkClipOp op,
-                  ClipEdgeStyle style) override;
-  void onClipRRect(const SkRRect& rrect,
-                   SkClipOp op,
-                   ClipEdgeStyle style) override;
-  void onClipPath(const SkPath& path,
-                  SkClipOp op,
-                  ClipEdgeStyle style) override;
+  void Save() override;
+  void SaveLayer(const SkRect* bounds,
+                 const DlPaint* paint = nullptr,
+                 const DlImageFilter* backdrop = nullptr) override;
+  void Restore() override;
+  int GetSaveCount() const { return current_layer_; }
+  void RestoreToCount(int restore_count) {
+    while (current_layer_ > restore_count) {
+      Restore();
+    }
+  }
 
-  // Operations that we don't track.
-  bool onDoSaveBehind(const SkRect*) override;
-  void onDrawAnnotation(const SkRect&, const char[], SkData*) override;
-  void onDrawDRRect(const SkRRect&, const SkRRect&, const SkPaint&) override;
-  void onDrawDrawable(SkDrawable*, const SkMatrix*) override;
-  void onDrawPatch(const SkPoint[12],
-                   const SkColor[4],
-                   const SkPoint[4],
-                   SkBlendMode,
-                   const SkPaint&) override;
-  void onDrawPaint(const SkPaint&) override;
-  void onDrawBehind(const SkPaint&) override;
-  void onDrawPoints(PointMode,
-                    size_t,
-                    const SkPoint[],
-                    const SkPaint&) override;
-  void onDrawRegion(const SkRegion&, const SkPaint&) override;
-  void onDrawOval(const SkRect&, const SkPaint&) override;
-  void onDrawArc(const SkRect&,
-                 SkScalar,
-                 SkScalar,
-                 bool,
-                 const SkPaint&) override;
-  void onDrawRRect(const SkRRect&, const SkPaint&) override;
-  void onDrawImage2(const SkImage* image,
+  // clang-format off
+
+  // 2x3 2D affine subset of a 4x4 transform in row major order
+  void Transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
+                         SkScalar myx, SkScalar myy, SkScalar myt) override;
+  // full 4x4 transform in row major order
+  void TransformFullPerspective(
+      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
+  // clang-format on
+
+  void Translate(SkScalar tx, SkScalar ty) override;
+  void Scale(SkScalar sx, SkScalar sy) override;
+  void Rotate(SkScalar degrees) override;
+  void Skew(SkScalar sx, SkScalar sy) override;
+  void TransformReset() override;
+  void Transform(const SkMatrix* matrix) override;
+  void Transform(const SkM44* matrix44) override;
+  void SetTransform(const SkMatrix* matrix) override;
+  void SetTransform(const SkM44* matrix44) override;
+  using DlCanvas::SetTransform;
+  using DlCanvas::Transform;
+
+  SkM44 GetTransformFullPerspective() const override;
+  SkMatrix GetTransform() const override;
+
+  void ClipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void ClipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void ClipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
+
+  SkRect GetDestinationClipBounds() const override;
+  SkRect GetLocalClipBounds() const override;
+  bool QuickReject(const SkRect& bounds) const override;
+
+  void DrawPaint(const DlPaint& paint) override;
+  void DrawColor(DlColor color, DlBlendMode mode) override;
+  void DrawLine(const SkPoint& p0,
+                const SkPoint& p1,
+                const DlPaint& paint) override;
+  void DrawRect(const SkRect& rect, const DlPaint& paint) override;
+  void DrawOval(const SkRect& bounds, const DlPaint& paint) override;
+  void DrawCircle(const SkPoint& center,
+                  SkScalar radius,
+                  const DlPaint& paint) override;
+  void DrawRRect(const SkRRect& rrect, const DlPaint& paint) override;
+  void DrawDRRect(const SkRRect& outer,
+                  const SkRRect& inner,
+                  const DlPaint& paint) override;
+  void DrawPath(const SkPath& path, const DlPaint& paint) override;
+  void DrawArc(const SkRect& bounds,
+               SkScalar start,
+               SkScalar sweep,
+               bool useCenter,
+               const DlPaint& paint) override;
+  void DrawPoints(PointMode mode,
+                  uint32_t count,
+                  const SkPoint pts[],
+                  const DlPaint& paint) override;
+  void DrawVertices(const DlVertices* vertices,
+                    DlBlendMode mode,
+                    const DlPaint& paint) override;
+
+  void DrawImage(const sk_sp<DlImage>& image,
+                 const SkPoint point,
+                 DlImageSampling sampling,
+                 const DlPaint* paint = nullptr) override;
+  void DrawImageRect(const sk_sp<DlImage>& image,
+                     const SkRect& src,
+                     const SkRect& dst,
+                     DlImageSampling sampling,
+                     const DlPaint* paint = nullptr,
+                     bool enforce_src_edges = false) override;
+  void DrawImageNine(const sk_sp<DlImage>& image,
+                     const SkIRect& center,
+                     const SkRect& dst,
+                     DlFilterMode filter,
+                     const DlPaint* paint = nullptr) override;
+  void DrawAtlas(const sk_sp<DlImage>& atlas,
+                 const SkRSXform xform[],
+                 const SkRect tex[],
+                 const DlColor colors[],
+                 int count,
+                 DlBlendMode mode,
+                 DlImageSampling sampling,
+                 const SkRect* cullRect,
+                 const DlPaint* paint = nullptr) override;
+
+  void DrawDisplayList(const sk_sp<DisplayList> display_list,
+                       SkScalar opacity) override;
+  void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,
                     SkScalar y,
-                    const SkSamplingOptions&,
-                    const SkPaint* paint) override;
-  void onDrawImageRect2(const SkImage*,
-                        const SkRect&,
-                        const SkRect&,
-                        const SkSamplingOptions&,
-                        const SkPaint*,
-                        SrcRectConstraint) override;
-  void onDrawImageLattice2(const SkImage*,
-                           const Lattice&,
-                           const SkRect&,
-                           SkFilterMode,
-                           const SkPaint*) override;
-  void onDrawVerticesObject(const SkVertices*,
-                            SkBlendMode,
-                            const SkPaint&) override;
-  void onDrawAtlas2(const SkImage*,
-                    const SkRSXform[],
-                    const SkRect[],
-                    const SkColor[],
-                    int,
-                    SkBlendMode,
-                    const SkSamplingOptions&,
-                    const SkRect*,
-                    const SkPaint*) override;
-  void onDrawEdgeAAQuad(const SkRect&,
-                        const SkPoint[4],
-                        QuadAAFlags,
-                        const SkColor4f&,
-                        SkBlendMode) override;
-  void onClipRegion(const SkRegion&, SkClipOp) override;
+                    const DlPaint& paint) override;
+  void DrawShadow(const SkPath& path,
+                  const DlColor color,
+                  const SkScalar elevation,
+                  bool transparent_occluder,
+                  SkScalar dpr) override;
+
+  void Flush() override;
 
  private:
-  SkNWayCanvas internal_canvas_;
-
+  DisplayListMatrixClipTracker tracker_;
   std::vector<DrawCall> draw_calls_;
   int current_layer_;
 };
@@ -295,10 +328,10 @@ extern bool operator==(const MockCanvas::DrawImageDataNoPaint& a,
                        const MockCanvas::DrawImageDataNoPaint& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::DrawImageDataNoPaint& data);
-extern bool operator==(const MockCanvas::DrawPictureData& a,
-                       const MockCanvas::DrawPictureData& b);
+extern bool operator==(const MockCanvas::DrawDisplayListData& a,
+                       const MockCanvas::DrawDisplayListData& b);
 extern std::ostream& operator<<(std::ostream& os,
-                                const MockCanvas::DrawPictureData& data);
+                                const MockCanvas::DrawDisplayListData& data);
 extern bool operator==(const MockCanvas::DrawShadowData& a,
                        const MockCanvas::DrawShadowData& b);
 extern std::ostream& operator<<(std::ostream& os,
@@ -321,10 +354,10 @@ extern bool operator==(const MockCanvas::DrawCall& a,
                        const MockCanvas::DrawCall& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::DrawCall& draw);
-extern bool operator==(const MockCanvas::DrawPaint& a,
-                       const MockCanvas::DrawPaint& b);
+extern bool operator==(const MockCanvas::DrawPaintData& a,
+                       const MockCanvas::DrawPaintData& b);
 extern std::ostream& operator<<(std::ostream& os,
-                                const MockCanvas::DrawPaint& data);
+                                const MockCanvas::DrawPaintData& data);
 }  // namespace testing
 }  // namespace flutter
 

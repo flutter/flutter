@@ -299,9 +299,9 @@ void DisplayList::RenderTo(DisplayListBuilder* builder) const {
     return;
   }
   if (has_rtree()) {
-    Dispatch(*builder, builder->getLocalClipBounds());
+    Dispatch(builder->asDispatcher(), builder->GetLocalClipBounds());
   } else {
-    Dispatch(*builder);
+    Dispatch(builder->asDispatcher());
   }
 }
 

@@ -56,9 +56,15 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
 // A utility class that will ignore all Dispatcher methods relating
 // to setting a clip.
 class IgnoreClipDispatchHelper : public virtual Dispatcher {
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override {}
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override {}
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override {}
+  void clipRect(const SkRect& rect,
+                DlCanvas::ClipOp clip_op,
+                bool is_aa) override {}
+  void clipRRect(const SkRRect& rrect,
+                 DlCanvas::ClipOp clip_op,
+                 bool is_aa) override {}
+  void clipPath(const SkPath& path,
+                DlCanvas::ClipOp clip_op,
+                bool is_aa) override {}
 };
 
 // A utility class that will ignore all Dispatcher methods relating
@@ -103,7 +109,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                SkScalar start_degrees,
                SkScalar sweep_degrees,
                bool use_center) override {}
-  void drawPoints(SkCanvas::PointMode mode,
+  void drawPoints(DlCanvas::PointMode mode,
                   uint32_t count,
                   const SkPoint points[]) override {}
   void drawSkVertices(const sk_sp<SkVertices> vertices,

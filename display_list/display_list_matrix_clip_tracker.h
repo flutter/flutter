@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkM44.h"
@@ -19,9 +20,14 @@
 namespace flutter {
 
 class DisplayListMatrixClipTracker {
+ private:
+  using ClipOp = DlCanvas::ClipOp;
+
  public:
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkMatrix& matrix);
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkM44& matrix);
+
+  SkRect base_device_cull_rect() const { return saved_[0]->device_cull_rect(); }
 
   bool using_4x4_matrix() const { return current_->is_4x4(); }
 
@@ -59,11 +65,11 @@ class DisplayListMatrixClipTracker {
   void setIdentity() { current_->setIdentity(); }
   bool mapRect(SkRect* rect) const { return current_->mapRect(*rect, rect); }
 
-  void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) {
+  void clipRect(const SkRect& rect, ClipOp op, bool is_aa) {
     current_->clipBounds(rect, op, is_aa);
   }
-  void clipRRect(const SkRRect& rrect, SkClipOp op, bool is_aa);
-  void clipPath(const SkPath& path, SkClipOp op, bool is_aa);
+  void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa);
+  void clipPath(const SkPath& path, ClipOp op, bool is_aa);
 
  private:
   class Data {
@@ -91,7 +97,7 @@ class DisplayListMatrixClipTracker {
     virtual bool mapRect(const SkRect& rect, SkRect* mapped) const = 0;
     virtual bool canBeInverted() const = 0;
 
-    virtual void clipBounds(const SkRect& clip, SkClipOp op, bool is_aa);
+    virtual void clipBounds(const SkRect& clip, ClipOp op, bool is_aa);
 
    protected:
     Data(const SkRect& rect) : cull_rect_(rect) {}

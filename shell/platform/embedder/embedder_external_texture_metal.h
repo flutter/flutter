@@ -25,9 +25,9 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
 
  private:
   const ExternalTextureCallback& external_texture_callback_;
-  sk_sp<SkImage> last_image_;
+  sk_sp<DlImage> last_image_;
 
-  sk_sp<SkImage> ResolveTexture(int64_t texture_id,
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,
                                 const SkISize& size);
 
@@ -35,7 +35,7 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
   void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             const SkSamplingOptions& sampling) override;
+             const DlImageSampling sampling) override;
 
   // |flutter::Texture|
   void OnGrContextCreated() override;

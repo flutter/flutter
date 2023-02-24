@@ -30,7 +30,7 @@ EmbedderExternalTextureGL::~EmbedderExternalTextureGL() = default;
 void EmbedderExternalTextureGL::Paint(PaintContext& context,
                                       const SkRect& bounds,
                                       bool freeze,
-                                      const SkSamplingOptions& sampling) {
+                                      const DlImageSampling sampling) {
   if (last_image_ == nullptr) {
     last_image_ =
         ResolveTexture(Id(),                                           //
@@ -39,19 +39,20 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
         );
   }
 
-  SkCanvas& canvas = *context.canvas;
-  const SkPaint* paint = context.sk_paint;
+  DlCanvas* canvas = context.canvas;
+  const DlPaint* paint = context.paint;
 
   if (last_image_) {
-    if (bounds != SkRect::Make(last_image_->bounds())) {
-      canvas.drawImageRect(last_image_, bounds, sampling, paint);
+    SkRect image_bounds = SkRect::Make(last_image_->bounds());
+    if (bounds != image_bounds) {
+      canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
     } else {
-      canvas.drawImage(last_image_, bounds.x(), bounds.y(), sampling, paint);
+      canvas->DrawImage(last_image_, {bounds.x(), bounds.y()}, sampling, paint);
     }
   }
 }
 
-sk_sp<SkImage> EmbedderExternalTextureGL::ResolveTexture(
+sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     int64_t texture_id,
     GrDirectContext* context,
     const SkISize& size) {
@@ -99,7 +100,7 @@ sk_sp<SkImage> EmbedderExternalTextureGL::ResolveTexture(
     return nullptr;
   }
 
-  return image;
+  return DlImage::Make(std::move(image));
 }
 
 // |flutter::Texture|

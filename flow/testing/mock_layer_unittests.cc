@@ -16,14 +16,14 @@ using MockLayerTest = LayerTest;
 #ifndef NDEBUG
 TEST_F(MockLayerTest, PaintBeforePrerollDies) {
   SkPath path = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  auto layer = std::make_shared<MockLayer>(path, SkPaint());
+  auto layer = std::make_shared<MockLayer>(path, DlPaint());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
 }
 
 TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
-  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  auto layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), SkPath().getBounds());
@@ -35,7 +35,7 @@ TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
 
 TEST_F(MockLayerTest, SimpleParams) {
   const SkPath path = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPaint paint = SkPaint(SkColors::kBlue);
+  const DlPaint paint = DlPaint(DlColor::kBlue());
   const SkMatrix start_matrix = SkMatrix::Translate(1.0f, 2.0f);
   const SkMatrix scale_matrix = SkMatrix::Scale(0.5f, 0.5f);
   const SkMatrix combined_matrix = SkMatrix::Concat(start_matrix, scale_matrix);
@@ -65,7 +65,7 @@ TEST_F(MockLayerTest, SimpleParams) {
 }
 
 TEST_F(MockLayerTest, FakePlatformView) {
-  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  auto layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
   layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 
@@ -74,7 +74,7 @@ TEST_F(MockLayerTest, FakePlatformView) {
 }
 
 TEST_F(MockLayerTest, SaveLayerOnLeafNodesCanvas) {
-  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  auto layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
   layer->set_fake_has_platform_view(true);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
 

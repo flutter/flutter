@@ -34,9 +34,8 @@ std::unique_ptr<flutter::SurfaceFrame> Surface::AcquireFrame(
   framebuffer_info.supports_readback = true;
   return std::make_unique<flutter::SurfaceFrame>(
       nullptr, std::move(framebuffer_info),
-      [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) {
-        return true;
-      },
+      [](const flutter::SurfaceFrame& surface_frame,
+         flutter::DlCanvas* canvas) { return true; },
       size);
 }
 

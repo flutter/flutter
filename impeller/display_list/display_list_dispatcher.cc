@@ -874,24 +874,26 @@ void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
 // |flutter::Dispatcher|
 void DisplayListDispatcher::transformReset() {
   canvas_.ResetTransform();
+  canvas_.Transform(initial_matrix_);
 }
 
 static Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }
 
-static Entity::ClipOperation ToClipOperation(SkClipOp clip_op) {
+static Entity::ClipOperation ToClipOperation(
+    flutter::DlCanvas::ClipOp clip_op) {
   switch (clip_op) {
-    case SkClipOp::kDifference:
+    case flutter::DlCanvas::ClipOp::kDifference:
       return Entity::ClipOperation::kDifference;
-    case SkClipOp::kIntersect:
+    case flutter::DlCanvas::ClipOp::kIntersect:
       return Entity::ClipOperation::kIntersect;
   }
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::clipRect(const SkRect& rect,
-                                     SkClipOp clip_op,
+                                     ClipOp clip_op,
                                      bool is_aa) {
   auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.ClipPath(path, ToClipOperation(clip_op));
@@ -991,14 +993,14 @@ static Path ToPath(const SkRRect& rrect) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
-                                      SkClipOp clip_op,
+                                      ClipOp clip_op,
                                       bool is_aa) {
   canvas_.ClipPath(ToPath(rrect), ToClipOperation(clip_op));
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::clipPath(const SkPath& path,
-                                     SkClipOp clip_op,
+                                     ClipOp clip_op,
                                      bool is_aa) {
   canvas_.ClipPath(ToPath(path), ToClipOperation(clip_op));
 }
@@ -1080,13 +1082,13 @@ void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
+void DisplayListDispatcher::drawPoints(PointMode mode,
                                        uint32_t count,
                                        const SkPoint points[]) {
   Paint paint = paint_;
   paint.style = Paint::Style::kStroke;
   switch (mode) {
-    case SkCanvas::kPoints_PointMode:
+    case flutter::DlCanvas::PointMode::kPoints:
       if (paint.stroke_cap == Cap::kButt) {
         paint.stroke_cap = Cap::kSquare;
       }
@@ -1096,7 +1098,7 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
         canvas_.DrawPath(path, paint);
       }
       break;
-    case SkCanvas::kLines_PointMode:
+    case flutter::DlCanvas::PointMode::kLines:
       for (uint32_t i = 1; i < count; i += 2) {
         Point p0 = ToPoint(points[i - 1]);
         Point p1 = ToPoint(points[i]);
@@ -1104,7 +1106,7 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
         canvas_.DrawPath(path, paint);
       }
       break;
-    case SkCanvas::kPolygon_PointMode:
+    case flutter::DlCanvas::PointMode::kPolygon:
       if (count > 1) {
         Point p0 = ToPoint(points[0]);
         for (uint32_t i = 1; i < count; i++) {
@@ -1232,9 +1234,12 @@ void DisplayListDispatcher::drawDisplayList(
     const sk_sp<flutter::DisplayList> display_list) {
   int saveCount = canvas_.GetSaveCount();
   Paint savePaint = paint_;
+  Matrix saveMatrix = initial_matrix_;
   paint_ = Paint();
+  initial_matrix_ = canvas_.GetCurrentTransformation();
   display_list->Dispatch(*this);
   paint_ = savePaint;
+  initial_matrix_ = saveMatrix;
   canvas_.RestoreToCount(saveCount);
 }
 

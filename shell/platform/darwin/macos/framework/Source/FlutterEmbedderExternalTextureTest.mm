@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#import "flutter/display_list/skia/dl_sk_canvas.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.h"
@@ -110,9 +111,10 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
+  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
-      .canvas = gpuSurface->getCanvas(),
+      .canvas = &canvas,
       .gr_context = grContext,
   };
   texture->Paint(context, bounds, /*freeze=*/false, sampling);
@@ -164,9 +166,10 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
+  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
-      .canvas = gpuSurface->getCanvas(),
+      .canvas = &canvas,
       .gr_context = grContext,
   };
   texture->Paint(context, bounds, /*freeze=*/false, sampling);
@@ -218,9 +221,10 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
+  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
-      .canvas = gpuSurface->getCanvas(),
+      .canvas = &canvas,
       .gr_context = grContext,
   };
   texture->Paint(context, bounds, /*freeze=*/false, sampling);
@@ -272,9 +276,10 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
   SkRect bounds = SkRect::MakeWH(info.width(), info.height());
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kNearest);
+  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
-      .canvas = gpuSurface->getCanvas(),
+      .canvas = &canvas,
       .gr_context = grContext,
   };
   texture->Paint(context, bounds, /*freeze=*/false, sampling);

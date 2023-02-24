@@ -14,12 +14,13 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
-#include "include/core/SkPaint.h"
 
 namespace flutter {
 namespace testing {
 
 using ClipPathLayerTest = LayerTest;
+
+using ClipOp = DlCanvas::ClipOp;
 
 #ifndef NDEBUG
 TEST_F(ClipPathLayerTest, ClipNoneBehaviorDies) {
@@ -103,7 +104,7 @@ TEST_F(ClipPathLayerTest, ChildOutsideBounds) {
   const SkRect clip_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPath clip_path = SkPath().addRect(clip_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipPathLayer>(clip_path, Clip::hardEdge);
   layer->Add(mock_layer);
@@ -116,8 +117,8 @@ TEST_F(ClipPathLayerTest, ChildOutsideBounds) {
   // Set up both contexts to cull clipped child
   preroll_context()->state_stack.set_preroll_delegate(device_cull_bounds,
                                                       initial_matrix);
-  paint_context().canvas->clipRect(device_cull_bounds);
-  paint_context().canvas->concat(initial_matrix);
+  paint_context().canvas->ClipRect(device_cull_bounds);
+  paint_context().canvas->Transform(initial_matrix);
 
   layer->Preroll(preroll_context());
   // Untouched
@@ -144,9 +145,11 @@ TEST_F(ClipPathLayerTest, FullyContainedChild) {
   const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPath layer_path = SkPath().addRect(layer_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const SkPath child_path =
+      SkPath().addRect(child_bounds).addOval(child_bounds.makeInset(0.1, 0.1));
+  const SkPath layer_path =
+      SkPath().addRect(layer_bounds).addOval(layer_bounds.makeInset(0.1, 0.1));
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipPathLayer>(layer_path, Clip::hardEdge);
   layer->Add(mock_layer);
@@ -173,7 +176,7 @@ TEST_F(ClipPathLayerTest, FullyContainedChild) {
       std::vector(
           {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
            MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{layer_bounds, SkClipOp::kIntersect,
+               1, MockCanvas::ClipPathData{layer_path, ClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
            MockCanvas::DrawCall{
                1, MockCanvas::DrawPathData{child_path, child_paint}},
@@ -186,9 +189,11 @@ TEST_F(ClipPathLayerTest, PartiallyContainedChild) {
   const SkRect device_cull_bounds = initial_matrix.mapRect(local_cull_bounds);
   const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const SkRect clip_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPath clip_path = SkPath().addRect(clip_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const SkPath child_path =
+      SkPath().addRect(child_bounds).addOval(child_bounds.makeInset(0.1, 0.1));
+  const SkPath clip_path =
+      SkPath().addRect(clip_bounds).addOval(clip_bounds.makeInset(0.1, 0.1));
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipPathLayer>(clip_path, Clip::hardEdge);
   layer->Add(mock_layer);
@@ -225,7 +230,7 @@ TEST_F(ClipPathLayerTest, PartiallyContainedChild) {
       std::vector(
           {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
            MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{clip_bounds, SkClipOp::kIntersect,
+               1, MockCanvas::ClipPathData{clip_path, ClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
            MockCanvas::DrawCall{
                1, MockCanvas::DrawPathData{child_path, child_paint}},
@@ -250,7 +255,7 @@ static bool ReadbackResult(PrerollContext* context,
 TEST_F(ClipPathLayerTest, Readback) {
   PrerollContext* context = preroll_context();
   SkPath path;
-  SkPaint paint;
+  DlPaint paint;
 
   const Clip hard = Clip::hardEdge;
   const Clip soft = Clip::antiAlias;
@@ -415,22 +420,22 @@ TEST_F(ClipPathLayerTest, OpacityInheritancePainting) {
 
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
-    expected_builder.save();
+    expected_builder.Save();
     {
-      expected_builder.translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.fX, offset.fY);
       /* ClipRectLayer::Paint() */ {
         expected_builder.save();
-        expected_builder.clipPath(layer_clip, SkClipOp::kIntersect, true);
+        expected_builder.ClipPath(layer_clip, ClipOp::kIntersect, true);
         /* child layer1 paint */ {
-          expected_builder.drawPath(path1, DlPaint().setAlpha(opacity_alpha));
+          expected_builder.DrawPath(path1, DlPaint().setAlpha(opacity_alpha));
         }
         /* child layer2 paint */ {
-          expected_builder.drawPath(path2, DlPaint().setAlpha(opacity_alpha));
+          expected_builder.DrawPath(path2, DlPaint().setAlpha(opacity_alpha));
         }
-        expected_builder.restore();
+        expected_builder.Restore();
       }
     }
-    expected_builder.restore();
+    expected_builder.Restore();
   }
 
   opacity_layer->Paint(display_list_paint_context());
@@ -472,7 +477,7 @@ TEST_F(ClipPathLayerTest, OpacityInheritanceSaveLayerPainting) {
       expected_builder.translate(offset.fX, offset.fY);
       /* ClipRectLayer::Paint() */ {
         expected_builder.save();
-        expected_builder.clipPath(layer_clip, SkClipOp::kIntersect, true);
+        expected_builder.clipPath(layer_clip, ClipOp::kIntersect, true);
         expected_builder.setColor(opacity_alpha << 24);
         expected_builder.saveLayer(&children_bounds, true);
         /* child layer1 paint */ {
@@ -504,8 +509,8 @@ TEST_F(ClipPathLayerTest, LayerCached) {
 
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   SkMatrix cache_ctm = initial_transform;
-  SkCanvas cache_canvas;
-  cache_canvas.setMatrix(cache_ctm);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -530,7 +535,7 @@ TEST_F(ClipPathLayerTest, LayerCached) {
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
   EXPECT_EQ(clip_cache_item->cache_state(),
             RasterCacheItem::CacheState::kCurrent);
-  SkPaint paint;
+  DlPaint paint;
   EXPECT_TRUE(raster_cache()->Draw(clip_cache_item->GetId().value(),
                                    cache_canvas, &paint));
 }
@@ -548,8 +553,8 @@ TEST_F(ClipPathLayerTest, EmptyClipDoesNotCullPlatformView) {
   clip->Add(platform_view);
 
   auto embedder = MockViewEmbedder();
-  SkCanvas fake_overlay_canvas;
-  embedder.AddCanvas(&fake_overlay_canvas);
+  DisplayListBuilder fake_overlay_builder;
+  embedder.AddCanvas(&fake_overlay_builder);
   preroll_context()->view_embedder = &embedder;
   paint_context().view_embedder = &embedder;
 

@@ -4044,27 +4044,27 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   EmbedderExternalTextureGL texture(1, callback);
 
   auto skia_surface = surface.GetOnscreenSurface();
-  auto canvas = skia_surface->getCanvas();
+  DlSkCanvasAdapter canvas(skia_surface->getCanvas());
 
   Texture* texture_ = &texture;
   Texture::PaintContext ctx{
-      .canvas = canvas,
+      .canvas = &canvas,
       .gr_context = context.get(),
   };
   texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+                  DlImageSampling::kLinear);
 
   EXPECT_TRUE(resolve_called);
   resolve_called = false;
 
   texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+                  DlImageSampling::kLinear);
 
   EXPECT_FALSE(resolve_called);
 
   texture_->MarkNewFrameAvailable();
   texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+                  DlImageSampling::kLinear);
 
   EXPECT_TRUE(resolve_called);
 }

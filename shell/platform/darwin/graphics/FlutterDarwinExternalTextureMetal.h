@@ -36,7 +36,7 @@
 - (void)paintContext:(flutter::Texture::PaintContext&)context
               bounds:(const SkRect&)bounds
               freeze:(BOOL)freeze
-            sampling:(const SkSamplingOptions&)sampling;
+            sampling:(const flutter::DlImageSampling)sampling;
 
 - (void)onGrContextCreated;
 

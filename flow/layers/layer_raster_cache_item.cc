@@ -101,7 +101,7 @@ const SkRect* LayerRasterCacheItem::GetPaintBoundsFromLayer() const {
 bool Rasterize(RasterCacheItem::CacheState cache_state,
                Layer* layer,
                const PaintContext& paint_context,
-               SkCanvas* canvas) {
+               DlCanvas* canvas) {
   FML_DCHECK(cache_state != RasterCacheItem::CacheState::kNone);
   LayerStateStack state_stack;
   state_stack.set_delegate(canvas);
@@ -158,7 +158,7 @@ bool LayerRasterCacheItem::TryToPrepareRasterCache(const PaintContext& context,
       return context.raster_cache->UpdateCacheEntry(
           GetId().value(), r_context,
           [ctx = context, cache_state = cache_state_,
-           layer = layer_](SkCanvas* canvas) {
+           layer = layer_](DlCanvas* canvas) {
             Rasterize(cache_state, layer, ctx, canvas);
           });
     }
@@ -167,13 +167,13 @@ bool LayerRasterCacheItem::TryToPrepareRasterCache(const PaintContext& context,
 }
 
 bool LayerRasterCacheItem::Draw(const PaintContext& context,
-                                const SkPaint* paint) const {
+                                const DlPaint* paint) const {
   return Draw(context, context.canvas, paint);
 }
 
 bool LayerRasterCacheItem::Draw(const PaintContext& context,
-                                SkCanvas* canvas,
-                                const SkPaint* paint) const {
+                                DlCanvas* canvas,
+                                const DlPaint* paint) const {
   if (!context.raster_cache || !canvas) {
     return false;
   }

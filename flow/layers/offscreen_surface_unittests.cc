@@ -29,9 +29,9 @@ TEST(OffscreenSurfaceTest, PaintSurfaceBlack) {
   auto surface =
       std::make_unique<OffscreenSurface>(nullptr, SkISize::Make(1, 1));
 
-  SkCanvas* canvas = surface->GetCanvas();
-  canvas->clear(SK_ColorBLACK);
-  canvas->flush();
+  DlCanvas* canvas = surface->GetCanvas();
+  canvas->Clear(DlColor::kBlack());
+  canvas->Flush();
 
   auto raster_data = surface->GetRasterData(false);
   const uint32_t* actual =

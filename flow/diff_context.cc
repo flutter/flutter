@@ -152,7 +152,7 @@ SkRect DiffContext::MapRect(const SkRect& rect) {
 }
 
 bool DiffContext::PushCullRect(const SkRect& clip) {
-  clip_tracker_.clipRect(clip, SkClipOp::kIntersect, false);
+  clip_tracker_.clipRect(clip, DlCanvas::ClipOp::kIntersect, false);
   return !clip_tracker_.device_cull_rect().isEmpty();
 }
 

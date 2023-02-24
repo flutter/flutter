@@ -10,6 +10,7 @@
 #import <Metal/Metal.h>
 
 #include "embedder.h"
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -514,28 +515,26 @@ TEST_F(EmbedderTest, ExternalTextureMetalRefreshedTooOften) {
 
   auto surface = TestMetalSurface::Create(*metal_context, SkISize::Make(100, 100));
   auto skia_surface = surface->GetSurface();
-  auto canvas = skia_surface->getCanvas();
+  DlSkCanvasAdapter canvas(skia_surface->getCanvas());
 
   Texture* texture_ = &texture;
+  DlImageSampling sampling = DlImageSampling::kLinear;
   Texture::PaintContext ctx{
-      .canvas = canvas,
+      .canvas = &canvas,
       .gr_context = surface->GetGrContext().get(),
   };
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_TRUE(resolve_called);
   resolve_called = false;
 
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_FALSE(resolve_called);
 
   texture_->MarkNewFrameAvailable();
 
-  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false,
-                  SkSamplingOptions(SkFilterMode::kLinear));
+  texture_->Paint(ctx, SkRect::MakeXYWH(0, 0, 100, 100), false, sampling);
 
   EXPECT_TRUE(resolve_called);
 }

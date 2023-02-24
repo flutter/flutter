@@ -15,16 +15,16 @@ TEST(CanvasSpyTest, DrawingIsTracked) {
   SkPictureRecorder picture_recorder;
   SkCanvas* canvas = picture_recorder.beginRecording(100, 100);
   CanvasSpy canvas_spy = CanvasSpy(canvas);
-  SkCanvas* spy = canvas_spy.GetSpyingCanvas();
+  DlCanvas* spy = canvas_spy.GetSpyingCanvas();
 
   ASSERT_FALSE(canvas_spy.DidDrawIntoCanvas());
 
-  spy->translate(128, 128);
-  spy->clear(SK_ColorTRANSPARENT);
+  spy->Translate(128, 128);
+  spy->Clear(DlColor::kTransparent());
   ASSERT_FALSE(canvas_spy.DidDrawIntoCanvas());
 
-  SkPaint paint;
-  spy->drawCircle(0, 0, 60, paint);
+  DlPaint paint;
+  spy->DrawCircle({0, 0}, 60, paint);
   ASSERT_TRUE(canvas_spy.DidDrawIntoCanvas());
 }
 
@@ -38,7 +38,7 @@ TEST(CanvasSpyTest, SpiedCanvasIsDrawing) {
   SkCanvas* expected_canvas = expected_surface->getCanvas();
 
   CanvasSpy canvas_spy = CanvasSpy(actual_canvas);
-  SkCanvas* spy = canvas_spy.GetSpyingCanvas();
+  SkCanvas* spy = canvas_spy.GetRawSpyingCanvas();
 
   SkNWayCanvas multi_canvas = SkNWayCanvas(100, 100);
   multi_canvas.addCanvas(spy);

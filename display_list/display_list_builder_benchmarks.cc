@@ -96,7 +96,7 @@ static void BM_DisplayListBuilderWithClipRect(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
-    builder.clipRect(clip_bounds, SkClipOp::kIntersect, true);
+    builder.clipRect(clip_bounds, DlCanvas::ClipOp::kIntersect, true);
     InvokeAllRenderingOps(builder);
     Complete(builder, type);
   }
@@ -132,9 +132,9 @@ static void BM_DisplayListBuilderWithSaveLayerAndImageFilter(
     for (auto& group : allRenderingOps) {
       for (size_t i = 0; i < group.variants.size(); i++) {
         auto& invocation = group.variants[i];
-        builder.saveLayer(&layer_bounds, &layer_paint);
+        builder.SaveLayer(&layer_bounds, &layer_paint);
         invocation.Invoke(builder);
-        builder.restore();
+        builder.Restore();
       }
     }
     Complete(builder, type);

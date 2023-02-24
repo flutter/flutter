@@ -58,17 +58,14 @@ void TextureLayer::Paint(PaintContext& context) const {
     TRACE_EVENT_INSTANT0("flutter", "null texture");
     return;
   }
-  SkPaint sk_paint;
-  DlPaint dl_paint;
+  DlPaint paint;
   Texture::PaintContext ctx{
       .canvas = context.canvas,
-      .builder = context.builder,
       .gr_context = context.gr_context,
       .aiks_context = context.aiks_context,
-      .sk_paint = context.state_stack.fill(sk_paint),
-      .dl_paint = context.state_stack.fill(dl_paint),
+      .paint = context.state_stack.fill(paint),
   };
-  texture->Paint(ctx, paint_bounds(), freeze_, ToSk(sampling_));
+  texture->Paint(ctx, paint_bounds(), freeze_, sampling_);
 }
 
 }  // namespace flutter

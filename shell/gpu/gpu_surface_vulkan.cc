@@ -43,7 +43,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
-        [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
           return true;
         },
         frame_size);
@@ -65,14 +65,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
 
   SurfaceFrame::SubmitCallback callback = [image = image, delegate = delegate_](
                                               const SurfaceFrame&,
-                                              SkCanvas* canvas) -> bool {
+                                              DlCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
       return false;
     }
 
-    canvas->flush();
+    canvas->Flush();
 
     return delegate->PresentImage(reinterpret_cast<VkImage>(image.image),
                                   static_cast<VkFormat>(image.format));

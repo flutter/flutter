@@ -66,7 +66,7 @@ FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
 
 FlatlandExternalViewEmbedder::~FlatlandExternalViewEmbedder() = default;
 
-SkCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
+flutter::DlCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
   auto found = frame_layers_.find(kRootLayerId);
   if (found == frame_layers_.end()) {
     FML_LOG(WARNING)
@@ -77,22 +77,6 @@ SkCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
   }
 
   return found->second.canvas_spy->GetSpyingCanvas();
-}
-
-std::vector<SkCanvas*> FlatlandExternalViewEmbedder::GetCurrentCanvases() {
-  std::vector<SkCanvas*> canvases;
-  for (const auto& layer : frame_layers_) {
-    // This method (for legacy reasons) expects non-root current canvases.
-    if (layer.first.has_value()) {
-      canvases.push_back(layer.second.canvas_spy->GetSpyingCanvas());
-    }
-  }
-  return canvases;
-}
-
-std::vector<flutter::DisplayListBuilder*>
-FlatlandExternalViewEmbedder::GetCurrentBuilders() {
-  return std::vector<flutter::DisplayListBuilder*>();
 }
 
 void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
@@ -107,13 +91,13 @@ void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
   frame_composition_order_.push_back(handle);
 }
 
-flutter::EmbedderPaintContext
-FlatlandExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
+flutter::DlCanvas* FlatlandExternalViewEmbedder::CompositeEmbeddedView(
+    int64_t view_id) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   auto found = frame_layers_.find(handle);
   FML_CHECK(found != frame_layers_.end());
 
-  return {found->second.canvas_spy->GetSpyingCanvas(), nullptr};
+  return found->second.canvas_spy->GetSpyingCanvas();
 }
 
 flutter::PostPrerollResult FlatlandExternalViewEmbedder::PostPrerollAction(

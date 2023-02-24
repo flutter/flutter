@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_vertices.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
 #include "third_party/benchmark/include/benchmark/benchmark.h"
@@ -63,7 +64,7 @@ void BM_DrawPath(benchmark::State& state,
 void BM_DrawPoints(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
-                   SkCanvas::PointMode mode);
+                   DlCanvas::PointMode mode);
 void BM_DrawVertices(benchmark::State& state,
                      BackendType backend_type,
                      unsigned attributes,
@@ -199,7 +200,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Points/BACKEND,                      \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkCanvas::kPoints_PointMode)                        \
+                    DlCanvas::PointMode::kPoints)                       \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -208,7 +209,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Lines/BACKEND,                       \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkCanvas::kLines_PointMode)                         \
+                    DlCanvas::PointMode::kLines)                        \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -217,7 +218,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Polygon/BACKEND,                     \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkCanvas::kPolygon_PointMode)                       \
+                    DlCanvas::PointMode::kPolygon)                      \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
