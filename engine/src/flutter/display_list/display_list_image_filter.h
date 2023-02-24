@@ -738,11 +738,11 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
 
 // A wrapper class for a Skia ImageFilter of unknown type. The above 4 types
 // are the only types that can be constructed by Flutter using the
-// ui.ImageFilter class so this class should be rarely used. The main use
-// would come from the |DisplayListCanvasRecorder| recording Skia rendering
-// calls that originated outside of the Flutter dart code. This would
-// primarily happen in the Paragraph code that renders the text using the
-// SkCanvas interface which we capture into DisplayList data structures.
+// ui.ImageFilter class so this class should be rarely used.
+// In fact, now that the DisplayListCanvasRecorder is deleted and the
+// Paragraph code talks directly to a DisplayListBuilder, there may be
+// no more reasons to maintain this sub-class.
+// See: https://github.com/flutter/flutter/issues/121389
 class DlUnknownImageFilter final : public DlImageFilter {
  public:
   explicit DlUnknownImageFilter(sk_sp<SkImageFilter> sk_filter)
