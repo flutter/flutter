@@ -605,7 +605,7 @@ class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFacto
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
-/// This is to similate when the test will take a long time, but a signal is
+/// This is to simulate when the test will take a long time, but a signal is
 /// expected to interrupt the process.
 class NeverEndingDriverService extends Fake implements DriverService {
   NeverEndingDriverService(this.callback);

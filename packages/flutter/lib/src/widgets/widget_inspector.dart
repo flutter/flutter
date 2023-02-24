@@ -3587,7 +3587,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Whether the tree should only include nodes created by the local project.
   final bool summaryTree;
 
-  /// Maximum descendents of [DiagnosticsNode] before truncating.
+  /// Maximum descendants of [DiagnosticsNode] before truncating.
   final int maxDescendantsTruncatableNode;
 
   @override

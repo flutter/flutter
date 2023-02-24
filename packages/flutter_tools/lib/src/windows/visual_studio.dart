@@ -349,7 +349,7 @@ class VisualStudio {
   /// will be returned, otherwise returns the latest installed version regardless
   /// of components and version, or null if no such installation is found.
   late final VswhereDetails?  _bestVisualStudioDetails = () {
-    // First, attempt to find the latest version of Visual Studio that satifies
+    // First, attempt to find the latest version of Visual Studio that satisfies
     // both the minimum supported version and the required workloads.
     // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT.
     final List<String> minimumVersionArguments = <String>[
@@ -371,7 +371,7 @@ class VisualStudio {
       }
     }
 
-    // An installation that satifies requirements could not be found.
+    // An installation that satisfies requirements could not be found.
     // Fallback to the latest Visual Studio installation.
     return _visualStudioDetails(
         additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);

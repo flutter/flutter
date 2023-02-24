@@ -43,7 +43,7 @@ class HashUrlStrategy extends UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
-  /// interations.
+  /// integrations.
   const HashUrlStrategy([PlatformLocation? _]);
 
   @override
@@ -91,7 +91,7 @@ class PathUrlStrategy extends HashUrlStrategy {
   /// Creates an instance of [PathUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
-  /// interations.
+  /// integrations.
   PathUrlStrategy([super.platformLocation]);
 
   @override

@@ -1865,7 +1865,7 @@ void main() {
       expect(exception.message, message);
     }
 
-    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.floatingActionButton', (WidgetTester tester) async {
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.floatingActionButton', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       Future<void> boilerplate({required double? fabHeight}) {
         return tester.pumpWidget(
@@ -1900,7 +1900,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.persistentFooterButtons', (WidgetTester tester) async {
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.persistentFooterButtons', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
         const MaterialApp(
@@ -1915,7 +1915,7 @@ void main() {
       expectSnackBarNotVisibleError(tester);
     });
 
-    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offsetted too high by a large Scaffold.bottomNavigationBar', (WidgetTester tester) async {
+    testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.bottomNavigationBar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
         const MaterialApp(
