@@ -199,9 +199,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get uninstallFirst => boolArgDeprecated('uninstall-first');
   bool get enableEmbedderApi => boolArgDeprecated('enable-embedder-api');
 
-  @override
-  bool get reportNullSafety => true;
-
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 

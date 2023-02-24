@@ -52,7 +52,7 @@ class WebTestCompiler {
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
     extraFrontEndOptions.add('--sound-null-safety');
     final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-    final String platformDillName = 'ddc_outline_sound.dill';
+    const String platformDillName = 'ddc_outline_sound.dill';
 
     final String platformDillPath = _fileSystem.path.join(
       getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,
