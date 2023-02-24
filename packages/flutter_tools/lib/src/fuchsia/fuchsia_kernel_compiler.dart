@@ -48,7 +48,6 @@ class FuchsiaKernelCompiler {
       throwToolExit('Fuchsia platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
-      '--no-sound-null-safety',
       '--target',
       'flutter_runner',
       '--platform',
