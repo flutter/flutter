@@ -448,10 +448,17 @@ class CupertinoDatePicker extends StatefulWidget {
             : localizations.postMeridiemAbbreviation;
         break;
       case _PickerColumnType.dayOfMonth:
-        final int lenght = showDayOfWeek ? DateTime.daysPerWeek : 2;
-        for (int wd = 1; wd < lenght; wd++) {
-          for (int i = 1; i <=31; i++) {
-            final String dayOfMonth = localizations.datePickerDayOfMonth(i, showDayOfWeek ? wd : null);
+        int longestDayOfMonth = 1;
+        for (int i = 1; i <=31; i++) {
+          final String dayOfMonth = localizations.datePickerDayOfMonth(i);
+          if (longestText.length < dayOfMonth.length) {
+            longestText = dayOfMonth;
+            longestDayOfMonth = i;
+          }
+        }
+        if (showDayOfWeek) {
+          for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
+            final String dayOfMonth = localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
             if (longestText.length < dayOfMonth.length) {
               longestText = dayOfMonth;
             }
