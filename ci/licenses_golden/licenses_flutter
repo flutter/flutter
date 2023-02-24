@@ -1843,6 +1843,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/skia_object_cache.d
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface_factory.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text_fragmenter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/util.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart + ../../../flutter/LICENSE
@@ -4344,6 +4345,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/skia_object_cache.dar
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface_factory.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text_fragmenter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart
