@@ -716,6 +716,96 @@ void main() {
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
+    testUsingContext('Uses namespace attribute if manifest lacks a package attribute', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+      );
+
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pdart-obfuscation=false',
+          '-Ptrack-widget-creation=false',
+          '-Ptree-shake-icons=false',
+          'assembleRelease',
+        ],
+      ));
+
+      fileSystem.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+'''
+apply from: irrelevant/flutter.gradle
+
+android {
+    namespace 'com.example.foo'
+}
+''');
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="namespacetest"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+</manifest>
+''');
+
+      fileSystem.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-release.apk')
+        .createSync(recursive: true);
+
+      await builder.buildGradleApp(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+            treeShakeIcons: false,
+          ),
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        localGradleErrors: const <GradleHandledError>[],
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+
+      // TODO: verify the packageId of the built APK equals the namespace value
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
