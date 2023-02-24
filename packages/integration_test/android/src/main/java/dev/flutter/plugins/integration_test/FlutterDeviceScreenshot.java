@@ -181,7 +181,7 @@ class FlutterDeviceScreenshot {
       @NonNull FlutterView view,
       @NonNull Result result) {
     final boolean acquired = view.acquireLatestImageViewFrame();
-    // The next frame may already have already been comitted.
+    // The next frame may already have already been committed.
     // The next frame is guaranteed to have the Flutter image.
     waitForAndroidFrame(
         () -> {

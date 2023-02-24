@@ -59,7 +59,7 @@ class HttpHostValidator extends DoctorValidator {
     } on HttpException catch (error) {
       return 'An HTTP error occurred while checking "$host": ${error.message}';
     } on HandshakeException catch (error) {
-      return 'A crytographic error occurred while checking "$host": ${error.message}\n'
+      return 'A cryptographic error occurred while checking "$host": ${error.message}\n'
              'You may be experiencing a man-in-the-middle attack, your network may be '
              'compromised, or you may have malware installed on your computer.';
     } on OSError catch (error) {

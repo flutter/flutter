@@ -129,8 +129,8 @@ abstract class Decoration with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Decoration? lerp(Decoration? a, Decoration? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.lerpFrom(null, t) ?? b;
