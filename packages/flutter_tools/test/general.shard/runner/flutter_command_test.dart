@@ -555,10 +555,11 @@ void main() {
     });
 
     testUsingContext('tool exits on non-sound-null-safe code when explicit flag not passed', () async {
+      fail('TODO');
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
-      flutterCommand.argParser
-          ..addFlag(FlutterOptions.kNullSafety, defaultsTo: true)
-          ..addOption('target');
+      //flutterCommand.argParser
+      //    ..addFlag(FlutterOptions.kNullSafety, defaultsTo: true)
+      //    ..addOption('target');
       final File targetFile = fileSystem.file('targetFile.dart')
           ..writeAsStringSync('// @dart = 2.11');
       expect(

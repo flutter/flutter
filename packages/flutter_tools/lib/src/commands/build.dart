@@ -90,36 +90,14 @@ class BuildCommand extends FlutterCommand {
 
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
-    required Logger logger,
     required bool verboseHelp
-  }): _logger = logger {
+  }) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
-
-  final Logger _logger;
 
   @override
   bool get reportNullSafety => true;
 
   bool get supported => true;
-
-  /// Display a message describing the current null safety runtime mode
-  /// that was selected.
-  ///
-  /// This is similar to the run message in run_hot.dart
-  @protected
-  void displayNullSafetyMode(BuildInfo buildInfo) {
-    if (buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-      _logger.printStatus('');
-      _logger.printStatus(
-        'Building without sound null safety ⚠️',
-        emphasis: true,
-      );
-      _logger.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
-    _logger.printStatus('');
-  }
 }
