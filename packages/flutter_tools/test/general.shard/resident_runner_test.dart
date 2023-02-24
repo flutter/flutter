@@ -1960,7 +1960,6 @@ flutter:
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.unsound,
       ),
       target: null,
       platform: FakePlatform(),
