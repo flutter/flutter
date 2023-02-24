@@ -573,9 +573,7 @@ Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mai
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
   final String examplePath = path.relative(exampleDirectory.path, from: Directory.current.path);
-  final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
-    if (hasNullSafety) '--no-sound-null-safety',
     if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
   ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
@@ -771,8 +769,6 @@ Future<void> _runAddToAppLifeCycleTests() async {
 }
 
 Future<void> _runFrameworkTests() async {
-  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -780,7 +776,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
+        options: <String>[trackWidgetCreationOption],
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
     }
@@ -795,13 +791,13 @@ Future<void> _runFrameworkTests() async {
     // Run release mode tests (see packages/flutter/test_release/README.md)
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
+      options: <String>['--dart-define=dart.vm.product=true'],
       tests: <String>['test_release${path.separator}'],
     );
     // Run profile mode tests (see packages/flutter/test_profile/README.md)
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
+      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true'],
       tests: <String>['test_profile${path.separator}'],
     );
   }
@@ -817,7 +813,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
+        options: <String>[trackWidgetCreationOption],
         tests: tests,
       );
     }
@@ -837,9 +833,9 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   }
 
   Future<void> runTracingTests() async {
@@ -945,7 +941,6 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
-      '--sound-null-safety',
       'run',
       'bin/test_private.dart',
     ];
@@ -1242,12 +1237,8 @@ Future<void> _runWebLongRunningTests() async {
         '--dart-define=test.valueB=Value',
       ]
     ),
-    () => _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-      '--sound-null-safety',
-    ]),
-    () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-      '--sound-null-safety',
-    ]),
+    () => _runWebDebugTest('lib/sound_mode.dart'),
+    () => _runWebReleaseTest('lib/sound_mode.dart'),
     () => _runFlutterWebTest(
       'html',
       path.join(flutterRoot, 'packages', 'integration_test'),
@@ -1306,7 +1297,6 @@ Future<void> _runFlutterDriverWebTest({
       if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
-      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',
@@ -1348,7 +1338,6 @@ Future<void> _runWebTreeshakeTest() async {
       'build',
       'web',
       '--target=$target',
-      '--no-sound-null-safety',
       '--profile',
     ],
     workingDirectory: testAppDirectory,
@@ -1574,7 +1563,6 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
-      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',
@@ -1697,7 +1685,6 @@ Future<void> _runWebDebugTest(String target, {
       '--debug',
       if (enableNullSafety)
         ...<String>[
-          '--no-sound-null-safety',
           '--null-assertions',
         ],
       '-d',
@@ -1742,7 +1729,6 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
       '--platform=chrome',
       '--web-renderer=$webRenderer',
       '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
-      '--sound-null-safety',
       ...flutterTestArgs,
       ...tests,
     ],
