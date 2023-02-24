@@ -53,6 +53,7 @@ export 'engine/canvaskit/skia_object_cache.dart';
 export 'engine/canvaskit/surface.dart';
 export 'engine/canvaskit/surface_factory.dart';
 export 'engine/canvaskit/text.dart';
+export 'engine/canvaskit/text_fragmenter.dart';
 export 'engine/canvaskit/util.dart';
 export 'engine/canvaskit/vertices.dart';
 export 'engine/clipboard.dart';

@@ -11,6 +11,7 @@
 library canvaskit_api;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -1884,6 +1885,20 @@ extension SkParagraphBuilderExtension on SkParagraphBuilder {
     SkTextBaseline baseline,
     double offset,
   );
+
+  @JS('getText')
+  external String getTextUtf8();
+  // SkParagraphBuilder.getText() returns a utf8 string, we need to decode it
+  // into a utf16 string.
+  String getText() => utf8.decode(getTextUtf8().codeUnits);
+
+  external void setWordsUtf8(Uint32List words);
+  external void setWordsUtf16(Uint32List words);
+  external void setGraphemeBreaksUtf8(Uint32List graphemes);
+  external void setGraphemeBreaksUtf16(Uint32List graphemes);
+  external void setLineBreaksUtf8(Uint32List lineBreaks);
+  external void setLineBreaksUtf16(Uint32List lineBreaks);
+
   external SkParagraph build();
   external void delete();
 }
