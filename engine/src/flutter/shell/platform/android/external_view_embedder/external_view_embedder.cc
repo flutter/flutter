@@ -29,11 +29,7 @@ void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
 
   SkRect view_bounds = SkRect::Make(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
-  if (params->display_list_enabled()) {
-    view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
-  } else {
-    view = std::make_unique<SkPictureEmbedderViewSlice>(view_bounds);
-  }
+  view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
   slices_.insert_or_assign(view_id, std::move(view));
 
   composition_order_.push_back(view_id);
@@ -46,37 +42,11 @@ void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 // |ExternalViewEmbedder|
-EmbedderPaintContext AndroidExternalViewEmbedder::CompositeEmbeddedView(
-    int64_t view_id) {
+DlCanvas* AndroidExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   if (slices_.count(view_id) == 1) {
-    return {slices_.at(view_id)->canvas(), slices_.at(view_id)->builder()};
+    return slices_.at(view_id)->canvas();
   }
-  return {nullptr, nullptr};
-}
-
-// |ExternalViewEmbedder|
-std::vector<SkCanvas*> AndroidExternalViewEmbedder::GetCurrentCanvases() {
-  std::vector<SkCanvas*> canvases;
-  for (size_t i = 0; i < composition_order_.size(); i++) {
-    int64_t view_id = composition_order_[i];
-    if (slices_.count(view_id) == 1) {
-      canvases.push_back(slices_.at(view_id)->canvas());
-    }
-  }
-  return canvases;
-}
-
-// |ExternalViewEmbedder|
-std::vector<DisplayListBuilder*>
-AndroidExternalViewEmbedder::GetCurrentBuilders() {
-  std::vector<DisplayListBuilder*> builders;
-  for (size_t i = 0; i < composition_order_.size(); i++) {
-    int64_t view_id = composition_order_[i];
-    if (slices_.count(view_id) == 1) {
-      builders.push_back(slices_.at(view_id)->builder());
-    }
-  }
-  return builders;
+  return nullptr;
 }
 
 SkRect AndroidExternalViewEmbedder::GetViewRect(int64_t view_id) const {
@@ -103,13 +73,12 @@ void AndroidExternalViewEmbedder::SubmitFrame(
   }
 
   std::unordered_map<int64_t, SkRect> overlay_layers;
-  SkCanvas* background_canvas = frame->SkiaCanvas();
-  DisplayListBuilder* background_builder = frame->GetDisplayListBuilder().get();
+  DlCanvas* background_canvas = frame->Canvas();
   auto current_frame_view_count = composition_order_.size();
 
   // Restore the clip context after exiting this method since it's changed
   // below.
-  SkAutoCanvasRestore save(background_canvas, /*doSave=*/true);
+  DlAutoCanvasRestore save(background_canvas, /*doSave=*/true);
 
   for (size_t i = 0; i < current_frame_view_count; i++) {
     int64_t view_id = composition_order_[i];
@@ -161,17 +130,14 @@ void AndroidExternalViewEmbedder::SubmitFrame(
       overlay_layers.insert({view_id, full_joined_rect});
       // Clip the background canvas, so it doesn't contain any of the pixels
       // drawn on the overlay layer.
-      background_canvas->clipRect(full_joined_rect, SkClipOp::kDifference);
+      background_canvas->ClipRect(full_joined_rect,
+                                  DlCanvas::ClipOp::kDifference);
     }
-    if (background_builder) {
-      slice->render_into(background_builder);
-    } else {
-      slice->render_into(background_canvas);
-    }
+    slice->render_into(background_canvas);
   }
 
-  // Manually trigger the SkAutoCanvasRestore before we submit the frame
-  save.restore();
+  // Manually trigger the DlAutoCanvasRestore before we submit the frame
+  save.Restore();
 
   // Submit the background canvas frame before switching the GL context to
   // the overlay surfaces.
@@ -234,16 +200,12 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
                                                 rect.width(),  //
                                                 rect.height()  //
   );
-  SkCanvas* overlay_canvas = frame->SkiaCanvas();
-  overlay_canvas->clear(SK_ColorTRANSPARENT);
+  DlCanvas* overlay_canvas = frame->Canvas();
+  overlay_canvas->Clear(DlColor::kTransparent());
   // Offset the picture since its absolute position on the scene is determined
   // by the position of the overlay view.
-  overlay_canvas->translate(-rect.x(), -rect.y());
-  if (frame->GetDisplayListBuilder()) {
-    slice->render_into(frame->GetDisplayListBuilder().get());
-  } else {
-    slice->render_into(overlay_canvas);
-  }
+  overlay_canvas->Translate(-rect.x(), -rect.y());
+  slice->render_into(overlay_canvas);
   return frame;
 }
 
@@ -280,7 +242,7 @@ bool AndroidExternalViewEmbedder::FrameHasPlatformLayers() {
 }
 
 // |ExternalViewEmbedder|
-SkCanvas* AndroidExternalViewEmbedder::GetRootCanvas() {
+DlCanvas* AndroidExternalViewEmbedder::GetRootCanvas() {
   // On Android, the root surface is created from the on-screen render target.
   return nullptr;
 }

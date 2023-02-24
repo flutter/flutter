@@ -4684,7 +4684,7 @@ class Vertices extends NativeFieldWrapperClass1 {
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
 /// Used by [Canvas.drawPoints] and [Canvas.drawRawPoints].
-// These enum values must be kept in sync with SkCanvas::PointMode.
+// These enum values must be kept in sync with DlCanvas::PointMode.
 enum PointMode {
   /// Draw each point separately.
   ///

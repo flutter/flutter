@@ -12,7 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "flutter/display_list/display_list_builder_multiplexer.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/canvas_test.h"
@@ -75,12 +74,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .frame_device_pixel_ratio      = 1.0f,
             // clang-format on
         },
-        display_list_recorder_(kDlBounds),
+        display_list_builder_(kDlBounds),
         display_list_paint_context_{
             // clang-format off
             .state_stack                   = display_list_state_stack_,
-            .canvas                        = &display_list_recorder_,
-            .builder                       = display_list_recorder_.builder().get(),
+            .canvas                        = &display_list_builder_,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
@@ -106,7 +104,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     use_null_raster_cache();
     preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
     paint_state_stack_.set_delegate(&TestT::mock_canvas());
-    display_list_state_stack_.set_delegate(display_list_recorder_);
+    display_list_state_stack_.set_delegate(&display_list_builder_);
     checkerboard_state_stack_.set_delegate(&TestT::mock_canvas());
     checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
     checkerboard_paint_.setColor(checkerboard_color_);
@@ -172,7 +170,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
-  const SkPaint& checkerboard_paint() { return checkerboard_paint_; }
+  const DlPaint& checkerboard_paint() { return checkerboard_paint_; }
   PaintContext& checkerboard_context() { return checkerboard_context_; }
   LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
@@ -182,8 +180,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
       // and the delegate of the state_stack to prevent future use.
       display_list_paint_context_.state_stack.clear_delegate();
       display_list_paint_context_.canvas = nullptr;
-      display_list_paint_context_.builder = nullptr;
-      display_list_ = display_list_recorder_.Build();
+      display_list_ = display_list_builder_.Build();
     }
     return display_list_;
   }
@@ -208,18 +205,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
 
   static constexpr SkColor checkerboard_color_ = 0x42424242;
 
-  static void draw_checkerboard(SkCanvas* canvas,
-                                DisplayListBuilder* builder,
-                                const SkRect& rect) {
+  static void draw_checkerboard(DlCanvas* canvas, const SkRect& rect) {
     if (canvas) {
-      SkPaint paint;
-      paint.setColor(checkerboard_color_);
-      canvas->drawRect(rect, paint);
-    }
-    if (builder) {
       DlPaint paint;
       paint.setColor(checkerboard_color_);
-      builder->drawRect(rect, paint);
+      canvas->DrawRect(rect, paint);
     }
   }
 
@@ -233,11 +223,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;
   PaintContext paint_context_;
-  DisplayListCanvasRecorder display_list_recorder_;
+  DisplayListBuilder display_list_builder_;
   LayerStateStack display_list_state_stack_;
   sk_sp<DisplayList> display_list_;
   PaintContext display_list_paint_context_;
-  SkPaint checkerboard_paint_;
+  DlPaint checkerboard_paint_;
   PaintContext checkerboard_context_;
   LayerSnapshotStore snapshot_store_;
 

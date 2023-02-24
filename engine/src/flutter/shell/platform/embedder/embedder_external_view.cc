@@ -42,7 +42,7 @@ EmbedderExternalView::CreateRenderTargetDescriptor() const {
   return {view_identifier_, render_surface_size_};
 }
 
-SkCanvas* EmbedderExternalView::GetCanvas() const {
+DlCanvas* EmbedderExternalView::GetCanvas() {
   return canvas_spy_->GetSpyingCanvas();
 }
 

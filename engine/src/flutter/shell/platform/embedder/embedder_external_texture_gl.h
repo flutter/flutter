@@ -8,7 +8,6 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
@@ -25,9 +24,9 @@ class EmbedderExternalTextureGL : public flutter::Texture {
 
  private:
   const ExternalTextureCallback& external_texture_callback_;
-  sk_sp<SkImage> last_image_;
+  sk_sp<DlImage> last_image_;
 
-  sk_sp<SkImage> ResolveTexture(int64_t texture_id,
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,
                                 const SkISize& size);
 
@@ -35,7 +34,7 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   void Paint(PaintContext& context,
              const SkRect& bounds,
              bool freeze,
-             const SkSamplingOptions& sampling) override;
+             const DlImageSampling sampling) override;
 
   // |flutter::Texture|
   void OnGrContextCreated() override;

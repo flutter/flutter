@@ -11,7 +11,8 @@
 #include <vector>
 
 #include "flutter/common/graphics/texture.h"
-#include "flutter/display_list/display_list_builder_multiplexer.h"
+#include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
@@ -103,8 +104,7 @@ struct PaintContext {
   // allowing leaf layers to report that they can handle rendering some of
   // its state attributes themselves via the |applyState| method.
   LayerStateStack& state_stack;
-  SkCanvas* canvas;
-  DisplayListBuilder* builder = nullptr;
+  DlCanvas* canvas;
 
   GrDirectContext* gr_context;
   SkColorSpace* dst_color_space;

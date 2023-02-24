@@ -19,6 +19,8 @@ source_set("testing_lib") {
     "assertions.h",
     "display_list_testing.cc",
     "display_list_testing.h",
+    "mock_canvas.cc",
+    "mock_canvas.h",
     "post_task_sync.cc",
     "post_task_sync.h",
     "testing.cc",
@@ -81,8 +83,6 @@ source_set("skia") {
     "assertions_skia.cc",
     "assertions_skia.h",
     "canvas_test.h",
-    "mock_canvas.cc",
-    "mock_canvas.h",
   ]
 
   public_deps = [

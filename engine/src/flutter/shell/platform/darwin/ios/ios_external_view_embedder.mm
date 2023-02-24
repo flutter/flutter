@@ -16,7 +16,7 @@ IOSExternalViewEmbedder::IOSExternalViewEmbedder(
 IOSExternalViewEmbedder::~IOSExternalViewEmbedder() = default;
 
 // |ExternalViewEmbedder|
-SkCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
+DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
   // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
   // various overlays are controlled by this class.
   return nullptr;
@@ -59,19 +59,7 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
 }
 
 // |ExternalViewEmbedder|
-std::vector<SkCanvas*> IOSExternalViewEmbedder::GetCurrentCanvases() {
-  FML_CHECK(platform_views_controller_);
-  return platform_views_controller_->GetCurrentCanvases();
-}
-
-// |ExternalViewEmbedder|
-std::vector<DisplayListBuilder*> IOSExternalViewEmbedder::GetCurrentBuilders() {
-  FML_CHECK(platform_views_controller_);
-  return platform_views_controller_->GetCurrentBuilders();
-}
-
-// |ExternalViewEmbedder|
-EmbedderPaintContext IOSExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
+DlCanvas* IOSExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
   return platform_views_controller_->CompositeEmbeddedView(view_id);

@@ -19,6 +19,14 @@ namespace flutter {
     }                                                                     \
   } while (0)
 
+static DlCanvas::ClipOp ToDl(SkClipOp op) {
+  return static_cast<DlCanvas::ClipOp>(op);
+}
+
+static DlCanvas::PointMode ToDl(SkCanvas::PointMode mode) {
+  return static_cast<DlCanvas::PointMode>(mode);
+}
+
 DisplayListCanvasRecorder::DisplayListCanvasRecorder(const SkRect& bounds,
                                                      bool prepare_rtree)
     : SkCanvasVirtualEnforcer(0, 0),
@@ -59,7 +67,7 @@ void DisplayListCanvasRecorder::onClipRect(const SkRect& rect,
                                            SkClipOp clip_op,
                                            ClipEdgeStyle edge_style) {
   CHECK_DISPOSE();
-  builder_->clipRect(rect, clip_op,
+  builder_->clipRect(rect, ToDl(clip_op),
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
   SkCanvasVirtualEnforcer::onClipRect(rect, clip_op, edge_style);
 }
@@ -67,7 +75,7 @@ void DisplayListCanvasRecorder::onClipRRect(const SkRRect& rrect,
                                             SkClipOp clip_op,
                                             ClipEdgeStyle edge_style) {
   CHECK_DISPOSE();
-  builder_->clipRRect(rrect, clip_op,
+  builder_->clipRRect(rrect, ToDl(clip_op),
                       edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
   SkCanvasVirtualEnforcer::onClipRRect(rrect, clip_op, edge_style);
 }
@@ -75,7 +83,7 @@ void DisplayListCanvasRecorder::onClipPath(const SkPath& path,
                                            SkClipOp clip_op,
                                            ClipEdgeStyle edge_style) {
   CHECK_DISPOSE();
-  builder_->clipPath(path, clip_op,
+  builder_->clipPath(path, ToDl(clip_op),
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
   SkCanvasVirtualEnforcer::onClipPath(path, clip_op, edge_style);
 }
@@ -176,7 +184,7 @@ void DisplayListCanvasRecorder::onDrawPoints(SkCanvas::PointMode mode,
     // multiple calls to drawPoints, but how much do we really want
     // to support more than a couple billion points?
     FML_DCHECK(count32 == count);
-    builder_->drawPoints(mode, count32, pts);
+    builder_->drawPoints(ToDl(mode), count32, pts);
   }
 }
 void DisplayListCanvasRecorder::onDrawVerticesObject(const SkVertices* vertices,

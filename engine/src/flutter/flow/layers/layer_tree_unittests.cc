@@ -74,7 +74,7 @@ TEST_F(LayerTreeTest, PaintBeforePrerollDies) {
 TEST_F(LayerTreeTest, Simple) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kCyan);
+  const DlPaint child_paint = DlPaint(DlColor::kCyan());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer);
@@ -96,8 +96,8 @@ TEST_F(LayerTreeTest, Simple) {
 TEST_F(LayerTreeTest, Multiple) {
   const SkPath child_path1 = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path2 = SkPath().addRect(8.0f, 2.0f, 16.5f, 14.5f);
-  const SkPaint child_paint1(SkColors::kGray);
-  const SkPaint child_paint2(SkColors::kGreen);
+  const DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  const DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   mock_layer1->set_fake_has_platform_view(true);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
@@ -132,8 +132,8 @@ TEST_F(LayerTreeTest, Multiple) {
 
 TEST_F(LayerTreeTest, MultipleWithEmpty) {
   const SkPath child_path1 = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPaint child_paint1(SkColors::kGray);
-  const SkPaint child_paint2(SkColors::kGreen);
+  const DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  const DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(SkPath(), child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
@@ -162,8 +162,8 @@ TEST_F(LayerTreeTest, MultipleWithEmpty) {
 TEST_F(LayerTreeTest, NeedsSystemComposite) {
   const SkPath child_path1 = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path2 = SkPath().addRect(8.0f, 2.0f, 16.5f, 14.5f);
-  const SkPaint child_paint1(SkColors::kGray);
-  const SkPaint child_paint2(SkColors::kGreen);
+  const DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
+  const DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
@@ -245,7 +245,6 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
                           &mock_registry](const PaintContext& context) {
     EXPECT_EQ(&context.state_stack, &state_stack);
     EXPECT_EQ(context.canvas, nullptr);
-    EXPECT_EQ(context.builder, nullptr);
     EXPECT_EQ(context.gr_context, nullptr);
     EXPECT_EQ(context.view_embedder, nullptr);
     EXPECT_EQ(&context.raster_time, &mock_raster_time);

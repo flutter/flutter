@@ -16,6 +16,7 @@
 #include "flutter/display_list/display_list_path_effect.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/display_list_vertices.h"
+#include "flutter/display_list/dl_canvas.h"
 
 namespace flutter {
 
@@ -28,6 +29,10 @@ class DisplayList;
 ///             invoked through the DisplayList::dispatch() method.
 ///
 class Dispatcher {
+ protected:
+  using ClipOp = DlCanvas::ClipOp;
+  using PointMode = DlCanvas::PointMode;
+
  public:
   // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
   static constexpr int kMaxDrawPointsCount = ((1 << 29) - 1);
@@ -183,11 +188,9 @@ class Dispatcher {
   // Clears the transformation stack.
   virtual void transformReset() = 0;
 
-  virtual void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) = 0;
-  virtual void clipRRect(const SkRRect& rrect,
-                         SkClipOp clip_op,
-                         bool is_aa) = 0;
-  virtual void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) = 0;
+  virtual void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) = 0;
+  virtual void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) = 0;
+  virtual void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) = 0;
 
   // The following rendering methods all take their rendering attributes
   // from the last value set by the attribute methods above (regardless
@@ -209,7 +212,7 @@ class Dispatcher {
                        SkScalar start_degrees,
                        SkScalar sweep_degrees,
                        bool use_center) = 0;
-  virtual void drawPoints(SkCanvas::PointMode mode,
+  virtual void drawPoints(PointMode mode,
                           uint32_t count,
                           const SkPoint points[]) = 0;
   virtual void drawSkVertices(const sk_sp<SkVertices> vertices,

@@ -36,11 +36,11 @@ class LayerRasterCacheItem : public RasterCacheItem {
   void PrerollFinalize(PrerollContext* context,
                        const SkMatrix& matrix) override;
 
-  bool Draw(const PaintContext& context, const SkPaint* paint) const override;
+  bool Draw(const PaintContext& context, const DlPaint* paint) const override;
 
   bool Draw(const PaintContext& context,
-            SkCanvas* canvas,
-            const SkPaint* paint) const override;
+            DlCanvas* canvas,
+            const DlPaint* paint) const override;
 
   bool TryToPrepareRasterCache(const PaintContext& context,
                                bool parent_cached = false) const override;

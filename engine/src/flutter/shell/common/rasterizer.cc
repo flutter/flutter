@@ -493,7 +493,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
   compositor_context_->ui_time().SetLapTime(
       frame_timings_recorder.GetBuildDuration());
 
-  SkCanvas* embedder_root_canvas = nullptr;
+  DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
     FML_DCHECK(!external_view_embedder_->GetUsedThisFrame());
     external_view_embedder_->SetUsedThisFrame(true);
@@ -523,7 +523,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       embedder_root_canvas ? SkMatrix{} : surface_->GetRootTransformation();
 
   auto root_surface_canvas =
-      embedder_root_canvas ? embedder_root_canvas : frame->SkiaCanvas();
+      embedder_root_canvas ? embedder_root_canvas : frame->Canvas();
 
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(),         // skia GrContext
@@ -629,12 +629,13 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 
   SkMatrix root_surface_transformation;
   root_surface_transformation.reset();
+  DlSkCanvasAdapter canvas(recorder.getRecordingCanvas());
 
   // TODO(amirh): figure out how to take a screenshot with embedded UIView.
   // https://github.com/flutter/flutter/issues/23435
   auto frame = compositor_context.AcquireFrame(
-      nullptr, recorder.getRecordingCanvas(), nullptr,
-      root_surface_transformation, false, true, nullptr, nullptr, nullptr);
+      nullptr, &canvas, nullptr, root_surface_transformation, false, true,
+      nullptr, nullptr, nullptr);
   frame->Raster(*tree, true, nullptr);
 
 #if defined(OS_FUCHSIA)
@@ -693,9 +694,9 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
       nullptr,                      // display list builder
       nullptr                       // aiks context
   );
-  canvas->clear(SK_ColorTRANSPARENT);
+  canvas->Clear(DlColor::kTransparent());
   frame->Raster(*tree, true, nullptr);
-  canvas->flush();
+  canvas->Flush();
 
   return snapshot_surface->GetRasterData(compressed);
 }

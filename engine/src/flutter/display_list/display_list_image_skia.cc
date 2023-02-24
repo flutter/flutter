@@ -38,10 +38,10 @@ SkISize DlImageSkia::dimensions() const {
 
 // |DlImage|
 size_t DlImageSkia::GetApproximateByteSize() const {
-  auto size = sizeof(this);
+  auto size = sizeof(*this);
   if (image_) {
     const auto& info = image_->imageInfo();
-    const auto kMipmapOverhead = 4.0 / 3.0;
+    const auto kMipmapOverhead = image_->hasMipmaps() ? 4.0 / 3.0 : 1.0;
     const size_t image_byte_size = info.computeMinByteSize() * kMipmapOverhead;
     size += image_byte_size;
   }

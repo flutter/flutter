@@ -839,13 +839,13 @@ std::vector<SkPoint> GetTestPoints(size_t count, SkISize canvas_size) {
   return points;
 }
 
-std::string PointModeToString(SkCanvas::PointMode mode) {
+std::string PointModeToString(DlCanvas::PointMode mode) {
   switch (mode) {
-    case SkCanvas::kLines_PointMode:
+    case DlCanvas::PointMode::kLines:
       return "Lines";
-    case SkCanvas::kPolygon_PointMode:
+    case DlCanvas::PointMode::kPolygon:
       return "Polygon";
-    case SkCanvas::kPoints_PointMode:
+    case DlCanvas::PointMode::kPoints:
     default:
       return "Points";
   }
@@ -860,26 +860,26 @@ std::string PointModeToString(SkCanvas::PointMode mode) {
 void BM_DrawPoints(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
-                   SkCanvas::PointMode mode) {
+                   DlCanvas::PointMode mode) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
   SkPaint paint;
   switch (mode) {
-    case SkCanvas::kPoints_PointMode:
+    case DlCanvas::PointMode::kPoints:
       builder.setAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsPointsFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPointsFlags);
       break;
-    case SkCanvas::kLines_PointMode:
+    case DlCanvas::PointMode::kLines:
       builder.setAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsLinesFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsLinesFlags);
       break;
-    case SkCanvas::kPolygon_PointMode:
+    case DlCanvas::PointMode::kPolygon:
       builder.setAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsPolygonFlags);

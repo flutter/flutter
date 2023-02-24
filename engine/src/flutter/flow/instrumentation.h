@@ -7,11 +7,11 @@
 
 #include <vector>
 
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -40,7 +40,7 @@ class Stopwatch {
 
   void InitVisualizeSurface(const SkRect& rect) const;
 
-  void Visualize(SkCanvas* canvas, const SkRect& rect) const;
+  void Visualize(DlCanvas* canvas, const SkRect& rect) const;
 
   void Start();
 

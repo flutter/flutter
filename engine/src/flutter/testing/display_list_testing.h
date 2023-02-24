@@ -33,6 +33,19 @@ bool inline DisplayListsNE_Verbose(sk_sp<const DisplayList> a,
 
 extern std::ostream& operator<<(std::ostream& os,
                                 const DisplayList& display_list);
+extern std::ostream& operator<<(std::ostream& os, const DlPaint& paint);
+extern std::ostream& operator<<(std::ostream& os, const DlBlendMode& mode);
+extern std::ostream& operator<<(std::ostream& os, const DlCanvas::ClipOp& op);
+extern std::ostream& operator<<(std::ostream& os, const DlStrokeCap& cap);
+extern std::ostream& operator<<(std::ostream& os, const DlStrokeJoin& join);
+extern std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style);
+extern std::ostream& operator<<(std::ostream& os, const SkBlurStyle& style);
+extern std::ostream& operator<<(std::ostream& os, const DlFilterMode& mode);
+extern std::ostream& operator<<(std::ostream& os, const DlColor& color);
+extern std::ostream& operator<<(std::ostream& os, DlImageSampling sampling);
+extern std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode);
+extern std::ostream& operator<<(std::ostream& os, const DlTileMode& mode);
+extern std::ostream& operator<<(std::ostream& os, const DlImage* image);
 
 class DisplayListStreamDispatcher final : public Dispatcher {
  public:
@@ -79,9 +92,9 @@ class DisplayListStreamDispatcher final : public Dispatcher {
   // clang-format on
   void transformReset() override;
 
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
+  void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
   void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
@@ -96,7 +109,7 @@ class DisplayListStreamDispatcher final : public Dispatcher {
                SkScalar start_degrees,
                SkScalar sweep_degrees,
                bool use_center) override;
-  void drawPoints(SkCanvas::PointMode mode,
+  void drawPoints(PointMode mode,
                   uint32_t count,
                   const SkPoint points[]) override;
   void drawSkVertices(const sk_sp<SkVertices> vertices,

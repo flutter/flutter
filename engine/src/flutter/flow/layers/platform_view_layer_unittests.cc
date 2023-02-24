@@ -17,6 +17,8 @@ namespace testing {
 
 using PlatformViewLayerTest = LayerTest;
 
+using ClipOp = DlCanvas::ClipOp;
+
 TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
@@ -74,11 +76,11 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
       std::vector(
           {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
            MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{parent_clip, SkClipOp::kIntersect,
+               1, MockCanvas::ClipRectData{parent_clip, ClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
            MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
            MockCanvas::DrawCall{
-               2, MockCanvas::ClipRectData{child_clip, SkClipOp::kIntersect,
+               2, MockCanvas::ClipRectData{child_clip, ClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
            MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
@@ -125,8 +127,8 @@ TEST_F(PlatformViewLayerTest, StateTransfer) {
   transform_layer2->Add(child2);
 
   auto embedder = MockViewEmbedder();
-  DisplayListCanvasRecorder recorder({0, 0, 500, 500});
-  embedder.AddRecorder(&recorder);
+  DisplayListBuilder builder({0, 0, 500, 500});
+  embedder.AddCanvas(&builder);
 
   PrerollContext* preroll_ctx = preroll_context();
   preroll_ctx->view_embedder = &embedder;

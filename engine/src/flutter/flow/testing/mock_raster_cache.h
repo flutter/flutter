@@ -11,11 +11,7 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/testing/mock_canvas.h"
-#include "include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flutter {
 namespace testing {
@@ -31,7 +27,7 @@ class MockRasterCacheResult : public RasterCacheResult {
  public:
   explicit MockRasterCacheResult(SkRect device_rect);
 
-  void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const override{};
+  void draw(DlCanvas& canvas, const DlPaint* paint = nullptr) const override{};
 
   SkISize image_dimensions() const override {
     return SkSize::Make(device_rect_.width(), device_rect_.height()).toCeil();
@@ -73,7 +69,7 @@ class MockRasterCache : public RasterCache {
   LayerStateStack preroll_state_stack_;
   LayerStateStack paint_state_stack_;
   MockCanvas mock_canvas_;
-  SkColorSpace* color_space_ = mock_canvas_.imageInfo().colorSpace();
+  sk_sp<SkColorSpace> color_space_ = SkColorSpace::MakeSRGB();
   MutatorsStack mutators_stack_;
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
@@ -84,7 +80,7 @@ class MockRasterCache : public RasterCache {
       .gr_context                    = nullptr,
       .view_embedder                 = nullptr,
       .state_stack                   = preroll_state_stack_,
-      .dst_color_space               = color_space_,
+      .dst_color_space               = color_space_.get(),
       .surface_needs_readback        = false,
       .raster_time                   = raster_time_,
       .ui_time                       = ui_time_,
@@ -101,7 +97,7 @@ class MockRasterCache : public RasterCache {
       .state_stack                   = paint_state_stack_,
       .canvas                        = nullptr,
       .gr_context                    = nullptr,
-      .dst_color_space               = color_space_,
+      .dst_color_space               = color_space_.get(),
       .view_embedder                 = nullptr,
       .raster_time                   = raster_time_,
       .ui_time                       = ui_time_,

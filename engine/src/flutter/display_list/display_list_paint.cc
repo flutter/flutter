@@ -6,7 +6,7 @@
 
 namespace flutter {
 
-DlPaint::DlPaint()
+DlPaint::DlPaint(DlColor color)
     : blendMode_(static_cast<unsigned>(DlBlendMode::kDefaultMode)),
       drawStyle_(static_cast<unsigned>(DlDrawStyle::kDefaultStyle)),
       strokeCap_(static_cast<unsigned>(DlStrokeCap::kDefaultCap)),
@@ -14,6 +14,7 @@ DlPaint::DlPaint()
       isAntiAlias_(false),
       isDither_(false),
       isInvertColors_(false),
+      color_(color),
       strokeWidth_(kDefaultWidth),
       strokeMiter_(kDefaultMiter) {}
 

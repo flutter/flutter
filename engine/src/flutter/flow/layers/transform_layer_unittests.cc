@@ -31,7 +31,7 @@ TEST_F(TransformLayerTest, PaintingEmptyLayerDies) {
 TEST_F(TransformLayerTest, PaintBeforePrerollDies) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, DlPaint());
   auto layer = std::make_shared<TransformLayer>(SkMatrix());  // identity
   layer->Add(mock_layer);
 
@@ -44,7 +44,7 @@ TEST_F(TransformLayerTest, Identity) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkRect cull_rect = SkRect::MakeXYWH(2.0f, 2.0f, 14.0f, 14.0f);
-  auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, DlPaint());
   auto layer = std::make_shared<TransformLayer>(SkMatrix());  // identity
   layer->Add(mock_layer);
 
@@ -62,7 +62,7 @@ TEST_F(TransformLayerTest, Identity) {
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({MockCanvas::DrawCall{
-                0, MockCanvas::DrawPathData{child_path, SkPaint()}}}));
+                0, MockCanvas::DrawPathData{child_path, DlPaint()}}}));
 }
 
 TEST_F(TransformLayerTest, Simple) {
@@ -75,7 +75,7 @@ TEST_F(TransformLayerTest, Simple) {
   SkMatrix inverse_layer_transform;
   EXPECT_TRUE(layer_transform.invert(&inverse_layer_transform));
 
-  auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, DlPaint());
   auto layer = std::make_shared<TransformLayer>(layer_transform);
   layer->Add(mock_layer);
 
@@ -102,7 +102,7 @@ TEST_F(TransformLayerTest, Simple) {
                    MockCanvas::DrawCall{
                        1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, SkPaint()}},
+                       1, MockCanvas::DrawPathData{child_path, DlPaint()}},
                    MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
@@ -118,7 +118,7 @@ TEST_F(TransformLayerTest, Nested) {
   EXPECT_TRUE(layer1_transform.invert(&inverse_layer1_transform));
   EXPECT_TRUE(layer2_transform.invert(&inverse_layer2_transform));
 
-  auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
+  auto mock_layer = std::make_shared<MockLayer>(child_path, DlPaint());
   auto layer1 = std::make_shared<TransformLayer>(layer1_transform);
   auto layer2 = std::make_shared<TransformLayer>(layer2_transform);
   layer1->Add(layer2);
@@ -158,7 +158,7 @@ TEST_F(TransformLayerTest, Nested) {
                  MockCanvas::DrawCall{
                      2, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
                  MockCanvas::DrawCall{
-                     2, MockCanvas::DrawPathData{child_path, SkPaint()}},
+                     2, MockCanvas::DrawPathData{child_path, DlPaint()}},
                  MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                  MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
@@ -176,9 +176,9 @@ TEST_F(TransformLayerTest, NestedSeparated) {
   EXPECT_TRUE(layer2_transform.invert(&inverse_layer2_transform));
 
   auto mock_layer1 =
-      std::make_shared<MockLayer>(child_path, SkPaint(SkColors::kBlue));
+      std::make_shared<MockLayer>(child_path, DlPaint(DlColor::kBlue()));
   auto mock_layer2 =
-      std::make_shared<MockLayer>(child_path, SkPaint(SkColors::kGreen));
+      std::make_shared<MockLayer>(child_path, DlPaint(DlColor::kGreen()));
   auto layer1 = std::make_shared<TransformLayer>(layer1_transform);
   auto layer2 = std::make_shared<TransformLayer>(layer2_transform);
   layer1->Add(mock_layer1);
@@ -229,13 +229,13 @@ TEST_F(TransformLayerTest, NestedSeparated) {
                      1, MockCanvas::ConcatMatrixData{SkM44(layer1_transform)}},
                  MockCanvas::DrawCall{
                      1, MockCanvas::DrawPathData{child_path,
-                                                 SkPaint(SkColors::kBlue)}},
+                                                 DlPaint(DlColor::kBlue())}},
                  MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
                  MockCanvas::DrawCall{
                      2, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
                  MockCanvas::DrawCall{
                      2, MockCanvas::DrawPathData{child_path,
-                                                 SkPaint(SkColors::kGreen)}},
+                                                 DlPaint(DlColor::kGreen())}},
                  MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                  MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
@@ -316,22 +316,22 @@ TEST_F(TransformLayerTest, OpacityInheritancePainting) {
 
   DisplayListBuilder expected_builder;
   /* opacity_layer paint */ {
-    expected_builder.save();
+    expected_builder.Save();
     {
-      expected_builder.translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.fX, offset.fY);
       /* transform_layer paint */ {
-        expected_builder.save();
-        expected_builder.transform(transform);
+        expected_builder.Save();
+        expected_builder.Transform(transform);
         /* child layer1 paint */ {
-          expected_builder.drawPath(path1, DlPaint().setAlpha(opacity_alpha));
+          expected_builder.DrawPath(path1, DlPaint().setAlpha(opacity_alpha));
         }
         /* child layer2 paint */ {
-          expected_builder.drawPath(path2, DlPaint().setAlpha(opacity_alpha));
+          expected_builder.DrawPath(path2, DlPaint().setAlpha(opacity_alpha));
         }
-        expected_builder.restore();
+        expected_builder.Restore();
       }
     }
-    expected_builder.restore();
+    expected_builder.Restore();
   }
 
   opacity_layer->Paint(display_list_paint_context());

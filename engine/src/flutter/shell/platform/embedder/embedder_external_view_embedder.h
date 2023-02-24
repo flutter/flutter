@@ -91,20 +91,14 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
       std::unique_ptr<EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  std::vector<SkCanvas*> GetCurrentCanvases() override;
-
-  // |ExternalViewEmbedder|
-  std::vector<DisplayListBuilder*> GetCurrentBuilders() override;
-
-  // |ExternalViewEmbedder|
-  EmbedderPaintContext CompositeEmbeddedView(int64_t view_id) override;
+  DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
                    std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  SkCanvas* GetRootCanvas() override;
+  DlCanvas* GetRootCanvas() override;
 
  private:
   const bool avoid_backing_store_cache_;

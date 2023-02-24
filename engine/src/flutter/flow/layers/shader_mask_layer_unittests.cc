@@ -55,7 +55,7 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ShaderMaskLayer>(nullptr, layer_bounds,
                                                  DlBlendMode::kSrc);
@@ -70,14 +70,14 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
-  SkPaint filter_paint;
-  filter_paint.setBlendMode(SkBlendMode::kSrc);
-  filter_paint.setShader(nullptr);
+  DlPaint filter_paint;
+  filter_paint.setBlendMode(DlBlendMode::kSrc);
+  filter_paint.setColorSource(nullptr);
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
       std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
                                                     nullptr, 1}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path, child_paint}},
@@ -97,7 +97,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto layer_filter =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
   auto dl_filter = DlColorSource::From(layer_filter);
@@ -113,14 +113,14 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
-  SkPaint filter_paint;
-  filter_paint.setBlendMode(SkBlendMode::kSrc);
-  filter_paint.setShader(layer_filter);
+  DlPaint filter_paint;
+  filter_paint.setBlendMode(DlBlendMode::kSrc);
+  filter_paint.setColorSource(dl_filter);
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
       std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
                                                     nullptr, 1}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path, child_paint}},
@@ -142,8 +142,8 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
-  const SkPaint child_paint1 = SkPaint(SkColors::kYellow);
-  const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
+  const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
+  const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   auto layer_filter =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
   auto dl_filter = DlColorSource::From(layer_filter);
@@ -168,14 +168,14 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
   EXPECT_EQ(mock_layer1->parent_matrix(), initial_transform);
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
-  SkPaint filter_paint;
-  filter_paint.setBlendMode(SkBlendMode::kSrc);
-  filter_paint.setShader(layer_filter);
+  DlPaint filter_paint;
+  filter_paint.setBlendMode(DlBlendMode::kSrc);
+  filter_paint.setColorSource(dl_filter);
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
       std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds, SkPaint(),
+                       0, MockCanvas::SaveLayerData{children_bounds, DlPaint(),
                                                     nullptr, 1}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path1, child_paint1}},
@@ -199,8 +199,8 @@ TEST_F(ShaderMaskLayerTest, Nested) {
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
-  const SkPaint child_paint1 = SkPaint(SkColors::kYellow);
-  const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
+  const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
+  const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   auto layer_filter1 =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
   auto dl_filter1 = DlColorSource::From(layer_filter1);
@@ -234,22 +234,22 @@ TEST_F(ShaderMaskLayerTest, Nested) {
   EXPECT_EQ(mock_layer1->parent_matrix(), initial_transform);
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
-  SkPaint filter_paint1, filter_paint2;
-  filter_paint1.setBlendMode(SkBlendMode::kSrc);
-  filter_paint2.setBlendMode(SkBlendMode::kSrc);
-  filter_paint1.setShader(layer_filter1);
-  filter_paint2.setShader(layer_filter2);
+  DlPaint filter_paint1, filter_paint2;
+  filter_paint1.setBlendMode(DlBlendMode::kSrc);
+  filter_paint2.setBlendMode(DlBlendMode::kSrc);
+  filter_paint1.setColorSource(dl_filter1);
+  filter_paint2.setColorSource(dl_filter2);
   layer1->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
       std::vector(
           {MockCanvas::DrawCall{
-               0, MockCanvas::SaveLayerData{children_bounds, SkPaint(), nullptr,
+               0, MockCanvas::SaveLayerData{children_bounds, DlPaint(), nullptr,
                                             1}},
            MockCanvas::DrawCall{
                1, MockCanvas::DrawPathData{child_path1, child_paint1}},
            MockCanvas::DrawCall{
-               1, MockCanvas::SaveLayerData{child_path2.getBounds(), SkPaint(),
+               1, MockCanvas::SaveLayerData{child_path2.getBounds(), DlPaint(),
                                             nullptr, 2}},
            MockCanvas::DrawCall{
                2, MockCanvas::DrawPathData{child_path2, child_paint2}},
@@ -287,7 +287,7 @@ TEST_F(ShaderMaskLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // ShaderMaskLayer blocks child with readback
-  auto mock_layer = std::make_shared<MockLayer>(SkPath(), SkPaint());
+  auto mock_layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
@@ -299,7 +299,7 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   auto layer_filter =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
   auto dl_filter = DlColorSource::From(layer_filter);
-  SkPaint paint;
+  DlPaint paint;
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
@@ -309,8 +309,8 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   layer->Add(mock_layer);
 
   SkMatrix cache_ctm = initial_transform;
-  SkCanvas cache_canvas;
-  cache_canvas.setMatrix(cache_ctm);
+  MockCanvas cache_canvas;
+  cache_canvas.SetTransform(cache_ctm);
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -372,25 +372,25 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
 
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
-    expected_builder.save();
+    expected_builder.Save();
     {
-      expected_builder.translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.fX, offset.fY);
       /* ShaderMaskLayer::Paint() */ {
-        DlPaint sl_paint = DlPaint().setColor(opacity_alpha << 24);
-        expected_builder.saveLayer(&child_path.getBounds(), &sl_paint);
+        DlPaint sl_paint = DlPaint(opacity_alpha << 24);
+        expected_builder.SaveLayer(&child_path.getBounds(), &sl_paint);
         {
           /* child layer paint */ {
-            expected_builder.drawPath(child_path, DlPaint());
+            expected_builder.DrawPath(child_path, DlPaint());
           }
           expected_builder.translate(mask_rect.fLeft, mask_rect.fTop);
-          expected_builder.drawRect(
+          expected_builder.DrawRect(
               SkRect::MakeWH(mask_rect.width(), mask_rect.height()),
               DlPaint().setBlendMode(DlBlendMode::kSrc));
         }
-        expected_builder.restore();
+        expected_builder.Restore();
       }
     }
-    expected_builder.restore();
+    expected_builder.Restore();
   }
 
   opacity_layer->Paint(display_list_paint_context());
@@ -404,7 +404,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto layer_filter =
       SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
   auto dl_filter = DlColorSource::From(layer_filter);
@@ -416,9 +416,9 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
 
-  SkPaint filter_paint;
-  filter_paint.setBlendMode(SkBlendMode::kSrc);
-  filter_paint.setShader(layer_filter);
+  DlPaint filter_paint;
+  filter_paint.setBlendMode(DlBlendMode::kSrc);
+  filter_paint.setColorSource(dl_filter);
   layer->Paint(paint_context());
   EXPECT_EQ(
       mock_canvas().draw_calls(),
@@ -426,7 +426,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
                    MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44(
                                                SkMatrix::Translate(0.0, 0.0))}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::SaveLayerData{child_bounds, SkPaint(),
+                       1, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
                                                     nullptr, 2}},
                    MockCanvas::DrawCall{
                        2, MockCanvas::DrawPathData{child_path, child_paint}},

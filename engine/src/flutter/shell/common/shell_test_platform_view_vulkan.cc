@@ -199,8 +199,8 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
   auto surface = SkSurface::MakeRenderTarget(
       context_.get(), skgpu::Budgeted::kNo, image_info, 0, nullptr);
   SurfaceFrame::SubmitCallback callback = [](const SurfaceFrame&,
-                                             SkCanvas* canvas) -> bool {
-    canvas->flush();
+                                             DlCanvas* canvas) -> bool {
+    canvas->Flush();
     return true;
   };
 

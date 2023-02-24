@@ -23,23 +23,23 @@
 
 namespace flutter {
 
-RasterCacheResult::RasterCacheResult(sk_sp<SkImage> image,
+RasterCacheResult::RasterCacheResult(sk_sp<DlImage> image,
                                      const SkRect& logical_rect,
                                      const char* type)
     : image_(std::move(image)), logical_rect_(logical_rect), flow_(type) {}
 
-void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
-  SkAutoCanvasRestore auto_restore(&canvas, true);
+void RasterCacheResult::draw(DlCanvas& canvas, const DlPaint* paint) const {
+  DlAutoCanvasRestore auto_restore(&canvas, true);
 
-  auto matrix = RasterCacheUtil::GetIntegralTransCTM(canvas.getTotalMatrix());
+  auto matrix = RasterCacheUtil::GetIntegralTransCTM(canvas.GetTransform());
   SkRect bounds =
       RasterCacheUtil::GetRoundedOutDeviceBounds(logical_rect_, matrix);
   FML_DCHECK(std::abs(bounds.width() - image_->dimensions().width()) <= 1 &&
              std::abs(bounds.height() - image_->dimensions().height()) <= 1);
-  canvas.resetMatrix();
+  canvas.TransformReset();
   flow_.Step();
-  canvas.drawImage(image_, bounds.fLeft, bounds.fTop, SkSamplingOptions(),
-                   paint);
+  canvas.DrawImage(image_, {bounds.fLeft, bounds.fTop},
+                   DlImageSampling::kNearestNeighbor, paint);
 }
 
 RasterCache::RasterCache(size_t access_threshold,
@@ -51,8 +51,8 @@ RasterCache::RasterCache(size_t access_threshold,
 /// @note Procedure doesn't copy all closures.
 std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     const RasterCache::Context& context,
-    const std::function<void(SkCanvas*)>& draw_function,
-    const std::function<void(SkCanvas*, const SkRect& rect)>& draw_checkerboard)
+    const std::function<void(DlCanvas*)>& draw_function,
+    const std::function<void(DlCanvas*, const SkRect& rect)>& draw_checkerboard)
     const {
   auto matrix = RasterCacheUtil::GetIntegralTransCTM(context.matrix);
   SkRect dest_rect =
@@ -72,28 +72,29 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     return nullptr;
   }
 
-  SkCanvas* canvas = surface->getCanvas();
-  canvas->clear(SK_ColorTRANSPARENT);
-  canvas->translate(-dest_rect.left(), -dest_rect.top());
-  canvas->concat(matrix);
-  draw_function(canvas);
+  DlSkCanvasAdapter canvas(surface->getCanvas());
+  canvas.Clear(DlColor::kTransparent());
+  canvas.Translate(-dest_rect.left(), -dest_rect.top());
+  canvas.Transform(matrix);
+  draw_function(&canvas);
 
   if (checkerboard_images_) {
-    draw_checkerboard(canvas, context.logical_rect);
+    draw_checkerboard(&canvas, context.logical_rect);
   }
 
-  return std::make_unique<RasterCacheResult>(
-      surface->makeImageSnapshot(), context.logical_rect, context.flow_type);
+  auto image = DlImage::Make(surface->makeImageSnapshot());
+  return std::make_unique<RasterCacheResult>(image, context.logical_rect,
+                                             context.flow_type);
 }
 
 bool RasterCache::UpdateCacheEntry(
     const RasterCacheKeyID& id,
     const Context& raster_cache_context,
-    const std::function<void(SkCanvas*)>& render_function) const {
+    const std::function<void(DlCanvas*)>& render_function) const {
   RasterCacheKey key = RasterCacheKey(id, raster_cache_context.matrix);
   Entry& entry = cache_[key];
   if (!entry.image) {
-    void (*func)(SkCanvas*, const SkRect& rect) = DrawCheckerboard;
+    void (*func)(DlCanvas*, const SkRect& rect) = DrawCheckerboard;
     entry.image = Rasterize(raster_cache_context, render_function, func);
     if (entry.image != nullptr) {
       switch (id.type()) {
@@ -143,9 +144,9 @@ bool RasterCache::HasEntry(const RasterCacheKeyID& id,
 }
 
 bool RasterCache::Draw(const RasterCacheKeyID& id,
-                       SkCanvas& canvas,
-                       const SkPaint* paint) const {
-  auto it = cache_.find(RasterCacheKey(id, canvas.getTotalMatrix()));
+                       DlCanvas& canvas,
+                       const DlPaint* paint) const {
+  auto it = cache_.find(RasterCacheKey(id, canvas.GetTransform()));
   if (it == cache_.end()) {
     return false;
   }

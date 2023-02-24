@@ -92,7 +92,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       fml::MakeCopyable([renderer = impeller_renderer_,  //
                          aiks_context = aiks_context_,   //
                          surface = std::move(surface)    //
-  ](SurfaceFrame& surface_frame, SkCanvas* canvas) mutable -> bool {
+  ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
         }

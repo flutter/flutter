@@ -12,7 +12,7 @@
 namespace flutter {
 namespace testing {
 
-MockLayer::MockLayer(const SkPath& path, SkPaint paint)
+MockLayer::MockLayer(const SkPath& path, DlPaint paint)
     : fake_paint_path_(path), fake_paint_(std::move(paint)) {}
 
 bool MockLayer::IsReplacing(DiffContext* context, const Layer* layer) const {
@@ -53,15 +53,14 @@ void MockLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   if (expected_paint_matrix_.has_value()) {
-    SkMatrix matrix = context.builder ? context.builder->getTransform()
-                                      : context.canvas->getTotalMatrix();
+    SkMatrix matrix = context.canvas->GetTransform();
 
     EXPECT_EQ(matrix, expected_paint_matrix_.value());
   }
 
-  SkPaint sk_paint = fake_paint_;
-  context.state_stack.fill(sk_paint);
-  context.canvas->drawPath(fake_paint_path_, sk_paint);
+  DlPaint paint = fake_paint_;
+  context.state_stack.fill(paint);
+  context.canvas->DrawPath(fake_paint_path_, paint);
 }
 
 void MockCacheableContainerLayer::Preroll(PrerollContext* context) {

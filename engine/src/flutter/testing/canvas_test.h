@@ -19,10 +19,11 @@ class CanvasTestBase : public BaseT {
   CanvasTestBase() = default;
 
   MockCanvas& mock_canvas() { return canvas_; }
-  SkColorSpace* mock_color_space() { return canvas_.imageInfo().colorSpace(); }
+  SkColorSpace* mock_color_space() { return color_space_.get(); }
 
  private:
   MockCanvas canvas_;
+  sk_sp<SkColorSpace> color_space_ = SkColorSpace::MakeSRGB();
 
   FML_DISALLOW_COPY_AND_ASSIGN(CanvasTestBase);
 };

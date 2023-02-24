@@ -76,7 +76,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     }
     size_t paint_id = std::get<PaintID>(paint);
     FML_DCHECK(paint_id < dl_paints_.size());
-    builder_->drawTextBlob(blob, x, y, dl_paints_[paint_id]);
+    builder_->DrawTextBlob(blob, x, y, dl_paints_[paint_id]);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -94,24 +94,24 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
                               false);
       paint.setMaskFilter(&filter);
     }
-    builder_->drawTextBlob(blob, x, y, paint);
+    builder_->DrawTextBlob(blob, x, y, paint);
   }
 
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
     size_t paint_id = std::get<PaintID>(paint);
     FML_DCHECK(paint_id < dl_paints_.size());
-    builder_->drawRect(rect, dl_paints_[paint_id]);
+    builder_->DrawRect(rect, dl_paints_[paint_id]);
   }
 
   void drawFilledRect(const SkRect& rect,
                       const DecorationStyle& decor_style) override {
     DlPaint paint = toDlPaint(decor_style, DlDrawStyle::kFill);
-    builder_->drawRect(rect, paint);
+    builder_->DrawRect(rect, paint);
   }
 
   void drawPath(const SkPath& path,
                 const DecorationStyle& decor_style) override {
-    builder_->drawPath(path, toDlPaint(decor_style));
+    builder_->DrawPath(path, toDlPaint(decor_style));
   }
 
   void drawLine(SkScalar x0,
@@ -119,21 +119,21 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
                 SkScalar x1,
                 SkScalar y1,
                 const DecorationStyle& decor_style) override {
-    builder_->drawLine(SkPoint::Make(x0, y0), SkPoint::Make(x1, y1),
+    builder_->DrawLine(SkPoint::Make(x0, y0), SkPoint::Make(x1, y1),
                        toDlPaint(decor_style));
   }
 
   void clipRect(const SkRect& rect) override {
-    builder_->clipRect(rect, SkClipOp::kIntersect, false);
+    builder_->ClipRect(rect, DlCanvas::ClipOp::kIntersect, false);
   }
 
   void translate(SkScalar dx, SkScalar dy) override {
-    builder_->translate(dx, dy);
+    builder_->Translate(dx, dy);
   }
 
-  void save() override { builder_->save(); }
+  void save() override { builder_->Save(); }
 
-  void restore() override { builder_->restore(); }
+  void restore() override { builder_->Restore(); }
 
  private:
   DisplayListBuilder* builder_;

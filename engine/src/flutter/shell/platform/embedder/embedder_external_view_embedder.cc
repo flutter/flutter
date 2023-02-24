@@ -86,7 +86,7 @@ void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 // |ExternalViewEmbedder|
-SkCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
+DlCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
   auto found = pending_views_.find(EmbedderExternalView::ViewIdentifier{});
   if (found == pending_views_.end()) {
     FML_DLOG(WARNING)
@@ -99,35 +99,15 @@ SkCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
 }
 
 // |ExternalViewEmbedder|
-std::vector<SkCanvas*> EmbedderExternalViewEmbedder::GetCurrentCanvases() {
-  std::vector<SkCanvas*> canvases;
-  for (const auto& view : pending_views_) {
-    const auto& external_view = view.second;
-    // This method (for legacy reasons) expects non-root current canvases.
-    if (!external_view->IsRootView()) {
-      canvases.push_back(external_view->GetCanvas());
-    }
-  }
-  return canvases;
-}
-
-// |ExternalViewEmbedder|
-std::vector<DisplayListBuilder*>
-EmbedderExternalViewEmbedder::GetCurrentBuilders() {
-  return std::vector<DisplayListBuilder*>({});
-}
-
-// |ExternalViewEmbedder|
-EmbedderPaintContext EmbedderExternalViewEmbedder::CompositeEmbeddedView(
-    int64_t view_id) {
+DlCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   auto vid = EmbedderExternalView::ViewIdentifier(view_id);
   auto found = pending_views_.find(vid);
   if (found == pending_views_.end()) {
     FML_DCHECK(false) << "Attempted to composite a view that was not "
                          "pre-rolled.";
-    return {nullptr, nullptr};
+    return nullptr;
   }
-  return {found->second->GetCanvas(), nullptr};
+  return found->second->GetCanvas();
 }
 
 static FlutterBackingStoreConfig MakeBackingStoreConfig(
