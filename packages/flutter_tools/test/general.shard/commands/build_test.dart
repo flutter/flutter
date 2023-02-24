@@ -2,29 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/commands/build_aar.dart';
-import 'package:flutter_tools/src/commands/build_apk.dart';
-import 'package:flutter_tools/src/commands/build_appbundle.dart';
-import 'package:flutter_tools/src/commands/build_ios.dart';
-import 'package:flutter_tools/src/commands/build_ios_framework.dart';
-import 'package:flutter_tools/src/commands/build_linux.dart';
-import 'package:flutter_tools/src/commands/build_macos.dart';
-import 'package:flutter_tools/src/commands/build_web.dart';
-import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
