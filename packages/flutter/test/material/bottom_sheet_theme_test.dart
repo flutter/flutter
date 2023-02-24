@@ -51,10 +51,10 @@ void main() {
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       elevation: 2.0,
+      shadowColor: Color(0xFF00FFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       clipBehavior: Clip.antiAlias,
       constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
-      shadowColor: Color(0xFF00FFFF),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -65,10 +65,10 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
       'elevation: 2.0',
+      'shadowColor: Color(0xff00ffff)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
-      'shadowColor: Color(0xff00ffff)',
     ]);
   });
 
