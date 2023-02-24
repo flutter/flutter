@@ -18,7 +18,6 @@ import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
-    required super.logger,
     required AndroidSdk? androidSdk,
     required FileSystem fileSystem,
     required bool verboseHelp,
@@ -67,9 +66,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  @override
-  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -138,7 +134,6 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder?.buildAar(
       project: _getProject(),
       target: targetFile.path,

@@ -18,7 +18,6 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({
-    required super.logger,
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
@@ -148,7 +147,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
 
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildAab(
       project: FlutterProject.current(),

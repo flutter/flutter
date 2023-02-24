@@ -319,7 +319,6 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -639,7 +638,6 @@ class WebDevFS implements DevFS {
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
-    required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
 
