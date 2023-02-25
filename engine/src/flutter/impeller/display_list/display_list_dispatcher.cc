@@ -589,12 +589,6 @@ void DisplayListDispatcher::setBlendMode(flutter::DlBlendMode dl_mode) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setBlender(sk_sp<SkBlender> blender) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
-}
-
-// |flutter::Dispatcher|
 void DisplayListDispatcher::setPathEffect(const flutter::DlPathEffect* effect) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
@@ -1121,13 +1115,6 @@ void DisplayListDispatcher::drawPoints(PointMode mode,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawSkVertices(const sk_sp<SkVertices> vertices,
-                                           SkBlendMode mode) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
-}
-
-// |flutter::Dispatcher|
 void DisplayListDispatcher::drawVertices(const flutter::DlVertices* vertices,
                                          flutter::DlBlendMode dl_mode) {
   canvas_.DrawVertices(DLVerticesGeometry::MakeVertices(vertices),
@@ -1194,18 +1181,6 @@ void DisplayListDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawImageLattice(
-    const sk_sp<flutter::DlImage> image,
-    const SkCanvas::Lattice& lattice,
-    const SkRect& dst,
-    flutter::DlFilterMode filter,
-    bool render_with_attributes) {
-  // Don't implement this one since it is not exposed by flutter,
-  // Skia internally converts calls to drawImageNine into this method,
-  // which is then converted back to drawImageNine by display list.
-}
-
-// |flutter::Dispatcher|
 void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                       const SkRSXform xform[],
                                       const SkRect tex[],
@@ -1219,14 +1194,6 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                     ToRSXForms(xform, count), ToRects(tex, count),
                     ToColors(colors, count), ToBlendMode(mode),
                     ToSamplerDescriptor(sampling), ToRect(cull_rect), paint_);
-}
-
-// |flutter::Dispatcher|
-void DisplayListDispatcher::drawPicture(const sk_sp<SkPicture> picture,
-                                        const SkMatrix* matrix,
-                                        bool render_with_attributes) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|

@@ -5,7 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_BLEND_MODE_H_
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_BLEND_MODE_H_
 
-#include "include/core/SkBlender.h"
+#include "include/core/SkBlendMode.h"
 
 namespace flutter {
 

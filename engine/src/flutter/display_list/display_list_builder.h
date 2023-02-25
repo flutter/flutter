@@ -92,15 +92,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
     }
   }
   void setBlendMode(DlBlendMode mode) override {
-    if (current_blender_ || current_.getBlendMode() != mode) {
+    if (current_.getBlendMode() != mode) {
       onSetBlendMode(mode);
-    }
-  }
-  void setBlender(sk_sp<SkBlender> blender) override {
-    if (!blender) {
-      setBlendMode(DlBlendMode::kSrcOver);
-    } else if (current_blender_ != blender) {
-      onSetBlender(std::move(blender));
     }
   }
   void setColorSource(const DlColorSource* source) override {
@@ -144,17 +137,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     return current_.getColorFilter();
   }
   bool isInvertColors() const { return current_.isInvertColors(); }
-  std::optional<DlBlendMode> getBlendMode() const {
-    if (current_blender_) {
-      // The setters will turn "Mode" style blenders into "blend_mode"s
-      return {};
-    }
-    return current_.getBlendMode();
-  }
-  sk_sp<SkBlender> getBlender() const {
-    return current_blender_ ? current_blender_
-                            : SkBlender::Mode(ToSk(current_.getBlendMode()));
-  }
+  DlBlendMode getBlendMode() const { return current_.getBlendMode(); }
   std::shared_ptr<const DlPathEffect> getPathEffect() const {
     return current_.getPathEffect();
   }
@@ -200,7 +183,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void rotate(SkScalar degrees) override { Rotate(degrees); }
   void skew(SkScalar sx, SkScalar sy) override { Skew(sx, sy); }
 
-  void setAttributesFromPaint(const SkPaint& paint,
+  void SetAttributesFromPaint(const DlPaint& paint,
                               const DisplayListAttributeFlags flags);
 
   // clang-format off
@@ -329,8 +312,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
                   uint32_t count,
                   const SkPoint pts[],
                   const DlPaint& paint) override;
-  void drawSkVertices(const sk_sp<SkVertices> vertices,
-                      SkBlendMode mode) override;
   void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
   void drawVertices(const std::shared_ptr<const DlVertices> vertices,
                     DlBlendMode mode) {
@@ -372,11 +353,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
                      const SkRect& dst,
                      DlFilterMode filter,
                      const DlPaint* paint = nullptr) override;
-  void drawImageLattice(const sk_sp<DlImage> image,
-                        const SkCanvas::Lattice& lattice,
-                        const SkRect& dst,
-                        DlFilterMode filter,
-                        bool render_with_attributes) override;
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
@@ -395,9 +371,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
                  DlImageSampling sampling,
                  const SkRect* cullRect,
                  const DlPaint* paint = nullptr) override;
-  void drawPicture(const sk_sp<SkPicture> picture,
-                   const SkMatrix* matrix,
-                   bool render_with_attributes) override;
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity) override;
   void drawDisplayList(const sk_sp<DisplayList> display_list) override {
@@ -443,8 +416,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   template <typename T, typename... Args>
   void* Push(size_t extra, int op_inc, Args&&... args);
 
-  void setAttributesFromDlPaint(const DlPaint& paint,
-                                const DisplayListAttributeFlags flags);
   void intersect(const SkRect& rect);
 
   // kInvalidSigma is used to indicate that no MaskBlur is currently set.
@@ -514,9 +485,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
     // that cull rect so that the overall unbounded state of the entire
     // DisplayList will never be true.
     //
-    // SkPicture treats these same conditions as a Nop (they accumulate
-    // the SkPicture cull rect, but if it was not specified then it is an
-    // empty Rect and so has no effect on the bounds).
+    // For historical consistency it is worth noting that SkPicture used
+    // to treat these same conditions as a Nop (they accumulate the
+    // SkPicture cull rect, but if no cull rect was specified then it is
+    // an empty Rect and so has no effect on the bounds).
     //
     // Flutter is unlikely to ever run into this as the Dart mechanisms
     // all supply a non-null cull rect for all Dart Picture objects,
@@ -564,7 +536,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
     current_opacity_compatibility_ =             //
         current_.getColorFilter() == nullptr &&  //
         !current_.isInvertColors() &&            //
-        current_blender_ == nullptr &&           //
         IsOpacityCompatible(current_.getBlendMode());
   }
 
@@ -612,7 +583,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void onSetStrokeMiter(SkScalar limit);
   void onSetColor(DlColor color);
   void onSetBlendMode(DlBlendMode mode);
-  void onSetBlender(sk_sp<SkBlender> blender);
   void onSetColorSource(const DlColorSource* source);
   void onSetImageFilter(const DlImageFilter* filter);
   void onSetColorFilter(const DlColorFilter* filter);
@@ -683,8 +653,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void AccumulateBounds(SkRect& bounds);
 
   DlPaint current_;
-  // If |current_blender_| is set then ignore |current_.getBlendMode()|
-  sk_sp<SkBlender> current_blender_;
 };
 
 }  // namespace flutter

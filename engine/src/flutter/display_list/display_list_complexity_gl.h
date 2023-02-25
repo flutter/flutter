@@ -55,7 +55,6 @@ class DisplayListGLComplexityCalculator
     void drawPoints(DlCanvas::PointMode mode,
                     uint32_t count,
                     const SkPoint points[]) override;
-    void drawSkVertices(const sk_sp<SkVertices>, SkBlendMode mode) override;
     void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
     void drawImage(const sk_sp<DlImage> image,
                    const SkPoint point,
