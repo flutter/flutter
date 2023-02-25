@@ -8,10 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
 
-#include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkBlenders.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -93,12 +90,6 @@ static sk_sp<DlImage> MakeTestImage(int w, int h, int checker_size) {
 static auto TestImage1 = MakeTestImage(40, 40, 5);
 static auto TestImage2 = MakeTestImage(50, 50, 5);
 
-static const sk_sp<SkBlender> kTestBlender1 =
-    SkBlenders::Arithmetic(0.2, 0.2, 0.2, 0.2, false);
-static const sk_sp<SkBlender> kTestBlender2 =
-    SkBlenders::Arithmetic(0.2, 0.2, 0.2, 0.2, true);
-static const sk_sp<SkBlender> kTestBlender3 =
-    SkBlenders::Arithmetic(0.3, 0.3, 0.3, 0.3, true);
 static const DlImageColorSource kTestSource1(TestImage1,
                                              DlTileMode::kClamp,
                                              DlTileMode::kMirror,
@@ -219,40 +210,6 @@ static std::shared_ptr<const DlVertices> TestVertices2 =
                      TestPoints,
                      nullptr,
                      kColors);
-
-static constexpr int kTestDivs1[] = {10, 20, 30};
-static constexpr int kTestDivs2[] = {15, 20, 25};
-static constexpr int kTestDivs3[] = {15, 25};
-static constexpr SkCanvas::Lattice::RectType kTestRTypes[] = {
-    SkCanvas::Lattice::RectType::kDefault,
-    SkCanvas::Lattice::RectType::kTransparent,
-    SkCanvas::Lattice::RectType::kFixedColor,
-    SkCanvas::Lattice::RectType::kDefault,
-    SkCanvas::Lattice::RectType::kTransparent,
-    SkCanvas::Lattice::RectType::kFixedColor,
-    SkCanvas::Lattice::RectType::kDefault,
-    SkCanvas::Lattice::RectType::kTransparent,
-    SkCanvas::Lattice::RectType::kFixedColor,
-};
-static constexpr SkColor kTestLatticeColors[] = {
-    SK_ColorBLUE, SK_ColorGREEN, SK_ColorYELLOW,
-    SK_ColorBLUE, SK_ColorGREEN, SK_ColorYELLOW,
-    SK_ColorBLUE, SK_ColorGREEN, SK_ColorYELLOW,
-};
-static constexpr SkIRect kTestLatticeSrcRect = {1, 1, 39, 39};
-
-static sk_sp<SkPicture> MakeTestPicture(int w, int h, SkColor color) {
-  SkPictureRecorder recorder;
-  SkRTreeFactory rtree_factory;
-  SkCanvas* cv = recorder.beginRecording(kTestBounds, &rtree_factory);
-  SkPaint paint;
-  paint.setColor(color);
-  paint.setStyle(SkPaint::kFill_Style);
-  cv->drawRect(SkRect::MakeWH(w, h), paint);
-  return recorder.finishRecordingAsPicture();
-}
-static sk_sp<SkPicture> TestPicture1 = MakeTestPicture(20, 20, SK_ColorGREEN);
-static sk_sp<SkPicture> TestPicture2 = MakeTestPicture(25, 25, SK_ColorBLUE);
 
 static sk_sp<DisplayList> MakeTestDisplayList(int w, int h, SkColor color) {
   DisplayListBuilder builder;

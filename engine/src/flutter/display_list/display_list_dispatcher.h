@@ -58,7 +58,6 @@ class Dispatcher {
   // filter so that the color inversion happens after the ColorFilter.
   virtual void setInvertColors(bool invert) = 0;
   virtual void setBlendMode(DlBlendMode mode) = 0;
-  virtual void setBlender(sk_sp<SkBlender> blender) = 0;
   virtual void setPathEffect(const DlPathEffect* effect) = 0;
   virtual void setMaskFilter(const DlMaskFilter* filter) = 0;
   virtual void setImageFilter(const DlImageFilter* filter) = 0;
@@ -215,8 +214,6 @@ class Dispatcher {
   virtual void drawPoints(PointMode mode,
                           uint32_t count,
                           const SkPoint points[]) = 0;
-  virtual void drawSkVertices(const sk_sp<SkVertices> vertices,
-                              SkBlendMode mode) = 0;
   virtual void drawVertices(const DlVertices* vertices, DlBlendMode mode) = 0;
   virtual void drawImage(const sk_sp<DlImage> image,
                          const SkPoint point,
@@ -233,11 +230,6 @@ class Dispatcher {
                              const SkRect& dst,
                              DlFilterMode filter,
                              bool render_with_attributes) = 0;
-  virtual void drawImageLattice(const sk_sp<DlImage> image,
-                                const SkCanvas::Lattice& lattice,
-                                const SkRect& dst,
-                                DlFilterMode filter,
-                                bool render_with_attributes) = 0;
   virtual void drawAtlas(const sk_sp<DlImage> atlas,
                          const SkRSXform xform[],
                          const SkRect tex[],
@@ -247,9 +239,6 @@ class Dispatcher {
                          DlImageSampling sampling,
                          const SkRect* cull_rect,
                          bool render_with_attributes) = 0;
-  virtual void drawPicture(const sk_sp<SkPicture> picture,
-                           const SkMatrix* matrix,
-                           bool render_with_attributes) = 0;
   virtual void drawDisplayList(const sk_sp<DisplayList> display_list) = 0;
   virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
                             SkScalar x,

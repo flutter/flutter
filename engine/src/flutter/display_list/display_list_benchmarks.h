@@ -28,7 +28,7 @@ enum BenchmarkAttributes {
   kAntiAliasing_Flag = 1 << 3
 };
 
-SkPaint GetPaintForRun(unsigned attributes);
+DlPaint GetPaintForRun(unsigned attributes);
 
 using BackendType = DlSurfaceProvider::BackendType;
 

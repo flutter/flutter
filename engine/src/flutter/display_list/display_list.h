@@ -38,7 +38,7 @@
 //                       Any class implementing Dispatcher can inherit from
 //                       these utility classes to simplify its creation
 //
-// The Flutter DisplayList mechanism can be used in place of the Skia
+// The Flutter DisplayList mechanism is used in a similar manner to the Skia
 // SkPicture mechanism. The primary means of communication into and out
 // of the DisplayList is through the Dispatcher virtual class which
 // provides a nearly 1:1 translation between the records of the DisplayList
@@ -74,9 +74,6 @@ namespace flutter {
                                     \
   V(SetColor)                       \
   V(SetBlendMode)                   \
-                                    \
-  V(SetBlender)                     \
-  V(ClearBlender)                   \
                                     \
   V(SetSkPathEffect)                \
   V(SetPodPathEffect)               \
@@ -139,19 +136,15 @@ namespace flutter {
   V(DrawLines)                      \
   V(DrawPolygon)                    \
   V(DrawVertices)                   \
-  V(DrawSkVertices)                 \
                                     \
   V(DrawImage)                      \
   V(DrawImageWithAttr)              \
   V(DrawImageRect)                  \
   V(DrawImageNine)                  \
   V(DrawImageNineWithAttr)          \
-  V(DrawImageLattice)               \
   V(DrawAtlas)                      \
   V(DrawAtlasCulled)                \
                                     \
-  V(DrawSkPicture)                  \
-  V(DrawSkPictureMatrix)            \
   V(DrawDisplayList)                \
   V(DrawTextBlob)                   \
                                     \
@@ -258,9 +251,9 @@ class DisplayList : public SkRefCnt {
 
   void RenderTo(SkCanvas* canvas, SkScalar opacity = SK_Scalar1) const;
 
-  // SkPicture always includes nested bytes, but nested ops are
-  // only included if requested. The defaults used here for these
-  // accessors follow that pattern.
+  // From historical behavior, SkPicture always included nested bytes,
+  // but nested ops are only included if requested. The defaults used
+  // here for these accessors follow that pattern.
   size_t bytes(bool nested = true) const {
     return sizeof(DisplayList) + byte_count_ +
            (nested ? nested_byte_count_ : 0);

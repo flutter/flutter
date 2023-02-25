@@ -513,9 +513,6 @@ void DisplayListStreamDispatcher::setInvertColors(bool invert) {
 void DisplayListStreamDispatcher::setBlendMode(DlBlendMode mode) {
   startl() << "setBlendMode(" << mode << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setBlender(sk_sp<SkBlender> blender) {
-  startl() << "setBlender(" << blender << ");" << std::endl;
-}
 void DisplayListStreamDispatcher::setPathEffect(const DlPathEffect* effect) {
   startl() << "setPathEffect(" << effect << ");" << std::endl;
 }
@@ -769,10 +766,6 @@ void DisplayListStreamDispatcher::drawPoints(PointMode mode,
                           out_array("points", count, points)
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawSkVertices(const sk_sp<SkVertices> vertices,
-                                                 SkBlendMode mode) {
-  startl() << "drawSkVertices(" << vertices << ", " << static_cast<int>(mode) << ");" << std::endl;
-}
 void DisplayListStreamDispatcher::drawVertices(const DlVertices* vertices,
                                                DlBlendMode mode) {
   startl() << "drawVertices("
@@ -820,13 +813,6 @@ void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage> image,
                                << "with attributes: " << render_with_attributes
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawImageLattice(const sk_sp<DlImage> image,
-                                                   const SkCanvas::Lattice& lattice,
-                                                   const SkRect& dst,
-                                                   DlFilterMode filter,
-                                                   bool render_with_attributes) {
-  startl() << "drawImageLattice(blah blah);" << std::endl;
-}
 void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
@@ -842,15 +828,6 @@ void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                    out_array("colors", count, colors) << ", "
                    << mode << ", " << sampling << ", cull: " << cull_rect << ", "
                    << "with attributes: " << render_with_attributes
-           << ");" << std::endl;
-}
-void DisplayListStreamDispatcher::drawPicture(const sk_sp<SkPicture> picture,
-                                              const SkMatrix* matrix,
-                                              bool render_with_attributes) {
-  startl() << "drawPicture("
-           << "SkPicture(ID: " << picture->uniqueID() << ", bounds: " << picture->cullRect() << ", @" << picture << "), "
-           << matrix << ", "
-           << render_with_attributes
            << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawDisplayList(

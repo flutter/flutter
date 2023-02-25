@@ -75,9 +75,6 @@ void SkPaintDispatchHelper::setColor(DlColor color) {
 void SkPaintDispatchHelper::setBlendMode(DlBlendMode mode) {
   paint_.setBlendMode(ToSk(mode));
 }
-void SkPaintDispatchHelper::setBlender(sk_sp<SkBlender> blender) {
-  paint_.setBlender(blender);
-}
 void SkPaintDispatchHelper::setColorSource(const DlColorSource* source) {
   paint_.setShader(source ? source->skia_object() : nullptr);
 }

@@ -108,7 +108,6 @@ class ComplexityCalculatorHelper
   void setStrokeMiter(SkScalar limit) override {}
   void setColor(DlColor color) override {}
   void setBlendMode(DlBlendMode mode) override {}
-  void setBlender(sk_sp<SkBlender> blender) override {}
   void setColorSource(const DlColorSource* source) override {}
   void setImageFilter(const DlImageFilter* filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
@@ -159,22 +158,6 @@ class ComplexityCalculatorHelper
               render_with_attributes, constraint);
   }
 
-  void drawImageLattice(const sk_sp<DlImage> image,
-                        const SkCanvas::Lattice& lattice,
-                        const SkRect& dst,
-                        DlFilterMode filter,
-                        bool render_with_attributes) override {
-    if (IsComplex()) {
-      return;
-    }
-    // This is not currently called from Flutter code, and this API is likely
-    // to be removed in the future. For now, just return what drawImageNine
-    // would
-    ImageRect(image->dimensions(), image->isTextureBacked(),
-              render_with_attributes,
-              SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);
-  }
-
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
@@ -194,14 +177,6 @@ class ComplexityCalculatorHelper
                 render_with_attributes,
                 SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);
     }
-  }
-
-  void drawPicture(const sk_sp<SkPicture> picture,
-                   const SkMatrix* matrix,
-                   bool render_with_attributes) override {
-    // This API shouldn't be used, but for now just take the
-    // approximateOpCount() and multiply by 50 as a placeholder.
-    AccumulateComplexity(picture->approximateOpCount() * 50);
   }
 
   // This method finalizes the complexity score calculation and returns it

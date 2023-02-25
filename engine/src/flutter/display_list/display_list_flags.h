@@ -194,17 +194,17 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
   // bool applies_stroke_attributes() const { return is_stroked(); }
 
   constexpr bool applies_shader() const { return has_any(kUsesShader_); }
-  /// The primitive honors the current SkColorFilter, including
+  /// The primitive honors the current DlColorFilter, including
   /// the related attribute InvertColors
   constexpr bool applies_color_filter() const {
     return has_any(kUsesColorFilter_);
   }
-  /// The primitive honors the SkBlendMode or SkBlender
+  /// The primitive honors the DlBlendMode
   constexpr bool applies_blend() const { return has_any(kUsesBlend_); }
   constexpr bool applies_path_effect() const {
     return has_any(kUsesPathEffect_);
   }
-  /// The primitive honors the SkMaskFilter whether set using the
+  /// The primitive honors the DlMaskFilter whether set using the
   /// filter object or using the convenience method |setMaskBlurFilter|
   constexpr bool applies_mask_filter() const {
     return has_any(kUsesMaskFilter_);
@@ -401,23 +401,11 @@ class DisplayListOpFlags : DisplayListFlags {
   static constexpr DisplayListAttributeFlags kDrawImageNineWithPaintFlags{
       kBASE_ImageFlags_  //
   };
-  static constexpr DisplayListAttributeFlags kDrawImageLatticeFlags{
-      kIgnoresPaint_  //
-  };
-  static constexpr DisplayListAttributeFlags kDrawImageLatticeWithPaintFlags{
-      kBASE_ImageFlags_  //
-  };
   static constexpr DisplayListAttributeFlags kDrawAtlasFlags{
       kIgnoresPaint_  //
   };
   static constexpr DisplayListAttributeFlags kDrawAtlasWithPaintFlags{
       kBASE_ImageFlags_  //
-  };
-  static constexpr DisplayListAttributeFlags kDrawPictureFlags{
-      kIgnoresPaint_  //
-  };
-  static constexpr DisplayListAttributeFlags kDrawPictureWithPaintFlags{
-      kSaveLayerWithPaintFlags  //
   };
   static constexpr DisplayListAttributeFlags kDrawDisplayListFlags{
       kIgnoresPaint_  //
