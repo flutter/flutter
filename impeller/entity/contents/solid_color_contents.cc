@@ -70,9 +70,9 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetSolidFillPipeline(options);
   cmd.BindVertices(geometry_result.vertex_buffer);
 
-  VS::VertInfo vert_info;
-  vert_info.mvp = geometry_result.transform;
-  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(vert_info));
+  VS::FrameInfo frame_info;
+  frame_info.mvp = geometry_result.transform;
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.color = color_.Premultiply();

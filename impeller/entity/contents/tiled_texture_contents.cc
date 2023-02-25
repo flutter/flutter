@@ -76,12 +76,12 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   //              position_uv.vert.
   //              https://github.com/flutter/flutter/issues/118553
 
-  VS::VertInfo vert_info;
-  vert_info.mvp = geometry_result.transform;
-  vert_info.effect_transform = GetInverseMatrix();
-  vert_info.bounds_origin = geometry->GetCoverage(Matrix())->origin;
-  vert_info.texture_size = Vector2(static_cast<Scalar>(texture_size.width),
-                                   static_cast<Scalar>(texture_size.height));
+  VS::FrameInfo frame_info;
+  frame_info.mvp = geometry_result.transform;
+  frame_info.effect_transform = GetInverseMatrix();
+  frame_info.bounds_origin = geometry->GetCoverage(Matrix())->origin;
+  frame_info.texture_size = Vector2(static_cast<Scalar>(texture_size.width),
+                                    static_cast<Scalar>(texture_size.height));
 
   FS::FragInfo frag_info;
   frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
@@ -102,7 +102,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetTiledTexturePipeline(options);
 
   cmd.BindVertices(geometry_result.vertex_buffer);
-  VS::BindVertInfo(cmd, host_buffer.EmplaceUniform(vert_info));
+  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   if (color_filter_.has_value()) {
     auto filtered_texture = CreateFilterTexture(renderer);

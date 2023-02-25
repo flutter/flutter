@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-uniform VertInfo {
+uniform FrameInfo {
   mat4 mvp;
 }
-vert_info;
+frame_info;
 
 // This attribute layout is expected to be identical to that within
 // `impeller/scene/importer/scene.fbs`.
@@ -21,12 +21,12 @@ out vec2 v_texture_coords;
 out vec4 v_color;
 
 void main() {
-  gl_Position = vert_info.mvp * vec4(position, 1.0);
+  gl_Position = frame_info.mvp * vec4(position, 1.0);
   v_position = gl_Position.xyz;
 
   vec3 lh_tangent = tangent.xyz * tangent.w;
-  v_tangent_space =
-      mat3(vert_info.mvp) * mat3(lh_tangent, cross(normal, lh_tangent), normal);
+  v_tangent_space = mat3(frame_info.mvp) *
+                    mat3(lh_tangent, cross(normal, lh_tangent), normal);
   v_texture_coords = texture_coords;
   v_color = color;
 }
