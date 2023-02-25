@@ -310,6 +310,160 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantics label is in order when uses widget span', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'foo'),
+              ),
+              const TextSpan(text: ' after'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
+  });
+
+  testWidgets('semantics can handle some widget spans without semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              const WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              const TextSpan(text: ' mid'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'foo'),
+              ),
+              const TextSpan(text: ' after'),
+              const WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\nfoo\n after'));
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\nfoo\n after'));
+  });
+
+  testWidgets('semantics can handle all widget spans without semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              TextSpan(text: ' mid'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              TextSpan(text: ' after'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\n after'));
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\n after'));
+  });
+
+  testWidgets('semantics can handle widget spans with explicit semantics node', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'inner', container: true),
+              ),
+              const TextSpan(text: ' after'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
+  });
+
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(

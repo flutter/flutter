@@ -498,6 +498,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       ?? theme.inputDecorationTheme
       ?? defaults.inputDecorationTheme!;
 
+    final MouseCursor effectiveMouseCursor = canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click;
+
     return Shortcuts(
       shortcuts: _kMenuTraversalShortcuts,
       child: Actions(
@@ -539,6 +541,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               width: widget.width,
               children: <Widget>[
                 TextField(
+                  mouseCursor: effectiveMouseCursor,
                   canRequestFocus: canRequestFocus(),
                   enableInteractiveSelection: canRequestFocus(),
                   textAlignVertical: TextAlignVertical.center,
