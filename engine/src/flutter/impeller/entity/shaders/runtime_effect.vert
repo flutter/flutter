@@ -4,10 +4,10 @@
 
 #include <impeller/types.glsl>
 
-uniform VertInfo {
+uniform FrameInfo {
   mat4 mvp;
 }
-vert_info;
+frame_info;
 
 in vec2 position;
 // Note: The GLES backend uses name matching for attribute locations. This name
@@ -16,6 +16,6 @@ in vec2 position;
 out vec2 _fragCoord;
 
 void main() {
-  gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
   _fragCoord = position;
 }

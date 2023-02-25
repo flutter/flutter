@@ -148,9 +148,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   /// Vertex stage uniforms.
   ///
 
-  VS::VertInfo frame_info;
+  VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
-  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   //--------------------------------------------------------------------------
   /// Fragment stage uniforms.

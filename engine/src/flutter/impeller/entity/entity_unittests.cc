@@ -808,11 +808,11 @@ TEST_P(EntityTest, BlendingModeOptions) {
       cmd.BindVertices(
           vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
-      VS::VertInfo frame_info;
+      VS::FrameInfo frame_info;
       frame_info.mvp =
           Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
-      VS::BindVertInfo(cmd,
-                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+      VS::BindFrameInfo(cmd,
+                        pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
       FS::FragInfo frag_info;
       frag_info.color = color.Premultiply();

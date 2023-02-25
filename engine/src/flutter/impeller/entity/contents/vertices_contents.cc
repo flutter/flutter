@@ -101,9 +101,9 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetGeometryColorPipeline(opts);
   cmd.BindVertices(geometry_result.vertex_buffer);
 
-  VS::VertInfo vert_info;
-  vert_info.mvp = geometry_result.transform;
-  VS::BindVertInfo(cmd, host_buffer.EmplaceUniform(vert_info));
+  VS::FrameInfo frame_info;
+  frame_info.mvp = geometry_result.transform;
+  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.alpha = alpha_;
