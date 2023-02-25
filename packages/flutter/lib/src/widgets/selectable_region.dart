@@ -973,7 +973,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// * [SelectableRegion.getSelectableButtonItems], which performs a similar role,
   ///   but for any selectable text, not just specifically SelectableRegion.
-  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  /// * [EditableTextState.contextMenuButtonItems], which performs a similar role
   ///   but for content that is not just selectable but also editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.

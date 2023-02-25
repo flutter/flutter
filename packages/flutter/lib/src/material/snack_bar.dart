@@ -516,7 +516,7 @@ class _SnackBarState extends State<SnackBar> {
     // the surrounding theme.
     final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
 
-    // Invert the theme values for Material 2. Material 3 values are tokenzied to pre-inverted values.
+    // Invert the theme values for Material 2. Material 3 values are tokenized to pre-inverted values.
     final ThemeData effectiveTheme = theme.useMaterial3
         ? theme
         : theme.copyWith(
