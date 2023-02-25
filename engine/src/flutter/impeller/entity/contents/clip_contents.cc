@@ -76,7 +76,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   using VS = ClipPipeline::VertexShader;
   using FS = ClipPipeline::FragmentShader;
 
-  VS::VertInfo info;
+  VS::FrameInfo info;
 
   Command cmd;
 
@@ -102,7 +102,7 @@ bool ClipContents::Render(const ContentContext& renderer,
       cmd.BindVertices(vertices);
 
       info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
-      VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+      VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
       options.primitive_type = PrimitiveType::kTriangleStrip;
       cmd.pipeline = renderer.GetClipPipeline(options);
@@ -130,7 +130,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   cmd.BindVertices(geometry_result.vertex_buffer);
 
   info.mvp = geometry_result.transform;
-  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   pass.AddCommand(std::move(cmd));
   return true;
@@ -194,9 +194,9 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   });
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
-  VS::VertInfo info;
+  VS::FrameInfo info;
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
-  VS::BindVertInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   FS::FragInfo frag_info;
   // The color really doesn't matter.
