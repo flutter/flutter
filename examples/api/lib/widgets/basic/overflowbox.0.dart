@@ -29,13 +29,16 @@ class OverflowBoxExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      // This parent container has fixed width and
-      // height of 100 pixels.
-      child: Container(
-        width: 100,
-        height: 100,
-        color: Theme.of(context).colorScheme.secondaryContainer,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const Text('Cover Me'),
+        // This parent container has fixed width and
+        // height of 100 pixels.
+        Container(
+          width: 100,
+          height: 100,
+          color: Theme.of(context).colorScheme.secondaryContainer,
           // This OverflowBox imposes its own constraints of maxWidth
           // and maxHeight of 200 pixels on its child which allows the
           // child to overflow the parent container.
@@ -47,7 +50,8 @@ class OverflowBoxExample extends StatelessWidget {
             // and would not overflow the parent container.
             child: FlutterLogo(size: 200),
           ),
-      ),
+        ),
+      ],
     );
   }
 }
