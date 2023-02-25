@@ -111,7 +111,7 @@ def main():
 
   command += args.source
 
-  subprocess.check_call(command)
+  subprocess.check_output(command, stderr=subprocess.STDOUT)
 
 
 if __name__ == '__main__':
