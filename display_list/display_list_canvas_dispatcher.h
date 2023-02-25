@@ -71,8 +71,6 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                SkScalar sweep,
                bool useCenter) override;
   void drawPoints(PointMode mode, uint32_t count, const SkPoint pts[]) override;
-  void drawSkVertices(const sk_sp<SkVertices> vertices,
-                      SkBlendMode mode) override;
   void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
   void drawImage(const sk_sp<DlImage> image,
                  const SkPoint point,
@@ -89,11 +87,6 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                      const SkRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
-  void drawImageLattice(const sk_sp<DlImage> image,
-                        const SkCanvas::Lattice& lattice,
-                        const SkRect& dst,
-                        DlFilterMode filter,
-                        bool render_with_attributes) override;
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
@@ -103,9 +96,6 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                  DlImageSampling sampling,
                  const SkRect* cullRect,
                  bool render_with_attributes) override;
-  void drawPicture(const sk_sp<SkPicture> picture,
-                   const SkMatrix* matrix,
-                   bool render_with_attributes) override;
   void drawDisplayList(const sk_sp<DisplayList> display_list) override;
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,

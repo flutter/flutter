@@ -435,34 +435,6 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawPoints(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListMetalComplexityCalculator::MetalHelper::drawSkVertices(
-    const sk_sp<SkVertices> vertices,
-    SkBlendMode mode) {
-  // There is currently no way for us to get the VertexMode from the SkVertices
-  // object, but for future reference:
-  //
-  // TriangleStrip is roughly 25% more expensive than TriangleFan.
-  // TriangleFan is roughly 5% more expensive than Triangles.
-
-  // There is currently no way for us to get the vertex count from an SkVertices
-  // object, so we have to estimate it from the approximate size.
-  //
-  // Approximate size returns the sum of the sizes of the positions (SkPoint),
-  // texs (SkPoint), colors (SkColor) and indices (uint16_t) arrays multiplied
-  // by sizeof(type). As a very, very rough estimate, divide that by 20 to get
-  // an idea of the vertex count.
-  unsigned int approximate_vertex_count = vertices->approximateSize() / 20;
-
-  // For the baseline, it's hard to identify the trend. It might be O(n^1/2).
-  // For now, treat it as linear as an approximation.
-  //
-  // m = 1/4000
-  // c = 1
-  unsigned int complexity = (approximate_vertex_count + 4000) * 50;
-
-  AccumulateComplexity(complexity);
-}
-
 void DisplayListMetalComplexityCalculator::MetalHelper::drawVertices(
     const DlVertices* vertices,
     DlBlendMode mode) {

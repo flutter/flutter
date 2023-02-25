@@ -13,17 +13,17 @@
 namespace flutter {
 namespace testing {
 
-SkPaint GetPaintForRun(unsigned attributes) {
-  SkPaint paint;
+DlPaint GetPaintForRun(unsigned attributes) {
+  DlPaint paint;
 
   if (attributes & kStrokedStyle_Flag && attributes & kFilledStyle_Flag) {
     // Not currently exposed by Flutter, but we can probably benchmark this in
     // the future
-    paint.setStyle(SkPaint::kStrokeAndFill_Style);
+    paint.setDrawStyle(DlDrawStyle::kStrokeAndFill);
   } else if (attributes & kStrokedStyle_Flag) {
-    paint.setStyle(SkPaint::kStroke_Style);
+    paint.setDrawStyle(DlDrawStyle::kStroke);
   } else if (attributes & kFilledStyle_Flag) {
-    paint.setStyle(SkPaint::kFill_Style);
+    paint.setDrawStyle(DlDrawStyle::kFill);
   }
 
   if (attributes & kHairlineStroke_Flag) {
@@ -76,7 +76,7 @@ void BM_DrawLine(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawLineFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawLineFlags);
 
@@ -114,7 +114,7 @@ void BM_DrawRect(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawRectFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRectFlags);
 
@@ -163,7 +163,7 @@ void BM_DrawOval(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawOvalFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawOvalFlags);
 
@@ -209,7 +209,7 @@ void BM_DrawCircle(benchmark::State& state,
                    unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawCircleFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawCircleFlags);
 
@@ -258,7 +258,7 @@ void BM_DrawRRect(benchmark::State& state,
                   SkRRect::Type type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawRRectFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRRectFlags);
 
@@ -339,7 +339,7 @@ void BM_DrawDRRect(benchmark::State& state,
                    SkRRect::Type type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawDRRectFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
 
@@ -413,7 +413,7 @@ void BM_DrawArc(benchmark::State& state,
                 unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawArcNoCenterFlags);
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawArcNoCenterFlags);
@@ -629,7 +629,7 @@ void BM_DrawPath(benchmark::State& state,
                  SkPath::Verb type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawPathFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
 
@@ -767,7 +767,7 @@ void BM_DrawVertices(benchmark::State& state,
                      DlVertexMode mode) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawVerticesFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawVerticesFlags);
 
@@ -866,21 +866,21 @@ void BM_DrawPoints(benchmark::State& state,
   SkPaint paint;
   switch (mode) {
     case DlCanvas::PointMode::kPoints:
-      builder.setAttributesFromPaint(
+      builder.SetAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsPointsFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPointsFlags);
       break;
     case DlCanvas::PointMode::kLines:
-      builder.setAttributesFromPaint(
+      builder.SetAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsLinesFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsLinesFlags);
       break;
     case DlCanvas::PointMode::kPolygon:
-      builder.setAttributesFromPaint(
+      builder.SetAttributesFromPaint(
           GetPaintForRun(attributes),
           DisplayListOpFlags::kDrawPointsAsPolygonFlags);
       AnnotateAttributes(attributes, state,
@@ -933,7 +933,7 @@ void BM_DrawImage(benchmark::State& state,
                   bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawImageWithPaintFlags);
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawImageWithPaintFlags);
@@ -1016,7 +1016,7 @@ void BM_DrawImageRect(benchmark::State& state,
                       bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(
+  builder.SetAttributesFromPaint(
       GetPaintForRun(attributes),
       DisplayListOpFlags::kDrawImageRectWithPaintFlags);
   AnnotateAttributes(attributes, state,
@@ -1104,7 +1104,7 @@ void BM_DrawImageNine(benchmark::State& state,
                       bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(
+  builder.SetAttributesFromPaint(
       GetPaintForRun(attributes),
       DisplayListOpFlags::kDrawImageNineWithPaintFlags);
   AnnotateAttributes(attributes, state,
@@ -1181,7 +1181,7 @@ void BM_DrawTextBlob(benchmark::State& state,
                      unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawTextBlobFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextBlobFlags);
 
@@ -1228,7 +1228,7 @@ void BM_DrawShadow(benchmark::State& state,
                    SkPath::Verb type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kDrawShadowFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawShadowFlags);
 
@@ -1292,7 +1292,7 @@ void BM_SaveLayer(benchmark::State& state,
                   size_t save_depth) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
                                  DisplayListOpFlags::kSaveLayerFlags);
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kSaveLayerFlags);
 

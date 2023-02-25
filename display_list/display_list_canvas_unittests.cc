@@ -15,7 +15,6 @@
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkBlenders.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkDiscretePathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
@@ -555,7 +554,7 @@ class TestParameters {
       return false;
     }
     if (flags_.applies_blend() &&  //
-        ref_attr.getBlender() != attr.getBlender()) {
+        ref_attr.getBlendMode() != attr.getBlendMode()) {
       return false;
     }
     if (flags_.applies_color_filter() &&  //
@@ -1306,28 +1305,6 @@ class CanvasCompareTester {
                        b.setColor(blendable_color);
                      })
                      .with_bg(bg));
-    }
-
-    {
-      sk_sp<SkBlender> blender =
-          SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, false);
-      {
-        RenderWith(testP, env, tolerance,
-                   CaseParameters(
-                       "Blender == Arithmetic 0.25-false",
-                       [=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
-                       [=](DisplayListBuilder& b) { b.setBlender(blender); }));
-      }
-      EXPECT_TRUE(blender->unique()) << "Blender Cleanup";
-      blender = SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, true);
-      {
-        RenderWith(testP, env, tolerance,
-                   CaseParameters(
-                       "Blender == Arithmetic 0.25-true",
-                       [=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
-                       [=](DisplayListBuilder& b) { b.setBlender(blender); }));
-      }
-      EXPECT_TRUE(blender->unique()) << "Blender Cleanup";
     }
 
     {
@@ -3146,93 +3123,6 @@ TEST_F(DisplayListCanvas, DrawImageNineLinear) {
           kDrawImageNineWithPaintFlags));
 }
 
-TEST_F(DisplayListCanvas, DrawImageLatticeNearest) {
-  const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int div_x[] = {
-      kRenderWidth * 1 / 4,
-      kRenderWidth * 2 / 4,
-      kRenderWidth * 3 / 4,
-  };
-  const int div_y[] = {
-      kRenderHeight * 1 / 4,
-      kRenderHeight * 2 / 4,
-      kRenderHeight * 3 / 4,
-  };
-  SkCanvas::Lattice lattice = {
-      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
-  };
-  sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {
-            canvas->drawImageLattice(image.get(), lattice, dst,
-                                     SkFilterMode::kNearest, &paint);
-          },
-          [=](DisplayListBuilder& builder) {
-            builder.drawImageLattice(DlImage::Make(image), lattice, dst,
-                                     DlFilterMode::kNearest, true);
-          },
-          kDrawImageLatticeWithPaintFlags));
-}
-
-TEST_F(DisplayListCanvas, DrawImageLatticeNearestNoPaint) {
-  const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int div_x[] = {
-      kRenderWidth * 1 / 4,
-      kRenderWidth * 2 / 4,
-      kRenderWidth * 3 / 4,
-  };
-  const int div_y[] = {
-      kRenderHeight * 1 / 4,
-      kRenderHeight * 2 / 4,
-      kRenderHeight * 3 / 4,
-  };
-  SkCanvas::Lattice lattice = {
-      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
-  };
-  sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {
-            canvas->drawImageLattice(image.get(), lattice, dst,
-                                     SkFilterMode::kNearest, nullptr);
-          },
-          [=](DisplayListBuilder& builder) {
-            builder.drawImageLattice(DlImage::Make(image), lattice, dst,
-                                     DlFilterMode::kNearest, false);
-          },
-          kDrawImageLatticeFlags));
-}
-
-TEST_F(DisplayListCanvas, DrawImageLatticeLinear) {
-  const SkRect dst = kRenderBounds.makeInset(10.5, 10.5);
-  const int div_x[] = {
-      kRenderWidth / 4,
-      kRenderWidth / 2,
-      kRenderWidth * 3 / 4,
-  };
-  const int div_y[] = {
-      kRenderHeight / 4,
-      kRenderHeight / 2,
-      kRenderHeight * 3 / 4,
-  };
-  SkCanvas::Lattice lattice = {
-      div_x, div_y, nullptr, 3, 3, nullptr, nullptr,
-  };
-  sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {
-            canvas->drawImageLattice(image.get(), lattice, dst,
-                                     SkFilterMode::kLinear, &paint);
-          },
-          [=](DisplayListBuilder& builder) {
-            builder.drawImageLattice(DlImage::Make(image), lattice, dst,
-                                     DlFilterMode::kLinear, true);
-          },
-          kDrawImageLatticeWithPaintFlags));
-}
-
 TEST_F(DisplayListCanvas, DrawAtlasNearest) {
   const SkRSXform xform[] = {
       // clang-format off
@@ -3373,46 +3263,6 @@ sk_sp<SkPicture> makeTestPicture() {
   cv->drawRect({kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom},
                p);
   return recorder.finishRecordingAsPicture();
-}
-
-TEST_F(DisplayListCanvas, DrawPicture) {
-  sk_sp<SkPicture> picture = makeTestPicture();
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawPicture(picture, nullptr, nullptr);
-          },
-          [=](DisplayListBuilder& builder) {  //
-            builder.drawPicture(picture, nullptr, false);
-          },
-          kDrawPictureFlags));
-}
-
-TEST_F(DisplayListCanvas, DrawPictureWithMatrix) {
-  sk_sp<SkPicture> picture = makeTestPicture();
-  SkMatrix matrix = SkMatrix::Scale(0.9, 0.9);
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawPicture(picture, &matrix, nullptr);
-          },
-          [=](DisplayListBuilder& builder) {  //
-            builder.drawPicture(picture, &matrix, false);
-          },
-          kDrawPictureFlags));
-}
-
-TEST_F(DisplayListCanvas, DrawPictureWithPaint) {
-  sk_sp<SkPicture> picture = makeTestPicture();
-  CanvasCompareTester::RenderAll(  //
-      TestParameters(
-          [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawPicture(picture, nullptr, &paint);
-          },
-          [=](DisplayListBuilder& builder) {  //
-            builder.drawPicture(picture, nullptr, true);
-          },
-          kDrawPictureWithPaintFlags));
 }
 
 sk_sp<DisplayList> makeTestDisplayList() {

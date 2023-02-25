@@ -20,6 +20,7 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -230,7 +231,6 @@ TEST(DisplayList, FullRotationsAreNop) {
 TEST(DisplayList, AllBlendModeNops) {
   DisplayListBuilder builder;
   builder.setBlendMode(DlBlendMode::kSrcOver);
-  builder.setBlender(nullptr);
   sk_sp<DisplayList> dl = builder.Build();
   ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
   ASSERT_EQ(dl->bytes(true), sizeof(DisplayList));
@@ -499,57 +499,6 @@ TEST(DisplayList, NestedOpCountMetricsSameAsSkPicture) {
             static_cast<int>(display_list->op_count(true)));
 }
 
-class AttributeRefTester {
- public:
-  virtual void setRefToPaint(SkPaint& paint) const = 0;
-  virtual void setRefToDisplayList(DisplayListBuilder& builder) const = 0;
-  virtual bool ref_is_unique() const = 0;
-
-  void testDisplayList() {
-    {
-      DisplayListBuilder builder;
-      setRefToDisplayList(builder);
-      builder.drawRect(SkRect::MakeLTRB(50, 50, 100, 100));
-      ASSERT_FALSE(ref_is_unique());
-    }
-    ASSERT_TRUE(ref_is_unique());
-  }
-  void testPaint() {
-    {
-      SkPaint paint;
-      setRefToPaint(paint);
-      ASSERT_FALSE(ref_is_unique());
-    }
-    ASSERT_TRUE(ref_is_unique());
-  }
-
-  void test() {
-    testDisplayList();
-    testPaint();
-  }
-};
-
-TEST(DisplayList, DisplayListBlenderRefHandling) {
-  class BlenderRefTester : public virtual AttributeRefTester {
-   public:
-    void setRefToPaint(SkPaint& paint) const override {
-      paint.setBlender(blender_);
-    }
-    void setRefToDisplayList(DisplayListBuilder& builder) const override {
-      builder.setBlender(blender_);
-    }
-    bool ref_is_unique() const override { return blender_->unique(); }
-
-   private:
-    sk_sp<SkBlender> blender_ =
-        SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, true);
-  };
-
-  BlenderRefTester tester;
-  tester.test();
-  ASSERT_TRUE(tester.ref_is_unique());
-}
-
 TEST(DisplayList, DisplayListFullPerspectiveTransformHandling) {
   // SkM44 constructor takes row-major order
   SkM44 sk_matrix = SkM44(
@@ -677,15 +626,6 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
   RUN_TESTS2(builder.drawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
                                    DlFilterMode::kLinear, false);
              , true);
-  RUN_TESTS(builder.drawImageLattice(
-      TestImage1,
-      {kTestDivs1, kTestDivs1, nullptr, 3, 3, &kTestLatticeSrcRect, nullptr},
-      {10, 10, 40, 40}, DlFilterMode::kNearest, true););
-  RUN_TESTS2(builder.drawImageLattice(
-      TestImage1,
-      {kTestDivs1, kTestDivs1, nullptr, 3, 3, &kTestLatticeSrcRect, nullptr},
-      {10, 10, 40, 40}, DlFilterMode::kNearest, false);
-             , true);
   static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
   static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
   RUN_TESTS2(
@@ -696,8 +636,6 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
       builder.drawAtlas(TestImage1, xforms, texs, nullptr, 2,
                         DlBlendMode::kSrcIn, kNearestSampling, nullptr, false);
       , false);
-  RUN_TESTS(builder.drawPicture(TestPicture1, nullptr, true););
-  RUN_TESTS2(builder.drawPicture(TestPicture1, nullptr, false);, true);
   EXPECT_TRUE(TestDisplayList1->can_apply_group_opacity());
   RUN_TESTS2(builder.drawDisplayList(TestDisplayList1);, true);
   {

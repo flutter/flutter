@@ -122,17 +122,10 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DisplayListBuilder& b) { b.setBlendMode(DlBlendMode::kSrcIn); }},
            {0, 8, 0, 0,
             [](DisplayListBuilder& b) { b.setBlendMode(DlBlendMode::kDstIn); }},
-           {0, 16, 0, 0,
-            [](DisplayListBuilder& b) { b.setBlender(kTestBlender1); }},
-           {0, 16, 0, 0,
-            [](DisplayListBuilder& b) { b.setBlender(kTestBlender2); }},
-           {0, 16, 0, 0,
-            [](DisplayListBuilder& b) { b.setBlender(kTestBlender3); }},
            {0, 0, 0, 0,
             [](DisplayListBuilder& b) {
               b.setBlendMode(DlBlendMode::kSrcOver);
             }},
-           {0, 0, 0, 0, [](DisplayListBuilder& b) { b.setBlender(nullptr); }},
        }},
       {"SetColorSource",
        {
@@ -819,7 +812,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawImageNine",
        {
-           // SkVanvas::drawImageNine is immediately converted to
+           // SkCanvas::drawImageNine is immediately converted to
            // drawImageLattice
            {1, 48, -1, 80,
             [](DisplayListBuilder& b) {
@@ -850,90 +843,6 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DisplayListBuilder& b) {
               b.drawImageNine(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, false);
-            }},
-       }},
-      {"DrawImageLattice",
-       {
-           // Lattice:
-           // const int*      fXDivs;     //!< x-axis values dividing bitmap
-           // const int*      fYDivs;     //!< y-axis values dividing bitmap
-           // const RectType* fRectTypes; //!< array of fill types
-           // int             fXCount;    //!< number of x-coordinates
-           // int             fYCount;    //!< number of y-coordinates
-           // const SkIRect*  fBounds;    //!< source bounds to draw from
-           // const SkColor*  fColors;    //!< array of colors
-           // size = 64 + fXCount * 4 + fYCount * 4
-           // if fColors and fRectTypes are not null, add (fXCount + 1) *
-           // (fYCount + 1) * 5
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kNearest, false);
-            }},
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 45}, DlFilterMode::kNearest, false);
-            }},
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs2, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kNearest, false);
-            }},
-           // One less yDiv does not change the allocation due to 8-byte
-           // alignment
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 2, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kNearest, false);
-            }},
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kLinear, false);
-            }},
-           {1, 96, -1, 96,
-            [](DisplayListBuilder& b) {
-              b.setColor(SK_ColorMAGENTA);
-              b.drawImageLattice(
-                  TestImage1,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kNearest, true);
-            }},
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(
-                  TestImage2,
-                  {kTestDivs1, kTestDivs1, nullptr, 3, 3, nullptr, nullptr},
-                  {10, 10, 40, 40}, DlFilterMode::kNearest, false);
-            }},
-           // Supplying fBounds does not change size because the Op record
-           // always includes it
-           {1, 88, -1, 88,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(TestImage1,
-                                 {kTestDivs1, kTestDivs1, nullptr, 3, 3,
-                                  &kTestLatticeSrcRect, nullptr},
-                                 {10, 10, 40, 40}, DlFilterMode::kNearest,
-                                 false);
-            }},
-           {1, 128, -1, 128,
-            [](DisplayListBuilder& b) {
-              b.drawImageLattice(TestImage1,
-                                 {kTestDivs3, kTestDivs3, kTestRTypes, 2, 2,
-                                  nullptr, kTestLatticeColors},
-                                 {10, 10, 40, 40}, DlFilterMode::kNearest,
-                                 false);
             }},
        }},
       {"DrawAtlas",
@@ -1011,34 +920,6 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
               b.drawAtlas(TestImage1, xforms, texs, colors, 2,
                           DlBlendMode::kSrcIn, kNearestSampling, &cull_rect,
                           false);
-            }},
-       }},
-      {"DrawPicture",
-       {
-           // cv.drawPicture cannot be compared as SkCanvas may inline it
-           {1, 16, -1, 16,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture1, nullptr, false);
-            }},
-           {1, 16, -1, 16,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture2, nullptr, false);
-            }},
-           {1, 16, -1, 16,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture1, nullptr, true);
-            }},
-           {1, 56, -1, 56,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture1, &kTestMatrix1, false);
-            }},
-           {1, 56, -1, 56,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture1, &kTestMatrix2, false);
-            }},
-           {1, 56, -1, 56,
-            [](DisplayListBuilder& b) {
-              b.drawPicture(TestPicture1, &kTestMatrix1, true);
             }},
        }},
       {"DrawDisplayList",
