@@ -264,7 +264,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       if (!testDir.existsSync()) {
         throwToolExit('Test directory "${testDir.path}" not found.');
       }
-      _testFileUris..clear()..addAll(_findTests(testDir).map(Uri.file));
+      _testFileUris.addAll(_findTests(testDir).map(Uri.file));
       if (_testFileUris.isEmpty) {
         throwToolExit(
           'Test directory "${testDir.path}" does not appear to contain any test files.\n'
