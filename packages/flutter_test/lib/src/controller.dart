@@ -72,7 +72,7 @@ class SemanticsController {
   /// if no semantics are found or are not enabled.
   SemanticsNode find(Finder finder) {
     TestAsyncUtils.guardSync();
-    if (_binding.pipelineOwner.semanticsOwner == null) {
+    if (!_binding.semanticsEnabled) {
       throw StateError('Semantics are not enabled.');
     }
     final Iterable<Element> candidates = finder.evaluate();
@@ -241,7 +241,7 @@ abstract class WidgetController {
   /// use of the [Semantics] tree to determine the meaning of an application.
   /// If semantics has been disabled for the test, this will throw a [StateError].
   SemanticsController get semantics {
-    if (binding.pipelineOwner.semanticsOwner == null) {
+    if (!binding.semanticsEnabled) {
       throw StateError(
         'Semantics are not enabled. Enable them by passing '
         '`semanticsEnabled: true` to `testWidgets`, or by manually creating a '
@@ -1491,7 +1491,7 @@ abstract class WidgetController {
   ///
   /// The handle must be disposed at the end of the test.
   SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
+    return binding.ensureSemantics();
   }
 
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
