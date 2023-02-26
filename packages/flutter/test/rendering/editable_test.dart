@@ -394,7 +394,8 @@ void main() {
     expect(editable.plainText, 'abcdef');
   });
 
-  test('Cursor with ideographic script', () {
+  test('Cursor with varying-height text', () {
+    // Regression test for https://github.com/flutter/flutter/issues/23934
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
     EditableText.debugDeterministicCursor = true;
@@ -406,20 +407,21 @@ void main() {
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       text: const TextSpan(
-        text: '中文测试文本是否正确',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        text: 'low',
+        style: TextStyle(fontSize: 10.0, fontFamily: 'Ahem'),
+        children: <TextSpan>[
+          TextSpan(
+            text: 'high',
+            style: TextStyle(fontSize: 20.0, fontFamily: 'Ahem'),
+          )
+        ]
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      selection: const TextSelection.collapsed(
-        offset: 4,
-        affinity: TextAffinity.upstream,
-      ),
+      selection: const TextSelection.collapsed(offset: 4),
     );
 
-    layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+    layout(editable);
     pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       editable,
@@ -432,7 +434,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(40, 0, 1, 10),
+      rect: const Rect.fromLTWH(50, 0, 1, 20),
     ));
 
     // Now change to a rounded caret.
@@ -444,7 +446,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(40, 0, 4, 10),
+        const Rect.fromLTWH(50, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
@@ -456,7 +458,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(80, 0, 4, 20),
+        const Rect.fromLTWH(100, 0, 4, 40),
         const Radius.circular(3),
       ),
     ));
@@ -466,10 +468,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-
-    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
-    //                sensitive to browser/OS when running in web mode:
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/83129
+  });
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
