@@ -407,18 +407,18 @@ void main() {
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       text: const TextSpan(
-        text: 'low',
+        text: 'short',
         style: TextStyle(fontSize: 10.0, fontFamily: 'Ahem'),
         children: <TextSpan>[
           TextSpan(
-            text: 'high',
+            text: 'tall',
             style: TextStyle(fontSize: 20.0, fontFamily: 'Ahem'),
           )
         ]
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      selection: const TextSelection.collapsed(offset: 4),
+      selection: const TextSelection.collapsed(offset: 6),
     );
 
     layout(editable);
@@ -434,7 +434,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: const Rect.fromLTWH(50, 0, 1, 20),
+      rect: const Rect.fromLTWH(70, 0, 1, 20),
     ));
 
     // Now change to a rounded caret.
@@ -446,7 +446,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(50, 0, 4, 20),
+        const Rect.fromLTWH(70, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
@@ -458,7 +458,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(100, 0, 4, 40),
+        const Rect.fromLTWH(140, 0, 4, 40),
         const Radius.circular(3),
       ),
     ));
