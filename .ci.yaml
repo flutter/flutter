@@ -719,7 +719,6 @@ targets:
 
   - name: Linux run_debug_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       xvfb: "1"

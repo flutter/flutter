@@ -378,7 +378,7 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
+        // Don't port forward if debugging with a network device.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
           portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,

@@ -111,7 +111,7 @@ abstract class ChromiumDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  bool isSupported() =>  chromeLauncher.canFindExecutable();
+  bool isSupported() => chromeLauncher.canFindExecutable();
 
   @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
@@ -135,7 +135,7 @@ abstract class ChromiumDevice extends Device {
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
@@ -357,8 +357,7 @@ class WebDevices extends PollingDeviceDiscovery {
     }
     final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
-      if (WebServerDevice.showWebServerDevice)
-        _webServerDevice,
+      _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
       if (edgeDevice != null && await edgeDevice._meetsVersionConstraint())
@@ -392,7 +391,6 @@ class WebServerDevice extends Device {
        );
 
   static const String kWebServerDeviceId = 'web-server';
-  static bool showWebServerDevice = false;
 
   final Logger _logger;
 

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/list_tile/list_tile.4.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can choose different title aligments from popup menu', (WidgetTester tester) async {
+  testWidgets('Can choose different title alignments from popup menu', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );
