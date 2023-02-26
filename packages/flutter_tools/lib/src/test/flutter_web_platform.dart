@@ -177,7 +177,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final shelf.Server _server;
   Uri get url => _server.url;
 
-  /// The ahem text file.
+  /// The ahem font file.
   File get _ahem => _fileSystem.file(_fileSystem.path.join(
     Cache.flutterRoot!,
     'packages',
@@ -186,11 +186,10 @@ class FlutterWebPlatform extends PlatformPlugin {
     'Ahem.ttf',
   ));
 
+  /// The FlutterTest test font file.
   File get _flutterTestFont => _fileSystem.file(_fileSystem.path.join(
-    Cache.flutterRoot!,
-    'packages',
-    'flutter_tools',
-    'static',
+    _cache.getWebSdkDirectory().path,
+    'assets',
     'flutter_test.ttf',
   ));
 
