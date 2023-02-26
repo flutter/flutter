@@ -34,6 +34,45 @@ typedef PaintValueIndicator = void Function(PaintingContext context, Offset offs
 
 enum _SliderType { material, adaptive }
 
+/// Possible ways a user can interact with a [Slider].
+enum SliderInteraction {
+  /// Allows the user to interact with a [Slider] by tapping or sliding anywhere
+  /// on the track.
+  ///
+  /// Essentially all possible interactions are allowed.
+  ///
+  /// This is different from [SliderInteraction.slideOnTrack] as when you try
+  /// to slide anywhere other than the thumb, the thumb will move to the first
+  /// point of contact.
+  tapAndSlide,
+  /// Allows the user to interact with a [Slider] by only tapping anywhere on
+  /// the track.
+  ///
+  /// Sliding interaction is ignored.
+  tapOnly,
+  /// Allows the user to interact with a [Slider] only by sliding anywhere on
+  /// the track.
+  ///
+  /// Tapping interaction is ignored.
+  slideOnTrack,
+  /// Allows the user to interact with a [Slider] only by sliding the thumb.
+  ///
+  /// Taping and sliding interactions on the track are ignored.
+  slideThumb,
+  /// Disallows the user to interact with a [Slider] in any way.
+  ///
+  /// This is different from setting [Slider.onChanged] to null as the [Slider]
+  /// does not look disabled.
+  none;
+
+  bool _isSlideOnTrack() => this == SliderInteraction.slideOnTrack;
+  bool _isSlideThumb() => this == SliderInteraction.slideThumb;
+  bool _isTapAndSlide() => this == SliderInteraction.tapAndSlide;
+  bool _isTapOnly() => this == SliderInteraction.tapOnly;
+  bool _canSlide() => !_isTapOnly();
+  bool _canTap() => _isTapOnly() || _isTapAndSlide();
+}
+
 /// A Material Design slider.
 ///
 /// Used to select from a range of values.
@@ -158,6 +197,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
+    this.allowedInteraction = SliderInteraction.tapAndSlide,
   }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -198,6 +238,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
+    this.allowedInteraction = SliderInteraction.tapAndSlide,
   }) : _sliderType = _SliderType.adaptive,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -501,6 +542,11 @@ class Slider extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// How can the user interact with the [Slider].
+  ///
+  /// Defaults to [SliderInteraction.tapAndSlide].
+  final SliderInteraction allowedInteraction;
 
   final _SliderType _sliderType ;
 
@@ -877,6 +923,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             semanticFormatterCallback: widget.semanticFormatterCallback,
             hasFocus: _focused,
             hovering: _hovering,
+            allowedInteraction: widget.allowedInteraction,
           ),
         ),
       ),
@@ -940,6 +987,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.semanticFormatterCallback,
     required this.hasFocus,
     required this.hovering,
+    required this.allowedInteraction,
   });
 
   final double value;
@@ -956,6 +1004,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final _SliderState state;
   final bool hasFocus;
   final bool hovering;
+  final SliderInteraction allowedInteraction;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -977,6 +1026,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       hasFocus: hasFocus,
       hovering: hovering,
       gestureSettings: MediaQuery.gestureSettingsOf(context),
+      allowedInteraction: allowedInteraction,
     );
   }
 
@@ -1000,7 +1050,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..gestureSettings = MediaQuery.gestureSettingsOf(context);
+      ..gestureSettings = MediaQuery.gestureSettingsOf(context)
+      ..allowedInteraction = allowedInteraction;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -1025,6 +1076,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required bool hasFocus,
     required bool hovering,
     required DeviceGestureSettings gestureSettings,
+    required SliderInteraction allowedInteraction,
   }) : assert(value >= 0.0 && value <= 1.0),
         assert(secondaryTrackValue == null || (secondaryTrackValue >= 0.0 && secondaryTrackValue <= 1.0)),
         _platform = platform,
@@ -1040,7 +1092,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _state = state,
         _textDirection = textDirection,
         _hasFocus = hasFocus,
-        _hovering = hovering {
+        _hovering = hovering,
+        _allowedInteraction = allowedInteraction {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -1294,6 +1347,16 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateForHover(_hovering);
   }
 
+  SliderInteraction _allowedInteraction;
+  SliderInteraction get allowedInteraction => _allowedInteraction;
+  set allowedInteraction(SliderInteraction value) {
+    if (value == _allowedInteraction) {
+      return;
+    }
+    _allowedInteraction = value;
+    markNeedsSemanticsUpdate();
+  }
+
   void _updateForFocus(bool focused) {
     if (focused) {
       _state.overlayController.forward();
@@ -1423,24 +1486,33 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
     if (!_active && isInteractive) {
-      _active = true;
-      // We supply the *current* value as the start location, so that if we have
-      // a tap, it consists of a call to onChangeStart with the previous value and
-      // a call to onChangeEnd with the new value.
-      onChangeStart?.call(_discretize(value));
-      _currentDragValue = _getValueFromGlobalPosition(globalPosition);
-      onChanged!(_discretize(_currentDragValue));
-      _state.overlayController.forward();
-      if (showValueIndicator) {
-        _state.valueIndicatorController.forward();
-        _state.interactionTimer?.cancel();
-        _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
-          _state.interactionTimer = null;
-          if (!_active && !hasFocus &&
-              _state.valueIndicatorController.status == AnimationStatus.completed) {
-            _state.valueIndicatorController.reverse();
-          }
-        });
+      if (allowedInteraction._canTap()
+          || allowedInteraction._isSlideThumb() && _isPointerOnThumb(globalPosition)) {
+        _active = true;
+        _currentDragValue = _getValueFromGlobalPosition(globalPosition);
+        onChanged!(_discretize(_currentDragValue));
+      } else if (allowedInteraction._isSlideOnTrack()) {
+        _active = true;
+        _currentDragValue = value;
+      }
+
+      if (_active) {
+        // We supply the *current* value as the start location, so that if we have
+        // a tap, it consists of a call to onChangeStart with the previous value and
+        // a call to onChangeEnd with the new value.
+        onChangeStart?.call(_discretize(value));
+        _state.overlayController.forward();
+        if (showValueIndicator) {
+          _state.valueIndicatorController.forward();
+          _state.interactionTimer?.cancel();
+          _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
+            _state.interactionTimer = null;
+            if (!_active && !hasFocus &&
+                _state.valueIndicatorController.status == AnimationStatus.completed) {
+              _state.valueIndicatorController.reverse();
+            }
+          });
+        }
       }
     }
   }
@@ -1473,7 +1545,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    if (isInteractive) {
+    // for slide on track, there is no start interaction trigger, so _active
+    // will be false.
+    if ((_active || allowedInteraction._isSlideOnTrack()) && isInteractive
+        && allowedInteraction._canSlide()) {
       final double valueDelta = details.primaryDelta! / _trackRect.width;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1495,6 +1570,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleTapUp(TapUpDetails details) {
     _endInteraction();
+  }
+
+  bool _isPointerOnThumb(Offset globalPosition) {
+    return overlayRect!.contains(globalToLocal(globalPosition));
   }
 
   @override
