@@ -386,7 +386,7 @@ static Future<Iterable<int>> bloop(Image input) async {
       return inputPixels;
   }
 
-  static int getArgbFromAbgr(int abgr) {
+  //static int getArgbFromAbgr(int abgr) {
   //   final int EXCEPT_R_MASK = 0xFF00FFFF;
   //   final int ONLY_R_MASK = ~EXCEPT_R_MASK;
   //   final int EXCEPT_B_MASK = 0xFFFFFF00;
