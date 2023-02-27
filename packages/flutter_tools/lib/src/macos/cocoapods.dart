@@ -377,11 +377,8 @@ class CocoaPods {
     }
   }
 
-  bool _isFfiX86Error(String stdout, String stderr) {
-    return stderr.contains('ffi_c.bundle') ||
-           stdout.contains('ffi_c.bundle') ||
-           stderr.contains('/ffi/') ||
-           stdout.contains('/ffi/');
+  bool _isFfiX86Error(String error) {
+    return error.contains('ffi_c.bundle') || error.contains('/ffi/');
   }
 
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
