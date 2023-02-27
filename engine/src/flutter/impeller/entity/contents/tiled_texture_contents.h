@@ -53,6 +53,10 @@ class TiledTextureContents final : public ColorSourceContents {
   std::optional<std::shared_ptr<Texture>> CreateFilterTexture(
       const ContentContext& renderer) const;
 
+  bool RenderVertices(const ContentContext& renderer,
+                      const Entity& entity,
+                      RenderPass& pass) const;
+
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::TileMode x_tile_mode_ = Entity::TileMode::kClamp;

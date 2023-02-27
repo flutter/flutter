@@ -32,7 +32,9 @@ class DLVerticesGeometry : public VerticesGeometry {
                                         RenderPass& pass) override;
 
   // |VerticesGeometry|
-  GeometryResult GetPositionUVBuffer(const ContentContext& renderer,
+  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
+                                     Matrix effect_transform,
+                                     const ContentContext& renderer,
                                      const Entity& entity,
                                      RenderPass& pass) override;
 
@@ -49,6 +51,12 @@ class DLVerticesGeometry : public VerticesGeometry {
 
   // |VerticesGeometry|
   bool HasVertexColors() const override;
+
+  // |VerticesGeometry|
+  bool HasTextureCoordinates() const override;
+
+  // |VerticesGeometry|
+  std::optional<Rect> GetTextureCoordinateCoverge() const override;
 
  private:
   void NormalizeIndices();

@@ -7,6 +7,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/position_color.vert.h"
+#include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
@@ -100,8 +101,36 @@ static PrimitiveType GetPrimitiveType(const flutter::DlVertices* vertices) {
   }
 }
 
+std::optional<Rect> DLVerticesGeometry::GetTextureCoordinateCoverge() const {
+  if (!HasTextureCoordinates()) {
+    return std::nullopt;
+  }
+  auto vertex_count = vertices_->vertex_count();
+  auto* dl_texture_coordinates = vertices_->texture_coordinates();
+  if (vertex_count == 0) {
+    return std::nullopt;
+  }
+
+  auto left = dl_texture_coordinates[0].x();
+  auto top = dl_texture_coordinates[0].y();
+  auto right = dl_texture_coordinates[0].x();
+  auto bottom = dl_texture_coordinates[0].y();
+
+  for (auto i = 0; i < vertex_count; i++) {
+    left = std::min(left, dl_texture_coordinates[i].x());
+    top = std::min(top, dl_texture_coordinates[i].y());
+    right = std::max(right, dl_texture_coordinates[i].x());
+    bottom = std::max(bottom, dl_texture_coordinates[i].y());
+  }
+  return Rect::MakeLTRB(left, top, right, bottom);
+}
+
 bool DLVerticesGeometry::HasVertexColors() const {
   return vertices_->colors() != nullptr;
+}
+
+bool DLVerticesGeometry::HasTextureCoordinates() const {
+  return vertices_->texture_coordinates() != nullptr;
 }
 
 GeometryResult DLVerticesGeometry::GetPositionBuffer(
@@ -225,12 +254,80 @@ GeometryResult DLVerticesGeometry::GetPositionColorBuffer(
 }
 
 GeometryResult DLVerticesGeometry::GetPositionUVBuffer(
+    Rect texture_coverage,
+    Matrix effect_transform,
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
-  // TODO(jonahwilliams): support texture coordinates in vertices
-  // https://github.com/flutter/flutter/issues/109956
-  return {};
+  using VS = TexturePipeline::VertexShader;
+
+  auto index_count = normalized_indices_.size() == 0
+                         ? vertices_->index_count()
+                         : normalized_indices_.size();
+  auto vertex_count = vertices_->vertex_count();
+  auto* dl_indices = normalized_indices_.size() == 0
+                         ? vertices_->indices()
+                         : normalized_indices_.data();
+  auto* dl_vertices = vertices_->vertices();
+  auto* dl_texture_coordinates = vertices_->texture_coordinates();
+
+  auto size = texture_coverage.size;
+  auto origin = texture_coverage.origin;
+  std::vector<VS::PerVertexData> vertex_data(vertex_count);
+  {
+    for (auto i = 0; i < vertex_count; i++) {
+      auto sk_point = dl_vertices[i];
+      auto texture_coord = dl_texture_coordinates[i];
+      auto uv = effect_transform *
+                Point((texture_coord.x() - origin.x) / size.width,
+                      (texture_coord.y() - origin.y) / size.height);
+      // From experimentation we need to clamp these values to < 1.0 or else
+      // there can be flickering.
+      vertex_data[i] = {
+          .position = Point(sk_point.x(), sk_point.y()),
+          .texture_coords =
+              Point(std::clamp(uv.x, 0.0f, 1.0f - kEhCloseEnough),
+                    std::clamp(uv.y, 0.0f, 1.0f - kEhCloseEnough)),
+      };
+    }
+  }
+
+  size_t total_vtx_bytes = vertex_data.size() * sizeof(VS::PerVertexData);
+  size_t total_idx_bytes = index_count * sizeof(uint16_t);
+
+  DeviceBufferDescriptor buffer_desc;
+  buffer_desc.size = total_vtx_bytes + total_idx_bytes;
+  buffer_desc.storage_mode = StorageMode::kHostVisible;
+
+  auto buffer =
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
+
+  if (!buffer->CopyHostBuffer(reinterpret_cast<uint8_t*>(vertex_data.data()),
+                              Range{0, total_vtx_bytes}, 0)) {
+    return {};
+  }
+  if (!buffer->CopyHostBuffer(
+          reinterpret_cast<uint8_t*>(const_cast<uint16_t*>(dl_indices)),
+          Range{0, total_idx_bytes}, total_vtx_bytes)) {
+    return {};
+  }
+
+  return GeometryResult{
+      .type = GetPrimitiveType(vertices_),
+      .vertex_buffer =
+          {
+              .vertex_buffer = {.buffer = buffer,
+                                .range = Range{0, total_vtx_bytes}},
+              .index_buffer = {.buffer = buffer,
+                               .range =
+                                   Range{total_vtx_bytes, total_idx_bytes}},
+              .index_count = index_count,
+              .index_type = IndexType::k16bit,
+          },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
+      .prevent_overdraw = false,
+  };
 }
 
 GeometryVertexType DLVerticesGeometry::GetVertexType() const {
@@ -238,6 +335,11 @@ GeometryVertexType DLVerticesGeometry::GetVertexType() const {
   if (dl_colors != nullptr) {
     return GeometryVertexType::kColor;
   }
+  auto* dl_texture_coordinates = vertices_->texture_coordinates();
+  if (dl_texture_coordinates != nullptr) {
+    return GeometryVertexType::kUV;
+  }
+
   return GeometryVertexType::kPosition;
 }
 
