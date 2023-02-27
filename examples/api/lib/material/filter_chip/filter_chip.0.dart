@@ -35,7 +35,7 @@ class FilterChipExample extends StatefulWidget {
 }
 
 class _FilterChipExampleState extends State<FilterChipExample> {
-  final List<String> _filters = <String>[];
+  Set<ExerciseFilter> filters = <ExerciseFilter>{};
 
   @override
   Widget build(BuildContext context) {
@@ -52,17 +52,15 @@ class _FilterChipExampleState extends State<FilterChipExample> {
             children: ExerciseFilter.values.map((ExerciseFilter exercise) {
               return FilterChip(
                 label: Text(exercise.name),
-                selected:_filters.contains(exercise.name),
+                selected: filters.contains(exercise),
                 onSelected: (bool value) {
                   setState(() {
                     if (value) {
-                      if (!_filters.contains(exercise.name)) {
-                        _filters.add(exercise.name);
+                      if (!filters.contains(exercise)) {
+                        filters.add(exercise);
                       }
                     } else {
-                      _filters.removeWhere((String name) {
-                        return name == exercise.name;
-                      });
+                      filters.remove(exercise);
                     }
                   });
                 },
@@ -70,7 +68,11 @@ class _FilterChipExampleState extends State<FilterChipExample> {
             }).toList(),
           ),
           const SizedBox(height: 10.0),
-          Text('Looking for: ${_filters.join(', ')}')
+          Text(
+            'Looking for: ${filters.map(
+              (ExerciseFilter e) => e.name).join(', ')}',
+            style: textTheme.labelLarge,
+          ),
         ],
       ),
     );
