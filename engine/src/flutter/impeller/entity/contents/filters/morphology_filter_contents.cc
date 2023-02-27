@@ -90,6 +90,9 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.texture_sampler_y_coord_scale =
+        input_snapshot->texture->GetYCoordScale();
+
     auto transform = entity.GetTransformation() * effect_transform;
     auto transformed_radius =
         transform.TransformDirection(direction_ * radius_.radius);
@@ -104,8 +107,6 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
             transformed_texture_vertices[2]);
 
     FS::FragInfo frag_info;
-    frag_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
     frag_info.radius = std::round(transformed_radius.GetLength());
     frag_info.direction = input_snapshot->transform.Invert()
                               .TransformDirection(transformed_radius)
