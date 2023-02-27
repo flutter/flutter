@@ -1320,7 +1320,7 @@ TEST_P(DisplayListTest, SceneColorSource) {
 
   flutter::DlPaint paint = flutter::DlPaint().setColorSource(color_source);
 
-  builder.drawPaint(paint);
+  builder.DrawPaint(paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
