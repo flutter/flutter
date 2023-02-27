@@ -140,7 +140,7 @@ class BottomAppBar extends StatefulWidget {
   /// The color of the shadow below the app bar.
   ///
   /// If this property is null, then [BottomAppBarTheme.shadowColor] of
-  /// [ThemeData.bottomAppBar] is used. If that is also null, the default value
+  /// [ThemeData.bottomAppBarTheme] is used. If that is also null, the default value
   /// is fully opaque black.
   /// {@endtemplate}
   ///
