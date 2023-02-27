@@ -75,9 +75,19 @@ class Contents {
   virtual bool ShouldRender(const Entity& entity,
                             const std::optional<Rect>& stencil_coverage) const;
 
+  /// @brief  Return the color source's intrinsic size, if available.
+  ///
+  /// For example, a gradient has a size based on its end and beginning points,
+  /// ignoring any tiling. Solid colors and runtime effects have no size.
+  std::optional<Size> ColorSourceSize() const { return color_source_size_; }
+
+  void SetColorSourceSize(Size size) { color_source_size_ = size; }
+
  protected:
 
  private:
+  std::optional<Size> color_source_size_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Contents);
 };
 
