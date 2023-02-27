@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {

@@ -20,13 +20,13 @@ Future<int> getFreePort() async {
   return port;
 }
 
-Future<void> waitForVmServiceMessage(Process process, int port) async {
+Future<void> waitForObservatoryMessage(Process process, int port) async {
   final Completer<void> completer = Completer<void>();
   process.stdout
     .transform(utf8.decoder)
     .listen((String line) {
       printOnFailure(line);
-      if (line.contains('A Dart VM Service on Flutter test device is available at')) {
+      if (line.contains('An Observatory debugger and profiler on Flutter test device is available at')) {
         if (line.contains('http://127.0.0.1:$port')) {
           completer.complete();
         } else {
@@ -53,43 +53,43 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter run --vm-service-port', () async {
+  testWithoutContext('flutter run --observatory-port', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int port = await getFreePort();
-    // If only --vm-service-port is provided, --vm-service-port will be used by DDS
+    // If only --observatory-port is provided, --observatory-port will be used by DDS
     // and the VM service will bind to a random port.
     final Process process = await processManager.start(<String>[
       flutterBin,
       'run',
       '--show-test-device',
-      '--vm-service-port=$port',
+      '--observatory-port=$port',
       '-d',
       'flutter-tester',
     ], workingDirectory: tempDir.path);
-    await waitForVmServiceMessage(process, port);
+    await waitForObservatoryMessage(process, port);
     process.kill();
     await process.exitCode;
   });
 
-  testWithoutContext('flutter run --dds-port --vm-service-port', () async {
+  testWithoutContext('flutter run --dds-port --observatory-port', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final int vmServicePort = await getFreePort();
+    final int observatoryPort = await getFreePort();
     int ddsPort = await getFreePort();
-    while(ddsPort == vmServicePort) {
+    while(ddsPort == observatoryPort) {
       ddsPort = await getFreePort();
     }
-    // If both --dds-port and --vm-service-port are provided, --dds-port will be used by
-    // DDS and --vm-service-port will be used by the VM service.
+    // If both --dds-port and --observatory-port are provided, --dds-port will be used by
+    // DDS and --observatory-port will be used by the VM service.
     final Process process = await processManager.start(<String>[
       flutterBin,
       'run',
       '--show-test-device',
-      '--vm-service-port=$vmServicePort',
+      '--observatory-port=$observatoryPort',
       '--dds-port=$ddsPort',
       '-d',
       'flutter-tester',
     ], workingDirectory: tempDir.path);
-    await waitForVmServiceMessage(process, ddsPort);
+    await waitForObservatoryMessage(process, ddsPort);
     process.kill();
     await process.exitCode;
   });
@@ -107,7 +107,7 @@ void main() {
       '-d',
       'flutter-tester',
     ], workingDirectory: tempDir.path);
-    await waitForVmServiceMessage(process, ddsPort);
+    await waitForObservatoryMessage(process, ddsPort);
     process.kill();
     await process.exitCode;
   });

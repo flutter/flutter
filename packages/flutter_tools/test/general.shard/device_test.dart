@@ -509,7 +509,7 @@ void main() {
         <String>[
           '--enable-dart-profiling',
           '--disable-service-auth-codes',
-          '--disable-vm-service-publication',
+          '--disable-observatory-publication',
           '--start-paused',
           '--dart-flags="--foo,--null_assertions"',
           '--use-test-fonts',
@@ -529,7 +529,7 @@ void main() {
           '--route=/test',
           '--trace-startup',
           '--enable-impeller',
-          '--vm-service-port=0',
+          '--observatory-port=0',
         ].join(' '),
       );
     });
@@ -573,7 +573,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
-          '--vm-service-host=0.0.0.0',
+          '--observatory-host=0.0.0.0',
         ].join(' '),
       );
     });
@@ -597,7 +597,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
-          '--vm-service-host=::0',
+          '--observatory-host=::0',
         ].join(' '),
       );
     });
@@ -669,7 +669,7 @@ void main() {
         <String>[
           '--enable-dart-profiling',
           '--disable-service-auth-codes',
-          '--disable-vm-service-publication',
+          '--disable-observatory-publication',
           '--start-paused',
           '--dart-flags=--foo,--null_assertions',
           '--use-test-fonts',
@@ -689,7 +689,7 @@ void main() {
           '--route=/test',
           '--trace-startup',
           '--enable-impeller',
-          '--vm-service-port=1',
+          '--observatory-port=1',
         ].join(' '),
       );
     });

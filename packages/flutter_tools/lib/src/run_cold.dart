@@ -69,7 +69,7 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
-    // Connect to the VM Service.
+    // Connect to observatory.
     if (debuggingEnabled) {
       try {
         await connectToServiceProtocol(allowExistingDdsInstance: false);
@@ -93,7 +93,7 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (flutterDevices.first.vmServiceUris != null) {
+    if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
         httpUri: flutterDevices.first.vmService!.httpAddress,

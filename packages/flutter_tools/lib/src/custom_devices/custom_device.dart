@@ -309,7 +309,7 @@ class CustomDeviceAppSession {
         'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
-          'vm-service-port=${debuggingOptions.deviceVmServicePort}',
+          'observatory-port=${debuggingOptions.deviceVmServicePort}',
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           'enable-checked-mode=true',
           'verify-entry-points=true',
@@ -374,7 +374,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
+    final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -388,14 +388,14 @@ class CustomDeviceAppSession {
     // in the same microtask AFAICT but this way we're on the safe side.
     logReader.listenToProcessOutput(process);
 
-    final Uri? vmServiceUri = await discovery.uri;
+    final Uri? observatoryUri = await discovery.uri;
     await discovery.cancel();
 
     if (_device._config.usesPortForwarding) {
-      _forwardedHostPort = vmServiceUri?.port;
+      _forwardedHostPort = observatoryUri?.port;
     }
 
-    return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+    return LaunchResult.succeeded(observatoryUri: observatoryUri);
   }
 
   void _maybeUnforwardPort() {

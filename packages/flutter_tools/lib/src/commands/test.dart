@@ -464,7 +464,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
-      enableVmService: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
+      enableObservatory: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
       ipv6: boolArgDeprecated('ipv6'),
       machine: machine,
       updateGoldens: boolArgDeprecated('update-goldens'),

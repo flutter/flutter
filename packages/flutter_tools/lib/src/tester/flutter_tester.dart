@@ -174,11 +174,11 @@ class FlutterTesterDevice extends Device {
       if (debuggingOptions.disableServiceAuthCodes)
         '--disable-service-auth-codes',
       if (debuggingOptions.hostVmServicePort != null)
-        '--vm-service-port=${debuggingOptions.hostVmServicePort}',
+        '--observatory-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,
     ];
 
-    ProtocolDiscovery? vmServiceDiscovery;
+    ProtocolDiscovery? observatoryDiscovery;
     try {
       _logger.printTrace(command.join(' '));
       _process = await _processManager.start(command,
@@ -190,7 +190,7 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      vmServiceDiscovery = ProtocolDiscovery.vmService(
+      observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -199,9 +199,9 @@ class FlutterTesterDevice extends Device {
       );
       _logReader.initializeProcess(_process!);
 
-      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
-      if (vmServiceUri != null) {
-        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+      final Uri? observatoryUri = await observatoryDiscovery.uri;
+      if (observatoryUri != null) {
+        return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
       _logger.printError(
         'Failed to launch $package: '
@@ -210,7 +210,7 @@ class FlutterTesterDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Failed to launch $package: $error');
     } finally {
-      await vmServiceDiscovery?.cancel();
+      await observatoryDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }

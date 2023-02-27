@@ -933,7 +933,7 @@ class DebuggingOptions {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
-      if (disablePortPublication) '--disable-vm-service-publication',
+      if (disablePortPublication) '--disable-observatory-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
       if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
@@ -960,14 +960,14 @@ class DebuggingOptions {
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
-        '--vm-service-port=$deviceVmServicePort',
+        '--observatory-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
       // Use the suggested host port.
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
-        '--vm-service-port=$hostVmServicePort',
-      // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
+        '--observatory-port=$hostVmServicePort',
+      // Tell the observatory to listen on all interfaces, don't restrict to the loopback.
       if (interfaceType == IOSDeviceConnectionInterface.network)
-        '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
+        '--observatory-host=${ipv6 ? '::0' : '0.0.0.0'}',
     ];
   }
 
@@ -1066,24 +1066,21 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ Uri? vmServiceUri, Uri? observatoryUri }) :
-    started = true,
-    vmServiceUri = vmServiceUri ?? observatoryUri;
-
+  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
   LaunchResult.failed()
     : started = false,
-      vmServiceUri = null;
+      observatoryUri = null;
 
-  bool get hasVmService => vmServiceUri != null;
+  bool get hasObservatory => observatoryUri != null;
 
   final bool started;
-  final Uri? vmServiceUri;
+  final Uri? observatoryUri;
 
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (vmServiceUri != null) {
-      buf.write(', vmService=$vmServiceUri');
+    if (observatoryUri != null) {
+      buf.write(', observatory=$observatoryUri');
     }
     return buf.toString();
   }
@@ -1112,9 +1109,9 @@ abstract class DeviceLogReader {
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.vmServicePort);
+  DiscoveredApp(this.id, this.observatoryPort);
   final String id;
-  final int vmServicePort;
+  final int observatoryPort;
 }
 
 // An empty device log reader

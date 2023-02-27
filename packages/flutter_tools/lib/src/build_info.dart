@@ -394,16 +394,16 @@ class BuildMode {
     throw ArgumentError('$value is not a supported build mode');
   }
 
-  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
+  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
   static const BuildMode debug = BuildMode._('debug');
 
-  /// Built in AOT mode with some optimizations and a VM service.
+  /// Built in AOT mode with some optimizations and an observatory.
   static const BuildMode profile = BuildMode._('profile');
 
-  /// Built in AOT mode with all optimizations and no VM service.
+  /// Built in AOT mode with all optimizations and no observatory.
   static const BuildMode release = BuildMode._('release');
 
-  /// Built in JIT mode with all optimizations and no VM service.
+  /// Built in JIT mode with all optimizations and no observatory.
   static const BuildMode jitRelease = BuildMode._('jit_release');
 
   static const List<BuildMode> values = <BuildMode>[
