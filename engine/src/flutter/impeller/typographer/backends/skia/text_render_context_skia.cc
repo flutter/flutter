@@ -473,10 +473,12 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
 
   // ---------------------------------------------------------------------------
   // Step 3: Determine if the additional missing glyphs can be appended to the
-  //         existing bitmap without recreating the atlas.
+  //         existing bitmap without recreating the atlas. This requires that
+  //         the type is identical.
   // ---------------------------------------------------------------------------
   std::vector<Rect> glyph_positions;
-  if (CanAppendToExistingAtlas(last_atlas, new_glyphs, glyph_positions,
+  if (last_atlas->GetType() == type &&
+      CanAppendToExistingAtlas(last_atlas, new_glyphs, glyph_positions,
                                atlas_context->GetAtlasSize(),
                                atlas_context->GetRectPacker())) {
     // The old bitmap will be reused and only the additional glyphs will be
