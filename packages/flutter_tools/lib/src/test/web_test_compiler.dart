@@ -50,7 +50,6 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
   }) async {
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    extraFrontEndOptions.add('--sound-null-safety');
     final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
     const String platformDillName = 'ddc_outline_sound.dill';
 

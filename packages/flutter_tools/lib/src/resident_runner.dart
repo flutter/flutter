@@ -120,7 +120,6 @@ class FlutterDevice {
       // TODO(zanderso): consistently provide these flags across platforms.
       const String platformDillName = 'ddc_outline_sound.dill';
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      extraFrontEndOptions.add('--sound-null-safety');
 
       final String platformDillPath = globals.fs.path.join(
         getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
