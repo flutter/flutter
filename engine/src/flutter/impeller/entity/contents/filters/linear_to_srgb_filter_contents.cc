@@ -60,10 +60,10 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.texture_sampler_y_coord_scale =
+        input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
-    frag_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
     frag_info.input_alpha = GetAbsorbOpacity() ? input_snapshot->opacity : 1.0f;
 
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});

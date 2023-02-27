@@ -15,7 +15,6 @@ const float kBT601LimitedRange = 0;
 const float kBT601FullRange = 1;
 
 uniform FragInfo {
-  float texture_sampler_y_coord_scale;
   mat4 matrix;
   float yuv_color_space;
 }
@@ -31,11 +30,7 @@ void main() {
     yuv_offset.x = 16.0 / 255.0;
   }
 
-  yuv.x =
-      IPSample(y_texture, v_position, frag_info.texture_sampler_y_coord_scale)
-          .r;
-  yuv.yz =
-      IPSample(uv_texture, v_position, frag_info.texture_sampler_y_coord_scale)
-          .rg;
+  yuv.x = texture(y_texture, v_position).r;
+  yuv.yz = texture(uv_texture, v_position).rg;
   frag_color = frag_info.matrix * vec4(yuv - yuv_offset, 1);
 }
