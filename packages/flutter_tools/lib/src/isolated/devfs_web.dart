@@ -573,8 +573,6 @@ class WebAssetServer implements AssetReader {
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
-    } else {
-      throw Exception('foo bar $result');
     }
     return null;
   }
