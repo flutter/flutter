@@ -6,218 +6,275 @@
 
 import 'package:flutter/material.dart';
 
-
 const Widget divider = SizedBox(height: 10);
 const double narrowScreenWidthThreshold = 400;
 
 void main() => runApp(DynamicColorExample());
 
-
 class DynamicColorExample extends StatefulWidget {
   DynamicColorExample({super.key});
 
-final List<Image> images = [
-    // convert directly to ImageProvider instead of Image?
-
-// what the heck is going on with england rugby color
-    Image.asset('assets/yellow.png', height: 150,),
-    Image.asset('assets/yellow_transparent.png', height: 150,),
-    Image.asset('assets/yellow_full.png', height: 150,),
-    Image.asset('assets/squares.png', height: 150,),
-    Image.asset('assets/material_3_base.png', height: 150,),
-    Image.asset('assets/rugby_japan.png', height: 150,),
-    Image.asset('assets/football_leeds.png', height: 150,),
-    Image.asset('assets/rugby_england.png', height: 150,),
-];
+  final Map<Image, String> images = {
+    Image.asset(
+      'assets/yellow.png',
+      height: 150,
+    ): 'as expected',
+    Image.asset(
+      'assets/yellow_transparent.png',
+      height: 150,
+    ): 'as expected',
+    Image.asset(
+      'assets/yellow_full.png',
+      height: 150,
+    ): 'expected previous yellow',
+    Image.asset(
+      'assets/squares.png',
+      height: 150,
+    ): 'expected green',
+    Image.asset(
+      'assets/material_3_base.png',
+      height: 150,
+    ): 'Material 3 base: as expected',
+    Image.asset(
+      'assets/rugby_japan.png',
+      height: 150,
+    ): 'expected pink',
+    Image.asset(
+      'assets/football_leeds.png',
+      height: 150,
+    ): 'as expected',
+    Image.asset(
+      'assets/rugby_england.png',
+      height: 150,
+    ): 'very unexpected',
+  };
 
   @override
   State<DynamicColorExample> createState() => _DynamicColorExampleState();
 }
 
 class _DynamicColorExampleState extends State<DynamicColorExample> {
-    final TextEditingController _textFieldController = TextEditingController();
-    final ColorScheme currentColorScheme = ColorScheme.light();
+  final TextEditingController _textFieldController = TextEditingController();
+  late ColorScheme currentColorScheme;
+  late int selectedImage;
+  late bool isLight;
+  @override
+  void initState() {
+    currentColorScheme = ColorScheme.light();
+    selectedImage = 4;
+    isLight = true;
+  }
 
-
-    // @override
-    // void initState() {
-    //     currentColorScheme = ColorScheme.light();
-    // }
-
-    Future<void> _updateImage(Image image) async {
-        print('generating new colorScheme');
-        // TODO add fail handling.
-        final ColorScheme newColorScheme = await ColorScheme.fromImage(image: image);
-        print('calling setState');
-        setState(() { currentColorScheme = newColorScheme;
-        print('colorschemeUpdated via setState: ${currentColorScheme.primary}');
+  Future<void> _updateImage(Image image) async {
+    // TODO add fail handling.
+    final ColorScheme newColorScheme = await ColorScheme.fromImage(
+        image: image, brightness: isLight ? Brightness.light : Brightness.dark);
+    setState(() {
+      selectedImage = widget.images.keys.toList().indexOf(image) ??
+          widget.images.length + 1;
+      currentColorScheme = newColorScheme;
     });
+  }
+
+  // Image uploader
+
+  // Future<void> networkAssetDialog(BuildContext context) async {
+  //   late String input = 'url';
+  //   showDialog<String>(
+  //     context: context,
+  //     builder: (BuildContext context) => AlertDialog(
+  //       title: const Text('Image URL'),
+  //       content: TextField(
+  //         onChanged: (value) {
+  //           input = value;
+  //         },
+  //         controller: _textFieldController,
+  //         decoration: InputDecoration(hintText: input),
+  //       ),
+  //       actions: <Widget>[
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.pop(context, 'Cancel');
+  //           },
+  //           child: const Text('Cancel'),
+  //         ),
+  //         TextButton(
+  //           child: const Text('Submit'),
+  //           onPressed: () async {
+  //             print('input: $input');
+  //             try {
+  //               // https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png
+  //               final newColorScheme =
+  //                   await ColorScheme.fromImage(image: Image.network(input));
+  //               setState(() {
+  //                 currentColorScheme = newColorScheme;
+  //                 Navigator.pop(context, 'Submit');
+  //               });
+  //             } on Exception catch (exception) {
+  //               print('image load failed');
+  //               input = 'not a valid url';
+  //             }
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = currentColorScheme;
+    final Color selectedColor = colorScheme.primary;
+
+    final ThemeData lightTheme = ThemeData(
+      colorSchemeSeed: selectedColor,
+      brightness: Brightness.light,
+      useMaterial3: true,
+    );
+    final ThemeData darkTheme = ThemeData(
+      colorSchemeSeed: selectedColor,
+      brightness: Brightness.dark,
+      useMaterial3: true,
+    );
+
+    Widget schemeLabel(String brightness) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        child: Text(
+          brightness,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
     }
 
+    Widget schemeView(ThemeData theme) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: ColorSchemeView(
+          colorScheme: theme.colorScheme,
+        ),
+      );
+    }
 
-    Future<void> networkAssetDialog(BuildContext context) async {
-            late String
-            input = 'url';
-     showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Image URL'),
-          content: TextField(
-            onChanged: (value) { input = value;},
-            controller: _textFieldController,
-            decoration: InputDecoration(hintText: input),
-            ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                    Navigator.pop(context, 'Cancel');
-                 },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-                child: const Text('Submit'),
-                onPressed: () async {
-                    print('input: $input');
-                 try {
-                    // https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png
-                    // wiki links seem to work but general URLs do not
-                    final newColorScheme = await ColorScheme.fromImage(image: Image.network(input));
+    return MaterialApp(
+      title: 'Content Based Dynamic Color',
+      theme: ThemeData(useMaterial3: true, colorScheme: colorScheme),
+      debugShowCheckedModeBanner: false,
+      home: Builder(
+        builder: (BuildContext context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Content Based Dynamic Color'),
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            actions: [
+              Icon(Icons.light_mode),
+              Switch(
+                  activeColor: colorScheme.primary,
+                  activeTrackColor: colorScheme.surface,
+                  inactiveTrackColor: colorScheme.onSecondary,
+                  value: isLight,
+                  onChanged: (bool value) {
                     setState(() {
-                        currentColorScheme = newColorScheme;
-                        Navigator.pop(context, 'Submit');
+                      isLight = value;
+                      _updateImage(widget.images.keys.toList()[selectedImage]);
                     });
-                } on Exception catch (exception) {
-                print('image load failed');
-                input = 'not a valid url';
-                }
-              },
-            ),
-          ],
+                  })
+            ],
           ),
-        );
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        print('rebuilding!');
-        final ColorScheme colorScheme = currentColorScheme;
-        final Color selectedColor = colorScheme.primary;
-
-        final ThemeData lightTheme = ThemeData(
-            colorSchemeSeed: selectedColor,
-            brightness: Brightness.light,
-        );
-       final ThemeData darkTheme = ThemeData(
-            colorSchemeSeed: selectedColor,
-            brightness: Brightness.dark,
-        );
-
-        Widget schemeLabel(String brightness) {
-        return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            child: Text(
-            brightness,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-        );
-        }
-
-        Widget schemeView(ThemeData theme) {
-        return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: ColorSchemeView(
-            colorScheme: theme.colorScheme,
-            ),
-        );
-        }
-
-
-
-        return  MaterialApp(
-                title: 'Content Based Dynamic Color',
-                theme: ThemeData(
-                    useMaterial3: true,
-                    colorScheme: colorScheme
-                ),
-                home: Builder(
-                    builder: (BuildContext context) => Scaffold(
-                    appBar: AppBar(
-                        title: const Text('Content Based Dynamic Color'),
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                    ),
-                    body: Center(
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                                Row(mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [...widget.images.map((image) =>
-                                    GestureDetector(
-                                        onTap: () => _updateImage(image),
-                                        child: Card(
-                                            child: Padding(padding: EdgeInsets.all(10.0), child: image,),
-                                        ))).toList(),
-                                        GestureDetector(
-                                            onTap: () => networkAssetDialog(context),
-                                            child: Card(child: Padding(padding: EdgeInsets.all(10.0), child: Container(height: 150, child:Icon(Icons.link, size: 96.0)))
-                                            ,),
-                                        ),
-                                        ],
-                                        ),
-                                    Expanded(
-      child: LayoutBuilder(builder: (context, constraints) {
-        if (constraints.maxWidth < narrowScreenWidthThreshold) {
-          return SingleChildScrollView(
+          body: Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                divider,
-                schemeLabel('Light ColorScheme'),
-                schemeView(lightTheme),
-                divider,
-                divider,
-                schemeLabel('Dark ColorScheme'),
-                schemeView(darkTheme),
-              ],
-            ),
-          );
-        } else {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ...widget.images.keys
+                        .map((image) => GestureDetector(
+                            onTap: () => _updateImage(image),
+                            child: Card(
+                              color:
+                                  widget.images.keys.toList().indexOf(image) ==
+                                          selectedImage
+                                      ? colorScheme.surfaceVariant
+                                      : null,
+                              child: Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: Column(
+                                  children: [
+                                    image,
+                                    Text(widget.images[image] ?? ''),
+                                  ],
+                                ),
+                              ),
+                            )))
+                        .toList(),
+                    // Image upload tile
+                    // GestureDetector(
+                    //   onTap: () => networkAssetDialog(context),
+                    //   child: Card(
+                    //     child: Padding(
+                    //         padding: EdgeInsets.all(10.0),
+                    //         child: Container(
+                    //             height: 150,
+                    //             child: Icon(Icons.link, size: 96.0))),
+                    //   ),
+                    // ),
+                  ],
+                ),
+                Expanded(
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    if (constraints.maxWidth < narrowScreenWidthThreshold) {
+                      return SingleChildScrollView(
                         child: Column(
                           children: [
+                            divider,
                             schemeLabel('Light ColorScheme'),
                             schemeView(lightTheme),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
+                            divider,
+                            divider,
                             schemeLabel('Dark ColorScheme'),
                             schemeView(darkTheme),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-      }),
-    ),
+                      );
+                    } else {
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        schemeLabel('Light ColorScheme'),
+                                        schemeView(lightTheme),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        schemeLabel('Dark ColorScheme'),
+                                        schemeView(darkTheme),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                    ),
+                          ),
+                        ),
+                      );
+                    }
+                  }),
                 ),
+              ],
             ),
-                ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -405,7 +462,7 @@ class ColorChip extends StatelessWidget {
   final String label;
 
   static Color contrastColor(Color color) {
-    final brightness = ThemeData.estimateBrightnessForColor(color);
+    final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
     switch (brightness) {
       case Brightness.dark:
         return Colors.white;
@@ -418,7 +475,7 @@ class ColorChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color labelColor = onColor ?? contrastColor(color);
 
-    return Container(
+    return ColoredBox(
       color: color,
       child: Padding(
         padding: const EdgeInsets.all(16),

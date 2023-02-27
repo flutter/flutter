@@ -303,13 +303,12 @@ class ColorScheme with Diagnosticable {
     Color? scrim,
     Color? surfaceTint,
   }) async {
-    final pixels = await bloop(image);
+    final Iterable<int> imageBytes = await getImageBytes(image);
+    final QuantizerResult result = await QuantizerCelebi().quantize(imageBytes, 256);
 
-
-    final QuantizerResult result = await QuantizerCelebi().quantize(pixels, 256);
     print((result.colorToCount.keys).map((key) => Color(key)));
     final Color baseColor = Color((result.colorToCount.keys.toList())[0]);
-    print('baseColor: $baseColor');
+
     final Scheme scheme;
 
     switch (brightness) {
@@ -355,46 +354,25 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-static Future<Iterable<int>> bloop(Image input) async {
+static Future<Iterable<int>> getImageBytes(Image input) async {
     ImageStream stream = input.image.resolve(const ImageConfiguration(size: Size(112, 112)));
   final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-  final Duration timeout = Duration(seconds: 15);
     Timer? loadFailureTimeout;
     late ImageStreamListener listener;
     listener = ImageStreamListener((ImageInfo info, sync) async {
       stream.removeListener(listener);
       imageCompleter.complete(info.image);
     });
-    // if (timeout != Duration.zero) {
-    //   loadFailureTimeout = Timer(timeout, () {
-    //     stream.removeListener(listener);
-    //     imageCompleter.completeError(
-    //       TimeoutException(
-    //           'Timeout occurred trying to load from ${input.image}'),
-    //     );
-    //   });
-    // }
     stream.addListener(listener);
     final ui.Image image = await imageCompleter.future;
+
     final inputPixels = (await image.toByteData())!
       .buffer
       .asUint32List()
-      //.map((e) => getArgbFromAbgr(e))
       .toList();
-      //print(inputPixels);
       stream.removeListener(listener);
       return inputPixels;
   }
-
-  //static int getArgbFromAbgr(int abgr) {
-  //   final int EXCEPT_R_MASK = 0xFF00FFFF;
-  //   final int ONLY_R_MASK = ~EXCEPT_R_MASK;
-  //   final int EXCEPT_B_MASK = 0xFFFFFF00;
-  //   final int ONLY_B_MASK = ~EXCEPT_B_MASK;
-  //   int r = (abgr & ONLY_R_MASK) >> 16;
-  //   int b = abgr & ONLY_B_MASK;
-  //   return (abgr & EXCEPT_R_MASK & EXCEPT_B_MASK) | (b << 16) | r;
-  // }
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
