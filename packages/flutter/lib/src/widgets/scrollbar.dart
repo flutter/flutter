@@ -1849,7 +1849,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollableState? state = Scrollable.maybeOf(position.context.notificationContext!);
     final ScrollIntent intent = ScrollIntent(direction: scrollDirection, type: ScrollIncrementType.page);
     assert(state != null);
-    final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!,intent);
+    final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!, intent);
 
     _cachedController!.position.moveTo(
       _cachedController!.position.pixels + scrollIncrement,
