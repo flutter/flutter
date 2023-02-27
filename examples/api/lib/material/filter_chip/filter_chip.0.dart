@@ -53,12 +53,10 @@ class _FilterChipExampleState extends State<FilterChipExample> {
               return FilterChip(
                 label: Text(exercise.name),
                 selected: filters.contains(exercise),
-                onSelected: (bool value) {
+                onSelected: (bool selected) {
                   setState(() {
-                    if (value) {
-                      if (!filters.contains(exercise)) {
-                        filters.add(exercise);
-                      }
+                    if (selected) {
+                      filters.add(exercise);
                     } else {
                       filters.remove(exercise);
                     }
