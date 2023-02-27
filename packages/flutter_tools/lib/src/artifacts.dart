@@ -88,12 +88,14 @@ enum HostArtifact {
   webPlatformDart2JSSoundKernelDill,
 
   /// The precompiled SDKs and sourcemaps for web debug builds.
+  // TODO delete these
   webPrecompiledSdk,
   webPrecompiledSdkSourcemaps,
   webPrecompiledCanvaskitSdk,
   webPrecompiledCanvaskitSdkSourcemaps,
   webPrecompiledCanvaskitAndHtmlSdk,
   webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+
   webPrecompiledSoundSdk,
   webPrecompiledSoundSdkSourcemaps,
   webPrecompiledCanvaskitSoundSdk,
