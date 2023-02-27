@@ -361,7 +361,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if (_isFfiX86Error(stdout, stderr) &&
+    } else if ((_isFfiX86Error(stdout) || _isFfiX86Error(stderr)) &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
