@@ -32,7 +32,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@17573ee1cc1b9d061760f3a006fc4aac4f944fd5
+      uses: github/codeql-action/init@32dc499307d133bb5085bae78498c0ac2cf762d5
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -59,4 +59,4 @@ jobs:
     #   ./location_of_script_within_repo/buildscript.sh
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@17573ee1cc1b9d061760f3a006fc4aac4f944fd5
+      uses: github/codeql-action/analyze@32dc499307d133bb5085bae78498c0ac2cf762d5
