@@ -6,29 +6,35 @@
 
 namespace impeller {
 
-IDeviceCapabilities::IDeviceCapabilities(bool threading_restrictions,
-                                         bool offscreen_msaa,
+IDeviceCapabilities::IDeviceCapabilities(bool has_threading_restrictions,
+                                         bool supports_offscreen_msaa,
                                          bool supports_ssbo,
+                                         bool supports_texture_to_texture_blits,
                                          PixelFormat default_color_format,
                                          PixelFormat default_stencil_format)
-    : threading_restrictions_(threading_restrictions),
-      offscreen_msaa_(offscreen_msaa),
+    : has_threading_restrictions_(has_threading_restrictions),
+      supports_offscreen_msaa_(supports_offscreen_msaa),
       supports_ssbo_(supports_ssbo),
+      supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
       default_color_format_(default_color_format),
       default_stencil_format_(default_stencil_format) {}
 
 IDeviceCapabilities::~IDeviceCapabilities() = default;
 
 bool IDeviceCapabilities::HasThreadingRestrictions() const {
-  return threading_restrictions_;
+  return has_threading_restrictions_;
 }
 
 bool IDeviceCapabilities::SupportsOffscreenMSAA() const {
-  return offscreen_msaa_;
+  return supports_offscreen_msaa_;
 }
 
 bool IDeviceCapabilities::SupportsSSBO() const {
   return supports_ssbo_;
+}
+
+bool IDeviceCapabilities::SupportsTextureToTextureBlits() const {
+  return supports_texture_to_texture_blits_;
 }
 
 PixelFormat IDeviceCapabilities::GetDefaultColorFormat() const {
@@ -45,19 +51,25 @@ DeviceCapabilitiesBuilder::~DeviceCapabilitiesBuilder() = default;
 
 DeviceCapabilitiesBuilder&
 DeviceCapabilitiesBuilder::SetHasThreadingRestrictions(bool value) {
-  threading_restrictions_ = value;
+  has_threading_restrictions_ = value;
   return *this;
 }
 
 DeviceCapabilitiesBuilder& DeviceCapabilitiesBuilder::SetSupportsOffscreenMSAA(
     bool value) {
-  offscreen_msaa_ = value;
+  supports_offscreen_msaa_ = value;
   return *this;
 }
 
 DeviceCapabilitiesBuilder& DeviceCapabilitiesBuilder::SetSupportsSSBO(
     bool value) {
   supports_ssbo_ = value;
+  return *this;
+}
+
+DeviceCapabilitiesBuilder&
+DeviceCapabilitiesBuilder::SetSupportsTextureToTextureBlits(bool value) {
+  supports_texture_to_texture_blits_ = value;
   return *this;
 }
 
@@ -79,9 +91,14 @@ std::unique_ptr<IDeviceCapabilities> DeviceCapabilitiesBuilder::Build() {
   FML_CHECK(default_stencil_format_.has_value())
       << "Default stencil format not set";
 
-  IDeviceCapabilities* capabilities = new IDeviceCapabilities(
-      threading_restrictions_, offscreen_msaa_, supports_ssbo_,
-      *default_color_format_, *default_stencil_format_);
+  IDeviceCapabilities* capabilities = new IDeviceCapabilities(  //
+      has_threading_restrictions_,                              //
+      supports_offscreen_msaa_,                                 //
+      supports_ssbo_,                                           //
+      supports_texture_to_texture_blits_,                       //
+      *default_color_format_,                                   //
+      *default_stencil_format_                                  //
+  );
   return std::unique_ptr<IDeviceCapabilities>(capabilities);
 }
 
