@@ -1296,8 +1296,7 @@ abstract class FlutterCommand extends Command<void> {
   List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
-    final ArgResults argumentResults = argResults!;
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
+    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
       dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
     }
 
@@ -1314,8 +1313,7 @@ abstract class FlutterCommand extends Command<void> {
   Map<String, Object>? extractDartDefineConfigJsonMap() {
     Map<String, Object>? dartDefineConfigJsonMap;
 
-    final ArgResults argumentResults = argResults!;
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configJsonPaths = stringsArg(
           FlutterOptions.kDartDefineFromFileOption,
       );
