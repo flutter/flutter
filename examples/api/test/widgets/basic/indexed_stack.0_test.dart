@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('has correct forward rendering mechanism', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture2 = find.byKey(const Key('gesture2'));
     final Element containerFinder = find.byKey(const Key('Dash')).evaluate().first;
@@ -31,7 +31,7 @@ void main() {
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
   testWidgets('has correct backward rendering mechanism', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
     final Element containerFinder = find.byKey(const Key('Dash')).evaluate().first;
@@ -51,7 +51,7 @@ void main() {
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
   testWidgets('has correct element addition handling', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.IndexedStackApp());
 
     expect(find.byType(example.PersonTracker), findsNWidgets(3));
     final Finder textField = find.byType(TextField);
@@ -66,7 +66,7 @@ void main() {
     expect(find.byType(example.PersonTracker), findsNWidgets(5));
   });
   testWidgets('has state preservation', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
     final Finder gesture2 = find.byKey(const Key('gesture2'));
