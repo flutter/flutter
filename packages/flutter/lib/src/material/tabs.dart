@@ -442,8 +442,8 @@ class _IndicatorPainter extends CustomPainter {
 
     if (!(rect.size >= insets.collapsedSize)) {
       throw FlutterError(
-          'indicatorPadding insets should be less than Tab Size\n'
-          'Rect Size : ${rect.size}, Insets: $insets',
+        'indicatorPadding insets should be less than Tab Size\n'
+        'Rect Size : ${rect.size}, Insets: $insets',
       );
     }
     return insets.deflateRect(rect);
@@ -562,7 +562,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
 
   bool _viewportDimensionWasNonZero = false;
 
-  // Position should be adjusted at least once.
+  // The scroll position should be adjusted at least once.
   bool _needsPixelsCorrection = true;
 
   @override
@@ -573,11 +573,10 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
     }
     // If the viewport never had a non-zero dimension, we just want to jump
     // to the initial scroll position to avoid strange scrolling effects in
-    // release mode: In release mode, the viewport temporarily may have a
-    // dimension of zero before the actual dimension is calculated. In that
-    // scenario, setting the actual dimension would cause a strange scroll
-    // effect without this guard because the super call below would starts a
-    // ballistic scroll activity.
+    // release mode: the viewport temporarily may have a dimension of zero
+    // before the actual dimension is calculated. In that scenario, setting
+    // the actual dimension would cause a strange scroll effect without this
+    // guard because the super call below would start a ballistic scroll activity.
     if (!_viewportDimensionWasNonZero || _needsPixelsCorrection) {
       _needsPixelsCorrection = false;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
@@ -643,7 +642,7 @@ class _TabBarScrollController extends ScrollController {
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
-///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
+///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design tab bar.
   ///
@@ -658,7 +657,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
-  /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
+  /// then [indicatorWeight] and [indicatorColor] are ignored.
   const TabBar({
     super.key,
     required this.tabs,
@@ -708,8 +707,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The amount of space by which to inset the tab bar.
   ///
-  /// When [isScrollable] is false, this will yield the same result as if you had wrapped your
-  /// [TabBar] in a [Padding] widget. When [isScrollable] is true, the scrollable itself is inset,
+  /// When [isScrollable] is false, this will yield the same result as if [TabBar] was wrapped
+  /// in a [Padding] widget. When [isScrollable] is true, the scrollable itself is inset,
   /// allowing the padding to scroll with the tab bar, rather than enclosing it.
   final EdgeInsetsGeometry? padding;
 
@@ -731,22 +730,19 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// this property is ignored.
   final double indicatorWeight;
 
-
-  /// Padding for indicator.
-  /// This property will now no longer be ignored even if indicator is declared
-  /// or provided by [TabBarTheme]
+  /// The padding for the indicator.
+  ///
+  /// The default value of this property is [EdgeInsets.zero].
   ///
   /// For [isScrollable] tab bars, specifying [kTabLabelPadding] will align
   /// the indicator with the tab's text for [Tab] widgets and all but the
   /// shortest [Tab.text] values.
-  ///
-  /// The default value of [indicatorPadding] is [EdgeInsets.zero].
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
-  /// the [indicatorColor], and [indicatorWeight] properties are ignored.
+  /// the [indicatorColor] and [indicatorWeight] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
@@ -764,6 +760,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
+  ///
+  /// The default value of this property is true.
   ///
   /// If [automaticIndicatorColorAdjustment] is true,
   /// then the [indicatorColor] will be automatically adjusted to [Colors.white]
