@@ -3,4 +3,24 @@ workflows:
         name: RJ Mobile Flutter
         max_build_duration: 120
         instance_type: mac_mini_m1
-        
+        scripts:
+          - name: Set up local.properties
+            script: | 
+              echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+          - name: Get Flutter packages
+            script: | 
+              flutter packages pub get
+          - name: Build AAB with Flutter
+            script: | 
+              flutter build appbundle --release
+        artifacts:
+          - build/**/outputs/**/*.aab
+          - build/**/outputs/**/mapping.txt
+          - flutter_drive.log
+        publishing:
+          email:
+            recipients:
+              - rakeshyadav.j3@gmail.com
+            notify:
+              success: true
+              failure: false
