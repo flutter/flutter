@@ -53,7 +53,7 @@ class PointerInjectorDelegate {
 
   // Closes the |fuchsia.ui.pointerinjector.Device| channel for |view_id| and
   // cleans up resources.
-  void OnDestroyView(uint64_t view_id) { valid_views_.erase(view_id); };
+  void OnDestroyView(uint64_t view_id) { valid_views_.erase(view_id); }
 
  private:
   using ViewId = int64_t;
