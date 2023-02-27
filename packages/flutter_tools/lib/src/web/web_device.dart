@@ -111,7 +111,7 @@ abstract class ChromiumDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  bool isSupported() => chromeLauncher.canFindExecutable();
+  bool isSupported() =>  chromeLauncher.canFindExecutable();
 
   @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
@@ -357,7 +357,8 @@ class WebDevices extends PollingDeviceDiscovery {
     }
     final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
-      _webServerDevice,
+      if (WebServerDevice.showWebServerDevice)
+        _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
       if (edgeDevice != null && await edgeDevice._meetsVersionConstraint())
@@ -391,6 +392,7 @@ class WebServerDevice extends Device {
        );
 
   static const String kWebServerDeviceId = 'web-server';
+  static bool showWebServerDevice = false;
 
   final Logger _logger;
 
