@@ -137,7 +137,7 @@ class BottomSheet extends StatefulWidget {
 
   /// The color of the shadow below the sheet.
   ///
-  /// If this property is null, then [BottomSheetTheme.shadowColor] of
+  /// If this property is null, then [BottomSheetThemeData.shadowColor] of
   /// [ThemeData.bottomSheetTheme] is used. If that is also null, the default value
   /// is transparent.
   ///
