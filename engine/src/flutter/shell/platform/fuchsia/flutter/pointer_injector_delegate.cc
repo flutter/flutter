@@ -43,118 +43,125 @@ bool PointerInjectorDelegate::HandlePlatformMessage(
 
   auto method = request.FindMember("method");
   if (method == request.MemberEnd() || !method->value.IsString()) {
+    FML_LOG(ERROR) << "No method found in platform message.";
     return false;
   }
 
-  if (method->value == kPointerInjectorMethodPrefix) {
-    auto args_it = request.FindMember("args");
-    if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
-      FML_LOG(ERROR) << "No arguments found.";
-      return false;
-    }
-
-    const auto& args = args_it->value;
-
-    auto view_id = args.FindMember("viewId");
-    if (!view_id->value.IsUint64()) {
-      FML_LOG(ERROR) << "Argument 'viewId' is not a uint64";
-      return false;
-    }
-    auto id = view_id->value.GetUint64();
-
-    auto phase = args.FindMember("phase");
-    if (!phase->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'phase' is not a int";
-      return false;
-    }
-
-    auto pointer_x = args.FindMember("x");
-    if (!pointer_x->value.IsFloat() && !pointer_x->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'Pointer.X' is not a float";
-      return false;
-    }
-
-    auto pointer_y = args.FindMember("y");
-    if (!pointer_y->value.IsFloat() && !pointer_y->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'Pointer.Y' is not a float";
-      return false;
-    }
-
-    auto pointer_id = args.FindMember("pointerId");
-    if (!pointer_id->value.IsUint()) {
-      FML_LOG(ERROR) << "Argument 'pointerId' is not a uint32";
-      return false;
-    }
-
-    auto trace_flow_id = args.FindMember("traceFlowId");
-    if (!trace_flow_id->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'traceFlowId' is not a int";
-      return false;
-    }
-
-    // For GFX, the viewRef for the view is provided through the platform
-    // message. For flatland, the viewRef is provided through |OnCreateView|.
-    std::optional<fuv_ViewRef> view_ref;
-    if (!is_flatland_) {
-      auto view_ref_arg = args.FindMember("viewRef");
-      if (!view_ref_arg->value.IsUint64()) {
-        FML_LOG(ERROR) << "Argument 'viewRef' is not a uint64";
-        return false;
-      }
-
-      zx_handle_t handle = view_ref_arg->value.GetUint64();
-      zx_handle_t out_handle;
-      zx_status_t status =
-          zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
-      if (status != ZX_OK) {
-        FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
-        return false;
-      }
-      auto ref = fuv_ViewRef({
-          .reference = zx::eventpair(out_handle),
-      });
-      view_ref = std::move(ref);
-    }
-
-    auto width = args.FindMember("logicalWidth");
-    if (!width->value.IsFloat() && !width->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'logicalWidth' is not a float";
-      return false;
-    }
-
-    auto height = args.FindMember("logicalHeight");
-    if (!height->value.IsFloat() && !height->value.IsInt()) {
-      FML_LOG(ERROR) << "Argument 'logicalHeight' is not a float";
-      return false;
-    }
-
-    auto timestamp = args.FindMember("timestamp");
-    if (!timestamp->value.IsInt() && !timestamp->value.IsUint64()) {
-      FML_LOG(ERROR) << "Argument 'timestamp' is not a int";
-      return false;
-    }
-
-    PointerInjectorRequest request = {
-        .x = pointer_x->value.GetFloat(),
-        .y = pointer_y->value.GetFloat(),
-        .pointer_id = pointer_id->value.GetUint(),
-        .phase = static_cast<fup_EventPhase>(phase->value.GetInt()),
-        .trace_flow_id = trace_flow_id->value.GetUint64(),
-        .view_ref = std::move(view_ref),
-        .logical_size = {width->value.GetFloat(), height->value.GetFloat()},
-        .timestamp = timestamp->value.GetInt()};
-
-    // Inject the pointer event if the view has been created.
-    if (valid_views_.count(id) > 0) {
-      valid_views_.at(id).InjectEvent(std::move(request));
-      Complete(std::move(response), "[0]");
-    } else {
-      return false;
-    }
-  } else {
+  if (method->value != kPointerInjectorMethodPrefix) {
+    FML_LOG(ERROR) << "Unexpected platform message method, expected "
+                      "View.pointerinjector.inject.";
     return false;
   }
-  // All of our methods complete the platform message response.
+
+  auto args_it = request.FindMember("args");
+  if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
+    FML_LOG(ERROR) << "No arguments found in platform message's method";
+    return false;
+  }
+
+  const auto& args = args_it->value;
+
+  auto view_id = args.FindMember("viewId");
+  if (!view_id->value.IsUint64()) {
+    FML_LOG(ERROR) << "Argument 'viewId' is not a uint64";
+    return false;
+  }
+
+  auto id = view_id->value.GetUint64();
+  if (valid_views_.count(id) == 0) {
+    // A child view can get destroyed bottom-up, so the parent view may continue
+    // injecting until all view state processing "catches up". Until then, it's
+    // okay to accept a request to inject into a view that no longer exists.
+    // Doing so avoids log pollution regarding "MissingPluginException".
+    Complete(std::move(response), "[0]");
+    return true;
+  }
+
+  auto phase = args.FindMember("phase");
+  if (!phase->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'phase' is not a int";
+    return false;
+  }
+
+  auto pointer_x = args.FindMember("x");
+  if (!pointer_x->value.IsFloat() && !pointer_x->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'Pointer.X' is not a float";
+    return false;
+  }
+
+  auto pointer_y = args.FindMember("y");
+  if (!pointer_y->value.IsFloat() && !pointer_y->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'Pointer.Y' is not a float";
+    return false;
+  }
+
+  auto pointer_id = args.FindMember("pointerId");
+  if (!pointer_id->value.IsUint()) {
+    FML_LOG(ERROR) << "Argument 'pointerId' is not a uint32";
+    return false;
+  }
+
+  auto trace_flow_id = args.FindMember("traceFlowId");
+  if (!trace_flow_id->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'traceFlowId' is not a int";
+    return false;
+  }
+
+  // For GFX, the viewRef for the view is provided through the platform
+  // message. For flatland, the viewRef is provided through |OnCreateView|.
+  std::optional<fuv_ViewRef> view_ref;
+  if (!is_flatland_) {
+    auto view_ref_arg = args.FindMember("viewRef");
+    if (!view_ref_arg->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not a uint64";
+      return false;
+    }
+
+    zx_handle_t handle = view_ref_arg->value.GetUint64();
+    zx_handle_t out_handle;
+    zx_status_t status =
+        zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
+      return false;
+    }
+    auto ref = fuv_ViewRef({
+        .reference = zx::eventpair(out_handle),
+    });
+    view_ref = std::move(ref);
+  }
+
+  auto width = args.FindMember("logicalWidth");
+  if (!width->value.IsFloat() && !width->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'logicalWidth' is not a float";
+    return false;
+  }
+
+  auto height = args.FindMember("logicalHeight");
+  if (!height->value.IsFloat() && !height->value.IsInt()) {
+    FML_LOG(ERROR) << "Argument 'logicalHeight' is not a float";
+    return false;
+  }
+
+  auto timestamp = args.FindMember("timestamp");
+  if (!timestamp->value.IsInt() && !timestamp->value.IsUint64()) {
+    FML_LOG(ERROR) << "Argument 'timestamp' is not a int";
+    return false;
+  }
+
+  PointerInjectorRequest event = {
+      .x = pointer_x->value.GetFloat(),
+      .y = pointer_y->value.GetFloat(),
+      .pointer_id = pointer_id->value.GetUint(),
+      .phase = static_cast<fup_EventPhase>(phase->value.GetInt()),
+      .trace_flow_id = trace_flow_id->value.GetUint64(),
+      .view_ref = std::move(view_ref),
+      .logical_size = {width->value.GetFloat(), height->value.GetFloat()},
+      .timestamp = timestamp->value.GetInt()};
+
+  // Inject the pointer event if the view has been created.
+  valid_views_.at(id).InjectEvent(std::move(event));
+  Complete(std::move(response), "[0]");
   return true;
 }
 
