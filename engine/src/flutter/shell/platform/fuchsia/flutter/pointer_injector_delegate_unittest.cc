@@ -378,7 +378,11 @@ TEST_P(PointerInjectorDelegateTest,
         view_ref_clone = std::move(temp_ref);
       }
 
-      EXPECT_FALSE(pointer_injector_delegate_->HandlePlatformMessage(
+      // The platform message is *silently* accepted for non-existent views, in
+      // order to cleanly handle the lifecycle case where the child view is
+      // forcibly killed. By doing so, products avoid "MissingPluginException"
+      // log spam.
+      EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
           PlatformMessageBuilder()
               .SetViewId(view_id_1)
               .SetViewRefMaybe(std::move(view_ref_clone))
@@ -404,7 +408,11 @@ TEST_P(PointerInjectorDelegateTest,
         view_ref_clone = std::move(temp_ref);
       }
 
-      EXPECT_FALSE(pointer_injector_delegate_->HandlePlatformMessage(
+      // The platform message is *silently* accepted for non-existent views, in
+      // order to cleanly handle the lifecycle case where the child view is
+      // forcibly killed. By doing so, products avoid "MissingPluginException"
+      // log spam.
+      EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
           PlatformMessageBuilder()
               .SetViewId(view_id_2)
               .SetViewRefMaybe(std::move(view_ref_clone))
