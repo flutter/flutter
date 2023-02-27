@@ -1035,7 +1035,7 @@ class FakeDartDevelopmentService extends Fake
     implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
+    Uri observatoryUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,

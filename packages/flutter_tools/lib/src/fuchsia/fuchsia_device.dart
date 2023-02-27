@@ -52,11 +52,11 @@ Future<FlutterVmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
   Device device,
-  Uri vmServiceUri,
+  Uri observatoryUri,
   bool disableServiceAuthCodes,
 ) async {
   await device.dds.startDartDevelopmentService(
-    vmServiceUri,
+    observatoryUri,
     hostPort: 0,
     ipv6: true,
     disableServiceAuthCodes: disableServiceAuthCodes,
@@ -458,12 +458,12 @@ class FuchsiaDevice extends Device {
     globals.printTrace(
         'App started in a non-release mode. Setting up vmservice connection.');
 
-    // In a debug or profile build, try to find the vmService uri.
+    // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
         getIsolateDiscoveryProtocol(appName);
     try {
-      final Uri vmServiceUri = await discovery.uri;
-      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+      final Uri observatoryUri = await discovery.uri;
+      return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } finally {
       discovery.dispose();
     }
@@ -620,7 +620,7 @@ class FuchsiaDevice extends Device {
     return addr;
   }();
 
-  /// List the ports currently running a dart vmService.
+  /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
     const String findCommand = 'find /hub -name vmservice-port';
     final RunResult findResult = await shell(findCommand);

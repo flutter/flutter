@@ -285,7 +285,7 @@ void main() {
       userIdentifier: '10',
     );
 
-    // This fails to start due to VM Service discovery issues.
+    // This fails to start due to observatory discovery issues.
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });
