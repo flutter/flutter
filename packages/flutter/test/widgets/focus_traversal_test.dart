@@ -2201,6 +2201,48 @@ void main() {
       expect(unfocusableNode.hasFocus, isFalse);
     });
 
+    testWidgets('Group applies correct policy if focus tree is different from widget tree.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final FocusNode focusNode = FocusNode(debugLabel: 'child');
+      final FocusNode parentFocusNode = FocusNode(debugLabel: 'parent');
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            FocusTraversalGroup(
+              policy: WidgetOrderTraversalPolicy(),
+              child: Focus(
+                child: Focus.withExternalFocusNode(
+                  key: key1,
+                  // This makes focusNode be a child of parentFocusNode instead
+                  // of the surrounding Focus.
+                  parentNode: parentFocusNode,
+                  focusNode: focusNode,
+                  child: Container(key: key2),
+                ),
+              ),
+            ),
+            FocusTraversalGroup(
+              policy: SkipAllButFirstAndLastPolicy(),
+              child: FocusScope(
+                child: Focus.withExternalFocusNode(
+                  key: key3,
+                  focusNode: parentFocusNode,
+                  child: Container(key: key4),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      expect(focusNode.parent, equals(parentFocusNode));
+      expect(FocusTraversalGroup.maybeOf(key2.currentContext!), const TypeMatcher<SkipAllButFirstAndLastPolicy>());
+      expect(FocusTraversalGroup.of(key2.currentContext!), const TypeMatcher<SkipAllButFirstAndLastPolicy>());
+    });
+
     testWidgets("Descendants of FocusTraversalGroup aren't traversable if descendantsAreTraversable is false.", (WidgetTester tester) async {
       final FocusNode node1 = FocusNode();
       final FocusNode node2 = FocusNode();

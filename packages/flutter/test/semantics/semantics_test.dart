@@ -678,7 +678,7 @@ void main() {
     );
   });
 
-  test('Attributed String can concate', () {
+  test('Attributed String can concat', () {
     final AttributedString string1 = AttributedString(
       'string1',
       attributes: <StringAttribute>[

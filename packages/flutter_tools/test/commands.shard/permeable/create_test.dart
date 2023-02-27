@@ -1663,7 +1663,7 @@ void main() {
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
-  testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
+  testUsingContext('can re-gen default template over existing app project with no metadata and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
