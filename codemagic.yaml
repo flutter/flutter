@@ -3,6 +3,22 @@ workflows:
         name: RJ Android Mobile Flutter
         max_build_duration: 120
 #        instance_type: mac_mini_m1
+        environment:
+          vars:
+            ENV: DEV
+          flutter: stable
+          xcode: latest
+          cocoapods: default
+        triggering:
+          events:
+            - push
+          branch_patterns:
+            - pattern: master
+              include: true
+              source: true
+          tag_patterns:
+            - pattern: "*"
+              include: true
         scripts:
           - name: Set up local.properties
             script: |
