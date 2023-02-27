@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
@@ -39,7 +41,7 @@ class MDnsVmServiceDiscovery {
   final Usage _flutterUsage;
 
   @visibleForTesting
-  static const String dartVmServiceName = '_dartobservatory._tcp.local';
+  static const String dartVmServiceName = '_dartVmService._tcp.local';
 
   static MDnsVmServiceDiscovery? get instance => context.get<MDnsVmServiceDiscovery>();
 
