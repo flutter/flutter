@@ -123,7 +123,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   {
     const auto tess_result = renderer.GetTessellator()->Tessellate(
-        path_.GetFillType(), path_.CreatePolyline(),
+        path_.GetFillType(), path_.CreatePolyline(1.0f),
         [this, &vertex_builder, &coverage_rect, &texture_size](
             const float* vertices, size_t vertices_size,
             const uint16_t* indices, size_t indices_size) {
