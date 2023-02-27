@@ -202,22 +202,14 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: SafeArea(child: child),
     );
 
-    final PhysicalShape physicalShape = isMaterial3
-        ? PhysicalShape(
+    final PhysicalShape physicalShape = PhysicalShape(
             clipper: clipper,
             elevation: elevation,
-            shadowColor: shadowColor!,
+            shadowColor: isMaterial3 ? shadowColor! : Color(0x00000000),
             color: effectiveColor,
             clipBehavior: widget.clipBehavior,
             child: material,
-          )
-        : PhysicalShape(
-            clipper: clipper,
-            elevation: elevation,
-            color: effectiveColor,
-            clipBehavior: widget.clipBehavior,
-            child: material,
-          );
+     );
 
     return SizedBox(height: height, child: physicalShape);
   }

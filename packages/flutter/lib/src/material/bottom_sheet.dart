@@ -135,10 +135,16 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to null and falls back to [Material]'s default.
   final Color? backgroundColor;
 
-  /// The color used as a drop-shadow, if the sheet is elevated.
+  /// The color of the shadow below the sheet.
   ///
-  /// If this is null, the value will depend whether Material 3 is used - see [Material.shadowColor].
-  /// In Material 3, this value defaults to [Colors.transparent].
+  /// If this property is null, then [BottomSheetTheme.shadowColor] of
+  /// [ThemeData.bottomSheetTheme] is used. If that is also null, the default value
+  /// is transparent.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], which defines the size of the shadow below the sheet.
+  ///  * [shape], which defines the shape of the sheet and its shadow.
   final Color? shadowColor;
 
   /// The z-coordinate at which to place this material relative to its parent.
