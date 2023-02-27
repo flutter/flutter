@@ -594,6 +594,27 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('test --dart-define-from-file option by invalid file type', () {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('config').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+      bundleBuilder: fakeBundleBuilder,
+    ));
+
+    expect(() => runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=config',
+    ]), throwsA(predicate<Exception>((Exception e) => e is ToolExit && e.message == 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!')));
+  }, overrides: <Type, Generator>{
+    FileSystem: fsFactory,
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('test --dart-define-from-file option by corrupted json', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
