@@ -111,6 +111,9 @@ class DialogTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DialogTheme lerp(DialogTheme? a, DialogTheme? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DialogTheme(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),

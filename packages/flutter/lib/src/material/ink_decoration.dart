@@ -237,10 +237,10 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
+    if (decoration == null) {
       return padding ?? EdgeInsets.zero;
     }
-    final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
@@ -288,7 +288,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? const SizedBox();
+    return widget.child ?? ConstrainedBox(constraints: const BoxConstraints.expand());
   }
 
   @override

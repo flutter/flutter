@@ -10,7 +10,7 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'windows.dart';
 
-void drawHelloWorld() {
+void drawHelloWorld(ui.FlutterView view) {
   final ui.ParagraphStyle style = ui.ParagraphStyle();
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)
     ..addText('Hello world');
@@ -28,10 +28,14 @@ void drawHelloWorld() {
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
-  ui.window.render(sceneBuilder.build());
+  view.render(sceneBuilder.build());
 }
 
 void main() async {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  final ui.FlutterView view = ui.PlatformDispatcher.instance.implicitView!;
+
   // Create a completer to send the window visibility result back to the
   // integration test.
   final Completer<String> visibilityCompleter = Completer<String>();
@@ -50,8 +54,7 @@ void main() async {
       // The code points are passed a list of integers through the method channel,
       // which will use the UTF16 to UTF8 utility function to convert them to a
       // std::string, which should equate to the original expected string.
-      // TODO(schectman): Remove trailing null from returned string
-      const String expected = 'ABCℵ\x00';
+      const String expected = 'ABCℵ';
       final Int32List codePoints = Int32List.fromList(expected.codeUnits);
       final String converted = await testStringConversion(codePoints);
       return (converted == expected)
@@ -81,7 +84,7 @@ void main() async {
 
       // Draw something to trigger the first frame callback that displays the
       // window.
-      drawHelloWorld();
+      drawHelloWorld(view);
       firstFrame = false;
     };
 

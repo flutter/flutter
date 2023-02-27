@@ -93,7 +93,7 @@ class _HomeState extends State<Home> {
               // side parameter. The side can also be specified as a
               // LinearBorder parameter and if both are specified then the
               // ButtonStyle's side is used. This set up makes it possible
-              // for a button theme to specify the shape and for indidividual
+              // for a button theme to specify the shape and for individual
               // buttons to specify the shape border's color and width.
               SampleCard(
                 title: 'LinearBorder.bottom()',

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewConfiguration, WindowPadding;
+import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewConfiguration, ViewPadding;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -145,11 +145,11 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
+    expect(data.size, equals(tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -176,10 +176,10 @@ void main() {
     final TestView view = TestView(
       physicalSize: const Size(300, 600),
       devicePixelRatio: 3.0,
-      padding: const TestWindowPadding(15),
-      viewPadding: const TestWindowPadding(75),
-      viewInsets: const TestWindowPadding(45),
-      systemGestureInsets: const TestWindowPadding(9),
+      padding: const TestViewPadding(15),
+      viewPadding: const TestViewPadding(75),
+      viewInsets: const TestViewPadding(45),
+      systemGestureInsets: const TestViewPadding(9),
     );
 
     final MediaQueryData data = MediaQueryData.fromView(view, platformData: platformData);
@@ -189,10 +189,10 @@ void main() {
     expect(data.devicePixelRatio, view.devicePixelRatio);
     expect(data.textScaleFactor, platformData.textScaleFactor);
     expect(data.platformBrightness, platformData.platformBrightness);
-    expect(data.padding, EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
@@ -216,10 +216,10 @@ void main() {
       platformDispatcher: platformDispatcher,
       physicalSize: const Size(300, 600),
       devicePixelRatio: 3.0,
-      padding: const TestWindowPadding(15),
-      viewPadding: const TestWindowPadding(75),
-      viewInsets: const TestWindowPadding(45),
-      systemGestureInsets: const TestWindowPadding(9),
+      padding: const TestViewPadding(15),
+      viewPadding: const TestViewPadding(75),
+      viewInsets: const TestViewPadding(45),
+      systemGestureInsets: const TestViewPadding(9),
     );
 
     final MediaQueryData data = MediaQueryData.fromView(view);
@@ -229,10 +229,10 @@ void main() {
     expect(data.devicePixelRatio, view.devicePixelRatio);
     expect(data.textScaleFactor, platformDispatcher.textScaleFactor);
     expect(data.platformBrightness, platformDispatcher.platformBrightness);
-    expect(data.padding, EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
     expect(data.accessibleNavigation, platformDispatcher.accessibilityFeatures.accessibleNavigation);
     expect(data.invertColors, platformDispatcher.accessibilityFeatures.invertColors);
     expect(data.disableAnimations, platformDispatcher.accessibilityFeatures.disableAnimations);
@@ -260,10 +260,10 @@ void main() {
     final TestView view = TestView(
       physicalSize: const Size(300, 600),
       devicePixelRatio: 3.0,
-      padding: const TestWindowPadding(15),
-      viewPadding: const TestWindowPadding(75),
-      viewInsets: const TestWindowPadding(45),
-      systemGestureInsets: const TestWindowPadding(9),
+      padding: const TestViewPadding(15),
+      viewPadding: const TestViewPadding(75),
+      viewInsets: const TestViewPadding(45),
+      systemGestureInsets: const TestViewPadding(9),
     );
 
     late MediaQueryData data;
@@ -285,10 +285,10 @@ void main() {
     expect(data.devicePixelRatio, view.devicePixelRatio);
     expect(data.textScaleFactor, platformData.textScaleFactor);
     expect(data.platformBrightness, platformData.platformBrightness);
-    expect(data.padding, EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
@@ -300,7 +300,7 @@ void main() {
     expect(data.displayFeatures, view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no sourrounding MediaQuery exists', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
     final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(platformDispatcher: tester.binding.platformDispatcher);
     platformDispatcher
       ..textScaleFactorTestValue = 123
@@ -312,10 +312,10 @@ void main() {
       platformDispatcher: platformDispatcher,
       physicalSize: const Size(300, 600),
       devicePixelRatio: 3.0,
-      padding: const TestWindowPadding(15),
-      viewPadding: const TestWindowPadding(75),
-      viewInsets: const TestWindowPadding(45),
-      systemGestureInsets: const TestWindowPadding(9),
+      padding: const TestViewPadding(15),
+      viewPadding: const TestViewPadding(75),
+      viewInsets: const TestViewPadding(45),
+      systemGestureInsets: const TestViewPadding(9),
     );
 
     late MediaQueryData data;
@@ -343,10 +343,10 @@ void main() {
     expect(data.devicePixelRatio, view.devicePixelRatio);
     expect(data.textScaleFactor, platformDispatcher.textScaleFactor);
     expect(data.platformBrightness, platformDispatcher.platformBrightness);
-    expect(data.padding, EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
     expect(data.accessibleNavigation, platformDispatcher.accessibilityFeatures.accessibleNavigation);
     expect(data.invertColors, platformDispatcher.accessibilityFeatures.invertColors);
     expect(data.disableAnimations, platformDispatcher.accessibilityFeatures.disableAnimations);
@@ -513,7 +513,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -552,7 +552,7 @@ void main() {
       ),
     ];
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -1110,7 +1110,7 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
     MediaQuery? mediaQueryOutside;
     MediaQuery? mediaQueryInside;
 
@@ -1118,7 +1118,8 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           mediaQueryOutside = context.findAncestorWidgetOfExactType<MediaQuery>();
-          return MediaQuery.fromWindow(
+          return MediaQuery.fromView(
+            view: View.of(context),
             child: Builder(
               builder: (BuildContext context) {
                 mediaQueryInside = context.findAncestorWidgetOfExactType<MediaQuery>();
@@ -1135,7 +1136,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData windowData = MediaQueryData.fromWindow(tester.binding.window);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
@@ -1329,7 +1330,7 @@ void main() {
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    expect(MediaQueryData.fromView(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
   });
 
@@ -1532,13 +1533,13 @@ class TestView implements FlutterView {
   @override
   final double devicePixelRatio;
   @override
-  final WindowPadding padding;
+  final ViewPadding padding;
   @override
-  final WindowPadding viewPadding;
+  final ViewPadding viewPadding;
   @override
-  final WindowPadding viewInsets;
+  final ViewPadding viewInsets;
   @override
-  final WindowPadding systemGestureInsets;
+  final ViewPadding systemGestureInsets;
   @override
   final ViewConfiguration viewConfiguration = const ViewConfiguration();
   @override
@@ -1548,8 +1549,8 @@ class TestView implements FlutterView {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class TestWindowPadding implements WindowPadding {
-  const TestWindowPadding(this.value);
+class TestViewPadding implements ViewPadding {
+  const TestViewPadding(this.value);
   final double value;
 
   @override

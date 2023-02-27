@@ -30,7 +30,7 @@ abstract class FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableObservatory = false,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -45,6 +45,7 @@ abstract class FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -67,7 +68,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableObservatory = false,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -82,6 +83,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -103,6 +105,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['-r', 'json']
       else if (reporter != null)
         ...<String>['-r', reporter],
+      if (fileReporter != null)
+        '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
@@ -192,7 +196,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       shellPath: shellPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
-      enableObservatory: enableObservatory,
+      enableVmService: enableVmService,
       machine: machine,
       serverType: serverType,
       precompiledDillPath: precompiledDillPath,

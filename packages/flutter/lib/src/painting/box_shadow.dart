@@ -86,8 +86,8 @@ class BoxShadow extends ui.Shadow {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxShadow? lerp(BoxShadow? a, BoxShadow? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -110,8 +110,8 @@ class BoxShadow extends ui.Shadow {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     a ??= <BoxShadow>[];
     b ??= <BoxShadow>[];

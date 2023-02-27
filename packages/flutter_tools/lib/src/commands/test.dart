@@ -208,6 +208,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
         },
       )
+      ..addOption('file-reporter',
+        help: 'Enable an additional reporter writing test results to a file.\n'
+          'Should be in the form <reporter>:<filepath>, '
+          'Example: "json:reports/tests.json".'
+      )
       ..addOption('timeout',
         help: 'The default test timeout, specified either '
               'in seconds (e.g. "60s"), '
@@ -215,6 +220,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'or as the string "none" to disable the timeout entirely.',
       );
     addDdsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
@@ -404,6 +410,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
+      serveObservatory: boolArgDeprecated('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
@@ -451,7 +458,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
-      enableObservatory: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
+      enableVmService: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
       ipv6: boolArgDeprecated('ipv6'),
       machine: machine,
       updateGoldens: boolArgDeprecated('update-goldens'),
@@ -461,6 +468,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       web: stringArgDeprecated('platform') == 'chrome',
       randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
       reporter: stringArgDeprecated('reporter'),
+      fileReporter: stringArg('file-reporter'),
       timeout: stringArgDeprecated('timeout'),
       runSkipped: boolArgDeprecated('run-skipped'),
       shardIndex: shardIndex,

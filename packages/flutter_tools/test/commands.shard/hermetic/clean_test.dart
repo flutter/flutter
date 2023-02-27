@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -17,6 +19,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('clean command', () {
@@ -24,6 +27,7 @@ void main() {
     late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
 
     setUp(() {
+      Cache.disableLocking();
       xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
@@ -37,6 +41,7 @@ void main() {
 
       setUp(() {
         fs = MemoryFileSystem.test();
+        fs.file('pubspec.yaml').createSync(recursive: true);
 
         final Directory currentDirectory = fs.currentDirectory;
         buildDirectory = currentDirectory.childDirectory('build');
@@ -72,7 +77,30 @@ void main() {
 
         expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+        ]);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Xcode: () => xcode,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('$CleanCommand removes a specific xcode scheme --scheme', () async {
+        setupProjectUnderTest(fs.currentDirectory, true);
+        // Xcode is installed and version satisfactory.
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+        final CleanCommand command = CleanCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>['clean', '--scheme=custom-scheme']);
+
+        expect(xcodeProjectInterpreter.workspaces, <CleanWorkspaceCall>[
+          const CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+          const CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -96,6 +124,28 @@ void main() {
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      testUsingContext('$CleanCommand throws when given an invalid value for --scheme', () async {
+        setupProjectUnderTest(fs.currentDirectory, true);
+        // Xcode is installed and version satisfactory.
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+        final CleanCommand command = CleanCommand();
+        expect(
+          () => createTestCommandRunner(command).run(<String>['clean', '--scheme']),
+          throwsUsageException(),
+        );
+        expect(
+          () => createTestCommandRunner(command).run(<String>['clean', '--scheme=unknown']),
+          throwsToolExit(),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Xcode: () => xcode,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
       testUsingContext('$CleanCommand cleans Xcode verbosely for iOS and macOS', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         // Xcode is installed and version satisfactory.
@@ -106,7 +156,9 @@ void main() {
 
         expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
+          CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', true),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', true),
+          CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', true),
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -209,7 +261,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     return XcodeProjectInfo(
       const <String>[],
       const <String>[],
-      <String>['Runner'],
+      <String>['Runner', 'custom-scheme'],
       BufferLogger.test(),
     );
   }

@@ -1658,7 +1658,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: 2.0),
+                data: const MediaQueryData(textScaleFactor: 2.0),
                 child: Material(
                   child: Center(
                     child: Theme(
