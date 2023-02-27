@@ -498,7 +498,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     };
     possibleErrors.forEach((String errorName, String cocoaPodsError) {
       void testToolExitsWithCocoapodsMessage(_StdioStream outputStream) {
-        testUsingContext('ffi $errorName failure on ARM macOS prompts gem install', () async {
+        final String streamName = outputStream == _StdioStream.stdout ? 'stdout' : 'stderr';
+        testUsingContext('ffi $errorName failure to $streamName on ARM macOS prompts gem install', () async {
           final FlutterProject projectUnderTest = setupProjectUnderTest();
           pretendPodIsInstalled();
           pretendPodVersionIs('100.0.0');
