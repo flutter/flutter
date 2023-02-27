@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -11,6 +12,7 @@ import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -358,6 +360,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   void _handleTap() {
+    final TextDirection textDirection = Directionality.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -375,6 +380,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
+    SemanticsService.announce(stateHint, textDirection);
   }
 
   // Platform or null affinity defaults to trailing.
@@ -493,6 +499,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final bool closed = !_isExpanded && _controller.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String onTapHint = _isExpanded
+      ? localizations.expansionTileExpandedTapHint
+      : localizations.expansionTileCollapsedTapHint;
 
     final Widget result = Offstage(
       offstage: closed,
@@ -508,10 +518,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ),
     );
 
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: _buildChildren,
-      child: shouldRemoveChildren ? null : result,
+    return Semantics(
+      onTapHint: onTapHint,
+      child: AnimatedBuilder(
+        animation: _controller.view,
+        builder: _buildChildren,
+        child: shouldRemoveChildren ? null : result,
+      ),
     );
   }
 }

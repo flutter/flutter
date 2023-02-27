@@ -452,6 +452,18 @@ abstract class MaterialLocalizations {
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
 
+  /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [ExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [ExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
+
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
 
@@ -1175,6 +1187,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get collapsedIconTapHint => 'Expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   @override
   String get refreshIndicatorSemanticLabel => 'Refresh';

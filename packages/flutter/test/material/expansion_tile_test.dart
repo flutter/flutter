@@ -696,6 +696,106 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
+  testWidgets('ExpansionTile Semantics', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('Title'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Title'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Focus the first ExpansionTile.
+    tester.binding.focusManager.primaryFocus?.nextFocus();
+    await tester.pumpAndSettle();
+
+    // The first ExpansionTile should be collapsed and focused.
+    expect(
+      tester.getSemantics(find.byType(ExpansionTile).first),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocused: true,
+        isFocusable: true,
+        label: 'Title',
+        textDirection: TextDirection.ltr,
+        // The hint should be the opposite of the current state.
+        // The first ExpansionTile is collapsed, so the hint should be
+        // "double tap to expand".
+        onTapHint: localizations.expansionTileCollapsedTapHint,
+      ),
+    );
+
+    // The second ExpansionTile should be expanded and not focused.
+    expect(
+      tester.getSemantics(find.byType(ExpansionTile).last),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocusable: true,
+        label: 'Title',
+        textDirection: TextDirection.ltr,
+        // The hint should be the opposite of the current state.
+        // The second ExpansionTile is expanded, so the hint should be
+        // "double tap to collapse".
+        onTapHint: localizations.expansionTileExpandedTapHint,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('ExpansionTile Semantics announcement', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is expanded, so the announcement should be
+    // "Expanded".
+    expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is collapsed, so the announcement should be
+    // "Collapsed".
+    expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+    handle.dispose();
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
