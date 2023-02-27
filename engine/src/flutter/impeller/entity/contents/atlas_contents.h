@@ -66,6 +66,7 @@ class AtlasContents final : public Contents {
   std::optional<Rect> cull_rect_;
   Scalar alpha_ = 1.0;
   SamplerDescriptor sampler_descriptor_ = {};
+  mutable std::optional<Rect> bounding_box_cache_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AtlasContents);
 };

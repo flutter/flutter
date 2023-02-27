@@ -1553,13 +1553,14 @@ TEST(GeometryTest, RectGetTransformedPoints) {
 
 TEST(GeometryTest, RectMakePointBounds) {
   {
-    Rect r =
-        Rect::MakePointBounds({Point(1, 5), Point(4, -1), Point(0, 6)}).value();
+    std::vector<Point> points{{1, 5}, {4, -1}, {0, 6}};
+    Rect r = Rect::MakePointBounds(points.begin(), points.end()).value();
     auto expected = Rect(0, -1, 4, 7);
     ASSERT_RECT_NEAR(r, expected);
   }
   {
-    std::optional<Rect> r = Rect::MakePointBounds({});
+    std::vector<Point> points;
+    std::optional<Rect> r = Rect::MakePointBounds(points.begin(), points.end());
     ASSERT_FALSE(r.has_value());
   }
 }

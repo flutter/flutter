@@ -53,22 +53,21 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
-  constexpr static std::optional<TRect> MakePointBounds(
-      const std::vector<TPoint<Type>>& points) {
-    if (points.empty()) {
+  template <typename PointIter>
+  constexpr static std::optional<TRect> MakePointBounds(const PointIter first,
+                                                        const PointIter last) {
+    if (first == last) {
       return std::nullopt;
     }
-    auto left = points[0].x;
-    auto top = points[0].y;
-    auto right = points[0].x;
-    auto bottom = points[0].y;
-    if (points.size() > 1) {
-      for (size_t i = 1; i < points.size(); i++) {
-        left = std::min(left, points[i].x);
-        top = std::min(top, points[i].y);
-        right = std::max(right, points[i].x);
-        bottom = std::max(bottom, points[i].y);
-      }
+    auto left = first->x;
+    auto top = first->y;
+    auto right = first->x;
+    auto bottom = first->y;
+    for (auto it = first + 1; it < last; ++it) {
+      left = std::min(left, it->x);
+      top = std::min(top, it->y);
+      right = std::max(right, it->x);
+      bottom = std::max(bottom, it->y);
     }
     return TRect::MakeLTRB(left, top, right, bottom);
   }
@@ -175,7 +174,7 @@ struct TRect {
   ///         rectangle.
   constexpr TRect TransformBounds(const Matrix& transform) const {
     auto points = GetTransformedPoints(transform);
-    return TRect::MakePointBounds({points.begin(), points.end()}).value();
+    return TRect::MakePointBounds(points.begin(), points.end()).value();
   }
 
   constexpr TRect Union(const TRect& o) const {

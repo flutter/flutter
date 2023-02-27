@@ -35,10 +35,12 @@ std::shared_ptr<Texture> AtlasContents::GetTexture() const {
 
 void AtlasContents::SetTransforms(std::vector<Matrix> transforms) {
   transforms_ = std::move(transforms);
+  bounding_box_cache_.reset();
 }
 
 void AtlasContents::SetTextureCoordinates(std::vector<Rect> texture_coords) {
   texture_coords_ = std::move(texture_coords);
+  bounding_box_cache_.reset();
 }
 
 void AtlasContents::SetColors(std::vector<Color> colors) {
@@ -65,14 +67,17 @@ std::optional<Rect> AtlasContents::GetCoverage(const Entity& entity) const {
 }
 
 Rect AtlasContents::ComputeBoundingBox() const {
-  Rect bounding_box = {};
-  for (size_t i = 0; i < texture_coords_.size(); i++) {
-    auto matrix = transforms_[i];
-    auto sample_rect = texture_coords_[i];
-    auto bounds = Rect::MakeSize(sample_rect.size).TransformBounds(matrix);
-    bounding_box = bounds.Union(bounding_box);
+  if (!bounding_box_cache_.has_value()) {
+    Rect bounding_box = {};
+    for (size_t i = 0; i < texture_coords_.size(); i++) {
+      auto matrix = transforms_[i];
+      auto sample_rect = texture_coords_[i];
+      auto bounds = Rect::MakeSize(sample_rect.size).TransformBounds(matrix);
+      bounding_box = bounds.Union(bounding_box);
+    }
+    bounding_box_cache_ = bounding_box;
   }
-  return bounding_box;
+  return bounding_box_cache_.value();
 }
 
 void AtlasContents::SetSamplerDescriptor(SamplerDescriptor desc) {
@@ -164,7 +169,7 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   auto texture_coords = parent_.GetTextureCoordinates();
   auto transforms = parent_.GetTransforms();
 
-  const auto texture_size = texture->GetSize();
+  const Size texture_size(texture->GetSize());
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.Reserve(texture_coords.size() * 6);
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
