@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
@@ -59,17 +60,18 @@ void main() {
   late LoggingLogger logger;
 
   setUp(() {
-    fs = MemoryFileSystem.test();
-    fs.file('/package/pubspec.yaml').createSync(recursive: true);
-    fs.file('/package/pubspec.yaml').writeAsStringSync(_pubspecContents);
-    (fs.directory('/package/.dart_tool')
+    fs = MemoryFileSystem.test(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+    final Directory package = fs.directory('package');
+    package.childFile('pubspec.yaml').createSync(recursive: true);
+    package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
+    (package.childDirectory('.dart_tool')
         .childFile('package_config.json')
       ..createSync(recursive: true))
         .writeAsString(_packageConfigContents);
-    fs.directory('/package/test').childFile('some_test.dart').createSync(recursive: true);
-    fs.directory('/package/integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+    package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
+    package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
 
-    fs.currentDirectory = '/package';
+    fs.currentDirectory = package.path;
 
     logger = LoggingLogger();
   });
@@ -721,7 +723,7 @@ dev_dependencies:
       '--no-pub',
     ]);
 
-    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     expect(fileExists, true);
 
   }, overrides: <Type, Generator>{
@@ -742,7 +744,7 @@ dev_dependencies:
       '--no-test-assets',
     ]);
 
-    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     expect(fileExists, false);
 
   }, overrides: <Type, Generator>{
@@ -854,7 +856,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
+    List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
