@@ -703,7 +703,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 /// operation making it easier to avoid memory leaks.
 ///
 /// All methods in this class are appropriate to invoke from debugging tools
-/// using the VM service protocol to evaluate Dart expressions of the
+/// using the Observatory service protocol to evaluate Dart expressions of the
 /// form `WidgetInspectorService.instance.methodName(arg1, arg2, ...)`. If you
 /// make changes to any instance method of this class you need to verify that
 /// the [Flutter IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
@@ -712,7 +712,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 /// All methods returning String values return JSON.
 mixin WidgetInspectorService {
   /// Ring of cached JSON values to prevent JSON from being garbage
-  /// collected before it can be requested over the VM service protocol.
+  /// collected before it can be requested over the Observatory protocol.
   final List<String?> _serializeRing = List<String?>.filled(20, null);
   int _serializeRingIndex = 0;
 
@@ -739,7 +739,7 @@ mixin WidgetInspectorService {
   /// when the inspection target changes on device.
   InspectorSelectionChangedCallback? selectionChangedCallback;
 
-  /// The VM service protocol does not keep alive object references so this
+  /// The Observatory protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
   final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
@@ -932,7 +932,7 @@ mixin WidgetInspectorService {
         groupName: _consoleObjectGroup,
         subtreeDepth: 5,
         includeProperties: true,
-        maxDescendentsTruncatableNode: 5,
+        maxDescendantsTruncatableNode: 5,
         service: this,
       ),
     )!;
@@ -1690,7 +1690,7 @@ mixin WidgetInspectorService {
 
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
-  /// the value is returned over the VM service protocol and when the
+  /// the value is returned over the Observatory protocol and when the
   /// separate observatory protocol command has to be used to retrieve its full
   /// contents.
   //
@@ -3566,7 +3566,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   InspectorSerializationDelegate({
     this.groupName,
     this.summaryTree = false,
-    this.maxDescendentsTruncatableNode = -1,
+    this.maxDescendantsTruncatableNode = -1,
     this.expandPropertyValues = true,
     this.subtreeDepth = 1,
     this.includeProperties = false,
@@ -3587,8 +3587,8 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Whether the tree should only include nodes created by the local project.
   final bool summaryTree;
 
-  /// Maximum descendents of [DiagnosticsNode] before truncating.
-  final int maxDescendentsTruncatableNode;
+  /// Maximum descendants of [DiagnosticsNode] before truncating.
+  final int maxDescendantsTruncatableNode;
 
   @override
   final bool includeProperties;
@@ -3663,10 +3663,10 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
-    if (maxDescendentsTruncatableNode >= 0 &&
+    if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate == true &&
-        nodes.length > maxDescendentsTruncatableNode) {
-      nodes = service._truncateNodes(nodes, maxDescendentsTruncatableNode);
+        nodes.length > maxDescendantsTruncatableNode) {
+      nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }
     return nodes;
   }
@@ -3676,7 +3676,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     return InspectorSerializationDelegate(
       groupName: groupName,
       summaryTree: summaryTree,
-      maxDescendentsTruncatableNode: maxDescendentsTruncatableNode,
+      maxDescendantsTruncatableNode: maxDescendantsTruncatableNode,
       expandPropertyValues: expandPropertyValues ?? this.expandPropertyValues,
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
       includeProperties: includeProperties ?? this.includeProperties,
@@ -3711,8 +3711,8 @@ class _WidgetFactory {
 /// factory. The framework will then instrument that function in the same way
 /// as it does for [Widget] constructors.
 ///
-/// Note that the function **must not** have optional positional parameters for
-/// tracking to work correctly.
+/// Tracking will not work correctly if the function has optional positional
+/// parameters.
 ///
 /// Currently this annotation is only supported on extension methods.
 ///

@@ -802,8 +802,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.selected] state, i.e. if the [Tab] is selected or not,
   /// ignoring [unselectedLabelColor] even if it's non-null.
   ///
-  /// Note: [labelStyle]'s color and [TabBarTheme.labelStyle]'s color do not
-  /// affect the effective [labelColor].
+  /// The color specified in the [labelStyle] and the [TabBarTheme.labelStyle]
+  /// do not affect the effective [labelColor].
   ///
   /// See also:
   ///
@@ -822,9 +822,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// will be used, otherwise unselected tab labels are rendered with
   /// [labelColor] at 70% opacity.
   ///
-  /// Note: [unselectedLabelStyle]'s color and
-  /// [TabBarTheme.unselectedLabelStyle]'s color are ignored in
-  /// [unselectedLabelColor]'s precedence calculation.
+  /// The color specified in the [unselectedLabelStyle] and the
+  /// [TabBarTheme.unselectedLabelStyle] are ignored in [unselectedLabelColor]'s
+  /// precedence calculation.
   ///
   /// See also:
   ///
@@ -1122,7 +1122,7 @@ class _TabBarState extends State<TabBar> {
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
-      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? defaults.dividerColor : null,
+      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? defaults.dividerColor : null,
       labelPaddings: _labelPaddings,
     );
   }

@@ -275,13 +275,13 @@ abstract class FlutterTestDriver {
   ///
   /// Returns a future that completes when the [kind] event is received.
   ///
-  /// Note that this method should be called before the command that triggers
+  /// This method should be called before the command that triggers
   /// the event to subscribe to the event in time, for example:
   ///
-  /// ```
-  ///  var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
-  ///  ...                                             // Code that pauses the app.
-  ///  await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
+  /// ```dart
+  /// var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
+  /// ...                                             // Code that pauses the app.
+  /// await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
   /// ```
   Future<Event> subscribeToDebugEvent(String kind, String isolateId) {
     _debugPrint('Start listening for $kind events');
@@ -812,7 +812,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     if (withDebugger) {
       final Map<String, Object?> startedProcessParams =
           (await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout))['params']! as Map<String, Object?>;
-      final String vmServiceHttpString = startedProcessParams['vmServiceUri']! as String;
+      final String vmServiceHttpString = startedProcessParams['observatoryUri']! as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.

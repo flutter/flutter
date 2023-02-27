@@ -298,7 +298,7 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
-  testUsingContext('Pipes enable-vmService', () async {
+  testUsingContext('Pipes enable-observatory', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
@@ -313,7 +313,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       true,
     );
 
@@ -326,7 +326,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       true,
     );
 
@@ -337,7 +337,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableVmServiceValue,
+      testRunner.lastEnableObservatoryValue,
       false,
     );
   }, overrides: <Type, Generator>{
@@ -806,6 +806,41 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+
+  group('File Reporter', () {
+    testUsingContext('defaults to unset null value', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+      expect(testRunner.lastFileReporterValue, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when set --file-reporter value is passed on', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--file-reporter=json:out.jsonl'
+      ]);
+      expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -813,8 +848,9 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
   int exitCode;
   Duration? leastRunTime;
-  bool? lastEnableVmServiceValue;
+  bool? lastEnableObservatoryValue;
   late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastFileReporterValue;
   String? lastReporterOption;
 
   @override
@@ -826,7 +862,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableVmService = false,
+    bool enableObservatory = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -841,6 +877,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -849,8 +886,9 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
   }) async {
-    lastEnableVmServiceValue = enableVmService;
+    lastEnableObservatoryValue = enableObservatory;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
 
     if (leastRunTime != null) {

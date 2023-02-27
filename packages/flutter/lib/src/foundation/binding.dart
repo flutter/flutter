@@ -138,7 +138,7 @@ abstract class BindingBase {
   /// First calls [initInstances] to have bindings initialize their
   /// instance pointers and other state, then calls
   /// [initServiceExtensions] to have bindings initialize their
-  /// VM service extensions, if any.
+  /// observatory service extensions, if any.
   BindingBase() {
     developer.Timeline.startSync('Framework initialization');
     assert(() {
@@ -146,7 +146,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    assert(_debugInitializedType == null);
+    assert(_debugInitializedType == null, 'Binding is already initialized to $_debugInitializedType');
     initInstances();
     assert(_debugInitializedType != null);
 

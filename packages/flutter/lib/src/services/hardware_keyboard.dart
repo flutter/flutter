@@ -864,7 +864,7 @@ class KeyEventManager {
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
         // Having 0 as the physical and logical ID indicates an empty key data
-        // (the only occassion either field can be 0,) transmitted to ensure
+        // (the only occasion either field can be 0,) transmitted to ensure
         // that the transit mode is correctly inferred. These events should be
         // ignored.
         if (data.physical == 0 && data.logical == 0) {

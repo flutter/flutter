@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show WindowPadding, lerpDouble;
+import 'dart:ui' as ui show ViewPadding, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -215,8 +215,8 @@ abstract class EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsGeometry? lerp(EdgeInsetsGeometry? a, EdgeInsetsGeometry? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -397,17 +397,26 @@ class EdgeInsets extends EdgeInsetsGeometry {
        right = horizontal,
        bottom = vertical;
 
-  /// Creates insets that match the given window padding.
+  /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
   /// widget, consider using [MediaQuery.of] to obtain these values rather than
-  /// using the value from [dart:ui.window], so that you get notified of
+  /// using the value from a [FlutterView] directly, so that you get notified of
   /// changes.
-  EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
+  EdgeInsets.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio)
     : left = padding.left / devicePixelRatio,
       top = padding.top / devicePixelRatio,
       right = padding.right / devicePixelRatio,
       bottom = padding.bottom / devicePixelRatio;
+
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// Use [EdgeInsets.fromViewPadding] instead.
+  @Deprecated(
+    'Use EdgeInsets.fromViewPadding instead. '
+    'This feature was deprecated after v3.8.0-14.0.pre.',
+  )
+  factory EdgeInsets.fromWindowPadding(ui.ViewPadding padding, double devicePixelRatio) = EdgeInsets.fromViewPadding;
 
   /// An [EdgeInsets] with zero offsets in each direction.
   static const EdgeInsets zero = EdgeInsets.only();
@@ -602,8 +611,8 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsets? lerp(EdgeInsets? a, EdgeInsets? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -868,8 +877,8 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsDirectional? lerp(EdgeInsetsDirectional? a, EdgeInsetsDirectional? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;

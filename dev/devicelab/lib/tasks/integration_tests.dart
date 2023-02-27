@@ -8,9 +8,9 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
   ).call;
 }
 
