@@ -258,32 +258,8 @@ class AssembleCommand extends FlutterCommand {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
 
-    List<String> dartDefines = <String>[];
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
-    }
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPaths.isNotEmpty && configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
-        final Map<String, Object> defineConfigJsonMap = <String, Object>{};
-        for (final String path in configJsonPaths) {
-          final String configJsonRaw = globals.fs.file(path).readAsStringSync();
-          try {
-            (json.decode(configJsonRaw) as Map<String, dynamic>)
-                .forEach((String key, dynamic value) {
-              defineConfigJsonMap[key] = value as Object;
-            });
-          } on FormatException catch (err) {
-            throwToolExit('Json config define file "--${FlutterOptions
-                .kDartDefineFromFileOption}=$path" format err, '
-                'please fix first! format err:\n$err');
-          }
-        }
-        defineConfigJsonMap.forEach((String key, Object value) {
-          dartDefines.add('$key=$value');
-        });
-      }
-    }
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
     if(dartDefines.isNotEmpty){
       results[kDartDefines] = dartDefines.join(',');
     }

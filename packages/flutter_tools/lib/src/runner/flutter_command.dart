@@ -1166,9 +1166,8 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArgDeprecated(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-        ? stringsArg(FlutterOptions.kDartDefinesOption)
-        : <String>[];
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.autoDetect;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
@@ -1177,31 +1176,6 @@ abstract class FlutterCommand extends Command<void> {
         webRenderer = mappedMode;
       }
       dartDefines = updateDartDefines(dartDefines, webRenderer);
-    }
-
-    Map<String, Object>? defineConfigJsonMap;
-    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configJsonPaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPaths.isNotEmpty && configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
-        defineConfigJsonMap = <String, Object>{};
-        for (final String path in configJsonPaths) {
-          final String configJsonRaw = globals.fs.file(path).readAsStringSync();
-          try {
-            // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-            (json.decode(configJsonRaw) as Map<String, dynamic>)
-                .forEach((String key, dynamic value) {
-              defineConfigJsonMap?[key] = value as Object;
-            });
-          } on FormatException catch (err) {
-            throwToolExit('Json config define file "--${FlutterOptions
-                .kDartDefineFromFileOption}=$path" format err, '
-                'please fix first! format err:\n$err');
-          }
-        }
-        defineConfigJsonMap.forEach((String key, Object value) {
-          dartDefines.add('$key=$value');
-        });
-      }
     }
 
     return BuildInfo(buildMode,
@@ -1317,6 +1291,53 @@ abstract class FlutterCommand extends Command<void> {
     if (deprecated) {
       globals.printWarning(deprecationWarning);
     }
+  }
+
+  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+    final List<String> dartDefines = <String>[];
+
+    final ArgResults argumentResults = argResults!;
+    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
+      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+    }
+
+    if (defineConfigJsonMap != null && defineConfigJsonMap.isNotEmpty) {
+      defineConfigJsonMap.forEach((String key, Object value) {
+        dartDefines.add('$key=$value');
+      });
+    }
+
+    return dartDefines;
+  }
+
+  Map<String, Object>? extractDartDefineConfigJsonMap() {
+    Map<String, Object>? dartDefineConfigJsonMap;
+
+    final ArgResults argumentResults = argResults!;
+    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
+      final List<String> configJsonPaths = stringsArg(
+          FlutterOptions.kDartDefineFromFileOption,
+      );
+      if (configJsonPaths.isNotEmpty &&
+          configJsonPaths.every((String path) => globals.fs.isFileSync(path))) {
+        for (final String path in configJsonPaths) {
+          final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+          try {
+            // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+            (json.decode(configJsonRaw) as Map<String, dynamic>)
+                .forEach((String key, dynamic value) {
+              dartDefineConfigJsonMap?[key] = value as Object;
+            });
+          } on FormatException catch (err) {
+            throwToolExit('Json config define file "--${FlutterOptions
+                .kDartDefineFromFileOption}=$path" format err, '
+                'please fix first! format err:\n$err');
+          }
+        }
+      }
+    }
+
+    return dartDefineConfigJsonMap;
   }
 
   /// Updates dart-defines based on [webRenderer].
