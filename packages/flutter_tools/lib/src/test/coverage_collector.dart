@@ -100,18 +100,18 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
-    _logMessage('collecting coverage data from $vmServiceUri...');
+  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
+    _logMessage('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(
-        vmServiceUri, libraryNames, branchCoverage: branchCoverage);
+        observatoryUri, libraryNames, branchCoverage: branchCoverage);
 
-    _logMessage('($vmServiceUri): collected coverage data; merging...');
+    _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
       packagePath: packageDirectory,
       checkIgnoredLines: true,
     ));
-    _logMessage('($vmServiceUri): done merging coverage data into global coverage map.');
+    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -141,11 +141,11 @@ class CoverageCollector extends TestWatcher {
       }
     );
 
-    final Future<void> collectionComplete = testDevice.vmServiceUri
-      .then((Uri? vmServiceUri) {
-        _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
+    final Future<void> collectionComplete = testDevice.observatoryUri
+      .then((Uri? observatoryUri) {
+        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
         return collect(
-            vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
+            observatoryUri!, libraryNames, serviceOverride: serviceOverride,
             branchCoverage: branchCoverage)
           .then<void>((Map<String, dynamic> result) {
             _logMessage('Collected coverage data.');
