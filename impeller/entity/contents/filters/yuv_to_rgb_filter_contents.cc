@@ -87,10 +87,10 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.texture_sampler_y_coord_scale =
+        y_input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
-    frag_info.texture_sampler_y_coord_scale =
-        y_input_snapshot->texture->GetYCoordScale();
     frag_info.yuv_color_space = static_cast<Scalar>(yuv_color_space_);
     switch (yuv_color_space_) {
       case YUVColorSpace::kBT601LimitedRange:
