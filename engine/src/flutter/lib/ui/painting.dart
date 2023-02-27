@@ -4252,8 +4252,9 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   /// Creates a fragment program from the asset with key [assetKey].
   ///
   /// The asset must be a file produced as the output of the `impellerc`
-  /// compiler. The constructed object should then be reused via the [shader]
-  /// method to create [Shader] objects that can be used by [Shader.paint].
+  /// compiler. The constructed object should then be reused via the
+  /// [fragmentShader] method to create [Shader] objects that can be used by
+  /// [Paint.shader].
   static Future<FragmentProgram> fromAsset(String assetKey) {
     // The flutter tool converts all asset keys with spaces into URI
     // encoded paths (replacing ' ' with '%20', for example). We perform
