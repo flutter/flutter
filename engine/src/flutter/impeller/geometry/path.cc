@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "impeller/geometry/path_component.h"
+#include "path_component.h"
 
 namespace impeller {
 
@@ -221,8 +222,9 @@ bool Path::UpdateContourComponentAtIndex(size_t index,
   return true;
 }
 
-Path::Polyline Path::CreatePolyline(Scalar tolerance) const {
+Path::Polyline Path::CreatePolyline(Scalar scale) const {
   Polyline polyline;
+  auto tolerance = kDefaultCurveTolerance / scale;
 
   std::optional<Point> previous_contour_point;
   auto collect_points = [&polyline, &previous_contour_point](

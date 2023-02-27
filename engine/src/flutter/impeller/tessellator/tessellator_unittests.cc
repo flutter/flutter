@@ -14,7 +14,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Zero points.
   {
     Tessellator t;
-    auto polyline = PathBuilder{}.TakePath().CreatePolyline();
+    auto polyline = PathBuilder{}.TakePath().CreatePolyline(1.0f);
     Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
@@ -27,7 +27,8 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // One point.
   {
     Tessellator t;
-    auto polyline = PathBuilder{}.LineTo({0, 0}).TakePath().CreatePolyline();
+    auto polyline =
+        PathBuilder{}.LineTo({0, 0}).TakePath().CreatePolyline(1.0f);
     Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
@@ -40,7 +41,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   {
     Tessellator t;
     auto polyline =
-        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline();
+        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline(1.0f);
     Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
@@ -58,7 +59,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
       auto coord = i * 1.0f;
       builder.AddLine({coord, coord}, {coord + 1, coord + 1});
     }
-    auto polyline = builder.TakePath().CreatePolyline();
+    auto polyline = builder.TakePath().CreatePolyline(1.0f);
     Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,
@@ -72,7 +73,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   {
     Tessellator t;
     auto polyline =
-        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline();
+        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath().CreatePolyline(1.0f);
     Tessellator::Result result = t.Tessellate(
         FillType::kPositive, polyline,
         [](const float* vertices, size_t vertices_size, const uint16_t* indices,

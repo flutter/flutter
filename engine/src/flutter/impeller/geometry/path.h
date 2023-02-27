@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
+#include "path_component.h"
 
 namespace impeller {
 
@@ -122,7 +123,12 @@ class Path {
   bool UpdateContourComponentAtIndex(size_t index,
                                      const ContourComponent& contour);
 
-  Polyline CreatePolyline(Scalar tolerance = kDefaultCurveTolerance) const;
+  /// Callers must provide the scale factor for how this path will be
+  /// transformed.
+  ///
+  /// It is suitable to use the max basis length of the matrix used to transform
+  /// the path. If the provided scale is 0, curves will revert to lines.
+  Polyline CreatePolyline(Scalar scale) const;
 
   std::optional<Rect> GetBoundingBox() const;
 
