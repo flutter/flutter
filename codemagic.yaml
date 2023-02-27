@@ -1,0 +1,6 @@
+workflows:
+    sample-workflow:
+        name: RJ Mobile Flutter
+        max_build_duration: 120
+        instance_type: mac_mini_m1
+        
