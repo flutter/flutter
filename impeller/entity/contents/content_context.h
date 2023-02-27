@@ -54,7 +54,6 @@
 
 #include "impeller/entity/position.vert.h"
 #include "impeller/entity/position_color.vert.h"
-#include "impeller/entity/position_uv.vert.h"
 
 #include "impeller/scene/scene_context.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -123,6 +122,8 @@ using RRectBlurPipeline =
 using BlendPipeline = RenderPipelineT<BlendVertexShader, BlendFragmentShader>;
 using TexturePipeline =
     RenderPipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
+using PositionUVPipeline =
+    RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
 using TiledTexturePipeline = RenderPipelineT<TiledTextureFillVertexShader,
                                              TiledTextureFillFragmentShader>;
 using GaussianBlurPipeline =
@@ -360,6 +361,11 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTexturePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(texture_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPositionUVPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(position_uv_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTiledTexturePipeline(
@@ -626,6 +632,7 @@ class ContentContext {
   mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
   mutable Variants<BlendPipeline> texture_blend_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
+  mutable Variants<PositionUVPipeline> position_uv_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<GaussianBlurDecalPipeline> gaussian_blur_decal_pipelines_;

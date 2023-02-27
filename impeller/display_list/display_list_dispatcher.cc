@@ -396,6 +396,13 @@ void DisplayListDispatcher::setColorSource(
         contents->SetEndPoints(start_point, end_point);
         contents->SetTileMode(tile_mode);
         contents->SetEffectTransform(matrix);
+
+        std::vector<Point> bounds{start_point, end_point};
+        auto intrinsic_size =
+            Rect::MakePointBounds(bounds.begin(), bounds.end());
+        if (intrinsic_size.has_value()) {
+          contents->SetColorSourceSize(intrinsic_size->size);
+        }
         return contents;
       };
       return;
@@ -420,6 +427,14 @@ void DisplayListDispatcher::setColorSource(
         contents->SetCenterAndRadius(center, radius);
         contents->SetTileMode(tile_mode);
         contents->SetEffectTransform(matrix);
+
+        auto radius_pt = Point(radius, radius);
+        std::vector<Point> bounds{center + radius_pt, center - radius_pt};
+        auto intrinsic_size =
+            Rect::MakePointBounds(bounds.begin(), bounds.end());
+        if (intrinsic_size.has_value()) {
+          contents->SetColorSourceSize(intrinsic_size->size);
+        }
         return contents;
       };
       return;
@@ -447,6 +462,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetStops(stops);
         contents->SetTileMode(tile_mode);
         contents->SetEffectTransform(matrix);
+
         return contents;
       };
       return;
@@ -468,6 +484,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetSamplerDescriptor(desc);
         contents->SetEffectTransform(matrix);
         contents->SetColorFilter(paint.color_filter);
+        contents->SetColorSourceSize(Size::Ceil(texture->GetSize()));
         return contents;
       };
       return;

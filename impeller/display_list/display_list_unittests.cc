@@ -1151,6 +1151,60 @@ TEST_P(DisplayListTest, DrawVerticesLinearGradientWithoutIndices) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, DrawVerticesLinearGradientWithTextureCoordinates) {
+  std::vector<SkPoint> positions = {SkPoint::Make(100, 300),
+                                    SkPoint::Make(200, 100),
+                                    SkPoint::Make(300, 300)};
+  std::vector<SkPoint> texture_coordinates = {SkPoint::Make(300, 100),
+                                              SkPoint::Make(100, 200),
+                                              SkPoint::Make(300, 300)};
+
+  auto vertices = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangles, 3, positions.data(),
+      texture_coordinates.data(), /*colors=*/nullptr);
+
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
+                                          flutter::DlColor::kRed()};
+  const float stops[2] = {0.0, 1.0};
+
+  auto linear = flutter::DlColorSource::MakeLinear(
+      {100.0, 100.0}, {300.0, 300.0}, 2, colors.data(), stops,
+      flutter::DlTileMode::kRepeat);
+
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+
+  paint.setColorSource(linear);
+  builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, DrawVerticesImageSourceWithTextureCoordinates) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+  auto dl_image = DlImageImpeller::Make(texture);
+  std::vector<SkPoint> positions = {SkPoint::Make(100, 300),
+                                    SkPoint::Make(200, 100),
+                                    SkPoint::Make(300, 300)};
+  std::vector<SkPoint> texture_coordinates = {
+      SkPoint::Make(0, 0), SkPoint::Make(100, 200), SkPoint::Make(200, 100)};
+
+  auto vertices = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangles, 3, positions.data(),
+      texture_coordinates.data(), /*colors=*/nullptr);
+
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+
+  auto image_source = flutter::DlImageColorSource(
+      dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
+
+  paint.setColorSource(&image_source);
+  builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, DrawVerticesSolidColorTrianglesWithIndices) {
   std::vector<SkPoint> positions = {
       SkPoint::Make(100, 300), SkPoint::Make(200, 100), SkPoint::Make(300, 300),

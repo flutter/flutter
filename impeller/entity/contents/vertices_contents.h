@@ -35,6 +35,8 @@ class VerticesContents final : public Contents {
 
   std::shared_ptr<VerticesGeometry> GetGeometry() const;
 
+  const std::shared_ptr<Contents>& GetSourceContents() const;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
@@ -73,6 +75,29 @@ class VerticesColorContents final : public Contents {
   Scalar alpha_ = 1.0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VerticesColorContents);
+};
+
+class VerticesUVContents final : public Contents {
+ public:
+  explicit VerticesUVContents(const VerticesContents& parent);
+
+  ~VerticesUVContents() override;
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+  void SetAlpha(Scalar alpha);
+
+ private:
+  const VerticesContents& parent_;
+  Scalar alpha_ = 1.0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(VerticesUVContents);
 };
 
 }  // namespace impeller
