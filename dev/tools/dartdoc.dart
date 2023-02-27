@@ -437,7 +437,7 @@ void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
 
   // Check a "dartpad" example, any one will do, and check for the correct URL
   // arguments.
-  // Just use "master" for any branch other than the LUCH_BRANCH.
+  // Just use "master" for any branch other than the LUCI_BRANCH.
   final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
   final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
   final List<String> argumentRegExps = <String>[
@@ -581,8 +581,6 @@ Iterable<String> libraryRefs() sync* {
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
-  assert(prefix != null);
-  assert(filter != null);
   stream
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

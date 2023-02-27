@@ -129,9 +129,8 @@ abstract class BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     a ??= BorderRadius.zero;
     b ??= BorderRadius.zero;
@@ -507,9 +506,8 @@ class BorderRadius extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -590,7 +588,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   /// A border radius with all zero radii.
   ///
-  /// Consider using [EdgeInsets.zero] instead, since that object has the same
+  /// Consider using [BorderRadius.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
   static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(Radius.zero);
 
@@ -729,9 +727,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;

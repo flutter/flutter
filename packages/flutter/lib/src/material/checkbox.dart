@@ -34,7 +34,7 @@ import 'toggleable.dart';
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default theme of
-/// of a [Checkbox] with a [MaterialStateProperty].
+/// a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
@@ -88,9 +88,7 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(autofocus != null);
+  }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -256,10 +254,12 @@ class Checkbox extends StatefulWidget {
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
+  /// {@endtemplate}
   ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
@@ -305,7 +305,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 1.0.
+  /// with a circular corner radius of 1.0 in Material 2, and 2.0 in Material 3.
   final OutlinedBorder? shape;
 
   /// {@template flutter.material.checkbox.side}
@@ -321,6 +321,7 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///  * [MaterialState.error].
   ///
   /// If this property is not a [MaterialStateBorderSide] and it is
   /// non-null, then it is only rendered when the checkbox's value is
@@ -333,10 +334,12 @@ class Checkbox extends StatefulWidget {
   /// will be width 2.
   final BorderSide? side;
 
+  /// {@template flutter.material.checkbox.isError}
   /// True if this checkbox wants to show an error state.
   ///
   /// The checkbox will have different default container color and check color when
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
+  /// {@endtemplate}
   ///
   /// Must not be null. Defaults to false.
   final bool isError;
@@ -396,7 +399,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
-      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
+      final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
+      return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
     }
     if (!states.contains(MaterialState.selected)) {
       return side;
@@ -518,9 +522,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..checkColor = effectiveCheckColor
           ..value = value
           ..previousValue = _previousValue
-          ..shape = widget.shape ?? checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0)),
-          )
+          ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..side = _resolveSide(widget.side) ?? _resolveSide(checkboxTheme.side),
       ),
     );
@@ -755,6 +757,11 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+  );
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Checkbox
@@ -764,7 +771,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_158
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
@@ -865,6 +872,11 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(2.0)),
+  );
 }
 
 // END GENERATED TOKEN PROPERTIES - Checkbox

@@ -82,7 +82,7 @@ class CustomMagnifier extends StatelessWidget {
             ),
           );
 
-          // Finally, align the magnifier to the bottom center. The inital anchor is
+          // Finally, align the magnifier to the bottom center. The initial anchor is
           // the top left, so subtract bottom center alignment.
           magnifierPosition -= Alignment.bottomCenter.alongSize(magnifierSize);
 

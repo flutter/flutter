@@ -25,16 +25,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void handleTapDown(TapDownDetails details) { tapCount++; }
-  void handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void handleTapDown(TapDragDownDetails details) { tapCount++; }
+  void handleSingleTapUp(TapDragUpDetails details) { singleTapUpCount++; }
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void handleDoubleTapDown(TapDragDownDetails details) { doubleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
-  void handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
-  void handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void handleDragSelectionStart(TapDragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionUpdate(TapDragUpdateDetails details) { dragUpdateCount++; }
+  void handleDragSelectionEnd(TapDragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -173,7 +173,12 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
+    // Before the move to TapAndDragGestureRecognizer the tapCount was 0 because the
+    // TapGestureRecognizer rejected itself when the initial pointer moved past a certain
+    // threshold. With TapAndDragGestureRecognizer, we have two thresholds, a normal tap
+    // threshold, and a drag threshold, so it is possible for the tap count to increase
+    // even though the original pointer has moved beyond the tap threshold.
+    expect(tapCount, 1);
     expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
@@ -181,7 +186,7 @@ void main() {
     await gesture.up();
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
-    expect(tapCount, 0);
+    expect(tapCount, 1);
     expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
@@ -195,7 +200,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -370,7 +375,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a touch drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -384,11 +389,12 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(tapCount, 0);
+    expect(tapCount, 1);
     expect(singleTapUpCount, 0);
-    expect(dragStartCount, 0);
-    expect(dragUpdateCount, 0);
-    expect(dragEndCount, 0);
+    expect(singleTapCancelCount, 0);
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
@@ -406,8 +412,11 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(tapCount, 0);
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(singleTapUpCount, 0);
+
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
@@ -428,6 +437,11 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
+    expect(tapCount, 1);
+    expect(singleTapCancelCount, 0);
+    expect(singleTapUpCount, 0);
+
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
@@ -447,6 +461,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
@@ -463,6 +478,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
@@ -489,6 +505,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.tap);
 
     // Right clicking on a word within a selection shouldn't change the selection
     renderEditable.selectWordCalled = false;
@@ -575,6 +592,7 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
@@ -582,6 +600,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
     }
   }, variant: TargetPlatformVariant.all());
@@ -614,6 +633,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
     }
   }, variant: TargetPlatformVariant.all());
@@ -656,6 +676,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.doubleTap);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
@@ -746,12 +767,18 @@ void main() {
     final Offset position = textOffsetToPosition(tester, 4);
 
     await tester.tapAt(position);
-    await tester.pump();
+    // Don't do a double tap drag.
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
 
     final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.mouse);
+
+    // Checking that double-tap was not registered.
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+
     addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(textOffsetToPosition(tester, 7));
@@ -1354,11 +1381,11 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(hasStringsThrows: true);
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
@@ -1374,11 +1401,11 @@ void main() {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('update sets value based on clipboard contents', () async {
@@ -1651,11 +1678,14 @@ class FakeRenderEditable extends RenderEditable {
     ),
   );
 
+  SelectionChangedCause? lastCause;
+
   bool selectWordsInRangeCalled = false;
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectWordEdgeCalled = false;
@@ -1663,6 +1693,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionAtCalled = false;
@@ -1674,12 +1705,14 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionCalled = false;
   @override
   void selectPosition({ required SelectionChangedCause cause }) {
     selectPositionCalled = true;
+    lastCause = cause;
     return super.selectPosition(cause: cause);
   }
 
@@ -1688,6 +1721,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   @override

@@ -137,11 +137,11 @@ void main() {
       '     _FadeUpwardsPageTransition\n'
       '     AnimatedBuilder\n'
       '     RepaintBoundary\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Semantics\n'
       '     FocusScope\n'
       '     PrimaryScrollController\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     Builder\n'
       '     PageStorage\n'
@@ -158,17 +158,16 @@ void main() {
       '     _Theatre\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
       '     UnmanagedRestorationScope\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
       '     AbsorbPointer\n'
       '     Listener\n'
       '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Semantics\n'
       '     FocusScope\n'
       '     DefaultSelectionStyle\n'
@@ -192,34 +191,31 @@ void main() {
       '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromWindow\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
-      '     _ShortcutRegistrarMarker\n'
+      '     _ShortcutRegistrarScope\n'
       '     ShortcutRegistrar\n'
       '     TapRegionSurface\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '${kIsWeb
           ? '     Semantics\n'
-            '     _FocusMarker\n'
+            '     _FocusInheritedScope\n'
             '     Focus\n'
             '     Shortcuts\n'
            : ''}'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
       '     DefaultTextEditingShortcuts\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
       '     _SharedAppModel\n'
@@ -230,11 +226,14 @@ void main() {
       '     RootRestorationScope\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
       '     View-[GlobalObjectKey TestWindow#00000]\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
@@ -251,18 +250,15 @@ void main() {
     );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Builder(
-            builder: (BuildContext context) {
-              return Scaffold(
-                key: scaffoldKey,
-                body: Container(),
-              );
-            },
-          ),
+      child: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              key: scaffoldKey,
+              body: Container(),
+            );
+          },
         ),
       ),
     ));
@@ -278,12 +274,9 @@ void main() {
     // Pump widget to rebuild without ScaffoldMessenger
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          key: scaffoldKey,
-          body: Container(),
-        ),
+      child: Scaffold(
+        key: scaffoldKey,
+        body: Container(),
       ),
     ));
     // Tap SnackBarAction to dismiss.
@@ -362,7 +355,7 @@ void main() {
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.snackBar>]\n'
       '     CustomMultiChildLayout\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
@@ -378,8 +371,10 @@ void main() {
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
-      '     MediaQuery\n'
       '     Directionality\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
       '     View-[GlobalObjectKey TestWindow#00000]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'

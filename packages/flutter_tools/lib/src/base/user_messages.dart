@@ -176,10 +176,10 @@ class UserMessages {
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
-      'Xcode not installed; this is necessary for iOS development.\n'
+      'Xcode not installed; this is necessary for iOS and macOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
   String get xcodeIncomplete =>
-      'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
+      'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
@@ -274,7 +274,7 @@ class UserMessages {
       'Found $count devices with name or id matching $deviceId:';
   String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
+  String get flutterChooseOne => 'Please choose one (or "q" to quit)';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";

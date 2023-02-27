@@ -73,6 +73,7 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
 
   // A static `RestorableRouteBuilder` that can re-create the route during
   // state restoration.
+  @pragma('vm:entry-point')
   static Route<int> _counterRouteBuilder(
       BuildContext context, Object? arguments) {
     return MaterialPageRoute<int>(

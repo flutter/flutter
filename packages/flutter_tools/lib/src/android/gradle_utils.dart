@@ -151,8 +151,6 @@ bool _isWithinVersionRange(
   required String min,
   required String max,
 }) {
-  assert(min != null);
-  assert(max != null);
   final Version? parsedTargetVersion = Version.parse(targetVersion);
   final Version? minVersion = Version.parse(min);
   final Version? maxVersion = Version.parse(max);

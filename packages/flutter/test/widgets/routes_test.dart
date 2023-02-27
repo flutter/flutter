@@ -2153,6 +2153,7 @@ class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (

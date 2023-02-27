@@ -88,15 +88,8 @@ class RenderParagraph extends RenderBox
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
-  }) : assert(text != null),
-       assert(text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textDirection != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(textScaleFactor != null),
+  }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
@@ -126,13 +119,14 @@ class RenderParagraph extends RenderBox
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
-  AttributedString? _cachedAttributedLabel;
+
+  List<AttributedString>? _cachedAttributedLabels;
+
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
   set text(InlineSpan value) {
-    assert(value != null);
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
         return;
@@ -143,7 +137,7 @@ class RenderParagraph extends RenderBox
         break;
       case RenderComparison.paint:
         _textPainter.text = value;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
@@ -152,7 +146,7 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
@@ -279,7 +273,6 @@ class RenderParagraph extends RenderBox
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textPainter.textAlign == value) {
       return;
     }
@@ -302,7 +295,6 @@ class RenderParagraph extends RenderBox
   /// This must not be null.
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textPainter.textDirection == value) {
       return;
     }
@@ -320,7 +312,6 @@ class RenderParagraph extends RenderBox
   bool get softWrap => _softWrap;
   bool _softWrap;
   set softWrap(bool value) {
-    assert(value != null);
     if (_softWrap == value) {
       return;
     }
@@ -332,7 +323,6 @@ class RenderParagraph extends RenderBox
   TextOverflow get overflow => _overflow;
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
-    assert(value != null);
     if (_overflow == value) {
       return;
     }
@@ -347,7 +337,6 @@ class RenderParagraph extends RenderBox
   /// the specified font size.
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textPainter.textScaleFactor == value) {
       return;
     }
@@ -405,7 +394,6 @@ class RenderParagraph extends RenderBox
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textPainter.textWidthBasis == value) {
       return;
     }
@@ -490,7 +478,6 @@ class RenderParagraph extends RenderBox
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
-    assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
     // TODO(garyq): Since our metric for ideographic baseline is currently
@@ -813,7 +800,6 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          assert(textDirection != null);
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
@@ -975,8 +961,6 @@ class RenderParagraph extends RenderBox
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(!debugNeedsLayout);
-    assert(boxHeightStyle != null);
-    assert(boxWidthStyle != null);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(
       selection,
@@ -1053,12 +1037,23 @@ class RenderParagraph extends RenderBox
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
+    bool needsAssembleSemanticsNode = false;
+    bool needsChildConfigrationsDelegate = false;
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+      if (info.recognizer != null) {
+        needsAssembleSemanticsNode = true;
+        break;
+      }
+      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
+    }
 
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
+    } else if (needsChildConfigrationsDelegate) {
+      config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
-      if (_cachedAttributedLabel == null) {
+      if (_cachedAttributedLabels == null) {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
         final List<StringAttribute> attributes = <StringAttribute>[];
@@ -1068,19 +1063,75 @@ class RenderParagraph extends RenderBox
             final TextRange originalRange = infoAttribute.range;
             attributes.add(
               infoAttribute.copy(
-                  range: TextRange(start: offset + originalRange.start,
-                      end: offset + originalRange.end)
+                range: TextRange(
+                  start: offset + originalRange.start,
+                  end: offset + originalRange.end,
+                ),
               ),
             );
           }
           buffer.write(label);
           offset += label.length;
         }
-        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
+        _cachedAttributedLabels = <AttributedString>[AttributedString(buffer.toString(), attributes: attributes)];
       }
-      config.attributedLabel = _cachedAttributedLabel!;
+      config.attributedLabel = _cachedAttributedLabels![0];
       config.textDirection = textDirection;
     }
+  }
+
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+    int placeholderIndex = 0;
+    int childConfigsIndex = 0;
+    int attributedLabelCacheIndex = 0;
+    InlineSpanSemanticsInformation? seenTextInfo;
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
+      if (info.isPlaceholder) {
+        if (seenTextInfo != null) {
+          builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
+          attributedLabelCacheIndex += 1;
+        }
+        // Mark every childConfig belongs to this placeholder to merge up group.
+        while (childConfigsIndex < childConfigs.length &&
+            childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          builder.markAsMergeUp(childConfigs[childConfigsIndex]);
+          childConfigsIndex += 1;
+        }
+        placeholderIndex += 1;
+      } else {
+        seenTextInfo = info;
+      }
+    }
+
+    // Handle plain text info at the end.
+    if (seenTextInfo != null) {
+      builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
+    }
+    return builder.build();
+  }
+
+  SemanticsConfiguration _createSemanticsConfigForTextInfo(InlineSpanSemanticsInformation textInfo, int cacheIndex) {
+    assert(!textInfo.requiresOwnNode);
+    final List<AttributedString> cachedStrings = _cachedAttributedLabels ??= <AttributedString>[];
+    assert(cacheIndex <= cachedStrings.length);
+    final bool hasCache = cacheIndex < cachedStrings.length;
+
+    late AttributedString attributedLabel;
+    if (hasCache) {
+      attributedLabel = cachedStrings[cacheIndex];
+    } else {
+      assert(cachedStrings.length == cacheIndex);
+      attributedLabel = AttributedString(
+        textInfo.semanticsLabel ?? textInfo.text,
+        attributes: textInfo.stringAttributes,
+      );
+      cachedStrings.add(attributedLabel);
+    }
+    return SemanticsConfiguration()
+      ..textDirection = textDirection
+      ..attributedLabel = attributedLabel;
   }
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
@@ -1559,21 +1610,21 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     switch (granularity) {
       case TextGranularity.character:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(CharacterBoundary(text), targetedEdge, forward);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, CharacterBoundary(text));
         result = SelectionResult.end;
         break;
       case TextGranularity.word:
-        final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(WhitespaceBoundary(text) + WordBoundary(this), targetedEdge, forward);
+        final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _getNextPosition(LineBreak(this), targetedEdge, forward);
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
         break;
       case TextGranularity.document:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(DocumentBoundary(text), targetedEdge, forward);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, DocumentBoundary(text));
         if (forward && newPosition.offset == range.end) {
           result = SelectionResult.next;
         } else if (!forward && newPosition.offset == range.start) {
@@ -1592,15 +1643,43 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return result;
   }
 
-  TextPosition _getNextPosition(TextBoundary boundary, TextPosition position, bool forward) {
-    if (forward) {
-      return _clampTextPosition(
-        (PushTextPosition.forward + boundary).getTrailingTextBoundaryAt(position)
-      );
+  // Move **beyond** the local boundary of the given type (unless range.start or
+  // range.end is reached). Used for most TextGranularity types except for
+  // TextGranularity.line, to ensure the selection movement doesn't get stuck at
+  // a local fixed point.
+  TextPosition _moveBeyondTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    final int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
+    return TextPosition(offset: newOffset);
+  }
+
+  // Move **to** the local boundary of the given type. Typically used for line
+  // boundaries, such that performing "move to line start" more than once never
+  // moves the selection to the previous line.
+  TextPosition _moveToTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    assert(end.offset >= 0);
+    final int caretOffset;
+    switch (end.affinity) {
+      case TextAffinity.upstream:
+        if (end.offset < 1 && !forward) {
+          assert (end.offset == 0);
+          return const TextPosition(offset: 0);
+        }
+        final CharacterBoundary characterBoundary = CharacterBoundary(fullText);
+        caretOffset = math.max(
+          0,
+          characterBoundary.getLeadingTextBoundaryAt(range.start + end.offset) ?? range.start,
+        ) - 1;
+        break;
+      case TextAffinity.downstream:
+        caretOffset = end.offset;
+        break;
     }
-    return _clampTextPosition(
-      (PushTextPosition.backward + boundary).getLeadingTextBoundaryAt(position),
-    );
+    final int offset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+    return TextPosition(offset: offset);
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {

@@ -18,8 +18,7 @@ abstract class ApplicationPackageFactory {
 }
 
 abstract class ApplicationPackage {
-  ApplicationPackage({ required this.id })
-    : assert(id != null);
+  ApplicationPackage({ required this.id });
 
   /// Package ID from the Android Manifest or equivalent.
   final String id;

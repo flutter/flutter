@@ -72,6 +72,7 @@ void main() {
         'packages',
         verb,
         ...?args,
+        '--directory',
         projectPath,
       ]);
       return command;

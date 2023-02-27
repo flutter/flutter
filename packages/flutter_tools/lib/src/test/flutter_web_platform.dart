@@ -188,13 +188,12 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-    'lib',
-    'dev_compiler',
-    'kernel',
-    'amd',
-    'require.js',
-  ));
+        _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+        'lib',
+        'dev_compiler',
+        'amd',
+        'require.js',
+      ));
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
@@ -377,10 +376,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       } on FormatException catch (ex) {
         _logger.printError('Caught FormatException: $ex');
         return shelf.Response.ok('Caught exception: $ex');
-      }
-
-      if (bytes == null) {
-        return shelf.Response.ok('Unknown error, bytes is null');
       }
 
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
@@ -685,25 +680,33 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then<Object?>((int? browserExitCode) {
-      throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    }).catchError((Object error, StackTrace stackTrace) {
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-      return null;
-    }));
-    unawaited(future.then((WebSocketChannel webSocket) {
-      if (completer.isCompleted) {
-        return;
-      }
-      completer.complete(BrowserManager._(chrome, runtime, webSocket));
-    }).catchError((Object error, StackTrace stackTrace) {
-      chrome.close();
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }));
+    unawaited(chrome.onExit.then<Object?>(
+      (int? browserExitCode) {
+        throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
+      },
+    ).then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+        return null;
+      },
+    ));
+    unawaited(future.then(
+      (WebSocketChannel webSocket) {
+        if (completer.isCompleted) {
+          return;
+        }
+        completer.complete(BrowserManager._(chrome, runtime, webSocket));
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        chrome.close();
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    ));
 
     return completer.future;
   }

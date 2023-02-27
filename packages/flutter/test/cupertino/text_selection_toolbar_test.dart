@@ -60,6 +60,11 @@ class TestBox extends SizedBox {
   static const double itemWidth = 100.0;
 }
 
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
+);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -213,6 +218,7 @@ void main() {
     const double height = _kToolbarHeight;
     const double anchorBelowY = 500.0;
     double anchorAboveY = 0.0;
+    const double paddingAbove = 12.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -220,14 +226,26 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
-              return CupertinoTextSelectionToolbar(
-                anchorAbove: Offset(50.0, anchorAboveY),
-                anchorBelow: const Offset(50.0, anchorBelowY),
-                children: <Widget>[
-                  Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                  Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                  Container(color: const Color(0xff0000ff), width: 50.0, height: height),
-                ],
+              final MediaQueryData data = MediaQuery.of(context);
+              // Add some custom vertical padding to make this test more strict.
+              // By default in the testing environment, _kToolbarContentDistance
+              // and the built-in padding from CupertinoApp can end up canceling
+              // each other out.
+              return MediaQuery(
+                data: data.copyWith(
+                  padding: data.viewPadding.copyWith(
+                    top: paddingAbove,
+                  ),
+                ),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: Offset(50.0, anchorAboveY),
+                  anchorBelow: const Offset(50.0, anchorBelowY),
+                  children: <Widget>[
+                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  ],
+                ),
               );
             },
           ),
@@ -239,10 +257,14 @@ void main() {
     // belowAnchor.
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
+    expect(find.byType(CustomSingleChildLayout), findsOneWidget);
+    final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
+    final TextSelectionToolbarLayoutDelegate delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
+    expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.
     setState(() {
-      anchorAboveY = 50.0;
+      anchorAboveY = 70.0;
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
@@ -250,7 +272,7 @@ void main() {
 
     // When it does fit above aboveAnchor, it positions itself there.
     setState(() {
-      anchorAboveY = 60.0;
+      anchorAboveY = 80.0;
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
@@ -289,4 +311,64 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
+    for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
+      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            theme: CupertinoThemeData(
+              brightness: themeBrightness,
+            ),
+            home: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
+                    child: CupertinoTextSelectionToolbar(
+                      anchorAbove: const Offset(100.0, 0.0),
+                      anchorBelow: const Offset(100.0, 0.0),
+                      children: <Widget>[
+                        CupertinoTextSelectionToolbarButton.text(
+                          onPressed: () {},
+                          text: 'Button',
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        final Finder buttonFinder = find.byType(CupertinoButton);
+        expect(buttonFinder, findsOneWidget);
+
+        final Finder decorationFinder = find.descendant(
+          of: find.byType(CupertinoButton),
+          matching: find.byType(DecoratedBox)
+        );
+        expect(decorationFinder, findsOneWidget);
+        final DecoratedBox decoratedBox = tester.widget(decorationFinder);
+        final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+
+        // Theme brightness is preferred, otherwise MediaQuery brightness is
+        // used. If both are null, defaults to light.
+        late final Brightness effectiveBrightness;
+        if (themeBrightness != null) {
+          effectiveBrightness = themeBrightness;
+        } else {
+          effectiveBrightness = mediaBrightness ?? Brightness.light;
+        }
+
+        expect(
+          boxDecoration.color!.value,
+          effectiveBrightness == Brightness.dark
+              ? _kToolbarBackgroundColor.darkColor.value
+              : _kToolbarBackgroundColor.color.value,
+        );
+      }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    }
+  }
 }

@@ -135,7 +135,7 @@ abstract class ChromiumDevice extends Device {
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
@@ -153,7 +153,7 @@ abstract class ChromiumDevice extends Device {
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(observatoryUri: Uri.parse(url));
   }
 
   @override

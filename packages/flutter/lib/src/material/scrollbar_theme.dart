@@ -204,7 +204,9 @@ class ScrollbarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return ScrollbarThemeData(
       thumbVisibility: MaterialStateProperty.lerp<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
       thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
@@ -297,7 +299,7 @@ bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 ///
 ///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
-class ScrollbarTheme extends InheritedWidget {
+class ScrollbarTheme extends InheritedTheme {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({
@@ -320,6 +322,11 @@ class ScrollbarTheme extends InheritedWidget {
   static ScrollbarThemeData of(BuildContext context) {
     final ScrollbarTheme? scrollbarTheme = context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
     return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return ScrollbarTheme(data: data, child: child);
   }
 
   @override

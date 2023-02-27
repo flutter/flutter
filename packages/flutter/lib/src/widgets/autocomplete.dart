@@ -134,14 +134,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(
+  }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
-       assert(optionsBuilder != null),
-       assert(optionsViewBuilder != null),
        assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),

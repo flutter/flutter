@@ -88,16 +88,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required Logger logger,
     required FeatureFlags featureFlags,
     PrintFn usagePrintFn = print,
-  }) : assert(customDevicesConfig != null),
-       assert(operatingSystemUtils != null),
-       assert(terminal != null),
-       assert(platform != null),
-       assert(processManager != null),
-       assert(fileSystem != null),
-       assert(logger != null),
-       assert(featureFlags != null),
-       assert(usagePrintFn != null),
-       _customDevicesConfig = customDevicesConfig,
+  }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags,
        _usagePrintFn = usagePrintFn
   {
@@ -290,9 +281,9 @@ If a file already exists at the backup location, it will be overwritten.
 
     logger.printStatus(
         wasBackedUp
-        ? 'Successfully resetted the custom devices config file and created a '
+        ? 'Successfully reset the custom devices config file and created a '
           'backup at "$configBackupPath".'
-        : 'Successfully resetted the custom devices config file.'
+        : 'Successfully reset the custom devices config file.'
     );
     return FlutterCommandResult.success();
   }
@@ -443,13 +434,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         // find a random port we can forward
         final int port = await _operatingSystemUtils.findFreePort();
 
-        final ForwardedPort forwardedPort = await (portForwarder.tryForward(port, port) as FutureOr<ForwardedPort>);
+        final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
           _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
+        } else {
+          await portForwarder.unforward(forwardedPort);
         }
-
-        await portForwarder.unforward(forwardedPort);
       } on Exception catch (e) {
         _printConfigCheckingError(
           'While forwarding/unforwarding device port: $e',

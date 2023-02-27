@@ -144,7 +144,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       // Let subsequent isolates start automatically.
       try {
         final vms.Response result = await client.setFlag('pause_isolates_on_start', 'false');
-        if (result == null || result.type != 'Success') {
+        if (result.type != 'Success') {
           _log('setFlag failure: $result');
         }
       } catch (e) {
@@ -348,7 +348,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
       _log(message);
     }
     if (_logCommunicationToFile) {
-      assert(_logFilePathName != null);
       final f.File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
@@ -380,8 +379,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
   }) async {
-    assert(streams != null && streams.isNotEmpty);
-    assert(timeout != null);
+    assert(streams.isNotEmpty);
     try {
       await _warnIfSlow<vms.Success>(
         future: _serviceClient.setVMTimelineFlags(
@@ -405,7 +403,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
     int? startTime,
     int? endTime,
   }) async {
-    assert(timeout != null);
     assert((startTime == null && endTime == null) ||
            (startTime != null && endTime != null));
 
@@ -497,7 +494,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
   }) async {
-    assert(timeout != null);
     try {
       await _warnIfSlow<vms.Success>(
         future: _serviceClient.clearVMTimeline(),
@@ -630,9 +626,6 @@ Future<T> _warnIfSlow<T>({
   required Duration timeout,
   required String message,
 }) async {
-  assert(future != null);
-  assert(timeout != null);
-  assert(message != null);
   final Completer<void> completer = Completer<void>();
   completer.future.timeout(timeout, onTimeout: () {
     _log(message);

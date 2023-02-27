@@ -68,7 +68,6 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
 }) {
-  assert(testWrapper != null);
   assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
@@ -122,7 +121,7 @@ FlutterPlatform installHook({
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.
 ///
-// NOTE: this API is used by the fuchsia source tree, do not add new
+// This API is used by the Fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
   required Uri testUrl,
@@ -134,9 +133,6 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  assert(testUrl != null);
-  assert(host != null);
-  assert(updateGoldens != null);
 
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
@@ -294,7 +290,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
-  }) : assert(shellPath != null);
+  });
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
