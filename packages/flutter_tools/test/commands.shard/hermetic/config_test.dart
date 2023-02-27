@@ -44,6 +44,19 @@ void main() {
   }
 
   group('config', () {
+    testUsingContext('throws error on excess arguments', () {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--android-studio-dir=/opt/My', 'Android', 'Studio',
+      ]), throwsToolExit());
+      verifyNoAnalytics();
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
     testUsingContext('machine flag', () async {
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
