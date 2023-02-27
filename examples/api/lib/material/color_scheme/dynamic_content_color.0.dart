@@ -18,7 +18,7 @@ class DynamicColorExample extends StatefulWidget {
 
 final List<Image> images = [
     // convert directly to ImageProvider instead of Image?
-   
+
 // what the heck is going on with england rugby color
     Image.asset('assets/yellow.png', height: 150,),
     Image.asset('assets/yellow_transparent.png', height: 150,),
@@ -36,16 +36,18 @@ final List<Image> images = [
 
 class _DynamicColorExampleState extends State<DynamicColorExample> {
     final TextEditingController _textFieldController = TextEditingController();
-    late ColorScheme currentColorScheme;
+    final ColorScheme currentColorScheme = ColorScheme.light();
 
-    void initState() {
-        currentColorScheme = ColorScheme.light();
-    }
 
-    void _updateImage(Image image) async {
+    // @override
+    // void initState() {
+    //     currentColorScheme = ColorScheme.light();
+    // }
+
+    Future<void> _updateImage(Image image) async {
         print('generating new colorScheme');
         // TODO add fail handling.
-        final newColorScheme = await ColorScheme.fromImage(image: image);
+        final ColorScheme newColorScheme = await ColorScheme.fromImage(image: image);
         print('calling setState');
         setState(() { currentColorScheme = newColorScheme;
         print('colorschemeUpdated via setState: ${currentColorScheme.primary}');
@@ -54,7 +56,8 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
 
     Future<void> networkAssetDialog(BuildContext context) async {
-            late String input = 'url';
+            late String
+            input = 'url';
      showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
@@ -97,14 +100,14 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     @override
     Widget build(BuildContext context) {
         print('rebuilding!');
-        final colorScheme = currentColorScheme;
-        final selectedColor = colorScheme.primary;
+        final ColorScheme colorScheme = currentColorScheme;
+        final Color selectedColor = colorScheme.primary;
 
-        ThemeData lightTheme = ThemeData(
+        final ThemeData lightTheme = ThemeData(
             colorSchemeSeed: selectedColor,
             brightness: Brightness.light,
         );
-        ThemeData darkTheme = ThemeData(
+       final ThemeData darkTheme = ThemeData(
             colorSchemeSeed: selectedColor,
             brightness: Brightness.dark,
         );
