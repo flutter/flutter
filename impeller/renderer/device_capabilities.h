@@ -21,22 +21,26 @@ class IDeviceCapabilities {
 
   bool SupportsSSBO() const;
 
+  bool SupportsTextureToTextureBlits() const;
+
   PixelFormat GetDefaultColorFormat() const;
 
   PixelFormat GetDefaultStencilFormat() const;
 
  private:
-  IDeviceCapabilities(bool threading_restrictions,
-                      bool offscreen_msaa,
+  IDeviceCapabilities(bool has_threading_restrictions,
+                      bool supports_offscreen_msaa,
                       bool supports_ssbo,
+                      bool supports_texture_to_texture_blits,
                       PixelFormat default_color_format,
                       PixelFormat default_stencil_format);
 
   friend class DeviceCapabilitiesBuilder;
 
-  bool threading_restrictions_ = false;
-  bool offscreen_msaa_ = false;
+  bool has_threading_restrictions_ = false;
+  bool supports_offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
+  bool supports_texture_to_texture_blits_ = false;
   PixelFormat default_color_format_;
   PixelFormat default_stencil_format_;
 
@@ -55,6 +59,8 @@ class DeviceCapabilitiesBuilder {
 
   DeviceCapabilitiesBuilder& SetSupportsSSBO(bool value);
 
+  DeviceCapabilitiesBuilder& SetSupportsTextureToTextureBlits(bool value);
+
   DeviceCapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
 
   DeviceCapabilitiesBuilder& SetDefaultStencilFormat(PixelFormat value);
@@ -62,9 +68,10 @@ class DeviceCapabilitiesBuilder {
   std::unique_ptr<IDeviceCapabilities> Build();
 
  private:
-  bool threading_restrictions_ = false;
-  bool offscreen_msaa_ = false;
+  bool has_threading_restrictions_ = false;
+  bool supports_offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
+  bool supports_texture_to_texture_blits_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
 
