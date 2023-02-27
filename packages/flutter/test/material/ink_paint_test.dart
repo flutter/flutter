@@ -9,20 +9,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget renders a SizedBox by default', (WidgetTester tester) async {
+  testWidgets('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
       ),
     );
-    Finder sizedBox = find.descendant(
-      of: find.byType(Ink),
-      matching: find.byType(SizedBox),
-    );
-    expect(sizedBox, findsOneWidget);
-    expect(tester.getSize(sizedBox).height, 600.0);
-    expect(tester.getSize(sizedBox).width, 800.0);
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(800.0, 600.0));
+  });
 
+  testWidgets('The Ink widget fits the specified size', (WidgetTester tester) async {
     const double height = 150.0;
     const double width = 200.0;
     await tester.pumpWidget(
@@ -36,13 +33,24 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    sizedBox = find.descendant(
-      of: find.byType(Ink),
-      matching: find.byType(SizedBox),
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(width, height));
+  });
+
+  testWidgets('The Ink widget expands on a unspecified dimension', (WidgetTester tester) async {
+    const double height = 150.0;
+    await tester.pumpWidget(
+      Material(
+        child: Center( // used to constrain to child's size
+          child: Ink(
+            height: height,
+          ),
+        ),
+      ),
     );
-    expect(sizedBox, findsNWidgets(2));
-    expect(tester.getSize(sizedBox.at(0)).height, height);
-    expect(tester.getSize(sizedBox.at(0)).width, width);
+    await tester.pumpAndSettle();
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(800, height));
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {

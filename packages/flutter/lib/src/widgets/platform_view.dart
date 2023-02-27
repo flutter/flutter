@@ -1088,7 +1088,7 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
   void initState() {
     super.initState();
     if (!widget.controller.isCreated) {
-      // Schedule a rebuild once creation is complete and the final dislay
+      // Schedule a rebuild once creation is complete and the final display
       // type is known.
       widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     }

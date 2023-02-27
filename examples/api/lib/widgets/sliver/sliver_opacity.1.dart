@@ -46,7 +46,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body: CustomScrollView(
         slivers: <Widget>[
           const SliverToBoxAdapter(
-            child: ListTile(title: Text('Press on the button to toggle the list visibilty.')),
+            child: ListTile(title: Text('Press on the button to toggle the list visibility.')),
           ),
           const SliverToBoxAdapter(
             child: ListTile(title: Text('Before the list...')),

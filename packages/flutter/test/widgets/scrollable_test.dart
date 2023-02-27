@@ -336,7 +336,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgets('Scroll pointer signals are handled when there is competion', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are handled when there is competition', (WidgetTester tester) async {
     // This is a regression test. When there are multiple scrollables listening
     // to the same event, for example when scrollables are nested, there used
     // to be exceptions at scrolling events.
