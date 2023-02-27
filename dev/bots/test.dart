@@ -984,17 +984,17 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
       '--enable-vmservice',
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
       'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
