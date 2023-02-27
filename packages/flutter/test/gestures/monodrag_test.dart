@@ -45,8 +45,14 @@ void main() {
     GestureBinding.instance.gestureArena.close(91);
     tester.async.flushMicrotasks();
 
-    GestureBinding.instance.handleEvent(up90, HitTestEntry(MockHitTestTarget()));
-    GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
+
+    // Regression test for https://github.com/flutter/flutter/issues/112403.
+    v.checkStart(null, down91.pointer);
+
+    GestureBinding.instance
+        .handleEvent(up90, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance
+        .handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
   testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {

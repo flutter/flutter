@@ -379,7 +379,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
-      _checkStart(timestamp, pointer);
+      checkStart(timestamp, pointer);
       if (localUpdateDelta != Offset.zero && onUpdate != null) {
         final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
         final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
@@ -451,7 +451,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkStart(Duration? timestamp, int pointer) {
+// ignore: public_member_api_docs
+//
+// Exposed to test for null timestamp.
+@visibleForTesting
+void checkStart(Duration? timestamp, int pointer) {
     assert(_initialButtons == kPrimaryButton);
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
