@@ -34,7 +34,6 @@ class BottomAppBarTheme with Diagnosticable {
     this.shape,
     this.height,
     this.surfaceTintColor,
-    this.shadowColor,
     this.padding,
   });
 
@@ -51,7 +50,7 @@ class BottomAppBarTheme with Diagnosticable {
 
   /// Overrides the default value for [BottomAppBar.height].
   ///
-  /// If null, [BottomAppBar] height will be the minimum on the non Material 3.
+  /// If null, [BottomAppBar] height will be the minimum on the non material 3.
   final double? height;
 
   /// Overrides the default value for [BottomAppBar.surfaceTintColor].
@@ -60,9 +59,6 @@ class BottomAppBarTheme with Diagnosticable {
   ///
   /// See [Material.surfaceTintColor] for more details.
   final Color? surfaceTintColor;
-
-  /// Overrides the default value for [BottomAppBar.shadowColor].
-  final Color? shadowColor;
 
   /// Overrides the default value for [BottomAppBar.padding].
   final EdgeInsetsGeometry? padding;
@@ -75,7 +71,6 @@ class BottomAppBarTheme with Diagnosticable {
     NotchedShape? shape,
     double? height,
     Color? surfaceTintColor,
-    Color? shadowColor,
     EdgeInsetsGeometry? padding,
   }) {
     return BottomAppBarTheme(
@@ -84,7 +79,6 @@ class BottomAppBarTheme with Diagnosticable {
       shape: shape ?? this.shape,
       height: height ?? this.height,
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
-      shadowColor: shadowColor ?? this.shadowColor,
       padding: padding ?? this.padding,
     );
   }
@@ -109,7 +103,6 @@ class BottomAppBarTheme with Diagnosticable {
       shape: t < 0.5 ? a?.shape : b?.shape,
       height: lerpDouble(a?.height, b?.height, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
-      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
     );
   }
@@ -121,7 +114,6 @@ class BottomAppBarTheme with Diagnosticable {
     shape,
     height,
     surfaceTintColor,
-    shadowColor,
     padding,
   );
 
@@ -139,7 +131,6 @@ class BottomAppBarTheme with Diagnosticable {
         && other.shape == shape
         && other.height == height
         && other.surfaceTintColor == surfaceTintColor
-        && other.shadowColor == shadowColor
         && other.padding == padding;
   }
 
@@ -151,7 +142,6 @@ class BottomAppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('height', height, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }

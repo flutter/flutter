@@ -71,7 +71,6 @@ class BottomAppBar extends StatefulWidget {
     this.child,
     this.padding,
     this.surfaceTintColor,
-    this.shadowColor,
     this.height,
   }) : assert(elevation == null || elevation >= 0.0);
 
@@ -135,12 +134,6 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
   final Color? surfaceTintColor;
-
-  /// The color used as a drop-shadow, if the element is elevated.
-  ///
-  /// If this is null, the value will depend whether Material 3 is used - see [Material.shadowColor].
-  /// In Material 3, this value defaults to [Colors.transparent].
-  final Color? shadowColor;
 
   /// The double value used to indicate the height of the [BottomAppBar].
   ///
