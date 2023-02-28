@@ -98,11 +98,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
-  ui.WindowPadding? _viewInsetsTestValue;
+  ui.ViewPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
+  ui.ViewPadding? _viewInsetsTestValue;
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
   /// instead.
-  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) { // ignore: avoid_setters_without_getters
+  set viewInsetsTestValue(ui.ViewPadding viewInsetsTestValue) { // ignore: avoid_setters_without_getters
     _viewInsetsTestValue = viewInsetsTestValue;
     onMetricsChanged?.call();
   }
@@ -114,11 +114,11 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
-  ui.WindowPadding? _viewPaddingTestValue;
+  ui.ViewPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
+  ui.ViewPadding? _viewPaddingTestValue;
   /// Hides the real view padding and reports the given [paddingTestValue]
   /// instead.
-  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) { // ignore: avoid_setters_without_getters
+  set viewPaddingTestValue(ui.ViewPadding viewPaddingTestValue) { // ignore: avoid_setters_without_getters
     _viewPaddingTestValue = viewPaddingTestValue;
     onMetricsChanged?.call();
   }
@@ -130,10 +130,10 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get padding => _paddingTestValue ?? _window.padding;
-  ui.WindowPadding? _paddingTestValue;
+  ui.ViewPadding get padding => _paddingTestValue ?? _window.padding;
+  ui.ViewPadding? _paddingTestValue;
   /// Hides the real padding and reports the given [paddingTestValue] instead.
-  set paddingTestValue(ui.WindowPadding paddingTestValue) { // ignore: avoid_setters_without_getters
+  set paddingTestValue(ui.ViewPadding paddingTestValue) { // ignore: avoid_setters_without_getters
     _paddingTestValue = paddingTestValue;
     onMetricsChanged?.call();
   }
@@ -158,10 +158,10 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
-  ui.WindowPadding? _systemGestureInsetsTestValue;
+  ui.ViewPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
+  ui.ViewPadding? _systemGestureInsetsTestValue;
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
-  set systemGestureInsetsTestValue(ui.WindowPadding systemGestureInsetsTestValue) { // ignore: avoid_setters_without_getters
+  set systemGestureInsetsTestValue(ui.ViewPadding systemGestureInsetsTestValue) { // ignore: avoid_setters_without_getters
     _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
     onMetricsChanged?.call();
   }

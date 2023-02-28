@@ -10,7 +10,7 @@
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 @TestOn('!chrome')
 library;
 
@@ -220,6 +220,14 @@ class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   }
 }
 
+Widget _applyConstructor(Widget Function() constructor) => constructor();
+
+class _TrivialWidget extends StatelessWidget {
+  const _TrivialWidget() : super(key: const Key('singleton'));
+  @override
+  Widget build(BuildContext context) => const Text('Hello, world!');
+}
+
 int getChildLayerCount(OffsetLayer layer) {
   Layer? child = layer.firstChild;
   int count = 0;
@@ -228,6 +236,13 @@ int getChildLayerCount(OffsetLayer layer) {
     child = child.nextSibling;
   }
   return count;
+}
+
+extension TextFromString on String {
+  @widgetFactory
+  Widget text() {
+    return Text(this);
+  }
 }
 
 void main() {
@@ -240,8 +255,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    tearDown(() {
+    tearDown(() async {
       service.resetAllState();
+
+      if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'false'},
+        );
+      }
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
@@ -929,19 +951,20 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
+              const Text('a'),
+              const Text('b', textDirection: TextDirection.ltr),
+              'c'.text(),
             ],
           ),
         ),
       );
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
+      final Element elementC = find.text('c').evaluate().first;
 
       service.disposeAllGroups();
       service.resetPubRootDirectories();
@@ -964,14 +987,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final int columnB = creationLocationB['column']! as int;
       final String? nameB = creationLocationB['name'] as String?;
       expect(nameB, equals('Text'));
+
+      service.setSelection(elementC, 'my-group');
+      final Map<String, Object?> jsonC = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+      final Map<String, Object?> creationLocationC = jsonC['creationLocation']! as Map<String, Object?>;
+      expect(creationLocationC, isNotNull);
+      final String fileC = creationLocationC['file']! as String;
+      final int lineC = creationLocationC['line']! as int;
+      final int columnC = creationLocationC['column']! as int;
+      final String? nameC = creationLocationC['name'] as String?;
+      expect(nameC, equals('TextFromString|text'));
+
       expect(fileA, endsWith('widget_inspector_test.dart'));
       expect(fileA, equals(fileB));
+      expect(fileA, equals(fileC));
       // We don't hardcode the actual lines the widgets are created on as that
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
+      expect(lineB + 1, equals(lineC));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(15));
+      expect(columnA, equals(21));
       expect(columnA, equals(columnB));
+      expect(columnC, equals(19));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
   testWidgets('WidgetInspectorService setSelection notifiers for an Element',
@@ -1360,7 +1397,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, unorderedEquals(directories));
         });
 
-        test('can add multiple directories seperately', () async {
+        test('can add multiple directories separately', () async {
           service.addPubRootDirectories(<String>[directoryA]);
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
@@ -1402,7 +1439,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('removes multiple directories seperately', () async {
+        test('removes multiple directories separately', () async {
           service.removePubRootDirectories(<String>[directoryA]);
           service.removePubRootDirectories(<String>[directoryB]);
           service.removePubRootDirectories(<String>[]);
@@ -1558,7 +1595,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
 
           testWidgets(
-            'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
+            'does not have createdByLocalProject when thePubRootDirectory has a different suffix',
             (WidgetTester tester) async {
               const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
@@ -3582,6 +3619,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         },
       );
+    },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets with tear-offs', (WidgetTester tester) async {
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetInspector(
+          selectButtonBuilder: null,
+          child: _applyConstructor(_TrivialWidget.new),
+        ),
+      );
+
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+
+      await tester.pumpWidget(widget);
     },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );

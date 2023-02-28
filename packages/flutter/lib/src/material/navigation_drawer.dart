@@ -98,7 +98,7 @@ class NavigationDrawer extends StatelessWidget {
   /// If that is also null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
 
-  /// The shape of the selected inidicator.
+  /// The shape of the selected indicator.
   ///
   /// If this is null, [NavigationDrawerThemeData.indicatorShape] is used.
   /// If that is also null, defaults to [StadiumBorder].
@@ -114,7 +114,7 @@ class NavigationDrawer extends StatelessWidget {
   /// [NavigationDrawerDestination] or null if no destination is selected.
   ///
   /// A valid [selectedIndex] satisfies 0 <= [selectedIndex] < number of [NavigationDrawerDestination].
-  /// For an invalid [selectedIndex] like `-1`, all desitinations will appear unselected.
+  /// For an invalid [selectedIndex] like `-1`, all destinations will appear unselected.
   final int? selectedIndex;
 
   /// Called when one of the [NavigationDrawerDestination] children is selected.
@@ -658,7 +658,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)
