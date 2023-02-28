@@ -514,7 +514,9 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       // Blit `bridge` to the top left corner of the texture.
       pass->AddCopy(bridge, texture);
 
-      pass->EncodeCommands(context->GetResourceAllocator());
+      if (!pass->EncodeCommands(context->GetResourceAllocator())) {
+        return false;
+      }
     }
 
     {
