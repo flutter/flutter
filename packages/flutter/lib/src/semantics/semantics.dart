@@ -3248,7 +3248,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
 
     // Default actions if no [handler] was provided.
-    if (action == SemanticsAction.showOnScreen && _nodes[id]!._showOnScreen != null) {
+    if (action == SemanticsAction.showOnScreen && _nodes[id]?._showOnScreen != null) {
       _nodes[id]!._showOnScreen!();
     }
   }
