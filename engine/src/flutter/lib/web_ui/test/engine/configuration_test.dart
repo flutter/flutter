@@ -60,4 +60,46 @@ void testMain() {
       expect(config.canvasKitMaximumSurfaces, 16);
     });
   });
+
+  group('CanvasKit config', () {
+    test('default canvasKitVariant', () {
+      final FlutterConfiguration config = FlutterConfiguration();
+
+      expect(config.canvasKitVariant, CanvasKitVariant.auto);
+    });
+
+    test('default canvasKitVariant when it is undefined', () {
+      final FlutterConfiguration config = FlutterConfiguration();
+      config.setUserConfiguration(
+        // With an empty map, the canvasKitVariant is undefined in JS.
+        js_util.jsify(<String, Object?>{}) as JsFlutterConfiguration,
+      );
+
+      expect(config.canvasKitVariant, CanvasKitVariant.auto);
+    });
+
+    test('validates canvasKitVariant', () {
+      final FlutterConfiguration config = FlutterConfiguration();
+
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{'canvasKitVariant': 'foo'}) as JsFlutterConfiguration,
+      );
+      expect(() => config.canvasKitVariant, throwsArgumentError);
+
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{'canvasKitVariant': 'auto'}) as JsFlutterConfiguration,
+      );
+      expect(config.canvasKitVariant, CanvasKitVariant.auto);
+
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{'canvasKitVariant': 'full'}) as JsFlutterConfiguration,
+      );
+      expect(config.canvasKitVariant, CanvasKitVariant.full);
+
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{'canvasKitVariant': 'chromium'}) as JsFlutterConfiguration,
+      );
+      expect(config.canvasKitVariant, CanvasKitVariant.chromium);
+    });
+  });
 }
