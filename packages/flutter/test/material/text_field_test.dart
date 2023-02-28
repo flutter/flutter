@@ -8377,8 +8377,11 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(onSurface: Colors.blue[500]!),
-      textTheme: const TextTheme(bodyLarge: TextStyle(wordSpacing: 2.0)),
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(
+          color: Colors.blue[500],
+        ),
+      ),
     );
 
     Widget buildFrame(TextStyle style) {
