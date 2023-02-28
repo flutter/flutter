@@ -23,7 +23,7 @@ bool PipelineCreateInfoVK::IsValid() const {
   return is_valid_;
 }
 
-vk::Pipeline PipelineCreateInfoVK::GetVKPipeline() const {
+const vk::Pipeline& PipelineCreateInfoVK::GetVKPipeline() const {
   return *pipeline_;
 }
 

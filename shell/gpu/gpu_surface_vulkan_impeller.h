@@ -29,7 +29,6 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   std::shared_ptr<impeller::Renderer> impeller_renderer_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
-  uint64_t frame_num_ = 0;
   fml::WeakPtrFactory<GPUSurfaceVulkanImpeller> weak_factory_;
 
   // |Surface|

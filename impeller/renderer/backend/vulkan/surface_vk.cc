@@ -4,78 +4,98 @@
 
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 
+#include "impeller/renderer/backend/vulkan/swapchain_image_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/surface.h"
 
 namespace impeller {
+
 std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
-    uint32_t frame_num,
-    SwapchainImageVK* swapchain_image,
-    ContextVK* context,
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<SwapchainImageVK>& swapchain_image,
     SwapCallback swap_callback) {
-  if (!swapchain_image) {
+  if (!context || !swapchain_image || !swap_callback) {
     return nullptr;
   }
 
-  TextureDescriptor color0_tex;
-  color0_tex.type = TextureType::kTexture2D;
-  color0_tex.format = swapchain_image->GetPixelFormat();
-  color0_tex.size = swapchain_image->GetSize();
-  color0_tex.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  color0_tex.sample_count = SampleCount::kCount1;
-  color0_tex.storage_mode = StorageMode::kDevicePrivate;
+  TextureDescriptor msaa_tex_desc;
+  msaa_tex_desc.storage_mode = StorageMode::kDeviceTransient;
+  msaa_tex_desc.type = TextureType::kTexture2DMultisample;
+  msaa_tex_desc.sample_count = SampleCount::kCount4;
+  msaa_tex_desc.format = swapchain_image->GetPixelFormat();
+  msaa_tex_desc.size = swapchain_image->GetSize();
+  msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+
+  auto msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
+  if (!msaa_tex) {
+    VALIDATION_LOG << "Could not allocate MSAA color texture.";
+    return nullptr;
+  }
+  msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
+
+  TextureDescriptor resolve_tex_desc;
+  resolve_tex_desc.type = TextureType::kTexture2D;
+  resolve_tex_desc.format = swapchain_image->GetPixelFormat();
+  resolve_tex_desc.size = swapchain_image->GetSize();
+  resolve_tex_desc.usage =
+      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  resolve_tex_desc.sample_count = SampleCount::kCount1;
+  resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
+
+  std::shared_ptr<Texture> resolve_tex =
+      std::make_shared<TextureVK>(resolve_tex_desc,  //
+                                  context,           //
+                                  swapchain_image    //
+      );
+
+  if (!resolve_tex) {
+    VALIDATION_LOG << "Could not wrap resolve texture.";
+    return nullptr;
+  }
+  resolve_tex->SetLabel("ImpellerOnscreenResolve");
 
   ColorAttachment color0;
-  auto color_texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
-      .backing_type = TextureBackingTypeVK::kWrappedTexture,
-      .wrapped_texture =
-          {
-              .swapchain_image = swapchain_image,
-              .frame_num = frame_num,
-          },
-  });
-  color0.texture = std::make_shared<TextureVK>(color0_tex, context,
-                                               std::move(color_texture_info));
+  color0.texture = msaa_tex;
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
-  color0.store_action = StoreAction::kDontCare;
+  color0.store_action = StoreAction::kMultisampleResolve;
+  color0.resolve_texture = resolve_tex;
 
   TextureDescriptor stencil0_tex;
+  stencil0_tex.storage_mode = StorageMode::kDeviceTransient;
   stencil0_tex.type = TextureType::kTexture2D;
-  stencil0_tex.format = swapchain_image->GetPixelFormat();
-  stencil0_tex.size = swapchain_image->GetSize();
+  stencil0_tex.sample_count = SampleCount::kCount4;
+  stencil0_tex.format =
+      context->GetDeviceCapabilities().GetDefaultStencilFormat();
+  stencil0_tex.size = msaa_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  stencil0_tex.sample_count = SampleCount::kCount1;
+
+  auto stencil_tex =
+      context->GetResourceAllocator()->CreateTexture(stencil0_tex);
+  if (!stencil_tex) {
+    VALIDATION_LOG << "Could not create stencil texture.";
+    return nullptr;
+  }
+  stencil_tex->SetLabel("ImpellerOnscreenStencil");
 
   StencilAttachment stencil0;
+  stencil0.texture = stencil_tex;
   stencil0.clear_stencil = 0;
-  auto stencil_texture_info = std::make_unique<TextureInfoVK>(TextureInfoVK{
-      .backing_type = TextureBackingTypeVK::kWrappedTexture,
-      .wrapped_texture =
-          {
-              .swapchain_image = swapchain_image,
-              .frame_num = frame_num,
-          },
-  });
-  stencil0.texture = std::make_shared<TextureVK>(
-      stencil0_tex, context, std::move(stencil_texture_info));
   stencil0.load_action = LoadAction::kClear;
   stencil0.store_action = StoreAction::kDontCare;
 
   RenderTarget render_target_desc;
   render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetStencilAttachment(stencil0);
 
-  return std::unique_ptr<SurfaceVK>(new SurfaceVK(
-      render_target_desc, swapchain_image, std::move(swap_callback)));
+  // The constructor is private. So make_unique may not be used.
+  return std::unique_ptr<SurfaceVK>(
+      new SurfaceVK(render_target_desc, std::move(swap_callback)));
 }
 
-SurfaceVK::SurfaceVK(const RenderTarget& target,
-                     SwapchainImageVK* swapchain_image,
-                     SwapCallback swap_callback)
-    : Surface(target) {
-  swap_callback_ = std::move(swap_callback);
-}
+SurfaceVK::SurfaceVK(const RenderTarget& target, SwapCallback swap_callback)
+    : Surface(target), swap_callback_(std::move(swap_callback)) {}
 
 SurfaceVK::~SurfaceVK() = default;
 

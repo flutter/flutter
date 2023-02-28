@@ -5,36 +5,32 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
-class CommandBufferVK final : public CommandBuffer {
+class ContextVK;
+class CommandEncoderVK;
+
+class CommandBufferVK final
+    : public CommandBuffer,
+      public BackendCast<CommandBufferVK, CommandBuffer> {
  public:
-  static std::shared_ptr<CommandBufferVK> Create(
-      const std::weak_ptr<const Context>& context,
-      vk::Device device);
-
-  CommandBufferVK(std::weak_ptr<const Context> context,
-                  vk::Device device,
-                  std::unique_ptr<CommandPoolVK> command_pool,
-                  std::shared_ptr<FencedCommandBufferVK> command_buffer);
-
   // |CommandBuffer|
   ~CommandBufferVK() override;
+
+  const std::shared_ptr<CommandEncoderVK>& GetEncoder() const;
 
  private:
   friend class ContextVK;
 
-  vk::Device device_;
-  std::unique_ptr<CommandPoolVK> command_pool_;
-  vk::UniqueRenderPass render_pass_;
-  std::shared_ptr<FencedCommandBufferVK> fenced_command_buffer_;
+  std::shared_ptr<CommandEncoderVK> encoder_;
   bool is_valid_ = false;
+
+  CommandBufferVK(std::weak_ptr<const Context> context,
+                  std::shared_ptr<CommandEncoderVK> encoder);
 
   // |CommandBuffer|
   void SetLabel(const std::string& label) const override;

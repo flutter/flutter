@@ -37,7 +37,6 @@ ShaderLibraryMappingsForPlayground() {
                                              impeller_imgui_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
                                              impeller_scene_shaders_vk_length),
-
   };
 }
 
@@ -59,11 +58,9 @@ PlaygroundImplVK::PlaygroundImplVK()
 
   ::glfwDefaultWindowHints();
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  ::glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-  auto window =
-      ::glfwCreateWindow(800, 600, "Test Vulkan Window", nullptr, nullptr);
+  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
   if (!window) {
     VALIDATION_LOG << "Unable to create glfw window";
     return;
@@ -84,25 +81,26 @@ PlaygroundImplVK::PlaygroundImplVK()
     return;
   }
 
-  context_ = std::move(context);
-
-  SetupSwapchain();
-}
-
-void PlaygroundImplVK::SetupSwapchain() {
-  ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
-  auto window = reinterpret_cast<GLFWwindow*>(handle_.get());
-  vk::Instance instance = context_vk->GetInstance();
-  VkSurfaceKHR surface_tmp;
-  auto res = vk::Result{
-      ::glfwCreateWindowSurface(instance, window, nullptr, &surface_tmp)};
+  VkSurfaceKHR vk_surface;
+  auto res =
+      vk::Result{::glfwCreateWindowSurface(context->GetInstance(),  // instance
+                                           window,                  // window
+                                           nullptr,                 // allocator
+                                           &vk_surface              // surface
+                                           )};
   if (res != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create surface for GLFW window: "
                    << vk::to_string(res);
     return;
   }
-  vk::UniqueSurfaceKHR surface{surface_tmp, instance};
-  context_vk->SetupSwapchain(std::move(surface));
+
+  vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
+  if (!context->SetWindowSurface(std::move(surface))) {
+    VALIDATION_LOG << "Could not setup surface for context.";
+    return;
+  }
+
+  context_ = std::move(context);
 }
 
 PlaygroundImplVK::~PlaygroundImplVK() = default;
@@ -121,7 +119,7 @@ PlaygroundImpl::WindowHandle PlaygroundImplVK::GetWindowHandle() const {
 std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
     std::shared_ptr<Context> context) {
   ContextVK* context_vk = reinterpret_cast<ContextVK*>(context_.get());
-  return context_vk->AcquireSurface(current_frame_++);
+  return context_vk->AcquireNextSurface();
 }
 
 }  // namespace impeller

@@ -1406,20 +1406,12 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc + .
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_library_vk.cc + ../../../flutter/LICENSE
@@ -1436,14 +1428,18 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.cc 
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shared_object_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/shared_object_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_details_vk.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_details_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_image_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_image_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_impl_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_impl_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/texture_source_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/texture_source_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc + ../../../flutter/LICENSE
@@ -3906,20 +3902,12 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/capabilities_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/commands_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/deletion_queue_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/fenced_command_buffer_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_library_vk.cc
@@ -3936,14 +3924,18 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_function_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/shader_library_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_producer_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/shared_object_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/shared_object_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/surface_vk.h
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_details_vk.cc
-FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_details_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_image_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_image_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_impl_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_impl_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/swapchain_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_source_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_source_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/texture_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/vertex_descriptor_vk.cc
