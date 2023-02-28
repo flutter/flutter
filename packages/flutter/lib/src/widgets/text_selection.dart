@@ -2442,11 +2442,11 @@ class TextSelectionGestureDetectorBuilder {
     final TextRange toRange = toPosition == fromPosition ? fromRange : boundary.getTextBoundaryAt(
       toPosition.offset == editableText.textEditingValue.text.length ? toPosition.offset - 1 : toPosition.offset,
     );
-    final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
+    final bool isFromBoundaryBeforeToBoundary = fromRange.start < toRange.end;
 
     final TextSelection newSelection = TextSelection(
-      baseOffset: isFromParagraphBeforeToParagraph ? fromRange.start : fromRange.end,
-      extentOffset: isFromParagraphBeforeToParagraph ? toRange.end : toRange.start,
+      baseOffset: isFromBoundaryBeforeToBoundary ? fromRange.start : fromRange.end,
+      extentOffset: isFromBoundaryBeforeToBoundary ? toRange.end : toRange.start,
     );
 
     editableText.userUpdateTextEditingValue(
