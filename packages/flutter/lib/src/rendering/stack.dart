@@ -165,8 +165,8 @@ class RelativeRect {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RelativeRect? lerp(RelativeRect? a, RelativeRect? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return RelativeRect.fromLTRB(b!.left * t, b.top * t, b.right * t, b.bottom * t);
