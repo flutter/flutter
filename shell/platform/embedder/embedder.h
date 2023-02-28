@@ -25,6 +25,9 @@
 // - Function signatures (names, argument counts, argument order, and argument
 //   type) cannot change.
 // - The core behavior of existing functions cannot change.
+// - Instead of array of structures, prefer array of pointers to structures.
+//   This ensures that array indexing does not break if members are added
+//   to the structure.
 //
 // These changes are allowed:
 // - Adding new struct members at the end of a structure.
