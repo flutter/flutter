@@ -2413,34 +2413,28 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  // Select a paragraph around the given position.
-  void _selectParagraph({required Offset position, SelectionChangedCause? cause}) {
-    _selectParagraphsInRange(from: position, cause: cause);
-  }
-
-  // Selects the set of paragraphs in a document that intersect a given range of global positions.
+  // Selects the set of paragraphs in a document that intersect a given range of
+  // global positions.
   void _selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary paragraphBoundary = ParagraphBoundary(editableText.textEditingValue.text);
     _selectTextBoundariesInRange(boundary: paragraphBoundary, from: from, to: to, cause: cause);
   }
 
-  // Selects the line around the given position.
-  void _selectLine({required Offset position, SelectionChangedCause? cause}) {
-    _selectLinesInRange(from: position, cause: cause);
-  }
-
-  // Selects the set of lines in a document that intersect a given range of global positions.
+  // Selects the set of lines in a document that intersect a given range of
+  // global positions.
   void _selectLinesInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary lineBoundary = LineBoundary(renderEditable);
     _selectTextBoundariesInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
   }
 
-  // Selects the set of text boundaries in a document that intersect a given range of global positions.
+  // Selects the set of text boundaries in a document that intersect a given
+  // range of global positions.
   //
-  // The set of text boundaries selected are not strictly bounded by the range of global positions.
+  // The set of text boundaries selected are not strictly bounded by the range
+  // of global positions.
   //
-  // The first and last endpoints of the selection will always be at the beginning and end of a
-  // text boundary respectively.
+  // The first and last endpoints of the selection will always be at the
+  // beginning and end of a text boundary respectively.
   void _selectTextBoundariesInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
     final TextRange fromRange = boundary.getTextBoundaryAt(fromPosition.offset);
@@ -2463,7 +2457,8 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onTripleTapDown].
   ///
-  /// By default, it selects a paragraph if [TextSelectionGestureDetectorBuilderDelegate.selectionEnabled] is true
+  /// By default, it selects a paragraph if
+  /// [TextSelectionGestureDetectorBuilderDelegate.selectionEnabled] is true
   /// and shows the toolbar if necessary.
   ///
   /// See also:
@@ -2482,10 +2477,10 @@ class TextSelectionGestureDetectorBuilder {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            _selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+            _selectParagraphsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
             break;
           case TargetPlatform.linux:
-            _selectLine(position: details.globalPosition, cause: SelectionChangedCause.tap);
+            _selectLinesInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
             break;
         }
       }
@@ -2610,7 +2605,7 @@ class TextSelectionGestureDetectorBuilder {
         );
       }
 
-      // Select paragraph by paragraph.
+      // Select paragraph-by-paragraph.
       if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 3) {
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
@@ -2931,27 +2926,39 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
+
+  // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
+  // which can grow to be infinitely large, to a value between 1 and 3. The value
+  // that the raw count is converted to is based on the default observed behavior
+  // on the native platforms.
+  //
+  // This method should be used in all instances when details.consecutiveTapCount
+  // would be used.
   static int _getEffectiveConsecutiveTapCount(int rawCount) {
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        // From observation, these platform's reset their tap count to 0 when the number of consecutive taps
-        // exceeds 3. For example on Debian Linux with GTK, when going past a triple click, on the fourth click
-        // the selection is moved to the precise click position, on the fifth click the word at the position is
-        // selected, and on the sixth click the paragraph at the position is selected.
+        // From observation, these platform's reset their tap count to 0 when
+        // the number of consecutive taps exceeds 3. For example on Debian Linux
+        // with GTK, when going past a triple click, on the fourth click the
+        // selection is moved to the precise click position, on the fifth click
+        // the word at the position is selected, and on the sixth click the
+        // paragraph at the position is selected.
         return rawCount <= 3 ? rawCount : 0 + (rawCount % 3 == 0 ? 3 : rawCount % 3);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         // From observation, these platform's either hold their tap count at 3.
         // For example on macOS, when going past a triple click, the selection
-        // should be retained at the paragraph that was first selected on triple click.
+        // should be retained at the paragraph that was first selected on triple
+        // click.
         return math.min(rawCount, 3);
       case TargetPlatform.windows:
-        // From observation, this platform's consecutive tap actions alternate between
-        // double click and triple click actions. For example, after a triple click has
-        // selected a paragraph, on the next click the word at the clicked position will
-        // be selected, and on the next click the paragraph at the position is selected.
+        // From observation, this platform's consecutive tap actions alternate
+        // between double click and triple click actions. For example, after a
+        // triple click has selected a paragraph, on the next click the word at
+        // the clicked position will be selected, and on the next click the
+        // paragraph at the position is selected.
         return rawCount < 2 ? rawCount : 2 + rawCount % 2;
     }
   }

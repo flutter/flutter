@@ -4131,7 +4131,7 @@ void main() {
     );
 
     testWidgets(
-      'Can triple click + drag to select line by line',
+      'Can triple click + drag to select line by line on Linux',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController();
 
