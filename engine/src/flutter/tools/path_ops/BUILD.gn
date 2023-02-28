@@ -36,4 +36,8 @@ shared_library("path_ops") {
     ":path_ops_license",
     "//third_party/skia",
   ]
+
+  metadata = {
+    entitlement_file_path = [ "libpath_ops.dylib" ]
+  }
 }
