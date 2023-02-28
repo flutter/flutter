@@ -38,13 +38,13 @@ void main() {
 
   FlutterTesterTestDevice createDevice({
     List<String> dartEntrypointArgs = const <String>[],
-    bool enableObservatory = false,
+    bool enableVmService = false,
   }) =>
     TestFlutterTesterDevice(
       platform: platform,
       fileSystem: fileSystem,
       processManager: processManager,
-      enableObservatory: enableObservatory,
+      enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
       uriConverter: (String input) => '$input/converted',
     );
@@ -63,7 +63,7 @@ void main() {
     FakeCommand flutterTestCommand(String expectedFlutterTestValue) {
       return FakeCommand(command: const <String>[
         '/',
-        '--disable-observatory',
+        '--disable-vm-service',
         '--ipv6',
         '--enable-checked-mode',
         '--verify-entry-points',
@@ -121,7 +121,7 @@ void main() {
         const FakeCommand(
           command: <String>[
             '/',
-            '--disable-observatory',
+            '--disable-vm-service',
             '--ipv6',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -156,7 +156,7 @@ void main() {
         const FakeCommand(
           command: <String>[
             '/',
-            '--observatory-port=0',
+            '--vm-service-port=0',
             '--ipv6',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -173,12 +173,12 @@ void main() {
           stderr: 'failure',
         ),
       ]);
-      device = createDevice(enableObservatory: true);
+      device = createDevice(enableVmService: true);
     });
 
-    testUsingContext('skips setting observatory port and uses the input port for DDS instead', () async {
+    testUsingContext('skips setting VM Service port and uses the input port for DDS instead', () async {
       await device.start('example.dill');
-      await device.observatoryUri;
+      await device.vmServiceUri;
 
       final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
@@ -186,7 +186,7 @@ void main() {
 
     testUsingContext('sets up UriConverter from context', () async {
       await device.start('example.dill');
-      await device.observatoryUri;
+      await device.vmServiceUri;
 
       final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
       as FakeDartDevelopmentService;
@@ -206,7 +206,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.platform,
     required super.fileSystem,
     required super.processManager,
-    required super.enableObservatory,
+    required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required UriConverter uriConverter,
   }) : super(

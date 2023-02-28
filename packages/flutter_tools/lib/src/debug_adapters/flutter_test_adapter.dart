@@ -153,7 +153,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
 
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
   void _handleTestStartedProcess(Map<String, Object?> params) {
-    final String? vmServiceUriString = params['observatoryUri'] as String?;
+    final String? vmServiceUriString = params['vmServiceUri'] as String?;
     // For no-debug mode, this event may be still sent so ignore it if we know
     // we're not debugging, or its URI is null.
     if (!enableDebugger || vmServiceUriString == null) {

@@ -56,7 +56,7 @@ import '../vmservice.dart';
 /// ```
 /// $ flutter attach
 /// ```
-/// As soon as a new observatory is detected the command attaches to it and
+/// As soon as a new VM Service is detected the command attaches to it and
 /// enables hot reloading.
 ///
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
@@ -97,18 +97,18 @@ class AttachCommand extends FlutterCommand {
       ..addOption(
         'debug-port',
         hide: !verboseHelp,
-        help: '(deprecated) Device port where the observatory is listening. Requires '
+        help: '(deprecated) Device port where the Dart VM Service is listening. Requires '
               '"--disable-service-auth-codes" to also be provided to the Flutter '
               'application at launch, otherwise this command will fail to connect to '
               'the application. In general, "--debug-url" should be used instead.',
       )..addOption(
         'debug-url',
         aliases: <String>[ 'debug-uri' ], // supported for historical reasons
-        help: 'The URL at which the observatory is listening.',
+        help: 'The URL at which the Dart VM Service is listening.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the app. '
-              'This can be specified to avoid being prompted if multiple observatory ports '
+              'This can be specified to avoid being prompted if multiple Dart VM Service ports '
               'are advertised.\n'
               'If you have multiple devices or emulators running, you should include the '
               'device hostname as well, e.g. "com.example.myApp@my-iphone".\n'
@@ -169,7 +169,7 @@ For Fuchsia, the module name must be provided, e.g. `$flutter attach
 --module=mod_name`. This can be called either before or after the application
 is started.
 
-If the app or module is already running and the specific observatory port is
+If the app or module is already running and the specific vmService port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
 
@@ -225,10 +225,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.vmServicePortOption)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command does not use '
-        'the value of --observatory-port.',
+        'the value of --vm-service-port.',
       );
     }
     if (debugPort != null && debugUri != null) {
@@ -281,7 +281,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         )
       : null;
 
-    Stream<Uri>? observatoryUri;
+    Stream<Uri>? vmServiceUri;
     bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -298,7 +298,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         FuchsiaIsolateDiscoveryProtocol? isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
+          vmServiceUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
         } on Exception {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -351,7 +351,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
         Future<Uri?>? protocolDiscoveryFuture;
         if (compatibleWithProtocolDiscovery) {
-          final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.observatory(
+          final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
             device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6!,
@@ -372,14 +372,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }
         discoveryStatus.stop();
 
-        observatoryUri = foundUrl == null
+        vmServiceUri = foundUrl == null
           ? null
           : Stream<Uri>.value(foundUrl).asBroadcastStream();
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
-      if (observatoryUri == null) {
-        final ProtocolDiscovery observatoryDiscovery =
-          ProtocolDiscovery.observatory(
+      if (vmServiceUri == null) {
+        final ProtocolDiscovery vmServiceDiscovery =
+          ProtocolDiscovery.vmService(
             // If it's an Android device, attaching relies on past log searching
             // to find the service protocol.
             await device.getLogReader(includePastLogs: device is AndroidDevice),
@@ -390,12 +390,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: _logger,
           );
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        observatoryUri = observatoryDiscovery.uris;
+        vmServiceUri = vmServiceDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
-        usesIpv6 = observatoryDiscovery.ipv6;
+        usesIpv6 = vmServiceDiscovery.ipv6;
       }
     } else {
-      observatoryUri = Stream<Uri>
+      vmServiceUri = Stream<Uri>
         .fromFuture(
           buildVMServiceUri(
             device,
@@ -413,7 +413,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       int? result;
       if (daemon != null) {
         final ResidentRunner runner = await createResidentRunner(
-          observatoryUris: observatoryUri,
+          vmServiceUris: vmServiceUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
@@ -446,7 +446,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       }
       while (true) {
         final ResidentRunner runner = await createResidentRunner(
-          observatoryUris: observatoryUri,
+          vmServiceUris: vmServiceUri,
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
@@ -476,7 +476,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }
         terminalHandler?.stop();
         assert(result != null);
-        if (runner.exited || !runner.isWaitingForObservatory) {
+        if (runner.exited || !runner.isWaitingForVmService) {
           break;
         }
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
@@ -495,7 +495,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> createResidentRunner({
-    required Stream<Uri> observatoryUris,
+    required Stream<Uri> vmServiceUris,
     required Device device,
     required FlutterProject flutterProject,
     required bool usesIpv6,
@@ -510,7 +510,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       userIdentifier: userIdentifier,
       platform: _platform,
     );
-    flutterDevice.observatoryUris = observatoryUris;
+    flutterDevice.vmServiceUris = vmServiceUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,

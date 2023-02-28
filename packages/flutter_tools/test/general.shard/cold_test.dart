@@ -141,7 +141,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get observatoryUris => const Stream<Uri>.empty();
+  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
 
   @override
   final Device device;
