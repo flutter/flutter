@@ -625,6 +625,16 @@ if (target_cpu != "x86") {
     ]
 
     deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+
+    if (host_os == "mac") {
+      deps += [ ":android_entitlement_config" ]
+      files += [
+        {
+          source = "$target_gen_dir/android_entitlements.txt"
+          destination = "entitlements.txt"
+        },
+      ]
+    }
   }
 
   # TODO(godofredoc): Remove gen_snapshot and rename new_gen_snapshot when v2 migration is complete.
