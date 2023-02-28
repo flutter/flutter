@@ -361,7 +361,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if ((stderr.contains('ffi_c.bundle') || stderr.contains('/ffi/')) &&
+    } else if ((_isFfiX86Error(stdout) || _isFfiX86Error(stderr)) &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
@@ -375,6 +375,10 @@ class CocoaPods {
         emphasis: true,
       );
     }
+  }
+
+  bool _isFfiX86Error(String error) {
+    return error.contains('ffi_c.bundle') || error.contains('/ffi/');
   }
 
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
