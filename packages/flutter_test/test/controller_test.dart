@@ -727,10 +727,10 @@ void main() {
 
       testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: Row(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('hello'),
                   Text('hello'),
                 ],
@@ -876,7 +876,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We look for a SingleChildScrollView since the view itself isn't
-        // important for accessiblity, so it won't show up in the traversal
+        // important for accessibility, so it won't show up in the traversal
         expect(
           () => tester.semantics.simulatedAccessibilityTraversal(start: find.byType(SingleChildScrollView)),
           throwsA(isA<StateError>()),

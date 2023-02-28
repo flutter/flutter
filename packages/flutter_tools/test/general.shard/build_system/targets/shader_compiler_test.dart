@@ -16,7 +16,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 const String fragDir = '/shaders';
-const String shaderLibDir = './shader_lib';
+const String shaderLibDir = '/./shader_lib';
 const String fragPath = '/shaders/my_shader.frag';
 const String notFragPath = '/shaders/not_a_frag.file';
 const String outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
@@ -327,7 +327,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targts', () async {
+  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[

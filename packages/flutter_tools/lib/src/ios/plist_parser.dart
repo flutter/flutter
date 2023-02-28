@@ -66,7 +66,6 @@ class PlistParser {
   ///
   /// The [plistFilePath] argument must not be null.
   Map<String, Object> parseFile(String plistFilePath) {
-    assert(plistFilePath != null);
     if (!_fileSystem.isFileSync(plistFilePath)) {
       return const <String, Object>{};
     }

@@ -90,9 +90,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-
   testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
-
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -128,7 +126,6 @@ void main() {
   });
 
   testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
-
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -367,6 +364,32 @@ void main() {
     await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/121098
+  testWidgets('Verify that accessibleNavigation has no impact on the BottomSheet animation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: child!,
+        );
+      },
+      home: const Center(child: Text('Test')),
+    ));
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    final BuildContext homeContext = tester.element(find.text('Test'));
+    showModalBottomSheet<void>(
+      context: homeContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pump();
+
+    await checkNonLinearAnimation(tester);
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
@@ -785,7 +808,15 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -833,7 +864,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgets('BottomSheet uses fallback values in maretial3',
+  testWidgets('BottomSheet uses fallback values in material3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -883,7 +914,6 @@ void main() {
       ),
     ));
 
-
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
@@ -929,7 +959,15 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
           ],
         ),
       ],

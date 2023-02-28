@@ -9,11 +9,9 @@ class TextFieldTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-
 TextStyle _m3InputStyle(BuildContext context) => ${textStyle("md.comp.filled-text-field.label-text")}!;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
-  ${textStyle("md.comp.filled-text-field.supporting-text")}!.copyWith(color:${componentColor('md.comp.filled-text-field.error.supporting-text')});
+  ${textStyle("md.comp.filled-text-field.supporting-text")}!.copyWith(color: ${componentColor('md.comp.filled-text-field.error.supporting-text')});
 ''';
 }

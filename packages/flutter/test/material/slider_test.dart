@@ -2949,6 +2949,51 @@ void main() {
     );
   });
 
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118955
+    double sliderValue = 0.0;
+    Widget buildFrame(ThemeMode themeMode) {
+      return MaterialApp(
+        themeMode: themeMode,
+        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
+        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: sliderValue,
+                  label: 'label',
+                  onChanged: (double value) => sliderValue = value,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(ThemeMode.light));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+    expect(renderObject.debugNeedsLayout, false);
+
+    await tester.pumpWidget(buildFrame(ThemeMode.dark));
+    await tester.pump(
+      const Duration(milliseconds: 100), // to let the theme animate
+      EnginePhase.build,
+    );
+
+    expect(renderObject.debugNeedsLayout, true);
+
+    // Pump the rest of the frames to complete the test.
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -3436,6 +3481,61 @@ void main() {
       isNot(paints..path(color: const Color(0xff000000))..paragraph()),
     );
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+    // Test covering crashing found in Google internal issue b/192329942.
+    double value = 0.0;
+    final ValueNotifier<bool> shouldShowSliderListenable =
+        ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: shouldShowSliderListenable,
+                    builder: (BuildContext context, bool shouldShowSlider, _) {
+                      return shouldShowSlider
+                          ? Slider(
+                              value: value,
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  value = newValue;
+                                });
+                              },
+                            )
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester
+        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
+
+    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
+    // event performed on `Slider` before it is about to get unmounted.
+    shouldShowSliderListenable.value = false;
+
+    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(value, equals(0.0));
+
+    // This is supposed to trigger animation on `Slider` if it is mounted.
+    await gesture.up();
+
+    expect(tester.takeException(), null);
+  });
 
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
