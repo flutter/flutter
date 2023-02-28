@@ -1,42 +1,5 @@
 workflows:
-    android-workflow:
-        name: RJ Android Mobile Flutter
-        max_build_duration: 120
-#        instance_type: mac_mini_m1
-        environment:
-          vars:
-            ENV: DEV
-          flutter: stable
-          xcode: latest
-          cocoapods: default
-        triggering:
-          events:
-            - push
-          branch_patterns:
-            - pattern: master
-              include: true
-              source: true
-          tag_patterns:
-            - pattern: "*"
-              include: true
-        scripts:
-          - name: Set up local.properties
-            script: |
-               echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
-          - name: Get Flutter packages
-            script: | 
-              flutter packages pub get
-          - name: Build APK with Flutter
-            script: | 
-              flutter build apk --release
-        artifacts:
-          - build/**/outputs/**/*.aab
-          - build/**/outputs/**/mapping.txt
-          - flutter_drive.log
-        publishing:
-          email:
-            recipients:
-              - rakeshyadav.j3@gmail.com
-            notify:
-              success: true
-              failure: false
+  hello-world:
+    name: Hello world workflow
+    scripts:
+        - echo "Hello World!"
