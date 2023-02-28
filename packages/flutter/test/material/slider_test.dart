@@ -15,7 +15,6 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../widgets/semantics_tester.dart';
 
 // A thumb shape that also logs its repaint center.
 class LoggingThumbShape extends SliderComponentShape {
@@ -1148,7 +1147,7 @@ void main() {
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -1162,51 +1161,24 @@ void main() {
       ),
     ));
 
-    await tester.pumpAndSettle();
-
+    SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            hasEnabledState: true,
+            isEnabled: true,
+            isFocusable: true,
+            isSlider: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            value: '50%',
+            increasedValue: '55%',
+            decreasedValue: '45%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
 
@@ -1222,95 +1194,29 @@ void main() {
         ),
       ),
     ));
-
+    semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            isSlider: true,
+            hasEnabledState: true,
+            value: '50%',
+            increasedValue: '55%',
+            decreasedValue: '45%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
 
-    await tester.pump();
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
-
-    semantics.dispose();
+    handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1330,41 +1236,24 @@ void main() {
       ),
     );
 
+    SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            isEnabled: true,
+            isSlider: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
 
@@ -1381,47 +1270,29 @@ void main() {
       ),
     ));
 
+    semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isSlider],
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            isSlider: true,
+            hasEnabledState: true,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
-    semantics.dispose();
+
+    handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -1435,52 +1306,25 @@ void main() {
       ),
     ));
 
-    await tester.pumpAndSettle();
-
+    SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            isEnabled: true,
+            isSlider: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            hasDidGainAccessibilityFocusAction: true,
+            value: '50%',
+            increasedValue: '55%',
+            decreasedValue: '45%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
 
@@ -1496,101 +1340,30 @@ void main() {
         ),
       ),
     ));
-
+    semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            isSlider: true,
+            hasEnabledState: true,
+            hasDidGainAccessibilityFocusAction: true,
+            value: '50%',
+            increasedValue: '55%',
+            decreasedValue: '45%',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
 
-    await tester.pump();
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
-
-    semantics.dispose();
+    handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -1607,49 +1380,33 @@ void main() {
       ),
     ));
 
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            isEnabled: true,
+            isSlider: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            value: '40',
+            increasedValue: '60',
+            decreasedValue: '20',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
-    semantics.dispose();
+
+    handle.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
   testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -1667,44 +1424,28 @@ void main() {
       ),
     ));
 
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            isEnabled: true,
+            isSlider: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            value: '40',
+            increasedValue: '60',
+            decreasedValue: '20',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
       ),
     );
-    semantics.dispose();
+
+    handle.dispose();
   });
 
   testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
@@ -2376,9 +2117,10 @@ void main() {
   });
 
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -2391,55 +2133,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(Slider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        children: <Matcher>[
+          matchesSemantics(
+            isEnabled: true,
+            isSlider: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            hasIncreaseAction: true,
+            hasDecreaseAction: true,
+            hasDidGainAccessibilityFocusAction: true,
+            value: '50%',
+            increasedValue: '55%',
+            decreasedValue: '45%',
             textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 2,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 4,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasEnabledState,
-                          SemanticsFlag.isEnabled,
-                          SemanticsFlag.isFocusable,
-                          SemanticsFlag.isSlider,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.increase,
-                          SemanticsAction.decrease,
-                          SemanticsAction.didGainAccessibilityFocus,
-                        ],
-                        value: '50%',
-                        increasedValue: '55%',
-                        decreasedValue: '45%',
-                        textDirection: TextDirection.ltr,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
           ),
         ],
       ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    );
 
     expect(focusNode.hasFocus, isFalse);
-    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
-    semantics.dispose();
+
+    handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
