@@ -237,6 +237,7 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {

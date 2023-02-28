@@ -4510,7 +4510,6 @@ void main() {
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      addTearDown(semantics.dispose);
 
       controls.testCanCopy = false;
       controls.testCanCut = false;
@@ -4603,6 +4602,7 @@ void main() {
           ],
         ),
       );
+      semantics.dispose();
     });
 
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
