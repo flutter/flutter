@@ -46,6 +46,7 @@ library configuration;
 
 import 'package:js/js.dart';
 import 'package:meta/meta.dart';
+import 'canvaskit/renderer.dart';
 import 'dom.dart';
 
 /// The version of CanvasKit used by the web engine by default.
@@ -156,7 +157,8 @@ class FlutterConfiguration {
   // runtime. Runtime-supplied values take precedence over environment
   // variables.
 
-  /// The URL to use when downloading the CanvasKit script and associated wasm.
+  /// The base URL to use when downloading the CanvasKit script and associated
+  /// wasm.
   ///
   /// The expected directory structure nested under this URL is as follows:
   ///
@@ -182,6 +184,22 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_URL',
     defaultValue: 'https://unpkg.com/canvaskit-wasm@$_canvaskitVersion/bin/',
   );
+
+  /// The variant of CanvasKit to download.
+  ///
+  /// Available values are:
+  ///
+  /// * `auto` - the default value. The engine will automatically detect the
+  /// best variant to use based on the browser.
+  ///
+  /// * `full` - the full variant of CanvasKit that can be used in any browser.
+  ///
+  /// * `chromium` - the lite variant of CanvasKit that can be used in
+  /// Chromium-based browsers.
+  CanvasKitVariant get canvasKitVariant {
+    final String variant = _configuration?.canvasKitVariant ?? 'auto';
+    return CanvasKitVariant.values.byName(variant);
+  }
 
   /// If set to true, forces CPU-only rendering in CanvasKit (i.e. the engine
   /// won't use WebGL).
@@ -249,6 +267,7 @@ class JsFlutterConfiguration {}
 
 extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   external String? get canvasKitBaseUrl;
+  external String? get canvasKitVariant;
   external bool? get canvasKitForceCpuOnly;
   external double? get canvasKitMaximumSurfaces;
   external bool? get debugShowSemanticsNodes;
