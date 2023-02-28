@@ -333,7 +333,6 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
-    assert(projectName != null);
     return projectName;
   }
 
@@ -354,6 +353,7 @@ abstract class CreateBase extends FlutterCommand {
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
     bool withFfiPluginHook = false,
+    bool withEmptyMain = false,
     bool ios = false,
     bool android = false,
     bool web = false,
@@ -409,6 +409,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
       'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
+      'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
@@ -686,7 +687,7 @@ abstract class CreateBase extends FlutterCommand {
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
-        if (modes != null && modes.contains('x')) {
+        if (modes.contains('x')) {
           globals.os.makeExecutable(destinationFile);
         }
       },

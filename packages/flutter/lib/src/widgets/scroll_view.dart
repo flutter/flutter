@@ -99,19 +99,13 @@ abstract class ScrollView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(scrollDirection != null),
-       assert(reverse != null),
-       assert(shrinkWrap != null),
-       assert(dragStartBehavior != null),
-       assert(clipBehavior != null),
-       assert(
+  }) : assert(
          !(controller != null && (primary ?? false)),
          'Primary ScrollViews obtain their ScrollController via inheritance '
          'from a PrimaryScrollController widget. You cannot both set primary to '
          'true and pass an explicit controller.',
        ),
        assert(!shrinkWrap || center == null),
-       assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
        physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null);
@@ -186,6 +180,12 @@ abstract class ScrollView extends StatelessWidget {
   /// [TargetPlatformVariant.mobile] for ScrollViews in the [Axis.vertical]
   /// scroll direction. Adding another to your app will override the
   /// PrimaryScrollController above it.
+  ///
+  /// The following video contains more information about scroll controllers,
+  /// the PrimaryScrollController widget, and their impact on your apps:
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=33_0ABjFJUU}
+  ///
   /// {@endtemplate}
   final bool? primary;
 
@@ -411,7 +411,7 @@ abstract class ScrollView extends StatelessWidget {
         ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
     final ScrollController? scrollController = effectivePrimary
-        ? PrimaryScrollController.of(context)
+        ? PrimaryScrollController.maybeOf(context)
         : controller;
 
     final Scrollable scrollable = Scrollable(
@@ -946,7 +946,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// ListView(
-///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: const <Widget>[
 ///     Text("I'm dedicating every day to you"),
@@ -961,7 +960,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// CustomScrollView(
-///   shrinkWrap: true,
 ///   slivers: <Widget>[
 ///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
@@ -1253,34 +1251,23 @@ class ListView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
-  }) : assert(itemBuilder != null),
-       assert(separatorBuilder != null),
-       assert(itemCount != null && itemCount >= 0),
+  }) : assert(itemCount >= 0),
        itemExtent = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           final Widget? widget;
            if (index.isEven) {
-             widget = itemBuilder(context, itemIndex);
-           } else {
-             widget = separatorBuilder(context, itemIndex);
-             assert(() {
-               if (widget == null) {
-                 throw FlutterError('separatorBuilder cannot return null.');
-               }
-               return true;
-             }());
+             return itemBuilder(context, itemIndex);
            }
-           return widget;
+           return separatorBuilder(context, itemIndex);
          },
          findChildIndexCallback: findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-         semanticIndexCallback: (Widget _, int index) {
+         semanticIndexCallback: (Widget widget, int index) {
            return index.isEven ? index ~/ 2 : null;
          },
        ),
@@ -1393,8 +1380,7 @@ class ListView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
-  }) : assert(childrenDelegate != null),
-       assert(
+  }) : assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        );
@@ -1730,8 +1716,7 @@ class GridView extends BoxScrollView {
     super.clipBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
-  }) : assert(gridDelegate != null),
-       childrenDelegate = SliverChildListDelegate(
+  }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1787,8 +1772,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
-  }) : assert(gridDelegate != null),
-       childrenDelegate = SliverChildBuilderDelegate(
+  }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
@@ -1824,8 +1808,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
-  }) : assert(gridDelegate != null),
-       assert(childrenDelegate != null);
+  });
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
   /// the cross axis.

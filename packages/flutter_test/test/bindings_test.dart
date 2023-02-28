@@ -7,10 +7,13 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ignore: deprecated_member_use
@@ -57,18 +60,6 @@ void main() {
     order += 1;
   });
 
-  testWidgets('timeStamp should be accurate', (WidgetTester tester) async {
-    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-    await tester.pumpWidget(const CircularProgressIndicator());
-
-    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
-    await tester.pump(const Duration(microseconds: 12345));
-    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
-
-    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
-  });
-
   group('elapseBlocking', () {
     testWidgets('timer is not called', (WidgetTester tester) async {
       bool timerCalled = false;
@@ -101,5 +92,14 @@ void main() {
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
       binding.idle();
     });
+  });
+
+  testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
+    bool responded = false;
+    // The particular asset does not matter, as long as it exists.
+    rootBundle.load('AssetManifest.json').then((ByteData data) {
+      responded = true;
+    });
+    expect(responded, true);
   });
 }

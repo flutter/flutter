@@ -283,6 +283,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     final Widget title = DefaultTextStyle(
       style: titleTextStyle,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       child: widget.title,
     );
 
@@ -303,6 +304,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       subtitle = DefaultTextStyle(
         style: subtitleTextStyle,
         maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         child: widget.subtitle!,
       );
     }
@@ -353,18 +355,19 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
               SizedBox(width: widget.leadingToTitle),
             ] else
               SizedBox(height: widget.leadingSize),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                title,
-                if (subtitle != null) ...<Widget>[
-                  const SizedBox(height: _kNotchedTitleToSubtitle),
-                  subtitle,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  title,
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: _kNotchedTitleToSubtitle),
+                    subtitle,
+                  ],
                 ],
-              ],
+              ),
             ),
-            const Spacer(),
             if (additionalInfo != null) ...<Widget>[
               additionalInfo,
               if (widget.trailing != null)

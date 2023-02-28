@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -19,7 +20,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           SystemChannels.platform,
           mockClipboard.handleMethodCall,
@@ -30,7 +31,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -458,7 +459,7 @@ void main() {
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
-      // Tapping Select all changes the menu items so that there is no no longer
+      // Tapping Select all changes the menu items so that there is no longer
       // any overflow.
       await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
@@ -610,7 +611,6 @@ void main() {
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsNothing);
         expect(find.byType(IconButton), findsNothing);
-
 
         // The menu appears at the top of the visible selection.
         final Offset selectionOffset = tester

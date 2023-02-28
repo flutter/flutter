@@ -451,7 +451,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
             return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
-                _play(_allDemos[DefaultTabController.of(context)!.index]);
+                _play(_allDemos[DefaultTabController.of(context).index]);
               },
             );
           },

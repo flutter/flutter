@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [FocusNode.unfocus].
+// Flutter code sample for [FocusNode.unfocus].
 
 
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
+      child: ColoredBox(
         color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

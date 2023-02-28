@@ -1000,7 +1000,7 @@ void main() {
       ),
     );
 
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // 5 tick marks and a thumb.
     expect(material, paintsExactlyCountTimes(#drawCircle, 6));
@@ -1056,7 +1056,7 @@ void main() {
     }
 
     Future<void> testReparenting(bool reparent) async {
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
       final Offset center = tester.getCenter(find.byType(Slider));
       // Move to 0.0.
       TestGesture gesture = await tester.startGesture(Offset.zero);
@@ -1710,28 +1710,25 @@ void main() {
   testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return SliderTheme(
-                data: SliderThemeData(
-                  overlayColor: Colors.orange[500],
-                ),
-                child: Slider(
-                  value: value,
-                  onChanged: enabled
-                    ? (double newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
-                  autofocus: true,
-                  focusNode: focusNode,
-                ),
+              return Slider(
+                value: value,
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+                autofocus: true,
+                focusNode: focusNode,
               );
             }),
           ),
@@ -1745,16 +1742,16 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: Colors.orange[500]),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
     );
 
-    // Check that the overlay does not show when focused and disabled.
+    // Check that the overlay does not show when unfocused and disabled.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: Colors.orange[500])),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
     );
   });
 
@@ -1813,26 +1810,23 @@ void main() {
 
   testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return SliderTheme(
-                data: SliderThemeData(
-                  overlayColor: Colors.orange[500],
-                ),
-                child: Slider(
-                  value: value,
-                  onChanged: enabled
-                    ? (double newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
-                ),
+              return Slider(
+                value: value,
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
               );
             }),
           ),
@@ -1858,7 +1852,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: Colors.orange[500]),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.08)),
     );
 
     // Slider does not have an overlay when disabled and hovered.
@@ -1931,6 +1925,67 @@ void main() {
     );
   });
 
+  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double value = 0.5;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final Key sliderKey = UniqueKey();
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                key: sliderKey,
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have overlay when enabled and not dragged.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+    );
+
+    // Start dragging.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    // Slider has overlay when enabled and dragged.
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+    );
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    // Slider still has overlay when stopped dragging.
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+    );
+  });
+
   testWidgets('Slider has correct dragged color from overlayColor property', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
@@ -1990,10 +2045,10 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
 
-    // Slider does not have an overlay when stopped dragging.
+    // Slider still has overlay when stopped dragging.
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: Colors.lime[500])),
+      paints..circle(color: Colors.lime[500]),
     );
   });
 
@@ -2030,7 +2085,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
     // Check that thumb color is using active color.
     expect(material, paints..circle(color: activeColor));
 
@@ -2894,6 +2949,51 @@ void main() {
     );
   });
 
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118955
+    double sliderValue = 0.0;
+    Widget buildFrame(ThemeMode themeMode) {
+      return MaterialApp(
+        themeMode: themeMode,
+        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
+        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: sliderValue,
+                  label: 'label',
+                  onChanged: (double value) => sliderValue = value,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(ThemeMode.light));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+    expect(renderObject.debugNeedsLayout, false);
+
+    await tester.pumpWidget(buildFrame(ThemeMode.dark));
+    await tester.pump(
+      const Duration(milliseconds: 100), // to let the theme animate
+      EnginePhase.build,
+    );
+
+    expect(renderObject.debugNeedsLayout, true);
+
+    // Pump the rest of the frames to complete the test.
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -2989,7 +3089,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final MaterialInkController material =
-        Material.of(tester.element(find.byType(Slider)))!;
+        Material.of(tester.element(find.byType(Slider)));
     expect(material, paints..circle(color: color));
   });
 
@@ -3012,7 +3112,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final MaterialInkController material =
-        Material.of(tester.element(find.byType(Slider)))!;
+        Material.of(tester.element(find.byType(Slider)));
     expect(material, paints..circle(color: color));
   });
 
@@ -3032,7 +3132,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final MaterialInkController material =
-        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+        Material.of(tester.element(find.byType(CupertinoSlider)));
     expect(
       material,
       paints
@@ -3064,7 +3164,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final MaterialInkController material =
-        Material.of(tester.element(find.byType(CupertinoSlider)))!;
+        Material.of(tester.element(find.byType(CupertinoSlider)));
     expect(
       material,
       paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: color),
@@ -3176,5 +3276,431 @@ void main() {
 
     expect(sliderEnd, true);
     expect(dragStarted, false);
+  });
+
+  testWidgets('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
+    double value = 0.5;
+    const Color overlayColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have overlay when enabled and not hovered.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+
+    // Hover on the slider but outside the thumb.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getTopLeft(find.byType(Slider)));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+
+    // Hover on the thumb.
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+
+    // Hover on the slider but outside the thumb.
+    await gesture.moveTo(tester.getBottomRight(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Overlay remains when Slider is in focus on desktop', (WidgetTester tester) async {
+    double value = 0.5;
+    const Color overlayColor = Color(0xffff0000);
+    final FocusNode focusNode = FocusNode();
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                focusNode: focusNode,
+                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have overlay when enabled and not tapped.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap somewhere to bring overlay.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await gesture.up();
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+
+    tapLocation = Offset(sliderCenter.dx - 50, sliderCenter.dy);
+    await gesture.down(tapLocation);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
+    double value = 0.5;
+    final FocusNode focusNode = FocusNode();
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: const SliderThemeData(
+            showValueIndicator: ShowValueIndicator.always,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                focusNode: focusNode,
+                divisions: 5,
+                label: value.toStringAsFixed(1),
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not show value indicator without focus.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap somewhere to bring value indicator.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await gesture.up();
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..path(color: const Color(0xff000000))..paragraph(),
+    );
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+    // Test covering crashing found in Google internal issue b/192329942.
+    double value = 0.0;
+    final ValueNotifier<bool> shouldShowSliderListenable =
+        ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: shouldShowSliderListenable,
+                    builder: (BuildContext context, bool shouldShowSlider, _) {
+                      return shouldShowSlider
+                          ? Slider(
+                              value: value,
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  value = newValue;
+                                });
+                              },
+                            )
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester
+        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
+
+    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
+    // event performed on `Slider` before it is about to get unmounted.
+    shouldShowSliderListenable.value = false;
+
+    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(value, equals(0.0));
+
+    // This is supposed to trigger animation on `Slider` if it is mounted.
+    await gesture.up();
+
+    expect(tester.takeException(), null);
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData();
+      double value = 0.5;
+      Widget buildApp({bool enabled = true}) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  onChanged: enabled
+                    ? (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildApp());
+
+      // Slider does not have overlay when enabled and not hovered.
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      );
+
+      // Start hovering.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+
+      // Slider has overlay when enabled and hovered.
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      );
+
+      // Slider does not have an overlay when disabled and hovered.
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      );
+    });
+
+    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData();
+      double value = 0.5;
+      Widget buildApp({bool enabled = true}) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  onChanged: enabled
+                    ? (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
+                  autofocus: true,
+                  focusNode: focusNode,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildApp());
+
+      // Check that the overlay shows when focused.
+      await tester.pumpAndSettle();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      );
+
+      // Check that the overlay does not show when unfocused and disabled.
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasPrimaryFocus, isFalse);
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      );
+    });
+
+    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      double value = 0.5;
+      final ThemeData theme = ThemeData();
+      final Key sliderKey = UniqueKey();
+
+      Widget buildApp({bool enabled = true}) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  key: sliderKey,
+                  onChanged: enabled
+                    ? (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildApp());
+
+      // Slider does not have overlay when enabled and not dragged.
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      );
+
+      // Start dragging.
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+      await tester.pump(kPressTimeout);
+
+      // Less than configured touch slop, more than default touch slop
+      await drag.moveBy(const Offset(19.0, 0));
+      await tester.pump();
+
+      // Slider has overlay when enabled and dragged.
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      );
+
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      // Slider still has overlay when stopped dragging.
+      expect(
+        Material.of(tester.element(find.byType(Slider))),
+        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      );
+    });
   });
 }

@@ -207,12 +207,7 @@ class ToggleButtons extends StatelessWidget {
     this.borderWidth,
     this.direction = Axis.horizontal,
     this.verticalDirection = VerticalDirection.down,
-  }) :
-    assert(children != null),
-    assert(isSelected != null),
-    assert(children.length == isSelected.length),
-    assert(direction != null),
-    assert(direction == Axis.horizontal || verticalDirection != null);
+  }) : assert(children.length == isSelected.length);
 
   static const double _defaultBorderWidth = 1.0;
 
@@ -653,18 +648,6 @@ class ToggleButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      !isSelected.any((bool val) => val == null),
-      'All elements of isSelected must be non-null.\n'
-      'The current list of isSelected values is as follows:\n'
-      '$isSelected',
-    );
-    assert(
-      focusNodes == null || !focusNodes!.any((FocusNode val) => val == null),
-      'All elements of focusNodes must be non-null.\n'
-      'The current list of focus node values is as follows:\n'
-      '$focusNodes',
-    );
-    assert(
       () {
         if (focusNodes != null) {
           return focusNodes!.length == children.length;
@@ -798,7 +781,7 @@ class ToggleButtons extends StatelessWidget {
       return MergeSemantics(
         child: Semantics(
           container: true,
-          toggled: isSelected[index],
+          checked: isSelected[index],
           enabled: onPressed != null,
           child: _InputPadding(
             minSize: minPaddingSize,

@@ -24,6 +24,7 @@
 
 // This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -297,11 +298,13 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  })
-  // TODO(srawlins): Fix this static issue,
-  // https://github.com/flutter/flutter/issues/105750.
-  // ignore: body_might_complete_normally_catch_error
-  .catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
+  }).then(
+    (int i) => i,
+    onError: (Object error) {
+      // ignore errors here, they will be reported on the next line
+      return -1; // discarded
+    },
+  ));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -499,7 +502,7 @@ void main() {
         <String>['run', '-dflutter-tester', testScript],
         testDirectory,
         <Transition>[
-          Barrier(RegExp(r'^An Observatory debugger and profiler on Flutter test device is available at: ')),
+          Barrier(RegExp(r'^A Dart VM Service on Flutter test device is available at: ')),
           Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
             return 'r';
           }),
@@ -519,7 +522,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:12$')),
+        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),
@@ -548,6 +551,7 @@ void main() {
         '  verticalDirection: down',
         '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
         '════════════════════════════════════════════════════════════════════════════════════════════════════',
+        '',
         startsWith('Reloaded 0 libraries in '),
         '',
         'Application finished.',
@@ -590,9 +594,7 @@ void main() {
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
       '',
-      contains('Running with sound null safety'),
-      '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Flutter run key commands.',
@@ -619,9 +621,7 @@ void main() {
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
       '',
-      contains('Running with sound null safety'),
-      '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',

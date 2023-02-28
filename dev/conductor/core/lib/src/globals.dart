@@ -103,7 +103,7 @@ bool getBoolFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
-    return (env[envName]?.toUpperCase()) == 'TRUE';
+    return env[envName]?.toUpperCase() == 'TRUE';
   }
   return argResults[name] as bool;
 }
@@ -126,7 +126,7 @@ List<String> getValuesFromEnvOrArgs(
   if (env[envName] != null && env[envName] != '') {
     return env[envName]!.split(',');
   }
-  final List<String> argValues = argResults[name] as List<String>;
+  final List<String>? argValues = argResults[name] as List<String>?;
   if (argValues != null) {
     return argValues;
   }

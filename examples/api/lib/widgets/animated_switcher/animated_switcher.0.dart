@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AnimatedSwitcher].
+// Flutter code sample for [AnimatedSwitcher].
 
 import 'package:flutter/material.dart';
 
@@ -34,7 +34,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

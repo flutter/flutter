@@ -1467,7 +1467,7 @@ void main() {
     await tester.pumpAndSettle();
     expectBorder();
 
-    // Checkbox is selected/interdeterminate, so the specified BorderSide
+    // Checkbox is selected/indeterminate, so the specified BorderSide
     // does not appear.
 
     await tester.pumpWidget(buildApp(value: true));
@@ -1587,11 +1587,12 @@ void main() {
 
   testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool autoFocus = true}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: themeData,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1617,7 +1618,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: theme.colorScheme.error.withOpacity(0.12))..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -1627,7 +1628,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Start hovering
@@ -1639,8 +1640,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.08))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+        ..path(color: themeData.colorScheme.error)
     );
 
     // Start pressing
@@ -1649,11 +1650,124 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.12))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();
     await tester.pump();
+  });
+
+  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    const Color borderColor = Color(0xffffeb3b);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool? value = false;
+    Widget buildApp({bool autoFocus = true}) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                isError: true,
+                side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.error)) {
+                    return const BorderSide(color: borderColor, width: 4);
+                  }
+                  return const BorderSide(color: Colors.red, width: 2);
+                }),
+                value: value,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: autoFocus,
+                focusNode: focusNode,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    void expectBorder() {
+      expect(
+        tester.renderObject<RenderBox>(find.byType(Checkbox)),
+        paints
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(2)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    // Focused
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expectBorder();
+
+    // Default color
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildApp(autoFocus: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expectBorder();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    // Start pressing
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pump();
+    expectBorder();
+    await gestureLongPress.up();
+    await tester.pump();
+  });
+
+  testWidgets('Checkbox has correct default shape - M3', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+
+    Widget buildApp() {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: false,
+                onChanged: (bool? newValue) {},
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    final OutlinedBorder? expectedShape = themeData.checkboxTheme.shape;
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, expectedShape);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBR(15.0, 15.0, 33.0, 33.0, const Radius.circular(2)),
+          inner: RRect.fromLTRBR(17.0, 17.0, 31.0, 31.0, Radius.zero),
+        ),
+    );
   });
 }
 

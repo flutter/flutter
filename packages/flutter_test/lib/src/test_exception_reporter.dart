@@ -24,7 +24,6 @@ typedef TestExceptionReporter = void Function(FlutterErrorDetails details, Strin
 TestExceptionReporter get reportTestException => _reportTestException;
 TestExceptionReporter _reportTestException = _defaultTestExceptionReporter;
 set reportTestException(TestExceptionReporter handler) {
-  assert(handler != null);
   _reportTestException = handler;
 }
 

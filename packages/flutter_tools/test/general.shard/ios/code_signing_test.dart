@@ -39,7 +39,7 @@ void main() {
 
     testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
       final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-        buildSettings: null,
+        buildSettings: <String, String>{},
         processManager: FakeProcessManager.empty(),
         platform: macosPlatform,
         logger: logger,

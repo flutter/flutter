@@ -61,9 +61,15 @@ class CreateCommand extends CreateBase {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the "main.dart" for an application. Implies '
         '"--template=app". The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.dev/). An example can be found at: '
+        'documentation website (https://api.flutter.dev/). An example can be found at: '
         'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
+    );
+    argParser.addFlag(
+      'empty',
+      abbr: 'e',
+      help: 'Specifies creating using an application template with a main.dart that is minimal, '
+        'including no comments, as a starting point for a new application. Implies "--template=app".',
     );
     argParser.addOption(
       'list-samples',
@@ -191,9 +197,17 @@ class CreateCommand extends CreateBase {
       return FlutterCommandResult.success();
     }
 
+    if (argResults!.wasParsed('empty') && argResults!.wasParsed('sample')) {
+      throwToolExit(
+        'Only one of --empty or --sample may be specified, not both.',
+        exitCode: 2,
+      );
+    }
+
     validateOutputDirectoryArg();
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
+    final bool emptyArgument = boolArg('empty') ?? false;
     if (sampleArgument != null) {
       final String? templateArgument = stringArg('template');
       if (templateArgument != null && stringToProjectType(templateArgument) != FlutterProjectType.app) {
@@ -218,7 +232,7 @@ class CreateCommand extends CreateBase {
         'The "--platforms" argument is not supported in $template template.',
         exitCode: 2
       );
-    } else if (platforms == null || platforms.isEmpty) {
+    } else if (platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
     } else if (generateFfiPlugin && argResults!.wasParsed('platforms') && platforms.contains('web')) {
@@ -299,6 +313,7 @@ class CreateCommand extends CreateBase {
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
       withFfiPluginHook: generateFfiPlugin,
+      withEmptyMain: emptyArgument,
       androidLanguage: stringArgDeprecated('android-language'),
       iosLanguage: stringArgDeprecated('ios-language'),
       iosDevelopmentTeam: developmentTeam,
@@ -308,8 +323,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      // Enable null safety everywhere.
-      dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
+      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
       implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -400,6 +414,7 @@ class CreateCommand extends CreateBase {
         context: pubContext,
         project: project,
         offline: boolArgDeprecated('offline'),
+        outputMode: PubOutputMode.summaryOnly,
       );
       await project.ensureReadyForPlatformSpecificTooling(
         androidPlatform: includeAndroid,
@@ -411,11 +426,15 @@ class CreateCommand extends CreateBase {
       );
     }
     if (sampleCode != null) {
-      generatedFileCount += _applySample(relativeDir, sampleCode);
+      _applySample(relativeDir, sampleCode);
+    }
+    if (sampleCode != null || emptyArgument) {
+      generatedFileCount += _removeTestDir(relativeDir);
     }
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
-    final String application = sampleCode != null ? 'sample application' : 'application';
+    final String application =
+      '${emptyArgument ? 'empty ' : ''}${sampleCode != null ? 'sample ' : ''}application';
     if (generatePackage) {
       final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
         relativeDirPath,
@@ -457,6 +476,10 @@ class CreateCommand extends CreateBase {
 
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
+You can find general documentation for Flutter at: https://docs.flutter.dev/
+Detailed API documentation is available at: https://api.flutter.dev/
+If you prefer video documentation, consider: https://www.youtube.com/c/flutterdev
+
 In order to run your $application, type:
 
   \$ cd $relativeAppPath
@@ -573,7 +596,7 @@ Your $application code is in $relativeAppMain.
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
     generatedCount += await generateApp(
-      <String>['app', 'app_test_widget'],
+      <String>['app', 'app_test_widget', 'app_integration_test'],
       project.example.directory,
       templateContext,
       overwrite: overwrite,
@@ -657,10 +680,13 @@ Your $application code is in $relativeAppMain.
   // documentation website in sampleCode. Returns the difference in the number
   // of files after applying the sample, since it also deletes the application's
   // test directory (since the template's test doesn't apply to the sample).
-  int _applySample(Directory directory, String sampleCode) {
+  void _applySample(Directory directory, String sampleCode) {
     final File mainDartFile = directory.childDirectory('lib').childFile('main.dart');
     mainDartFile.createSync(recursive: true);
     mainDartFile.writeAsStringSync(sampleCode);
+  }
+
+  int _removeTestDir(Directory directory) {
     final Directory testDir = directory.childDirectory('test');
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
     testDir.deleteSync(recursive: true);
@@ -705,7 +731,7 @@ Your plugin code is in $relativePluginMain.
 Your example app code is in $relativeExampleMain.
 
 ''');
-  if (platformsString != null && platformsString.isNotEmpty) {
+  if (platformsString.isNotEmpty) {
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.

@@ -33,6 +33,19 @@ const String stablePostReleaseMsg = """
   '\t 4. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
 """;
+// The helper functions in `state.dart` wrap the code-generated dart files in
+// `lib/src/proto/`. The most interesting of these functions is:
+
+// * `pb.ConductorState readStateFromFile(File)` - uses the code generated
+// `.mergeFromProto3Json()` method to deserialize the JSON content from the
+// config file into a Dart instance of the `ConductorState` class.
+// * `void writeStateFromFile(File, pb.ConductorState, List<String>)`
+// - similarly calls the `.toProto3Json()` method to serialize a
+// * `ConductorState` instance to a JSON string which is then written to disk.
+// `String phaseInstructions(pb.ConductorState state)` - returns instructions
+// for what the user is supposed to do next based on `state.currentPhase`.
+// * `String presentState(pb.ConductorState state)` - pretty print the state file.
+// This is a little easier to read than the raw JSON.
 
 String luciConsoleLink(String channel, String groupName) {
   assert(
@@ -45,6 +58,9 @@ String luciConsoleLink(String channel, String groupName) {
   );
   final String consoleName =
       channel == 'master' ? groupName : '${channel}_$groupName';
+  if (groupName == 'packaging') {
+    return 'https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console';
+  }
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
 
@@ -86,8 +102,7 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Engine cherrypicks.');
   }
-  if (state.engine.dartRevision != null &&
-      state.engine.dartRevision.isNotEmpty) {
+  if (state.engine.dartRevision.isNotEmpty) {
     buffer.writeln('New Dart SDK revision: ${state.engine.dartRevision}');
   }
   buffer.writeln('Framework Repo');
@@ -149,6 +164,10 @@ String phaseInstructions(pb.ConductorState state) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
           'to the next step.',
+          '\n',
+          '******************************************************',
+          '* Create a new entry in http://go/release-eng-retros *',
+          '******************************************************',
         ].join('\n');
       }
       return <String>[
@@ -267,7 +286,6 @@ String githubAccount(String remoteUrl) {
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
 ReleasePhase getNextPhase(ReleasePhase currentPhase) {
-  assert(currentPhase != null);
   final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
   if (nextPhase == null) {
     throw globals.ConductorException('There is no next ReleasePhase!');

@@ -104,7 +104,7 @@ const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
-/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// {@macro flutter.flutter.ListenableBuilder.ChangeNotifier.rebuild}
 ///
 /// See also:
 ///
@@ -321,6 +321,12 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(
+      _notificationCallStackDepth == 0,
+      'The "dispose()" method on $this was called during the call to '
+      '"notifyListeners()". This is likely to cause errors since it modifies '
+      'the list of listeners while the list is being used.',
+    );
     assert(() {
       _debugDisposed = true;
       return true;

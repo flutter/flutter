@@ -119,9 +119,9 @@ class PlatformAdaptiveIcons implements Icons {
 /// ![The following code snippet would generate a row of icons consisting of a pink heart, a green musical note, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   mainAxisAlignment: MainAxisAlignment.spaceAround,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     Icon(
 ///       Icons.favorite,
 ///       color: Colors.pink,
@@ -148,6 +148,8 @@ class PlatformAdaptiveIcons implements Icons {
 ///  * [Icon]
 ///  * [IconButton]
 ///  * <https://material.io/resources/icons>
+///  * [AnimatedIcons], for the list of available animated Material Icons.
+@staticIconProvider
 class Icons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.

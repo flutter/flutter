@@ -189,7 +189,7 @@ enum SchedulerPhase {
 /// See also:
 ///
 /// * [PerformanceModeRequestHandle] for more information on the lifecycle of the handle.
-typedef _PerformanceModeCleaupCallback = VoidCallback;
+typedef _PerformanceModeCleanupCallback = VoidCallback;
 
 /// An opaque handle that keeps a request for [DartPerformanceMode] active until
 /// disposed.
@@ -197,9 +197,9 @@ typedef _PerformanceModeCleaupCallback = VoidCallback;
 /// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
 /// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
-  PerformanceModeRequestHandle._(_PerformanceModeCleaupCallback this._cleanup);
+  PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup);
 
-  _PerformanceModeCleaupCallback? _cleanup;
+  _PerformanceModeCleanupCallback? _cleanup;
 
   /// Call this method to signal to [SchedulerBinding] that a request for a [DartPerformanceMode]
   /// is no longer needed.
@@ -385,7 +385,6 @@ mixin SchedulerBinding on BindingBase {
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    assert(state != null);
     _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
@@ -645,6 +644,20 @@ mixin SchedulerBinding on BindingBase {
   bool debugAssertNoPendingPerformanceModeRequests(String reason) {
     assert(() {
       if (_performanceMode != null) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  /// Asserts that there is no artificial time dilation in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are such dilation, as this will make
+  /// subsequent tests see dilation and thus flaky.
+  bool debugAssertNoTimeDilation(String reason) {
+    assert(() {
+      if (timeDilation != 1.0) {
         throw FlutterError(reason);
       }
       return true;
@@ -1012,7 +1025,6 @@ mixin SchedulerBinding on BindingBase {
   /// presentation time, and can be used to ensure that animations running in
   /// different processes are synchronized.
   Duration get currentSystemFrameTimeStamp {
-    assert(_lastRawTimeStamp != null);
     return _lastRawTimeStamp;
   }
 
@@ -1261,11 +1273,10 @@ mixin SchedulerBinding on BindingBase {
   // Calls the given [callback] with [timestamp] as argument.
   //
   // Wraps the callback in a try/catch and forwards any error to
-  // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
+  // [debugSchedulerExceptionHandler], if set. If not set, prints
   // the error.
   @pragma('vm:notify-debugger-on-exception')
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {
-    assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     assert(() {
       _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack;

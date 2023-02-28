@@ -17,7 +17,9 @@ import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryNames, this.verbose = true, required this.packagesPath, this.resolver, this.testTimeRecorder});
+  CoverageCollector({
+      this.libraryNames, this.verbose = true, required this.packagesPath,
+      this.resolver, this.testTimeRecorder, this.branchCoverage = false});
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -34,9 +36,12 @@ class CoverageCollector extends TestWatcher {
   Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
-  final Map<String, List<List<int>>> _ignoredLinesInFilesCache = <String, List<List<int>>>{};
+  final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
 
   final TestTimeRecorder? testTimeRecorder;
+
+  /// Whether to collect branch coverage information.
+  bool branchCoverage;
 
   static Future<coverage.Resolver> getResolver(String? packagesPath) async {
     try {
@@ -95,20 +100,18 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
-    _logMessage('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await collect(observatoryUri, libraryNames);
-    if (data == null) {
-      throw Exception('Failed to collect coverage.');
-    }
+  Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
+    _logMessage('collecting coverage data from $vmServiceUri...');
+    final Map<String, dynamic> data = await collect(
+        vmServiceUri, libraryNames, branchCoverage: branchCoverage);
 
-    _logMessage('($observatoryUri): collected coverage data; merging...');
+    _logMessage('($vmServiceUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
       packagePath: packageDirectory,
       checkIgnoredLines: true,
     ));
-    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('($vmServiceUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -126,21 +129,25 @@ class CoverageCollector extends TestWatcher {
 
     final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
-    final Future<void> processComplete = testDevice.finished.catchError(
-      (Object error) => throw Exception(
-          'Failed to collect coverage, test device terminated prematurely with '
-          'error: ${(error as TestDeviceException).message}.'),
-      test: (Object error) => error is TestDeviceException,
+    final Future<void> processComplete = testDevice.finished.then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (error is TestDeviceException) {
+          throw Exception(
+            'Failed to collect coverage, test device terminated prematurely with '
+            'error: ${error.message}.\n$stackTrace');
+        }
+        return Future<Object?>.error(error, stackTrace);
+      }
     );
 
-    final Future<void> collectionComplete = testDevice.observatoryUri
-      .then((Uri? observatoryUri) {
-        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri!, libraryNames, serviceOverride: serviceOverride)
+    final Future<void> collectionComplete = testDevice.vmServiceUri
+      .then((Uri? vmServiceUri) {
+        _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
+        return collect(
+            vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
+            branchCoverage: branchCoverage)
           .then<void>((Map<String, dynamic> result) {
-            if (result == null) {
-              throw Exception('Failed to collect coverage.');
-            }
             _logMessage('Collected coverage data.');
             data = result;
           });
@@ -254,6 +261,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   String? debugName,
   @visibleForTesting bool forceSequential = false,
   @visibleForTesting FlutterVmService? serviceOverride,
+  bool branchCoverage = false,
 }) {
-  return coverage.collect(serviceUri, false, false, false, libraryNames, serviceOverrideForTesting: serviceOverride?.service);
+  return coverage.collect(
+      serviceUri, false, false, false, libraryNames,
+      serviceOverrideForTesting: serviceOverride?.service,
+      branchCoverage: branchCoverage);
 }

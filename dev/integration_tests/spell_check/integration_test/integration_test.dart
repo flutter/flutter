@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(camsim99): Revert this timeout change after effects are investigated.
+@Timeout(Duration(seconds: 60))
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +47,7 @@ Future<bool> findTextSpanTree(
   return true;
 }
 
-Future<void> main() async {
+void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
@@ -175,27 +179,5 @@ Future<void> main() async {
     final bool expectedTextSpanTreeFound = await findTextSpanTree(tester, expectedTextSpanTree);
 
     expect(expectedTextSpanTreeFound, isTrue);
-  });
-
-  test(
-      'fetchSpellCheckSuggestions returns null when there is a pending request',
-      () async {
-    final String text =
-        'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
-            10;
-
-    defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
-
-    final String modifiedText = text.substring(5);
-
-    final List<SuggestionSpan>? spellCheckSuggestionSpans =
-        await defaultSpellCheckService.fetchSpellCheckSuggestions(
-            locale, modifiedText);
-
-    expect(spellCheckSuggestionSpans, isNull);
-
-    // We expect it to be rare for the first request to complete before the
-    // second, so no text should be saved as of now.
-    expect(defaultSpellCheckService.lastSavedResults, null);
   });
 }

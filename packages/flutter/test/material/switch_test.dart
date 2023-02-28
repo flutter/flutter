@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -404,20 +405,16 @@ void main() {
 
   testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: false,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
-        ),
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: false,
+              onChanged: null,
+            ),
+          ),
+        )
       ),
     );
 
@@ -436,19 +433,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: true,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: true,
+              onChanged: null,
+            ),
+          ),
         ),
       ),
     );
@@ -890,15 +883,13 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Switch(
-                value: true,
-                onChanged: (bool newValue) {},
-                focusColor: Colors.orange[500],
-                autofocus: true,
-                splashRadius: splashRadius,
-              );
-            }),
+            child: Switch(
+              value: true,
+              onChanged: (bool newValue) {},
+              focusColor: Colors.orange[500],
+              autofocus: true,
+              splashRadius: splashRadius,
+            ),
           ),
         ),
       );
@@ -1203,18 +1194,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  thumbColor: thumbColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              thumbColor: thumbColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1309,20 +1296,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  thumbColor: thumbColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              thumbColor: thumbColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1392,18 +1375,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  trackColor: trackColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              trackColor: trackColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1482,20 +1461,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  trackColor: trackColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              trackColor: trackColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1547,21 +1522,17 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Theme(
-              data: theme,
-              child: Material(
-                child: Center(
-                  child: Switch(
-                    thumbColor: thumbColor,
-                    value: active,
-                    onChanged: enabled ? (_) { } : null,
-                  ),
-                ),
+        child: Theme(
+          data: theme,
+          child: Material(
+            child: Center(
+              child: Switch(
+                thumbColor: thumbColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }
@@ -2139,19 +2110,15 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: false,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: false,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2182,19 +2149,15 @@ void main() {
       final ColorScheme colors = themeData.colorScheme;
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: true,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2438,6 +2401,89 @@ void main() {
       );
     });
 
+    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: true);
+      final ColorScheme colors = themeData.colorScheme;
+      Widget buildApp({bool enabled = true, bool value = true}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Switch(
+                  value: value,
+                  onChanged: enabled ? (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.primary, // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.primaryContainer, rrect: RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant, // track color
+          style: PaintingStyle.fill
+        )..rrect(
+          color: colors.outline, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.onSurfaceVariant),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.surface.withOpacity(1.0)),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false, value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+      );
+    }, variant: TargetPlatformVariant.mobile());
+
     testWidgets('Switch thumb color resolves in active/enabled states - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
@@ -2466,18 +2512,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2576,20 +2618,16 @@ void main() {
           theme: themeData,
           home: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      thumbColor: thumbColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  thumbColor: thumbColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2659,18 +2697,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      trackColor: trackColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  trackColor: trackColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2753,20 +2787,16 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      trackColor: trackColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  trackColor: trackColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2802,6 +2832,141 @@ void main() {
       );
     });
 
+    testWidgets('Track outline color resolves in active/enabled states', (WidgetTester tester) async {
+      const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
+      const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
+      const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+      const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+
+      Color getTrackOutlineColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          if (states.contains(MaterialState.selected)) {
+            return activeDisabledTrackOutlineColor;
+          }
+          return inactiveDisabledTrackOutlineColor;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return activeEnabledTrackOutlineColor;
+        }
+        return inactiveEnabledTrackOutlineColor;
+      }
+
+      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+      Widget buildSwitch({required bool enabled, required bool active}) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: Switch(
+                trackOutlineColor: trackOutlineColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: inactiveDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Inactive disabled switch track outline should use this value',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: activeDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active disabled switch track outline should match these colors',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: inactiveEnabledTrackOutlineColor),
+        reason: 'Inactive enabled switch track outline should match these colors',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: activeEnabledTrackOutlineColor),
+        reason: 'Active enabled switch track outline should match these colors',
+      );
+    });
+
+    testWidgets('Switch track outline color resolves in hovered/focused states', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      const Color hoveredTrackOutlineColor = Color(0xFF000001);
+      const Color focusedTrackOutlineColor = Color(0xFF000002);
+
+      Color getTrackOutlineColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoveredTrackOutlineColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusedTrackOutlineColor;
+        }
+        return Colors.transparent;
+      }
+
+      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+      Widget buildSwitch() {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: Switch(
+                focusNode: focusNode,
+                autofocus: true,
+                value: true,
+                trackOutlineColor: trackOutlineColor,
+                onChanged: (_) { },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch());
+      await tester.pumpAndSettle();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: focusedTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline should match this color',
+      );
+
+      // Start hovering
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: hoveredTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline should match this color',
+      );
+    });
+
     testWidgets('Switch thumb color is blended against surface color - M3', (WidgetTester tester) async {
       final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
       final ThemeData theme = ThemeData.light(useMaterial3: true);
@@ -2820,21 +2985,17 @@ void main() {
       Widget buildSwitch({required bool enabled, required bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Theme(
-                data: theme,
-                child: Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
+          child: Theme(
+            data: theme,
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
       }
@@ -2875,18 +3036,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbIcon: thumbIcon(activeIcon, inactiveIcon),
-                      value: active,
-                      onChanged: enabled ? (_) {} : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbIcon: thumbIcon(activeIcon, inactiveIcon),
+                  value: active,
+                  onChanged: enabled ? (_) {} : null,
+                ),
+              ),
             ),
           ),
         );

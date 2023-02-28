@@ -219,7 +219,8 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
       });
       if (node.isMergedIntoParent ||
           node.isInvisible ||
-          node.hasFlag(ui.SemanticsFlag.isHidden)) {
+          node.hasFlag(ui.SemanticsFlag.isHidden) ||
+          node.hasFlag(ui.SemanticsFlag.isTextField)) {
         return result;
       }
       final SemanticsData data = node.getSemanticsData();
@@ -228,7 +229,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
           !data.hasAction(ui.SemanticsAction.tap)) {
         return result;
       }
-      if ((data.label == null || data.label.isEmpty) && (data.tooltip == null || data.tooltip.isEmpty)) {
+      if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
         result += Evaluation.fail(
           '$node: expected tappable node to have semantic label, '
           'but none was found.\n',
@@ -597,7 +598,7 @@ class _ContrastReport {
       count += entry.value;
     }
     final double averageLightness = totalLightness / count;
-    assert(averageLightness != double.nan);
+    assert(!averageLightness.isNaN);
 
     MapEntry<Color, int>? lightColor;
     MapEntry<Color, int>? darkColor;

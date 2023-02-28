@@ -865,6 +865,39 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
+  testWidgets('receives fontFamilyFallback and package from root ThemeData', (WidgetTester tester) async {
+    const String fontFamily = 'fontFamily';
+    const String package = 'package_name';
+    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          package: package,
+          primarySwatch: Colors.blue,
+        ),
+        home: const Scaffold(
+          body: Center(
+            child: Text(
+              'foo',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+    final RichText richText = tester.widget(find.byType(RichText));
+    final InlineSpan text = richText.text;
+    final TextStyle? style = text.style;
+    expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
+    for (int i = 0; i < fontFamilyFallback.length; i++) {
+      final String fallback = fontFamilyFallback[i];
+      expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
+    }
+  });
+
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
@@ -979,13 +1012,13 @@ void main() {
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text(
                   'LEFT ALIGNED, PARENT',
                   textAlign: TextAlign.left,
@@ -1299,21 +1332,21 @@ void main() {
             height: 100,
             child: IntrinsicWidth(
               child: RichText(
-                text: TextSpan(
-                  style: const TextStyle(fontSize: 16, height: 1),
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 16, height: 1),
                   children: <InlineSpan>[
-                    const TextSpan(text: 'S '),
+                    TextSpan(text: 'S '),
                     WidgetSpan(
                       alignment: PlaceholderAlignment.top,
                       child: Wrap(
                         direction: Axis.vertical,
-                        children: const <Widget>[
+                        children: <Widget>[
                           SizedBox(width: 200, height: 100),
                           SizedBox(width: 200, height: 30),
                         ],
                       ),
                     ),
-                    const TextSpan(text: ' E'),
+                    TextSpan(text: ' E'),
                   ],
                 ),
               ),

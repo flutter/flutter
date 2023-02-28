@@ -1209,13 +1209,13 @@ void main() {
     painter.dispose();
   });
 
-   test('TextPainter.getWordBoundary works', (){
-     // Regression test for https://github.com/flutter/flutter/issues/93493 .
-     const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
-     final TextPainter textPainter = TextPainter(
-       text: const TextSpan(text: testCluster),
-       textDirection: TextDirection.ltr,
-     );
+  test('TextPainter.getWordBoundary works', (){
+    // Regression test for https://github.com/flutter/flutter/issues/93493 .
+    const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
+    final TextPainter textPainter = TextPainter(
+      text: const TextSpan(text: testCluster),
+      textDirection: TextDirection.ltr,
+    );
 
      textPainter.layout();
      expect(
@@ -1223,6 +1223,61 @@ void main() {
        const TextRange(start: 8, end: 16),
      );
    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+
+  test('TextHeightBehavior with strut on empty paragraph', () {
+    // Regression test for https://github.com/flutter/flutter/issues/112123
+    const TextStyle style = TextStyle(height: 11, fontSize: 7);
+    const TextSpan simple = TextSpan(text: 'x', style: style);
+    const TextSpan emptyString = TextSpan(text: '', style: style);
+    const TextSpan emptyParagraph = TextSpan(style: style);
+
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      strutStyle: StrutStyle.fromTextStyle(style, forceStrutHeight: true),
+      textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
+    );
+
+    painter.text = simple;
+    painter.layout();
+    final double height = painter.height;
+    for (final TextSpan span in <TextSpan>[simple, emptyString, emptyParagraph]) {
+      painter.text = span;
+      painter.layout();
+      expect(painter.height, height, reason: '$span is expected to have a height of $height');
+      expect(painter.preferredLineHeight, height, reason: '$span is expected to have a height of $height');
+    }
+  });
+
+  test('TextPainter plainText getter', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    expect(painter.plainText, '');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+    expect(painter.plainText, 'before\n\uFFFCafter');
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'be\nfo\nre\n'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'af\nter'),
+    ]);
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+    painter.layout();
+    expect(painter.plainText, 'be\nfo\nre\n\uFFFCaf\nter');
+
+    painter.dispose();
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

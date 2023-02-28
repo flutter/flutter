@@ -215,6 +215,8 @@ void main() {
     tick(const Duration(seconds: 8));
     expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
     expect(lastSystemTimeStamp, const Duration(seconds: 8));
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   test('Animation frame scheduled in the middle of the warm-up frame', () {
