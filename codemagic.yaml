@@ -1,4 +1,12 @@
 workflows:
+  environment:
+  vars: # Define your public environment variables here
+    PUBLIC_ENV_VAR: "value here"
+  groups: # Import UI defined environment variable groups(either in Application/Team variables) here
+    - staging
+  xcode: latest # Define latest, edge or version (e.g. 11.2)
+  flutter: stable   # Define the channel name or version (e.g. v1.13.4)
+  
   hello-world:
     name: Hello world workflow
     scripts:
