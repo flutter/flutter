@@ -1311,7 +1311,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Map<String, Object>? extractDartDefineConfigJsonMap() {
-    Map<String, Object>? dartDefineConfigJsonMap;
+    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configJsonPaths = stringsArg(
@@ -1330,7 +1330,7 @@ abstract class FlutterCommand extends Command<void> {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
               .forEach((String key, dynamic value) {
-            dartDefineConfigJsonMap?[key] = value as Object;
+            dartDefineConfigJsonMap[key] = value as Object;
           });
         } on FormatException catch (err) {
           throwToolExit('Json config define file "--${FlutterOptions
