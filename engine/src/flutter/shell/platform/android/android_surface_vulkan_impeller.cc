@@ -104,7 +104,6 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   bool success = native_window_ && native_window_->IsValid();
-
   if (success) {
     auto& context_vk = impeller::ContextVK::Cast(*impeller_context_);
     auto surface = context_vk.CreateAndroidSurface(native_window_->handle());
@@ -114,8 +113,7 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
       return false;
     }
 
-    context_vk.SetupSwapchain(std::move(surface));
-    return true;
+    return context_vk.SetWindowSurface(std::move(surface));
   }
 
   native_window_ = nullptr;

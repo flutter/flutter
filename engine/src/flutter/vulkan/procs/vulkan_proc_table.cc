@@ -8,18 +8,15 @@
 
 #include "flutter/fml/logging.h"
 
-#define ACQUIRE_PROC(name, context)                          \
-  if (!(name = AcquireProc("vk" #name, context))) {          \
-    FML_DLOG(INFO) << "Could not acquire proc: vk" << #name; \
-    return false;                                            \
+#define ACQUIRE_PROC(name, context)                 \
+  if (!(name = AcquireProc("vk" #name, context))) { \
+    return false;                                   \
   }
 
-#define ACQUIRE_PROC_EITHER(name, name2, context)                              \
-  if (!(name = AcquireProc("vk" #name, context)) &&                            \
-      !(name2 = AcquireProc("vk" #name2, context))) {                          \
-    FML_DLOG(INFO) << "Could not acquire proc: vk" << #name << ", or proc: vk" \
-                   << #name2;                                                  \
-    return false;                                                              \
+#define ACQUIRE_PROC_EITHER(name, name2, context)     \
+  if (!(name = AcquireProc("vk" #name, context)) &&   \
+      !(name2 = AcquireProc("vk" #name2, context))) { \
+    return false;                                     \
   }
 
 namespace vulkan {

@@ -104,7 +104,6 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
     color0.store_action = StoreAction::kStore;
   }
 
-#ifndef IMPELLER_ENABLE_VULKAN
   auto stencil = render_target_.GetStencilAttachment();
   if (!stencil.has_value()) {
     VALIDATION_LOG << "Stencil attachment unexpectedly missing from the "
@@ -122,11 +121,6 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
                               ? StoreAction::kDontCare
                               : StoreAction::kStore;
   render_target_.SetStencilAttachment(stencil.value());
-#else
-  // Touch this variable to avoid a compiler warnings.
-  // This will go away once stencil support is added for vulkan.
-  total_pass_reads_ = 1;
-#endif
 
   render_target_.SetColorAttachment(color0, 0);
 

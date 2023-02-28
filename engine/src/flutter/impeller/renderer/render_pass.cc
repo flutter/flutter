@@ -74,4 +74,8 @@ bool RenderPass::EncodeCommands() const {
   return OnEncodeCommands(*context);
 }
 
+const std::weak_ptr<const Context>& RenderPass::GetContext() const {
+  return context_;
+}
+
 }  // namespace impeller
