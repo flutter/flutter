@@ -176,7 +176,7 @@ class FontFeature {
   /// letters. With value 2, the lowercase "a" changes to a stemless
   /// "a", whereas the lowercase "t" changes to a vertical bar instead
   /// of having a curve. By targeting specific letters in the text
-  /// (using [Text.rich]), the desired rendering for each glyph can be
+  /// (using [widgets.Text.rich]), the desired rendering for each glyph can be
   /// achieved.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_aalt.png)
@@ -2054,10 +2054,10 @@ class StrutStyle {
 ///
 /// At the higher levels (specifically starting at the widgets library), an
 /// ambient [Directionality] is introduced, which provides a default. Thus, for
-/// instance, a [Text] widget in the scope of a [MaterialApp] widget does not
-/// need to be given an explicit writing direction. The [Directionality.of]
-/// static method can be used to obtain the ambient text direction for a
-/// particular [BuildContext].
+/// instance, a [widgets.Text] widget in the scope of a [MaterialApp] widget
+/// does not need to be given an explicit writing direction. The
+/// [Directionality.of] static method can be used to obtain the ambient text
+/// direction for a particular [BuildContext].
 ///
 /// ### Known left-to-right biases in Flutter
 ///
