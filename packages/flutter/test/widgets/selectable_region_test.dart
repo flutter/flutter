@@ -1743,14 +1743,22 @@ void main() {
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
     // In Android copy should clear the selection
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      expect(regionState.selectionOverlay, isNull);
-      expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
-      expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      expect(regionState.selectionOverlay, isNotNull);
-      expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
-      expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(regionState.selectionOverlay, isNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
+        break;
+      case TargetPlatform.iOS:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+        break;
     }
   },
     skip: kIsWeb, // [intended]
