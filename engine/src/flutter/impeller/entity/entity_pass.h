@@ -43,8 +43,6 @@ class EntityPass {
 
   void SetElements(std::vector<Element> elements);
 
-  const std::shared_ptr<LazyGlyphAtlas>& GetLazyGlyphAtlas() const;
-
   EntityPass* AddSubpass(std::unique_ptr<EntityPass> pass);
 
   EntityPass* GetSuperpass() const;
@@ -130,8 +128,6 @@ class EntityPass {
 
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
-  std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_ =
-      std::make_shared<LazyGlyphAtlas>();
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
