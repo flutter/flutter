@@ -767,9 +767,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// dragged up and down and dismissed by swiping downwards.
 ///
 /// The [useSafeArea] parameter specifies whether the sheet will avoid system
-/// intrusions on the top, left, and right. If false, no SafeArea is added
-/// and the top padding is consumed using [MediaQuery.removePadding].
-/// Defaults to false.
+/// intrusions on the top, left, and right. Defaults to false.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
@@ -947,8 +945,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// If true, a [SafeArea] is inserted to keep the bottom sheet away from
   /// system intrusions at the top, left, and right sides of the screen.
   ///
-  /// If false, the bottom sheet isn't exposed to the top padding of the
-  /// MediaQuery.
+  /// If false, no [SafeArea] is inserted.
+  /// Where the sheet overlaps with the system intrusions, consider
+  /// adding your own [SafeArea]s in [builder] so
+  /// content avoids the system intrusions.
   ///
   /// In either case, the bottom sheet extends all the way to the bottom of
   /// the screen, including any system intrusions.
@@ -1039,11 +1039,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
     final Widget bottomSheet = useSafeArea
       ? SafeArea(bottom: false, child: content)
-      : MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: content,
-        );
+      : content;
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
