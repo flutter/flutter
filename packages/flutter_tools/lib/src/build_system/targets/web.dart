@@ -42,7 +42,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 /// The default optimization level for dart2js.
 ///
 /// Maps to [kDart2jsOptimization].
-const String kDart2jsDefaultOptimizationLevel = '04';
+const String kDart2jsDefaultOptimizationLevel = 'O4';
 
 /// If `--dump-info` should be passed to dart2js.
 const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
