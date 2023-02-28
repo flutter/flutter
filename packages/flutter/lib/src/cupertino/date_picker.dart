@@ -81,6 +81,7 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
   _DatePickerLayoutDelegate({
     required this.columnWidths,
     required this.textDirectionFactor,
+    required this.maxWidth,
   });
 
   // The list containing widths of all columns.
@@ -89,15 +90,18 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
   // textDirectionFactor is 1 if text is written left to right, and -1 if right to left.
   final int textDirectionFactor;
 
+  // The max width the children should reach to avoid bending outwards.
+  final double maxWidth;
+
   @override
   void performLayout(Size size) {
-    double remainingWidth = size.width;
+    double remainingWidth = maxWidth < size.width ? maxWidth : size.width;
+
+    double currentHorizontalOffset = (size.width - remainingWidth) / 2;
 
     for (int i = 0; i < columnWidths.length; i++) {
       remainingWidth -= columnWidths[i] + _kDatePickerPadSize * 2;
     }
-
-    double currentHorizontalOffset = 0.0;
 
     for (int i = 0; i < columnWidths.length; i++) {
       final int index = textDirectionFactor == 1 ? i : columnWidths.length - i - 1;
@@ -1077,17 +1081,13 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: maxPickerWidth),
-            child: CustomMultiChildLayout(
-              delegate: _DatePickerLayoutDelegate(
-                columnWidths: columnWidths,
-                textDirectionFactor: textDirectionFactor,
-              ),
-              children: pickers,
-            ),
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
           ),
+          children: pickers,
         ),
       ),
     );
@@ -1475,17 +1475,13 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: maxPickerWidth),
-            child: CustomMultiChildLayout(
-              delegate: _DatePickerLayoutDelegate(
-                columnWidths: columnWidths,
-                textDirectionFactor: textDirectionFactor,
-              ),
-              children: pickers,
-            ),
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
           ),
+          children: pickers,
         ),
       ),
     );
