@@ -211,24 +211,39 @@ bool EntityPass::Render(ContentContext& renderer,
 
     auto command_buffer = renderer.GetContext()->CreateCommandBuffer();
     command_buffer->SetLabel("EntityPass Root Command Buffer");
-    auto render_pass = command_buffer->CreateRenderPass(render_target);
-    render_pass->SetLabel("EntityPass Root Render Pass");
 
-    {
-      auto size_rect = Rect::MakeSize(offscreen_target.GetRenderTargetSize());
-      auto contents = TextureContents::MakeRect(size_rect);
-      contents->SetTexture(offscreen_target.GetRenderTargetTexture());
-      contents->SetSourceRect(size_rect);
+    if (renderer.GetContext()
+            ->GetDeviceCapabilities()
+            .SupportsTextureToTextureBlits()) {
+      auto blit_pass = command_buffer->CreateBlitPass();
 
-      Entity entity;
-      entity.SetContents(contents);
-      entity.SetBlendMode(BlendMode::kSource);
+      blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
+                         render_target.GetRenderTargetTexture());
 
-      entity.Render(renderer, *render_pass);
-    }
+      if (!blit_pass->EncodeCommands(
+              renderer.GetContext()->GetResourceAllocator())) {
+        return false;
+      }
+    } else {
+      auto render_pass = command_buffer->CreateRenderPass(render_target);
+      render_pass->SetLabel("EntityPass Root Render Pass");
 
-    if (!render_pass->EncodeCommands()) {
-      return false;
+      {
+        auto size_rect = Rect::MakeSize(offscreen_target.GetRenderTargetSize());
+        auto contents = TextureContents::MakeRect(size_rect);
+        contents->SetTexture(offscreen_target.GetRenderTargetTexture());
+        contents->SetSourceRect(size_rect);
+
+        Entity entity;
+        entity.SetContents(contents);
+        entity.SetBlendMode(BlendMode::kSource);
+
+        entity.Render(renderer, *render_pass);
+      }
+
+      if (!render_pass->EncodeCommands()) {
+        return false;
+      }
     }
     if (!command_buffer->SubmitCommands()) {
       return false;
