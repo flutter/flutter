@@ -1491,7 +1491,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
@@ -1499,7 +1499,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     final DeviceManager deviceManager = globals.deviceManager!;
     List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       timeout: deviceDiscoveryTimeout,
     );
 
@@ -1607,12 +1607,14 @@ abstract class FlutterCommand extends Command<void> {
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
   ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
-    List<Device>? deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+    List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
     if (deviceList == null) {
       return null;
     }

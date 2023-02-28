@@ -267,8 +267,8 @@ abstract class DeviceManager {
   /// * If [promptUserToChooseDevice] is true, and there are more than one
   /// device after the aforementioned filters, and the user is connected to a
   /// terminal, then show a prompt asking the user to choose one.
-  Future<List<Device>> findTargetDevices(
-    FlutterProject? flutterProject, {
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
     Duration? timeout,
   }) async {
     if (timeout != null) {
@@ -276,13 +276,10 @@ abstract class DeviceManager {
       await refreshAllDevices(timeout: timeout);
     }
 
-    List<Device> devices = await getDevices(
+    final List<Device> devices = await getDevices(
       filter: DeviceDiscoveryFilter(
-        supportFilter: DeviceDiscoverySupportFilter(
-          flutterProject: flutterProject,
-          mustBeSupportedByFlutter: true,
-          mustBeSupportedForProject: !hasSpecifiedDeviceId,
-          mustBeSupportedForAll: hasSpecifiedAllDevices,
+        supportFilter: deviceSupportFilter(
+          includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         ),
       ),
     );
@@ -305,55 +302,99 @@ abstract class DeviceManager {
         ];
 
         if (ephemeralDevices.length == 1) {
-          devices = ephemeralDevices;
+          return ephemeralDevices;
         }
       }
     }
 
     return devices;
   }
+
+  /// Determines how to filter devices.
+  ///
+  /// By default, filters to only include devices that are supported by Flutter.
+  ///
+  /// If the user has not specificied a device, filters to only include devices
+  /// that are supported by Flutter and supported by the project.
+  ///
+  /// If the user has specified `--device all`, filters to only include devices
+  /// that are supported by Flutter, supported by the project, and supported for `all`.
+  ///
+  /// If [includeDevicesUnsupportedByProject] is true, all devices will be
+  /// considered supported by the project, regardless of user specifications.
+  ///
+  /// This also exists to allow the check to be overridden for google3 clients.
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+  }) {
+    FlutterProject? flutterProject;
+    if (includeDevicesUnsupportedByProject == false) {
+      flutterProject = FlutterProject.current();
+    }
+    if (hasSpecifiedAllDevices) {
+      return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll(
+        flutterProject: flutterProject,
+      );
+    } else if (!hasSpecifiedDeviceId) {
+      return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+        flutterProject: flutterProject,
+      );
+    } else {
+      return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter();
+    }
+  }
 }
 
 /// A class for determining how to filter devices based on if they are supported.
-///
-/// If [mustBeSupportedByFlutter] is true, only devices supported by Flutter
-/// will be included.
-///
-/// If [mustBeSupportedForProject] is true, only devices supported by Flutter
-/// and supported for the provided [flutterProject] will be included.
-///
-/// If [mustBeSupportedForAll] is true, only devices supported by Flutter,
-/// supported for the provided [flutterProject], and supported for
-/// `--device all` will be included.
 class DeviceDiscoverySupportFilter {
-  DeviceDiscoverySupportFilter({
-    required this.flutterProject,
-    this.mustBeSupportedByFlutter = false,
-    this.mustBeSupportedForProject = false,
-    this.mustBeSupportedForAll = false,
-  });
+  /// Filter devices to only include those supported by Flutter.
+  DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter()
+      : _excludeDevicesNotSupportedByProject = false,
+        _excludeDevicesNotSupportedByAll = false,
+        _flutterProject = null;
 
-  final FlutterProject? flutterProject;
-  final bool mustBeSupportedByFlutter;
-  final bool mustBeSupportedForProject;
-  final bool mustBeSupportedForAll;
+  /// Filter devices to only include those supported by Flutter and the
+  /// provided [flutterProject].
+  ///
+  /// If [flutterProject] is null, all devices will be considered supported by
+  /// the project.
+  DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject({
+    required FlutterProject? flutterProject,
+  })  : _flutterProject = flutterProject,
+        _excludeDevicesNotSupportedByProject = true,
+        _excludeDevicesNotSupportedByAll = false;
+
+  /// Filter devices to only include those supported by Flutter, the provided
+  /// [flutterProject], and `--device all`.
+  ///
+  /// If [flutterProject] is null, all devices will be considered supported by
+  /// the project.
+  DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll({
+    required FlutterProject? flutterProject,
+  })  : _flutterProject = flutterProject,
+        _excludeDevicesNotSupportedByProject = true,
+        _excludeDevicesNotSupportedByAll = true;
+
+  final FlutterProject? _flutterProject;
+  final bool _excludeDevicesNotSupportedByProject;
+  final bool _excludeDevicesNotSupportedByAll;
 
   Future<bool> matchesRequirements(Device device) async {
-    final bool meetsSupportByFlutterRequirement = !mustBeSupportedByFlutter || device.isSupported();
-    final bool meetsSupportForProjectRequirement = !mustBeSupportedForProject || isDeviceSupportedForProject(device);
-    final bool meetsSupportForAllRequirement = !mustBeSupportedForAll || await isDeviceSupportedForAll(device);
+    final bool meetsSupportByFlutterRequirement = device.isSupported();
+    final bool meetsSupportForProjectRequirement = !_excludeDevicesNotSupportedByProject || isDeviceSupportedForProject(device);
+    final bool meetsSupportForAllRequirement = !_excludeDevicesNotSupportedByAll || await isDeviceSupportedForAll(device);
 
     return meetsSupportByFlutterRequirement &&
         meetsSupportForProjectRequirement &&
         meetsSupportForAllRequirement;
   }
 
-  // User has specified `--device all`.
-  //
-  // Always remove web and fuchsia devices from `--all`. This setting
-  // currently requires devices to share a frontend_server and resident
-  // runner instance. Both web and fuchsia require differently configured
-  // compilers, and web requires an entirely different resident runner.
+  /// User has specified `--device all`.
+  ///
+  /// Always remove web and fuchsia devices from `all`. This setting
+  /// currently requires devices to share a frontend_server and resident
+  /// runner instance. Both web and fuchsia require differently configured
+  /// compilers, and web requires an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
     final TargetPlatform devicePlatform = await device.targetPlatform;
     return device.isSupported() &&
@@ -369,42 +410,42 @@ class DeviceDiscoverySupportFilter {
   /// (e.g. when the user has removed the iOS directory from their project).
   ///
   /// This also exists to allow the check to be overridden for google3 clients. If
-  /// [flutterProject] is null then return true.
+  /// [_flutterProject] is null then return true.
   bool isDeviceSupportedForProject(Device device) {
     if (!device.isSupported()) {
       return false;
     }
-    if (flutterProject == null) {
+    if (_flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(flutterProject!);
+    return device.isSupportedForProject(_flutterProject!);
   }
 }
 
 /// A class for filtering devices.
 ///
-/// If [mustBeConnected] is true, only devices detected as connected will be included.
+/// If [excludeDisconnected] is true, only devices detected as connected will be included.
 ///
 /// If [supportFilter] is provided, only devices matching the requirements will be included.
 ///
-/// If [deviceConnectionFilter] is provided, only devices matching the DeviceConnectionInterface will be included.
+/// If [deviceConnectionInterface] is provided, only devices matching the DeviceConnectionInterface will be included.
 class DeviceDiscoveryFilter {
   DeviceDiscoveryFilter({
-    this.mustBeConnected = true,
+    this.excludeDisconnected = true,
     this.supportFilter,
-    this.deviceConnectionFilter,
+    this.deviceConnectionInterface,
   });
 
-  final bool mustBeConnected;
+  final bool excludeDisconnected;
   final DeviceDiscoverySupportFilter? supportFilter;
-  final DeviceConnectionInterface? deviceConnectionFilter;
+  final DeviceConnectionInterface? deviceConnectionInterface;
 
   Future<bool> matchesRequirements(Device device) async {
     final DeviceDiscoverySupportFilter? localSupportFilter = supportFilter;
 
-    final bool meetsConnectionRequirement = !mustBeConnected || device.isConnected;
+    final bool meetsConnectionRequirement = !excludeDisconnected || device.isConnected;
     final bool meetsSupportRequirements = localSupportFilter == null || (await localSupportFilter.matchesRequirements(device));
-    final bool meetsConnectionInterfaceRequirement = matchesDeviceConnectionInterface(device, deviceConnectionFilter);
+    final bool meetsConnectionInterfaceRequirement = matchesDeviceConnectionInterface(device, deviceConnectionInterface);
 
     return meetsConnectionRequirement &&
         meetsSupportRequirements &&
@@ -421,12 +462,12 @@ class DeviceDiscoveryFilter {
 
   bool matchesDeviceConnectionInterface(
     Device device,
-    DeviceConnectionInterface? deviceConnectionFilter,
+    DeviceConnectionInterface? deviceConnectionInterface,
   ) {
-    if (deviceConnectionFilter == null) {
+    if (deviceConnectionInterface == null) {
       return true;
     }
-    return device.connectionInterface == deviceConnectionFilter;
+    return device.connectionInterface == deviceConnectionInterface;
   }
 }
 

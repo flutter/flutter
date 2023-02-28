@@ -592,7 +592,11 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   }) async => devices;
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async => devices;
 }
 
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].

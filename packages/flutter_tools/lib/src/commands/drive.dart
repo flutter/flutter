@@ -209,7 +209,9 @@ class DriveCommand extends RunCommandBase {
   String? get applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
 
   Future<Device?> get targetedDevice async {
-    return findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+    return findTargetDevice(
+      includeDevicesUnsupportedByProject: applicationBinaryPath == null,
+    );
   }
 
   // Network devices need `publish-port` to be enabled because it requires mDNS.

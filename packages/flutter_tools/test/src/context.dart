@@ -246,9 +246,25 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout, bool promptUserToChooseDevice = true }) async {
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async {
     return devices;
   }
+
+  @override
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+    FlutterProject? flutterProject,
+  }) {
+    return TestDeviceDiscoverySupportFilter();
+  }
+}
+
+class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+  TestDeviceDiscoverySupportFilter();
 }
 
 class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {
