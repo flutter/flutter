@@ -768,8 +768,9 @@ class _AppBarState extends State<AppBar> {
           break;
         case AxisDirection.right:
         case AxisDirection.left:
-          // Scrolled under is only supported in the vertical axis.
-          _scrolledUnder = false;
+          // Scrolled under is only supported in the vertical axis, and should
+          // not be altered based on horizontal notifications of the same
+          // predicate since it could be a 2D scroller.
           break;
       }
 
