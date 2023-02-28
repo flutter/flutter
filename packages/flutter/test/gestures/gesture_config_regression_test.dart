@@ -50,8 +50,8 @@ class NestedScrollableCase extends StatelessWidget {
   }
 }
 
-class NestedDragableCase extends StatelessWidget {
-  const NestedDragableCase({super.key, required this.testResult});
+class NestedDraggableCase extends StatelessWidget {
+  const NestedDraggableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 
@@ -120,7 +120,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       title: 'Scroll Bug',
-      home: NestedDragableCase(testResult: result),
+      home: NestedDraggableCase(testResult: result),
     ));
 
     // By dragging the scroll view more than the configured touch slop above but less than

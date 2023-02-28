@@ -139,7 +139,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();
 
-  /// The option name for a custom observatory port.
+  /// The option name for a custom VM Service port.
+  static const String vmServicePortOption = 'vm-service-port';
+
+  /// The option name for a custom VM Service port.
   static const String observatoryPortOption = 'observatory-port';
 
   /// The option name for a custom DevTools server address.
@@ -379,14 +382,22 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
-  /// Adds options for connecting to the Dart VM observatory port.
+  /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({ required bool verboseHelp }) {
-    argParser.addOption(observatoryPortOption,
+    argParser.addOption(vmServicePortOption,
         help: '(deprecated; use host-vmservice-port instead) '
-              'Listen to the given port for an observatory debugger connection.\n'
+              'Listen to the given port for a Dart VM Service connection.\n'
               'Specifying port 0 (the default) will find a random free port.\n '
               'if the Dart Development Service (DDS) is enabled, this will not be the port '
-              'of the Observatory instance advertised on the command line.',
+              'of the VmService instance advertised on the command line.',
+        hide: !verboseHelp,
+    );
+    argParser.addOption(observatoryPortOption,
+        help: '(deprecated; use host-vmservice-port instead) '
+              'Listen to the given port for a Dart VM Service connection.\n'
+              'Specifying port 0 (the default) will find a random free port.\n '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the VmService instance advertised on the command line.',
         hide: !verboseHelp,
     );
     argParser.addOption('device-vmservice-port',
@@ -458,6 +469,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addServeObservatoryOptions({required bool verboseHelp}) {
+    argParser.addFlag('serve-observatory',
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Serve the legacy Observatory developer tooling through the VM service.',
+    );
+  }
+
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -482,19 +501,21 @@ abstract class FlutterCommand extends Command<void> {
     return ddsEnabled;
   }();
 
-  bool get _hostVmServicePortProvided => (argResults?.wasParsed('observatory-port') ?? false)
+  bool get _hostVmServicePortProvided => (argResults?.wasParsed(vmServicePortOption) ?? false)
+      || (argResults?.wasParsed(observatoryPortOption) ?? false)
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? observatoryPort = stringArgDeprecated('observatory-port');
+    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
+                                  stringArgDeprecated(observatoryPortOption);
     final String? hostPort = stringArgDeprecated('host-vmservice-port');
-    if (observatoryPort == null && hostPort == null) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`');
+    if (vmServicePort == null && hostPort == null) {
+      throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
     }
     try {
-      return int.parse((observatoryPort ?? hostPort)!);
+      return int.parse((vmServicePort ?? hostPort)!);
     } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+      throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`: $error');
     }
   }
 
@@ -520,10 +541,10 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
-  /// Gets the vmservice port provided to in the 'observatory-port' or
+  /// Gets the vmservice port provided to in the 'vm-service-port' or
   /// 'host-vmservice-port option.
   ///
-  /// Only one of "host-vmservice-port" and "observatory-port" may be
+  /// Only one of "host-vmservice-port" and "vm-service-port" may be
   /// specified.
   ///
   /// If no port is set, returns null.
@@ -531,9 +552,10 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if ((argResults?.wasParsed('observatory-port') ?? false)
+    if ((argResults?.wasParsed(vmServicePortOption) ?? false)
+        && (argResults?.wasParsed(observatoryPortOption) ?? false)
         && (argResults?.wasParsed('host-vmservice-port') ?? false)) {
-      throwToolExit('Only one of "--observatory-port" and '
+      throwToolExit('Only one of "--vm-service-port" and '
         '"--host-vmservice-port" may be specified.');
     }
     // If DDS is enabled and no explicit DDS port is provided, use the
@@ -569,7 +591,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -1093,7 +1115,11 @@ abstract class FlutterCommand extends Command<void> {
             (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
-          nullSafetyMode = NullSafetyMode.unsound;
+          throwToolExit(
+            'This application does not support sound null-safety (its language version is $languageVersion).\n'
+            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
+            'support sound null safety, see https://dart.dev/null-safety.',
+          );
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
@@ -1340,17 +1366,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1748,4 +1769,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

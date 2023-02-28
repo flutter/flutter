@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -277,7 +278,7 @@ abstract class DeviceManager {
         // user only typed 'flutter run' and both an Android device and desktop
         // device are available, choose the Android device.
 
-        // Note: ephemeral is nullable for device types where this is not well
+        // Ephemeral is nullable for device types where this is not well
         // defined.
         final List<Device> ephemeralDevices = <Device>[
           for (final Device device in devices)
@@ -753,6 +754,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
+    this.serveObservatory = true,
     this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
@@ -798,7 +800,8 @@ class DebuggingOptions {
       fastStart = false,
       webEnableExpressionEvaluation = false,
       nullAssertions = false,
-      nativeNullAssertions = false;
+      nativeNullAssertions = false,
+      serveObservatory = false;
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -843,6 +846,7 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
+    required this.serveObservatory,
     required this.enableDartProfiling,
   });
 
@@ -879,6 +883,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
+  final bool serveObservatory;
   final bool enableDartProfiling;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
@@ -917,12 +922,18 @@ class DebuggingOptions {
   ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
-  List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
+  List<String> getIOSLaunchArguments(
+    EnvironmentType environmentType,
+    String? route,
+    Map<String, Object?> platformArgs, {
+    bool ipv6 = false,
+    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+  }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
-      if (disablePortPublication) '--disable-observatory-publication',
+      if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
       if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
@@ -949,11 +960,14 @@ class DebuggingOptions {
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
-        '--observatory-port=$deviceVmServicePort',
+        '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
       // Use the suggested host port.
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
-        '--observatory-port=$hostVmServicePort',
+        '--vm-service-port=$hostVmServicePort',
+      // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
+      if (interfaceType == IOSDeviceConnectionInterface.network)
+        '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
     ];
   }
 
@@ -998,6 +1012,7 @@ class DebuggingOptions {
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
+    'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
   };
 
@@ -1045,26 +1060,30 @@ class DebuggingOptions {
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+      serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     );
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.succeeded({ Uri? vmServiceUri, Uri? observatoryUri }) :
+    started = true,
+    vmServiceUri = vmServiceUri ?? observatoryUri;
+
   LaunchResult.failed()
     : started = false,
-      observatoryUri = null;
+      vmServiceUri = null;
 
-  bool get hasObservatory => observatoryUri != null;
+  bool get hasVmService => vmServiceUri != null;
 
   final bool started;
-  final Uri? observatoryUri;
+  final Uri? vmServiceUri;
 
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null) {
-      buf.write(', observatory=$observatoryUri');
+    if (vmServiceUri != null) {
+      buf.write(', vmService=$vmServiceUri');
     }
     return buf.toString();
   }
@@ -1093,9 +1112,9 @@ abstract class DeviceLogReader {
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort);
+  DiscoveredApp(this.id, this.vmServicePort);
   final String id;
-  final int observatoryPort;
+  final int vmServicePort;
 }
 
 // An empty device log reader

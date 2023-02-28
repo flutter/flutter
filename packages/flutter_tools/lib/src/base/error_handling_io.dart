@@ -40,8 +40,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required Platform platform,
   }) :
-      assert(delegate != null),
-      assert(platform != null),
       _platform = platform,
       super(delegate);
 
@@ -164,9 +162,6 @@ class ErrorHandlingFile
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -379,9 +374,6 @@ class ErrorHandlingDirectory
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -518,9 +510,6 @@ class ErrorHandlingLink
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -563,7 +552,6 @@ Future<T> _run<T>(Future<T> Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) async {
-  assert(platform != null);
   try {
     return await op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -595,7 +583,6 @@ T _runSync<T>(T Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) {
-  assert(platform != null);
   try {
     return op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -680,7 +667,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -701,7 +691,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         runInShell: runInShell,
         mode: mode,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -724,7 +717,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 }
 
@@ -772,9 +768,11 @@ void _handleMacOSException(Exception e, String? message, int errorCode, String? 
   const int ebadarch = 86;
   if (errorCode == ebadarch) {
     final StringBuffer errorBuffer = StringBuffer();
-    errorBuffer.writeln(message);
-    errorBuffer.writeln('This binary was built with the incorrect architecture to run on this machine.');
-    errorBuffer.writeln('Flutter requires the Rosetta translation environment. If you are on an ARM Mac, try running:');
+    if (message != null) {
+      errorBuffer.writeln('$message.');
+    }
+    errorBuffer.writeln('The binary was built with the incorrect architecture to run on this machine.');
+    errorBuffer.writeln('If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:');
     errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
     _throwFileSystemException(errorBuffer.toString());
   }

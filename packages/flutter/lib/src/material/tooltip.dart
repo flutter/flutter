@@ -630,6 +630,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _entry?.remove();
     }
     _isConcealed = false;
+    _entry?.dispose();
     _entry = null;
     if (_mouseIsConnected) {
       Tooltip._revealLastTooltip();
@@ -778,9 +779,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  }) : assert(target != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null);
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.

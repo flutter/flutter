@@ -78,7 +78,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   const ScrollNotificationObserver({
     super.key,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The subtree below this widget.
   final Widget child;

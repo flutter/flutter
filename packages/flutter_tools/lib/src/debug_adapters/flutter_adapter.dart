@@ -148,6 +148,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       customTool: args.customTool,
       customToolReplacesArgs: args.customToolReplacesArgs,
       userToolArgs: args.toolArgs,
+      targetProgram: args.program,
     );
   }
 
@@ -345,6 +346,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final String messageString = jsonEncode(message);
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
+    _logTraffic('==> [Flutter] $payload');
     process.stdin.writeln(payload);
   }
 
@@ -352,7 +354,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   Future<void> terminateImpl() async {
     if (isAttach) {
-      await preventBreakingAndResume();
+      await handleDetach();
     }
 
     // Send a request to stop/detach to give Flutter chance to do some cleanup.
@@ -446,7 +448,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   void handleExitCode(int code) {
     final String codeSuffix = code == 0 ? '' : ' ($code)';
-    logger?.call('Process exited ($code)');
+    _logTraffic('<== [Flutter] Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
 
@@ -505,8 +507,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
     completer.future
-        .then((Object? value) => sendResponseToFlutter(id, value))
-        .catchError((Object? e) => sendResponseToFlutter(id, e.toString(), error: true));
+        .then(
+          (Object? value) => sendResponseToFlutter(id, value),
+          onError: (Object? e) => sendResponseToFlutter(id, e.toString(), error: true),
+        );
 
     if (_requestsToForwardToClient.contains(method)) {
       // Forward the request to the client in an event.
@@ -558,7 +562,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
 
   @override
   void handleStderr(List<int> data) {
-    logger?.call('stderr: $data');
+    _logTraffic('<== [Flutter] [stderr] $data');
     sendOutput('stderr', utf8.decode(data));
   }
 
@@ -574,7 +578,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // - the item has an "event" field that is a String
     // - the item has a "params" field that is a Map<String, Object?>?
 
-    logger?.call('stdout: $data');
+    _logTraffic('<== [Flutter] $data');
 
     // Output is sent as console (eg. output from tooling) until the app has
     // started, then stdout (users output). This is so info like
@@ -587,7 +591,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // debugging, we must try to detect which messages are likely Flutter
     // messages as reliably as possible, as trying to process users output
     // as a Flutter message may result in an unhandled error that will
-    // terminate the debug adater in a way that does not provide feedback
+    // terminate the debug adapter in a way that does not provide feedback
     // because the standard crash violates the DAP protocol.
     Object? jsonData;
     try {
@@ -635,6 +639,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     } else {
       // If it wasn't processed above,
       sendOutput(outputCategory, data);
+    }
+  }
+
+  /// Logs JSON traffic to aid debugging.
+  ///
+  /// If `sendLogsToClient` was `true` in the launch/attach config, logs will
+  /// also be sent back to the client in a "dart.log" event to simplify
+  /// capturing logs from the IDE (such as using the **Dart: Capture Logs**
+  /// command in VS Code).
+  void _logTraffic(String message) {
+    logger?.call(message);
+    if (sendLogsToClient) {
+      sendEvent(
+        RawEventBody(<String, String>{'message': message}),
+        eventType: 'dart.log',
+      );
     }
   }
 

@@ -28,12 +28,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'empty'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   group('SelectableRegion', () {
@@ -72,6 +72,37 @@ void main() {
 
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+
+    testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/119776
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Navigator(
+            pages: <Page<void>> [
+              MaterialPage<void>(
+                child: Column(
+                  children: <Widget>[
+                    const Text('How are you?'),
+                    SelectableRegion(
+                      focusNode: FocusNode(),
+                      selectionControls: materialTextSelectionControls,
+                      child: const SelectAllWidget(child: SizedBox(width: 100, height: 100)),
+                    ),
+                    const Text('Fine, thank you.'),
+                  ],
+                ),
+              ),
+              const MaterialPage<void>(
+                child: Scaffold(body: Text('Foreground Page')),
+              ),
+            ],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -409,8 +440,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -449,8 +480,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 SelectionContainer.disabled(child: Text('Good, and you?')),
                 Text('Fine, thank you.'),
@@ -490,8 +521,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -529,8 +560,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -665,8 +696,8 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -813,8 +844,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('جيد وانت؟', textDirection: TextDirection.rtl),
                 Text('Fine, thank you.'),
@@ -842,7 +873,7 @@ void main() {
       // Add a little offset to cross the boundary between paragraph 2 and 3.
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6) + const Offset(0, 1));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();
@@ -854,8 +885,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -954,8 +985,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -995,8 +1026,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1031,8 +1062,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1067,8 +1098,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1102,8 +1133,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1141,8 +1172,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1201,8 +1232,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1296,12 +1327,12 @@ void main() {
 
       await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: alt, control: control));
       await tester.pump();
-      // Ho[w are you]?
+      // Ho[w are ]you?
       // Good, and you?
       // Fine, thank you.
       expect(paragraph1.selections.length, 1);
       expect(paragraph1.selections[0].start, 2);
-      expect(paragraph1.selections[0].end, 11);
+      expect(paragraph1.selections[0].end, 8);
       expect(paragraph2.selections.length, 0);
     }, variant: TargetPlatformVariant.all());
 
@@ -1311,8 +1342,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1402,8 +1433,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1480,8 +1511,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1573,7 +1604,7 @@ void main() {
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
           (WidgetTester tester) async {
-        const String text = 'Monkies and rabbits in my soup';
+        const String text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(

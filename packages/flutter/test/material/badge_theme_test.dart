@@ -14,6 +14,12 @@ void main() {
     expect(const BadgeThemeData().hashCode, const BadgeThemeData().copyWith().hashCode);
   });
 
+  test('BadgeThemeData lerp special cases', () {
+    expect(BadgeThemeData.lerp(null, null, 0), const BadgeThemeData());
+    const BadgeThemeData data = BadgeThemeData();
+    expect(identical(BadgeThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('BadgeThemeData defaults', () {
     const BadgeThemeData themeData = BadgeThemeData();
     expect(themeData.backgroundColor, null);
@@ -23,6 +29,7 @@ void main() {
     expect(themeData.textStyle, null);
     expect(themeData.padding, null);
     expect(themeData.alignment, null);
+    expect(themeData.offset, null);
   });
 
   testWidgets('Default BadgeThemeData debugFillProperties', (WidgetTester tester) async {
@@ -47,6 +54,7 @@ void main() {
       textStyle: TextStyle(fontSize: 4),
       padding: EdgeInsets.all(5),
       alignment: AlignmentDirectional(6, 7),
+      offset: Offset.zero,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -61,7 +69,8 @@ void main() {
       'largeSize: 2.0',
       'textStyle: TextStyle(inherit: true, size: 4.0)',
       'padding: EdgeInsets.all(5.0)',
-      'alignment: AlignmentDirectional(6.0, 7.0)'
+      'alignment: AlignmentDirectional(6.0, 7.0)',
+      'offset: Offset(0.0, 0.0)'
     ]);
   });
 
@@ -75,7 +84,8 @@ void main() {
       largeSize: 20,
       textStyle: TextStyle(fontSize: 12),
       padding: EdgeInsets.symmetric(horizontal: 5),
-      alignment: AlignmentDirectional(24, 0),
+      alignment: Alignment.topRight,
+      offset: Offset(24, 0),
     );
 
     await tester.pumpWidget(
@@ -95,8 +105,7 @@ void main() {
     // text width = 48 = fontSize * 4, text height = fontSize
     expect(tester.getSize(find.text('1234')), const Size(48, 12));
 
-    // x = 29 = alignment.start + padding.left, y = 4 = (largeSize - fontSize) / 2
-    expect(tester.getTopLeft(find.text('1234')), const Offset(29, 4));
+    expect(tester.getTopLeft(find.text('1234')), const Offset(33, 4));
 
 
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
@@ -107,8 +116,7 @@ void main() {
     expect(textStyle.color, black);
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    // L = alignment.start, T = alignment.top, R = L + fontSize * 4 + padding.width, B = largeSize R = largeSize/2
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(24, 0, 82, 20, const Radius.circular(10)), color: green));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(28, 0, 86, 20, const Radius.circular(10)), color: green));
   });
 
 
@@ -125,7 +133,8 @@ void main() {
       largeSize: 20,
       textStyle: TextStyle(fontSize: 12),
       padding: EdgeInsets.symmetric(horizontal: 5),
-      alignment: AlignmentDirectional(24, 0),
+      alignment: Alignment.topRight,
+      offset: Offset(24, 0),
     );
 
     await tester.pumpWidget(
@@ -143,13 +152,13 @@ void main() {
     );
 
     expect(tester.getSize(find.text('1234')), const Size(48, 12));
-    expect(tester.getTopLeft(find.text('1234')), const Offset(29, 4));
+    expect(tester.getTopLeft(find.text('1234')), const Offset(33, 4));
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
     final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('1234')).text.style!;
     expect(textStyle.fontSize, 12);
     expect(textStyle.color, black);
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(24, 0, 82, 20, const Radius.circular(10)), color: green));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(28, 0, 86, 20, const Radius.circular(10)), color: green));
   });
 }

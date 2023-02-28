@@ -77,7 +77,6 @@ class Version {
   /// `flutter --version` and match one of `stablePattern`, `developmentPattern`
   /// and `latestPattern`.
   factory Version.fromString(String versionString) {
-    assert(versionString != null);
 
     versionString = versionString.trim();
     // stable tag

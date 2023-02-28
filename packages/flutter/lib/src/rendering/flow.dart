@@ -183,9 +183,7 @@ class RenderFlow extends RenderBox
     List<RenderBox>? children,
     required FlowDelegate delegate,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(delegate != null),
-       assert(clipBehavior != null),
-       _delegate = delegate,
+  }) : _delegate = delegate,
        _clipBehavior = clipBehavior {
     addAll(children);
   }
@@ -209,7 +207,6 @@ class RenderFlow extends RenderBox
   /// to determine whether the new delegate requires this object to update its
   /// layout or painting.
   set delegate(FlowDelegate newDelegate) {
-    assert(newDelegate != null);
     if (_delegate == newDelegate) {
       return;
     }
@@ -234,7 +231,6 @@ class RenderFlow extends RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();

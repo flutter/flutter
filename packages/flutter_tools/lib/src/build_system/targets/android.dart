@@ -67,7 +67,7 @@ abstract class AndroidAssetBundle extends Target {
       outputDirectory,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.sksl,
+      shaderTarget: ShaderTarget.impellerAndroid,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

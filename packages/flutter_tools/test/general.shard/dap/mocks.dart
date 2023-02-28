@@ -57,6 +57,11 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   late List<String> processArgs;
   late Map<String, String>? env;
 
+  /// Overrides base implementation of [sendLogsToClient] which requires valid
+  /// `args` to have been set which may not be the case for mocks.
+  @override
+  bool get sendLogsToClient => false;
+
   final StreamController<Map<String, Object?>> _dapToClientMessagesController = StreamController<Map<String, Object?>>.broadcast();
 
   /// A stream of all messages sent from the adapter back to the client.
@@ -73,7 +78,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
   final List<Map<String, Object?>> dapToFlutterMessages = <Map<String, Object?>>[];
 
-  /// The `method`s of all mesages sent to the `flutter run` processes `stdin`
+  /// The `method`s of all messages sent to the `flutter run` processes `stdin`
   /// by the debug adapter.
   List<String> get dapToFlutterRequests => dapToFlutterMessages
       .map((Map<String, Object?> message) => message['method'] as String?)

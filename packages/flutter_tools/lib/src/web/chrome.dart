@@ -73,9 +73,6 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
         platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
-      if (prefix == null) {
-        return false;
-      }
       final String path = fileSystem.path.join(prefix, kWindowsExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -102,9 +99,6 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
         platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
-      if (prefix == null) {
-        return false;
-      }
       final String path = fileSystem.path.join(prefix, kWindowsEdgeExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -158,7 +152,7 @@ class ChromiumLauncher {
   /// Launch a Chromium browser to a particular `host` page.
   ///
   /// [headless] defaults to false, and controls whether we open a headless or
-  /// a "headfull" browser.
+  /// a "headful" browser.
   ///
   /// [debugPort] is Chrome's debugging protocol port. If null, a random free
   /// port is picked automatically.
@@ -180,7 +174,7 @@ class ChromiumLauncher {
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
 
     if (_logger.isVerbose && !_platform.isWindows) {
-      // Note: --version is not supported on windows.
+      // The "--version" argument is not supported on Windows.
       final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
       _logger.printTrace('Using ${versionResult.stdout}');
     }
@@ -228,6 +222,12 @@ class ChromiumLauncher {
     if (process != null && cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
+        // cleanup temp dir
+        try {
+          userDataDir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // ignore
+        }
       }));
     }
     return connect(Chromium(
@@ -332,7 +332,7 @@ class ChromiumLauncher {
   /// Copy Chrome user information from a Chrome session into a per-project
   /// cache.
   ///
-  /// Note: more detailed docs of the Chrome user preferences store exists here:
+  /// More detailed docs of the Chrome user preferences store exists here:
   /// https://www.chromium.org/developers/design-documents/preferences.
   ///
   /// This intentionally skips the Cache, Code Cache, and GPUCache directories.
@@ -419,9 +419,13 @@ class ChromiumLauncher {
 
   /// Gets the first [chrome] tab.
   ///
-  /// Note: Retry getting tabs from Chrome for a few seconds and retry finding
-  /// the tab a few times. This prevents flakes caused by Chrome not returning
+  /// Retries getting tabs from Chrome for a few seconds and retries finding
+  /// the tab a few times. This reduces flakes caused by Chrome not returning
   /// correct output if the call was too close to the start.
+  //
+  // TODO(ianh): remove the timeouts here, they violate our style guide.
+  // (We should just keep waiting forever, and print a warning when it's
+  // taking too long.)
   Future<ChromeTab?> _getFirstTab(Chromium chrome) async {
     const Duration retryFor = Duration(seconds: 2);
     const int attempts = 5;

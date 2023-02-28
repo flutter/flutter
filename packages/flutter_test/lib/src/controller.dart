@@ -23,7 +23,7 @@ const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
-/// Class that programatically interacts with the [Semantics] tree.
+/// Class that programmatically interacts with the [Semantics] tree.
 ///
 /// Allows for testing of the [Semantics] tree, which is used by assistive
 /// technology, search engines, and other analysis software to determine the
@@ -72,7 +72,7 @@ class SemanticsController {
   /// if no semantics are found or are not enabled.
   SemanticsNode find(Finder finder) {
     TestAsyncUtils.guardSync();
-    if (_binding.pipelineOwner.semanticsOwner == null) {
+    if (!_binding.semanticsEnabled) {
       throw StateError('Semantics are not enabled.');
     }
     final Iterable<Element> candidates = finder.evaluate();
@@ -187,7 +187,7 @@ class SemanticsController {
   }
 
   /// Whether or not the node is important for semantics. Should match most cases
-  /// on the platforms, but certain edge cases will be inconsisent.
+  /// on the platforms, but certain edge cases will be inconsistent.
   ///
   /// Based on:
   ///
@@ -241,7 +241,7 @@ abstract class WidgetController {
   /// use of the [Semantics] tree to determine the meaning of an application.
   /// If semantics has been disabled for the test, this will throw a [StateError].
   SemanticsController get semantics {
-    if (binding.pipelineOwner.semanticsOwner == null) {
+    if (!binding.semanticsEnabled) {
       throw StateError(
         'Semantics are not enabled. Enable them by passing '
         '`semanticsEnabled: true` to `testWidgets`, or by manually creating a '
@@ -562,6 +562,16 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
+  /// {@template flutter.flutter_test.WidgetController.fling.offset}
+  /// The `offset` represents a distance the pointer moves in the global
+  /// coordinate system of the screen.
+  ///
+  /// Positive [Offset.dy] values mean the pointer moves downward. Negative
+  /// [Offset.dy] values mean the pointer moves upwards. Accordingly, positive
+  /// [Offset.dx] values mean the pointer moves towards the right. Negative
+  /// [Offset.dx] values mean the pointer moves towards left.
+  /// {@endtemplate}
+  ///
   /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
@@ -817,6 +827,8 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
+  ///
   /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
@@ -878,7 +890,6 @@ abstract class WidgetController {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
-      assert(gesture != null);
 
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
@@ -952,6 +963,8 @@ abstract class WidgetController {
   /// time, starting in the middle of the widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
   ///
   /// This is the timed version of [drag]. This may or may not result in a
   /// [fling] or ballistic animation, depending on the speed from
@@ -1106,7 +1119,6 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -1254,9 +1266,7 @@ abstract class WidgetController {
       }
       if (!found) {
         bool outOfBounds = false;
-        if (binding.renderView != null && binding.renderView.size != null) {
-          outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
-        }
+        outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
@@ -1335,7 +1345,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
@@ -1379,7 +1388,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1413,7 +1421,6 @@ abstract class WidgetController {
         String platform = _defaultPlatform,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -1455,7 +1462,6 @@ abstract class WidgetController {
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1485,7 +1491,7 @@ abstract class WidgetController {
   ///
   /// The handle must be disposed at the end of the test.
   SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
+    return binding.ensureSemantics();
   }
 
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
@@ -1613,7 +1619,6 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
   ]) {
-    assert(duration != null);
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
       int count = 0;
@@ -1627,7 +1632,6 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
-    assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];
