@@ -248,7 +248,7 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTexture(
 
   texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
 
-  {
+  if (texture_descriptor.mip_count > 1u) {
     auto command_buffer = context->CreateCommandBuffer();
     if (!command_buffer) {
       FML_DLOG(ERROR)
