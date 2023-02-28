@@ -155,10 +155,10 @@ void testWidgets(
       () {
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
+        tester._recordNumberOfSemanticsHandles();
         if (semanticsEnabled == true) {
           semanticsHandle = tester.ensureSemantics();
         }
-        tester._recordNumberOfSemanticsHandles();
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
