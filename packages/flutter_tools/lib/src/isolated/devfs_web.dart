@@ -42,7 +42,6 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
-import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
@@ -61,10 +60,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
   bool launchDevToolsInNewWindow,
-  SdkConfigurationProvider sdkConfigurationProvider,
   bool emitDebugEvents,
   bool isInternalBuild,
-  bool isFlutterApp,
+  Future<bool> Function()? isFlutterApp,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -301,7 +299,6 @@ class WebAssetServer implements AssetReader {
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
-      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts!),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
