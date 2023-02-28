@@ -653,57 +653,6 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
-    late BuildContext outerContext;
-    late BuildContext innerContext;
-
-    await tester.pumpWidget(Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.all(50.0),
-            size: Size(400.0, 600.0),
-          ),
-          child: Navigator(
-            onGenerateRoute: (_) {
-              return PageRouteBuilder<void>(
-                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-                  outerContext = context;
-                  return Container();
-                },
-              );
-            },
-          ),
-        ),
-      ),
-    ));
-
-    showModalBottomSheet<void>(
-      context: outerContext,
-      builder: (BuildContext context) {
-        innerContext = context;
-        return Container();
-      },
-    );
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(
-      MediaQuery.of(outerContext).padding,
-      const EdgeInsets.all(50.0),
-    );
-    expect(
-      MediaQuery.of(innerContext).padding,
-      const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
-    );
-  });
-
   testWidgets('modal BottomSheet can insert a SafeArea', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext innerContext;
@@ -746,9 +695,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Top padding is consumed and there is no SafeArea
-    expect(MediaQuery.of(innerContext).padding.top, 0);
+    // No SafeArea is inserted
     expect(find.byType(SafeArea), findsNothing);
+
+    // Because no SafeArea is inserted, all padding remains for `builder` to consume.
+    expect(MediaQuery.of(innerContext).padding, const EdgeInsets.all(50.0));
 
     // With a SafeArea
     showModalBottomSheet<void>(
@@ -762,9 +713,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Top padding is consumed and there is a SafeArea
-    expect(MediaQuery.of(innerContext).padding.top, 0);
-    expect(find.byType(SafeArea), findsOneWidget);
+    // A SafeArea is inserted, with left / top / right true but bottom false.
+    final Finder safeAreaWidgetFinder = find.byType(SafeArea);
+    expect(safeAreaWidgetFinder, findsOneWidget);
+    final SafeArea safeAreaWidget = safeAreaWidgetFinder.evaluate().single.widget as SafeArea;
+    expect(safeAreaWidget.left, true);
+    expect(safeAreaWidget.top, true);
+    expect(safeAreaWidget.right, true);
+    expect(safeAreaWidget.bottom, false);
+
+    // Because that SafeArea is inserted, no left / top / right padding remains
+    // for `builder` to consume. Bottom padding does remain.
+    expect(MediaQuery.of(innerContext).padding, const EdgeInsets.fromLTRB(0, 0, 0, 50.0));
   });
 
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
