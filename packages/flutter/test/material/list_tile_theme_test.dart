@@ -46,9 +46,15 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  test('ListTileThemeData copyWith, ==, hashCode basics', () {
+  test('ListTileThemeData copyWith, ==, hashCode, basics', () {
     expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
     expect(const ListTileThemeData().hashCode, const ListTileThemeData().copyWith().hashCode);
+  });
+
+  test('ListTileThemeData lerp special cases', () {
+    expect(ListTileThemeData.lerp(null, null, 0), null);
+    const ListTileThemeData data = ListTileThemeData();
+    expect(identical(ListTileThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ListTileThemeData defaults', () {

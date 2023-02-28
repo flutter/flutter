@@ -72,6 +72,18 @@ void main() {
     expect(LinearBorder.none.copyWith(side: side), const LinearBorder(side: side));
   });
 
+  test('LinearBorder lerp identical a,b', () {
+    expect(OutlinedBorder.lerp(null, null, 0), null);
+    const LinearBorder border = LinearBorder.none;
+    expect(identical(OutlinedBorder.lerp(border, border, 0.5), border), true);
+  });
+
+  test('LinearBorderEdge.lerp identical a,b', () {
+    expect(LinearBorderEdge.lerp(null, null, 0), null);
+    const LinearBorderEdge edge = LinearBorderEdge();
+    expect(identical(LinearBorderEdge.lerp(edge, edge, 0.5), edge), true);
+  });
+
   test('LinearBorderEdge, LinearBorder toString()', () {
     expect(const LinearBorderEdge(size: 0.5, alignment: -0.5).toString(), 'LinearBorderEdge(size: 0.5, alignment: -0.5)');
     expect(LinearBorder.none.toString(), 'LinearBorder.none');

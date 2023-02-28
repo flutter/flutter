@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1031,6 +1034,32 @@ void main() {
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('If requestFocusOnTap is false, the mouse cursor should be clickable when hovered', (WidgetTester tester) async {
+    Widget buildDropdownMenu() => MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              requestFocusOnTap: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu());
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, false);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 }
 
 enum TestMenu {

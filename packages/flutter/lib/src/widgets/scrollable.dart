@@ -359,7 +359,7 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope?;
+    final _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     if (widget == null) {
       return false;
     }
@@ -1659,6 +1659,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+      _innerNode = null;
       super.assembleSemanticsNode(node, config, children);
       return;
     }

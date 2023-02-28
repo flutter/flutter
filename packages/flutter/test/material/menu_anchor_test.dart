@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   late MenuController controller;
   String? focusedMenu;
@@ -297,6 +299,101 @@ void main() {
     );
     expect(iconRichText.text.style?.color, themeData.colorScheme.onSurface.withOpacity(0.38));
   });
+
+  testWidgets('Menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
+    const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
+      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
+        home: Material(
+          child: MenuBar(
+            children: <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    style: ButtonStyle(
+                      minimumSize: MaterialStateProperty.all<Size>(
+                        const Size.fromHeight(1000),
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: const Text(
+                      'Category',
+                    ),
+                  ),
+                ],
+                child: const Text(
+                  'Main Menu',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Main Menu'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Test Scrollbar thumb color.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xffff0000)),
+    );
+
+    // Close the menu.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: scrollbarTheme),
+        home: Material(
+          child: ScrollbarTheme(
+            data: scrollbarTheme.copyWith(
+              thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff00ff00)),
+            ),
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      style: ButtonStyle(
+                        minimumSize: MaterialStateProperty.all<Size>(
+                          const Size.fromHeight(1000),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text(
+                        'Category',
+                      ),
+                    ),
+                  ],
+                  child: const Text(
+                    'Main Menu',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Main Menu'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Scrollbar thumb color should be updated.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xff00ff00)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 
   group('Menu functions', () {
     testWidgets('basic menu structure', (WidgetTester tester) async {

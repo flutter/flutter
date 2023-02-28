@@ -276,6 +276,15 @@ public class $pluginClass: NSObject, FlutterPlugin {
           }
         });
         break;
+      case 'linux':
+        if (await exec(
+          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_plugin_test'),
+          <String>[],
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+        break;
       case 'macos':
         if (!await runXcodeTests(
           platformDirectory: path.join(rootPath, 'macos'),
@@ -289,7 +298,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
         break;
       case 'windows':
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_plugin_test'),
+          path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
           <String>[],
           canFail: true,
         ) != 0) {

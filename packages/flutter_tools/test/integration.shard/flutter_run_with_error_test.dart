@@ -52,7 +52,7 @@ void main() {
     transformToLines(process.stdout).listen((String line) async {
       stdout.writeln(line);
 
-      if (line.startsWith('A Dart VM Service on')) {
+      if (line.startsWith('An Observatory debugger')) {
         final RegExp exp = RegExp(r'http://127.0.0.1:(\d+)/');
         final RegExpMatch match = exp.firstMatch(line)!;
         final String port = match.group(1)!;

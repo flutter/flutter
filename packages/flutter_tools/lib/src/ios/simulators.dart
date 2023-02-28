@@ -450,9 +450,9 @@ class IOSSimulator extends Device {
       platformArgs,
     );
 
-    ProtocolDiscovery? vmServiceDiscovery;
+    ProtocolDiscovery? observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {
-      vmServiceDiscovery = ProtocolDiscovery.vmService(
+      observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(app: package),
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -485,13 +485,13 @@ class IOSSimulator extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Dart VM Service is listening on..."
-    globals.printTrace('Waiting for VM Service port to be available...');
+    // device has printed "Observatory is listening on..."
+    globals.printTrace('Waiting for observatory port to be available...');
 
     try {
-      final Uri? deviceUri = await vmServiceDiscovery?.uri;
+      final Uri? deviceUri = await observatoryDiscovery?.uri;
       if (deviceUri != null) {
-        return LaunchResult.succeeded(vmServiceUri: deviceUri);
+        return LaunchResult.succeeded(observatoryUri: deviceUri);
       }
       globals.printError(
         'Error waiting for a debug connection: '
@@ -500,7 +500,7 @@ class IOSSimulator extends Device {
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
     } finally {
-      await vmServiceDiscovery?.cancel();
+      await observatoryDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }

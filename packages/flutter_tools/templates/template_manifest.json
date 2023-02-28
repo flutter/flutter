@@ -274,6 +274,8 @@
         "templates/plugin/linux.tmpl/CMakeLists.txt.tmpl",
         "templates/plugin/linux.tmpl/include/projectName.tmpl/pluginClassSnakeCase.h.tmpl",
         "templates/plugin/linux.tmpl/pluginClassSnakeCase.cc.tmpl",
+        "templates/plugin/linux.tmpl/pluginClassSnakeCase_private.h.tmpl",
+        "templates/plugin/linux.tmpl/test/pluginClassSnakeCase_test.cc.tmpl",
         "templates/plugin/macos.tmpl/Classes/pluginClass.swift.tmpl",
         "templates/plugin/README.md.tmpl",
         "templates/plugin/test/projectName_test.dart.tmpl",

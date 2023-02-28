@@ -12,6 +12,12 @@ void main() {
     expect(const SnackBarThemeData().hashCode, const SnackBarThemeData().copyWith().hashCode);
   });
 
+  test('SnackBarThemeData lerp special cases', () {
+    expect(SnackBarThemeData.lerp(null, null, 0), const SnackBarThemeData());
+    const SnackBarThemeData data = SnackBarThemeData();
+    expect(identical(SnackBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('SnackBarThemeData null fields by default', () {
     const SnackBarThemeData snackBarTheme = SnackBarThemeData();
     expect(snackBarTheme.backgroundColor, null);
