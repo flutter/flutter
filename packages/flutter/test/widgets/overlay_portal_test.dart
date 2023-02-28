@@ -194,7 +194,10 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    expect(tester.takeException(), isAssertionError);
+    expect(
+      tester.takeException().toString(),
+      stringContainsInOrder(<String>['Failed to attach' ,'It is already attached to']),
+    );
   });
 
   testWidgets('show/hide works', (WidgetTester tester) async {
@@ -438,7 +441,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isAssertionError);
+    expect(
+      tester.takeException().toString(),
+      startsWith(
+        'No Overlay widget found.\n'
+        'OverlayPortal widgets require an Overlay widget ancestor.\n'
+        'An overlay lets widgets float on top of other widget children.\n'
+        'To introduce an Overlay widget, you can either directly include one, or use a widget '
+        'that contains an Overlay itself, such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.\n'
+        'The specific widget that could not find a Overlay ancestor was:\n'
+      ),
+    );
   });
 
   testWidgets('widget is laid out before overlay child', (WidgetTester tester) async {

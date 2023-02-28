@@ -238,25 +238,26 @@ class _OverlayEntryWidget extends StatefulWidget {
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   late _RenderTheater _theater;
 
-  // The children added by OverlayPortal are added to this child model, and
-  // these children will be shown _above_ the OverlayEntry tied to this widget.
-  //
-  // This child model is lazily created in `_add`. When the associated
-  // OverlayEntry is reparented to a different Overlay, the existing
-  // child model will be destroyed.
-  // The data structure for managing the stack of theater children whose paint
-  // order are sorted by their _zOrderIndex.
-  //
+  // Manages the stack of theater children whose paint order are sorted by their
+  // _zOrderIndex. The children added by OverlayPortal are added to this linked
+  // list, and they will be shown _above_ the OverlayEntry tied to this widget.
   // The children with larger zOrderIndex values (i.e. those called `show`
   // recently) will be painted last.
-  LinkedList<_OverlayEntryLocation>? _sortedChildren;
+  //
+  // This linked list is lazily created in `_add`, and the entries are added/removed
+  // via `_add`/`_remove`, called by OverlayPortals lower in the tree. `_add` or
+  // `_remove` does not cause this widget to rebuild, the linked list will be
+  // read by _RenderTheater as part of its render child model. This would ideally
+  // be in a RenderObject but there may not be RenderObjects between
+  // _RenderTheater and the render subtree OverlayEntry builds.
+  LinkedList<_OverlayEntryLocation>? _sortedTheaterSiblings;
 
   // Worst-case O(N), N being the number of children added to the top spot in
   // the same frame. This can be a bit expensive when there's a lot of global
   // key reparenting in the same frame but N is usually a small number.
   void _add(_OverlayEntryLocation child) {
     assert(mounted);
-    final LinkedList<_OverlayEntryLocation> children = _sortedChildren ??= LinkedList<_OverlayEntryLocation>();
+    final LinkedList<_OverlayEntryLocation> children = _sortedTheaterSiblings ??= LinkedList<_OverlayEntryLocation>();
     assert(!children.contains(child));
     _OverlayEntryLocation? insertPosition = children.isEmpty ? null : children.last;
     while (insertPosition != null && insertPosition._zOrderIndex > child._zOrderIndex) {
@@ -271,27 +272,27 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   }
 
   void _remove(_OverlayEntryLocation child) {
-    assert(_sortedChildren != null);
-    final bool wasInCollection = _sortedChildren?.remove(child) ?? false;
+    assert(_sortedTheaterSiblings != null);
+    final bool wasInCollection = _sortedTheaterSiblings?.remove(child) ?? false;
     assert(wasInCollection);
   }
 
   // Returns an Iterable that traverse the children in the child model in paint
-  // (from farthest to the user to the closest to the user).
+  // order (from farthest to the user to the closest to the user).
   //
   // The iterator should be safe to use even when the child model is being
   // mutated. The reason for that is it's allowed to add/remove/move deferred
   // children to a _RenderTheater during performLayout, but the affected
   // children don't have to be laid out in the same performLayout call.
-  late final Iterable<RenderBox> _paintOrderIterable = _createChildIterable(false);
+  late final Iterable<RenderBox> _paintOrderIterable = _createChildIterable(reversed: false);
   // An Iterable that traverse the children in the child model in
   // hit-test order (from closest to the user to the farthest to the user).
-  late final Iterable<RenderBox> _hitTestOrderIterable = _createChildIterable(true);
+  late final Iterable<RenderBox> _hitTestOrderIterable = _createChildIterable(reversed: true);
 
   // The following uses sync* because hit-testing is lazy, and LinkedList as a
   // Iterable doesn't support current modification.
-  Iterable<RenderBox> _createChildIterable(bool reversed) sync* {
-    final LinkedList<_OverlayEntryLocation>? children = _sortedChildren;
+  Iterable<RenderBox> _createChildIterable({ required bool reversed }) sync* {
+    final LinkedList<_OverlayEntryLocation>? children = _sortedTheaterSiblings;
     if (children == null || children.isEmpty) {
       return;
     }
@@ -310,7 +311,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
     super.initState();
     widget.entry._overlayEntryStateNotifier.value = this;
     _theater = context.findAncestorRenderObjectOfType<_RenderTheater>()!;
-    assert(_sortedChildren == null);
+    assert(_sortedTheaterSiblings == null);
   }
 
   @override
@@ -330,7 +331,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   void dispose() {
     widget.entry._overlayEntryStateNotifier.value = null;
     widget.entry._didUnmount();
-    _sortedChildren = null;
+    _sortedTheaterSiblings = null;
     super.dispose();
   }
 
@@ -831,7 +832,7 @@ mixin _RenderTheaterMixin on RenderBox {
         child.layout(nonPositionedChildConstraints, parentUsesSize: true);
         childParentData.offset = alignment.alongOffset(size - child.size as Offset);
       } else {
-        assert(child is! _RenderDeferredLayoutBox);
+        assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
         RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
       }
       assert(child.parentData == childParentData);
@@ -1278,6 +1279,11 @@ class OverlayPortalController {
   OverlayPortalController({ String? debugLabel }) : _debugLabel = debugLabel;
 
   _OverlayPortalState? _attachTarget;
+
+  // A separate _zOrderIndex to allow `show()` or `hide()` to be called when the
+  // controller is not yet attached. Once this controller is attached,
+  // _attachTarget._zOrderIndex will be used as the source of truth, and this
+  // variable will be set to null.
   int? _zOrderIndex;
   final String? _debugLabel;
 
@@ -1508,8 +1514,6 @@ class _OverlayPortalState extends State<OverlayPortal> {
         ...context.describeMissingAncestor(expectedAncestorType: Overlay),
       ]);
     }
-    // Lazily creates a new _EventOrderChildModel only when there is an
-    // OverlayPortal descendant that targets that OverlayEntry.
     final _OverlayEntryLocation returnValue;
     if (cachedLocation == null) {
       returnValue = _OverlayEntryLocation(zOrderIndex, marker.overlayEntryWidgetState, marker.theater);
@@ -1532,7 +1536,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void _setupController(OverlayPortalController controller) {
     assert(
       controller._attachTarget == null || controller._attachTarget == this,
-      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}'
+      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.'
     );
     final int? controllerZOrderIndex = controller._zOrderIndex;
     final int? zOrderIndex = _zOrderIndex;
@@ -1643,25 +1647,21 @@ class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
 
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
   void _addToChildModel(_RenderDeferredLayoutBox child) {
-    assert(_overlayChildRenderBox == null, 'Failed to add $child. $_overlayChildRenderBox is attached to $this');
+    assert(_overlayChildRenderBox == null, 'Failed to add $child. This location ($this) is already occupied by $_overlayChildRenderBox.');
     _overlayChildRenderBox = child;
     _childModel._add(this);
-    if (_overlayChildRenderBox != null) {
-      _theater.markNeedsPaint();
-      _theater.markNeedsCompositingBitsUpdate();
-      _theater.markNeedsSemanticsUpdate();
-    }
+    _theater.markNeedsPaint();
+    _theater.markNeedsCompositingBitsUpdate();
+    _theater.markNeedsSemanticsUpdate();
   }
   void _removeFromChildModel(_RenderDeferredLayoutBox child) {
     assert(child == _overlayChildRenderBox);
     _overlayChildRenderBox = null;
-    assert(_childModel._sortedChildren?.contains(this) ?? false);
+    assert(_childModel._sortedTheaterSiblings?.contains(this) ?? false);
     _childModel._remove(this);
-    if (_overlayChildRenderBox != null) {
-      _theater.markNeedsPaint();
-      _theater.markNeedsCompositingBitsUpdate();
-      _theater.markNeedsSemanticsUpdate();
-    }
+    _theater.markNeedsPaint();
+    _theater.markNeedsCompositingBitsUpdate();
+    _theater.markNeedsSemanticsUpdate();
   }
 
   void _addChild(_RenderDeferredLayoutBox child) {
@@ -1912,6 +1912,8 @@ class _OverlayPortalElement extends RenderObjectElement {
 
 class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
+    // This widget must not be given a key: we currently do not support
+    // reparenting between the overlayChild and child.
     required Widget child,
   }) : super(child: child);
 
