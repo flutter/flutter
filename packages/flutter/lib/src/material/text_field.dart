@@ -1487,7 +1487,7 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {
-    return TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+    return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
   }
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });

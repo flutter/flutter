@@ -6113,7 +6113,7 @@ void main() {
       ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(editableText.style.color, theme.textTheme.bodyLarge!.color!.withOpacity(0.38));
   });
 
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
