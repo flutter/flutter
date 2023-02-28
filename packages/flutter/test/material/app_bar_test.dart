@@ -3598,6 +3598,64 @@ void main() {
         );
       }
 
+      testWidgets('backgroundColor for horizontal scrolling', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                  return states.contains(MaterialState.scrolledUnder)
+                    ? scrolledColor
+                    : defaultColor;
+                }),
+                title: const Text('AppBar'),
+                notificationPredicate: (ScrollNotification notification) {
+                  // Represents both scroll views below being treated as a
+                  // single viewport.
+                  return notification.depth <= 1;
+                },
+              ),
+              body: SingleChildScrollView(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    height: 1200,
+                    width: 1200,
+                    color: Colors.teal,
+                  ),
+                ),
+              ),
+            ),
+          )
+        );
+
+        expect(getAppBarBackgroundColor(tester), defaultColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await tester.pump();
+        await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+        gesture = await tester.startGesture(const Offset(50.0, 300.0));
+        // Scroll horizontally
+        await gesture.moveBy(const Offset(-kToolbarHeight, 0.0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(-kToolbarHeight, 0.0));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        // The app bar is still scrolled under vertically, so it should not have
+        // changed back in response to horizontal scrolling.
+        expect(getAppBarBackgroundColor(tester), scrolledColor);
+        expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      });
+
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildAppBar(contentHeight: 1200.0)
