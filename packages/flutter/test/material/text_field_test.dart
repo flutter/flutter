@@ -4514,6 +4514,7 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {

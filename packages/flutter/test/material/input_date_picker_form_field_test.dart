@@ -262,7 +262,6 @@ void main() {
 
     testWidgets('Semantics', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
@@ -287,6 +286,7 @@ void main() {
         hasMoveCursorBackwardByCharacterAction: true,
         hasMoveCursorBackwardByWordAction: true,
       ));
+      semantics.dispose();
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {

@@ -421,7 +421,7 @@ class SemanticsTester {
   /// You should call [dispose] at the end of a test that creates a semantics
   /// tester.
   SemanticsTester(this.tester) {
-    _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+    _semanticsHandle = tester.ensureSemantics();
 
     // This _extra_ clean-up is needed for the case when a test fails and
     // therefore fails to call dispose() explicitly. The test is still required

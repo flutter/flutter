@@ -67,6 +67,11 @@ mixin SemanticsBinding on BindingBase {
     _semanticsEnabled.removeListener(listener);
   }
 
+  /// The number of clients registered to listen for semantics.
+  ///
+  /// The number is increased whenever [ensureSemantics] is called and decreased
+  /// when [SemanticsHandle.dispose] is called.
+  int get debugOutstandingSemanticsHandles => _outstandingHandles;
   int _outstandingHandles = 0;
 
   /// Creates a new [SemanticsHandle] and requests the collection of semantics

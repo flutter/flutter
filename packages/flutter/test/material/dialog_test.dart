@@ -2505,6 +2505,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {

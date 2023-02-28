@@ -13,7 +13,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/100358.
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -44,5 +43,6 @@ void main() {
       type: SemanticsAction.showOnScreen,
       nodeId: nodeId,
     ));
+    semantics.dispose();
   });
 }
