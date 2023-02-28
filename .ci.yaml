@@ -719,7 +719,6 @@ targets:
 
   - name: Linux run_debug_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       xvfb: "1"
@@ -3927,7 +3926,6 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

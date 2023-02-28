@@ -6,34 +6,32 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const DatePickerApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class DatePickerApp extends StatelessWidget {
+  const DatePickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatefulWidget(restorationId: 'main'),
+      home: const DatePickerExample(restorationId: 'main'),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key, this.restorationId});
+class DatePickerExample extends StatefulWidget {
+  const DatePickerExample({super.key, this.restorationId});
 
   final String? restorationId;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DatePickerExample> createState() => _DatePickerExampleState();
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _DatePickerExampleState extends State<DatePickerExample>
     with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.

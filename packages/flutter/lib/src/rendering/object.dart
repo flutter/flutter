@@ -807,24 +807,8 @@ typedef RenderObjectVisitor = void Function(RenderObject child);
 /// Used by [RenderObject.invokeLayoutCallback].
 typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
-/// A reference to the semantics tree.
-///
-/// The framework maintains the semantics tree (used for accessibility and
-/// indexing) only when there is at least one client holding an open
-/// [SemanticsHandle].
-///
-/// The framework notifies the client that it has updated the semantics tree by
-/// calling the [listener] callback. When the client no longer needs the
-/// semantics tree, the client can call [dispose] on the [SemanticsHandle],
-/// which stops these callbacks and closes the [SemanticsHandle]. When all the
-/// outstanding [SemanticsHandle] objects are closed, the framework stops
-/// updating the semantics tree.
-///
-/// To obtain a [SemanticsHandle], call [PipelineOwner.ensureSemantics] on the
-/// [PipelineOwner] for the render tree from which you wish to read semantics.
-/// You can obtain the [PipelineOwner] using the [RenderObject.owner] property.
-class SemanticsHandle {
-  SemanticsHandle._(PipelineOwner owner, this.listener)
+class _LocalSemanticsHandle implements SemanticsHandle {
+  _LocalSemanticsHandle._(PipelineOwner owner, this.listener)
       : _owner = owner {
     if (listener != null) {
       _owner.semanticsOwner!.addListener(listener!);
@@ -836,13 +820,7 @@ class SemanticsHandle {
   /// The callback that will be notified when the semantics tree updates.
   final VoidCallback? listener;
 
-  /// Closes the semantics handle and stops calling [listener] when the
-  /// semantics updates.
-  ///
-  /// When all the outstanding [SemanticsHandle] objects for a given
-  /// [PipelineOwner] are closed, the [PipelineOwner] will stop updating the
-  /// semantics tree.
-  @mustCallSuper
+  @override
   void dispose() {
     if (listener != null) {
       _owner.semanticsOwner!.removeListener(listener!);
@@ -1170,7 +1148,12 @@ class PipelineOwner {
   int _outstandingSemanticsHandles = 0;
 
   /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
-  /// updates.
+  /// generated from the render tree owned by this [PipelineOwner] updates.
+  ///
+  /// Calling this method only ensures that this particular [PipelineOwner] will
+  /// generate a semantics tree. Consider calling
+  /// [SemanticsBinding.ensureSemantics] instead to turn on semantics globally
+  /// for the entire app.
   ///
   /// The [PipelineOwner] updates the semantics tree only when there are clients
   /// that wish to use the semantics tree. These clients express their interest
@@ -1189,7 +1172,7 @@ class PipelineOwner {
       _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
       onSemanticsOwnerCreated?.call();
     }
-    return SemanticsHandle._(this, listener);
+    return _LocalSemanticsHandle._(this, listener);
   }
 
   void _didDisposeSemanticsHandle() {
@@ -2369,7 +2352,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// needing to paint and needing a composited layer update, this method is only
   /// called once.
   // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/102102 revisit the
-  // contraint that the instance/type of layer cannot be changed at runtime.
+  // constraint that the instance/type of layer cannot be changed at runtime.
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
     return oldLayer ?? OffsetLayer();
