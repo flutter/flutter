@@ -50,6 +50,10 @@ impeller_component("playground") {
     "//third_party/imgui:imgui_glfw",
   ]
 
+  if (impeller_enable_vulkan || impeller_enable_metal) {
+    public_deps += [ "../fixtures:shader_subgroup_fixtures" ]
+  }
+
   public_configs = [ ":playground_config" ]
 
   if (is_mac) {

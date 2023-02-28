@@ -44,6 +44,11 @@ def main():
       choices=['mac', 'ios', 'ios-simulator'],
       help='Select the platform.'
   )
+  parser.add_argument(
+      '--metal-version',
+      required=True,
+      help='The language standard version to compile for.'
+  )
 
   args = parser.parse_args()
 
@@ -93,17 +98,17 @@ def main():
   # The Metal standard must match the specification in impellerc.
   if args.platform == 'mac':
     command += [
-        '--std=macos-metal1.2',
+        '--std=macos-metal%s' % args.metal_version,
         '-mmacos-version-min=10.14',
     ]
   elif args.platform == 'ios':
     command += [
-        '--std=ios-metal1.2',
+        '--std=ios-metal%s' % args.metal_version,
         '-mios-version-min=11.0',
     ]
   elif args.platform == 'ios-simulator':
     command += [
-        '--std=ios-metal1.2',
+        '--std=ios-metal%s' % args.metal_version,
         '-miphonesimulator-version-min=11.0',
     ]
   else:

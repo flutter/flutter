@@ -138,6 +138,7 @@
 ../../../flutter/impeller/geometry/geometry_unittests.h
 ../../../flutter/impeller/image/README.md
 ../../../flutter/impeller/playground
+../../../flutter/impeller/renderer/compute_subgroup_unittests.cc
 ../../../flutter/impeller/renderer/compute_unittests.cc
 ../../../flutter/impeller/renderer/device_buffer_unittests.cc
 ../../../flutter/impeller/renderer/host_buffer_unittests.cc
