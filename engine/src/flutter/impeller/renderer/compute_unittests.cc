@@ -10,6 +10,8 @@
 #include "impeller/fixtures/sample.comp.h"
 #include "impeller/fixtures/stage1.comp.h"
 #include "impeller/fixtures/stage2.comp.h"
+#include "impeller/geometry/path.h"
+#include "impeller/geometry/path_component.h"
 #include "impeller/playground/compute_playground_test.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_command.h"
@@ -19,7 +21,6 @@
 
 namespace impeller {
 namespace testing {
-
 using ComputeTest = ComputePlaygroundTest;
 INSTANTIATE_COMPUTE_SUITE(ComputeTest);
 

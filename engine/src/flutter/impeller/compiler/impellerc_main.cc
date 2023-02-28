@@ -74,6 +74,7 @@ bool Main(const fml::CommandLine& command_line) {
       switches.entry_point);
   options.json_format = switches.json_format;
   options.gles_language_version = switches.gles_language_version;
+  options.metal_version = switches.metal_version;
 
   Reflector::Options reflector_options;
   reflector_options.target_platform = switches.target_platform;

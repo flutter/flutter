@@ -109,10 +109,14 @@ template("impeller_component") {
 # @param[required] sources  The GLSL (4.60) sources to compiled into the Metal
 #                           library.
 #
+# @param[required] metal_version  The Metal language version to compile for.
+#
 template("metal_library") {
   assert(is_ios || is_mac)
   assert(defined(invoker.name), "Metal library name must be specified.")
   assert(defined(invoker.sources), "Metal source files must be specified.")
+  assert(defined(invoker.metal_version),
+         "Metal language version must be specified.")
 
   metal_library_name = invoker.name
 
@@ -147,6 +151,7 @@ template("metal_library") {
       rebase_path(metal_library_path, root_out_dir),
       "--depfile",
       rebase_path(depfile),
+      "--metal-version=$metal_version",
     ]
 
     if (is_ios) {
@@ -295,6 +300,11 @@ template("impellerc") {
       args += [ "--gles-language-version=$gles_language_version" ]
     }
 
+    if (defined(invoker.metal_version)) {
+      metal_version = invoker.metal_version
+      args += [ "--metal-version=$metal_version" ]
+    }
+
     if (json) {
       args += [ "--json" ]
     }
@@ -388,6 +398,11 @@ template("impeller_shaders_metal") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
 
+  metal_version = "1.2"
+  if (defined(invoker.metal_version)) {
+    metal_version = invoker.metal_version
+  }
+
   shaders_base_name = string_join("",
                                   [
                                     invoker.name,
@@ -396,6 +411,7 @@ template("impeller_shaders_metal") {
   impellerc_mtl = "impellerc_$target_name"
   impellerc(impellerc_mtl) {
     shaders = invoker.shaders
+    metal_version = metal_version
     sl_file_extension = "metal"
     shader_target_flag = ""
     defines = [ "IMPELLER_TARGET_METAL" ]
@@ -413,6 +429,7 @@ template("impeller_shaders_metal") {
   mtl_lib = "genlib_$target_name"
   metal_library(mtl_lib) {
     name = invoker.name
+    metal_version = metal_version
     sources =
         filter_include(get_target_outputs(":$impellerc_mtl"), [ "*.metal" ])
     deps = [ ":$impellerc_mtl" ]
@@ -553,6 +570,9 @@ template("impeller_shaders_vk") {
   impellerc(impellerc_vk) {
     shaders = invoker.shaders
     sl_file_extension = "vkspv"
+    if (defined(invoker.metal_version)) {
+      metal_version = invoker.metal_version
+    }
 
     # Metal reflectors generate a superset of information.
     if (impeller_enable_metal) {
@@ -595,15 +615,27 @@ template("impeller_shaders_vk") {
 }
 
 template("impeller_shaders") {
+  metal_version = "1.2"
+  if (defined(invoker.metal_version)) {
+    metal_version = invoker.metal_version
+  }
+  not_needed([ "metal_version" ])
+
+  enable_opengles = impeller_enable_opengles
+  if (defined(invoker.enable_opengles)) {
+    enable_opengles = invoker.enable_opengles
+  }
+
   if (impeller_enable_metal) {
     mtl_shaders = "mtl_$target_name"
     impeller_shaders_metal(mtl_shaders) {
       name = invoker.name
       shaders = invoker.shaders
+      metal_version = metal_version
     }
   }
 
-  if (impeller_enable_opengles) {
+  if (enable_opengles) {
     analyze = true
     if (defined(invoker.analyze) && !invoker.analyze) {
       analyze = false
@@ -628,6 +660,7 @@ template("impeller_shaders") {
     impeller_shaders_vk(vk_shaders) {
       name = invoker.name
       shaders = invoker.shaders
+      metal_version = metal_version
     }
   }
 
@@ -641,7 +674,7 @@ template("impeller_shaders") {
       public_deps += [ ":$mtl_shaders" ]
     }
 
-    if (impeller_enable_opengles) {
+    if (enable_opengles) {
       public_deps += [ ":$gles_shaders" ]
     }
 

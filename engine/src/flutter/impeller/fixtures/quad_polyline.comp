@@ -1,0 +1,89 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+layout(local_size_x = 512, local_size_y = 1) in;
+layout(std430) buffer;
+
+#include <impeller/path.glsl>
+
+layout(binding = 0) buffer Quads {
+  uint count;
+  QuadData data[];
+}
+quads;
+
+layout(binding = 1) buffer Polyline {
+  uint count;
+  vec2 data[];
+}
+polyline;
+
+uniform Config {
+  float tolerance;
+}
+config;
+
+shared uint point_counts[512];
+shared uint count_sums[512];
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  if (ident >= quads.count) {
+    return;
+  }
+
+  QuadData quad = quads.data[ident];
+  float sqrt_tolerance = sqrt(config.tolerance);
+
+  vec2 d01 = quad.cp - quad.p1;
+  vec2 d12 = quad.p2 - quad.cp;
+  vec2 dd = d01 - d12;
+  float c = Cross(quad.p2 - quad.p1, dd);
+  float x0 = dot(d01, dd) * 1. / c;
+  float x2 = dot(d12, dd) * 1. / c;
+  float scale = abs(c / (sqrt(dd.x * dd.x + dd.y * dd.y) * (x2 - x0)));
+
+  float a0 = ApproximateParabolaIntegral(x0);
+  float a2 = ApproximateParabolaIntegral(x2);
+  float val = 0.f;
+  if (isfinite(scale)) {
+    float da = abs(a2 - a0);
+    float sqrt_scale = sqrt(scale);
+    if ((x0 < 0 && x2 < 0) || (x0 >= 0 && x2 >= 0)) {
+      val = da * sqrt_scale;
+    } else {
+      // cusp case
+      float xmin = sqrt_tolerance / sqrt_scale;
+      val = sqrt_tolerance * da / ApproximateParabolaIntegral(xmin);
+    }
+  }
+  float u0 = ApproximateParabolaIntegral(a0);
+  float u2 = ApproximateParabolaIntegral(a2);
+  float u_scale = 1. / (u2 - u0);
+
+  float line_count = max(1., ceil(0.5 * val / sqrt_tolerance)) + 1.;
+  float steps = 1. / line_count;
+
+  point_counts[ident] = uint(line_count);
+
+  barrier();
+  count_sums[ident] = subgroupInclusiveAdd(point_counts[ident]);
+  barrier();
+
+  polyline.count = count_sums[quads.count - 1] + 1;
+  polyline.data[0] = quads.data[0].p1;
+
+  // In theory this could be unrolled into a separate shader, but in practice
+  // line_count usually pretty low and currently lack benchmark data to show
+  // how much it would even help.
+  for (uint i = 1; i < line_count; i += 1) {
+    float u = i * steps;
+    float a = a0 + (a2 - a0) * u;
+    float t = (ApproximateParabolaIntegral(a) - u0) * u_scale;
+    uint offset = count_sums[ident] - uint(line_count);
+    polyline.data[offset + i] = QuadraticSolve(quad, t);
+  }
+  polyline.data[count_sums[ident]] = quad.p2;
+}

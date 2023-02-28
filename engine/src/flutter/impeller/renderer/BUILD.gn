@@ -112,8 +112,11 @@ impeller_component("renderer_unittests") {
     "renderer_unittests.cc",
   ]
 
-  if (impeller_enable_metal || impeller_enable_vulkan) {
-    sources += [ "compute_unittests.cc" ]
+  if (impeller_enable_vulkan || impeller_enable_metal) {
+    sources += [
+      "compute_subgroup_unittests.cc",
+      "compute_unittests.cc",
+    ]
   }
 
   deps = [
