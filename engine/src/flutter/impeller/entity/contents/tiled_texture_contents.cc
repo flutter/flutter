@@ -15,6 +15,23 @@
 
 namespace impeller {
 
+static std::optional<SamplerAddressMode> TileModeToAddressMode(
+    Entity::TileMode tile_mode) {
+  switch (tile_mode) {
+    case Entity::TileMode::kClamp:
+      return SamplerAddressMode::kClampToEdge;
+      break;
+    case Entity::TileMode::kMirror:
+      return SamplerAddressMode::kMirror;
+      break;
+    case Entity::TileMode::kRepeat:
+      return SamplerAddressMode::kRepeat;
+      break;
+    case Entity::TileMode::kDecal:
+      return std::nullopt;
+  }
+}
+
 TiledTextureContents::TiledTextureContents() = default;
 
 TiledTextureContents::~TiledTextureContents() = default;
@@ -48,6 +65,19 @@ TiledTextureContents::CreateFilterTexture(
     return snapshot.value().texture;
   }
   return std::nullopt;
+}
+
+SamplerDescriptor TiledTextureContents::CreateDescriptor() const {
+  SamplerDescriptor descriptor = sampler_descriptor_;
+  auto width_mode = TileModeToAddressMode(x_tile_mode_);
+  auto height_mode = TileModeToAddressMode(y_tile_mode_);
+  if (width_mode.has_value()) {
+    descriptor.width_address_mode = width_mode.value();
+  }
+  if (height_mode.has_value()) {
+    descriptor.height_address_mode = height_mode.value();
+  }
+  return descriptor;
 }
 
 bool TiledTextureContents::Render(const ContentContext& renderer,
@@ -84,13 +114,13 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
+  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.effect_transform = GetInverseMatrix();
   frame_info.bounds_origin = geometry->GetCoverage(Matrix())->origin;
   frame_info.texture_size = Vector2(static_cast<Scalar>(texture_size.width),
                                     static_cast<Scalar>(texture_size.height));
 
   FS::FragInfo frag_info;
-  frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
   frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
   frag_info.alpha = GetAlpha();
@@ -110,6 +140,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   cmd.BindVertices(geometry_result.vertex_buffer);
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+
   if (color_filter_.has_value()) {
     auto filtered_texture = CreateFilterTexture(renderer);
     if (!filtered_texture.has_value()) {
@@ -118,12 +149,12 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     FS::BindTextureSampler(
         cmd, filtered_texture.value(),
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            sampler_descriptor_));
+            CreateDescriptor()));
   } else {
     FS::BindTextureSampler(
         cmd, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            sampler_descriptor_));
+            CreateDescriptor()));
   }
 
   if (!pass.AddCommand(std::move(cmd))) {
@@ -156,9 +187,9 @@ bool TiledTextureContents::RenderVertices(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
+  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 
   FS::FragInfo frag_info;
-  frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
   frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
   frag_info.alpha = GetAlpha();
@@ -178,6 +209,7 @@ bool TiledTextureContents::RenderVertices(const ContentContext& renderer,
   cmd.BindVertices(geometry_result.vertex_buffer);
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+
   if (color_filter_.has_value()) {
     auto filtered_texture = CreateFilterTexture(renderer);
     if (!filtered_texture.has_value()) {
@@ -186,12 +218,12 @@ bool TiledTextureContents::RenderVertices(const ContentContext& renderer,
     FS::BindTextureSampler(
         cmd, filtered_texture.value(),
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            sampler_descriptor_));
+            CreateDescriptor()));
   } else {
     FS::BindTextureSampler(
         cmd, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            sampler_descriptor_));
+            CreateDescriptor()));
   }
 
   if (!pass.AddCommand(std::move(cmd))) {
