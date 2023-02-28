@@ -24,7 +24,7 @@ abstract class FlutterTestRunner {
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
+    List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
@@ -45,6 +45,7 @@ abstract class FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -61,7 +62,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
+    List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
@@ -82,6 +83,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool web = false,
     String? randomSeed,
     String? reporter,
+    String? fileReporter,
     String? timeout,
     bool runSkipped = false,
     int? shardIndex,
@@ -103,6 +105,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['-r', 'json']
       else if (reporter != null)
         ...<String>['-r', reporter],
+      if (fileReporter != null)
+        '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
@@ -124,6 +128,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--shard-index=$shardIndex',
       '--chain-stack-traces',
     ];
+
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
         .createTempSync('flutter_test.')
@@ -140,13 +145,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
-        testFiles: testFiles,
+        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
       );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
-        ..addAll(testFiles);
+        ..addAll(testFiles.map((Uri uri) => uri.toString()));
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
@@ -182,7 +187,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     testArgs
       ..add('--')
-      ..addAll(testFiles);
+      ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
         ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;

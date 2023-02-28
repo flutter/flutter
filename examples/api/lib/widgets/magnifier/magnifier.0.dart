@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Offset dragGesturePositon = Offset.zero;
+  Offset dragGesturePosition = Offset.zero;
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +32,14 @@ class _MyAppState extends State<MyApp> {
                     GestureDetector(
                       onPanUpdate: (DragUpdateDetails details) => setState(
                         () {
-                          dragGesturePositon = details.localPosition;
+                          dragGesturePosition = details.localPosition;
                         },
                       ),
                       child: const FlutterLogo(size: 200),
                     ),
                     Positioned(
-                      left: dragGesturePositon.dx,
-                      top: dragGesturePositon.dy,
+                      left: dragGesturePosition.dx,
+                      top: dragGesturePosition.dy,
                       child: const RawMagnifier(
                         decoration: MagnifierDecoration(
                           shape: CircleBorder(

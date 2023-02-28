@@ -1195,6 +1195,59 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
+  testWidgets('M3 TextButton has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home:  Scaffold(
+                body: Center(
+                  child: TextButton(
+                    key: key,
+                    onPressed: () {},
+                    child: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12,vertical: 8));
+  });
+
+  testWidgets('M3 TextButton.icon has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Scaffold(
+                body: Center(
+                  child: TextButton.icon(
+                    key: key,
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                    label: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+   expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8));
+  });
+
   testWidgets('Fixed size TextButtons', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

@@ -680,25 +680,33 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then<Object?>((int? browserExitCode) {
-      throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    }).catchError((Object error, StackTrace stackTrace) {
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-      return null;
-    }));
-    unawaited(future.then((WebSocketChannel webSocket) {
-      if (completer.isCompleted) {
-        return;
-      }
-      completer.complete(BrowserManager._(chrome, runtime, webSocket));
-    }).catchError((Object error, StackTrace stackTrace) {
-      chrome.close();
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }));
+    unawaited(chrome.onExit.then<Object?>(
+      (int? browserExitCode) {
+        throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
+      },
+    ).then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+        return null;
+      },
+    ));
+    unawaited(future.then(
+      (WebSocketChannel webSocket) {
+        if (completer.isCompleted) {
+          return;
+        }
+        completer.complete(BrowserManager._(chrome, runtime, webSocket));
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        chrome.close();
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    ));
 
     return completer.future;
   }
