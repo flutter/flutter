@@ -8399,7 +8399,8 @@ void main() {
     EditableText editableText = tester.widget(find.byType(EditableText));
 
     // According to material 3 spec, the input text should be the color of onSurface.
-    expect(editableText.style.color, themeData.colorScheme.onSurface);
+    // https://github.com/flutter/flutter/issues/107686 is tracking this issue.
+    expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
 
     expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
     expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
