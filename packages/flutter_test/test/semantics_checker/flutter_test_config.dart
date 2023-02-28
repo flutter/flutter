@@ -53,7 +53,7 @@ void semanticsBindingTestRun() {
 void failingTestTestRun() {
   testWidgets('open SemanticsHandle from SemanticsBinding fails test', (WidgetTester tester) async {
     final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
-    final SemanticsHandle handle = tester.binding.ensureSemantics();
+    tester.binding.ensureSemantics();
     expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
 
     // Failing expectation to verify that an open semantics handle doesn't
