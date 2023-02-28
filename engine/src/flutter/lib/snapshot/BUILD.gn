@@ -290,9 +290,6 @@ if (host_os == "mac" && target_os == "mac") {
     sources = [ "${host_output_dir}/gen_snapshot" ]
     outputs = [ "${root_out_dir}/gen_snapshot_${target_cpu}" ]
     deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
-    metadata = {
-      snapshot_entitlement_file_path = [ "gen_snapshot_{$target_cpu}" ]
-    }
   }
 }
 
