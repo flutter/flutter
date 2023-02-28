@@ -504,10 +504,10 @@ class SystemChrome {
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
-  /// However, the [AppBar] widget automatically sets the system overlay style
-  /// based on its [AppBar.brightness], so configure that instead of calling
-  /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
-  /// via [CupertinoNavigationBar.backgroundColor].
+  /// The [AppBar] widget automatically sets the system overlay style based on
+  /// its [AppBar.systemOverlayStyle], so configure that instead of calling this
+  /// method directly. Likewise, do the same for [CupertinoNavigationBar] via
+  /// [CupertinoNavigationBar.backgroundColor].
   ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
@@ -531,9 +531,9 @@ class SystemChrome {
   /// to configure the system styles when an app bar is not used. When an app
   /// bar is used, apps should not enclose the app bar in an annotated region
   /// because one is automatically created. If an app bar is used and the app
-  /// bar is enclosed in an annotated region, the app bar overlay style supercedes
+  /// bar is enclosed in an annotated region, the app bar overlay style supersedes
   /// the status bar properties defined in the enclosing annotated region overlay
-  /// style and the enclosing annotated region overlay style supercedes the app bar
+  /// style and the enclosing annotated region overlay style supersedes the app bar
   /// overlay style navigation bar properties.
   ///
   /// {@tool sample}

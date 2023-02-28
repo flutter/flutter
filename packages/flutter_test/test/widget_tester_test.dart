@@ -827,7 +827,7 @@ void main() {
     testWidgets('Returns the list of announcements', (WidgetTester tester) async {
 
       // Make sure the handler is properly set
-      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
 
       await SemanticsService.announce('announcement 1', TextDirection.ltr);
@@ -863,7 +863,7 @@ void main() {
         log.add(message);
       }
 
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, handleMessage);
 
@@ -883,14 +883,14 @@ void main() {
       ]));
 
       // Remove the handler
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, null);
     });
 
     tearDown(() {
       // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
-      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
   });

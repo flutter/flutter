@@ -11,6 +11,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 Future<void> pumpTest(
   WidgetTester tester,
   TargetPlatform? platform, {
@@ -334,7 +336,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgets('Scroll pointer signals are handled when there is competion', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are handled when there is competition', (WidgetTester tester) async {
     // This is a regression test. When there are multiple scrollables listening
     // to the same event, for example when scrollables are nested, there used
     // to be exceptions at scrolling events.
@@ -1471,6 +1473,40 @@ void main() {
     await tester.pump();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
+  testWidgets("Support updating 'ScrollBehavior.dragDevices' at runtime", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
+      return MaterialApp(
+        scrollBehavior: const NoScrollbarBehavior().copyWith(
+          dragDevices: dragDevices,
+        ),
+        home: ListView.builder(
+          itemCount: 1000,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.pumpWidget(buildFrame(<ui.PointerDeviceKind>{ui.PointerDeviceKind.stylus}));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.mouse);
+
+    // Non-matching device should not allow user scrolling.
+    expect(getScrollOffset(tester), 100.0);
+
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -100.0), kind: ui.PointerDeviceKind.stylus);
+
+    // Matching device should allow user scrolling.
+    expect(getScrollOffset(tester), 200.0);
+  });
+
   testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
@@ -1608,6 +1644,51 @@ void main() {
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
     await tester.pump(const Duration(milliseconds: 4800));
     expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+  });
+
+  testWidgets('Swapping viewports in a scrollable does not crash', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey key = GlobalKey();
+    final GlobalKey key1 = GlobalKey();
+    Widget buildScrollable(bool withViewPort) {
+      return Scrollable(
+        key: key,
+        viewportBuilder: (BuildContext context, ViewportOffset position) {
+          if (withViewPort) {
+            return Viewport(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: Semantics(key: key1, container: true, child: const Text('text1')))
+              ],
+              offset: ViewportOffset.zero(),
+            );
+          }
+          return Semantics(key: key1, container: true, child: const Text('text1'));
+        },
+      );
+    }
+    // This should cache the inner node in Scrollable with the children text1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
+    // This does not use two panel, this should clear cached inner node.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(false),
+      ),
+    );
+    expect(semantics, isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics})));
+    // If the inner node was cleared in the previous step, this should not crash.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: buildScrollable(true),
+      ),
+    );
+    expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }
 

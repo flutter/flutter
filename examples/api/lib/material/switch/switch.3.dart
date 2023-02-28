@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Flutter code sample for [Switch].
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

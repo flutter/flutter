@@ -124,10 +124,9 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationDrawerThemeData? lerp(
-      NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+  static NavigationDrawerThemeData? lerp(NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
+    if (identical(a, b)) {
+      return a;
     }
     return NavigationDrawerThemeData(
       tileHeight: lerpDouble(a?.tileHeight, b?.tileHeight, t),
