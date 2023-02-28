@@ -82,7 +82,6 @@ vec2 IPVec2Tile(vec2 coords, float x_tile_mode, float y_tile_mode) {
 /// for Decal.
 vec4 IPSampleWithTileMode(sampler2D tex,
                           vec2 coords,
-                          float y_coord_scale,
                           float x_tile_mode,
                           float y_tile_mode) {
   if (x_tile_mode == kTileModeDecal && (coords.x < 0 || coords.x >= 1) ||
@@ -90,19 +89,7 @@ vec4 IPSampleWithTileMode(sampler2D tex,
     return vec4(0);
   }
 
-  return IPSample(tex, IPVec2Tile(coords, x_tile_mode, y_tile_mode),
-                  y_coord_scale);
-}
-
-/// Sample a texture, emulating a specific tile mode.
-///
-/// This is useful for Impeller graphics backend that don't have native support
-/// for Decal.
-vec4 IPSampleWithTileMode(sampler2D tex,
-                          vec2 coords,
-                          float y_coord_scale,
-                          float tile_mode) {
-  return IPSampleWithTileMode(tex, coords, y_coord_scale, tile_mode, tile_mode);
+  return texture(tex, coords);
 }
 
 /// Sample a texture, emulating a specific tile mode.

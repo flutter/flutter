@@ -57,6 +57,8 @@ class TiledTextureContents final : public ColorSourceContents {
                       const Entity& entity,
                       RenderPass& pass) const;
 
+  SamplerDescriptor CreateDescriptor() const;
+
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::TileMode x_tile_mode_ = Entity::TileMode::kClamp;
