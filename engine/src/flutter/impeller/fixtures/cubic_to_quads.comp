@@ -1,0 +1,83 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+layout(local_size_x = 512, local_size_y = 1) in;
+layout(std430) buffer;
+
+#include <impeller/path.glsl>
+
+layout(binding = 0) readonly buffer Cubics {
+  uint count;
+  CubicData data[];
+}
+cubics;
+
+layout(binding = 1) buffer Quads {
+  uint count;
+  QuadData data[];
+}
+quads;
+
+uniform Config {
+  float accuracy;
+}
+config;
+
+shared uint quad_counts[512];
+shared uint count_sums[512];
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  if (ident >= cubics.count) {
+    return;
+  }
+
+  // The maximum error, as a vector from the cubic to the best approximating
+  // quadratic, is proportional to the third derivative, which is constant
+  // across the segment. Thus, the error scales down as the third power of
+  // the number of subdivisions. Our strategy then is to subdivide `t` evenly.
+  //
+  // This is an overestimate of the error because only the component
+  // perpendicular to the first derivative is important. But the simplicity is
+  // appealing.
+
+  // This magic number is the square of 36 / sqrt(3).
+  // See: http://caffeineowl.com/graphics/2d/vectorial/cubic2quad01.html
+  float max_hypot2 = 432.0 * config.accuracy * config.accuracy;
+
+  CubicData cubic = cubics.data[ident];
+
+  vec2 err_v = 3.0 * (cubic.cp2 - cubic.cp1) + cubic.p1 - cubic.p2;
+  float err = dot(err_v, err_v);
+  float quad_count = max(1., ceil(pow(err * (1.0 / max_hypot2), 1. / 6.0)));
+
+  quad_counts[ident] = uint(quad_count);
+
+  barrier();
+  count_sums[ident] = subgroupInclusiveAdd(quad_counts[ident]);
+
+  quads.count = count_sums[cubics.count - 1];
+  for (uint i = 0; i < quad_count; i++) {
+    float t0 = i / quad_count;
+    float t1 = (i + 1) / quad_count;
+
+    // calculate the subsegment
+    vec2 sub_p1 = CubicSolve(cubic, t0);
+    vec2 sub_p2 = CubicSolve(cubic, t1);
+    QuadData quad = QuadData(3.0 * (cubic.cp1 - cubic.p1),   //
+                             3.0 * (cubic.cp2 - cubic.cp1),  //
+                             3.0 * (cubic.p2 - cubic.cp2));
+    float sub_scale = (t1 - t0) * (1.0 / 3.0);
+    vec2 sub_cp1 = sub_p1 + sub_scale * QuadraticSolve(quad, t0);
+    vec2 sub_cp2 = sub_p2 - sub_scale * QuadraticSolve(quad, t1);
+
+    vec2 quad_p1x2 = 3.0 * sub_cp1 - sub_p1;
+    vec2 quad_p2x2 = 3.0 * sub_cp2 - sub_p2;
+    uint offset = count_sums[ident] - uint(quad_count);
+    quads.data[offset + i] = QuadData(sub_p1,                           //
+                                      ((quad_p1x2 + quad_p2x2) / 4.0),  //
+                                      sub_p2);
+  }
+}

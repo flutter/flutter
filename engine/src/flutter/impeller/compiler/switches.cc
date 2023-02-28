@@ -131,6 +131,8 @@ Switches::Switches(const fml::CommandLine& command_line)
       gles_language_version(
           stoi(command_line.GetOptionValueWithDefault("gles-language-version",
                                                       "0"))),
+      metal_version(
+          command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
           command_line.GetOptionValueWithDefault("entry-point", "main")) {
   auto language =

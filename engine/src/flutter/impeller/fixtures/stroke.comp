@@ -1,0 +1,49 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+#define N_ROWS 8
+#define LG_WG_SIZE 9
+#define WG_SIZE (1 << LG_WG_SIZE)
+
+layout(local_size_x = WG_SIZE, local_size_y = 1) in;
+layout(std430) buffer;
+
+layout(binding = 0) buffer Polyline {
+  uint count;
+  vec2 data[];
+}
+polyline;
+
+layout(binding = 1) buffer VertexBuffer {
+  vec2 position[];
+}
+vertex_buffer;
+
+uniform Config {
+  float width;
+  uint cap;
+  uint join;
+  float miter_limit;
+}
+config;
+
+vec2 compute_offset(uint index) {
+  vec2 direction = normalize(polyline.data[index + 1] - polyline.data[index]);
+  return vec2(-direction.y, direction.x) * config.width * .5;
+}
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  if (ident >= polyline.count || ident == 0) {
+    return;
+  }
+
+  vec2 offset = compute_offset(ident);
+  uint index = ident - 1;
+  vertex_buffer.position[index * 4 + 0] = polyline.data[ident - 1] + offset;
+  vertex_buffer.position[index * 4 + 1] = polyline.data[ident - 1] - offset;
+  vertex_buffer.position[index * 4 + 2] = polyline.data[ident] + offset;
+  vertex_buffer.position[index * 4 + 3] = polyline.data[ident] - offset;
+}
