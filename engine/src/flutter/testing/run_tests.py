@@ -947,7 +947,12 @@ def run_engine_tasks_in_parallel(tasks):
 
 
 def main():
-  parser = argparse.ArgumentParser()
+  parser = argparse.ArgumentParser(
+      description="""
+In order to learn the details of running tests in the engine, please consult the
+Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testing-the-engine
+"""
+  )
   all_types = [
       'engine', 'dart', 'benchmarks', 'java', 'android', 'objc', 'font-subset'
   ]
