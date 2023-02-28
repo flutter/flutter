@@ -80,7 +80,7 @@ bool BlitPassMTL::EncodeCommands(id<MTLBlitCommandEncoder> encoder) const {
       auto_pop_debug_marker.Release();
     }
 
-    if (command->Encode(encoder)) {
+    if (!command->Encode(encoder)) {
       return false;
     }
   }
