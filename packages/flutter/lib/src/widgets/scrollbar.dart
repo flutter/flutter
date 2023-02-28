@@ -1825,46 +1825,31 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    double scrollIncrement;
-    // Is an increment calculator available?
-    final ScrollIncrementCalculator? calculator = Scrollable.maybeOf(
-      _cachedController!.position.context.notificationContext!,
-    )?.widget.incrementCalculator;
-    if (calculator != null) {
-      scrollIncrement = calculator(
-        ScrollIncrementDetails(
-          type: ScrollIncrementType.page,
-          metrics: _cachedController!.position,
-        ),
-      );
-    } else {
-      // Default page increment
-      scrollIncrement = 0.8 * _cachedController!.position.viewportDimension;
-    }
+    // Determines the scroll direction.
+    final AxisDirection scrollDirection;
 
-    // Adjust scrollIncrement for direction
-    switch (_cachedController!.position.axisDirection) {
+    switch (position.axisDirection) {
       case AxisDirection.up:
-        if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
-        }
-        break;
       case AxisDirection.down:
-        if (details.localPosition.dy < scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
-        }
-        break;
-      case AxisDirection.right:
-        if (details.localPosition.dx < scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
+        if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
+          scrollDirection = AxisDirection.down;
+        } else {
+          scrollDirection = AxisDirection.up;
         }
         break;
       case AxisDirection.left:
+      case AxisDirection.right:
         if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
+          scrollDirection = AxisDirection.right;
+        } else {
+          scrollDirection = AxisDirection.left;
         }
-        break;
     }
+
+    final ScrollableState? state = Scrollable.maybeOf(position.context.notificationContext!);
+    final ScrollIntent intent = ScrollIntent(direction: scrollDirection, type: ScrollIncrementType.page);
+    assert(state != null);
+    final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!, intent);
 
     _cachedController!.position.moveTo(
       _cachedController!.position.pixels + scrollIncrement,
