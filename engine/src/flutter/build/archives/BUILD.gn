@@ -16,6 +16,7 @@ generated_file("artifacts_entitlement_config") {
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/shell/testing:testing",
+      "//flutter/tools/path_ops:path_ops",
     ]
   }
 }
