@@ -1489,7 +1489,7 @@ TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
   }
-  return TextStyle(color: Theme.of(context).colorScheme.onSurface);
+  return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
