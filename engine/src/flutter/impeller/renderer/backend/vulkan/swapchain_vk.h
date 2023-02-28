@@ -4,66 +4,41 @@
 
 #pragma once
 
-#include <vector>
+#include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/geometry/size.h"
-#include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
 
 namespace impeller {
 
-class SwapchainImageVK {
- public:
-  SwapchainImageVK(vk::Image image,
-                   vk::UniqueImageView image_view,
-                   vk::Format image_format,
-                   vk::Extent2D extent);
+class SwapchainImplVK;
 
-  ~SwapchainImageVK();
-
-  PixelFormat GetPixelFormat() const;
-
-  ISize GetSize() const;
-
-  vk::Image GetImage() const;
-
-  vk::ImageView GetImageView() const;
-
- private:
-  vk::Image image_;
-  vk::UniqueImageView image_view_;
-  vk::Format image_format_;
-  vk::Extent2D extent_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(SwapchainImageVK);
-};
-
+//------------------------------------------------------------------------------
+/// @brief      A swapchain that adapts to the underlying surface going out of
+///             date. If the caller cannot acquire the next drawable, it is due
+///             to an unrecoverable error and the swapchain must be recreated
+///             with a new surface.
+///
 class SwapchainVK {
  public:
-  static std::unique_ptr<SwapchainVK> Create(vk::Device device,
-                                             vk::SurfaceKHR surface,
-                                             SwapchainDetailsVK& details);
-
-  SwapchainVK(vk::Device device,
-              vk::UniqueSwapchainKHR swapchain,
-              vk::Format image_format,
-              vk::Extent2D extent);
+  static std::shared_ptr<SwapchainVK> Create(
+      const std::shared_ptr<Context>& context,
+      vk::UniqueSurfaceKHR surface);
 
   ~SwapchainVK();
 
-  vk::SwapchainKHR GetSwapchain() const;
+  bool IsValid() const;
 
-  SwapchainImageVK* GetSwapchainImage(uint32_t image_index) const;
+  std::unique_ptr<Surface> AcquireNextDrawable();
+
+  vk::Format GetSurfaceFormat() const;
 
  private:
-  bool CreateSwapchainImages();
+  std::shared_ptr<SwapchainImplVK> impl_;
 
-  vk::Device device_;
-  vk::UniqueSwapchainKHR swapchain_;
-  vk::Format image_format_;
-  vk::Extent2D extent_;
-  std::vector<std::unique_ptr<SwapchainImageVK>> swapchain_images_;
+  explicit SwapchainVK(std::shared_ptr<SwapchainImplVK> impl);
 
   FML_DISALLOW_COPY_AND_ASSIGN(SwapchainVK);
 };

@@ -26,11 +26,12 @@ class AllocatorVK final : public Allocator {
 
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   VmaAllocator allocator_ = {};
-  ContextVK& context_;
+  std::weak_ptr<Context> context_;
   vk::Device device_;
+  ISize max_texture_size_ = {4096, 4096};
   bool is_valid_ = false;
 
-  AllocatorVK(ContextVK& context,
+  AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
               const vk::PhysicalDevice& physical_device,
               const vk::Device& logical_device,
@@ -51,8 +52,6 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
-
-  DeviceBufferAllocationVK CreateHostVisibleDeviceAllocation(size_t size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorVK);
 };

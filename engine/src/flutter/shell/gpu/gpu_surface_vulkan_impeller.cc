@@ -56,16 +56,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   }
 
   auto& context_vk = impeller::ContextVK::Cast(*impeller_context_);
-  std::unique_ptr<impeller::Surface> surface =
-      context_vk.AcquireSurface(frame_num_++);
-
-  auto swap_callback = [weak = weak_factory_.GetWeakPtr()]() -> bool {
-    if (weak) {
-      // TODO (kaushikiska@): Invoke the clean-up callback.
-      // Blocked by - https://github.com/flutter/flutter/issues/112387
-    }
-    return true;
-  };
+  std::unique_ptr<impeller::Surface> surface = context_vk.AcquireNextSurface();
 
   SurfaceFrame::SubmitCallback submit_callback =
       fml::MakeCopyable([renderer = impeller_renderer_,  //

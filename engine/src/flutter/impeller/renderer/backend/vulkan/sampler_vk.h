@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/sampler.h"
 #include "vulkan/vulkan_handles.hpp"
@@ -23,10 +24,12 @@ class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
 
   vk::Sampler GetSamplerVK() const;
 
+  const std::shared_ptr<SharedObjectVKT<vk::Sampler>>& GetSharedSampler() const;
+
  private:
   friend SamplerLibraryVK;
 
-  vk::UniqueSampler sampler_;
+  std::shared_ptr<SharedObjectVKT<vk::Sampler>> sampler_;
   bool is_valid_ = false;
 
   // |Sampler|

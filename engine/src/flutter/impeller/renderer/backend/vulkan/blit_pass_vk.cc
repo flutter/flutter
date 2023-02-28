@@ -9,8 +9,8 @@
 
 namespace impeller {
 
-BlitPassVK::BlitPassVK(std::shared_ptr<FencedCommandBufferVK> command_buffer)
-    : command_buffer_(std::move(command_buffer)) {}
+BlitPassVK::BlitPassVK(std::weak_ptr<CommandEncoderVK> encoder)
+    : encoder_(std::move(encoder)) {}
 
 BlitPassVK::~BlitPassVK() = default;
 
@@ -23,7 +23,7 @@ void BlitPassVK::OnSetLabel(std::string label) {
 
 // |BlitPass|
 bool BlitPassVK::IsValid() const {
-  return command_buffer_ != nullptr;
+  return true;
 }
 
 // |BlitPass|
@@ -35,9 +35,13 @@ bool BlitPassVK::EncodeCommands(
     return false;
   }
 
+  auto encoder = encoder_.lock();
+  if (!encoder) {
+    return false;
+  }
+
   for (auto& command : commands_) {
-    bool encode_res = command->Encode(command_buffer_.get());
-    if (!encode_res) {
+    if (!command->Encode(*encoder)) {
       return false;
     }
   }
@@ -53,6 +57,7 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
     IPoint destination_origin,
     std::string label) {
   auto command = std::make_unique<BlitCopyTextureToTextureCommandVK>();
+
   command->source = std::move(source);
   command->destination = std::move(destination);
   command->source_region = source_region;
@@ -71,6 +76,7 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
     size_t destination_offset,
     std::string label) {
   auto command = std::make_unique<BlitCopyTextureToBufferCommandVK>();
+
   command->source = std::move(source);
   command->destination = std::move(destination);
   command->source_region = source_region;
@@ -85,6 +91,7 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
 bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                          std::string label) {
   auto command = std::make_unique<BlitGenerateMipmapCommandVK>();
+
   command->texture = std::move(texture);
   command->label = std::move(label);
 

@@ -62,10 +62,6 @@ bool TextureMTL::OnSetContents(const uint8_t* contents,
     return false;
   }
 
-  // TODO(csg): Perhaps the storage mode should be added to the texture
-  // descriptor so that invalid region replacements on potentially non-host
-  // visible textures are disallowed. The annoying bit about the API below is
-  // that there seems to be no error handling guidance.
   const auto region =
       MTLRegionMake2D(0u, 0u, desc.size.width, desc.size.height);
   [texture_ replaceRegion:region                            //

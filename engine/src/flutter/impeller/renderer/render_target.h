@@ -17,7 +17,7 @@ namespace impeller {
 
 class Context;
 
-class RenderTarget {
+class RenderTarget final {
  public:
   struct AttachmentConfig {
     StorageMode storage_mode;
@@ -91,11 +91,15 @@ class RenderTarget {
   RenderTarget& SetStencilAttachment(
       std::optional<StencilAttachment> attachment);
 
+  size_t GetMaxColorAttacmentBindIndex() const;
+
   const std::map<size_t, ColorAttachment>& GetColorAttachments() const;
 
   const std::optional<DepthAttachment>& GetDepthAttachment() const;
 
   const std::optional<StencilAttachment>& GetStencilAttachment() const;
+
+  size_t GetTotalAttachmentCount() const;
 
  private:
   std::map<size_t, ColorAttachment> colors_;

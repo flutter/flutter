@@ -10,13 +10,13 @@
 
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
-#include "impeller/renderer/backend/vulkan/commands_vk.h"
+#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
-#include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/sampler.h"
 #include "impeller/renderer/shader_types.h"
@@ -25,18 +25,102 @@
 
 namespace impeller {
 
-static uint32_t color_flash = 0;
+static vk::AttachmentDescription CreateAttachmentDescription(
+    const Attachment& attachment,
+    AttachmentKind kind,
+    bool resolve_texture = false) {
+  const auto& texture = resolve_texture
+                            ? attachment.resolve_texture->GetTextureDescriptor()
+                            : attachment.texture->GetTextureDescriptor();
+  return CreateAttachmentDescription(texture.format,          //
+                                     texture.sample_count,    //
+                                     kind,                    //
+                                     attachment.load_action,  //
+                                     attachment.store_action  //
+  );
+}
 
-RenderPassVK::RenderPassVK(
-    std::weak_ptr<const Context> context,
-    vk::Device device,
-    const RenderTarget& target,
-    std::shared_ptr<FencedCommandBufferVK> command_buffer,
-    vk::RenderPass render_pass)
-    : RenderPass(std::move(context), target),
-      device_(device),
-      command_buffer_(std::move(command_buffer)),
-      render_pass_(render_pass) {
+static vk::UniqueRenderPass CreateVKRenderPass(const vk::Device& device,
+                                               const RenderTarget& target) {
+  std::vector<vk::AttachmentDescription> attachments;
+
+  std::vector<vk::AttachmentReference> color_refs;
+  std::vector<vk::AttachmentReference> resolve_refs;
+  vk::AttachmentReference depth_stencil_ref = kUnusedAttachmentReference;
+
+  // Spec says: "Each element of the pColorAttachments array corresponds to an
+  // output location in the shader, i.e. if the shader declares an output
+  // variable decorated with a Location value of X, then it uses the attachment
+  // provided in pColorAttachments[X]. If the attachment member of any element
+  // of pColorAttachments is VK_ATTACHMENT_UNUSED."
+  //
+  // Just initialize all the elements as unused and fill in the valid bind
+  // points in the loop below.
+  color_refs.resize(target.GetMaxColorAttacmentBindIndex() + 1u,
+                    kUnusedAttachmentReference);
+  resolve_refs.resize(target.GetMaxColorAttacmentBindIndex() + 1u,
+                      kUnusedAttachmentReference);
+
+  for (const auto& [bind_point, color] : target.GetColorAttachments()) {
+    color_refs[bind_point] =
+        vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
+                                vk::ImageLayout::eColorAttachmentOptimal};
+    attachments.emplace_back(
+        CreateAttachmentDescription(color, AttachmentKind::kColor));
+    if (color.resolve_texture) {
+      resolve_refs[bind_point] =
+          vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
+                                  vk::ImageLayout::eColorAttachmentOptimal};
+      attachments.emplace_back(
+          CreateAttachmentDescription(color, AttachmentKind::kColor, true));
+    }
+  }
+
+  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+    depth_stencil_ref = vk::AttachmentReference{
+        static_cast<uint32_t>(attachments.size()),
+        vk::ImageLayout::eDepthStencilAttachmentOptimal};
+    attachments.emplace_back(
+        CreateAttachmentDescription(depth.value(), AttachmentKind::kDepth));
+  } else if (auto stencil = target.GetStencilAttachment();
+             stencil.has_value()) {
+    depth_stencil_ref = vk::AttachmentReference{
+        static_cast<uint32_t>(attachments.size()),
+        vk::ImageLayout::eDepthStencilAttachmentOptimal};
+    attachments.emplace_back(
+        CreateAttachmentDescription(stencil.value(), AttachmentKind::kStencil));
+  }
+
+  vk::SubpassDescription subpass_desc;
+  subpass_desc.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+  subpass_desc.setColorAttachments(color_refs);
+  subpass_desc.setResolveAttachments(resolve_refs);
+  subpass_desc.setPDepthStencilAttachment(&depth_stencil_ref);
+
+  vk::RenderPassCreateInfo render_pass_desc;
+  render_pass_desc.setAttachments(attachments);
+  render_pass_desc.setPSubpasses(&subpass_desc);
+  render_pass_desc.setSubpassCount(1u);
+
+  auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to create render pass: " << vk::to_string(result);
+    return {};
+  }
+
+  return std::move(pass);
+}
+
+RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
+                           const RenderTarget& target,
+                           std::weak_ptr<CommandEncoderVK> encoder)
+    : RenderPass(context, target),
+      render_pass_(
+          CreateVKRenderPass(ContextVK::Cast(*context).GetDevice(), target)),
+      encoder_(std::move(encoder)) {
+  if (!render_pass_) {
+    return;
+  }
   is_valid_ = true;
 }
 
@@ -47,226 +131,172 @@ bool RenderPassVK::IsValid() const {
 }
 
 void RenderPassVK::OnSetLabel(std::string label) {
-  label_ = std::move(label);
+  auto context = GetContext().lock();
+  if (!context) {
+    return;
+  }
+  ContextVK::Cast(*context).SetDebugName(*render_pass_, label.c_str());
+  debug_label_ = std::move(label);
 }
 
-bool RenderPassVK::OnEncodeCommands(const Context& context) const {
-  if (!IsValid()) {
-    return false;
-  }
+static vk::ClearColorValue VKClearValueFromColor(Color color) {
+  vk::ClearColorValue value;
+  value.setFloat32(
+      std::array<float, 4>{color.red, color.green, color.blue, color.alpha});
+  return value;
+}
 
-  const auto& render_target = GetRenderTarget();
-  if (!render_target.HasColorAttachment(0u)) {
-    return false;
-  }
+static vk::ClearDepthStencilValue VKClearValueFromDepth(Scalar depth) {
+  vk::ClearDepthStencilValue value;
+  value.depth = depth;
+  return value;
+}
 
-  vk::CommandBufferBeginInfo begin_info;
-  auto res = command_buffer_->Get().begin(begin_info);
-  if (res != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to begin command buffer: " << vk::to_string(res);
-    return false;
-  }
+static vk::ClearDepthStencilValue VKClearValueFromStencil(uint32_t stencil) {
+  vk::ClearDepthStencilValue value;
+  value.stencil = stencil;
+  return value;
+}
 
-  const auto& color0 = render_target.GetColorAttachments().at(0u);
-  const auto& depth0 = render_target.GetDepthAttachment();
-  const auto& stencil0 = render_target.GetStencilAttachment();
+static std::vector<vk::ClearValue> GetVKClearValues(
+    const RenderTarget& target) {
+  std::vector<vk::ClearValue> clears;
 
-  auto& texture = TextureVK::Cast(*color0.texture);
-  const auto& size = texture.GetTextureDescriptor().size;
-  vk::Framebuffer framebuffer = CreateFrameBuffer(texture);
-  uint32_t mip_count = texture.GetTextureDescriptor().mip_count;
-
-  command_buffer_->GetDeletionQueue()->Push(
-      [device = device_, fbo = framebuffer]() {
-        device.destroyFramebuffer(fbo);
-      });
-
-  // layout transition.
-  if (!TransitionImageLayout(texture.GetImage(), vk::ImageLayout::eUndefined,
-                             vk::ImageLayout::eColorAttachmentOptimal,
-                             mip_count)) {
-    return false;
-  }
-
-  vk::ClearValue clear_value;
-  clear_value.color =
-      vk::ClearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0, 0.0f});
-
-  vk::Rect2D render_area =
-      vk::Rect2D()
-          .setOffset(vk::Offset2D(0, 0))
-          .setExtent(vk::Extent2D(size.width, size.height));
-  auto rp_begin_info = vk::RenderPassBeginInfo()
-                           .setRenderPass(render_pass_)
-                           .setFramebuffer(framebuffer)
-                           .setRenderArea(render_area)
-                           .setClearValues(clear_value);
-
-  command_buffer_->Get().beginRenderPass(rp_begin_info,
-                                         vk::SubpassContents::eInline);
-
-  const auto& transients_allocator = context.GetResourceAllocator();
-
-  // encode the commands.
-  for (const auto& command : commands_) {
-    if (command.index_count == 0u) {
-      continue;
+  for (const auto& [_, color] : target.GetColorAttachments()) {
+    clears.emplace_back(VKClearValueFromColor(color.clear_color));
+    if (color.resolve_texture) {
+      clears.emplace_back(VKClearValueFromColor(color.clear_color));
     }
+  }
 
-    if (command.instance_count == 0u) {
-      continue;
+  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+    clears.emplace_back(VKClearValueFromDepth(depth->clear_depth));
+  }
+
+  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
+    clears.emplace_back(VKClearValueFromStencil(stencil->clear_stencil));
+  }
+
+  return clears;
+}
+
+static vk::UniqueFramebuffer CreateFramebuffer(const vk::Device& device,
+                                               const RenderTarget& target,
+                                               const vk::RenderPass& pass) {
+  vk::FramebufferCreateInfo fb_info;
+
+  fb_info.renderPass = pass;
+
+  const auto target_size = target.GetRenderTargetSize();
+  fb_info.width = target_size.width;
+  fb_info.height = target_size.height;
+
+  fb_info.layers = 1u;
+
+  std::vector<vk::ImageView> attachments;
+
+  // This bit must be consistent to ensure compatibility with the pass created
+  // earlier. Follow this order: Color attachments, then depth, then stencil.
+  for (const auto& [_, color] : target.GetColorAttachments()) {
+    // The bind point doesn't matter here since that information is present in
+    // the render pass.
+    attachments.emplace_back(TextureVK::Cast(*color.texture).GetImageView());
+    if (color.resolve_texture) {
+      attachments.emplace_back(
+          TextureVK::Cast(*color.resolve_texture).GetImageView());
     }
+  }
+  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+    attachments.emplace_back(TextureVK::Cast(*depth->texture).GetImageView());
+  }
+  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
+    attachments.emplace_back(TextureVK::Cast(*stencil->texture).GetImageView());
+  }
 
-    if (!command.pipeline) {
-      continue;
+  fb_info.setAttachments(attachments);
+
+  auto [result, framebuffer] = device.createFramebufferUnique(fb_info);
+
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create framebuffer: " << vk::to_string(result);
+    return {};
+  }
+
+  return std::move(framebuffer);
+}
+
+static bool ConfigureRenderTargetAttachmentLayouts(
+    const RenderTarget& target,
+    const vk::CommandBuffer& command_buffer) {
+  for (const auto& [_, color] : target.GetColorAttachments()) {
+    if (!TextureVK::Cast(*color.texture)
+             .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
+                        command_buffer)) {
+      return false;
     }
-
-    if (!EncodeCommand(context, command)) {
+    if (color.resolve_texture) {
+      if (!TextureVK::Cast(*color.resolve_texture)
+               .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
+                          command_buffer)) {
+        return false;
+      }
+    }
+  }
+  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+    if (!TextureVK::Cast(*depth->texture)
+             .SetLayout(vk::ImageLayout::eDepthAttachmentOptimal,
+                        command_buffer)) {
       return false;
     }
   }
-
-  if (!TransitionImageLayout(texture.GetImage(), vk::ImageLayout::eUndefined,
-                             vk::ImageLayout::eColorAttachmentOptimal,
-                             mip_count)) {
-    return false;
-  }
-
-  command_buffer_->Get().endRenderPass();
-
-  return const_cast<RenderPassVK*>(this)->EndCommandBuffer();
-}
-
-bool RenderPassVK::EndCommandBuffer() {
-  if (command_buffer_) {
-    auto res = command_buffer_->Get().end();
-    if (res != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Failed to end command buffer: " << vk::to_string(res);
+  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
+    if (!TextureVK::Cast(*stencil->texture)
+             .SetLayout(vk::ImageLayout::eStencilAttachmentOptimal,
+                        command_buffer)) {
       return false;
     }
-
-    const auto& context_vk = GetContextVK();
-    command_buffer_->GetDeletionQueue()->Push(
-        [device = device_, render_pass = render_pass_]() {
-          device.destroyRenderPass(render_pass);
-        });
-
-    return true;
   }
-  return false;
-}
-
-bool RenderPassVK::EncodeCommand(const Context& context,
-                                 const Command& command) const {
-  SetViewportAndScissor(command);
-
-  auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
-  PipelineCreateInfoVK* pipeline_create_info = pipeline_vk.GetCreateInfo();
-
-  if (!AllocateAndBindDescriptorSets(context, command, pipeline_create_info)) {
-    return false;
-  }
-
-  command_buffer_->Get().bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                      pipeline_create_info->GetVKPipeline());
-
-  auto vertex_buffer_view = command.GetVertexBuffer();
-  auto index_buffer_view = command.index_buffer;
-
-  if (!vertex_buffer_view || !index_buffer_view) {
-    return false;
-  }
-
-  auto& allocator = *context.GetResourceAllocator();
-  const auto& pipeline_desc = command.pipeline->GetDescriptor();
-
-  auto vertex_buffer = vertex_buffer_view.buffer->GetDeviceBuffer(allocator);
-  auto index_buffer = index_buffer_view.buffer->GetDeviceBuffer(allocator);
-
-  if (!vertex_buffer || !index_buffer) {
-    VALIDATION_LOG << "Failed to acquire device buffers"
-                   << " for vertex and index buffer views";
-    return false;
-  }
-
-  // bind vertex buffer
-  auto vertex_buffer_handle =
-      DeviceBufferVK::Cast(*vertex_buffer).GetVKBufferHandle();
-  vk::Buffer vertex_buffers[] = {vertex_buffer_handle};
-  vk::DeviceSize vertex_buffer_offsets[] = {vertex_buffer_view.range.offset};
-  command_buffer_->Get().bindVertexBuffers(0, 1, vertex_buffers,
-                                           vertex_buffer_offsets);
-
-  // index buffer
-  auto index_buffer_handle =
-      DeviceBufferVK::Cast(*index_buffer).GetVKBufferHandle();
-  command_buffer_->Get().bindIndexBuffer(index_buffer_handle,
-                                         index_buffer_view.range.offset,
-                                         ToVKIndexType(command.index_type));
-
-  // execute draw
-  command_buffer_->Get().drawIndexed(command.index_count,
-                                     command.instance_count, 0, 0, 0);
   return true;
 }
 
-bool RenderPassVK::AllocateAndBindDescriptorSets(
-
-    const Context& context,
-    const Command& command,
-    PipelineCreateInfoVK* pipeline_create_info) const {
-  auto& allocator = *context.GetResourceAllocator();
-  vk::PipelineLayout pipeline_layout =
-      pipeline_create_info->GetPipelineLayout();
-
-  const auto& context_vk = GetContextVK();
-  const auto& pool = context_vk.CreateDescriptorPool();
-
-  command_buffer_->GetDeletionQueue()->Push(
-      [pool = pool->GetPool(), device = device_]() {
-        device.destroyDescriptorPool(pool);
-      });
-
-  vk::DescriptorSetAllocateInfo alloc_info;
-  std::array<vk::DescriptorSetLayout, 1> dsls = {
-      pipeline_create_info->GetDescriptorSetLayout(),
-  };
-
-  alloc_info.setDescriptorPool(pool->GetPool());
-  alloc_info.setSetLayouts(dsls);
-
-  auto desc_sets_res = device_.allocateDescriptorSets(alloc_info);
-  if (desc_sets_res.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to allocate descriptor sets: "
-                   << vk::to_string(desc_sets_res.result);
-    return false;
+static bool UpdateBindingLayouts(const Bindings& bindings,
+                                 const vk::CommandBuffer& buffer) {
+  for (const auto& [_, texture] : bindings.textures) {
+    if (!TextureVK::Cast(*texture.resource)
+             .SetLayout(vk::ImageLayout::eShaderReadOnlyOptimal, buffer)) {
+      return false;
+    }
   }
-
-  auto desc_sets = desc_sets_res.value;
-  bool update_vertex_descriptors = UpdateDescriptorSets(
-      "vertex_bindings", command.vertex_bindings, allocator, desc_sets[0]);
-  if (!update_vertex_descriptors) {
-    return false;
-  }
-  bool update_frag_descriptors = UpdateDescriptorSets(
-      "fragment_bindings", command.fragment_bindings, allocator, desc_sets[0]);
-  if (!update_frag_descriptors) {
-    return false;
-  }
-
-  command_buffer_->Get().bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, pipeline_layout, 0, desc_sets, nullptr);
   return true;
 }
 
-bool RenderPassVK::UpdateDescriptorSets(const char* label,
-                                        const Bindings& bindings,
-                                        Allocator& allocator,
-                                        vk::DescriptorSet desc_set) const {
+static bool UpdateBindingLayouts(const Command& command,
+                                 const vk::CommandBuffer& buffer) {
+  return UpdateBindingLayouts(command.vertex_bindings, buffer) &&
+         UpdateBindingLayouts(command.fragment_bindings, buffer);
+}
+
+static bool UpdateBindingLayouts(const std::vector<Command>& commands,
+                                 const vk::CommandBuffer& buffer) {
+  for (const auto& command : commands) {
+    if (!UpdateBindingLayouts(command, buffer)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static bool UpdateDescriptorSets(vk::Device device,
+                                 const Bindings& bindings,
+                                 Allocator& allocator,
+                                 vk::DescriptorSet desc_set,
+                                 CommandEncoderVK& encoder) {
   std::vector<vk::WriteDescriptorSet> writes;
-  std::vector<vk::DescriptorBufferInfo> buffer_infos;
-  std::vector<vk::DescriptorImageInfo> image_infos;
 
+  //----------------------------------------------------------------------------
+  /// Setup buffer descriptors.
+  ///
+  std::vector<vk::DescriptorBufferInfo> buffer_desc;
   for (const auto& [buffer_index, view] : bindings.buffers) {
     const auto& buffer_view = view.resource.buffer;
 
@@ -281,9 +311,13 @@ bool RenderPassVK::UpdateDescriptorSets(const char* label,
       return false;
     }
 
-    // reserved index used for per-vertex data.
+    // Reserved index used for per-vertex data.
     if (buffer_index == VertexDescriptor::kReservedVertexBufferIndex) {
       continue;
+    }
+
+    if (!encoder.Track(device_buffer)) {
+      return false;
     }
 
     uint32_t offset = view.resource.range.offset;
@@ -292,169 +326,314 @@ bool RenderPassVK::UpdateDescriptorSets(const char* label,
     desc_buffer_info.setBuffer(buffer);
     desc_buffer_info.setOffset(offset);
     desc_buffer_info.setRange(view.resource.range.length);
-    buffer_infos.push_back(desc_buffer_info);
+    buffer_desc.push_back(desc_buffer_info);
 
     const ShaderUniformSlot& uniform = bindings.uniforms.at(buffer_index);
 
-    vk::WriteDescriptorSet setWrite;
-    setWrite.setDstSet(desc_set);
-    setWrite.setDstBinding(uniform.binding);
-    setWrite.setDescriptorCount(1);
-    setWrite.setDescriptorType(vk::DescriptorType::eUniformBuffer);
-    setWrite.setPBufferInfo(&buffer_infos.back());
+    vk::WriteDescriptorSet write_set;
+    write_set.setDstSet(desc_set);
+    write_set.setDstBinding(uniform.binding);
+    write_set.setDescriptorCount(1);
+    write_set.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+    write_set.setPBufferInfo(&buffer_desc.back());
 
-    writes.push_back(setWrite);
+    writes.push_back(write_set);
   }
 
+  //----------------------------------------------------------------------------
+  /// Setup image descriptors.
+  ///
+  std::vector<vk::DescriptorImageInfo> image_descs;
   for (const auto& [index, sampler_handle] : bindings.samplers) {
     if (bindings.textures.find(index) == bindings.textures.end()) {
       VALIDATION_LOG << "Missing texture for sampler: " << index;
       return false;
     }
 
-    const auto& texture_vk =
-        TextureVK::Cast(*bindings.textures.at(index).resource);
+    auto texture = bindings.textures.at(index).resource;
+    const auto& texture_vk = TextureVK::Cast(*texture);
+    const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
 
-    const Sampler& sampler = *sampler_handle.resource;
-    const SamplerVK& sampler_vk = SamplerVK::Cast(sampler);
+    if (!encoder.Track(texture) || !encoder.Track(sampler.GetSharedSampler())) {
+      return false;
+    }
 
     const SampledImageSlot& slot = bindings.sampled_images.at(index);
-    uint32_t mip_levels = texture_vk.GetTextureDescriptor().mip_count;
-
-    if (!TransitionImageLayout(
-            texture_vk.GetImage(), vk::ImageLayout::eUndefined,
-            vk::ImageLayout::eTransferDstOptimal, mip_levels)) {
-      return false;
-    }
-
-    CopyBufferToImage(texture_vk);
-
-    if (!TransitionImageLayout(
-            texture_vk.GetImage(), vk::ImageLayout::eTransferDstOptimal,
-            vk::ImageLayout::eShaderReadOnlyOptimal, mip_levels)) {
-      return false;
-    }
 
     vk::DescriptorImageInfo desc_image_info;
     desc_image_info.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-    desc_image_info.setSampler(sampler_vk.GetSamplerVK());
+    desc_image_info.setSampler(sampler.GetSamplerVK());
     desc_image_info.setImageView(texture_vk.GetImageView());
-    image_infos.push_back(desc_image_info);
+    image_descs.push_back(desc_image_info);
 
-    vk::WriteDescriptorSet setWrite;
-    setWrite.setDstSet(desc_set);
-    setWrite.setDstBinding(slot.binding);
-    setWrite.setDescriptorCount(1);
-    setWrite.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-    setWrite.setPImageInfo(&image_infos.back());
+    vk::WriteDescriptorSet write_set;
+    write_set.setDstSet(desc_set);
+    write_set.setDstBinding(slot.binding);
+    write_set.setDescriptorCount(1);
+    write_set.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+    write_set.setPImageInfo(&image_descs.back());
 
-    writes.push_back(setWrite);
+    writes.push_back(write_set);
   }
 
-  std::array<vk::CopyDescriptorSet, 0> copies;
-  if (!writes.empty()) {
-    device_.updateDescriptorSets(writes, copies);
+  if (writes.empty()) {
+    return true;
   }
-
+  device.updateDescriptorSets(writes, {});
   return true;
 }
 
-void RenderPassVK::SetViewportAndScissor(const Command& command) const {
-  // set viewport.
+static bool AllocateAndBindDescriptorSets(
+    const ContextVK& context,
+    const Command& command,
+    CommandEncoderVK& encoder,
+    PipelineCreateInfoVK* pipeline_create_info) {
+  auto& allocator = *context.GetResourceAllocator();
+  vk::PipelineLayout pipeline_layout =
+      pipeline_create_info->GetPipelineLayout();
+
+  vk::DescriptorSetAllocateInfo alloc_info;
+  std::array<vk::DescriptorSetLayout, 1> dsls = {
+      pipeline_create_info->GetDescriptorSetLayout(),
+  };
+
+  alloc_info.setDescriptorPool(context.GetDescriptorPool());
+  alloc_info.setSetLayouts(dsls);
+
+  auto [sets_result, sets] =
+      context.GetDevice().allocateDescriptorSetsUnique(alloc_info);
+  if (sets_result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to allocate descriptor sets: "
+                   << vk::to_string(sets_result);
+    return false;
+  }
+
+  const auto set = MakeSharedVK<vk::DescriptorSet>(std::move(sets[0]));
+
+  if (!encoder.Track(set)) {
+    return false;
+  }
+
+  bool update_vertex_descriptors =
+      UpdateDescriptorSets(context.GetDevice(),      //
+                           command.vertex_bindings,  //
+                           allocator,                //
+                           *set,                     //
+                           encoder                   //
+      );
+  if (!update_vertex_descriptors) {
+    return false;
+  }
+  bool update_frag_descriptors =
+      UpdateDescriptorSets(context.GetDevice(),        //
+                           command.fragment_bindings,  //
+                           allocator,                  //
+                           *set,                       //
+                           encoder                     //
+      );
+  if (!update_frag_descriptors) {
+    return false;
+  }
+
+  encoder.GetCommandBuffer().bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics,  // bind point
+      pipeline_layout,                   // layout
+      0,                                 // first set
+      {vk::DescriptorSet{*set}},         // sets
+      nullptr                            // offsets
+  );
+  return true;
+}
+
+static void SetViewportAndScissor(const Command& command,
+                                  const vk::CommandBuffer& cmd_buffer,
+                                  const ISize& target_size) {
+  // Set the viewport.
   const auto& vp = command.viewport.value_or<Viewport>(
-      {.rect = Rect::MakeSize(GetRenderTargetSize())});
+      {.rect = Rect::MakeSize(target_size)});
   vk::Viewport viewport = vk::Viewport()
                               .setWidth(vp.rect.size.width)
                               .setHeight(-vp.rect.size.height)
                               .setY(vp.rect.size.height)
                               .setMinDepth(0.0f)
                               .setMaxDepth(1.0f);
-  command_buffer_->Get().setViewport(0, 1, &viewport);
+  cmd_buffer.setViewport(0, 1, &viewport);
 
-  // scissor
-  const auto& sc =
-      command.scissor.value_or(IRect::MakeSize(GetRenderTargetSize()));
+  // Set the scissor rect.
+  const auto& sc = command.scissor.value_or(IRect::MakeSize(target_size));
   vk::Rect2D scissor =
       vk::Rect2D()
           .setOffset(vk::Offset2D(sc.origin.x, sc.origin.y))
           .setExtent(vk::Extent2D(sc.size.width, sc.size.height));
-  command_buffer_->Get().setScissor(0, 1, &scissor);
+  cmd_buffer.setScissor(0, 1, &scissor);
 }
 
-vk::Framebuffer RenderPassVK::CreateFrameBuffer(
-    const TextureVK& texture) const {
-  auto img_view = texture.GetImageView();
-  auto size = texture.GetTextureDescriptor().size;
-  vk::FramebufferCreateInfo fb_create_info = vk::FramebufferCreateInfo()
-                                                 .setRenderPass(render_pass_)
-                                                 .setAttachmentCount(1)
-                                                 .setPAttachments(&img_view)
-                                                 .setWidth(size.width)
-                                                 .setHeight(size.height)
-                                                 .setLayers(1);
-  auto res = device_.createFramebuffer(fb_create_info);
-  FML_CHECK(res.result == vk::Result::eSuccess);
-  return res.value;
-}
+static bool EncodeCommand(const Context& context,
+                          const Command& command,
+                          CommandEncoderVK& encoder,
+                          const ISize& target_size) {
+  if (command.index_count == 0u || command.instance_count == 0u) {
+    return true;
+  }
 
-bool RenderPassVK::TransitionImageLayout(vk::Image image,
-                                         vk::ImageLayout layout_old,
-                                         vk::ImageLayout layout_new,
-                                         uint32_t mip_levels) const {
-  auto transition_cmd =
-      TransitionImageLayoutCommandVK(image, layout_old, layout_new, mip_levels);
-  return transition_cmd.Submit(command_buffer_.get());
-}
+  fml::ScopedCleanupClosure pop_marker(
+      [&encoder]() { encoder.PopDebugGroup(); });
+  if (!command.label.empty()) {
+    encoder.PushDebugGroup(command.label.c_str());
+  } else {
+    pop_marker.Release();
+  }
 
-bool RenderPassVK::CopyBufferToImage(const TextureVK& texture_vk) const {
-  auto copy_cmd = command_buffer_->GetSingleUseChild();
+  const auto& cmd_buffer = encoder.GetCommandBuffer();
 
-  const auto& size = texture_vk.GetTextureDescriptor().size;
+  auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
+  PipelineCreateInfoVK* pipeline_create_info = pipeline_vk.GetCreateInfo();
 
-  // actual copy happens here
-  vk::BufferImageCopy region =
-      vk::BufferImageCopy()
-          .setBufferOffset(0)
-          .setBufferRowLength(0)
-          .setBufferImageHeight(0)
-          .setImageSubresource(
-              vk::ImageSubresourceLayers()
-                  .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                  .setMipLevel(0)
-                  .setBaseArrayLayer(0)
-                  .setLayerCount(1))
-          .setImageOffset(vk::Offset3D(0, 0, 0))
-          .setImageExtent(vk::Extent3D(size.width, size.height, 1));
-
-  vk::CommandBufferBeginInfo begin_info;
-  begin_info.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-  auto res = copy_cmd.begin(begin_info);
-
-  if (res != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to begin command buffer: " << vk::to_string(res);
+  if (!AllocateAndBindDescriptorSets(ContextVK::Cast(context),  //
+                                     command,                   //
+                                     encoder,                   //
+                                     pipeline_create_info       //
+                                     )) {
     return false;
   }
 
-  copy_cmd.copyBufferToImage(texture_vk.GetStagingBuffer(),
-                             texture_vk.GetImage(),
-                             vk::ImageLayout::eTransferDstOptimal, region);
+  cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                          pipeline_create_info->GetVKPipeline());
 
-  res = copy_cmd.end();
-  if (res != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to end command buffer: " << vk::to_string(res);
+  // Set the viewport and scissors.
+  SetViewportAndScissor(command, cmd_buffer, target_size);
+
+  // Set the stencil reference.
+  cmd_buffer.setStencilReference(
+      vk::StencilFaceFlagBits::eVkStencilFrontAndBack,
+      command.stencil_reference);
+
+  // Configure vertex and index and buffers for binding.
+  auto vertex_buffer_view = command.GetVertexBuffer();
+  auto index_buffer_view = command.index_buffer;
+
+  if (!vertex_buffer_view || !index_buffer_view) {
     return false;
   }
 
+  auto& allocator = *context.GetResourceAllocator();
+
+  auto vertex_buffer = vertex_buffer_view.buffer->GetDeviceBuffer(allocator);
+  auto index_buffer = index_buffer_view.buffer->GetDeviceBuffer(allocator);
+
+  if (!vertex_buffer || !index_buffer) {
+    VALIDATION_LOG << "Failed to acquire device buffers"
+                   << " for vertex and index buffer views";
+    return false;
+  }
+
+  if (!encoder.Track(vertex_buffer) || !encoder.Track(index_buffer)) {
+    return false;
+  }
+
+  // Bind the vertex buffer.
+  auto vertex_buffer_handle =
+      DeviceBufferVK::Cast(*vertex_buffer).GetVKBufferHandle();
+  vk::Buffer vertex_buffers[] = {vertex_buffer_handle};
+  vk::DeviceSize vertex_buffer_offsets[] = {vertex_buffer_view.range.offset};
+  cmd_buffer.bindVertexBuffers(0u, 1u, vertex_buffers, vertex_buffer_offsets);
+
+  // Bind the index buffer.
+  auto index_buffer_handle =
+      DeviceBufferVK::Cast(*index_buffer).GetVKBufferHandle();
+  cmd_buffer.bindIndexBuffer(index_buffer_handle,
+                             index_buffer_view.range.offset,
+                             ToVKIndexType(command.index_type));
+
+  // Engage!
+  cmd_buffer.drawIndexed(command.index_count,     // index count
+                         command.instance_count,  // instance count
+                         0u,                      // first index
+                         command.base_vertex,     // vertex offset
+                         0u                       // first instance
+  );
   return true;
 }
 
-const ContextVK& RenderPassVK::GetContextVK() const {
-  if (auto context = context_.lock()) {
-    const auto& context_vk = ContextVK::Cast(*context);
-    return context_vk;
+bool RenderPassVK::OnEncodeCommands(const Context& context) const {
+  if (!IsValid()) {
+    return false;
   }
 
-  FML_UNREACHABLE();
+  if (commands_.empty()) {
+    return true;
+  }
+
+  const auto& vk_context = ContextVK::Cast(context);
+
+  const auto& render_target = GetRenderTarget();
+  if (!render_target.HasColorAttachment(0u)) {
+    VALIDATION_LOG
+        << "Render target doesn't have a color attachment at index 0.";
+    return false;
+  }
+
+  auto encoder = encoder_.lock();
+  if (!encoder) {
+    VALIDATION_LOG << "Command encoder died before commands could be encoded.";
+    return false;
+  }
+
+  fml::ScopedCleanupClosure pop_marker(
+      [&encoder]() { encoder->PopDebugGroup(); });
+  if (!debug_label_.empty()) {
+    encoder->PushDebugGroup(debug_label_.c_str());
+  } else {
+    pop_marker.Release();
+  }
+
+  auto cmd_buffer = encoder->GetCommandBuffer();
+
+  if (!UpdateBindingLayouts(commands_, cmd_buffer)) {
+    return false;
+  }
+
+  if (!ConfigureRenderTargetAttachmentLayouts(render_target, cmd_buffer)) {
+    VALIDATION_LOG << "Could not complete attachment layout transitions.";
+    return false;
+  }
+
+  const auto& target_size = render_target.GetRenderTargetSize();
+
+  auto framebuffer = MakeSharedVK(
+      CreateFramebuffer(vk_context.GetDevice(), render_target_, *render_pass_));
+  if (!encoder->Track(framebuffer)) {
+    return false;
+  }
+
+  auto clear_values = GetVKClearValues(render_target);
+
+  vk::RenderPassBeginInfo pass_info;
+  pass_info.renderPass = *render_pass_;
+  pass_info.framebuffer = *framebuffer;
+  pass_info.renderArea.extent.width = static_cast<uint32_t>(target_size.width);
+  pass_info.renderArea.extent.height =
+      static_cast<uint32_t>(target_size.height);
+  pass_info.setClearValues(clear_values);
+
+  {
+    cmd_buffer.beginRenderPass(pass_info, vk::SubpassContents::eInline);
+
+    fml::ScopedCleanupClosure end_render_pass(
+        [cmd_buffer]() { cmd_buffer.endRenderPass(); });
+
+    for (const auto& command : commands_) {
+      if (!command.pipeline) {
+        continue;
+      }
+
+      if (!EncodeCommand(context, command, *encoder, target_size)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 }  // namespace impeller

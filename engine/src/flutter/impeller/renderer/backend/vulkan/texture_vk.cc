@@ -7,32 +7,24 @@
 namespace impeller {
 
 TextureVK::TextureVK(TextureDescriptor desc,
-                     ContextVK* context,
-                     std::unique_ptr<TextureInfoVK> texture_info)
-    : Texture(desc),
-      context_(context),
-      texture_info_(std::move(texture_info)) {}
+                     std::weak_ptr<Context> context,
+                     std::shared_ptr<TextureSourceVK> source)
+    : Texture(desc), context_(std::move(context)), source_(std::move(source)) {}
 
-TextureVK::~TextureVK() {
-  if (!IsWrapped() && IsValid()) {
-    const auto& texture = texture_info_->allocated_texture;
-    vmaDestroyImage(*texture.backing_allocation.allocator, texture.image,
-                    texture.backing_allocation.allocation);
-  }
-}
+TextureVK::~TextureVK() = default;
 
 void TextureVK::SetLabel(std::string_view label) {
-  context_->SetDebugName(GetImage(), label);
+  auto context = context_.lock();
+  if (!context) {
+    // The context may have died.
+    return;
+  }
+  ContextVK::Cast(*context).SetDebugName(GetImage(), label);
 }
 
 bool TextureVK::OnSetContents(const uint8_t* contents,
                               size_t length,
                               size_t slice) {
-  if (IsWrapped()) {
-    FML_LOG(ERROR) << "Cannot set contents of a wrapped texture";
-    return false;
-  }
-
   if (!IsValid() || !contents) {
     return false;
   }
@@ -45,15 +37,7 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
     return false;
   }
 
-  // currently we are only supporting 2d textures, no cube textures etc.
-  auto mapping = texture_info_->allocated_texture.staging_buffer.GetMapping();
-
-  if (mapping) {
-    memcpy(mapping, contents, length);
-    return true;
-  } else {
-    return false;
-  }
+  return source_->SetContents(desc, contents, length, slice);
 }
 
 bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
@@ -64,61 +48,83 @@ bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
 }
 
 bool TextureVK::IsValid() const {
-  switch (texture_info_->backing_type) {
-    case TextureBackingTypeVK::kUnknownType:
-      return false;
-    case TextureBackingTypeVK::kAllocatedTexture:
-      return texture_info_->allocated_texture.image;
-    case TextureBackingTypeVK::kWrappedTexture:
-      return texture_info_->wrapped_texture.swapchain_image;
-  }
+  return !!source_;
 }
 
 ISize TextureVK::GetSize() const {
   return GetTextureDescriptor().size;
 }
 
-TextureInfoVK* TextureVK::GetTextureInfo() const {
-  return texture_info_.get();
-}
-
-bool TextureVK::IsWrapped() const {
-  return texture_info_->backing_type == TextureBackingTypeVK::kWrappedTexture;
+vk::Image TextureVK::GetImage() const {
+  return source_->GetVKImage();
 }
 
 vk::ImageView TextureVK::GetImageView() const {
-  switch (texture_info_->backing_type) {
-    case TextureBackingTypeVK::kUnknownType:
-      return nullptr;
-    case TextureBackingTypeVK::kAllocatedTexture:
-      return vk::ImageView{texture_info_->allocated_texture.image_view};
-    case TextureBackingTypeVK::kWrappedTexture:
-      return texture_info_->wrapped_texture.swapchain_image->GetImageView();
-  }
+  return source_->GetVKImageView();
 }
 
-vk::Image TextureVK::GetImage() const {
-  switch (texture_info_->backing_type) {
-    case TextureBackingTypeVK::kUnknownType:
-      FML_CHECK(false) << "Unknown texture backing type";
-    case TextureBackingTypeVK::kAllocatedTexture:
-      return vk::Image{texture_info_->allocated_texture.image};
-    case TextureBackingTypeVK::kWrappedTexture:
-      return texture_info_->wrapped_texture.swapchain_image->GetImage();
+static constexpr vk::ImageAspectFlags ToImageAspectFlags(
+    vk::ImageLayout layout) {
+  switch (layout) {
+    case vk::ImageLayout::eColorAttachmentOptimal:
+    case vk::ImageLayout::eShaderReadOnlyOptimal:
+      return vk::ImageAspectFlagBits::eColor;
+    case vk::ImageLayout::eDepthAttachmentOptimal:
+      return vk::ImageAspectFlagBits::eDepth;
+    case vk::ImageLayout::eStencilAttachmentOptimal:
+      return vk::ImageAspectFlagBits::eStencil;
+    default:
+      FML_DLOG(INFO) << "Unknown layout to determine aspect.";
+      return vk::ImageAspectFlagBits::eNone;
   }
+  FML_UNREACHABLE();
 }
 
-vk::Buffer TextureVK::GetStagingBuffer() const {
-  switch (texture_info_->backing_type) {
-    case TextureBackingTypeVK::kUnknownType:
-      FML_CHECK(false) << "Unknown texture backing type";
-      return nullptr;
-    case TextureBackingTypeVK::kAllocatedTexture:
-      return texture_info_->allocated_texture.staging_buffer.GetBufferHandle();
-    case TextureBackingTypeVK::kWrappedTexture:
-      FML_CHECK(false) << "Wrapped textures do not have staging buffers";
-      return nullptr;
+vk::ImageLayout TextureVK::GetLayout() const {
+  ReaderLock lock(layout_mutex_);
+  return layout_;
+}
+
+vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(
+    vk::ImageLayout layout) const {
+  WriterLock lock(layout_mutex_);
+  const auto old_layout = layout_;
+  layout_ = layout;
+  return old_layout;
+}
+
+bool TextureVK::SetLayout(vk::ImageLayout new_layout,
+                          const vk::CommandBuffer& buffer) const {
+  const auto old_layout = SetLayoutWithoutEncoding(new_layout);
+  if (new_layout == old_layout) {
+    return true;
   }
+
+  vk::ImageMemoryBarrier image_barrier;
+  image_barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite |
+                                vk::AccessFlagBits::eTransferWrite;
+  image_barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
+                                vk::AccessFlagBits::eShaderRead;
+  image_barrier.oldLayout = old_layout;
+  image_barrier.newLayout = new_layout;
+  image_barrier.image = GetImage();
+  image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  image_barrier.subresourceRange.aspectMask = ToImageAspectFlags(new_layout);
+  image_barrier.subresourceRange.baseMipLevel = 0u;
+  image_barrier.subresourceRange.levelCount = GetTextureDescriptor().mip_count;
+  image_barrier.subresourceRange.baseArrayLayer = 0u;
+  image_barrier.subresourceRange.layerCount = 1u;
+
+  buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllGraphics,  // src stage
+                         vk::PipelineStageFlagBits::eAllGraphics,  // dst stage
+                         {},            // dependency flags
+                         nullptr,       // memory barriers
+                         nullptr,       // buffer barriers
+                         image_barrier  // image barriers
+  );
+
+  return true;
 }
 
 }  // namespace impeller

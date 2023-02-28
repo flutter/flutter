@@ -142,6 +142,7 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
       return vk::Format::eUndefined;
     case PixelFormat::kA8UNormInt:
+      // TODO(csg): This is incorrect. Don't depend on swizzle support for GLES.
       return vk::Format::eR8Unorm;
     case PixelFormat::kR8G8B8A8UNormInt:
       return vk::Format::eR8G8B8A8Unorm;
@@ -172,37 +173,26 @@ constexpr PixelFormat ToPixelFormat(vk::Format format) {
   switch (format) {
     case vk::Format::eUndefined:
       return PixelFormat::kUnknown;
-
     case vk::Format::eR8G8B8A8Unorm:
       return PixelFormat::kR8G8B8A8UNormInt;
-
     case vk::Format::eR8G8B8A8Srgb:
       return PixelFormat::kR8G8B8A8UNormIntSRGB;
-
     case vk::Format::eB8G8R8A8Unorm:
       return PixelFormat::kB8G8R8A8UNormInt;
-
     case vk::Format::eB8G8R8A8Srgb:
       return PixelFormat::kB8G8R8A8UNormIntSRGB;
-
     case vk::Format::eR32G32B32A32Sfloat:
       return PixelFormat::kR32G32B32A32Float;
-
     case vk::Format::eR16G16B16A16Sfloat:
       return PixelFormat::kR16G16B16A16Float;
-
     case vk::Format::eS8Uint:
       return PixelFormat::kS8UInt;
-
     case vk::Format::eD32SfloatS8Uint:
       return PixelFormat::kD32FloatS8UInt;
-
     case vk::Format::eR8Unorm:
       return PixelFormat::kR8UNormInt;
-
     case vk::Format::eR8G8Unorm:
       return PixelFormat::kR8G8UNormInt;
-
     default:
       return PixelFormat::kUnknown;
   }
@@ -316,7 +306,6 @@ constexpr vk::AttachmentStoreOp ToVKAttachmentStoreOp(
       return vk::AttachmentStoreOp::eDontCare;
     case StoreAction::kMultisampleResolve:
     case StoreAction::kStoreAndMultisampleResolve:
-      // TODO (kaushikiska): vulkan doesn't support multisample resolve.
       return vk::AttachmentStoreOp::eDontCare;
   }
 
@@ -362,5 +351,204 @@ constexpr vk::PrimitiveTopology ToVKPrimitiveTopology(PrimitiveType primitive) {
 
   FML_UNREACHABLE();
 }
+
+constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+    case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+    case PixelFormat::kR32G32B32A32Float:
+    case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
+    case PixelFormat::kB10G10R10A10XR:
+      return false;
+    case PixelFormat::kS8UInt:
+    case PixelFormat::kD32FloatS8UInt:
+      return true;
+  }
+  return false;
+}
+
+enum class AttachmentKind {
+  kColor,
+  kDepth,
+  kStencil,
+};
+
+constexpr vk::AttachmentDescription CreateAttachmentDescription(
+    PixelFormat format,
+    SampleCount sample_count,
+    AttachmentKind kind,
+    LoadAction load_action,
+    StoreAction store_action) {
+  vk::AttachmentDescription vk_attachment;
+
+  vk_attachment.format = ToVKImageFormat(format);
+  vk_attachment.samples = ToVKSampleCount(sample_count);
+
+  // The Vulkan spec has somewhat complicated rules for when these ops are used
+  // and ignored. Just set safe defaults.
+  vk_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
+  vk_attachment.storeOp = vk::AttachmentStoreOp::eDontCare;
+  vk_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+  vk_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+
+  switch (kind) {
+    case AttachmentKind::kColor:
+      // If the attachment uses a color format, then loadOp and storeOp are
+      // used, and stencilLoadOp and stencilStoreOp are ignored.
+      vk_attachment.loadOp = ToVKAttachmentLoadOp(load_action);
+      vk_attachment.storeOp = ToVKAttachmentStoreOp(store_action);
+      break;
+    case AttachmentKind::kDepth:
+      // If the format has depth and/or stencil components, loadOp and storeOp
+      // apply only to the depth data, while stencilLoadOp and stencilStoreOp
+      // define how the stencil data is handled.
+      vk_attachment.loadOp = ToVKAttachmentLoadOp(load_action);
+      vk_attachment.storeOp = ToVKAttachmentStoreOp(store_action);
+      [[fallthrough]];
+    case AttachmentKind::kStencil:
+      vk_attachment.stencilLoadOp = ToVKAttachmentLoadOp(load_action);
+      vk_attachment.stencilStoreOp = ToVKAttachmentStoreOp(store_action);
+      break;
+  }
+
+  switch (kind) {
+    case AttachmentKind::kColor:
+      vk_attachment.initialLayout = vk_attachment.finalLayout =
+          vk::ImageLayout::eColorAttachmentOptimal;
+      break;
+    case AttachmentKind::kDepth:
+    case AttachmentKind::kStencil:
+      // Separate depth stencil layouts feature is only available in Vulkan 1.2.
+      vk_attachment.initialLayout = vk_attachment.finalLayout =
+          vk::ImageLayout::eDepthStencilAttachmentOptimal;
+      break;
+  }
+
+  return vk_attachment;
+}
+
+static constexpr vk::AttachmentReference kUnusedAttachmentReference = {
+    VK_ATTACHMENT_UNUSED, vk::ImageLayout::eUndefined};
+
+constexpr vk::CullModeFlags ToVKCullModeFlags(CullMode mode) {
+  switch (mode) {
+    case CullMode::kNone:
+      return vk::CullModeFlagBits::eNone;
+    case CullMode::kFrontFace:
+      return vk::CullModeFlagBits::eFront;
+    case CullMode::kBackFace:
+      return vk::CullModeFlagBits::eBack;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr vk::CompareOp ToVKCompareOp(CompareFunction op) {
+  switch (op) {
+    case CompareFunction::kNever:
+      return vk::CompareOp::eNever;
+    case CompareFunction::kAlways:
+      return vk::CompareOp::eAlways;
+    case CompareFunction::kLess:
+      return vk::CompareOp::eLess;
+    case CompareFunction::kEqual:
+      return vk::CompareOp::eEqual;
+    case CompareFunction::kLessEqual:
+      return vk::CompareOp::eLessOrEqual;
+    case CompareFunction::kGreater:
+      return vk::CompareOp::eGreater;
+    case CompareFunction::kNotEqual:
+      return vk::CompareOp::eNotEqual;
+    case CompareFunction::kGreaterEqual:
+      return vk::CompareOp::eGreaterOrEqual;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr vk::StencilOp ToVKStencilOp(StencilOperation op) {
+  switch (op) {
+    case StencilOperation::kKeep:
+      return vk::StencilOp::eKeep;
+    case StencilOperation::kZero:
+      return vk::StencilOp::eZero;
+    case StencilOperation::kSetToReferenceValue:
+      return vk::StencilOp::eReplace;
+    case StencilOperation::kIncrementClamp:
+      return vk::StencilOp::eIncrementAndClamp;
+    case StencilOperation::kDecrementClamp:
+      return vk::StencilOp::eDecrementAndClamp;
+    case StencilOperation::kInvert:
+      return vk::StencilOp::eInvert;
+    case StencilOperation::kIncrementWrap:
+      return vk::StencilOp::eIncrementAndWrap;
+    case StencilOperation::kDecrementWrap:
+      return vk::StencilOp::eDecrementAndWrap;
+      break;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr vk::StencilOpState ToVKStencilOpState(
+    const StencilAttachmentDescriptor& desc) {
+  vk::StencilOpState state;
+  state.failOp = ToVKStencilOp(desc.stencil_failure);
+  state.passOp = ToVKStencilOp(desc.depth_stencil_pass);
+  state.depthFailOp = ToVKStencilOp(desc.depth_failure);
+  state.compareOp = ToVKCompareOp(desc.stencil_compare);
+  state.compareMask = desc.read_mask;
+  state.writeMask = desc.write_mask;
+  // This is irrelevant as the stencil references are always dynamic state and
+  // will be set in the render pass.
+  state.reference = 1988;
+  return state;
+}
+
+constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+    case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+    case PixelFormat::kR32G32B32A32Float:
+    case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
+    case PixelFormat::kB10G10R10A10XR:
+      return vk::ImageAspectFlagBits::eColor;
+    case PixelFormat::kS8UInt:
+      return vk::ImageAspectFlagBits::eStencil;
+    case PixelFormat::kD32FloatS8UInt:
+      return vk::ImageAspectFlagBits::eDepth |
+             vk::ImageAspectFlagBits::eStencil;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr uint32_t ToArrayLayerCount(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+    case TextureType::kTexture2DMultisample:
+      return 1u;
+    case TextureType::kTextureCube:
+      return 6u;
+  }
+  FML_UNREACHABLE();
+}
+
+vk::PipelineDepthStencilStateCreateInfo ToVKPipelineDepthStencilStateCreateInfo(
+    std::optional<DepthAttachmentDescriptor> depth,
+    std::optional<StencilAttachmentDescriptor> front,
+    std::optional<StencilAttachmentDescriptor> back);
 
 }  // namespace impeller

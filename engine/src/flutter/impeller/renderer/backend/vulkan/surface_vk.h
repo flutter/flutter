@@ -8,7 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/swapchain_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain_image_vk.h"
 #include "impeller/renderer/surface.h"
 
 namespace impeller {
@@ -18,21 +18,17 @@ class SurfaceVK final : public Surface {
   using SwapCallback = std::function<bool(void)>;
 
   static std::unique_ptr<SurfaceVK> WrapSwapchainImage(
-      uint32_t frame_num,
-      SwapchainImageVK* swapchain_image,
-      ContextVK* context,
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<SwapchainImageVK>& swapchain_image,
       SwapCallback swap_callback);
-
-  SurfaceVK(const RenderTarget& target,
-            SwapchainImageVK* swapchain_image,
-            SwapCallback swap_callback);
 
   // |Surface|
   ~SurfaceVK() override;
 
  private:
-  const SwapchainImageVK* swapchain_image_;
   SwapCallback swap_callback_;
+
+  SurfaceVK(const RenderTarget& target, SwapCallback swap_callback);
 
   // |Surface|
   bool Present() const override;

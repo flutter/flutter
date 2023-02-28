@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// FLUTTER_NOLINT: https://github.com/flutter/flutter/issues/68331
-
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 #include <map>
@@ -21,10 +19,9 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/deletion_queue_vk.h"
+#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
-#include "impeller/renderer/backend/vulkan/surface_producer_vk.h"
-#include "impeller/renderer/backend/vulkan/swapchain_details_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/device_capabilities.h"
 
@@ -32,23 +29,34 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace {
 
+// TODO(csg): Mimic vulkan_debug_report.cc for prettier reports.
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* pUserData) {
-  const auto prefix = impeller::vk::to_string(
-      impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT{severity});
-
   // There isn't stable messageIdNumber for this validation failure.
   if (strstr(pCallbackData->pMessageIdName,
              "CoreValidation-Shader-OutputNotConsumed") != nullptr) {
     return VK_FALSE;
   }
 
-  FML_DCHECK(false) << prefix << "[" << pCallbackData->messageIdNumber << "]["
-                    << pCallbackData->pMessageIdName
-                    << "] : " << pCallbackData->pMessage;
+  if (pCallbackData->messageIdNumber == static_cast<int32_t>(0x82ae5050)) {
+    // This is a real error but we can't fix it due to our headers being too
+    // old. More more details see:
+    // https://vulkan.lunarg.com/doc/view/1.3.224.1/mac/1.3-extensions/vkspec.html#VUID-VkImageViewCreateInfo-imageViewFormatSwizzle-04465
+    // This validation error currently only trips on macOS due to the use of
+    // texture swizzles.
+    return VK_FALSE;
+  }
+
+  const auto prefix = impeller::vk::to_string(
+      impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT{severity});
+  // Just so that the log doesn't say FML_DCHECK(false).
+  constexpr bool kVulkanValidationFailure = false;
+  FML_DCHECK(kVulkanValidationFailure)
+      << prefix << "[" << pCallbackData->messageIdNumber << "]["
+      << pCallbackData->pMessageIdName << "] : " << pCallbackData->pMessage;
 
   // The return value of this callback controls whether the Vulkan call that
   // caused the validation message will be aborted or not We return VK_TRUE as
@@ -125,7 +133,9 @@ static std::vector<std::string> HasRequiredExtensions(
 
 static vk::PhysicalDeviceFeatures GetRequiredPhysicalDeviceFeatures() {
   vk::PhysicalDeviceFeatures features;
+#ifndef NDEBUG
   features.setRobustBufferAccess(true);
+#endif  // NDEBUG
   return features;
 };
 
@@ -200,23 +210,6 @@ static std::optional<QueueVK> PickQueue(const vk::PhysicalDevice& device,
     }
     return QueueVK{.family = i, .index = 0};
   }
-  return std::nullopt;
-}
-
-static std::optional<QueueVK> PickPresentQueue(const vk::PhysicalDevice& device,
-                                               vk::SurfaceKHR surface) {
-  const auto families = device.getQueueFamilyProperties();
-  for (size_t i = 0u; i < families.size(); i++) {
-    auto res = device.getSurfaceSupportKHR(i, surface);
-    if (res.result != vk::Result::eSuccess) {
-      continue;
-    }
-    vk::Bool32 present_supported = res.value;
-    if (present_supported) {
-      return QueueVK{.family = i, .index = 0};
-    }
-  }
-  VALIDATION_LOG << "No present queue found.";
   return std::nullopt;
 }
 
@@ -396,15 +389,20 @@ ContextVK::ContextVK(
     debug_messenger = std::move(debug_messenger_result.value);
   }
 
+  //----------------------------------------------------------------------------
+  /// Pick the physical device.
+  ///
   auto physical_device = PickPhysicalDevice(instance.value.get());
   if (!physical_device.has_value()) {
     VALIDATION_LOG << "No valid Vulkan device found.";
     return;
   }
 
+  //----------------------------------------------------------------------------
+  /// Pick device queues.
+  ///
   auto graphics_queue =
       PickQueue(physical_device.value(), vk::QueueFlagBits::eGraphics);
-  graphics_queue_idx_ = graphics_queue->index;
   auto transfer_queue =
       PickQueue(physical_device.value(), vk::QueueFlagBits::eTransfer);
   auto compute_queue =
@@ -429,6 +427,7 @@ ContextVK::ContextVK(
   const auto required_features = GetRequiredPhysicalDeviceFeatures();
 
   vk::DeviceCreateInfo device_info;
+
   device_info.setQueueCreateInfos(queue_create_infos);
   device_info.setPEnabledExtensionNames(required_extensions);
   device_info.setPEnabledFeatures(&required_features);
@@ -441,7 +440,7 @@ ContextVK::ContextVK(
   }
 
   auto allocator = std::shared_ptr<AllocatorVK>(new AllocatorVK(
-      *this,                             //
+      weak_from_this(),                  //
       application_info.apiVersion,       //
       physical_device.value(),           //
       device.value.get(),                //
@@ -455,6 +454,9 @@ ContextVK::ContextVK(
     return;
   }
 
+  //----------------------------------------------------------------------------
+  /// Setup the pipeline library.
+  ///
   auto pipeline_library = std::shared_ptr<PipelineLibraryVK>(
       new PipelineLibraryVK(device.value.get(),   //
                             pipeline_cache_data,  //
@@ -484,6 +486,54 @@ ContextVK::ContextVK(
     return;
   }
 
+  //----------------------------------------------------------------------------
+  /// Setup the command pool.
+  ///
+  vk::CommandPoolCreateInfo graphics_command_pool_info;
+  graphics_command_pool_info.queueFamilyIndex = graphics_queue->index;
+  graphics_command_pool_info.flags = vk::CommandPoolCreateFlagBits::eTransient;
+  auto graphics_command_pool =
+      device.value->createCommandPoolUnique(graphics_command_pool_info);
+  if (graphics_command_pool.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create graphics command pool.";
+    return;
+  }
+
+  //----------------------------------------------------------------------------
+  /// Setup the descriptor pool. This needs to be dynamic but we just allocate a
+  /// jumbo pool and hope for the best.
+  ///
+  constexpr size_t kPoolSize = 1024 * 3;
+
+  std::vector<vk::DescriptorPoolSize> pool_sizes = {
+      {vk::DescriptorType::eSampler, kPoolSize},
+      {vk::DescriptorType::eCombinedImageSampler, kPoolSize},
+      {vk::DescriptorType::eSampledImage, kPoolSize},
+      {vk::DescriptorType::eStorageImage, kPoolSize},
+      {vk::DescriptorType::eUniformTexelBuffer, kPoolSize},
+      {vk::DescriptorType::eStorageTexelBuffer, kPoolSize},
+      {vk::DescriptorType::eUniformBuffer, kPoolSize},
+      {vk::DescriptorType::eStorageBuffer, kPoolSize},
+      {vk::DescriptorType::eUniformBufferDynamic, kPoolSize},
+      {vk::DescriptorType::eStorageBufferDynamic, kPoolSize},
+      {vk::DescriptorType::eInputAttachment, kPoolSize},
+  };
+  vk::DescriptorPoolCreateInfo pool_info = {
+      vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,  // flags
+      static_cast<uint32_t>(pool_sizes.size() * kPoolSize),  // max sets
+      static_cast<uint32_t>(pool_sizes.size()),              // pool sizes count
+      pool_sizes.data()                                      // pool sizes
+  };
+
+  auto descriptor_pool = device.value->createDescriptorPoolUnique(pool_info);
+  if (descriptor_pool.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Unable to create a descriptor pool";
+    return;
+  }
+
+  //----------------------------------------------------------------------------
+  /// All done!
+  ///
   instance_ = std::move(instance.value);
   debug_messenger_ = std::move(debug_messenger);
   device_ = std::move(device.value);
@@ -498,7 +548,6 @@ ContextVK::ContextVK(
       device_->getQueue(compute_queue->family, compute_queue->index);
   transfer_queue_ =
       device_->getQueue(transfer_queue->family, transfer_queue->index);
-
   device_capabilities_ =
       DeviceCapabilitiesBuilder()
           .SetHasThreadingRestrictions(false)
@@ -508,11 +557,16 @@ ContextVK::ContextVK(
           .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
           .SetDefaultStencilFormat(PixelFormat::kS8UInt)
           .Build();
-
+  graphics_command_pool_ = std::move(graphics_command_pool.value);
+  descriptor_pool_ = std::move(descriptor_pool.value);
   is_valid_ = true;
 }
 
-ContextVK::~ContextVK() = default;
+ContextVK::~ContextVK() {
+  if (device_) {
+    [[maybe_unused]] auto result = device_->waitIdle();
+  }
+}
 
 bool ContextVK::IsValid() const {
   return is_valid_;
@@ -540,15 +594,22 @@ std::shared_ptr<WorkQueue> ContextVK::GetWorkQueue() const {
 }
 
 std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
-  return CommandBufferVK::Create(weak_from_this(), *device_);
+  return std::shared_ptr<CommandBufferVK>(
+      new CommandBufferVK(shared_from_this(),              //
+                          CreateGraphicsCommandEncoder())  //
+  );
 }
 
 vk::Instance ContextVK::GetInstance() const {
   return *instance_;
 }
 
-std::unique_ptr<Surface> ContextVK::AcquireSurface(size_t current_frame) {
-  return surface_producer_->AcquireSurface(current_frame);
+vk::Device ContextVK::GetDevice() const {
+  return *device_;
+}
+
+std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
+  return swapchain_ ? swapchain_->AcquireNextDrawable() : nullptr;
 }
 
 #ifdef FML_OS_ANDROID
@@ -573,38 +634,18 @@ vk::UniqueSurfaceKHR ContextVK::CreateAndroidSurface(
 
 #endif  // FML_OS_ANDROID
 
-void ContextVK::SetupSwapchain(vk::UniqueSurfaceKHR surface) {
-  surface_ = std::move(surface);
-  auto present_queue_out = PickPresentQueue(physical_device_, *surface_);
-  if (!present_queue_out.has_value()) {
-    return;
+bool ContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface) {
+  auto swapchain = SwapchainVK::Create(shared_from_this(), std::move(surface));
+  if (!swapchain) {
+    return false;
   }
-  present_queue_ =
-      device_->getQueue(present_queue_out->family, present_queue_out->index);
-
-  auto swapchain_details =
-      SwapchainDetailsVK::Create(physical_device_, *surface_);
-  if (!swapchain_details) {
-    return;
-  }
-  surface_format_ = swapchain_details->PickSurfaceFormat().format;
-  swapchain_ = SwapchainVK::Create(*device_, *surface_, *swapchain_details);
-  auto weak_this = weak_from_this();
-  surface_producer_ = SurfaceProducerVK::Create(
-      weak_this, {
-                     .device = *device_,
-                     .graphics_queue = graphics_queue_,
-                     .present_queue = present_queue_,
-                     .swapchain = swapchain_.get(),
-                 });
-}
-
-std::unique_ptr<DescriptorPoolVK> ContextVK::CreateDescriptorPool() const {
-  return std::make_unique<DescriptorPoolVK>(*device_);
+  swapchain_ = std::move(swapchain);
+  return true;
 }
 
 PixelFormat ContextVK::GetColorAttachmentPixelFormat() const {
-  return ToPixelFormat(surface_format_);
+  return swapchain_ ? ToPixelFormat(swapchain_->GetSurfaceFormat())
+                    : PixelFormat::kB8G8R8A8UNormInt;
 }
 
 const IDeviceCapabilities& ContextVK::GetDeviceCapabilities() const {
@@ -615,8 +656,29 @@ vk::Queue ContextVK::GetGraphicsQueue() const {
   return graphics_queue_;
 }
 
-std::unique_ptr<CommandPoolVK> ContextVK::CreateGraphicsCommandPool() const {
-  return CommandPoolVK::Create(*device_, graphics_queue_idx_);
+vk::CommandPool ContextVK::GetGraphicsCommandPool() const {
+  return *graphics_command_pool_;
+}
+
+vk::DescriptorPool ContextVK::GetDescriptorPool() const {
+  return *descriptor_pool_;
+}
+
+vk::PhysicalDevice ContextVK::GetPhysicalDevice() const {
+  return physical_device_;
+}
+
+std::unique_ptr<CommandEncoderVK> ContextVK::CreateGraphicsCommandEncoder()
+    const {
+  auto encoder = std::unique_ptr<CommandEncoderVK>(new CommandEncoderVK(
+      *device_,                //
+      graphics_queue_,         //
+      *graphics_command_pool_  //
+      ));
+  if (!encoder->IsValid()) {
+    return nullptr;
+  }
+  return encoder;
 }
 
 }  // namespace impeller

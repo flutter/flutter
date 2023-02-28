@@ -148,6 +148,14 @@ PixelFormat RenderTarget::GetRenderTargetPixelFormat() const {
   return PixelFormat::kUnknown;
 }
 
+size_t RenderTarget::GetMaxColorAttacmentBindIndex() const {
+  size_t max = 0;
+  for (const auto& color : colors_) {
+    max = std::max(color.first, max);
+  }
+  return max;
+}
+
 RenderTarget& RenderTarget::SetColorAttachment(
     const ColorAttachment& attachment,
     size_t index) {
@@ -342,6 +350,25 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   }
 
   return target;
+}
+
+size_t RenderTarget::GetTotalAttachmentCount() const {
+  size_t count = 0u;
+  for (const auto& [_, color] : colors_) {
+    if (color.texture) {
+      count++;
+    }
+    if (color.resolve_texture) {
+      count++;
+    }
+  }
+  if (depth_.has_value()) {
+    count++;
+  }
+  if (stencil_.has_value()) {
+    count++;
+  }
+  return count;
 }
 
 }  // namespace impeller
