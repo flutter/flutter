@@ -13,7 +13,7 @@ TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: ${componentColor('md.comp.filled-text-field.disabled.input-text')});
   }
-  return TextStyle(color: ${componentColor('md.comp.filled-text-field.input-text')});
+  return TextStyle(color: ${textStyle("md.comp.filled-text-field.label-text")}!.color);
 });
 
 TextStyle _m3InputStyle(BuildContext context) => ${textStyle("md.comp.filled-text-field.label-text")}!;
