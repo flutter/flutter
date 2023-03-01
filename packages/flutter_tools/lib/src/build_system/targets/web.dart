@@ -39,6 +39,11 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// The default optimization level for dart2js.
+///
+/// Maps to [kDart2jsOptimization].
+const String kDart2jsDefaultOptimizationLevel = 'O4';
+
 /// If `--dump-info` should be passed to dart2js.
 const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
 
@@ -235,7 +240,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw Exception(_collectOutput(kernelResult));
     }
 
-    final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final String dart2jsOptimization = environment.defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel;
     final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
     final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
@@ -243,7 +248,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
-      if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
+      '-$dart2jsOptimization',
       if (buildMode == BuildMode.profile) '--no-minify',
       if (dumpInfo) '--dump-info',
       if (noFrequencyBasedMinification) '--no-frequency-based-minification',
