@@ -70,6 +70,7 @@ void main() {
       null,
       null,
       null,
+      null,
       mockVMService,
     );
 
@@ -87,10 +88,27 @@ void main() {
       mockDevice,
       null,
       null,
+      null,
       mockVMService,
     );
 
     expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
+  });
+
+  testWithoutContext('VmService registers flutterGetIOSBuildOptions service', () async {
+    final MockVMService mockVMService = MockVMService();
+    await setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      () async => null,
+      null,
+      mockVMService,
+    );
+
+    expect(mockVMService.services, containsPair('flutterGetIOSBuildOptions', 'Flutter Tools'));
   });
 
   testWithoutContext('VM Service registers flutterGetSkSL service', () async {
@@ -101,6 +119,7 @@ void main() {
       null,
       null,
       () async => 'hello',
+      null,
       null,
       mockVMService,
     );
@@ -119,6 +138,7 @@ void main() {
       null,
       () async => 'hello',
       null,
+      null,
       mockVMService,
     ), throwsToolExit());
   });
@@ -133,6 +153,7 @@ void main() {
       null,
       null,
       () async => 'hello',
+      null,
       (vm_service.Event event) { },
       mockVMService,
     ), throwsToolExit());
@@ -141,6 +162,7 @@ void main() {
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
+      null,
       null,
       null,
       null,
@@ -155,6 +177,7 @@ void main() {
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
+      null,
       null,
       null,
       null,

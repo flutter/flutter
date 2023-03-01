@@ -570,6 +570,7 @@ class ResidentWebRunner extends ResidentRunner {
         null,
         device!.device,
         null,
+        null,
         printStructuredErrorLog,
         _vmService.service,
       );

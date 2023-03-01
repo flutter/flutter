@@ -678,6 +678,7 @@ class TestFlutterDevice extends FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    GetXcodeProjectInfo? getIOSProjectInfo,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,

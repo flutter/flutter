@@ -33,6 +33,7 @@ import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
+import 'src/commands/list_xcode_modes.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
@@ -232,6 +233,7 @@ List<FlutterCommand> generateCommands({
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(),
+  XcodeOptionCommand(verbose: verbose),
 ];
 
 /// An abstraction for instantiation of the correct logger type.

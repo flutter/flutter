@@ -443,6 +443,7 @@ FlutterDriverService setUpDriverService({
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      GetXcodeProjectInfo? getIOSProjectInfo,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,

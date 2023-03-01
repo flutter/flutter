@@ -14,6 +14,7 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'ios/xcodeproj.dart';
 import 'version.dart';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
@@ -102,6 +103,11 @@ typedef CompileExpression = Future<String> Function(
 /// The name of the file returned as a result.
 typedef GetSkSLMethod = Future<String?> Function();
 
+/// A method that pulls an SkSL shader from the device and writes it to a file.
+///
+/// The name of the file returned as a result.
+typedef GetXcodeProjectInfo = Future<XcodeProjectInfo?> Function();
+
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   required Logger logger,
@@ -165,6 +171,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   Restart? restart,
   CompileExpression? compileExpression,
   GetSkSLMethod? getSkSLMethod,
+  GetXcodeProjectInfo? getIOSProjectInfo,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device? device,
@@ -181,6 +188,7 @@ Future<vm_service.VmService> setUpVmService(
   CompileExpression? compileExpression,
   Device? device,
   GetSkSLMethod? skSLMethod,
+  GetXcodeProjectInfo? getIOSProjectInfo,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) async {
@@ -283,6 +291,30 @@ Future<vm_service.VmService> setUpVmService(
     });
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
+
+  if (getIOSProjectInfo != null) {
+    vmService.registerServiceCallback('flutterGetIOSBuildOptions', (Map<String, Object?> params) async {
+      final XcodeProjectInfo? info = await getIOSProjectInfo();
+      if (info == null) {
+        return <String, Object>{
+          'result': <String, Object>{
+            'type': 'Success',
+          },
+        };
+      }
+      return <String, Object>{
+        'result': <String, Object>{
+          'type': 'Success',
+          'targets': info.targets,
+          'schemes': info.schemes,
+          'buildConfigurations': info.buildConfigurations,
+        },
+      };
+    });
+    registrationRequests.add(
+        vmService.registerService('flutterGetIOSBuildOptions', 'Flutter Tools'));
+  }
+
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
     registrationRequests.add(vmService
@@ -323,6 +355,7 @@ Future<FlutterVmService> connectToVmService(
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    GetXcodeProjectInfo? getIOSProjectInfo,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device? device,
@@ -336,6 +369,7 @@ Future<FlutterVmService> connectToVmService(
     compression: compression,
     device: device,
     getSkSLMethod: getSkSLMethod,
+    getIOSProjectInfo: getIOSProjectInfo,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     logger: logger,
   );
@@ -362,6 +396,7 @@ Future<FlutterVmService> _connect(
   Restart? restart,
   CompileExpression? compileExpression,
   GetSkSLMethod? getSkSLMethod,
+  GetXcodeProjectInfo? getIOSProjectInfo,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -378,6 +413,7 @@ Future<FlutterVmService> _connect(
     compileExpression,
     device,
     getSkSLMethod,
+    getIOSProjectInfo,
     printStructuredErrorLogMethod,
     delegateService,
   );
