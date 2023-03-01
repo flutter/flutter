@@ -1733,7 +1733,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
-    return _CompositedTranformFollowerWithoutAbsorb(
+    return CompositedTransformFollower(
       link: widget.handleLayerLink,
       offset: interactiveRect.topLeft,
       showWhenUnlinked: false,
@@ -1782,107 +1782,6 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
           ),
         ),
       ),
-    );
-  }
-}
-
-class _CompositedTranformFollowerWithoutAbsorb
-    extends CompositedTransformFollower {
-  const _CompositedTranformFollowerWithoutAbsorb({
-    super.key,
-    required super.link,
-    super.showWhenUnlinked,
-    super.offset,
-    super.targetAnchor,
-    super.followerAnchor,
-    super.child,
-  });
-
-  @override
-  _RenderFollowerLayerWithoutAbsorb createRenderObject(BuildContext context) {
-    return _RenderFollowerLayerWithoutAbsorb(
-      link: link,
-      showWhenUnlinked: showWhenUnlinked,
-      offset: offset,
-      leaderAnchor: targetAnchor,
-      followerAnchor: followerAnchor,
-    );
-  }
-
-  @override
-  void updateRenderObject(
-      BuildContext context, RenderFollowerLayer renderObject) {
-    renderObject
-      ..link = link
-      ..showWhenUnlinked = showWhenUnlinked
-      ..offset = offset
-      ..leaderAnchor = targetAnchor
-      ..followerAnchor = followerAnchor;
-  }
-}
-
-class _RenderFollowerLayerWithoutAbsorb extends RenderFollowerLayer {
-  _RenderFollowerLayerWithoutAbsorb({
-    required super.link,
-    super.showWhenUnlinked,
-    super.offset,
-    super.leaderAnchor,
-    super.followerAnchor,
-    super.child,
-  });
-
-  bool _hitTestAll(BoxHitTestResult result, Offset position) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-                'Cannot hit test a render box that has never been laid out.'),
-            describeForError(
-                'The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-              "Unfortunately, this object's geometry is not known at this time, "
-              'probably because it has never been laid out. '
-              'This means it cannot be accurately hit-tested.',
-            ),
-            ErrorHint(
-              'If you are trying '
-              'to perform a hit test during the layout phase itself, make sure '
-              "you only hit test nodes that have completed layout (e.g. the node's "
-              'children, after their layout() method has been called).',
-            ),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-            'Although this node is not marked as needing layout, '
-            'its size is not set.',
-          ),
-          ErrorHint(
-            'A RenderBox object must have an '
-            'explicit size before it can be hit-tested. Make sure '
-            'that the RenderBox in question sets its size during layout.',
-          ),
-        ]);
-      }
-      return true;
-    }());
-    if (size!.contains(position)) {
-      result.add(BoxHitTestEntry(this, position));
-    }
-    return false;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return result.addWithPaintTransform(
-      transform: getCurrentTransform(),
-      position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
-        return child == null ? false : _hitTestAll(result, position);
-      },
     );
   }
 }
