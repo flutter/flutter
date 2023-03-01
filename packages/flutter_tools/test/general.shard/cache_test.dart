@@ -767,6 +767,40 @@ void main() {
     expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
+  testWithoutContext('TestFonts are downloaded from/to the correct location', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final File fakeVersionFile = fileSystem.currentDirectory
+      .childDirectory('cache')
+      .childDirectory('bin')
+      .childDirectory('internal')
+      .childFile('test_fonts.version');
+
+    fakeVersionFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync('3012db47f3130e62f7cc0beabff968a33cbec8d8');
+
+    final TestFonts testFonts = TestFonts(Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem));
+
+    String? fromLocation, toLocation, downloadMessage;
+    final FakeArtifactUpdater updater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri uri, Directory location) {
+        assert(fromLocation == null);
+        assert(toLocation == null);
+        assert(downloadMessage == null);
+        downloadMessage = message;
+        fromLocation = uri.toString();
+        toLocation = location.path;
+      };
+
+    await testFonts.updateInner(updater, fileSystem, FakeOperatingSystemUtils());
+    expect(downloadMessage, 'Downloading test fonts...');
+    expect(
+      fromLocation,
+      'https://storage.googleapis.com/flutter_infra_release/flutter/3012db47f3130e62f7cc0beabff968a33cbec8d8/test_fonts.zip',
+    );
+    expect(toLocation, 'cache/bin/cache/artifacts/test_fonts');
+  });
+
   testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Directory internalDir = fileSystem.currentDirectory

@@ -32,6 +32,7 @@ class FlutterCache extends Cache {
     required super.osUtils,
     required FlutterProjectFactory projectFactory,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
+    //registerArtifact(TestFonts(this));
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
@@ -129,6 +130,26 @@ class PubDependencies extends ArtifactSet {
       ),
       offline: offline
     );
+  }
+}
+
+/// A cached artifact containing fonts used in
+class TestFonts extends CachedArtifact {
+  TestFonts(Cache cache) : super(
+    'test_fonts',
+    cache,
+    DevelopmentArtifact.universal,
+  );
+
+  @override
+  Future<void> updateInner(
+    ArtifactUpdater artifactUpdater,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+
+    final Uri archiveUri = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/${version!}/test_fonts.zip');
+    return artifactUpdater.downloadZipArchive('Downloading test fonts...', archiveUri, location);
   }
 }
 
