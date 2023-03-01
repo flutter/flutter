@@ -84,12 +84,19 @@ static std::optional<vk::SurfaceFormatKHR> ChooseSurfaceFormat(
 
 static std::optional<vk::CompositeAlphaFlagBitsKHR> ChooseAlphaCompositionMode(
     vk::CompositeAlphaFlagsKHR flags) {
+  if (flags & vk::CompositeAlphaFlagBitsKHR::eInherit) {
+    return vk::CompositeAlphaFlagBitsKHR::eInherit;
+  }
   if (flags & vk::CompositeAlphaFlagBitsKHR::ePreMultiplied) {
     return vk::CompositeAlphaFlagBitsKHR::ePreMultiplied;
+  }
+  if (flags & vk::CompositeAlphaFlagBitsKHR::ePostMultiplied) {
+    return vk::CompositeAlphaFlagBitsKHR::ePostMultiplied;
   }
   if (flags & vk::CompositeAlphaFlagBitsKHR::eOpaque) {
     return vk::CompositeAlphaFlagBitsKHR::eOpaque;
   }
+
   return std::nullopt;
 }
 
