@@ -223,6 +223,13 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
          level: level,
        );
 
+  @override
+  String toString({
+    TextTreeConfiguration? parentConfiguration,
+    DiagnosticLevel minLevel = DiagnosticLevel.info,
+  }) {
+    return valueToString(parentConfiguration: parentConfiguration);
+  }
 
   @override
   List<Object> get value => super.value!;
