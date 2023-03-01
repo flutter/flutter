@@ -310,14 +310,16 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: (widget.enableDrag && hasDragHandler) ? Stack(
+          alignment: Alignment.topCenter,
           children: <Widget>[
-            if (widget.enableDrag && hasDragHandler)
               _DragHandle(onSemanticsTap: widget.onClosing),
-            widget.builder(context),
+              Padding(
+                padding: const EdgeInsets.only(top:48),
+                child: widget.builder(context),
+            ),
           ],
-        ),
+        ) : widget.builder(context),
       ),
     );
 
@@ -352,8 +354,10 @@ class _DragHandle extends StatelessWidget {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData m3Defaults =  _BottomSheetDefaultsM3(context) ;
 
-    final Size dragHandleSize= bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
-    final Color dragHandleColor= bottomSheetTheme.dragHandleColor ?? m3Defaults.dragHandleColor!;
+    final Size dragHandleSize = bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
+    final Color dragHandleColor = bottomSheetTheme.dragHandleColor ?? m3Defaults.dragHandleColor!;
+
+     MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
 
     return Semantics(
       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -361,7 +365,7 @@ class _DragHandle extends StatelessWidget {
       onTap: onSemanticsTap,
       child: Padding(
         // Add padding to make sure target size is larger than 48dp.
-        padding: const EdgeInsets.fromLTRB(20, 15, 20, 30),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
         child: Container(
           height: dragHandleSize.height,
           width: dragHandleSize.width,
