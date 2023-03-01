@@ -73,6 +73,8 @@ class DlPaint {
   static constexpr float kDefaultWidth = 0.0;
   static constexpr float kDefaultMiter = 4.0;
 
+  static const DlPaint kDefault;
+
   DlPaint() : DlPaint(DlColor::kBlack()) {}
   DlPaint(DlColor color);
 
@@ -214,6 +216,8 @@ class DlPaint {
     pathEffect_ = pathEffect;
     return *this;
   }
+
+  bool isDefault() const { return *this == kDefault; }
 
   bool operator==(DlPaint const& other) const;
   bool operator!=(DlPaint const& other) const { return !(*this == other); }

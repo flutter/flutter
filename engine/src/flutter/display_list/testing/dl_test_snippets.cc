@@ -769,6 +769,11 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DisplayListBuilder& b) {
               b.drawImage(TestImage2, {10, 10}, kNearestSampling, false);
             }},
+           {1, 24, -1, 48,
+            [](DisplayListBuilder& b) {
+              auto dl_image = DlImage::Make(TestSkImage);
+              b.drawImage(dl_image, {10, 10}, kNearestSampling, false);
+            }},
        }},
       {"DrawImageRect",
        {
@@ -809,6 +814,12 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
               b.drawImageRect(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
                               kNearestSampling, false);
             }},
+           {1, 56, -1, 80,
+            [](DisplayListBuilder& b) {
+              auto dl_image = DlImage::Make(TestSkImage);
+              b.drawImageRect(dl_image, {10, 10, 15, 15}, {10, 10, 80, 80},
+                              kNearestSampling, false);
+            }},
        }},
       {"DrawImageNine",
        {
@@ -842,6 +853,12 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 48, -1, 80,
             [](DisplayListBuilder& b) {
               b.drawImageNine(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
+                              DlFilterMode::kNearest, false);
+            }},
+           {1, 48, -1, 80,
+            [](DisplayListBuilder& b) {
+              auto dl_image = DlImage::Make(TestSkImage);
+              b.drawImageNine(dl_image, {10, 10, 15, 15}, {10, 10, 80, 80},
                               DlFilterMode::kNearest, false);
             }},
        }},
@@ -921,6 +938,15 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
                           DlBlendMode::kSrcIn, kNearestSampling, &cull_rect,
                           false);
             }},
+           {1, 48 + 32 + 8, -1, 48 + 32 + 32,
+            [](DisplayListBuilder& b) {
+              auto dl_image = DlImage::Make(TestSkImage);
+              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
+              b.drawAtlas(dl_image, xforms, texs, nullptr, 2,
+                          DlBlendMode::kSrcIn, kNearestSampling, nullptr,
+                          false);
+            }},
        }},
       {"DrawDisplayList",
        {
@@ -929,6 +955,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             [](DisplayListBuilder& b) { b.drawDisplayList(TestDisplayList1); }},
            {1, 16, -1, 16,
             [](DisplayListBuilder& b) { b.drawDisplayList(TestDisplayList2); }},
+           {1, 16, -1, 16,
+            [](DisplayListBuilder& b) {
+              b.drawDisplayList(MakeTestDisplayList(10, 10, SK_ColorRED));
+            }},
        }},
       {"DrawTextBlob",
        {
