@@ -3934,6 +3934,7 @@ targets:
       task_name: wide_gamut_ios
 
   - name: Mac_ios simple_animation_perf_impeller_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/121705
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
