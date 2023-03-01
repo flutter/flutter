@@ -3590,7 +3590,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     endBatchEdit();
   }
 
-  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause){
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
