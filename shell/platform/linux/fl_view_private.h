@@ -10,46 +10,16 @@
 #include "flutter/shell/platform/linux/fl_gl_area.h"
 
 /**
- * fl_view_begin_frame:
+ * fl_view_set_textures:
  * @view: an #FlView.
+ * @context: a #GdkGLContext, for #FlGLArea to render.
+ * @textures: (transfer none) (element-type FlBackingStoreProvider): a list of
+ * #FlBackingStoreProvider.
  *
- * Reset children of #FlView a stacked #GtkContainer.
- * This function is always paired with fl_view_end_frame.
+ * Set the textures for this view to render.
  */
-void fl_view_begin_frame(FlView* view);
-
-/**
- * fl_view_add_gl_area:
- * @view: an #FlView.
- * @context: (transfer full): a #GdkGLContext, for #FlGLArea to render.
- * @texture: (transfer full): texture for OpenGL area to render.
- *
- * Append an #FlGLArea at top of stacked children of #FlView.
- * This function must be called after fl_view_begin_frame, and
- * before fl_view_end_frame.
- */
-void fl_view_add_gl_area(FlView* view,
-                         GdkGLContext* context,
-                         FlBackingStoreProvider* texture);
-
-/**
- * fl_view_add_widget:
- * @view: an #FlView.
- * @widget: a #GtkWidget.
- * @geometry: geometry of the widget.
- *
- * Append a #GtkWidget at top of stacked children of #FlView.
- */
-void fl_view_add_widget(FlView* view,
-                        GtkWidget* widget,
-                        GdkRectangle* geometry);
-
-/**
- * fl_view_end_frame:
- * @view: an #FlView.
- *
- * Apply changes made by fl_view_add_gl_area and fl_view_add_widget.
- */
-void fl_view_end_frame(FlView* view);
+void fl_view_set_textures(FlView* view,
+                          GdkGLContext* context,
+                          GPtrArray* textures);
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
