@@ -158,7 +158,6 @@ targets:
 
   - name: Linux Fuchsia FEMU (cso)
     recipe: engine/femu_test
-    bringup: true
     properties:
       add_recipes_cq: "false"
       build_fuchsia: "true"
@@ -171,7 +170,6 @@ targets:
 
   - name: Linux Fuchsia arm64 FEMU
     recipe: engine/femu_test
-    bringup: true
     properties:
       add_recipes_cq: "true"
       build_fuchsia: "true"
