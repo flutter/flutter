@@ -154,19 +154,8 @@ targets:
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
       clobber: "true"
       emulator_arch: "x64"
-    timeout: 60
-
-  - name: Linux Fuchsia FEMU (cso)
-    recipe: engine/femu_test
-    properties:
-      add_recipes_cq: "false"
-      build_fuchsia: "true"
-      fuchsia_ctl_version: version:0.0.27
-      # ensure files from pre-production Fuchsia SDK tests are purged from cache
-      clobber: "true"
-      emulator_arch: "x64"
       enable_cso: "true"
-    timeout: 90
+    timeout: 60
 
   - name: Linux Fuchsia arm64 FEMU
     recipe: engine/femu_test
@@ -177,6 +166,7 @@ targets:
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
       clobber: "true"
       emulator_arch: "arm64"
+      enable_cso: "true"
     timeout: 60
 
   - name: Linux Framework Smoke Tests
