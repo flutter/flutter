@@ -5285,6 +5285,10 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
   late final _Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
 
+  // This is used to prevent a reentrant call to the history (a call to _undo or _redo
+  // should not call _push to add a new entry in the history).
+  bool _locked = false;
+
   // This duration was chosen as a best fit for the behavior of Mac, Linux,
   // and Windows undo/redo state save durations, but it is not perfect for any
   // of them.
@@ -5305,13 +5309,19 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
     if (nextValue.text == widget.controller.text) {
       return;
     }
+    _locked = true;
     widget.onTriggered(widget.controller.value.copyWith(
       text: nextValue.text,
       selection: nextValue.selection,
     ));
+    _locked = false;
   }
 
   void _push() {
+    // Do not try to push a new state when the change is related to an undo or redo.
+    if (_locked) {
+      return;
+    }
     if (widget.controller.value == TextEditingValue.empty) {
       return;
     }
