@@ -1151,6 +1151,7 @@ void main() {
         ),
       ],
     )));
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1174,29 +1175,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'included'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'included'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
+                TestSemantics(label: 'included2'),
               ],
             ),
-            TestSemantics(label: 'included2'),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1232,29 +1238,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'foo'),
-            TestSemantics(label: 'bar'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'foo'),
+                TestSemantics(label: 'bar'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
               ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1303,24 +1314,29 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'not clipped'),
             TestSemantics(
-              label: 'next WS is clipped',
-              flags: <SemanticsFlag>[SemanticsFlag.isLink],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              children: <TestSemantics>[
+                TestSemantics(label: 'not clipped'),
+                TestSemantics(
+                  label: 'next WS is clipped',
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {

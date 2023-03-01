@@ -2160,6 +2160,7 @@ void main() {
       await tester.pumpWidget(FocusTraversalGroup(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.", (WidgetTester tester) async {
@@ -2418,6 +2419,7 @@ void main() {
         ignoreRect: true,
         ignoreTransform: true,
       ));
+      semantics.dispose();
     });
 
     testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
@@ -2432,6 +2434,7 @@ void main() {
       );
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
   });
 
@@ -2489,6 +2492,7 @@ void main() {
       await tester.pumpWidget(ExcludeFocusTraversal(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
   });
 
