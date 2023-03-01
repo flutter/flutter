@@ -4876,7 +4876,7 @@ void main() {
       // Double tap 'b' to show handles.
       final Offset bPos = textOffsetToPosition(tester, testValue.indexOf('b'));
       await tester.tapAt(bPos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
       await tester.tapAt(bPos);
       await tester.pumpAndSettle();
 
@@ -4895,11 +4895,14 @@ void main() {
       );
       expect(endpoints.length, 2);
 
-      // Left handle should appear.
-      expect(endpoints[0].point.dx, isPositive);
-      // Right handle should remain off-screen.
+      // Left handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(endpoints[0].point.dx - textFieldLeftPosition.dx, isPositive);
       final Offset textFieldRightPosition =
           tester.getTopRight(find.byType(CupertinoTextField));
+      expect(textFieldRightPosition.dx - endpoints[0].point.dx, isPositive);
+      // Right handle should remain off-screen.
       expect(endpoints[1].point.dx - textFieldRightPosition.dx, isPositive);
 
       // Drag the left handle to the right by 25 offset.
@@ -4958,7 +4961,7 @@ void main() {
       // Double tap 'a' to show handles.
       final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
       await tester.tapAt(aPos);
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
       await tester.tapAt(aPos);
       await tester.pumpAndSettle();
 
@@ -4977,8 +4980,13 @@ void main() {
       );
       expect(endpoints.length, 2);
 
-      // Right handle should appear.
-      expect(endpoints[1].point.dx, greaterThanOrEqualTo(325));
+      // Right handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(endpoints[1].point.dx - textFieldLeftPosition.dx, isPositive);
+      final Offset textFieldRightPosition =
+          tester.getTopRight(find.byType(CupertinoTextField));
+      expect(textFieldRightPosition.dx - endpoints[1].point.dx, isPositive);
       // Left handle should remain off-screen.
       expect(endpoints[0].point.dx, isNegative);
 
