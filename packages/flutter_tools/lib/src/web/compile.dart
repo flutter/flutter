@@ -18,6 +18,8 @@ import '../plugins.dart';
 import '../project.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
+export '../build_system/targets/web.dart' show kDart2jsDefaultOptimizationLevel;
+
 Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
@@ -27,7 +29,7 @@ Future<void> buildWeb(
   bool sourceMaps,
   bool nativeNullAssertions,
   bool isWasm, {
-  String? dart2jsOptimization,
+  String dart2jsOptimization = kDart2jsDefaultOptimizationLevel,
   String? baseHref,
   bool dumpInfo = false,
   bool noFrequencyBasedMinification = false,
@@ -68,8 +70,7 @@ Future<void> buildWeb(
           kSourceMapsEnabled: sourceMaps.toString(),
           kNativeNullAssertions: nativeNullAssertions.toString(),
           kServiceWorkerStrategy: serviceWorkerStrategy,
-          if (dart2jsOptimization != null)
-            kDart2jsOptimization: dart2jsOptimization,
+          kDart2jsOptimization: dart2jsOptimization,
           kDart2jsDumpInfo: dumpInfo.toString(),
           kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
           ...buildInfo.toBuildSystemEnvironment(),
