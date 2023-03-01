@@ -832,6 +832,13 @@ struct DrawVerticesOp final : DrawOpBase {
         ctx.dispatcher.drawImage(image, point, sampling, with_attributes); \
       }                                                                    \
     }                                                                      \
+                                                                           \
+    DisplayListCompare equals(const name##Op* other) const {               \
+      return (point == other->point && sampling == other->sampling &&      \
+              image->Equals(other->image))                                 \
+                 ? DisplayListCompare::kEqual                              \
+                 : DisplayListCompare::kNotEqual;                          \
+    }                                                                      \
   };
 DEFINE_DRAW_IMAGE_OP(DrawImage, false)
 DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
@@ -868,30 +875,46 @@ struct DrawImageRectOp final : DrawOpBase {
                                    render_with_attributes, constraint);
     }
   }
+
+  DisplayListCompare equals(const DrawImageRectOp* other) const {
+    return (src == other->src && dst == other->dst &&
+            sampling == other->sampling &&
+            render_with_attributes == other->render_with_attributes &&
+            constraint == other->constraint && image->Equals(other->image))
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
+  }
 };
 
 // 4 byte header + 44 byte payload packs efficiently into 48 bytes
-#define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)                \
-  struct name##Op final : DrawOpBase {                                         \
-    static const auto kType = DisplayListOpType::k##name;                      \
-                                                                               \
-    name##Op(const sk_sp<DlImage> image,                                       \
-             const SkIRect& center,                                            \
-             const SkRect& dst,                                                \
-             DlFilterMode filter)                                              \
-        : center(center), dst(dst), filter(filter), image(std::move(image)) {} \
-                                                                               \
-    const SkIRect center;                                                      \
-    const SkRect dst;                                                          \
-    const DlFilterMode filter;                                                 \
-    const sk_sp<DlImage> image;                                                \
-                                                                               \
-    void dispatch(DispatchContext& ctx) const {                                \
-      if (op_needed(ctx)) {                                                    \
-        ctx.dispatcher.drawImageNine(image, center, dst, filter,               \
-                                     render_with_attributes);                  \
-      }                                                                        \
-    }                                                                          \
+#define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)            \
+  struct name##Op final : DrawOpBase {                                     \
+    static const auto kType = DisplayListOpType::k##name;                  \
+                                                                           \
+    name##Op(const sk_sp<DlImage> image,                                   \
+             const SkIRect& center,                                        \
+             const SkRect& dst,                                            \
+             DlFilterMode mode)                                            \
+        : center(center), dst(dst), mode(mode), image(std::move(image)) {} \
+                                                                           \
+    const SkIRect center;                                                  \
+    const SkRect dst;                                                      \
+    const DlFilterMode mode;                                               \
+    const sk_sp<DlImage> image;                                            \
+                                                                           \
+    void dispatch(DispatchContext& ctx) const {                            \
+      if (op_needed(ctx)) {                                                \
+        ctx.dispatcher.drawImageNine(image, center, dst, mode,             \
+                                     render_with_attributes);              \
+      }                                                                    \
+    }                                                                      \
+                                                                           \
+    DisplayListCompare equals(const name##Op* other) const {               \
+      return (center == other->center && dst == other->dst &&              \
+              mode == other->mode && image->Equals(other->image))          \
+                 ? DisplayListCompare::kEqual                              \
+                 : DisplayListCompare::kNotEqual;                          \
+    }                                                                      \
   };
 DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNine, false)
 DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
@@ -924,6 +947,23 @@ struct DrawAtlasBaseOp : DrawOpBase {
   const uint8_t render_with_attributes;
   const DlImageSampling sampling;
   const sk_sp<DlImage> atlas;
+
+  bool equals(const DrawAtlasBaseOp* other,
+              const void* pod_this,
+              const void* pod_other) const {
+    bool ret = (count == other->count && mode_index == other->mode_index &&
+                has_colors == other->has_colors &&
+                render_with_attributes == other->render_with_attributes &&
+                sampling == other->sampling && atlas->Equals(other->atlas));
+    if (ret) {
+      size_t bytes = count * (sizeof(SkRSXform) + sizeof(SkRect));
+      if (has_colors) {
+        bytes += count * sizeof(DlColor);
+      }
+      ret = (memcmp(pod_this, pod_other, bytes) == 0);
+    }
+    return ret;
+  }
 };
 
 // Packs into 48 bytes as per DrawAtlasBaseOp
@@ -954,6 +994,14 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
       ctx.dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                                nullptr, render_with_attributes);
     }
+  }
+
+  DisplayListCompare equals(const DrawAtlasOp* other) const {
+    const void* pod_this = reinterpret_cast<const void*>(this + 1);
+    const void* pod_other = reinterpret_cast<const void*>(other + 1);
+    return (DrawAtlasBaseOp::equals(other, pod_this, pod_other))
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
   }
 };
 
@@ -991,6 +1039,15 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
       ctx.dispatcher.drawAtlas(atlas, xform, tex, colors, count, mode, sampling,
                                &cull_rect, render_with_attributes);
     }
+  }
+
+  DisplayListCompare equals(const DrawAtlasCulledOp* other) const {
+    const void* pod_this = reinterpret_cast<const void*>(this + 1);
+    const void* pod_other = reinterpret_cast<const void*>(other + 1);
+    return (cull_rect == other->cull_rect &&
+            DrawAtlasBaseOp::equals(other, pod_this, pod_other))
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
   }
 };
 

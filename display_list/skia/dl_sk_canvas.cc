@@ -41,12 +41,25 @@ static SkCanvas::PointMode ToSk(DlCanvas::PointMode mode) {
   return static_cast<SkCanvas::PointMode>(mode);
 }
 
-static SkPaint ToSk(const DlPaint& paint) {
+// clang-format off
+constexpr float kInvertColorMatrix[20] = {
+  -1.0,    0,    0, 1.0, 0,
+     0, -1.0,    0, 1.0, 0,
+     0,    0, -1.0, 1.0, 0,
+   1.0,  1.0,  1.0, 1.0, 0
+};
+// clang-format on
+
+static SkPaint ToSk(const DlPaint& paint, bool force_stroke = false) {
   SkPaint sk_paint;
+
+  sk_paint.setAntiAlias(paint.isAntiAlias());
+  sk_paint.setDither(paint.isDither());
 
   sk_paint.setColor(paint.getColor());
   sk_paint.setBlendMode(ToSk(paint.getBlendMode()));
-  sk_paint.setStyle(ToSk(paint.getDrawStyle()));
+  sk_paint.setStyle(force_stroke ? SkPaint::kStroke_Style
+                                 : ToSk(paint.getDrawStyle()));
   sk_paint.setStrokeWidth(paint.getStrokeWidth());
   sk_paint.setStrokeMiter(paint.getStrokeMiter());
   sk_paint.setStrokeCap(ToSk(paint.getStrokeCap()));
@@ -54,7 +67,15 @@ static SkPaint ToSk(const DlPaint& paint) {
 
   sk_paint.setShader(ToSk(paint.getColorSourcePtr()));
   sk_paint.setImageFilter(ToSk(paint.getImageFilterPtr()));
-  sk_paint.setColorFilter(ToSk(paint.getColorFilterPtr()));
+  auto color_filter = ToSk(paint.getColorFilterPtr());
+  if (paint.isInvertColors()) {
+    auto invert_filter = SkColorFilters::Matrix(kInvertColorMatrix);
+    if (color_filter) {
+      invert_filter = invert_filter->makeComposed(color_filter);
+    }
+    color_filter = invert_filter;
+  }
+  sk_paint.setColorFilter(color_filter);
   sk_paint.setMaskFilter(ToSk(paint.getMaskFilterPtr()));
   sk_paint.setPathEffect(ToSk(paint.getPathEffectPtr()));
 
@@ -63,10 +84,10 @@ static SkPaint ToSk(const DlPaint& paint) {
 
 class SkOptionalPaint {
  public:
-  explicit SkOptionalPaint(const DlPaint* paint) {
-    if (paint) {
-      paint_ = ToSk(*paint);
-      ptr_ = &paint_;
+  explicit SkOptionalPaint(const DlPaint* dl_paint) {
+    if (dl_paint && !dl_paint->isDefault()) {
+      sk_paint_ = ToSk(*dl_paint);
+      ptr_ = &sk_paint_;
     } else {
       ptr_ = nullptr;
     }
@@ -75,7 +96,7 @@ class SkOptionalPaint {
   SkPaint* operator()() { return ptr_; }
 
  private:
-  SkPaint paint_;
+  SkPaint sk_paint_;
   SkPaint* ptr_;
 };
 
@@ -239,7 +260,7 @@ void DlSkCanvasAdapter::DrawColor(DlColor color, DlBlendMode mode) {
 void DlSkCanvasAdapter::DrawLine(const SkPoint& p0,
                                  const SkPoint& p1,
                                  const DlPaint& paint) {
-  delegate_->drawLine(p0, p1, ToSk(paint));
+  delegate_->drawLine(p0, p1, ToSk(paint, true));
 }
 
 void DlSkCanvasAdapter::DrawRect(const SkRect& rect, const DlPaint& paint) {
@@ -282,7 +303,7 @@ void DlSkCanvasAdapter::DrawPoints(PointMode mode,
                                    uint32_t count,
                                    const SkPoint pts[],
                                    const DlPaint& paint) {
-  delegate_->drawPoints(ToSk(mode), count, pts, ToSk(paint));
+  delegate_->drawPoints(ToSk(mode), count, pts, ToSk(paint, true));
 }
 
 void DlSkCanvasAdapter::DrawVertices(const DlVertices* vertices,
@@ -358,7 +379,7 @@ void DlSkCanvasAdapter::DrawShadow(const SkPath& path,
                                    bool transparent_occluder,
                                    SkScalar dpr) {
   DisplayListCanvasDispatcher::DrawShadow(delegate_, path, color, elevation,
-                                          SkColorGetA(color) != 0xff, dpr);
+                                          transparent_occluder, dpr);
 }
 
 void DlSkCanvasAdapter::Flush() {

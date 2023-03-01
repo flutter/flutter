@@ -27,6 +27,8 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_EQ(paint.getColorFilter(), nullptr);
   EXPECT_EQ(paint.getImageFilter(), nullptr);
   EXPECT_EQ(paint.getMaskFilter(), nullptr);
+  EXPECT_TRUE(paint.isDefault());
+  EXPECT_EQ(paint, DlPaint::kDefault);
 
   EXPECT_EQ(DlBlendMode::kDefaultMode, DlBlendMode::kSrcOver);
   EXPECT_EQ(DlDrawStyle::kDefaultStyle, DlDrawStyle::kFill);

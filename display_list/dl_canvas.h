@@ -109,7 +109,8 @@ class DlCanvas {
   virtual bool QuickReject(const SkRect& bounds) const = 0;
 
   virtual void DrawPaint(const DlPaint& paint) = 0;
-  virtual void DrawColor(DlColor color, DlBlendMode mode) = 0;
+  virtual void DrawColor(DlColor color,
+                         DlBlendMode mode = DlBlendMode::kSrcOver) = 0;
   void Clear(DlColor color) { DrawColor(color, DlBlendMode::kSrc); }
   virtual void DrawLine(const SkPoint& p0,
                         const SkPoint& p1,

@@ -35,4 +35,6 @@ bool DlPaint::operator==(DlPaint const& other) const {
          Equals(maskFilter_, other.maskFilter_);
 }
 
+const DlPaint DlPaint::kDefault;
+
 }  // namespace flutter

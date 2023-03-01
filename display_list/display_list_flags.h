@@ -222,6 +222,10 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
 
   constexpr bool is_flood() const { return has_any(kFloodsSurface_); }
 
+  constexpr bool operator==(DisplayListAttributeFlags const& other) const {
+    return flags_ == other.flags_;
+  }
+
  private:
   explicit constexpr DisplayListAttributeFlags(int flags)
       : DisplayListFlagsBase(flags),
