@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -11,6 +12,7 @@ import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -358,6 +360,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   void _handleTap() {
+    final TextDirection textDirection = Directionality.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -375,6 +380,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
+    SemanticsService.announce(stateHint, textDirection);
   }
 
   // Platform or null affinity defaults to trailing.
@@ -410,13 +416,31 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
+    final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
             top: BorderSide(color: Colors.transparent),
             bottom: BorderSide(color: Colors.transparent),
           );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
-
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String onTapHint = _isExpanded
+      ? localizations.expansionTileExpandedTapHint
+      : localizations.expansionTileCollapsedTapHint;
+    String? semanticsHint;
+    switch (theme.platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsHint = _isExpanded
+          ? '${localizations.collapsedHint} double tap to ${localizations.expandedIconTapHint}'
+          : '${localizations.expandedHint} double tap to ${localizations.collapsedIconTapHint}';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
     return Container(
       clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
@@ -426,16 +450,20 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ListTileTheme.merge(
-            iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-            textColor: _headerColor.value,
-            child: ListTile(
-              onTap: _handleTap,
-              contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-              leading: widget.leading ?? _buildLeadingIcon(context),
-              title: widget.title,
-              subtitle: widget.subtitle,
-              trailing: widget.trailing ?? _buildTrailingIcon(context),
+          Semantics(
+            hint: semanticsHint,
+            onTapHint: onTapHint,
+            child: ListTileTheme.merge(
+              iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
+              textColor: _headerColor.value,
+              child: ListTile(
+                onTap: _handleTap,
+                contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
+                leading: widget.leading ?? _buildLeadingIcon(context),
+                title: widget.title,
+                subtitle: widget.subtitle,
+                trailing: widget.trailing ?? _buildTrailingIcon(context),
+              ),
             ),
           ),
           ClipRect(
