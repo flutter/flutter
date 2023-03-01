@@ -89,6 +89,7 @@ static sk_sp<DlImage> MakeTestImage(int w, int h, int checker_size) {
 
 static auto TestImage1 = MakeTestImage(40, 40, 5);
 static auto TestImage2 = MakeTestImage(50, 50, 5);
+static auto TestSkImage = MakeTestImage(30, 30, 5) -> skia_image();
 
 static const DlImageColorSource kTestSource1(TestImage1,
                                              DlTileMode::kClamp,
