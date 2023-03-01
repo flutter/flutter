@@ -122,11 +122,11 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
+  auto out_texture = renderer.MakeSubpass("Border Mask Blur Filter",
+                                          ISize(coverage.size), callback);
   if (!out_texture) {
     return std::nullopt;
   }
-  out_texture->SetLabel("BorderMaskBlurFilter Texture");
 
   return Contents::EntityFromSnapshot(
       Snapshot{.texture = out_texture,
