@@ -7,7 +7,6 @@
 #include <memory>
 #include <sstream>
 
-#include "impeller/base/strings.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/formats.h"
@@ -309,7 +308,6 @@ bool ContentContext::IsValid() const {
 }
 
 std::shared_ptr<Texture> ContentContext::MakeSubpass(
-    const std::string& label,
     ISize texture_size,
     const SubpassCallback& subpass_callback,
     bool msaa_enabled) const {
@@ -319,11 +317,11 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   if (context->GetDeviceCapabilities().SupportsOffscreenMSAA() &&
       msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(
-        *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
+        *context, texture_size, "Contents Offscreen MSAA",
         RenderTarget::kDefaultColorAttachmentConfigMSAA, std::nullopt);
   } else {
     subpass_target = RenderTarget::CreateOffscreen(
-        *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
+        *context, texture_size, "Contents Offscreen",
         RenderTarget::kDefaultColorAttachmentConfig, std::nullopt);
   }
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
@@ -332,7 +330,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   }
 
   auto sub_command_buffer = context->CreateCommandBuffer();
-  sub_command_buffer->SetLabel(SPrintF("%s CommandBuffer", label.c_str()));
+  sub_command_buffer->SetLabel("Offscreen Contents Command Buffer");
   if (!sub_command_buffer) {
     return nullptr;
   }
@@ -341,7 +339,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   if (!sub_renderpass) {
     return nullptr;
   }
-  sub_renderpass->SetLabel(SPrintF("%s RenderPass", label.c_str()));
+  sub_renderpass->SetLabel("OffscreenContentsPass");
 
   if (!subpass_callback(*this, *sub_renderpass)) {
     return nullptr;

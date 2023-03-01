@@ -150,11 +150,11 @@ static std::optional<Entity> AdvancedBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass("Advanced Blend Filter",
-                                          ISize(coverage.size), callback);
+  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
   if (!out_texture) {
     return std::nullopt;
   }
+  out_texture->SetLabel("Advanced Blend Filter Texture");
 
   return Contents::EntityFromSnapshot(
       Snapshot{.texture = out_texture,
@@ -274,11 +274,11 @@ static std::optional<Entity> PipelineBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass("Pipeline Blend Filter",
-                                          ISize(coverage.size), callback);
+  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
   if (!out_texture) {
     return std::nullopt;
   }
+  out_texture->SetLabel("Pipeline Blend Filter Texture");
 
   return Contents::EntityFromSnapshot(
       Snapshot{.texture = out_texture,
