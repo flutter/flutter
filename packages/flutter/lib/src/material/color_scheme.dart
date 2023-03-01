@@ -306,7 +306,6 @@ class ColorScheme with Diagnosticable {
     final Iterable<int> imageBytes = await getImageBytes(image);
     final QuantizerResult result = await QuantizerCelebi().quantize(imageBytes, 256);
 
-    print((result.colorToCount.keys).map((key) => Color(key)));
     final Color baseColor = Color((result.colorToCount.keys.toList())[0]);
 
     final Scheme scheme;
@@ -319,6 +318,7 @@ class ColorScheme with Diagnosticable {
         scheme = Scheme.dark(baseColor.value);
         break;
     }
+
     return ColorScheme(
       primary: primary ?? Color(scheme.primary),
       onPrimary: onPrimary ?? Color(scheme.onPrimary),
