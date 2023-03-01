@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewConfiguration, ViewPadding;
+import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewPadding;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1326,12 +1326,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
-      gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
-    );
+    tester.binding.window.gestureSettingsTestValue = const GestureSettings(physicalTouchSlop: 4);
 
     expect(MediaQueryData.fromView(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
-    tester.binding.window.viewConfigurationTestValue = null;
+    tester.binding.window.clearGestureSettingsTestValue();
   });
 
   testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {

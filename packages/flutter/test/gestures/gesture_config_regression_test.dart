@@ -90,9 +90,7 @@ class NestedDraggableCase extends StatelessWidget {
 
 void main() {
   testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+    tester.binding.window.gestureSettingsTestValue = const ui.GestureSettings(physicalTouchSlop: 4);
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
@@ -110,12 +108,12 @@ void main() {
 
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
+   tester.binding.window.clearGestureSettingsTestValue();
   });
 
   testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+    tester.binding.window.gestureSettingsTestValue = const ui.GestureSettings(physicalTouchSlop: 4);
+
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
@@ -133,5 +131,6 @@ void main() {
 
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
+   tester.binding.window.clearGestureSettingsTestValue();
   });
 }
