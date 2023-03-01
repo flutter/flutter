@@ -177,6 +177,17 @@ class FlutterWebPlatform extends PlatformPlugin {
   final shelf.Server _server;
   Uri get url => _server.url;
 
+  /// The ahem font file.
+  File get _ahem => _fileSystem.file(_fileSystem.path.join(
+    Cache.flutterRoot!,
+    'packages',
+    'flutter_tools',
+    'static',
+    'Ahem.ttf',
+  ));
+
+  File get _flutterTest => _cache.getArtifactDirectory('test_fonts').childFile('flutter_test.ttf');
+
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
         _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
@@ -268,15 +279,15 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
-    const List<String> testFontList = <String>['flutter_test.ttf', 'ahem.ttf'];
-    final int testFontIndex = testFontList.indexWhere(request.requestedUri.path.contains);
-    if (testFontIndex >= 0) {
-      return shelf.Response.ok(_cache.getArtifactDirectory('test_fonts').childFile(testFontList[testFontIndex]).openRead());
-    } else if (request.requestedUri.path.contains('require.js')) {
+    if (request.requestedUri.path.contains('require.js')) {
       return shelf.Response.ok(
         _requireJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
+    } else if (request.requestedUri.path.contains('ahem.ttf')) {
+      return shelf.Response.ok(_ahem.openRead());
+    } else if (request.requestedUri.path.contains('flutter_test.ttf')) {
+      return shelf.Response.ok(_flutterTest.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
       return shelf.Response.ok(
         _dartSdk.openRead(),
