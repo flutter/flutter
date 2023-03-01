@@ -103,9 +103,7 @@ typedef CompileExpression = Future<String> Function(
 /// The name of the file returned as a result.
 typedef GetSkSLMethod = Future<String?> Function();
 
-/// A method that pulls an SkSL shader from the device and writes it to a file.
-///
-/// The name of the file returned as a result.
+/// A method that pulls an Xcode project info.
 typedef GetXcodeProjectInfo = Future<XcodeProjectInfo?> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
