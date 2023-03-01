@@ -233,7 +233,6 @@ List<FlutterCommand> generateCommands({
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(),
-  XcodeOptionCommand(verbose: verbose),
 ];
 
 /// An abstraction for instantiation of the correct logger type.
