@@ -2450,7 +2450,7 @@ class TextSelectionGestureDetectorBuilder {
   void _selectTextBoundariesInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
     final TextRange fromRange = _moveBeyondTextBoundary(fromPosition, boundary);
-    final TextPosition toPosition = to == null 
+    final TextPosition toPosition = to == null
         ? fromPosition
         : renderEditable.getPositionForPoint(to);
     final TextRange toRange = toPosition == fromPosition
