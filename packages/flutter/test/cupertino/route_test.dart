@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1482,6 +1484,7 @@ void main() {
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
@@ -1517,6 +1520,7 @@ void main() {
       label: 'Dismiss',
     ));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
@@ -1828,7 +1832,6 @@ void main() {
             child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
-              assert(navigator != null);
               navigator.push<void>(r);
             },
           );
@@ -2215,7 +2218,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromView(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2312,6 +2315,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 class _RestorableModalTestWidget extends StatelessWidget {
   const _RestorableModalTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

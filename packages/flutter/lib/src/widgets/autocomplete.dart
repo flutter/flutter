@@ -134,14 +134,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(
+  }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
-       assert(optionsBuilder != null),
-       assert(optionsViewBuilder != null),
        assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),
@@ -263,8 +260,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// The default way to convert an option to a string in
   /// [displayStringForOption].
   ///
-  /// Simply uses the `toString` method on the option.
-  static String defaultStringForOption(dynamic option) {
+  /// Uses the `toString` method of the given `option`.
+  static String defaultStringForOption(Object? option) {
     return option.toString();
   }
 
@@ -438,7 +435,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           );
         },
       );
-      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(newFloatingOptions);
+      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(newFloatingOptions);
       _floatingOptions = newFloatingOptions;
     } else {
       _floatingOptions = null;

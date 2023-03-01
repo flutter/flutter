@@ -18,6 +18,8 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'platform_menu_bar.dart';
 import 'router.dart';
+import 'service_extensions.dart';
+import 'view.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -115,7 +117,9 @@ abstract class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
+  ///     // [View.of] exposes the view from `WidgetsBinding.instance.platformDispatcher.views`
+  ///     // into which this widget is drawn.
+  ///     _lastSize = View.of(context).physicalSize;
   ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
@@ -127,7 +131,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
+  ///     setState(() { _lastSize = View.of(context).physicalSize; });
   ///   }
   ///
   ///   @override
@@ -184,7 +188,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
   ///   }
   ///
   ///   @override
@@ -256,7 +260,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
-    platformDispatcher.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
@@ -360,7 +363,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
     if (!kReleaseMode) {
       registerServiceExtension(
-        name: 'debugDumpApp',
+        name: WidgetsServiceExtensions.debugDumpApp.name,
         callback: (Map<String, String> parameters) async {
           final String data = _debugDumpAppString();
           return <String, Object>{
@@ -371,7 +374,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       if (!kIsWeb) {
         registerBoolServiceExtension(
-          name: 'showPerformanceOverlay',
+          name: WidgetsServiceExtensions.showPerformanceOverlay.name,
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
@@ -385,7 +388,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       }
 
       registerServiceExtension(
-        name: 'didSendFirstFrameEvent',
+        name: WidgetsServiceExtensions.didSendFirstFrameEvent.name,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -396,10 +399,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // This returns 'true' when the first frame is rasterized, and the trace
-      // event 'Rasterized first useful frame' is sent out.
       registerServiceExtension(
-        name: 'didSendFirstFrameRasterizedEvent',
+        name: WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -411,7 +412,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
-        name: 'fastReassemble',
+        name: WidgetsServiceExtensions.fastReassemble.name,
         callback: (Map<String, Object> params) async {
           // This mirrors the implementation of the 'reassemble' callback registration
           // in lib/src/foundation/binding.dart, but with the extra binding config used
@@ -429,28 +430,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
+        name: WidgetsServiceExtensions.profileWidgetBuilds.name,
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value) {
-            debugProfileBuildsEnabled = value;
-          }
-        },
+          debugProfileBuildsEnabled = value;
+        }
       );
       registerBoolServiceExtension(
-        name: 'profileUserWidgetBuilds',
+        name: WidgetsServiceExtensions.profileUserWidgetBuilds.name,
         getter: () async => debugProfileBuildsEnabledUserWidgets,
         setter: (bool value) async {
-          if (debugProfileBuildsEnabledUserWidgets != value) {
-            debugProfileBuildsEnabledUserWidgets = value;
-          }
-        },
+          debugProfileBuildsEnabledUserWidgets = value;
+        }
       );
     }
 
     assert(() {
       registerBoolServiceExtension(
-        name: 'debugAllowBanner',
+        name: WidgetsServiceExtensions.debugAllowBanner.name,
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value) {
@@ -459,20 +456,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
-      );
-
-      // This service extension is deprecated and will be removed by 12/1/2018.
-      // Use ext.flutter.inspector.show instead.
-      registerBoolServiceExtension(
-          name: 'debugWidgetInspector',
-          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
-          setter: (bool value) {
-            if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
-              return Future<void>.value();
-            }
-            WidgetsApp.debugShowWidgetInspectorOverride = value;
-            return _forceRebuild();
-          },
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
@@ -915,6 +898,22 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   bool get framesEnabled => super.framesEnabled && _readyToProduceFrames;
 
+  /// Used by [runApp] to wrap the provided `rootWidget` in the default [View].
+  ///
+  /// The [View] determines into what [FlutterView] the app is rendered into.
+  /// For backwards-compatibility reasons, this method currently chooses
+  /// [window] (which is a [FlutterView]) as the rendering target. This will
+  /// change in a future version of Flutter.
+  ///
+  /// The `rootWidget` widget provided to this method must not already be
+  /// wrapped in a [View].
+  Widget wrapWithDefaultView(Widget rootWidget) {
+    return View(
+      view: window,
+      child: rootWidget,
+    );
+  }
+
   /// Schedules a [Timer] for attaching the root widget.
   ///
   /// This is called by [runApp] to configure the widget tree. Consider using
@@ -1033,8 +1032,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  WidgetsFlutterBinding.ensureInitialized()
-    ..scheduleAttachRootWidget(app)
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  binding
+    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
     ..scheduleWarmUpFrame();
 }
 

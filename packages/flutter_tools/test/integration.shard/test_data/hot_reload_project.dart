@@ -6,11 +6,13 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class HotReloadProject extends Project {
+  HotReloadProject({super.indexHtml});
+
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: ">=2.12.0-0 <4.0.0"
 
   dependencies:
     flutter:

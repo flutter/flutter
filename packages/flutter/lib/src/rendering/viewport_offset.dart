@@ -196,7 +196,6 @@ abstract class ViewportOffset extends ChangeNotifier {
     Curve? curve,
     bool? clamp,
   }) {
-    assert(to != null);
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);
       return Future<void>.value();

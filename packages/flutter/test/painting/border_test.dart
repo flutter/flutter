@@ -16,7 +16,7 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
-  test('Border.uniform constructor', () {
+  test('Border.fromBorderSide constructor', () {
     const BorderSide side = BorderSide();
     const Border border = Border.fromBorderSide(side);
     expect(border.left, same(side));

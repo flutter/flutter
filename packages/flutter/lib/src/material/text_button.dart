@@ -107,6 +107,7 @@ class TextButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -152,6 +153,8 @@ class TextButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -174,7 +177,7 @@ class TextButton extends ButtonStyleButton {
     )
     Color? primary,
     @Deprecated(
-      'Use disabledForegroundColor and disabledForegroundColor instead. '
+      'Use disabledForegroundColor instead. '
       'This feature was deprecated after v3.1.0.'
     )
     Color? onSurface,
@@ -192,6 +195,11 @@ class TextButton extends ButtonStyleButton {
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
       : _TextButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
+      ? null
+      : disabledIconColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(iconColor)
+        : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
@@ -203,6 +211,7 @@ class TextButton extends ButtonStyleButton {
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -222,13 +231,14 @@ class TextButton extends ButtonStyleButton {
 
   /// Defines the button's default appearance.
   ///
+  /// {@template flutter.material.text_button.default_style_of}
   /// The button [child]'s [Text] and [Icon] widgets are rendered with
   /// the [ButtonStyle]'s foreground color. The button's [InkWell] adds
   /// the style's overlay color when the button is focused, hovered
   /// or pressed. The button's background color becomes its [Material]
   /// color and is transparent by default.
   ///
-  /// All of the ButtonStyle's defaults appear below.
+  /// All of the [ButtonStyle]'s defaults appear below.
   ///
   /// In this list "Theme.foo" is shorthand for
   /// `Theme.of(context).foo`. Color scheme values like
@@ -239,12 +249,13 @@ class TextButton extends ButtonStyleButton {
   /// each state and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
+  /// {@endtemplate}
   ///
   /// ## Material 2 defaults
   ///
@@ -259,7 +270,7 @@ class TextButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `textScaleFactor <= 1` - (horizontal(12), vertical(8))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -295,6 +306,7 @@ class TextButton extends ButtonStyleButton {
   /// If [ThemeData.useMaterial3] is set to true the following defaults will
   /// be used:
   ///
+  /// {@template flutter.material.text_button.material3_defaults}
   /// * `textStyle` - Theme.textTheme.labelLarge
   /// * `backgroundColor` - transparent
   /// * `foregroundColor`
@@ -308,7 +320,7 @@ class TextButton extends ButtonStyleButton {
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `textScaleFactor <= 1` - lerp(horizontal(12), horizontal(4))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -326,6 +338,10 @@ class TextButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [TextButton.icon] factory, the end (generally the right) value of
+  /// [padding] is increased from 12 to 16.
+  /// {@endtemplate}
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -365,11 +381,12 @@ class TextButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  final bool useMaterial3 = Theme.of(context).useMaterial3;
   return ButtonStyleButton.scaledPadding(
-    const EdgeInsets.all(8),
+    useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+    MediaQuery.textScaleFactorOf(context),
   );
 }
 
@@ -418,6 +435,27 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 }
 
 @immutable
+class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultIconColor(this.iconColor, this.disabledIconColor);
+
+  final Color? iconColor;
+  final Color? disabledIconColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledIconColor;
+    }
+    return iconColor;
+  }
+
+  @override
+  String toString() {
+    return '{disabled: $disabledIconColor, color: $iconColor}';
+  }
+}
+
+@immutable
 class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
@@ -444,11 +482,10 @@ class _TextButtonWithIcon extends TextButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),
@@ -456,11 +493,12 @@ class _TextButtonWithIcon extends TextButton {
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
+      useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.textScaleFactorOf(context),
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -479,7 +517,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -495,7 +533,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_158
 
 class _TextButtonDefaultsM3 extends ButtonStyle {
   _TextButtonDefaultsM3(this.context)
@@ -514,7 +552,7 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
@@ -540,33 +578,37 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
       return null;
     });
 
-  // No default shadow color
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
-  // No default surface tint color
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialStateProperty<double>? get elevation =>
-    ButtonStyleButton.allOrNull<double>(0.0);
+    const MaterialStatePropertyAll<double>(0.0);
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
+    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
+    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>

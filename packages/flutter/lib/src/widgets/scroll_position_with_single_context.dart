@@ -12,7 +12,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
-import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -147,33 +146,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         simulation,
         context.vsync,
         activity?.shouldIgnorePointer ?? true,
-        initVelocity: velocity,
-        initPosition: pixels,
       ));
     } else {
       goIdle();
     }
-  }
-
-  @override
-  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
-    assert(hasPixels);
-    final FixedScrollMetrics initScrollMetrics = FixedScrollMetrics(
-      minScrollExtent: minScrollExtent,
-      maxScrollExtent: maxScrollExtent,
-      pixels: initPosition,
-      viewportDimension: viewportDimension,
-      axisDirection: axisDirection,
-    );
-    final Simulation? simulation = physics.createBallisticSimulation(
-      initScrollMetrics,
-      initVelocity,
-    );
-    if (simulation == null) {
-      goIdle();
-      return null;
-    }
-    return simulation;
   }
 
   @override
@@ -186,7 +162,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @protected
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }
@@ -200,7 +175,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     required Duration duration,
     required Curve curve,
   }) {
-    if (nearEqual(to, pixels, physics.tolerance.distance)) {
+    if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
       return Future<void>.value();
@@ -236,7 +211,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     final double targetPixels =
         math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
@@ -246,8 +224,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
           -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
-      forcePixels(targetPixels);
+      // Set the notifier before calling force pixels.
+      // This is set to false again after going ballistic below.
       isScrollingNotifier.value = true;
+      forcePixels(targetPixels);
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();

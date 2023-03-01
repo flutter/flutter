@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -62,11 +63,11 @@ void main() {
   testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: IconTheme(
-        data: const IconThemeData(size: 200),
+        data: IconThemeData(size: 200),
         child: Wrap(
-          children: const <Icon>[
+          children: <Icon>[
             Icon(Icons.ten_k),
             Icon(Icons.ac_unit),
             Icon(Icons.local_taxi),
@@ -86,11 +87,11 @@ void main() {
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: IconTheme(
-        data: const IconThemeData(size: 200),
+        data: IconThemeData(size: 200),
         child: Wrap(
-          children: const <Icon>[
+          children: <Icon>[
             Icon(Icons.water_drop),
             Icon(Icons.water_drop_outlined),
             Icon(Icons.water_drop_rounded),
@@ -106,11 +107,11 @@ void main() {
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: IconTheme(
-        data: const IconThemeData(size: 200),
+        data: IconThemeData(size: 200),
         child: Wrap(
-          children: const <Icon>[
+          children: <Icon>[
             Icon(Icons.electric_bolt),
             Icon(Icons.electric_bolt_outlined),
             Icon(Icons.electric_bolt_rounded),
@@ -121,6 +122,27 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  // Regression test for https://github.com/flutter/flutter/issues/103202.
+  testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
+    await _loadIconFont();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: IconTheme(
+        data: IconThemeData(size: 200),
+        child: Wrap(
+          children: <Icon>[
+            Icon(Icons.repeat_on),
+            Icon(Icons.repeat_on_outlined),
+            Icon(Icons.repeat_on_rounded),
+            Icon(Icons.repeat_on_sharp),
+          ],
+        ),
+      ),
+    ));
+
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample4.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 

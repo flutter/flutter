@@ -47,8 +47,7 @@ class ChipTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -225,8 +224,6 @@ class ChipThemeData with Diagnosticable {
   }) {
     assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
     assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
-    assert(secondaryColor != null);
-    assert(labelStyle != null);
 
     if (primaryColor != null) {
       brightness = ThemeData.estimateBrightnessForColor(primaryColor);
@@ -486,9 +483,8 @@ class ChipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -510,7 +506,9 @@ class ChipThemeData with Diagnosticable {
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
-      iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
+      iconTheme: a?.iconTheme != null || b?.iconTheme != null
+        ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
+        : null,
     );
   }
 

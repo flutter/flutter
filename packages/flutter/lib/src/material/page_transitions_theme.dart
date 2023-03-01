@@ -157,9 +157,9 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     required this.allowSnapshotting,
+    required this.allowEnterRouteSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(secondaryAnimation != null);
+  });
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
@@ -207,6 +207,15 @@ class _ZoomPageTransition extends StatelessWidget {
   /// [secondaryAnimation].
   final Widget? child;
 
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
+
   @override
   Widget build(BuildContext context) {
     return DualTransitionBuilder(
@@ -218,7 +227,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          allowSnapshotting: allowSnapshotting,
+          allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           child: child,
         );
       },
@@ -243,7 +252,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            allowSnapshotting: allowSnapshotting,
+            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
             child: child,
           );
@@ -271,8 +280,7 @@ class _ZoomEnterTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final Widget? child;
@@ -369,6 +377,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -380,8 +389,7 @@ class _ZoomExitTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final bool allowSnapshotting;
@@ -472,6 +480,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -594,7 +603,18 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
-  const ZoomPageTransitionsBuilder();
+  const ZoomPageTransitionsBuilder({
+    this.allowEnterRouteSnapshotting = true,
+  });
+
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
 
   @override
   Widget buildTransitions<T>(
@@ -608,6 +628,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       allowSnapshotting: route?.allowSnapshotting ?? true,
+      allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
   }
@@ -874,7 +895,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     _drawScrim(context, offset, size);
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
@@ -924,7 +945,7 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
   final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
 

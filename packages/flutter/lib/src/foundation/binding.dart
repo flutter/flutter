@@ -6,6 +6,7 @@ import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'debug.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+import 'service_extensions.dart';
 
 export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
 
@@ -108,7 +110,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// layer that it wishes to expose, and should have an
 /// `ensureInitialized` method that constructs the class if that
 /// layer's mixin's `_instance` field is null. This allows the binding
-/// to be overriden by developers who have more specific needs, while
+/// to be overridden by developers who have more specific needs, while
 /// still allowing other code to call `ensureInitialized` when a binding
 /// is needed.
 ///
@@ -136,7 +138,7 @@ abstract class BindingBase {
   /// First calls [initInstances] to have bindings initialize their
   /// instance pointers and other state, then calls
   /// [initServiceExtensions] to have bindings initialize their
-  /// observatory service extensions, if any.
+  /// VM service extensions, if any.
   BindingBase() {
     developer.Timeline.startSync('Framework initialization');
     assert(() {
@@ -144,7 +146,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    assert(_debugInitializedType == null);
+    assert(_debugInitializedType == null, 'Binding is already initialized to $_debugInitializedType');
     initInstances();
     assert(_debugInitializedType != null);
 
@@ -178,15 +180,15 @@ abstract class BindingBase {
   /// Each of these other bindings could individually access a
   /// [ui.SingletonFlutterWindow] statically, but that would preclude the
   /// ability to test its behaviors with a fake window for verification
-  /// purposes.  Therefore, [BindingBase] exposes this
-  /// [ui.SingletonFlutterWindow] for use by other bindings.  A subclass of
+  /// purposes. Therefore, [BindingBase] exposes this
+  /// [ui.SingletonFlutterWindow] for use by other bindings. A subclass of
   /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
   /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
   /// such as a [TestWindow].
   ///
-  /// The `window` is a singleton meant for use by applications that only have a
-  /// single main window. In addition to the properties of [ui.FlutterWindow],
-  /// `window` provides access to platform-specific properties and callbacks
+  /// The [window] is a singleton meant for use by applications that only have a
+  /// single main window. In addition to the properties of [ui.FlutterView],
+  /// [window] provides access to platform-specific properties and callbacks
   /// available on the [platformDispatcher].
   ///
   /// For applications designed for more than one main window, prefer using the
@@ -325,7 +327,6 @@ abstract class BindingBase {
         ]);
       }
       try {
-        assert(instance != null);
         if (instance._debugConstructed && _debugInitializedType == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Binding initialized without calling initInstances.'),
@@ -423,7 +424,7 @@ abstract class BindingBase {
 
     assert(() {
       registerSignalServiceExtension(
-        name: 'reassemble',
+        name: FoundationServiceExtensions.reassemble.name,
         callback: reassembleApplication,
       );
       return true;
@@ -432,20 +433,20 @@ abstract class BindingBase {
     if (!kReleaseMode) {
       if (!kIsWeb) {
         registerSignalServiceExtension(
-          name: 'exit',
+          name: FoundationServiceExtensions.exit.name,
           callback: _exitApplication,
         );
       }
       // These service extensions are used in profile mode applications.
       registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
+        name: FoundationServiceExtensions.connectedVmServiceUri.name,
         getter: () async => connectedVmServiceUri ?? '',
         setter: (String uri) async {
           connectedVmServiceUri = uri;
         },
       );
       registerStringServiceExtension(
-        name: 'activeDevToolsServerAddress',
+        name: FoundationServiceExtensions.activeDevToolsServerAddress.name,
         getter: () async => activeDevToolsServerAddress ?? '',
         setter: (String serverAddress) async {
           activeDevToolsServerAddress = serverAddress;
@@ -454,9 +455,8 @@ abstract class BindingBase {
     }
 
     assert(() {
-      const String platformOverrideExtensionName = 'platformOverride';
       registerServiceExtension(
-        name: platformOverrideExtensionName,
+        name: FoundationServiceExtensions.platformOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -483,7 +483,7 @@ abstract class BindingBase {
                 debugDefaultTargetPlatformOverride = null;
             }
             _postExtensionStateChangedEvent(
-              platformOverrideExtensionName,
+              FoundationServiceExtensions.platformOverride.name,
               defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
             );
             await reassembleApplication();
@@ -496,9 +496,8 @@ abstract class BindingBase {
         },
       );
 
-      const String brightnessOverrideExtensionName = 'brightnessOverride';
       registerServiceExtension(
-        name: brightnessOverrideExtensionName,
+        name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -512,7 +511,7 @@ abstract class BindingBase {
                 debugBrightnessOverride = null;
             }
             _postExtensionStateChangedEvent(
-              brightnessOverrideExtensionName,
+              FoundationServiceExtensions.brightnessOverride.name,
               (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
             );
             await reassembleApplication();
@@ -553,10 +552,8 @@ abstract class BindingBase {
   Future<void> lockEvents(Future<void> Function() callback) {
     final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
-    assert(callback != null);
     _lockCount += 1;
     final Future<void> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
@@ -627,8 +624,6 @@ abstract class BindingBase {
     required String name,
     required AsyncCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -658,9 +653,6 @@ abstract class BindingBase {
     required AsyncValueGetter<bool> getter,
     required AsyncValueSetter<bool> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -692,9 +684,6 @@ abstract class BindingBase {
     required AsyncValueGetter<double> getter,
     required AsyncValueSetter<double> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -754,9 +743,6 @@ abstract class BindingBase {
     required AsyncValueGetter<String> getter,
     required AsyncValueSetter<String> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -825,8 +811,6 @@ abstract class BindingBase {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);

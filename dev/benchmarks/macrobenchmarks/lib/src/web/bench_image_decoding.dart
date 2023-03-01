@@ -8,18 +8,18 @@ import 'dart:ui' as ui;
 
 import 'recorder.dart';
 
-/// Measures the performance of image decoding.
-///
-/// The benchmark measures the decoding latency and not impact on jank. It
-/// cannot distinguish between blocking and non-blocking decoding. It simply
-/// measures the total time it takes to decode image frames. For example, the
-/// WASM codecs execute on the main thread and block the UI, leading to jank,
-/// but the browser's WebCodecs API is asynchronous running on a separate thread
-/// and does not jank. However, the benchmark result may be the same.
-///
-/// This benchmark does not support the HTML renderer because the HTML renderer
-/// cannot decode image frames (it always returns 1 dummy frame, even for
-/// animated images).
+// Measures the performance of image decoding.
+//
+// The benchmark measures the decoding latency and not impact on jank. It
+// cannot distinguish between blocking and non-blocking decoding. It naively
+// measures the total time it takes to decode image frames. For example, the
+// WASM codecs execute on the main thread and block the UI, leading to jank,
+// but the browser's WebCodecs API is asynchronous running on a separate thread
+// and does not jank. However, the benchmark result may be the same.
+//
+// This benchmark does not support the HTML renderer because the HTML renderer
+// cannot decode image frames (it always returns 1 dummy frame, even for
+// animated images).
 class BenchImageDecoding extends RawRecorder {
   BenchImageDecoding() : super(
     name: benchmarkName,

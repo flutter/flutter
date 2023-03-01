@@ -47,20 +47,17 @@ Future<void> buildLinux(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Unable to migrate project files');
-  }
+  migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
   // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   environmentConfig['FLUTTER_TARGET'] = target;
-  final Artifacts? artifacts = globals.artifacts;
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
+  final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String engineOutPath = localEngineInfo.engineOutPath;
     environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
+    environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localEngineName;
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig);
 

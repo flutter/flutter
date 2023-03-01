@@ -5,32 +5,20 @@
 import 'dart:async';
 
 import 'base/io.dart';
+import 'base/net.dart';
 import 'base/platform.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
 
-// Overridable environment variables
-const String kEnvPubHostedUrl = 'PUB_HOSTED_URL';
-const String kEnvCloudUrl = 'FLUTTER_STORAGE_BASE_URL';
-const String kDoctorHostTimeout = 'FLUTTER_DOCTOR_HOST_TIMEOUT';
-
 /// Common Flutter HTTP hosts.
-const String kPubDevHttpHost = 'https://pub.dev/';
-const String kgCloudHttpHost = 'https://cloud.google.com/';
+const String kCloudHost = 'https://storage.googleapis.com/';
+const String kCocoaPods = 'https://cocoapods.org/';
+const String kGitHub = 'https://github.com/';
+const String kMaven = 'https://maven.google.com/';
+const String kPubDev = 'https://pub.dev/';
 
-/// MacOS specific required HTTP hosts.
-const List<String> macOSRequiredHttpHosts = <String>[
-  'https://cocoapods.org/',
-];
-
-/// Android specific required HTTP hosts.
-List<String> androidRequiredHttpHosts(Platform platform) {
-  return <String>[
-    // If kEnvCloudUrl is set, it will be used as the maven host
-    if (!platform.environment.containsKey(kEnvCloudUrl))
-      'https://maven.google.com/',
-  ];
-}
+// Overridable environment variables.
+const String kPubDevOverride = 'PUB_HOSTED_URL'; // https://dart.dev/tools/pub/environment-variables
 
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
@@ -41,103 +29,121 @@ class HttpHostValidator extends DoctorValidator {
   }) : _platform = platform,
       _featureFlags = featureFlags,
       _httpClient = httpClient,
-      super('HTTP Host Availability');
+      super('Network resources');
 
   final Platform _platform;
   final FeatureFlags _featureFlags;
   final HttpClient _httpClient;
 
-  @override
-  String get slowWarning => 'HTTP Host availability check is taking a long time...';
+  final Set<Uri> _activeHosts = <Uri>{};
 
-  List<String> get _requiredHosts => <String>[
-    if (_featureFlags.isMacOSEnabled) ...macOSRequiredHttpHosts,
-    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts(_platform),
-    _platform.environment[kEnvPubHostedUrl] ?? kPubDevHttpHost,
-    _platform.environment[kEnvCloudUrl] ?? kgCloudHttpHost,
-  ];
+  @override
+  String get slowWarning {
+    if (_activeHosts.isEmpty) {
+      return 'Network resources check is taking a long time...';
+    }
+    return 'Attempting to reach ${_activeHosts.map((Uri url) => url.host).join(", ")}...';
+  }
 
   /// Make a head request to the HTTP host for checking availability
-  Future<_HostValidationResult> _checkHostAvailability(String host) async {
-    late final int timeout;
+  Future<String?> _checkHostAvailability(Uri host) async {
     try {
-      timeout = int.parse(_platform.environment[kDoctorHostTimeout] ?? '10');
-      final HttpClientRequest req = await _httpClient.headUrl(Uri.parse(host));
-      await req.close().timeout(Duration(seconds: timeout));
-      // HTTP host is available if no exception happened
-      return _HostValidationResult.success(host);
-    } on TimeoutException {
-      return _HostValidationResult.fail(host, 'Failed to connect to host in $timeout second${timeout == 1 ? '': 's'}');
-    } on SocketException catch (e) {
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
-    } on HttpException catch (e) {
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
-    } on HandshakeException catch (e) {
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
-    } on OSError catch (e) {
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
-    } on FormatException catch (e) {
-      if (e.message.contains('Invalid radix-10 number')) {
-        return _HostValidationResult.fail(host, 'The value of $kDoctorHostTimeout(${_platform.environment[kDoctorHostTimeout]}) is not a valid duration in seconds');
-      } else if (e.message.contains('Invalid empty scheme')){
-        // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
-        final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
-        if (pubHostedUrl != null && host == pubHostedUrl) {
-          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) could not be parsed as a valid url');
-        }
-        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) could not be parsed as a valid url');
-      }
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
-    } on ArgumentError catch (e) {
-      final String exceptionMessage = e.message.toString();
-      if (exceptionMessage.contains('No host specified')) {
-        // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
-        final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
-        if (pubHostedUrl != null && host == pubHostedUrl) {
-          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) is not a valid host');
-        }
-        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) is not a valid host');
-      }
-      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: $exceptionMessage');
+      assert(!_activeHosts.contains(host));
+      _activeHosts.add(host);
+      final HttpClientRequest req = await _httpClient.headUrl(host);
+      await req.close();
+      // HTTP host is available if no exception happened.
+      return null;
+    } on SocketException catch (error) {
+      return 'A network error occurred while checking "$host": ${error.message}';
+    } on HttpException catch (error) {
+      return 'An HTTP error occurred while checking "$host": ${error.message}';
+    } on HandshakeException catch (error) {
+      return 'A cryptographic error occurred while checking "$host": ${error.message}\n'
+             'You may be experiencing a man-in-the-middle attack, your network may be '
+             'compromised, or you may have malware installed on your computer.';
+    } on OSError catch (error) {
+      return 'An error occurred while checking "$host": ${error.message}';
+    } finally {
+      _activeHosts.remove(host);
     }
+  }
+
+  static Uri? _parseUrl(String value) {
+    final Uri? url = Uri.tryParse(value);
+    if (url == null || !url.hasScheme || !url.hasAuthority || (!url.hasEmptyPath && !url.hasAbsolutePath) || url.hasFragment) {
+      return null;
+    }
+    return url;
   }
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    final Iterable<Future<_HostValidationResult>> availabilityResultFutures = _requiredHosts.map(_checkHostAvailability);
-    final List<_HostValidationResult> availabilityResults = await Future.wait(availabilityResultFutures);
+    final List<String?> availabilityResults = <String?>[];
 
-    if (availabilityResults.every((_HostValidationResult result) => result.available)) {
-      return ValidationResult(
-          ValidationType.installed,
-          messages..add(const ValidationMessage('All required HTTP hosts are available')),
+    final List<Uri> requiredHosts = <Uri>[];
+    if (_platform.environment.containsKey(kPubDevOverride)) {
+      final Uri? url = _parseUrl(_platform.environment[kPubDevOverride]!);
+      if (url == null) {
+        availabilityResults.add(
+          'Environment variable $kPubDevOverride does not specify a valid URL: "${_platform.environment[kPubDevOverride]}"\n'
+          'Please see https://flutter.dev/community/china for an example of how to use it.'
+        );
+      } else {
+        requiredHosts.add(url);
+      }
+    } else {
+      requiredHosts.add(Uri.parse(kPubDev));
+    }
+    if (_platform.environment.containsKey(kFlutterStorageBaseUrl)) {
+      final Uri? url = _parseUrl(_platform.environment[kFlutterStorageBaseUrl]!);
+      if (url == null) {
+        availabilityResults.add(
+          'Environment variable $kFlutterStorageBaseUrl does not specify a valid URL: "${_platform.environment[kFlutterStorageBaseUrl]}"\n'
+          'Please see https://flutter.dev/community/china for an example of how to use it.'
+        );
+      } else {
+        requiredHosts.add(url);
+      }
+    } else {
+      requiredHosts.add(Uri.parse(kCloudHost));
+      if (_featureFlags.isAndroidEnabled) {
+        // if kFlutterStorageBaseUrl is set it is used instead of Maven
+        requiredHosts.add(Uri.parse(kMaven));
+      }
+    }
+    if (_featureFlags.isMacOSEnabled) {
+      requiredHosts.add(Uri.parse(kCocoaPods));
+    }
+    requiredHosts.add(Uri.parse(kGitHub));
+
+    // Check all the hosts simultaneously.
+    availabilityResults.addAll(await Future.wait<String?>(requiredHosts.map(_checkHostAvailability)));
+
+    int failures = 0;
+    int successes = 0;
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    for (final String? message in availabilityResults) {
+      if (message == null) {
+        successes += 1;
+      } else {
+        failures += 1;
+        messages.add(ValidationMessage.error(message));
+      }
+    }
+
+    if (failures == 0) {
+      assert(successes > 0);
+      assert(messages.isEmpty);
+      return const ValidationResult(
+        ValidationType.success,
+        <ValidationMessage>[ValidationMessage('All expected network resources are available.')],
       );
     }
-
-    availabilityResults.removeWhere((_HostValidationResult result) => result.available);
-
-    for (final _HostValidationResult result in availabilityResults) {
-      messages.add(ValidationMessage.error('HTTP host "${result.host}" is not reachable. Reason: ${result.failResultInfo}'));
-    }
-
+    assert(messages.isNotEmpty);
     return ValidationResult(
-      availabilityResults.length == _requiredHosts.length
-        ? ValidationType.notAvailable
-        : ValidationType.partial,
+      successes == 0 ? ValidationType.notAvailable : ValidationType.partial,
       messages,
     );
   }
-}
-
-class _HostValidationResult {
-  _HostValidationResult.success(this.host)
-    : failResultInfo = '',
-      available = true;
-
-  _HostValidationResult.fail(this.host, this.failResultInfo) : available = false;
-
-  final String failResultInfo;
-  final String host;
-  final bool available;
 }

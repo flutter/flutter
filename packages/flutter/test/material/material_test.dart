@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -189,6 +190,58 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Shadow color defaults', (WidgetTester tester) async {
+    Widget buildWithShadow(Color? shadowColor) {
+      return Center(
+        child: SizedBox(
+          height: 100.0,
+          width: 100.0,
+          child: Material(
+            shadowColor: shadowColor,
+            elevation: 10,
+            shape: const CircleBorder(),
+          ),
+        )
+      );
+    }
+
+    // Default M2 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: false,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().shadowColor);
+
+    // Default M3 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
+
+    // Drop shadow can be turned off with a transparent color.
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(Colors.transparent),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, Colors.transparent);
+  });
+
   testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
@@ -303,6 +356,23 @@ void main() {
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
       expect(noTintModel.color, equals(baseColor));
+
+      // With transparent surfaceTintColor, it should not apply an overlay
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            surfaceTintColor: Colors.transparent,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape transparentTintModel = getModel(tester);
+      expect(transparentTintModel.color, equals(baseColor));
 
       // With surfaceTintColor specified, it should not apply an overlay based
       // on the elevation.
@@ -937,7 +1007,7 @@ void main() {
         child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
       ),
     ));
-    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!)!;
+    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!);
 
     final TrackPaintInkFeature tracker = TrackPaintInkFeature(
       controller: controller,
@@ -946,7 +1016,7 @@ void main() {
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
-    // Force a repaint. Since it's offstage, the ink feture should not get painted.
+    // Force a repaint. Since it's offstage, the ink feature should not get painted.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
     expect(tracker.paintCount, 0);
 
@@ -964,6 +1034,101 @@ void main() {
     // Force a repaint again. This time, it gets repainted because it is onstage.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
+  });
+
+  group('LookupBoundary', () {
+    testWidgets('hides Material from Material.maybeOf', (WidgetTester tester) async {
+      MaterialInkController? material;
+
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                material = Material.maybeOf(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(material, isNull);
+    });
+
+    testWidgets('hides Material from Material.of', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                Material.of(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   Material.of() was called with a context that does not have access\n'
+        '   to a Material widget.\n'
+        '   The context provided to Material.of() does have a Material widget\n'
+        '   ancestor, but it is hidden by a LookupBoundary. This can happen\n'
+        '   because you are using a widget that looks for a Material\n'
+        '   ancestor, but no such ancestor exists within the closest\n'
+        '   LookupBoundary.\n'
+        '   The context used was:\n'
+        '     Builder(dirty)\n'
+      );
+    });
+
+    testWidgets('hides Material from debugCheckHasMaterial', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                debugCheckHasMaterial(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   No Material widget found within the closest LookupBoundary.\n'
+          '   There is an ancestor Material widget, but it is hidden by a\n'
+          '   LookupBoundary.\n'
+          '   Builder widgets require a Material widget ancestor within the\n'
+          '   closest LookupBoundary.\n'
+          '   In Material Design, most widgets are conceptually "printed" on a\n'
+          "   sheet of material. In Flutter's material library, that material\n"
+          '   is represented by the Material widget. It is the Material widget\n'
+          '   that renders ink splashes, for instance. Because of this, many\n'
+          '   material library widgets require that there be a Material widget\n'
+          '   in the tree above them.\n'
+          '   To introduce a Material widget, you can either directly include\n'
+          '   one, or use a widget that contains Material itself, such as a\n'
+          '   Card, Dialog, Drawer, or Scaffold.\n'
+          '   The specific widget that could not find a Material ancestor was:\n'
+          '     Builder\n'
+          '   The ancestors of this widget were:\n'
+          '     LookupBoundary\n'
+        ),
+      );
+    });
   });
 }
 

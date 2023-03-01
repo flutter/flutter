@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -17,9 +18,10 @@ import 'theme_data.dart';
 /// content. Action chips should appear dynamically and contextually in a UI.
 ///
 /// Action chips can be tapped to trigger an action or show progress and
-/// confirmation. They cannot be disabled; if the action is not applicable, the
-/// chip should not be included in the interface. (This contrasts with buttons,
-/// where unavailable choices are usually represented as disabled controls.)
+/// confirmation. For Material 3, a disabled state is supported for Action
+/// chips and is specified with [onPressed] being null. For previous versions
+/// of Material Design, it is recommended to remove the Action chip from
+/// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
@@ -84,10 +86,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -176,13 +175,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_158
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
@@ -196,10 +195,10 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => null;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => null;
@@ -237,7 +236,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

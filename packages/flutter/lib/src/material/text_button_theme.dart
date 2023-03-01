@@ -16,7 +16,7 @@ import 'theme.dart';
 /// overall [Theme]'s [ThemeData.textButtonTheme].
 ///
 /// The [style]'s properties override [TextButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [TextButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [TextButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///
@@ -49,9 +49,8 @@ class TextButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -98,7 +97,7 @@ class TextButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final TextButtonThemeData data;

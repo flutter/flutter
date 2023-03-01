@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'colors.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -82,11 +83,7 @@ class ChoiceChip extends StatelessWidget
     this.iconTheme,
     this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -148,7 +145,7 @@ class ChoiceChip extends StatelessWidget
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected)
+      ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
       : null;
     return RawChip(
       defaultProperties: defaults,
@@ -178,24 +175,25 @@ class ChoiceChip extends StatelessWidget
       surfaceTintColor: surfaceTintColor,
       selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - FilterChip
+// BEGIN GENERATED TOKEN PROPERTIES - ChoiceChip
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_158
 
-class _FilterChipDefaultsM3 extends ChipThemeData {
-  const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
+class _ChoiceChipDefaultsM3 extends ChipThemeData {
+  const _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0), bottomRight: Radius.circular(8.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
@@ -210,10 +208,10 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  @override Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
@@ -236,7 +234,7 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     ? isEnabled
       ? BorderSide(color: Theme.of(context).colorScheme.outline)
       : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-    : null;
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
@@ -257,8 +255,8 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 
-// END GENERATED TOKEN PROPERTIES - FilterChip
+// END GENERATED TOKEN PROPERTIES - ChoiceChip

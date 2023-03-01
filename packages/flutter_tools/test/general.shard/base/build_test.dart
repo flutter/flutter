@@ -165,7 +165,6 @@ void main() {
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
       ), isNot(equals(0)));
     });
@@ -178,7 +177,6 @@ void main() {
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
       ), isNot(0));
     });
@@ -191,83 +189,8 @@ void main() {
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
       ), isNot(0));
-    });
-
-    testWithoutContext('builds iOS with bitcode', () async {
-      final String outputPath = fileSystem.path.join('build', 'foo');
-      final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
-      final String genSnapshotPath = artifacts.getArtifactPath(
-        Artifact.genSnapshot,
-        platform: TargetPlatform.ios,
-        mode: BuildMode.profile,
-      );
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          '${genSnapshotPath}_arm64',
-          '--deterministic',
-          '--snapshot_kind=app-aot-assembly',
-          '--assembly=$assembly',
-          '--strip',
-          'main.dill',
-        ]),
-        kWhichSysctlCommand,
-        kARMCheckCommand,
-        const FakeCommand(command: <String>[
-          'xcrun',
-          'cc',
-          '-arch',
-          'arm64',
-          '-miphoneos-version-min=11.0',
-          '-isysroot',
-          'path/to/sdk',
-          '-fembed-bitcode',
-          '-c',
-          'build/foo/snapshot_assembly.S',
-          '-o',
-          'build/foo/snapshot_assembly.o',
-        ]),
-        const FakeCommand(command: <String>[
-          'xcrun',
-          'clang',
-          '-arch',
-          'arm64',
-          '-miphoneos-version-min=11.0',
-          '-isysroot',
-          'path/to/sdk',
-          '-dynamiclib',
-          '-Xlinker',
-          '-rpath',
-          '-Xlinker',
-          '@executable_path/Frameworks',
-          '-Xlinker',
-          '-rpath',
-          '-Xlinker',
-          '@loader_path/Frameworks',
-          '-install_name',
-          '@rpath/App.framework/App',
-          '-fembed-bitcode',
-          '-o',
-          'build/foo/App.framework/App',
-          'build/foo/snapshot_assembly.o',
-        ]),
-      ]);
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.ios,
-        buildMode: BuildMode.profile,
-        mainPath: 'main.dill',
-        outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
-        sdkRoot: 'path/to/sdk',
-        bitcode: true,
-        dartObfuscation: false,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
@@ -285,8 +208,8 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
           '--dwarf-stack-traces',
+          '--resolve-dwarf-paths',
           '--save-debugging-info=$debugPath',
           'main.dill',
         ]),
@@ -312,6 +235,21 @@ void main() {
           'arm64',
           ...kDefaultClang,
         ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
+        ]),
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -321,7 +259,6 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
-        bitcode: false,
         splitDebugInfo: 'foo',
         dartObfuscation: false,
       );
@@ -344,7 +281,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
-          '--strip',
           '--obfuscate',
           'main.dill',
         ]),
@@ -370,6 +306,21 @@ void main() {
           'arm64',
           ...kDefaultClang,
         ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
+        ]),
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -379,7 +330,6 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
-        bitcode: false,
         dartObfuscation: true,
       );
 
@@ -400,7 +350,6 @@ void main() {
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
-          '--strip',
           'main.dill',
         ]),
         kWhichSysctlCommand,
@@ -425,6 +374,21 @@ void main() {
           'arm64',
           ...kDefaultClang,
         ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'dsymutil',
+          '-o',
+          'build/foo/App.framework.dSYM',
+          'build/foo/App.framework/App',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'strip',
+          '-x',
+          'build/foo/App.framework/App',
+          '-o',
+          'build/foo/App.framework/App',
+        ]),
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -434,7 +398,6 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         sdkRoot: 'path/to/sdk',
-        bitcode: false,
         dartObfuscation: false,
       );
 
@@ -462,7 +425,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
       );
 
@@ -483,6 +445,7 @@ void main() {
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '--dwarf-stack-traces',
+          '--resolve-dwarf-paths',
           '--save-debugging-info=$debugPath',
           'main.dill',
         ]
@@ -493,7 +456,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         splitDebugInfo: 'foo',
         dartObfuscation: false,
       );
@@ -523,7 +485,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: true,
       );
 
@@ -551,7 +512,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         splitDebugInfo: '',
         dartObfuscation: false,
       );
@@ -578,7 +538,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
       );
 
@@ -603,7 +562,6 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        bitcode: false,
         dartObfuscation: false,
         extraGenSnapshotOptions: const <String>['--no-strip'],
       );

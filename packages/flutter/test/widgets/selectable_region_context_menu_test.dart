@@ -5,6 +5,7 @@
 // ignore_for_file: undefined_class, undefined_getter, undefined_setter
 
 @TestOn('browser') // This file contains web-only library.
+library;
 
 import 'dart:html' as html;
 

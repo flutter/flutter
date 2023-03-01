@@ -70,6 +70,39 @@ void main() {
       ]);
     });
 
+    testWithoutContext('logs to client when sendLogsToClient=true', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            sendLogsToClient: true,
+          ),
+        ),
+      ], eagerError: true);
+
+      // Capture events while terminating.
+      final Future<List<Event>> logEventsFuture = dap.client.events('dart.log').toList();
+      await dap.client.terminate();
+
+      // Ensure logs contain both the app.stop request and the result.
+      final List<Event> logEvents = await logEventsFuture;
+      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      expect(
+        logMessages,
+        containsAll(<Matcher>[
+          startsWith('==> [Flutter] [{"id":1,"method":"app.stop"'),
+          startsWith('<== [Flutter] [{"id":1,"result":true}]'),
+        ]),
+      );
+    });
+
     testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
@@ -218,6 +251,43 @@ void main() {
       await dap.client.terminate();
     });
 
+    testWithoutContext('sends progress notifications during hot reload', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a reload.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotReload();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot reloading…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
+    });
+
     testWithoutContext('can hot restart', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
@@ -253,6 +323,43 @@ void main() {
       );
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('sends progress notifications during hot restart', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a restart.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotRestart();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot restarting…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
     });
 
     testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
@@ -454,11 +561,18 @@ void main() {
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
       ], eagerError: true);
 
-      // Detach.
-      await dap.client.terminate();
+      // Detach and expected resume and correct output.
+      await Future.wait(<Future<void>>[
+        // We should print "Detached" instead of "Exited".
+        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
+        // We should still get terminatedEvent (this signals the DAP server terminating).
+        dap.client.event('terminated'),
+        // We should get output showing the app resumed.
+        testProcess.output.firstWhere((String output) => output.contains('topLevelFunction')),
+        // Trigger the detach.
+        dap.client.terminate(),
+      ]);
 
-      // Ensure we get additional output (confirming the process resumed).
-      await testProcess.output.first;
     });
   });
 }

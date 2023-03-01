@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -63,9 +65,17 @@ $assetsSection
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
-    String? expectedAssetManifest, {
+    String? expectedJsonAssetManifest,
+    String? expectedBinAssetManifestAsJson, {
     bool expectExists = true,
   }) async {
+    Future<String> extractAssetManifestBinFromBundleAsJson(AssetBundle bundle) async {
+      final List<int> manifestBytes = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
+      return json.encode(const StandardMessageCodec().decodeMessage(
+        ByteData.sublistView(Uint8List.fromList(manifestBytes))
+      ));
+    }
+
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
@@ -86,7 +96,11 @@ $assetsSection
     if (expectExists) {
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-        expectedAssetManifest,
+        expectedJsonAssetManifest,
+      );
+      expect(
+        await extractAssetManifestBinFromBundleAsJson(bundle),
+        expectedBinAssetManifestAsJson
       );
     }
   }
@@ -120,7 +134,8 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -145,7 +160,8 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -174,12 +190,14 @@ $assetsSection
 
       writeAssets('p/p/', assets);
 
-      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
+      const String expectedJsonAssetManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo"]}';
+      const String expectedBinAssetManifest = '{"packages/test_package/a/foo":[]}';
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
-        expectedAssetManifest,
+        expectedJsonAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -202,10 +220,12 @@ $assetsSection
 
       const String expectedAssetManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo"]}';
+      const String expectedBinAssetManifest = '{"packages/test_package/a/foo":[]}';
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -219,19 +239,31 @@ $assetsSection
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>['a/foo'],
+        assets: <String>['a/foo', 'a/bar'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
       writeAssets('p/p/', assets);
 
-      const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+      const String expectedManifest = '{'
+          '"packages/test_package/a/bar":'
+          '["packages/test_package/a/bar"],'
+          '"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
+          '}';
+
+      const String expectedBinManifest = '{'
+          '"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":'
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}]'
+          '}';
+
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
         expectedManifest,
+        expectedBinManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -251,16 +283,20 @@ $assetsSection
         'test_package',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
 
       const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+        '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+
+      const String expectedBinManifest = '{"packages/test_package/a/foo":'
+        '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
         expectedManifest,
+        expectedBinManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -283,11 +319,16 @@ $assetsSection
       const String expectedAssetManifest =
           '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
           '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
+
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -316,11 +357,15 @@ $assetsSection
       const String expectedAssetManifest =
           '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
           '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -344,20 +389,26 @@ $assetsSection
         assets: <String>['a/foo'],
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/', assets);
       writeAssets('p2/p/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/foo":'
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}],'
+          '"packages/test_package2/a/foo":'
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -384,20 +435,27 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
           '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/foo":'
+          '[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}],'
+          '"packages/test_package2/a/foo":'
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -421,17 +479,21 @@ $assetsSection
         'test_package2',
       );
 
-      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p2/p/lib/', assets);
 
       const String expectedAssetManifest =
           '{"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package2/a/foo":'
+          '[{"asset":"packages/test_package2/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assets,
         <String>['test_package2'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -443,7 +505,7 @@ $assetsSection
     writePubspecFile('pubspec.yaml', 'test');
     writePackagesFile('test_package:p/p/lib/');
 
-    final List<String> assets = <String>['a/foo', 'a/foo[x]'];
+    final List<String> assets = <String>['a/foo', 'a/foo [x]'];
     writePubspecFile(
       'p/p/pubspec.yaml',
       'test_package',
@@ -453,12 +515,16 @@ $assetsSection
     writeAssets('p/p/', assets);
     const String expectedAssetManifest =
         '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+        '"packages/test_package/a/foo [x]":["packages/test_package/a/foo [x]"]}';
+    const String expectedBinAssetManifest =
+        '{"packages/test_package/a/foo":[],'
+        '"packages/test_package/a/foo [x]":[]}';
 
     await buildAndVerifyAssets(
       assets,
       <String>['test_package'],
       expectedAssetManifest,
+      expectedBinAssetManifest
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => testFileSystem,
@@ -483,11 +549,15 @@ $assetsSection
       const String expectedAssetManifest =
           '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
           '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/bar":[],'
+          '"packages/test_package/a/foo":[]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -511,11 +581,15 @@ $assetsSection
       const String expectedAssetManifest =
           '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
           '"packages/test_package/abc/bar":["packages/test_package/abc/bar"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/foo":[],'
+          '"packages/test_package/abc/bar":[]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -553,7 +627,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo','a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo','a/2x/foo'];
       final List<String> assetOnManifest = <String>['a/',];
 
       writePubspecFile(
@@ -564,12 +638,15 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/b/foo"]}';
+          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+      const String expectedBinAssetManifest =
+          '{"packages/test_package/a/foo":[{"asset":"packages/test_package/a/2x/foo","dpr":2.0}]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -580,7 +657,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo', 'a/b/foo'];
+      final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
       final List<String> assetOnManifest = <String>[];
 
       writePubspecFile(
@@ -591,11 +668,14 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest = '{}';
+      const String expectedBinAssetManifest = '{}';
+
 
       await buildAndVerifyAssets(
         assetOnManifest,
         <String>['test_package'],
         expectedAssetManifest,
+        expectedBinAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -617,6 +697,7 @@ $assetsSection
       await buildAndVerifyAssets(
         assetOnManifest,
         <String>['test_package'],
+        null,
         null,
         expectExists: false,
       );

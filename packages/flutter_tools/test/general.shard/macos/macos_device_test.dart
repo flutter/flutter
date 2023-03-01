@@ -197,7 +197,7 @@ void main() {
   testWithoutContext('target platform display name on ARM', () async {
     final FakeOperatingSystemUtils fakeOperatingSystemUtils =
         FakeOperatingSystemUtils();
-    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm;
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -235,9 +235,9 @@ void main() {
     const String profilePath = 'profile/executable';
     const String releasePath = 'release/executable';
 
-    expect(device.executablePathForDevice(package, BuildMode.debug), debugPath);
-    expect(device.executablePathForDevice(package, BuildMode.profile), profilePath);
-    expect(device.executablePathForDevice(package, BuildMode.release), releasePath);
+    expect(device.executablePathForDevice(package, BuildInfo.debug), debugPath);
+    expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
+    expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
 }
 
@@ -251,13 +251,13 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
-  String executable(BuildMode buildMode) {
-    switch (buildMode) {
-      case BuildMode.debug:
+  String executable(BuildInfo buildInfo) {
+    switch (buildInfo) {
+      case BuildInfo.debug:
         return 'debug/executable';
-      case BuildMode.profile:
+      case BuildInfo.profile:
         return 'profile/executable';
-      case BuildMode.release:
+      case BuildInfo.release:
         return 'release/executable';
       default:
         throw StateError('');

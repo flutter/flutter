@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -578,6 +579,55 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      // Clear any render objects that were there before so that we can see more
+      // than one error. Otherwise, it just throws the first one and skips the
+      // rest, since the render objects haven't changed.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
+            child: clip == null
+              ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
+              : UnconstrainedBox(
+                clipBehavior: clip,
+                child: const SizedBox(width: 400, height: 400),
+              ),
+          ),
+        ),
+      );
+
+      final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+
+      // Defaults to Clip.none
+      expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
+
+      switch(clip) {
+        case null:
+        case Clip.none:
+          // the UnconstrainedBox overflows.
+          final dynamic exception = tester.takeException();
+          expect(exception, isFlutterError, reason: 'for clip = $clip');
+          // ignore: avoid_dynamic_calls
+          expect(exception.diagnostics.first.level, DiagnosticLevel.summary, reason: 'for clip = $clip');
+          expect(
+            // ignore: avoid_dynamic_calls
+            exception.diagnostics.first.toString(),
+            startsWith('A RenderConstraintsTransformBox overflowed'),
+            reason: 'for clip = $clip',
+          );
+          break;
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(tester.takeException(), isNull, reason: 'for clip = $clip');
+          break;
+      }
+    }
+  });
+
   group('ConstraintsTransformBox', () {
     test('toString', () {
       expect(
@@ -608,10 +658,10 @@ void main() {
     });
 
     testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint),
           ),
@@ -631,10 +681,10 @@ void main() {
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint, child: child),
           ),
@@ -861,12 +911,12 @@ void main() {
 
   testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    Wrap(
+    const Wrap(
       spacing: 8.0, // gap between adjacent Text widget
       runSpacing: 4.0, // gap between lines
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: const <Widget>[
+      children: <Widget>[
         Text('Hamilton'),
         Text('Lafayette'),
         Text('Mulligan'),

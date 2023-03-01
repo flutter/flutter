@@ -80,7 +80,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
     ),
@@ -215,7 +215,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('Chip defaults', (WidgetTester tester) async {
+  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -290,6 +290,87 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
+  });
+
+  testWidgets('M3 Chip defaults', (WidgetTester tester) async {
+    late TextTheme textTheme;
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                textTheme = Theme.of(context).textTheme;
+                return Chip(
+                  avatar: const CircleAvatar(child: Text('A')),
+                  label: const Text('Chip A'),
+                  onDeleted: () { },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(lightTheme));
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).elevation, 0);
+    expect(getMaterial(tester).shape, RoundedRectangleBorder(
+      side: BorderSide(color: lightTheme.colorScheme.outline),
+      borderRadius: BorderRadius.circular(8.0),
+    ));
+    expect(getIconData(tester).color, lightTheme.colorScheme.primary);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, 18);
+
+    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
+
+    await tester.pumpWidget(buildFrame(darkTheme));
+    await tester.pumpAndSettle(); // Theme transition animation
+    expect(getMaterial(tester).color, null);
+    expect(getMaterial(tester).elevation, 0);
+    expect(getMaterial(tester).shape, RoundedRectangleBorder(
+      side: BorderSide(color: darkTheme.colorScheme.outline),
+      borderRadius: BorderRadius.circular(8.0),
+    ));
+    expect(getIconData(tester).color, darkTheme.colorScheme.primary);
+    expect(getIconData(tester).opacity, null);
+    expect(getIconData(tester).size, 18);
+
+    labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color, textTheme.labelLarge?.color);
+    expect(labelStyle.fontFamily, textTheme.labelLarge?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.labelLarge?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.labelLarge?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.labelLarge?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.labelLarge?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.labelLarge?.fontWeight);
+    expect(labelStyle.height, textTheme.labelLarge?.height);
+    expect(labelStyle.inherit, textTheme.labelLarge?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.labelLarge?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.labelLarge?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
+    expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
   });
 
   testWidgets('Chip control test', (WidgetTester tester) async {
@@ -498,8 +579,8 @@ void main() {
     const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Chip(label: Text('Test'), labelStyle: style),
           ],
         ),
@@ -509,8 +590,8 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Flexible(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
@@ -520,8 +601,8 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       wrapForChip(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Expanded(child: Chip(label: Text('Test'), labelStyle: style)),
           ],
         ),
@@ -534,8 +615,8 @@ void main() {
   testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Chip(
                 label: Text('X'),
                 materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -650,8 +731,8 @@ void main() {
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A'),
@@ -681,8 +762,8 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         textScaleFactor: 3.0,
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A'),
@@ -708,8 +789,8 @@ void main() {
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
       wrapForChip(
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Chip(
               avatar: CircleAvatar(child: Text('A')),
               label: Text('Chip A', textScaleFactor: 3.0),
@@ -1425,7 +1506,7 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   avatar: avatar,
-                  onSelected: selectable != null
+                  onSelected: selectable
                     ? (bool value) {
                         setState(() {
                           selected = value;
@@ -1504,7 +1585,7 @@ void main() {
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
-                  onSelected: selectable != null
+                  onSelected: selectable
                     ? (bool value) {
                         setState(() {
                           selected = value;
@@ -1578,7 +1659,7 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   avatar: avatar,
-                  onSelected: selectable != null
+                  onSelected: selectable
                     ? (bool value) {
                         setState(() {
                           selected = value;

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show collectAllElementsFrom;
 
 import '../common.dart';
@@ -27,8 +28,8 @@ Future<void> main() async {
                   Icon(Icons.ac_unit),
                 ],
               ),
-              body: Column(
-                children: const <Widget>[
+              body: const Column(
+                children: <Widget>[
                   Text('Item 1'),
                   Text('Item 2'),
                   Text('Item 3'),
@@ -41,6 +42,12 @@ Future<void> main() async {
       ),
     ),
   ));
+
+  // Lists may not be scrolled into frame in landscape.
+  SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // Wait for frame rendering to stabilize.
   for (int i = 0; i < 5; i++) {

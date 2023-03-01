@@ -60,15 +60,13 @@ class InlineSpanSemanticsInformation {
     this.semanticsLabel,
     this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
-  }) : assert(text != null),
-       assert(isPlaceholder != null),
-       assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
   static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
 
-  /// The text value, if any.  For [PlaceholderSpan]s, this will be the unicode
+  /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
   final String text;
 
@@ -280,7 +278,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Walks the [InlineSpan] tree and accumulates a list of
   /// [InlineSpanSemanticsInformation] objects.
   ///
-  /// This method should not be directly called.  Use
+  /// This method should not be directly called. Use
   /// [getSemanticsInformation] instead.
   ///
   /// [PlaceholderSpan]s in the tree will be represented with a

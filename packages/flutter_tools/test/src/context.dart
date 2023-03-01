@@ -154,7 +154,7 @@ void testUsingContext(
       );
     }, overrides: <Type, Generator>{
       // This has to go here so that runInContext will pick it up when it tries
-      // to do bot detection before running the closure.  This is important
+      // to do bot detection before running the closure. This is important
       // because the test may be giving us a fake HttpClientFactory, which may
       // throw in unexpected/abnormal ways.
       // If a test needs a BotDetector that does not always return true, it
@@ -241,7 +241,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout, bool promptUserToChooseDevice = true }) async {
     return devices;
   }
 }

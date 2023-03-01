@@ -27,8 +27,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          Column(
-            children: const <Widget>[
+          const Column(
+            children: <Widget>[
               Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
@@ -52,8 +52,8 @@ void main() {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           _boilerplate(
-            Column(
-              children: const <Widget>[
+            const Column(
+              children: <Widget>[
                 Text(
                   'this is a test',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
@@ -97,6 +97,40 @@ void main() {
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
+
+    testWidgets('White text on white background fails contrast test',
+      (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _boilerplate(
+        Container(
+          width: 200.0,
+          height: 300.0,
+          color: Colors.white,
+          child: const Column(
+            children: <Widget>[
+              Text(
+                'this is a white text',
+                style: TextStyle(fontSize: 14.0, color: Colors.white),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test1',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test2',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 
     const Color surface = Color(0xFFF0F0F0);
 
@@ -183,6 +217,37 @@ void main() {
             child: TextField(
               style: const TextStyle(color: Colors.amber),
               controller: TextEditingController(text: 'this is a test'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -805,6 +870,14 @@ void main() {
           child: const SizedBox(width: 10.0, height: 10.0),
         ),
       )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(const TextField()));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, true);
       handle.dispose();

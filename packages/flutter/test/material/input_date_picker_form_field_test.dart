@@ -262,7 +262,6 @@ void main() {
 
     testWidgets('Semantics', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
@@ -274,7 +273,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
-        label: 'Enter Date\nmm/dd/yyyy',
+        label: 'Enter Date',
         isTextField: true,
         isFocused: true,
         value: '01/15/2016',
@@ -287,6 +286,7 @@ void main() {
         hasMoveCursorBackwardByCharacterAction: true,
         hasMoveCursorBackwardByWordAction: true,
       ));
+      semantics.dispose();
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {

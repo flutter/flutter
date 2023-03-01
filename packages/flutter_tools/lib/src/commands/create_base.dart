@@ -17,7 +17,6 @@ import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
-import '../dart/pub.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -334,7 +333,6 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
-    assert(projectName != null);
     return projectName;
   }
 
@@ -355,6 +353,7 @@ abstract class CreateBase extends FlutterCommand {
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
     bool withFfiPluginHook = false,
+    bool withEmptyMain = false,
     bool ios = false,
     bool android = false,
     bool web = false,
@@ -410,6 +409,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
       'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
+      'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
@@ -549,24 +549,6 @@ abstract class CreateBase extends FlutterCommand {
         environment: environment,
         buildSystem: globals.buildSystem,
       );
-
-      await pub.get(
-        context: PubContext.create,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-        // For templates that use the l10n localization tooling, make sure
-        // importing the generated package works right after `flutter create`.
-        generateSyntheticPackage: true,
-      );
-
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: androidPlatform,
-        iosPlatform: iosPlatform,
-        linuxPlatform: linuxPlatform,
-        macOSPlatform: macOSPlatform,
-        windowsPlatform: windowsPlatform,
-        webPlatform: webPlatform,
-      );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
@@ -705,7 +687,7 @@ abstract class CreateBase extends FlutterCommand {
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
-        if (modes != null && modes.contains('x')) {
+        if (modes.contains('x')) {
           globals.os.makeExecutable(destinationFile);
         }
       },

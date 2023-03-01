@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -108,6 +109,18 @@ void main() {
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
     shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5)!;
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
+  });
+
+  test('BoxShadow.lerp identical a,b', () {
+    expect(BoxShadow.lerp(null, null, 0), null);
+    const BoxShadow border = BoxShadow();
+    expect(identical(BoxShadow.lerp(border, border, 0.5), border), true);
+  });
+
+  test('BoxShadowList.lerp identical a,b', () {
+    expect(BoxShadow.lerpList(null, null, 0), null);
+    const List<BoxShadow> border = <BoxShadow>[BoxShadow()];
+    expect(identical(BoxShadow.lerpList(border, border, 0.5), border), true);
   });
 
   test('BoxShadow BlurStyle test', () {

@@ -248,7 +248,11 @@ PlistParser? _plistInstance;
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 
-ShutdownHooks? get shutdownHooks => context.get<ShutdownHooks>();
+/// Global [ShutdownHooks] that should be run before the tool process exits.
+///
+/// This is depended on by [localFileSystem] which is called before any
+/// [Context] is set up, and thus this cannot be a Context getter.
+final ShutdownHooks shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
@@ -280,5 +284,4 @@ PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const N
 const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
-const String kServicePrefixRegExp = '(?:Observatory|The Dart VM service is)';
-final RegExp kVMServiceMessageRegExp = RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');

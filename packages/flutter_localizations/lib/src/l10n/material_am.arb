@@ -128,5 +128,10 @@
   "keyboardKeySpace": "ክፍተት",
   "keyboardKeyMetaMacOs": "ትዕዛዝ",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ"
+  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

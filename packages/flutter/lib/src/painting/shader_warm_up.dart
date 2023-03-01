@@ -69,10 +69,10 @@ abstract class ShaderWarmUp {
   ///
   /// To decide which draw operations to be added to your custom warm up
   /// process, consider capturing an skp using `flutter screenshot
-  /// --observatory-uri=<uri> --type=skia` and analyzing it with
+  /// --vm-service-uri=<uri> --type=skia` and analyzing it with
   /// <https://debugger.skia.org/>. Alternatively, one may run the app with
   /// `flutter run --trace-skia` and then examine the raster thread in the
-  /// observatory timeline to see which Skia draw operations are commonly used,
+  /// Flutter DevTools timeline to see which Skia draw operations are commonly used,
   /// and which shader compilations are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
@@ -87,7 +87,7 @@ abstract class ShaderWarmUp {
     await warmUpOnCanvas(canvas);
     final ui.Picture picture = recorder.endRecording();
     assert(debugCaptureShaderWarmUpPicture(picture));
-    if (!kIsWeb) { // Picture.toImage is not yet implemented on the web.
+    if (!kIsWeb || isCanvasKit) { // Picture.toImage is not yet implemented on the web.
       final TimelineTask shaderWarmUpTask = TimelineTask();
       shaderWarmUpTask.start('Warm-up shader');
       try {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Overlay
+// Flutter code sample for [Overlay].
 
 import 'package:flutter/material.dart';
 
@@ -61,8 +61,8 @@ class _OverlayExampleState extends State<OverlayExample> {
                   Builder(builder: (BuildContext context) {
                     switch (currentPageIndex) {
                       case 0:
-                        return Column(
-                          children: const <Widget>[
+                        return const Column(
+                          children: <Widget>[
                             Text(
                               'Explore page',
                                 style: TextStyle(
@@ -76,8 +76,8 @@ class _OverlayExampleState extends State<OverlayExample> {
                           ],
                         );
                       case 1:
-                        return Column(
-                          children: const <Widget>[
+                        return const Column(
+                          children: <Widget>[
                             Text(
                               'Commute page',
                                 style: TextStyle(
@@ -91,8 +91,8 @@ class _OverlayExampleState extends State<OverlayExample> {
                           ],
                         );
                       case 2:
-                        return Column(
-                          children: const <Widget>[
+                        return const Column(
+                          children: <Widget>[
                             Text(
                               'Saved page',
                                 style: TextStyle(
@@ -132,7 +132,7 @@ class _OverlayExampleState extends State<OverlayExample> {
     );
 
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)!.insert(overlayEntry!);
+    Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
   }
 
   // Remove the OverlayEntry.

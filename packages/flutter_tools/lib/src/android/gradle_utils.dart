@@ -26,10 +26,10 @@ import 'android_sdk.dart';
 //
 // For more information about the latest version, check:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-// https://kotlinlang.org/docs/gradle.html#plugin-and-versions
+// https://kotlinlang.org/docs/releases.html#release-details
 const String templateDefaultGradleVersion = '7.5';
-const String templateAndroidGradlePluginVersion = '7.2.0';
-const String templateDefaultGradleVersionForModule = '7.2.0';
+const String templateAndroidGradlePluginVersion = '7.3.0';
+const String templateDefaultGradleVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
 // These versions should match the values in flutter.gradle (FlutterExtension).
@@ -41,7 +41,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 const String compileSdkVersion = '31';
 const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
-const String ndkVersion = '21.4.7075529';
+const String ndkVersion = '23.1.7779620';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
@@ -151,8 +151,6 @@ bool _isWithinVersionRange(
   required String min,
   required String max,
 }) {
-  assert(min != null);
-  assert(max != null);
   final Version? parsedTargetVersion = Version.parse(targetVersion);
   final Version? minVersion = Version.parse(min);
   final Version? maxVersion = Version.parse(max);

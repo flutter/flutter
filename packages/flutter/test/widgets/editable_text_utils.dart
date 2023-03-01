@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Returns the first RenderEditable.
-RenderEditable findRenderEditable(WidgetTester tester) {
-  final RenderObject root = tester.renderObject(find.byType(EditableText));
+/// On web, the context menu (aka toolbar) is provided by the browser.
+const bool isContextMenuProvidedByPlatform = isBrowser;
+
+// Returns the RenderEditable at the given index, or the first if not given.
+RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
+  final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
   expect(root, isNotNull);
 
   late RenderEditable renderEditable;
@@ -33,8 +37,8 @@ List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBo
   }).toList();
 }
 
-Offset textOffsetToPosition(WidgetTester tester, int offset) {
-  final RenderEditable renderEditable = findRenderEditable(tester);
+Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
+  final RenderEditable renderEditable = findRenderEditable(tester, index: index);
   final List<TextSelectionPoint> endpoints = globalize(
     renderEditable.getEndpointsForSelection(
       TextSelection.collapsed(offset: offset),
@@ -42,7 +46,7 @@ Offset textOffsetToPosition(WidgetTester tester, int offset) {
     renderEditable,
   );
   expect(endpoints.length, 1);
-  return endpoints[0].point + const Offset(0.0, -2.0);
+  return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
 }
 
 // Simple controller that builds a WidgetSpan with 100 height.

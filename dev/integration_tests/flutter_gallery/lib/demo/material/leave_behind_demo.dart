@@ -243,7 +243,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           }
           return false;
         },
-        background: Container(
+        background: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -251,7 +251,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             ),
           ),
         ),
-        secondaryBackground: Container(
+        secondaryBackground: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(

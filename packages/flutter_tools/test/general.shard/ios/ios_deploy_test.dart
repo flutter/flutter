@@ -93,6 +93,22 @@ void main () {
         logger = BufferLogger.test();
       });
 
+      testWithoutContext('custom lldb prompt', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: "(mylldb)    platform select remote-'ios' --sysroot\r\n(mylldb)     run\r\nsuccess\r\n",
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+      });
+
       testWithoutContext('debugger attached and stopped', () async {
         final StreamController<List<int>> stdin = StreamController<List<int>>();
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

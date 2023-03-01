@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
@@ -43,10 +42,9 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-
-  ProcessManager processManager;
-  TestUsage usage;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
+  late TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -75,7 +73,7 @@ void main() {
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
-    void Function() onRun,
+    void Function()? onRun,
     String generator = _defaultGenerator,
   }) {
     return FakeCommand(
@@ -95,7 +93,7 @@ void main() {
   // Returns the command matching the build_windows call to build.
   FakeCommand buildCommand(String buildMode, {
     bool verbose = false,
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -119,7 +117,7 @@ void main() {
   }
 
   testUsingContext('Windows build fails when there is no cmake path', () async {
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = FakeVisualStudio(cmakePath: null);
     setUpMockProjectFilesForBuild();
 
@@ -135,7 +133,7 @@ void main() {
 
   testUsingContext('Windows build fails when there is no windows project', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockCoreProjectFiles();
 
@@ -153,7 +151,7 @@ void main() {
 
   testUsingContext('Windows build fails on non windows platform', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -169,7 +167,7 @@ void main() {
 
   testUsingContext('Windows build fails when feature is disabled', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -185,7 +183,7 @@ void main() {
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -210,7 +208,7 @@ void main() {
 
   testUsingContext('Windows build extracts errors from stdout', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -268,7 +266,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -294,7 +292,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Windows build works around CMake generation bug', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(displayVersion: '17.1.0');
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -430,7 +428,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build invokes build and writes generated files', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -500,7 +498,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows profile build passes Profile configuration', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -523,7 +521,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     const String generator = 'A different generator';
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(
       cmakeGenerator: generator);
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -544,7 +542,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext("Windows build uses pubspec's version", () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -590,7 +588,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build uses build-name and build-number', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -634,7 +632,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build build-name overrides pubspec', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -681,7 +679,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build build-number overrides pubspec', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -728,7 +726,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build build-name and build-number override pubspec', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -776,7 +774,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build warns on non-numeric build-number', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -826,7 +824,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Windows build warns on complex build-number', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -875,14 +873,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   });
 
   testUsingContext('hidden when not enabled on Windows host', () {
-    expect(BuildWindowsCommand().hidden, true);
+    expect(BuildWindowsCommand(logger: BufferLogger.test()).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => windowsPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on Windows host', () {
-    expect(BuildWindowsCommand().hidden, false);
+    expect(BuildWindowsCommand(logger: BufferLogger.test()).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Platform: () => windowsPlatform,
@@ -890,7 +888,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
@@ -942,7 +940,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   // is resolved on the VS side, we can allow these paths again
   testUsingContext('Test bad path characters', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand()
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
       ..visualStudioOverride = fakeVisualStudio;
     fileSystem.currentDirectory = fileSystem.directory("test_'path")
       ..createSync();
@@ -974,7 +972,7 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   });
 
   @override
-  final String cmakePath;
+  final String? cmakePath;
 
   @override
   final String cmakeGenerator;

@@ -194,16 +194,16 @@ class _ChipDemoState extends State<ChipDemo> {
   }
 
   // This converts a String to a unique color, based on the hash value of the
-  // String object.  It takes the bottom 16 bits of the hash, and uses that to
+  // String object. It takes the bottom 16 bits of the hash, and uses that to
   // pick a hue for an HSV color, and then creates the color (with a preset
-  // saturation and value).  This means that any unique strings will also have
+  // saturation and value). This means that any unique strings will also have
   // unique colors, but they'll all be readable, since they have the same
   // saturation and value.
   Color _nameToColor(String name, ThemeData theme) {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
     final double hue = (360.0 * hash / (1 << 15)) % 360.0;
-    final double themeValue = HSVColor.fromColor(theme.backgroundColor).value;
+    final double themeValue = HSVColor.fromColor(theme.colorScheme.background).value;
     return HSVColor.fromAHSV(1.0, hue, 0.4, themeValue).toColor();
   }
 

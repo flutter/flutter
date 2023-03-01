@@ -66,13 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: Column(
           children: <Widget>[
-            Container(color: Colors.grey.shade200, child: Options(_model)),
+            ColoredBox(color: Colors.grey.shade200, child: Options(_model)),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -94,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Polygon'),
                   ),
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -227,28 +225,6 @@ class OptionModel extends ChangeNotifier {
     _innerRadiusRatio = defaultModel._innerRadiusRatio;
     _points = defaultModel.points;
     notifyListeners();
-  }
-}
-
-class LabeledCheckbox extends StatelessWidget {
-  const LabeledCheckbox({super.key, required this.label, this.onChanged, this.value});
-
-  final String label;
-  final ValueChanged<bool?>? onChanged;
-  final bool? value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Checkbox(
-          onChanged: onChanged,
-          value: value,
-        ),
-        Text(label),
-      ],
-    );
   }
 }
 

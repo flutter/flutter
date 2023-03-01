@@ -15,10 +15,10 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace('Xcode project not found, skipping script build phase dependency analysis removal.');
-      return true;
+      return;
     }
 
     final String originalProjectContents = _xcodeProjectInfoFile.readAsStringSync();
@@ -56,6 +56,5 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
       logger.printStatus('Removing script build phase dependency analysis.');
       _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
     }
-    return true;
   }
 }

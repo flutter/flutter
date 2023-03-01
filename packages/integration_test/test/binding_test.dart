@@ -39,6 +39,7 @@ Future<void> main() async {
       ));
       expect(tester.binding, binding);
       binding.reportData = <String, dynamic>{'answer': 42};
+      await tester.pump();
     });
 
     testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {

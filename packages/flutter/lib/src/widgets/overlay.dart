@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -71,10 +72,7 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
-  }) : assert(builder != null),
-       assert(opaque != null),
-       assert(maintainState != null),
-       _opaque = opaque,
+  }) : _opaque = opaque,
        _maintainState = maintainState;
 
   /// This entry will include the widget built by this builder in the overlay at
@@ -118,7 +116,6 @@ class OverlayEntry implements Listenable {
   bool _maintainState;
   set maintainState(bool value) {
     assert(!_disposedByOwner);
-    assert(_maintainState != null);
     if (_maintainState == value) {
       return;
     }
@@ -226,10 +223,7 @@ class _OverlayEntryWidget extends StatefulWidget {
     required Key key,
     required this.entry,
     this.tickerEnabled = true,
-  }) : assert(key != null),
-       assert(entry != null),
-       assert(tickerEnabled != null),
-       super(key: key);
+  }) : super(key: key);
 
   final OverlayEntry entry;
   final bool tickerEnabled;
@@ -273,13 +267,14 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// [OverlayEntry] objects.
 ///
 /// Although you can create an [Overlay] directly, it's most common to use the
-/// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
-/// navigator uses its overlay to manage the visual appearance of its routes.
+/// overlay created by the [Navigator] in a [WidgetsApp], [CupertinoApp] or a
+/// [MaterialApp]. The navigator uses its overlay to manage the visual
+/// appearance of its routes.
 ///
 /// The [Overlay] widget uses a custom stack implementation, which is very
 /// similar to the [Stack] widget. The main use case of [Overlay] is related to
 /// navigation and being able to insert widgets on top of the pages in an app.
-/// To simply display a stack of widgets, consider using [Stack] instead.
+/// For layout purposes unrelated to navigation, consider using [Stack] instead.
 ///
 /// An [Overlay] widget requires a [Directionality] widget to be in scope, so
 /// that it can resolve direction-sensitive coordinates of any
@@ -298,6 +293,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [OverlayState], which is used to insert the entries into the overlay.
 ///  * [WidgetsApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
+///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
@@ -306,13 +302,13 @@ class Overlay extends StatefulWidget {
   /// [OverlayState] is initialized.
   ///
   /// Rather than creating an overlay, consider using the overlay that is
-  /// created by the [Navigator] in a [WidgetsApp] or a [MaterialApp] for the application.
+  /// created by the [Navigator] in a [WidgetsApp], [CupertinoApp], or a
+  /// [MaterialApp] for the application.
   const Overlay({
     super.key,
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(initialEntries != null),
-       assert(clipBehavior != null);
+  });
 
   /// The entries to include in the overlay initially.
   ///
@@ -334,40 +330,52 @@ class Overlay extends StatefulWidget {
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context within the closest [LookupBoundary], and, in debug mode,
+  /// will throw if one is not found.
   ///
-  /// In debug mode, if the `debugRequiredFor` argument is provided then this
-  /// function will assert that an overlay was found and will throw an exception
-  /// if not. The exception attempts to explain that the calling [Widget] (the
-  /// one given by the `debugRequiredFor` argument) needs an [Overlay] to be
-  /// present to function.
+  /// In debug mode, if the `debugRequiredFor` argument is provided and an
+  /// overlay isn't found, then this function will throw an exception containing
+  /// the runtime type of the given widget in the error message. The exception
+  /// attempts to explain that the calling [Widget] (the one given by the
+  /// `debugRequiredFor` argument) needs an [Overlay] to be present to function.
+  /// If `debugRequiredFor` is not supplied, then the error message is more
+  /// generic.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OverlayState overlay = Overlay.of(context)!;
+  /// OverlayState overlay = Overlay.of(context);
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of
-  /// this class is given instead. Useful for installing overlay entries
-  /// above all subsequent instances of [Overlay].
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
   ///
   /// This method can be expensive (it walks the element tree).
-  static OverlayState? of(
+  ///
+  /// See also:
+  ///
+  /// * [Overlay.maybeOf] for a similar function that returns null if an
+  ///   [Overlay] is not found.
+  static OverlayState of(
     BuildContext context, {
     bool rootOverlay = false,
     Widget? debugRequiredFor,
   }) {
-    final OverlayState? result = rootOverlay
-        ? context.findRootAncestorStateOfType<OverlayState>()
-        : context.findAncestorStateOfType<OverlayState>();
+    final OverlayState? result = maybeOf(context, rootOverlay: rootOverlay);
     assert(() {
-      if (debugRequiredFor != null && result == null) {
+      if (result == null) {
+        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorStateOfType<OverlayState>(context);
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
-          ErrorSummary('No Overlay widget found.'),
-          ErrorDescription('${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.'),
-          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
-          DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorSummary('No Overlay widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+          if (hiddenByBoundary)
+            ErrorDescription(
+                'There is an ancestor Overlay widget, but it is hidden by a LookupBoundary.'
+            ),
+          ErrorDescription('${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.'),
+          if (debugRequiredFor != null) DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
           if (context.widget != debugRequiredFor)
             context.describeElement('The context from which that widget was searching for an overlay was'),
         ];
@@ -376,7 +384,36 @@ class Overlay extends StatefulWidget {
       }
       return true;
     }());
-    return result;
+    return result!;
+  }
+
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context within the closest [LookupBoundary], if any.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// OverlayState? overlay = Overlay.maybeOf(context);
+  /// ```
+  ///
+  /// If `rootOverlay` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  ///  * [Overlay.of] for a similar function that returns a non-nullable result
+  ///    and throws if an [Overlay] is not found.
+
+  static OverlayState? maybeOf(
+    BuildContext context, {
+    bool rootOverlay = false,
+  }) {
+    return rootOverlay
+        ? LookupBoundary.findRootAncestorStateOfType<OverlayState>(context)
+        : LookupBoundary.findAncestorStateOfType<OverlayState>(context);
   }
 
   @override
@@ -600,15 +637,12 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 ///
 /// The first [skipCount] children are considered "offstage".
 class _Theatre extends MultiChildRenderObjectWidget {
-  _Theatre({
+  const _Theatre({
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,
     super.children,
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(children != null),
-       assert(children.length >= skipCount),
-       assert(clipBehavior != null);
+  }) : assert(skipCount >= 0),
+       assert(children.length >= skipCount);
 
   final int skipCount;
 
@@ -661,17 +695,12 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     required TextDirection textDirection,
     int skipCount = 0,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(textDirection != null),
-       assert(clipBehavior != null),
+  }) : assert(skipCount >= 0),
        _textDirection = textDirection,
        _skipCount = skipCount,
        _clipBehavior = clipBehavior {
     addAll(children);
   }
-
-  bool _hasVisualOverflow = false;
 
   @override
   void setupParentData(RenderBox child) {
@@ -707,7 +736,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   int get skipCount => _skipCount;
   int _skipCount;
   set skipCount(int value) {
-    assert(value != null);
     if (_skipCount != value) {
       _skipCount = value;
       markNeedsLayout();
@@ -720,7 +748,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -798,8 +825,6 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void performLayout() {
-    _hasVisualOverflow = false;
-
     if (_onstageChildCount == 0) {
       return;
     }
@@ -818,7 +843,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         child.layout(nonPositionedConstraints, parentUsesSize: true);
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment!);
       }
 
       assert(child.parentData == childParentData);
@@ -860,7 +885,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
+    if (clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
@@ -901,7 +926,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       case Clip.hardEdge:
       case Clip.antiAlias:
       case Clip.antiAliasWithSaveLayer:
-        return _hasVisualOverflow ? Offset.zero & size : null;
+        return Offset.zero & size;
     }
   }
 

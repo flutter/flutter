@@ -14,7 +14,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../ios/application_package.dart';
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -47,19 +46,19 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm;
+  bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
-    return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm;
+    return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
 
   @override
   Future<LaunchResult> startApp(
-    IOSApp package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -74,13 +73,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<bool> stopApp(
-    IOSApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async => false;
 
   @override
-  Future<void> buildForDevice(
-    covariant IOSApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {
@@ -119,7 +117,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm && allowDiscovery;
+      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 && allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
   static bool allowDiscovery = false;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -23,7 +21,6 @@ import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -171,7 +168,7 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 class FakeTerminal implements Terminal {
-  factory FakeTerminal({Platform platform}) {
+  factory FakeTerminal({required Platform platform}) {
     return FakeTerminal._private(
         stdio: FakeStdio(),
         platform: platform
@@ -179,8 +176,8 @@ class FakeTerminal implements Terminal {
   }
 
   FakeTerminal._private({
-    this.stdio,
-    Platform platform
+    required this.stdio,
+    required Platform platform
   }) :
     terminal = AnsiTerminal(
       stdio: stdio,
@@ -215,9 +212,9 @@ class FakeTerminal implements Terminal {
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true
   }) => terminal.promptForCharInput(
       acceptedCharacters,
@@ -253,17 +250,14 @@ class FakeTerminal implements Terminal {
 
 class FakeCommandRunner extends FlutterCommandRunner {
   FakeCommandRunner({
-    @required Platform platform,
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    UserMessages userMessages
+    required Platform platform,
+    required FileSystem fileSystem,
+    required Logger logger,
+    UserMessages? userMessages
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
-       _userMessages = userMessages ?? UserMessages(),
-       assert(platform != null),
-       assert(fileSystem != null),
-       assert(logger != null);
+       _userMessages = userMessages ?? UserMessages();
 
   final Platform _platform;
   final FileSystem _fileSystem;
@@ -285,7 +279,7 @@ class FakeCommandRunner extends FlutterCommandRunner {
           userMessages: _userMessages,
         );
         // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = _fileSystem.path.normalize(_fileSystem.path.absolute(Cache.flutterRoot));
+        Cache.flutterRoot = _fileSystem.path.normalize(_fileSystem.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       }
     );
@@ -295,13 +289,13 @@ class FakeCommandRunner extends FlutterCommandRunner {
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
 CustomDevicesCommand createCustomDevicesCommand({
-  CustomDevicesConfig Function(FileSystem, Logger) config,
-  Terminal Function(Platform) terminal,
-  Platform platform,
-  FileSystem fileSystem,
-  ProcessManager processManager,
-  Logger logger,
-  PrintFn usagePrintFn,
+  CustomDevicesConfig Function(FileSystem, Logger)? config,
+  Terminal Function(Platform)? terminal,
+  Platform? platform,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Logger? logger,
+  PrintFn? usagePrintFn,
   bool featureEnabled = false
 }) {
   platform ??= FakePlatform();
@@ -340,13 +334,13 @@ CustomDevicesCommand createCustomDevicesCommand({
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
 CommandRunner<void> createCustomDevicesCommandRunner({
-  CustomDevicesConfig Function(FileSystem, Logger) config,
-  Terminal Function(Platform) terminal,
-  Platform platform,
-  FileSystem fileSystem,
-  ProcessManager processManager,
-  Logger logger,
-  PrintFn usagePrintFn,
+  CustomDevicesConfig Function(FileSystem, Logger)? config,
+  Terminal Function(Platform)? terminal,
+  Platform? platform,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Logger? logger,
+  PrintFn? usagePrintFn,
   bool featureEnabled = false,
 }) {
   platform ??= FakePlatform();
@@ -372,17 +366,17 @@ CommandRunner<void> createCustomDevicesCommandRunner({
 }
 
 FakeTerminal createFakeTerminalForAddingSshDevice({
-  @required Platform platform,
-  @required String id,
-  @required String label,
-  @required String sdkNameAndVersion,
-  @required String enabled,
-  @required String hostname,
-  @required String username,
-  @required String runDebug,
-  @required String usePortForwarding,
-  @required String screenshot,
-  @required String apply
+  required Platform platform,
+  required String id,
+  required String label,
+  required String sdkNameAndVersion,
+  required String enabled,
+  required String hostname,
+  required String username,
+  required String runDebug,
+  required String usePortForwarding,
+  required String screenshot,
+  required String apply
 }) {
   return FakeTerminal(platform: platform)
     ..simulateStdin(id)
@@ -1126,7 +1120,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file and created a '
+            'Successfully reset the custom devices config file and created a '
             'backup at "/.flutter_custom_devices.json.bak".'
           )
         );
@@ -1158,7 +1152,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file.'
+            'Successfully reset the custom devices config file.'
           )
         );
 

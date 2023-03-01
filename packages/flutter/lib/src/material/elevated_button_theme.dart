@@ -16,7 +16,7 @@ import 'theme.dart';
 /// overall [Theme]'s [ThemeData.elevatedButtonTheme].
 ///
 /// The [style]'s properties override [ElevatedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///
@@ -49,9 +49,8 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two elevated button themes.
   static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ElevatedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -98,7 +97,7 @@ class ElevatedButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;

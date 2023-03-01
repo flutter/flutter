@@ -20,7 +20,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-
 import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
@@ -313,7 +312,7 @@ class AndroidDevice extends Device {
     try {
       // If the server is automatically restarted, then we get irrelevant
       // output lines like this, which we want to ignore:
-      //   adb server is out of date.  killing..
+      //   adb server is out of date. killing..
       //   * daemon started successfully *
       await _processUtils.run(
         <String>[adbPath, 'start-server'],
@@ -367,7 +366,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     // This call takes 400ms - 600ms.
@@ -389,14 +388,14 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(AndroidApk app) async {
+  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
     final String installedSha1 = await _getDeviceApkSha1(app);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
   Future<bool> installApp(
-    AndroidApk app, {
+    covariant AndroidApk app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -479,7 +478,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -520,7 +519,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    AndroidApk package, {
+    AndroidApk? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -600,12 +599,12 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // observatory discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dipose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
@@ -627,7 +626,8 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-dart-profiling', 'true',
+      if (debuggingOptions.enableDartProfiling)
+        ...<String>['--ez', 'enable-dart-profiling', 'true'],
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)
@@ -687,13 +687,13 @@ class AndroidDevice extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on...".
-    _logger.printTrace('Waiting for observatory port to be available...');
+    // device has printed "VM Service is listening on...".
+    _logger.printTrace('Waiting for VM Service port to be available...');
     try {
-      Uri? observatoryUri;
+      Uri? vmServiceUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
-        observatoryUri = await observatoryDiscovery?.uri;
-        if (observatoryUri == null) {
+        vmServiceUri = await vmServiceDiscovery?.uri;
+        if (vmServiceUri == null) {
           _logger.printError(
             'Error waiting for a debug connection: '
             'The log reader stopped unexpectedly',
@@ -701,12 +701,12 @@ class AndroidDevice extends Device {
           return LaunchResult.failed();
         }
       }
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
   }
 
@@ -721,11 +721,11 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
-  }) {
+  }) async {
     if (app == null) {
-      return Future<bool>.value(false);
+      return false;
     }
     final List<String> command = adbCommandForDevice(<String>[
       'shell',
@@ -767,7 +767,7 @@ class AndroidDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    AndroidApk? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) async {
     // The Android log reader isn't app-specific. The `app` parameter isn't used.

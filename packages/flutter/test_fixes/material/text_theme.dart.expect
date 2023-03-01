@@ -1,0 +1,111 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme textTheme = TextTheme(
+    displayLarge: displayStyle4,
+    displayMedium: displayStyle3,
+    displaySmall: displayStyle2,
+    headlineMedium: displayStyle1,
+    headlineSmall: headlineStyle,
+    titleLarge: titleStyle,
+    titleMedium: subheadStyle,
+    bodyLarge: body2Style,
+    bodyMedium: body1Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    titleSmall: subtitleStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme textTheme = TextTheme(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    displayLarge: displayStyle4,
+    displayMedium: displayStyle3,
+    displaySmall: displayStyle2,
+    headlineMedium: displayStyle1,
+    headlineSmall: headlineStyle,
+    titleLarge: titleStyle,
+    titleMedium: subheadStyle,
+    bodyLarge: body2Style,
+    bodyMedium: body1Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    titleSmall: subtitleStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var style;
+  style = textTheme.displayLarge;
+  style = textTheme.displayMedium;
+  style = textTheme.displaySmall;
+  style = textTheme.headlineMedium;
+  style = textTheme.headlineSmall;
+  style = textTheme.titleLarge;
+  style = textTheme.titleMedium;
+  style = textTheme.bodyLarge;
+  style = textTheme.bodyMedium;
+  style = textTheme.bodySmall;
+  style = textTheme.labelLarge;
+  style = textTheme.titleSmall;
+  style = textTheme.labelSmall;
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme textTheme = TextTheme(
+    displayLarge: headline1Style,
+    displayMedium: headline2Style,
+    displaySmall: headline3Style,
+    headlineMedium: headline4Style,
+    headlineSmall: headline5Style,
+    titleLarge: headline6Style,
+    titleMedium: subtitle1Style,
+    titleSmall: subtitle2Style,
+    bodyLarge: bodyText1Style,
+    bodyMedium: bodyText2Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme textTheme = TextTheme(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    displayLarge: headline1Style,
+    displayMedium: headline2Style,
+    displaySmall: headline3Style,
+    headlineMedium: headline4Style,
+    headlineSmall: headline5Style,
+    titleLarge: headline6Style,
+    titleMedium: subtitle1Style,
+    titleSmall: subtitle2Style,
+    bodyLarge: bodyText1Style,
+    bodyMedium: bodyText2Style,
+    bodySmall: captionStyle,
+    labelLarge: buttonStyle,
+    labelSmall: overlineStyle,
+  );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/109817
+  var style;
+  style = textTheme.displayLarge;
+  style = textTheme.displayMedium;
+  style = textTheme.displaySmall;
+  style = textTheme.headlineMedium;
+  style = textTheme.headlineSmall;
+  style = textTheme.titleLarge;
+  style = textTheme.titleMedium;
+  style = textTheme.titleSmall;
+  style = textTheme.bodyLarge;
+  style = textTheme.bodyMedium;
+  style = textTheme.bodySmall;
+  style = textTheme.labelLarge;
+  style = textTheme.labelSmall;
+}

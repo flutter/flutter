@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -61,8 +59,8 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 );
 
 void main() {
-  testWithoutContext('VmService registers reloadSources', () async {
-    Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+  testWithoutContext('VM Service registers reloadSources', () async {
+    Future<void> reloadSources(String isolateId, { bool? pause, bool? force}) async {}
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
@@ -78,7 +76,7 @@ void main() {
     expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService registers flutterMemoryInfo service', () async {
+  testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
     final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
@@ -95,7 +93,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService registers flutterGetSkSL service', () async {
+  testWithoutContext('VM Service registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -110,7 +108,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
@@ -125,7 +123,7 @@ void main() {
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure with awaited future.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
@@ -140,7 +138,7 @@ void main() {
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
+  testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -154,7 +152,7 @@ void main() {
     expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
   });
 
-  testWithoutContext('VMService returns correct FlutterVersion', () async {
+  testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -169,7 +167,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
   });
 
-  testUsingContext('VMService prints messages for connection failures', () {
+  testUsingContext('VM Service prints messages for connection failures', () {
     final BufferLogger logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
@@ -217,7 +215,7 @@ void main() {
       windows: false,
     ));
 
-    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kSetAssetBundlePathMethod),
@@ -245,7 +243,7 @@ void main() {
       windows: true,
     ));
 
-    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kSetAssetBundlePathMethod),
@@ -269,7 +267,7 @@ void main() {
       viewId: 'abc',
     ));
 
-    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kGetSkSLsMethod),
@@ -291,7 +289,7 @@ void main() {
       uiIsolateId: 'def',
     ));
 
-    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+    final Map<String, Object?>? rawRequest = json.decode(await completer.future) as Map<String, Object?>?;
 
     expect(rawRequest, allOf(<Matcher>[
       containsPair('method', kFlushUIThreadTasksMethod),
@@ -469,7 +467,7 @@ void main() {
       ]
     );
 
-    final Map<String, Object> skSLs = await fakeVmServiceHost.vmService.getSkSLs(
+    final Map<String, Object?>? skSLs = await fakeVmServiceHost.vmService.getSkSLs(
       viewId: '1234',
     );
     expect(skSLs, isNull);
@@ -477,19 +475,19 @@ void main() {
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
     expect(views, isEmpty);
 
-    final vm_service.Response screenshot = await fakeVmServiceHost.vmService.screenshot();
+    final vm_service.Response? screenshot = await fakeVmServiceHost.vmService.screenshot();
     expect(screenshot, isNull);
 
-    final vm_service.Response screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
+    final vm_service.Response? screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
     expect(screenshotSkp, isNull);
 
     // Checking that this doesn't throw.
     await fakeVmServiceHost.vmService.setTimelineFlags(<String>['test']);
 
-    final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
+    final vm_service.Response? timeline = await fakeVmServiceHost.vmService.getTimeline();
     expect(timeline, isNull);
 
-    final Map<String, Object> rasterStats =
+    final Map<String, Object?>? rasterStats =
       await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: '1', uiIsolateId: '12');
     expect(rasterStats, isNull);
 
@@ -505,7 +503,7 @@ void main() {
       ]
     );
 
-    final vm_service.Isolate isolate = await fakeVmServiceHost.vmService.getIsolateOrNull(
+    final vm_service.Isolate? isolate = await fakeVmServiceHost.vmService.getIsolateOrNull(
       'isolate/123',
     );
     expect(isolate, null);
@@ -535,7 +533,7 @@ void main() {
       ]
     );
 
-    final Map<String, Object> rasterStats =
+    final Map<String, Object?>? rasterStats =
       await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: 'view/1', uiIsolateId: 'isolate/123');
     expect(rasterStats, equals(response));
 
@@ -629,7 +627,7 @@ void main() {
         isolate.toJson()
           ..['id'] = '2'
           ..['extensionRPCs'] = <String>[otherExtensionName],
-      );
+      )!;
 
       final FlutterView fakeFlutterView2 = FlutterView(
         id: '2',
@@ -680,7 +678,7 @@ void main() {
 
     testWithoutContext('does not rethrow a sentinel exception if the initially queried flutter view disappears', () async {
       const String otherExtensionName = 'ext.flutter.test.otherExtension';
-      final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+      final vm_service.Isolate? isolate2 = vm_service.Isolate.parse(
         isolate.toJson()
           ..['id'] = '2'
           ..['extensionRPCs'] = <String>[otherExtensionName],
@@ -836,7 +834,7 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (String url, {io.CompressionOptions compression, Logger logger}) async {
+    openChannelForTesting = (String url, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault, required Logger logger}) async {
       completer.complete(url);
       throw Exception('');
     };
@@ -883,8 +881,8 @@ class FakeDevice extends Fake implements Device { }
 /// A [WebSocketConnector] that always throws an [io.SocketException].
 Future<io.WebSocket> failingWebSocketConnector(
   String url, {
-  io.CompressionOptions compression,
-  Logger logger,
+  io.CompressionOptions? compression,
+  Logger? logger,
 }) {
   throw const io.SocketException('Failed WebSocket connection');
 }

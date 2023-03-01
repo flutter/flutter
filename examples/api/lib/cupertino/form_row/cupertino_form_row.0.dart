@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoFormRow
+// Flutter code sample for [CupertinoFormRow].
 
 import 'package:flutter/cupertino.dart';
 
@@ -56,33 +56,33 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 },
               ),
             ),
-            CupertinoFormRow(
-              prefix: const PrefixWidget(
+            const CupertinoFormRow(
+              prefix: PrefixWidget(
                 icon: CupertinoIcons.wifi,
                 title: 'Wi-Fi',
                 color: CupertinoColors.systemBlue,
               ),
-              error: const Text('Home network unavailable'),
+              error: Text('Home network unavailable'),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const <Widget>[
+                children: <Widget>[
                   Text('Not connected'),
                   SizedBox(width: 5),
                   Icon(CupertinoIcons.forward)
                 ],
               ),
             ),
-            CupertinoFormRow(
-              prefix: const PrefixWidget(
+            const CupertinoFormRow(
+              prefix: PrefixWidget(
                 icon: CupertinoIcons.bluetooth,
                 title: 'Bluetooth',
                 color: CupertinoColors.activeBlue,
               ),
               helper: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: EdgeInsets.symmetric(vertical: 4.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('Headphone'),
                     Text('Connected'),
                   ],
@@ -90,7 +90,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const <Widget>[
+                children: <Widget>[
                   Text('On'),
                   SizedBox(width: 5),
                   Icon(CupertinoIcons.forward)
