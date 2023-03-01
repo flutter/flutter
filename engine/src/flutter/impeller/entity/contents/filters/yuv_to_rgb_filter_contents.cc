@@ -111,12 +111,11 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture =
-      renderer.MakeSubpass(y_input_snapshot->texture->GetSize(), callback);
+  auto out_texture = renderer.MakeSubpass(
+      "YUV to RGB Filter", y_input_snapshot->texture->GetSize(), callback);
   if (!out_texture) {
     return std::nullopt;
   }
-  out_texture->SetLabel("YUVToRGB Texture");
 
   return Contents::EntityFromSnapshot(Snapshot{.texture = out_texture},
                                       entity.GetBlendMode(),
