@@ -1198,27 +1198,35 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.4, precisionErrorTolerance)]);
     loggedSizes.clear();
 
     await tester.timedDrag(find.text('Item 1'), Offset(0, -.1 * screenHeight), const Duration(seconds: 1), frequency: 2);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.45, .5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[
+      closeTo(.45, precisionErrorTolerance),
+      closeTo(.5, precisionErrorTolerance),
+    ]);
     loggedSizes.clear();
 
     controller.jumpTo(.6);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.6, precisionErrorTolerance)]);
     loggedSizes.clear();
 
     controller.animateTo(1, duration: const Duration(milliseconds: 400), curve: Curves.linear);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.7, .8, .9, 1].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[
+      closeTo(.7, precisionErrorTolerance),
+      closeTo(.8, precisionErrorTolerance),
+      closeTo(.9, precisionErrorTolerance),
+      closeTo(1.0, precisionErrorTolerance),
+    ]);
     loggedSizes.clear();
 
     DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.5, precisionErrorTolerance)]);
     loggedSizes.clear();
   });
 
@@ -1242,7 +1250,7 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.4, precisionErrorTolerance)]);
     loggedSizes.clear();
 
     // Update a parameter without forcing a change in the current size.
@@ -1256,7 +1264,7 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.3, precisionErrorTolerance)]);
     loggedSizes.clear();
   });
 
@@ -1286,13 +1294,13 @@ void main() {
       stackKey: stackKey,
       containerKey: containerKey,
     ));
-    expect(loggedSizes, const <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.6, precisionErrorTolerance)]);
     loggedSizes.clear();
 
     // Move away from initial child size.
     await tester.drag(find.text('Item 1'), Offset(0, .3 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, const <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.3, precisionErrorTolerance)]);
     loggedSizes.clear();
 
     // Set a `minChildSize` greater than the current size.
@@ -1302,7 +1310,7 @@ void main() {
       stackKey: stackKey,
       containerKey: containerKey,
     ));
-    expect(loggedSizes, const <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <Matcher>[closeTo(.4, precisionErrorTolerance)]);
     loggedSizes.clear();
   });
 
