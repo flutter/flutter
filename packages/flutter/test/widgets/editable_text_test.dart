@@ -1676,7 +1676,7 @@ void main() {
       SystemChannels.contextMenu.setMockMethodCallHandler(null);
     });
 
-    testWidgets('web can show toolbar when the browser context menu is disabled', (WidgetTester tester) async {
+    testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
