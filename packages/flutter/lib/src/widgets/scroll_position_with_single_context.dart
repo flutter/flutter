@@ -80,12 +80,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   void absorb(ScrollPosition other) {
+    other.activity!.updateDelegate(this);
     super.absorb(other);
     if (other is! ScrollPositionWithSingleContext) {
       goIdle();
       return;
     }
-    activity!.updateDelegate(this);
     _userScrollDirection = other._userScrollDirection;
     assert(_currentDrag == null);
     if (other._currentDrag != null) {

@@ -1206,8 +1206,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   void absorb(ScrollPosition other) {
+    other.activity!.updateDelegate(this);
     super.absorb(other);
-    activity!.updateDelegate(this);
   }
 
   @override
