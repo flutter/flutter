@@ -141,7 +141,7 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// If this property is null, then [BottomAppBarTheme.shadowColor] of
   /// [ThemeData.bottomAppBarTheme] is used. If that is also null, the default value
-  /// is fully opaque black.
+  /// is fully opaque black for Material 2, and transparent for Material 3.
   /// {@endtemplate}
   ///
   /// See also:
@@ -192,7 +192,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
-    final Color? shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor;
+    final Color? shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     final Widget child = Padding(
       padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
@@ -210,9 +210,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
     );
 
     final PhysicalShape physicalShape = PhysicalShape(
-            clipper: clipper,
-            elevation: elevation,
-            shadowColor: isMaterial3 ? shadowColor! : const Color(0xFF000000),
+      clipper: clipper,
+      elevation: elevation,
+      shadowColor: shadowColor,
             color: effectiveColor,
             clipBehavior: widget.clipBehavior,
             child: material,
@@ -279,6 +279,9 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color get shadowColor => const Color(0xFF000000);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - BottomAppBar
@@ -307,7 +310,7 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  Color? get shadowColor => Colors.transparent;
+  Color get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar

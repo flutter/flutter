@@ -50,8 +50,6 @@ class BottomAppBarTheme with Diagnosticable {
   final NotchedShape? shape;
 
   /// Overrides the default value for [BottomAppBar.height].
-  ///
-  /// If null, [BottomAppBar] height will be the minimum on the non Material 3.
   final double? height;
 
   /// Overrides the default value for [BottomAppBar.surfaceTintColor].
