@@ -283,8 +283,7 @@ class AssetImage extends AssetBundleImageProvider {
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
-        final Iterable<AssetMetadata>? candidateVariants =
-          manifest.getAssetVariants(keyName);
+        final Iterable<AssetMetadata> candidateVariants = _getVariants(manifest, keyName);
         final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
           configuration,
@@ -327,14 +326,25 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
-    if (candidateVariants == null) {
-      return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
+  Iterable<AssetMetadata> _getVariants(AssetManifest manifest, String key) {
+    try {
+      return manifest.getAssetVariants(key);
+    } catch (e) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset with key "$key".'),
+        ErrorDescription(
+'''
+The key was not found in the asset manifest.
+Make sure the key is correct and the appropriate file or folder is specified in pubspec.yaml.
+'''),
+      ]);
     }
-    if (config.devicePixelRatio == null) {
+  }
+
+  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata> candidateVariants) {
+    if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
       return candidateVariants.firstWhere((AssetMetadata variant) => variant.main);
     }
-
     final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
       SplayTreeMap<double, AssetMetadata>();
     for (final AssetMetadata candidate in candidateVariants) {
