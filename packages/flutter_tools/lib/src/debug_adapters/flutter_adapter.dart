@@ -507,8 +507,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
     completer.future
-        .then((Object? value) => sendResponseToFlutter(id, value))
-        .catchError((Object? e) => sendResponseToFlutter(id, e.toString(), error: true));
+        .then(
+          (Object? value) => sendResponseToFlutter(id, value),
+          onError: (Object? e) => sendResponseToFlutter(id, e.toString(), error: true),
+        );
 
     if (_requestsToForwardToClient.contains(method)) {
       // Forward the request to the client in an event.
@@ -589,7 +591,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // debugging, we must try to detect which messages are likely Flutter
     // messages as reliably as possible, as trying to process users output
     // as a Flutter message may result in an unhandled error that will
-    // terminate the debug adater in a way that does not provide feedback
+    // terminate the debug adapter in a way that does not provide feedback
     // because the standard crash violates the DAP protocol.
     Object? jsonData;
     try {
