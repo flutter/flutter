@@ -132,11 +132,11 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     return pass.AddCommand(cmd);
   };
 
-  auto out_texture = renderer.MakeSubpass("Directional Morphology Filter",
-                                          ISize(coverage.size), callback);
+  auto out_texture = renderer.MakeSubpass(ISize(coverage.size), callback);
   if (!out_texture) {
     return std::nullopt;
   }
+  out_texture->SetLabel("DirectionalMorphologyFilter Texture");
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
