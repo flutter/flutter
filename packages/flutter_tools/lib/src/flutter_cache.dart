@@ -32,7 +32,7 @@ class FlutterCache extends Cache {
     required super.osUtils,
     required FlutterProjectFactory projectFactory,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
-    //registerArtifact(TestFonts(this));
+    registerArtifact(TestFonts(this));
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
@@ -133,7 +133,7 @@ class PubDependencies extends ArtifactSet {
   }
 }
 
-/// A cached artifact containing fonts used in
+/// A cached artifact containing fonts used by framework tests.
 class TestFonts extends CachedArtifact {
   TestFonts(Cache cache) : super(
     'test_fonts',
