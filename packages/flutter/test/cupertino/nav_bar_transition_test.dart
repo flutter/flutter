@@ -625,9 +625,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets(
-      'Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded',
-      (WidgetTester tester) async {
+  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -644,9 +642,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
   });
 
-  testWidgets(
-      'Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed',
-      (WidgetTester tester) async {
+  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     final ScrollController scrollController = ScrollController();
 
