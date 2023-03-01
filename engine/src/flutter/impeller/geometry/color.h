@@ -95,6 +95,15 @@ struct Color {
                  static_cast<Scalar>(b) / 255, static_cast<Scalar>(a) / 255);
   }
 
+  /// @brief Convert this color to a 32-bit representation.
+  static constexpr uint32_t ToIColor(Color color) {
+    return (((std::lround(color.alpha * 255) & 0xff) << 24) |
+            ((std::lround(color.red * 255) & 0xff) << 16) |
+            ((std::lround(color.green * 255) & 0xff) << 8) |
+            ((std::lround(color.blue * 255) & 0xff) << 0)) &
+           0xFFFFFFFF;
+  }
+
   constexpr bool operator==(const Color& c) const {
     return ScalarNearlyEqual(red, c.red) && ScalarNearlyEqual(green, c.green) &&
            ScalarNearlyEqual(blue, c.blue) && ScalarNearlyEqual(alpha, c.alpha);

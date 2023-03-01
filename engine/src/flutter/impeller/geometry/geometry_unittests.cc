@@ -1844,6 +1844,12 @@ TEST(GeometryTest, ColorPrinting) {
   }
 }
 
+TEST(GeometryTest, ToIColor) {
+  ASSERT_EQ(Color::ToIColor(Color(0, 0, 0, 0)), 0u);
+  ASSERT_EQ(Color::ToIColor(Color(1.0, 1.0, 1.0, 1.0)), 0xFFFFFFFF);
+  ASSERT_EQ(Color::ToIColor(Color(0.5, 0.5, 1.0, 1.0)), 0xFF8080FF);
+}
+
 TEST(GeometryTest, Gradient) {
   {
     // Simple 2 color gradient produces color buffer containing exactly those

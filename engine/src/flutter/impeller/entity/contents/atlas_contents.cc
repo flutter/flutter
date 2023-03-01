@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 #include <optional>
+#include <unordered_map>
 #include <utility>
+
+#include "flutter/fml/macros.h"
 
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -18,6 +21,10 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+
+#ifdef FML_OS_PHYSICAL_IOS
+#include "impeller/entity/contents/framebuffer_blend_contents.h"
+#endif
 
 namespace impeller {
 
@@ -57,6 +64,87 @@ void AtlasContents::SetBlendMode(BlendMode blend_mode) {
 
 void AtlasContents::SetCullRect(std::optional<Rect> cull_rect) {
   cull_rect_ = cull_rect;
+}
+
+struct AtlasBlenderKey {
+  Color color;
+  Rect rect;
+  uint32_t color_key;
+
+  struct Hash {
+    std::size_t operator()(const AtlasBlenderKey& key) const {
+      return fml::HashCombine(key.color_key, key.rect.size.width,
+                              key.rect.size.height, key.rect.origin.x,
+                              key.rect.origin.y);
+    }
+  };
+
+  struct Equal {
+    bool operator()(const AtlasBlenderKey& lhs,
+                    const AtlasBlenderKey& rhs) const {
+      return lhs.rect == rhs.rect && lhs.color_key == rhs.color_key;
+    }
+  };
+};
+
+std::shared_ptr<SubAtlasResult> AtlasContents::GenerateSubAtlas() const {
+  FML_DCHECK(colors_.size() > 0 && blend_mode_ != BlendMode::kSource &&
+             blend_mode_ != BlendMode::kDestination);
+
+  std::unordered_map<AtlasBlenderKey, std::vector<Matrix>,
+                     AtlasBlenderKey::Hash, AtlasBlenderKey::Equal>
+      sub_atlas = {};
+
+  for (auto i = 0u; i < texture_coords_.size(); i++) {
+    AtlasBlenderKey key = {.color = colors_[i],
+                           .rect = texture_coords_[i],
+                           .color_key = Color::ToIColor(colors_[i])};
+    if (sub_atlas.find(key) == sub_atlas.end()) {
+      sub_atlas[key] = {transforms_[i]};
+    } else {
+      sub_atlas[key].push_back(transforms_[i]);
+    }
+  }
+
+  auto result = std::make_shared<SubAtlasResult>();
+  Scalar x_offset = 0.0;
+  Scalar y_offset = 0.0;
+  Scalar x_extent = 0.0;
+  Scalar y_extent = 0.0;
+
+  for (auto it = sub_atlas.begin(); it != sub_atlas.end(); it++) {
+    // This size was arbitrarily chosen to keep the textures from getting too
+    // wide. We could instead use a more generic rect packer but in the majority
+    // of cases the sample rects will be fairly close in size making this a good
+    // enough approximation.
+    if (x_offset >= 1000) {
+      y_offset = y_extent + 1;
+      x_offset = 0.0;
+    }
+
+    auto key = it->first;
+    auto transforms = it->second;
+
+    auto new_rect = Rect::MakeXYWH(x_offset, y_offset, key.rect.size.width,
+                                   key.rect.size.height);
+    auto sub_transform = Matrix::MakeTranslation(Vector2(x_offset, y_offset));
+
+    x_offset += std::ceil(key.rect.size.width) + 1.0;
+
+    result->sub_texture_coords.push_back(key.rect);
+    result->sub_colors.push_back(key.color);
+    result->sub_transforms.push_back(sub_transform);
+
+    x_extent = std::max(x_extent, x_offset);
+    y_extent = std::max(y_extent, std::ceil(y_offset + key.rect.size.height));
+
+    for (auto transform : transforms) {
+      result->result_texture_coords.push_back(new_rect);
+      result->result_transforms.push_back(transform);
+    }
+  }
+  result->size = ISize(std::ceil(x_extent), std::ceil(y_extent));
+  return result;
 }
 
 std::optional<Rect> AtlasContents::GetCoverage(const Entity& entity) const {
@@ -125,17 +213,56 @@ bool AtlasContents::Render(const ContentContext& renderer,
     return child_contents.Render(renderer, entity, pass);
   }
 
+  auto sub_atlas = GenerateSubAtlas();
+  auto sub_coverage = Rect::MakeSize(sub_atlas->size);
+
   auto src_contents = std::make_shared<AtlasTextureContents>(*this);
-  src_contents->SetCoverage(coverage);
+  src_contents->SetSubAtlas(sub_atlas);
+  src_contents->SetCoverage(sub_coverage);
 
   auto dst_contents = std::make_shared<AtlasColorContents>(*this);
-  dst_contents->SetCoverage(coverage);
+  dst_contents->SetSubAtlas(sub_atlas);
+  dst_contents->SetCoverage(sub_coverage);
 
+#ifdef FML_OS_PHYSICAL_IOS
+  auto new_texture = renderer.MakeSubpass(
+      sub_atlas->size, [&](const ContentContext& context, RenderPass& pass) {
+        Entity entity;
+        entity.SetContents(dst_contents);
+        entity.SetBlendMode(BlendMode::kSource);
+        if (!entity.Render(context, pass)) {
+          return false;
+        }
+        if (blend_mode_ >= Entity::kLastPipelineBlendMode) {
+          auto contents = std::make_shared<FramebufferBlendContents>();
+          contents->SetBlendMode(blend_mode_);
+          contents->SetChildContents(src_contents);
+          entity.SetContents(std::move(contents));
+          entity.SetBlendMode(BlendMode::kSource);
+          return entity.Render(context, pass);
+        }
+        entity.SetContents(src_contents);
+        entity.SetBlendMode(blend_mode_);
+        return entity.Render(context, pass);
+      });
+#else
   auto contents = ColorFilterContents::MakeBlend(
       blend_mode_,
       {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
-  contents->SetAlpha(alpha_);
-  return contents->Render(renderer, entity, pass);
+  auto snapshot = contents->RenderToSnapshot(renderer, entity);
+  if (!snapshot.has_value()) {
+    return false;
+  }
+  auto new_texture = snapshot.value().texture;
+#endif
+
+  auto child_contents = AtlasTextureContents(*this);
+  child_contents.SetAlpha(alpha_);
+  child_contents.SetCoverage(coverage);
+  child_contents.SetTexture(new_texture);
+  child_contents.SetUseDestination(true);
+  child_contents.SetSubAtlas(sub_atlas);
+  return child_contents.Render(renderer, entity, pass);
 }
 
 // AtlasTextureContents
@@ -159,15 +286,38 @@ void AtlasTextureContents::SetCoverage(Rect coverage) {
   coverage_ = coverage;
 }
 
+void AtlasTextureContents::SetUseDestination(bool value) {
+  use_destination_ = value;
+}
+
+void AtlasTextureContents::SetSubAtlas(
+    const std::shared_ptr<SubAtlasResult>& subatlas) {
+  subatlas_ = subatlas;
+}
+
+void AtlasTextureContents::SetTexture(std::shared_ptr<Texture> texture) {
+  texture_ = std::move(texture);
+}
+
 bool AtlasTextureContents::Render(const ContentContext& renderer,
                                   const Entity& entity,
                                   RenderPass& pass) const {
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
 
-  auto texture = parent_.GetTexture();
-  auto texture_coords = parent_.GetTextureCoordinates();
-  auto transforms = parent_.GetTransforms();
+  auto texture = texture_.value_or(parent_.GetTexture());
+  std::vector<Rect> texture_coords;
+  std::vector<Matrix> transforms;
+  if (subatlas_.has_value()) {
+    auto subatlas = subatlas_.value();
+    texture_coords = use_destination_ ? subatlas->result_texture_coords
+                                      : subatlas->sub_texture_coords;
+    transforms = use_destination_ ? subatlas->result_transforms
+                                  : subatlas->sub_transforms;
+  } else {
+    texture_coords = parent_.GetTextureCoordinates();
+    transforms = parent_.GetTransforms();
+  }
 
   const Size texture_size(texture->GetSize());
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
@@ -242,15 +392,30 @@ void AtlasColorContents::SetCoverage(Rect coverage) {
   coverage_ = coverage;
 }
 
+void AtlasColorContents::SetSubAtlas(
+    const std::shared_ptr<SubAtlasResult>& subatlas) {
+  subatlas_ = subatlas;
+}
+
 bool AtlasColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
   using VS = GeometryColorPipeline::VertexShader;
   using FS = GeometryColorPipeline::FragmentShader;
 
-  auto texture_coords = parent_.GetTextureCoordinates();
-  auto transforms = parent_.GetTransforms();
-  auto colors = parent_.GetColors();
+  std::vector<Rect> texture_coords;
+  std::vector<Matrix> transforms;
+  std::vector<Color> colors;
+  if (subatlas_.has_value()) {
+    auto subatlas = subatlas_.value();
+    texture_coords = subatlas->sub_texture_coords;
+    colors = subatlas->sub_colors;
+    transforms = subatlas->sub_transforms;
+  } else {
+    texture_coords = parent_.GetTextureCoordinates();
+    transforms = parent_.GetTransforms();
+    colors = parent_.GetColors();
+  }
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.Reserve(texture_coords.size() * 6);
