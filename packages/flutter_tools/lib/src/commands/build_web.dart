@@ -73,7 +73,8 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
-          'Valid values range from O0 to O4.'
+          'Valid values range from O0 to O4.',
+          defaultsTo: kDart2jsDefaultOptimizationLevel
     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
@@ -147,7 +148,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArgDeprecated('native-null-assertions'),
       boolArgDeprecated('wasm'),
       baseHref: baseHref,
-      dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
+      dart2jsOptimization: stringArgDeprecated('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
       dumpInfo: boolArgDeprecated('dump-info'),
       noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
