@@ -2427,6 +2427,18 @@ class TextSelectionGestureDetectorBuilder {
     _selectTextBoundariesInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
   }
 
+  // Returns the closest boundary location to `extent` but not including `extent`
+  // itself.
+  TextRange _moveBeyondTextBoundary(TextPosition extent, TextBoundary textBoundary) {
+    assert(extent.offset >= 0);
+    // if x is a boundary defined by `textBoundary`, most textBoundaries (except
+    // LineBreaker) guarantees `x == textBoundary.getLeadingTextBoundaryAt(x)`.
+    // Use x - 1 here to make sure we don't get stuck at the fixed point x.
+    final int start = textBoundary.getLeadingTextBoundaryAt(extent.offset - 1) ?? 0;
+    final int end = textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? editableText.textEditingValue.text.length;
+    return TextRange(start: start, end: end);
+  }
+
   // Selects the set of text boundaries in a document that intersect a given
   // range of global positions.
   //
@@ -2437,17 +2449,14 @@ class TextSelectionGestureDetectorBuilder {
   // beginning and end of a text boundary respectively.
   void _selectTextBoundariesInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
-    final TextRange fromRange = boundary.getTextBoundaryAt(fromPosition.offset);
+    final TextRange fromRange = _moveBeyondTextBoundary(fromPosition, boundary);
     final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
-    final TextRange toRange = toPosition == fromPosition ? fromRange : boundary.getTextBoundaryAt(
-      toPosition.offset == editableText.textEditingValue.text.length ? toPosition.offset - 1 : toPosition.offset,
-    );
+    final TextRange toRange = toPosition == fromPosition ? fromRange : _moveBeyondTextBoundary(toPosition, boundary);
     final bool isFromBoundaryBeforeToBoundary = fromRange.start < toRange.end;
 
-    final TextSelection newSelection = TextSelection(
-      baseOffset: isFromBoundaryBeforeToBoundary ? fromRange.start : fromRange.end,
-      extentOffset: isFromBoundaryBeforeToBoundary ? toRange.end : toRange.start,
-    );
+    final TextSelection newSelection = isFromBoundaryBeforeToBoundary
+        ? TextSelection(baseOffset: fromRange.start, extentOffset: toRange.end)
+        : TextSelection(baseOffset: fromRange.end, extentOffset: toRange.start);
 
     editableText.userUpdateTextEditingValue(
       editableText.textEditingValue.copyWith(selection: newSelection),
