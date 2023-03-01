@@ -148,7 +148,7 @@ class TestFonts extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {
 
-    final Uri archiveUri = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/${version!}/test_fonts.zip');
+    final Uri archiveUri = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/fonts/${version!}/test_fonts.zip');
     return artifactUpdater.downloadZipArchive('Downloading test fonts...', archiveUri, location);
   }
 }

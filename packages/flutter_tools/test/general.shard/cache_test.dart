@@ -796,7 +796,7 @@ void main() {
     expect(downloadMessage, 'Downloading test fonts...');
     expect(
       fromLocation,
-      'https://storage.googleapis.com/flutter_infra_release/flutter/3012db47f3130e62f7cc0beabff968a33cbec8d8/test_fonts.zip',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/fonts/3012db47f3130e62f7cc0beabff968a33cbec8d8/test_fonts.zip',
     );
     expect(toLocation, 'cache/bin/cache/artifacts/test_fonts');
   });
