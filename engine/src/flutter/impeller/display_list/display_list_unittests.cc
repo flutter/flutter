@@ -35,12 +35,8 @@ namespace impeller {
 namespace testing {
 
 flutter::DlColor toColor(const float* components) {
-  auto value = (((std::lround(components[3] * 255) & 0xff) << 24) |
-                ((std::lround(components[0] * 255) & 0xff) << 16) |
-                ((std::lround(components[1] * 255) & 0xff) << 8) |
-                ((std::lround(components[2] * 255) & 0xff) << 0)) &
-               0xFFFFFFFF;
-  return flutter::DlColor(value);
+  return flutter::DlColor(Color::ToIColor(
+      Color(components[0], components[1], components[2], components[3])));
 }
 
 using DisplayListTest = DisplayListPlayground;

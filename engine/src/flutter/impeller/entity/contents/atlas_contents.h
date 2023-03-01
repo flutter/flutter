@@ -15,6 +15,20 @@
 
 namespace impeller {
 
+struct SubAtlasResult {
+  // Sub atlas values.
+  std::vector<Rect> sub_texture_coords;
+  std::vector<Color> sub_colors;
+  std::vector<Matrix> sub_transforms;
+
+  // Result atlas values.
+  std::vector<Rect> result_texture_coords;
+  std::vector<Matrix> result_transforms;
+
+  // Size of the sub-atlass.
+  ISize size;
+};
+
 class AtlasContents final : public Contents {
  public:
   explicit AtlasContents();
@@ -46,6 +60,11 @@ class AtlasContents final : public Contents {
   const std::vector<Rect>& GetTextureCoordinates() const;
 
   const std::vector<Color>& GetColors() const;
+
+  /// @brief Compress a drawAtlas call with blending into a smaller sized atlas.
+  ///        This atlas has no overlapping to ensure
+  ///        blending behaves as if it were done in the fragment shader.
+  std::shared_ptr<SubAtlasResult> GenerateSubAtlas() const;
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
@@ -89,10 +108,19 @@ class AtlasTextureContents final : public Contents {
 
   void SetCoverage(Rect coverage);
 
+  void SetTexture(std::shared_ptr<Texture> texture);
+
+  void SetUseDestination(bool value);
+
+  void SetSubAtlas(const std::shared_ptr<SubAtlasResult>& subatlas);
+
  private:
   const AtlasContents& parent_;
   Scalar alpha_ = 1.0;
   Rect coverage_;
+  std::optional<std::shared_ptr<Texture>> texture_;
+  bool use_destination_ = false;
+  std::optional<std::shared_ptr<SubAtlasResult>> subatlas_ = std::nullopt;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AtlasTextureContents);
 };
@@ -115,10 +143,13 @@ class AtlasColorContents final : public Contents {
 
   void SetCoverage(Rect coverage);
 
+  void SetSubAtlas(const std::shared_ptr<SubAtlasResult>& subatlas);
+
  private:
   const AtlasContents& parent_;
   Scalar alpha_ = 1.0;
   Rect coverage_;
+  std::optional<std::shared_ptr<SubAtlasResult>> subatlas_ = std::nullopt;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AtlasColorContents);
 };

@@ -2115,6 +2115,69 @@ TEST_P(EntityTest, SdfText) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, AtlasContentsSubAtlas) {
+  auto boston = CreateTextureForFixture("boston.jpg");
+
+  {
+    auto contents = std::make_shared<AtlasContents>();
+    contents->SetBlendMode(BlendMode::kSourceOver);
+    contents->SetTexture(boston);
+    contents->SetColors({
+        Color::Red(),
+        Color::Red(),
+        Color::Red(),
+    });
+    contents->SetTextureCoordinates({
+        Rect::MakeLTRB(0, 0, 10, 10),
+        Rect::MakeLTRB(0, 0, 10, 10),
+        Rect::MakeLTRB(0, 0, 10, 10),
+    });
+    contents->SetTransforms({
+        Matrix::MakeTranslation(Vector2(0, 0)),
+        Matrix::MakeTranslation(Vector2(100, 100)),
+        Matrix::MakeTranslation(Vector2(200, 200)),
+    });
+
+    // Since all colors and sample rects are the same, there should
+    // only be a single entry in the sub atlas.
+    auto subatlas = contents->GenerateSubAtlas();
+    ASSERT_EQ(subatlas->sub_texture_coords.size(), 1u);
+  }
+
+  {
+    auto contents = std::make_shared<AtlasContents>();
+    contents->SetBlendMode(BlendMode::kSourceOver);
+    contents->SetTexture(boston);
+    contents->SetColors({
+        Color::Red(),
+        Color::Green(),
+        Color::Blue(),
+    });
+    contents->SetTextureCoordinates({
+        Rect::MakeLTRB(0, 0, 10, 10),
+        Rect::MakeLTRB(0, 0, 10, 10),
+        Rect::MakeLTRB(0, 0, 10, 10),
+    });
+    contents->SetTransforms({
+        Matrix::MakeTranslation(Vector2(0, 0)),
+        Matrix::MakeTranslation(Vector2(100, 100)),
+        Matrix::MakeTranslation(Vector2(200, 200)),
+    });
+
+    // Since all colors are different, there are three entires.
+    auto subatlas = contents->GenerateSubAtlas();
+    ASSERT_EQ(subatlas->sub_texture_coords.size(), 3u);
+
+    // The translations are kept but the sample rects point into
+    // different parts of the sub atlas.
+    ASSERT_EQ(subatlas->result_texture_coords[0], Rect::MakeXYWH(0, 0, 10, 10));
+    ASSERT_EQ(subatlas->result_texture_coords[1],
+              Rect::MakeXYWH(11, 0, 10, 10));
+    ASSERT_EQ(subatlas->result_texture_coords[2],
+              Rect::MakeXYWH(22, 0, 10, 10));
+  }
+}
+
 static Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
   Vector3 yuv;
   switch (yuv_color_space) {
