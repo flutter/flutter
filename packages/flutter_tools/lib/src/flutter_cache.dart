@@ -127,7 +127,8 @@ class PubDependencies extends ArtifactSet {
       project: _projectFactory.fromDirectory(
         fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
       ),
-      offline: offline
+      offline: offline,
+      outputMode: PubOutputMode.none,
     );
   }
 }
