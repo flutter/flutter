@@ -404,7 +404,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleOnDatePickerModeChange(){
-    if(widget.onDatePickerModeChange != null){
+    if (widget.onDatePickerModeChange != null){
       widget.onDatePickerModeChange!(_entryMode.value);
     }
   }
