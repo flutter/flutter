@@ -28,35 +28,15 @@ class BuildWebCommand extends BuildSubCommand {
     usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
-    usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
-    argParser.addFlag('csp',
-      negatable: false,
-      help: 'Disable dynamic generation of code in the generated output. '
-            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
-    );
-    argParser.addFlag(
-      'source-maps',
-      help: 'Generate a sourcemap file. These can be used by browsers '
-            'to view and debug the original source code of a compiled and minified Dart '
-            'application.'
-    );
 
-    if (featureFlags.isFlutterWebWasmEnabled) {
-      argParser.addFlag(
-        'wasm',
-        help: 'Compile to WebAssembly rather than JavaScript (experimental).',
-      );
-    } else {
-      // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
-      argParser.addFlag(
-        'wasm',
-        hide: true,
-      );
-    }
-
+    //
+    // Flutter web-specific options
+    //
+    argParser.addSeparator('Flutter web options');
+    usesWebRendererOption();
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
@@ -80,6 +60,22 @@ class BuildWebCommand extends BuildSubCommand {
           'The value has to start and end with a slash "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
     );
+
+    //
+    // JavaScript compilation options
+    //
+    argParser.addSeparator('JavaScript compilation options');
+    argParser.addFlag('csp',
+      negatable: false,
+      help: 'Disable dynamic generation of code in the generated output. '
+            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
+    argParser.addFlag(
+      'source-maps',
+      help: 'Generate a sourcemap file. These can be used by browsers '
+            'to view and debug the original source code of a compiled and minified Dart '
+            'application.'
+    );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.',
@@ -93,6 +89,23 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Disables the frequency based minifier. '
           'Useful for comparing the output between builds.'
     );
+
+    //
+    // Experimental options
+    //
+    if (featureFlags.isFlutterWebWasmEnabled) {
+      argParser.addSeparator('Experimental options');
+      argParser.addFlag(
+        'wasm',
+        help: 'Compile to WebAssembly rather than JavaScript.',
+      );
+    } else {
+      // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
+      argParser.addFlag(
+        'wasm',
+        hide: true,
+      );
+    }
   }
 
   final FileSystem _fileSystem;
