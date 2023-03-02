@@ -4606,7 +4606,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     super.addTags(tags);
     // _ContainerSemanticsFragments add their tags to child fragments through
     // this method. This fragment must make sure its _config is in sync.
-    tags.forEach(_config.addTagForChildren);
+    if (tags.isNotEmpty) {
+      _ensureConfigIsWritable();
+      tags.forEach(_config.addTagForChildren);
+    }
   }
 
   void _ensureConfigIsWritable() {
