@@ -213,9 +213,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
       clipper: clipper,
       elevation: elevation,
       shadowColor: shadowColor,
-            color: effectiveColor,
-            clipBehavior: widget.clipBehavior,
-            child: material,
+      color: effectiveColor,
+      clipBehavior: widget.clipBehavior,
+      child: material,
      );
 
     return SizedBox(height: height, child: physicalShape);
