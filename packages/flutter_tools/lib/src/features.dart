@@ -70,6 +70,11 @@ const List<Feature> allFeatures = <Feature>[
   flutterWebWasm,
 ];
 
+/// All current Flutter feature flags that can be configured.
+/// 
+/// [Feature.configSetting] is not `null`.
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
