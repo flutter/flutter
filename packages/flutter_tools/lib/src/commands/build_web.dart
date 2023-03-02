@@ -36,7 +36,12 @@ class BuildWebCommand extends BuildSubCommand {
     // Flutter web-specific options
     //
     argParser.addSeparator('Flutter web options');
-    usesWebRendererOption();
+    argParser.addOption('base-href',
+      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is done to web/index.html file if this flag is not provided. '
+          'The value has to start and end with a slash "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
+    );
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
@@ -54,12 +59,7 @@ class BuildWebCommand extends BuildSubCommand {
                        'is not desirable',
       },
     );
-    argParser.addOption('base-href',
-      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
-    );
+    usesWebRendererOption();
 
     //
     // JavaScript compilation options
@@ -98,6 +98,7 @@ class BuildWebCommand extends BuildSubCommand {
       argParser.addFlag(
         'wasm',
         help: 'Compile to WebAssembly rather than JavaScript.',
+        negatable: false,
       );
     } else {
       // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
