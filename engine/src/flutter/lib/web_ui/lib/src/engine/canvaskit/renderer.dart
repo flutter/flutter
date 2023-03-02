@@ -28,13 +28,6 @@ import 'shader.dart';
 import 'text.dart';
 import 'vertices.dart';
 
-/// Whether we can use client-provided ICU information instead of CanvasKit's
-/// built-in ICU.
-const bool browserSupportsCanvaskitChromium = false;
-// TODO(mdebbar): Uncomment this and use it to determine which flavor of
-//  CanvasKit to download.
-// final bool browserSupportsCanvaskitChromium = domIntl.v8BreakIterator != null;
-
 enum CanvasKitVariant {
   /// The appropriate variant is chosen based on the browser.
   ///
