@@ -624,6 +624,8 @@ void hooksTests() async {
 
     expectEquals(window.viewConfiguration.gestureSettings,
       GestureSettings(physicalTouchSlop: 11.0));
+    expectEquals(window.gestureSettings,
+      GestureSettings(physicalTouchSlop: 11.0));
 
     _callHook(
       '_updateWindowMetrics',
@@ -652,6 +654,8 @@ void hooksTests() async {
 
     expectEquals(window.viewConfiguration.gestureSettings,
       GestureSettings(physicalTouchSlop: null));
+    expectEquals(window.gestureSettings,
+      GestureSettings(physicalTouchSlop: null));
 
     _callHook(
       '_updateWindowMetrics',
@@ -679,6 +683,8 @@ void hooksTests() async {
     );
 
     expectEquals(window.viewConfiguration.gestureSettings,
+      GestureSettings(physicalTouchSlop: 22.0));
+    expectEquals(window.gestureSettings,
       GestureSettings(physicalTouchSlop: 22.0));
   });
 
