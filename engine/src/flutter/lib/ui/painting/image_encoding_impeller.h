@@ -15,14 +15,28 @@ class Context;
 
 namespace flutter {
 
-void ConvertImageToRasterImpeller(
-    const sk_sp<DlImage>& dl_image,
-    std::function<void(sk_sp<SkImage>)> encode_task,
-    const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
-    const fml::RefPtr<fml::TaskRunner>& io_task_runner,
-    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
-    const std::shared_ptr<impeller::Context>& impeller_context);
+class ImageEncodingImpeller {
+ public:
+  /// Converts a DlImage to a SkImage.
+  /// This should be called from the thread that corresponds to
+  /// `dl_image->owning_context()` when gpu access is guaranteed.
+  /// See also: `ConvertImageToRaster`.
+  /// Visible for testing.
+  static void ConvertDlImageToSkImage(
+      const sk_sp<DlImage>& dl_image,
+      std::function<void(sk_sp<SkImage>)> encode_task,
+      const std::shared_ptr<impeller::Context>& impeller_context);
 
+  /// Converts a DlImage to a SkImage.
+  /// `encode_task` is executed with the resulting `SkImage`.
+  static void ConvertImageToRaster(
+      const sk_sp<DlImage>& dl_image,
+      std::function<void(sk_sp<SkImage>)> encode_task,
+      const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
+      const fml::RefPtr<fml::TaskRunner>& io_task_runner,
+      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
+      const std::shared_ptr<impeller::Context>& impeller_context);
+};
 }  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_IMPELLER_H_
