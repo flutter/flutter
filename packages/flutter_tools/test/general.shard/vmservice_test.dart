@@ -317,7 +317,7 @@ void main() {
 
     final Map<String, dynamic> response = await cb(<String, dynamic>{});
     final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
-    expect(result[kResultType], kResultTypeFailure);
+    expect(result[kResultType], kResultTypeSuccess);
     expect(result['targets'], isNull);
     expect(result['buildConfigurations'], isNull);
     expect(result['schemes'], isNull);

@@ -20,7 +20,6 @@ import 'version.dart';
 
 const String kResultType = 'type';
 const String kResultTypeSuccess = 'Success';
-const String kResultTypeFailure = 'Failure';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
@@ -298,7 +297,7 @@ Future<vm_service.VmService> setUpVmService({
       if (info == null) {
         return <String, Object>{
           'result': <String, Object>{
-            kResultType: kResultTypeFailure,
+            kResultType: kResultTypeSuccess,
           },
         };
       }

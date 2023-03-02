@@ -74,6 +74,10 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'service': 'flutterMemoryInfo',
     'alias': 'Flutter Tools',
   }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': 'flutterGetIOSBuildOptions',
+    'alias': 'Flutter Tools',
+  }),
   FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{
