@@ -144,6 +144,20 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  ui.GestureSettings get gestureSettings => _gestureSettings ?? _window.gestureSettings;
+  ui.GestureSettings? _gestureSettings;
+  /// Hides the real gesture settings and reports the given [gestureSettingsTestValue] instead.
+  set gestureSettingsTestValue(ui.GestureSettings gestureSettingsTestValue) { // ignore: avoid_setters_without_getters
+    _gestureSettings = gestureSettingsTestValue;
+    onMetricsChanged?.call();
+  }
+  /// Deletes any existing test gesture settings and returns to using the real gesture settings.
+  void clearGestureSettingsTestValue() {
+    _paddingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
   List<ui.DisplayFeature> get displayFeatures => _displayFeaturesTestValue ?? _window.displayFeatures;
   List<ui.DisplayFeature>? _displayFeaturesTestValue;
   /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
@@ -508,6 +522,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   void clearAllTestValues() {
     clearDevicePixelRatioTestValue();
     clearPaddingTestValue();
+    clearGestureSettingsTestValue();
     clearDisplayFeaturesTestValue();
     clearPhysicalSizeTestValue();
     clearViewInsetsTestValue();

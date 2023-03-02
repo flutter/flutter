@@ -1326,12 +1326,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ViewConfiguration(
-      gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
-    );
+    tester.binding.window.gestureSettingsTestValue = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
 
     expect(MediaQueryData.fromView(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
-    tester.binding.window.viewConfigurationTestValue = null;
+    tester.binding.window.clearGestureSettingsTestValue();
   });
 
   testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
@@ -1544,6 +1542,8 @@ class TestView implements FlutterView {
   final ViewConfiguration viewConfiguration = const ViewConfiguration();
   @override
   final List<DisplayFeature> displayFeatures = <DisplayFeature>[];
+  @override
+  final GestureSettings gestureSettings = const GestureSettings();
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
