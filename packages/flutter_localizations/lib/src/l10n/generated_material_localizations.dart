@@ -132,7 +132,13 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Vou in';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -601,7 +607,13 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ሰብስብ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1070,7 +1082,13 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'تصغير';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -1539,7 +1557,13 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'সংকোচন কৰক';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2008,7 +2032,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Yığcamlaşdırın';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2477,7 +2507,13 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Згарнуць';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -2946,7 +2982,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Свиване';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -3415,7 +3457,13 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'আড়াল করুন';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -3884,7 +3932,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Suzi';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -4353,7 +4407,13 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Replega';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -4822,7 +4882,13 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sbalit';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5291,7 +5357,13 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -5760,7 +5832,13 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6266,7 +6344,13 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Σύμπτυξη';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -6735,7 +6819,13 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -8061,7 +8151,13 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ocultar';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -11733,7 +11829,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ahenda';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12202,7 +12304,13 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tolestu';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -12671,7 +12779,13 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'کوچک کردن';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13140,7 +13254,13 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tiivistä';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -13609,7 +13729,13 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14078,7 +14204,13 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Réduire';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -14683,7 +14815,13 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Contraer';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15152,7 +15290,13 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -15621,7 +15765,13 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'સંકુચિત કરો';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16090,7 +16240,13 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'כיווץ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -16559,7 +16715,13 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'छोटा करें';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -17028,7 +17190,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sažmi';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -17497,7 +17665,13 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Összecsukás';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -17966,7 +18140,13 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ծալել';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -18435,7 +18615,13 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ciutkan';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -18904,7 +19090,13 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Draga saman';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -19373,7 +19565,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Comprimi';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -19842,7 +20040,13 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '折りたたむ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -20311,7 +20515,13 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ჩაკეცვა';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -20780,7 +20990,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Жию';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -21249,7 +21465,13 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'បង្រួម';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -21718,7 +21940,13 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -22187,7 +22415,13 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '접기';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -22656,7 +22890,13 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Жыйыштыруу';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -23125,7 +23365,13 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ຫຍໍ້ເຂົ້າ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -23594,7 +23840,13 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sutraukti';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -24063,7 +24315,13 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sakļaut';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -24532,7 +24790,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Собери';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -25001,7 +25265,13 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ചുരുക്കുക';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -25470,7 +25740,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Буулгах';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -25939,7 +26215,13 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'कोलॅप्स करा';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -26408,7 +26690,13 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Runtuhkan';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -26877,7 +27165,13 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'လျှော့ပြရန်';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -27346,7 +27640,13 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -27815,7 +28115,13 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -28284,7 +28590,13 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Samenvouwen';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -28753,7 +29065,13 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -29222,7 +29540,13 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -29691,7 +30015,13 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ਸਮੇਟੋ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -30160,7 +30490,13 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Zwiń';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -30629,7 +30965,13 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -31098,7 +31440,13 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Recolher';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -31706,7 +32054,13 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Restrângeți';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -32175,7 +32529,13 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Свернуть';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -32644,7 +33004,13 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'හකුළන්න';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -33113,7 +33479,13 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Zbaliť';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -33582,7 +33954,13 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Strniti';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -34051,7 +34429,13 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Palos';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -34520,7 +34904,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Скупи';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -35291,7 +35681,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Dölj';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -35760,7 +36156,13 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kunja';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -36229,7 +36631,13 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'சுருக்கும்';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -36698,7 +37106,13 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'కుదించు';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -37167,7 +37581,13 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ยุบ';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -37636,7 +38056,13 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -38105,7 +38531,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Daralt';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -38574,7 +39006,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Згорнути';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -39043,7 +39481,13 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'سکیڑیں';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -39512,7 +39956,13 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kichraytirish';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -39981,7 +40431,13 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Thu gọn';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -40450,7 +40906,13 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '收起';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
@@ -41382,7 +41844,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Goqa';
 
   @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
   String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => "double tap to collapse'";
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';

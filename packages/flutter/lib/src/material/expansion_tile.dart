@@ -432,8 +432,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         semanticsHint = _isExpanded
-          ? '${localizations.collapsedHint} double tap to ${localizations.expandedIconTapHint}'
-          : '${localizations.expandedHint} double tap to ${localizations.collapsedIconTapHint}';
+          ? '${localizations.collapsedHint} ${localizations.expansionTileExpandedHint}'
+          : '${localizations.expandedHint} ${localizations.expansionTileCollapsedHint}';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

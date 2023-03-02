@@ -873,7 +873,7 @@ void main() {
     expect(semantics, isNotNull);
     expect(
       semantics.hint,
-      '${localizations.expandedHint} double tap to ${localizations.collapsedIconTapHint}',
+      '${localizations.expandedHint} ${localizations.expansionTileCollapsedHint}',
     );
 
     semantics = tester.getSemantics(
@@ -886,7 +886,7 @@ void main() {
     expect(semantics, isNotNull);
     expect(
       semantics.hint,
-      '${localizations.collapsedHint} double tap to ${localizations.expandedIconTapHint}',
+      '${localizations.collapsedHint} ${localizations.expansionTileExpandedHint}',
     );
     handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
