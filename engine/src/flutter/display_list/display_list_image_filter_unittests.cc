@@ -32,120 +32,6 @@ TEST(DisplayListImageFilter, BuilderSetGet) {
   ASSERT_EQ(builder.getImageFilter(), nullptr);
 }
 
-TEST(DisplayListImageFilter, FromSkiaNullFilter) {
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(nullptr);
-
-  ASSERT_EQ(filter, nullptr);
-  ASSERT_EQ(filter.get(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaBlurImageFilter) {
-  sk_sp<SkImageFilter> sk_image_filter =
-      SkImageFilters::Blur(5.0, 5.0, SkTileMode::kRepeat, nullptr);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
-
-  // We cannot recapture the blur parameters from an SkBlurImageFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_EQ(filter->asColorFilter(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaDilateImageFilter) {
-  sk_sp<SkImageFilter> sk_image_filter =
-      SkImageFilters::Dilate(5.0, 5.0, nullptr);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
-
-  // We cannot recapture the dilate parameters from an SkDilateImageFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_EQ(filter->asColorFilter(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaErodeImageFilter) {
-  sk_sp<SkImageFilter> sk_image_filter =
-      SkImageFilters::Erode(5.0, 5.0, nullptr);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
-
-  // We cannot recapture the erode parameters from an SkErodeImageFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_EQ(filter->asColorFilter(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaMatrixImageFilter) {
-  sk_sp<SkImageFilter> sk_image_filter = SkImageFilters::MatrixTransform(
-      SkMatrix::RotateDeg(45), ToSk(DlImageSampling::kLinear), nullptr);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
-
-  // We cannot recapture the blur parameters from an SkMatrixImageFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_EQ(filter->asColorFilter(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaComposeImageFilter) {
-  sk_sp<SkImageFilter> sk_blur_filter =
-      SkImageFilters::Blur(5.0, 5.0, SkTileMode::kRepeat, nullptr);
-  sk_sp<SkImageFilter> sk_matrix_filter = SkImageFilters::MatrixTransform(
-      SkMatrix::RotateDeg(45), ToSk(DlImageSampling::kLinear), nullptr);
-  sk_sp<SkImageFilter> sk_image_filter =
-      SkImageFilters::Compose(sk_blur_filter, sk_matrix_filter);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
-
-  // We cannot recapture the blur parameters from an SkComposeImageFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_EQ(filter->asColorFilter(), nullptr);
-}
-
-TEST(DisplayListImageFilter, FromSkiaColorFilterImageFilter) {
-  sk_sp<SkColorFilter> sk_color_filter =
-      SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcIn);
-  sk_sp<SkImageFilter> sk_image_filter =
-      SkImageFilters::ColorFilter(sk_color_filter, nullptr);
-  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
-  DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcIn);
-  DlColorFilterImageFilter dl_image_filter(dl_color_filter.shared());
-
-  ASSERT_EQ(filter->type(), DlImageFilterType::kColorFilter);
-
-  ASSERT_TRUE(*filter->asColorFilter() == dl_image_filter);
-  ASSERT_EQ(*filter.get(), dl_image_filter);
-  ASSERT_EQ(*filter->asColorFilter()->color_filter(), dl_color_filter);
-
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->asDilate(), nullptr);
-  ASSERT_EQ(filter->asErode(), nullptr);
-  ASSERT_EQ(filter->asMatrix(), nullptr);
-  ASSERT_EQ(filter->asCompose(), nullptr);
-  ASSERT_NE(filter->asColorFilter(), nullptr);
-}
-
 // SkRect::contains treats the rect as a half-open interval which is
 // appropriate for so many operations. Unfortunately, we are using
 // it here to test containment of the corners of a transformed quad
@@ -308,6 +194,15 @@ TEST(DisplayListImageFilter, BlurEquals) {
   TestEquals(filter1, filter2);
 }
 
+TEST(DisplayListImageFilter, BlurWithLocalMatrixEquals) {
+  DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
+  DlBlurImageFilter filter2(5.0, 6.0, DlTileMode::kMirror);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
+}
+
 TEST(DisplayListImageFilter, BlurNotEquals) {
   DlBlurImageFilter filter1(5.0, 6.0, DlTileMode::kMirror);
   DlBlurImageFilter filter2(7.0, 6.0, DlTileMode::kMirror);
@@ -358,6 +253,15 @@ TEST(DisplayListImageFilter, DilateEquals) {
   TestEquals(filter1, filter2);
 }
 
+TEST(DisplayListImageFilter, DilateWithLocalMatrixEquals) {
+  DlDilateImageFilter filter1(5.0, 6.0);
+  DlDilateImageFilter filter2(5.0, 6.0);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
+}
+
 TEST(DisplayListImageFilter, DilateNotEquals) {
   DlDilateImageFilter filter1(5.0, 6.0);
   DlDilateImageFilter filter2(7.0, 6.0);
@@ -404,6 +308,15 @@ TEST(DisplayListImageFilter, ErodeEquals) {
   DlErodeImageFilter filter2(5.0, 6.0);
 
   TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, ErodeWithLocalMatrixEquals) {
+  DlErodeImageFilter filter1(5.0, 6.0);
+  DlErodeImageFilter filter2(5.0, 6.0);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
 }
 
 TEST(DisplayListImageFilter, ErodeNotEquals) {
@@ -467,6 +380,18 @@ TEST(DisplayListImageFilter, MatrixEquals) {
   DlMatrixImageFilter filter2(matrix, DlImageSampling::kLinear);
 
   TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, MatrixWithLocalMatrixEquals) {
+  SkMatrix matrix = SkMatrix::MakeAll(2.0, 0.0, 10,  //
+                                      0.5, 3.0, 15,  //
+                                      0.0, 0.0, 1);
+  DlMatrixImageFilter filter1(matrix, DlImageSampling::kLinear);
+  DlMatrixImageFilter filter2(matrix, DlImageSampling::kLinear);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
 }
 
 TEST(DisplayListImageFilter, MatrixNotEquals) {
@@ -562,6 +487,26 @@ TEST(DisplayListImageFilter, ComposeEquals) {
   DlComposeImageFilter filter2(outer1, inner1);
 
   TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, ComposeWithLocalMatrixEquals) {
+  DlMatrixImageFilter outer1(SkMatrix::MakeAll(2.0, 0.0, 10,  //
+                                               0.5, 3.0, 15,  //
+                                               0.0, 0.0, 1),
+                             DlImageSampling::kLinear);
+  DlBlurImageFilter inner1(5.0, 6.0, DlTileMode::kMirror);
+  DlComposeImageFilter filter1(outer1, inner1);
+
+  DlMatrixImageFilter outer2(SkMatrix::MakeAll(2.0, 0.0, 10,  //
+                                               0.5, 3.0, 15,  //
+                                               0.0, 0.0, 1),
+                             DlImageSampling::kLinear);
+  DlBlurImageFilter inner2(5.0, 6.0, DlTileMode::kMirror);
+  DlComposeImageFilter filter2(outer1, inner1);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
 }
 
 TEST(DisplayListImageFilter, ComposeNotEquals) {
@@ -714,6 +659,18 @@ TEST(DisplayListImageFilter, ColorFilterEquals) {
   TestEquals(filter1, filter2);
 }
 
+TEST(DisplayListImageFilter, ColorFilterWithLocalMatrixEquals) {
+  DlBlendColorFilter dl_color_filter1(DlColor::kRed(), DlBlendMode::kLighten);
+  DlColorFilterImageFilter filter1(dl_color_filter1);
+
+  DlBlendColorFilter dl_color_filter2(DlColor::kRed(), DlBlendMode::kLighten);
+  DlColorFilterImageFilter filter2(dl_color_filter2);
+
+  SkMatrix local_matrix = SkMatrix::Translate(10, 10);
+  TestEquals(*filter1.makeWithLocalMatrix(local_matrix),
+             *filter2.makeWithLocalMatrix(local_matrix));
+}
+
 TEST(DisplayListImageFilter, ColorFilterNotEquals) {
   DlBlendColorFilter dl_color_filter1(DlColor::kRed(), DlBlendMode::kLighten);
   DlColorFilterImageFilter filter1(dl_color_filter1);
@@ -740,28 +697,6 @@ TEST(DisplayListImageFilter, ColorFilterModifiesTransparencyBounds) {
   DlColorFilterImageFilter filter(dl_color_filter);
   SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
   TestInvalidBounds(filter, SkMatrix::I(), input_bounds);
-}
-
-TEST(DisplayListImageFilter, UnknownConstructor) {
-  DlUnknownImageFilter filter(
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr));
-}
-
-TEST(DisplayListImageFilter, UnknownShared) {
-  DlUnknownImageFilter filter(
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr));
-
-  ASSERT_NE(filter.shared().get(), &filter);
-  ASSERT_EQ(*filter.shared(), filter);
-}
-
-TEST(DisplayListImageFilter, UnknownContents) {
-  sk_sp<SkImageFilter> sk_filter =
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr);
-  DlUnknownImageFilter filter(sk_filter);
-
-  ASSERT_EQ(filter.skia_object(), sk_filter);
-  ASSERT_EQ(filter.skia_object().get(), sk_filter.get());
 }
 
 TEST(DisplayListImageFilter, LocalImageFilterBounds) {
@@ -858,28 +793,6 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
   // With sigmas set to zero on the blur filter, Skia will return a null filter.
   // The local matrix filter should return nullptr instead of crashing.
   ASSERT_EQ(dl_local_matrix_filter.skia_object(), nullptr);
-}
-
-TEST(DisplayListImageFilter, UnknownEquals) {
-  sk_sp<SkImageFilter> sk_filter =
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr);
-
-  DlUnknownImageFilter filter1(sk_filter);
-  DlUnknownImageFilter filter2(sk_filter);
-
-  TestEquals(filter1, filter2);
-}
-
-TEST(DisplayListImageFilter, UnknownNotEquals) {
-  DlUnknownImageFilter filter1(
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr));
-  DlUnknownImageFilter filter2(
-      SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr));
-
-  // Even though the filter is the same, it is a different instance
-  // and we cannot currently tell them apart because the Skia
-  // ImageFilter objects do not implement ==
-  TestNotEquals(filter1, filter2, "SkImageFilter instance differs");
 }
 
 }  // namespace testing

@@ -168,7 +168,8 @@ class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
 class DisplayListAttributeFlags : DisplayListFlagsBase {
  public:
   const DisplayListSpecialGeometryFlags WithPathEffect(
-      const DlPathEffect* effect) const;
+      const DlPathEffect* effect,
+      bool is_stroked) const;
 
   constexpr bool ignores_paint() const { return has_any(kIgnoresPaint_); }
 

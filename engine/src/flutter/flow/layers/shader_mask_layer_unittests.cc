@@ -21,6 +21,19 @@ namespace testing {
 
 using ShaderMaskLayerTest = LayerTest;
 
+static std::shared_ptr<DlColorSource> MakeFilter(DlColor color) {
+  DlColor colors[] = {
+      color.withAlpha(0x7f),
+      color,
+  };
+  float stops[] = {
+      0,
+      1,
+  };
+  return DlColorSource::MakeLinear(SkPoint::Make(0, 0), SkPoint::Make(10, 10),
+                                   2, colors, stops, DlTileMode::kRepeat);
+}
+
 #ifndef NDEBUG
 TEST_F(ShaderMaskLayerTest, PaintingEmptyLayerDies) {
   auto layer =
@@ -98,9 +111,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto layer_filter =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter = DlColorSource::From(layer_filter);
+  auto dl_filter = MakeFilter(DlColor::kBlue());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
                                                  DlBlendMode::kSrc);
@@ -144,9 +155,7 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
-  auto layer_filter =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter = DlColorSource::From(layer_filter);
+  auto dl_filter = MakeFilter(DlColor::kBlue());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
@@ -201,12 +210,8 @@ TEST_F(ShaderMaskLayerTest, Nested) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
-  auto layer_filter1 =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter1 = DlColorSource::From(layer_filter1);
-  auto layer_filter2 =
-      SkPerlinNoiseShader::MakeFractalNoise(2.0f, 2.0f, 2, 2.0f);
-  auto dl_filter2 = DlColorSource::From(layer_filter2);
+  auto dl_filter1 = MakeFilter(DlColor::kGreen());
+  auto dl_filter2 = MakeFilter(DlColor::kMagenta());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
   auto layer1 = std::make_shared<ShaderMaskLayer>(dl_filter1, layer_bounds,
@@ -275,9 +280,7 @@ TEST_F(ShaderMaskLayerTest, Nested) {
 
 TEST_F(ShaderMaskLayerTest, Readback) {
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
-  auto layer_filter =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter = DlColorSource::From(layer_filter);
+  auto dl_filter = MakeFilter(DlColor::kBlue());
   auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
                                                  DlBlendMode::kSrc);
 
@@ -296,9 +299,7 @@ TEST_F(ShaderMaskLayerTest, Readback) {
 }
 
 TEST_F(ShaderMaskLayerTest, LayerCached) {
-  auto layer_filter =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter = DlColorSource::From(layer_filter);
+  auto dl_filter = MakeFilter(DlColor::kBlue());
   DlPaint paint;
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
@@ -405,9 +406,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 6.5f, 6.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
-  auto layer_filter =
-      SkPerlinNoiseShader::MakeFractalNoise(1.0f, 1.0f, 1, 1.0f);
-  auto dl_filter = DlColorSource::From(layer_filter);
+  auto dl_filter = MakeFilter(DlColor::kBlue());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
                                                  DlBlendMode::kSrc);

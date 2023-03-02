@@ -20,26 +20,14 @@ class DlDashPathEffect;
 // facilities and adheres to the design goals of the |DlAttribute| base
 // class.
 
-// An enumerated type for the recognized PathEffect operations.
-// In current Flutter we only use the DashPathEffect.
-// And another PathEffect outside of the recognized types is needed
-// then a |kUnknown| type that simply defers to an SkPathEffect is
-// provided as a fallback.
+// An enumerated type for the supported PathEffect operations.
 enum class DlPathEffectType {
   kDash,
-  kUnknown,
 };
 
 class DlPathEffect
     : public DlAttribute<DlPathEffect, SkPathEffect, DlPathEffectType> {
  public:
-  static std::shared_ptr<DlPathEffect> From(SkPathEffect* sk_path_effect);
-
-  static std::shared_ptr<DlPathEffect> From(
-      sk_sp<SkPathEffect> sk_path_effect) {
-    return From(sk_path_effect.get());
-  }
-
   virtual const DlDashPathEffect* asDash() const { return nullptr; }
 
   virtual std::optional<SkRect> effect_bounds(SkRect&) const = 0;
@@ -134,43 +122,6 @@ class DlDashPathEffect final : public DlPathEffect {
   friend class DlPathEffect;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlDashPathEffect);
-};
-
-// Now that the DisplayListCanvasRecorder is deleted and the
-// Paragraph code talks directly to a DisplayListBuilder, there may be
-// no more reasons to maintain this sub-class.
-// See: https://github.com/flutter/flutter/issues/121389
-class DlUnknownPathEffect final : public DlPathEffect {
- public:
-  DlUnknownPathEffect(sk_sp<SkPathEffect> effect)
-      : sk_path_effect_(std::move(effect)) {}
-  DlUnknownPathEffect(const DlUnknownPathEffect& effect)
-      : DlUnknownPathEffect(effect.sk_path_effect_) {}
-  DlUnknownPathEffect(const DlUnknownPathEffect* effect)
-      : DlUnknownPathEffect(effect->sk_path_effect_) {}
-
-  DlPathEffectType type() const override { return DlPathEffectType::kUnknown; }
-  size_t size() const override { return sizeof(*this); }
-
-  std::shared_ptr<DlPathEffect> shared() const override {
-    return std::make_shared<DlUnknownPathEffect>(this);
-  }
-
-  sk_sp<SkPathEffect> skia_object() const override { return sk_path_effect_; }
-
-  virtual ~DlUnknownPathEffect() = default;
-
-  std::optional<SkRect> effect_bounds(SkRect& rect) const override;
-
- protected:
-  bool equals_(const DlPathEffect& other) const override {
-    FML_DCHECK(other.type() == DlPathEffectType::kUnknown);
-    auto that = static_cast<DlUnknownPathEffect const*>(&other);
-    return sk_path_effect_ == that->sk_path_effect_;
-  }
-
- private:
-  sk_sp<SkPathEffect> sk_path_effect_;
 };
 
 }  // namespace flutter

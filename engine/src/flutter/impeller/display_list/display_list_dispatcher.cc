@@ -342,8 +342,6 @@ static std::optional<Paint::ColorSourceType> ToColorSourceType(
     case flutter::DlColorSourceType::kScene:
       return Paint::ColorSourceType::kScene;
 #endif  // IMPELLER_ENABLE_3D
-    case flutter::DlColorSourceType::kUnknown:
-      return std::nullopt;
   }
 }
 
@@ -581,9 +579,6 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
       return [](FilterInput::Ref input) {
         return ColorFilterContents::MakeLinearToSrgbFilter({std::move(input)});
       };
-    case flutter::DlColorFilterType::kUnknown:
-      FML_LOG(ERROR) << "Requested DlColorFilterType::kUnknown";
-      UNIMPLEMENTED;
   }
   return std::nullopt;
 }
@@ -641,9 +636,6 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
       };
       break;
     }
-    case flutter::DlMaskFilterType::kUnknown:
-      UNIMPLEMENTED;
-      break;
   }
 }
 
@@ -771,8 +763,6 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       };
       break;
     }
-    case flutter::DlImageFilterType::kUnknown:
-      return std::nullopt;
   }
 }
 

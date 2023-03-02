@@ -116,7 +116,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
            {0, 0, 0, 0,
             [](DisplayListBuilder& b) { b.setColor(SK_ColorBLACK); }},
        }},
-      {"SetBlendModeOrBlender",
+      {"SetBlendMode",
        {
            {0, 8, 0, 0,
             [](DisplayListBuilder& b) { b.setBlendMode(DlBlendMode::kSrcIn); }},
@@ -227,6 +227,13 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             }},
            {0, 0, 0, 0,
             [](DisplayListBuilder& b) { b.setImageFilter(nullptr); }},
+           {0, 24, 0, 0,
+            [](DisplayListBuilder& b) {
+              b.setImageFilter(
+                  kTestBlurImageFilter1
+                      .makeWithLocalMatrix(SkMatrix::Translate(2, 2))
+                      .get());
+            }},
        }},
       {"SetColorFilter",
        {
