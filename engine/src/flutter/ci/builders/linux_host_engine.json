@@ -259,14 +259,13 @@
             "gn": [
                 "--runtime-mode",
                 "release",
-                "--web",
-                "--build-canvaskit"
+                "--web"
             ],
             "name": "wasm_release",
             "ninja": {
                 "config": "wasm_release",
                 "targets": [
-                    "flutter/web_sdk"
+                    "flutter/web_sdk:flutter_web_sdk_archive"
                 ]
             },
             "tests": []
