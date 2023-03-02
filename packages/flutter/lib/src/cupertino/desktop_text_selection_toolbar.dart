@@ -10,23 +10,23 @@ import 'colors.dart';
 // the screen.
 const double _kToolbarScreenPadding = 8.0;
 
-// These values were measured from a screenshot of TextEdit on macOS 10.15.7 on
-// a Macbook Pro.
+// These values were measured from a screenshot of the native context menu on
+// macOS 13.2 on a Macbook Pro.
 const double _kToolbarWidth = 222.0;
-const Radius _kToolbarBorderRadius = Radius.circular(4.0);
-const EdgeInsets _kToolbarPadding = EdgeInsets.symmetric(
-  vertical: 3.0,
-);
+const Radius _kToolbarBorderRadius = Radius.circular(8.0);
+const EdgeInsets _kToolbarPadding = EdgeInsets.all(6.0);
 
-// These values were measured from a screenshot of TextEdit on macOS 10.16 on a
-// Macbook Pro.
-const CupertinoDynamicColor _kToolbarBorderColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFBBBBBB),
-  darkColor: Color(0xFF505152),
+// These values were measured from a screenshot of the native context menu on
+// macOS 13.2 on a Macbook Pro.
+const CupertinoDynamicColor _kToolbarBorderColor =
+    CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFB8B8B8),
+  darkColor: Color(0xFF5B5B5B),
 );
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xffECE8E6),
-  darkColor: Color(0xff302928),
+const CupertinoDynamicColor _kToolbarBackgroundColor =
+    CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFECECEC),
+  darkColor: Color(0xFF333333),
 );
 
 /// A macOS-style text selection toolbar.
@@ -74,6 +74,14 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
           color: _kToolbarBorderColor.resolveFrom(context),
         ),
         borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color.fromARGB(50, 0, 0, 0),
+            blurRadius: 10.0,
+            spreadRadius: 0.5,
+            offset: Offset(0.0, 4.0),
+          ),
+        ],
       ),
       child: Padding(
         padding: _kToolbarPadding,
@@ -86,7 +94,8 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
-    final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
+    final double paddingAbove =
+        MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(

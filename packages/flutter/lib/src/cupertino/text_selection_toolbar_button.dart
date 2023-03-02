@@ -83,8 +83,10 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// {@endtemplate}
   final ContextMenuButtonItem? buttonItem;
 
+  /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.text}
   /// The text used in the button's label when using
   /// [CupertinoTextSelectionToolbarButton.text].
+  /// {@endtemplate}
   final String? text;
 
   /// Returns the default button label String for the button of the given
