@@ -226,7 +226,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
 
 #ifdef FML_OS_PHYSICAL_IOS
   auto new_texture = renderer.MakeSubpass(
-      sub_atlas->size, [&](const ContentContext& context, RenderPass& pass) {
+      "Atlas Blend", sub_atlas->size,
+      [&](const ContentContext& context, RenderPass& pass) {
         Entity entity;
         entity.SetContents(dst_contents);
         entity.SetBlendMode(BlendMode::kSource);

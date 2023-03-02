@@ -97,12 +97,11 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture =
-      renderer.MakeSubpass(input_snapshot->texture->GetSize(), callback);
+  auto out_texture = renderer.MakeSubpass(
+      "Color Matrix Filter", input_snapshot->texture->GetSize(), callback);
   if (!out_texture) {
     return std::nullopt;
   }
-  out_texture->SetLabel("ColorMatrixFilter Texture");
 
   return Contents::EntityFromSnapshot(
       Snapshot{.texture = out_texture,

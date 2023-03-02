@@ -603,7 +603,8 @@ class ContentContext {
 
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
-  std::shared_ptr<Texture> MakeSubpass(ISize texture_size,
+  std::shared_ptr<Texture> MakeSubpass(const std::string& label,
+                                       ISize texture_size,
                                        const SubpassCallback& subpass_callback,
                                        bool msaa_enabled = true) const;
 
