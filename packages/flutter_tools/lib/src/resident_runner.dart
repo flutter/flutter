@@ -36,7 +36,6 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
-import 'ios/xcodeproj.dart';
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -250,7 +249,7 @@ class FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
-    GetXcodeProjectInfo? getIOSProjectInfo,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     int? hostVmServicePort,
     int? ddsPort,
@@ -331,7 +330,7 @@ class FlutterDevice {
               restart: restart,
               compileExpression: compileExpression,
               getSkSLMethod: getSkSLMethod,
-              getIOSProjectInfo: getIOSProjectInfo,
+              flutterProject: FlutterProject.current(),
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
               logger: globals.logger,
@@ -946,14 +945,6 @@ abstract class ResidentHandlers {
     return sharedSkSlWriter(device, data);
   }
 
-  /// Write the SkSL shaders to a zip file in build directory.
-  ///
-  /// Returns the name of the file, or `null` on failures.
-  Future<XcodeProjectInfo?> _getIOSProjectInfo() {
-    final FlutterProject flutterProject = FlutterProject.current();
-    return flutterProject.ios.projectInfo();
-  }
-
   /// Take a screenshot on the provided [device].
   ///
   /// If the device has a connected vmservice, this method will attempt to hide
@@ -1391,7 +1382,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
-        getIOSProjectInfo: _getIOSProjectInfo,
+        flutterProject: FlutterProject.current(),
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6 ?? false,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,

@@ -15,7 +15,12 @@ import 'base/utils.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'ios/xcodeproj.dart';
+import 'project.dart';
 import 'version.dart';
+
+const String kResultType = 'type';
+const String kResultTypeSuccess = 'Success';
+const String kResultTypeFailure = 'Failure';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
@@ -103,9 +108,6 @@ typedef CompileExpression = Future<String> Function(
 /// The name of the file returned as a result.
 typedef GetSkSLMethod = Future<String?> Function();
 
-/// A method that pulls an Xcode project info.
-typedef GetXcodeProjectInfo = Future<XcodeProjectInfo?> Function();
-
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   required Logger logger,
@@ -169,7 +171,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   Restart? restart,
   CompileExpression? compileExpression,
   GetSkSLMethod? getSkSLMethod,
-  GetXcodeProjectInfo? getIOSProjectInfo,
+  FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device? device,
@@ -180,16 +182,16 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
 /// callbacks.
 ///
 /// All parameters besides [vmService] may be null.
-Future<vm_service.VmService> setUpVmService(
+Future<vm_service.VmService> setUpVmService({
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
   Device? device,
   GetSkSLMethod? skSLMethod,
-  GetXcodeProjectInfo? getIOSProjectInfo,
+  FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  vm_service.VmService vmService
-) async {
+  required vm_service.VmService vmService,
+}) async {
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
@@ -204,7 +206,7 @@ Future<vm_service.VmService> setUpVmService(
 
       return <String, Object>{
         'result': <String, Object>{
-          'type': 'Success',
+          kResultType: kResultTypeSuccess,
         },
       };
     });
@@ -217,7 +219,7 @@ Future<vm_service.VmService> setUpVmService(
       await restart(pause: pause);
       return <String, Object>{
         'result': <String, Object>{
-          'type': 'Success',
+          kResultType: kResultTypeSuccess,
         },
       };
     });
@@ -231,7 +233,7 @@ Future<vm_service.VmService> setUpVmService(
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
     return <String, Object>{
       'result': <String, Object>{
-        'type': 'Success',
+        kResultType: kResultTypeSuccess,
         ...versionJson,
       },
     };
@@ -252,7 +254,7 @@ Future<vm_service.VmService> setUpVmService(
           expression, definitions, typeDefinitions, libraryUri, klass,
           isStatic);
       return <String, Object>{
-        'type': 'Success',
+        kResultType: kResultTypeSuccess,
         'result': <String, String>{'kernelBytes': kernelBytesBase64},
       };
     });
@@ -263,7 +265,7 @@ Future<vm_service.VmService> setUpVmService(
       final MemoryInfo result = await device.queryMemoryInfo();
       return <String, Object>{
         'result': <String, Object>{
-          'type': 'Success',
+          kResultType: kResultTypeSuccess,
           ...result.toJson(),
         },
       };
@@ -276,13 +278,13 @@ Future<vm_service.VmService> setUpVmService(
       if (filename == null) {
         return <String, Object>{
           'result': <String, Object>{
-            'type': 'Success',
+            kResultType: kResultTypeSuccess,
           },
         };
       }
       return <String, Object>{
         'result': <String, Object>{
-          'type': 'Success',
+          kResultType: kResultTypeSuccess,
           'filename': filename,
         },
       };
@@ -290,19 +292,19 @@ Future<vm_service.VmService> setUpVmService(
     registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
   }
 
-  if (getIOSProjectInfo != null) {
+  if (flutterProject != null) {
     vmService.registerServiceCallback('flutterGetIOSBuildOptions', (Map<String, Object?> params) async {
-      final XcodeProjectInfo? info = await getIOSProjectInfo();
+      final XcodeProjectInfo? info = await flutterProject.ios.projectInfo();
       if (info == null) {
         return <String, Object>{
           'result': <String, Object>{
-            'type': 'Success',
+            kResultType: kResultTypeFailure,
           },
         };
       }
       return <String, Object>{
         'result': <String, Object>{
-          'type': 'Success',
+          kResultType: kResultTypeSuccess,
           'targets': info.targets,
           'schemes': info.schemes,
           'buildConfigurations': info.buildConfigurations,
@@ -349,16 +351,16 @@ Future<vm_service.VmService> setUpVmService(
 /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
 Future<FlutterVmService> connectToVmService(
   Uri httpUri, {
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    GetXcodeProjectInfo? getIOSProjectInfo,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-    Device? device,
-    required Logger logger,
-  }) async {
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  GetSkSLMethod? getSkSLMethod,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+  Device? device,
+  required Logger logger,
+}) async {
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(httpUri,
     reloadSources: reloadSources,
@@ -367,7 +369,7 @@ Future<FlutterVmService> connectToVmService(
     compression: compression,
     device: device,
     getSkSLMethod: getSkSLMethod,
-    getIOSProjectInfo: getIOSProjectInfo,
+    flutterProject: flutterProject,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     logger: logger,
   );
@@ -394,7 +396,7 @@ Future<FlutterVmService> _connect(
   Restart? restart,
   CompileExpression? compileExpression,
   GetSkSLMethod? getSkSLMethod,
-  GetXcodeProjectInfo? getIOSProjectInfo,
+  FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -406,14 +408,14 @@ Future<FlutterVmService> _connect(
   );
 
   final vm_service.VmService service = await setUpVmService(
-    reloadSources,
-    restart,
-    compileExpression,
-    device,
-    getSkSLMethod,
-    getIOSProjectInfo,
-    printStructuredErrorLogMethod,
-    delegateService,
+    reloadSources: reloadSources,
+    restart: restart,
+    compileExpression: compileExpression,
+    device: device,
+    skSLMethod: getSkSLMethod,
+    flutterProject: flutterProject,
+    printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+    vmService: delegateService,
   );
 
   // This call is to ensure we are able to establish a connection instead of
