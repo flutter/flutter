@@ -485,7 +485,6 @@ class _DraggableSheetExtent {
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
-    this.activePositionCount = 0,
   })  : assert(minSize >= 0),
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
@@ -519,8 +518,6 @@ class _DraggableSheetExtent {
   //      sheet has not changed, either by drag or programmatic control. See
   //      docs for `initialChildSize`.
   bool hasChanged;
-
-  int activePositionCount;
 
   bool get isAtMin => minSize >= _currentSize.value;
   bool get isAtMax => maxSize <= _currentSize.value;
@@ -614,7 +611,6 @@ class _DraggableSheetExtent {
           : initialSize),
       hasDragged: hasDragged,
       hasChanged: hasChanged,
-      activePositionCount: activePositionCount,
     );
   }
 }
@@ -795,7 +791,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       physics: const AlwaysScrollableScrollPhysics().applyTo(physics),
       context: context,
       oldPosition: oldPosition,
-      getExtent: () => extent,
+      controller: this,
     );
   }
 
@@ -835,6 +831,9 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     onPositionDetached?.call();
     super.detach(position);
   }
+
+  bool get isIdle => positions.every(
+    (_DraggableScrollableSheetScrollPosition position) => position.isIdle);
 }
 
 class _SheetBallisticScrollActivity extends BallisticScrollActivity {
@@ -906,38 +905,17 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     required super.physics,
     required super.context,
     super.oldPosition,
-    required this.getExtent,
+    required this.controller,
   });
 
-  final _DraggableSheetExtent Function() getExtent;
+  final _DraggableScrollableSheetScrollController controller;
 
-  bool _isActive = false;
+  /// Whether this scroll position is idle. This differs from
+  /// [isScrollingNotifier] in that it considers [HoldScrollActivity] to be
+  /// active for the purposes of preventing snaps.
+  bool get isIdle => activity is IdleScrollActivity;
 
-  _DraggableSheetExtent get extent => getExtent();
-
-  @override
-  void absorb(ScrollPosition other) {
-    // super.absorb will adopt other.activity, but may also immediately reset it
-    // (if other was of a different runtimeType) or goIdle (if other was not a
-    // ScrollPositionWithSingleContext). We need to prepare for this by updating
-    // extent.activePositionCount as if the activity were ours.
-    if (other.activity!.isScrolling) {
-      ++extent.activePositionCount;
-      _isActive = true;
-      // The symmetric -- case is handled in dispose.
-    }
-
-    super.absorb(other);
-  }
-
-  @override
-  void dispose() {
-    if (_isActive) {
-      --extent.activePositionCount;
-      assert(extent.activePositionCount >= 0);
-    }
-    super.dispose();
-  }
+  _DraggableSheetExtent get extent => controller.extent;
 
   bool shouldScrollList(double direction) =>
       pixels > 0.0 &&
@@ -966,42 +944,8 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       extent.hasDragged &&
       !_isAtSnapSize &&
       // Only allow `goBallistic(0)` to snap if there are no active positions on
-      // the extent or if this position itself is active.
-      (extent.activePositionCount == 0 || _isActive);
-
-  @override
-  void beginActivity(ScrollActivity? newActivity) {
-    super.beginActivity(newActivity);
-    if (newActivity == null) {
-      return;
-    }
-
-    // It's debatable whether HoldScrollActivity should be considered active. In
-    // principle, hold should probably prevent snapping. However, this comes at
-    // the expense of instead gating on `is IdleScrollActivity` or introducing a
-    // separate notion of activity, and in practice there are additional
-    // complexities since we allow ongoing scrolling activities to trigger snaps
-    // in order to transfer velocity.
-    //
-    // TODO(AsturaPhoenix): There are several related outstanding edge cases:
-    // * Hold arrests a snap but then snaps to the nearest snap position when
-    //   drag begins.
-    // * More conflicts between ballistic activities (not just snaps) between
-    //   multiple controllers.
-    if (newActivity.isScrolling != _isActive) {
-      // Store this in a field rather than using a getter derived from the
-      // activity to handle the absorb + dispose case, where the only
-      // notification we get that we've been absorbed is the dispose call, by
-      // which point our activity is null.
-      _isActive = newActivity.isScrolling;
-      if (_isActive) {
-        ++extent.activePositionCount;
-      } else {
-        --extent.activePositionCount;
-        assert(extent.activePositionCount >= 0);
-      }
-    }
-  }
+      // the controller or if this position itself is active.
+      (controller.isIdle || !isIdle);
 
   /// Re-evaluates scroll physics for updated max dimensions or snap positions.
   ///

@@ -1989,20 +1989,6 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
-
-    // TODO(AsturaPhoenix): Since dispose happens in a microtask after absorb
-    // right now, the interrupted animation may not snap to a snap point. Update
-    // layout dimensions to make sure we're not stuck.
-    //
-    // A user interaction would also unstick us, but that could happen even if
-    // we're holding onto a stale extent lock since we allow scrolling scroll
-    // activities to trigger snaps regardless.
-    //
-    // Ideally, the snap should complete without any changes.
-    tester.binding.window.physicalSizeTestValue = tester.binding.window.physicalSize + const Offset(0, 1);
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    await tester.pumpAndSettle();
-
     expect(outerController.size, 1.0);
   });
 }
