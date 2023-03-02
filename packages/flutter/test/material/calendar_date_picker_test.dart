@@ -657,7 +657,6 @@ void main() {
     group('Semantics', () {
       testWidgets('day mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker());
 
@@ -837,11 +836,11 @@ void main() {
           hasTapAction: true,
           isFocusable: true,
         ));
+        semantics.dispose();
       });
 
       testWidgets('calendar year mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker(
           initialCalendarMode: DatePickerMode.year,
@@ -863,8 +862,8 @@ void main() {
             isButton: true,
           ));
         }
+        semantics.dispose();
       });
-
     });
   });
 

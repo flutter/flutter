@@ -814,7 +814,6 @@ void main() {
   group('Semantics', () {
     testWidgets('calendar mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Header
@@ -858,11 +857,11 @@ void main() {
           isFocusable: true,
         ));
       });
+      semantics.dispose();
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       initialEntryMode = DatePickerEntryMode.input;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
@@ -901,6 +900,7 @@ void main() {
           isFocusable: true,
         ));
       });
+      semantics.dispose();
     });
   });
 

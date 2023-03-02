@@ -304,8 +304,8 @@ class MenuStyle with Diagnosticable {
 
   /// Linearly interpolate between two [MenuStyle]s.
   static MenuStyle? lerp(MenuStyle? a, MenuStyle? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return MenuStyle(
       backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),

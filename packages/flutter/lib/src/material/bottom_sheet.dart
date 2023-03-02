@@ -559,10 +559,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
-        // Disable the initial animation when accessible navigation is on so
-        // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            MediaQuery.accessibleNavigationOf(context) ? 1.0 : widget.route.animation!.value,
+            widget.route.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -1127,7 +1125,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
    const _BottomSheetDefaultsM3(this.context)
