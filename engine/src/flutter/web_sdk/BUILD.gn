@@ -583,7 +583,9 @@ if (!is_fuchsia) {
     }
 
     tmp_files = []
-    foreach(source, sources) {
+    web_sdk_files =
+        filter_include(sources, [ "$root_build_dir/flutter_web_sdk/**" ])
+    foreach(source, web_sdk_files) {
       tmp_files += [
         {
           source = rebase_path(source)
