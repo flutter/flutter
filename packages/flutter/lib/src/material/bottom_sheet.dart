@@ -313,7 +313,8 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
-    final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final BottomSheetThemeData defaults = useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
@@ -321,7 +322,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
-    final bool hasDragHandle = widget.hasDragHandle ?? Theme.of(context).useMaterial3;
+    final bool hasDragHandle = widget.hasDragHandle ?? useMaterial3;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -333,16 +334,18 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: (widget.enableDrag && hasDragHandle) ? Stack(
-          alignment: Alignment.topCenter,
-          children: <Widget>[
-            _buildDragHandle(context, onSemanticsTap: widget.onClosing),
-            Padding(
-              padding: const EdgeInsets.only(top:kMinInteractiveDimension),
-              child: widget.builder(context),
+        child: (!widget.enableDrag || !hasDragHandle)
+          ? widget.builder(context) 
+          : Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                _dragHandle(context, onSemanticsTap: widget.onClosing),
+                Padding(
+                  padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                  child: widget.builder(context),
+                ),
+              ],
             ),
-          ],
-        ) : widget.builder(context),
       ),
     );
 
@@ -366,35 +369,35 @@ class _BottomSheetState extends State<BottomSheet> {
     );
   }
 
-  Widget _buildDragHandle(BuildContext context, {required VoidCallback onSemanticsTap}) {
+  Widget _dragHandle(BuildContext context, {required VoidCallback onSemanticsTap}) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
 
     final Size dragHandleSize = bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
-    final Color dragHandleColor = bottomSheetTheme.dragHandleColor ?? m3Defaults.dragHandleColor!;
 
     return MouseRegion(
       onEnter: (PointerEnterEvent event) => _handleDragHandleHover(true),
       onExit: (PointerExitEvent event) => _handleDragHandleHover(false),
       child: Semantics(
-      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      container: true,
-      onTap: onSemanticsTap,
-      child: SizedBox(
-        height: kMinInteractiveDimension,
-        width: kMinInteractiveDimension,
-        child: Center(
-          child: Container(
-            height: dragHandleSize.height,
-            width: dragHandleSize.width,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(dragHandleSize.height/2),
-              color: MaterialStateProperty.resolveAs(dragHandleColor, dragHandleMaterialState),
+        label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        container: true,
+        onTap: onSemanticsTap,
+        child: SizedBox(
+          height: kMinInteractiveDimension,
+          width: kMinInteractiveDimension,
+          child: Center(
+            child: Container(
+              height: dragHandleSize.height,
+              width: dragHandleSize.width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(dragHandleSize.height/2),
+                color: MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, dragHandleMaterialState) ?? m3Defaults.dragHandleColor!,
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }
 
