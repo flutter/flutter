@@ -212,9 +212,6 @@ void DisplayListBuilder::onSetColorSource(const DlColorSource* source) {
         break;
       }
 #endif  // IMPELLER_ENABLE_3D
-      case DlColorSourceType::kUnknown:
-        Push<SetSkColorSourceOp>(0, 0, source->skia_object());
-        break;
     }
   }
 }
@@ -259,10 +256,6 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
         Push<SetSharedImageFilterOp>(0, 0, filter);
         break;
       }
-      case DlImageFilterType::kUnknown: {
-        Push<SetSkImageFilterOp>(0, 0, filter->skia_object());
-        break;
-      }
     }
   }
 }
@@ -297,10 +290,6 @@ void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
         new (pod) DlLinearToSrgbGammaColorFilter();
         break;
       }
-      case DlColorFilterType::kUnknown: {
-        Push<SetSkColorFilterOp>(0, 0, filter->skia_object());
-        break;
-      }
     }
   }
   UpdateCurrentOpacityCompatibility();
@@ -316,10 +305,6 @@ void DisplayListBuilder::onSetPathEffect(const DlPathEffect* effect) {
         const DlDashPathEffect* dash_effect = effect->asDash();
         void* pod = Push<SetPodPathEffectOp>(dash_effect->size(), 0);
         new (pod) DlDashPathEffect(dash_effect);
-        break;
-      }
-      case DlPathEffectType::kUnknown: {
-        Push<SetSkPathEffectOp>(0, 0, effect->skia_object());
         break;
       }
     }
@@ -339,9 +324,6 @@ void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
         new (pod) DlBlurMaskFilter(blur_filter);
         break;
       }
-      case DlMaskFilterType::kUnknown:
-        Push<SetSkMaskFilterOp>(0, 0, filter->skia_object());
-        break;
     }
   }
 }
@@ -1183,9 +1165,11 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
   }
 
   if (flags.is_geometric()) {
+    bool is_stroked = flags.is_stroked(current_.getDrawStyle());
+
     // Path effect occurs before stroking...
     DisplayListSpecialGeometryFlags special_flags =
-        flags.WithPathEffect(current_.getPathEffectPtr());
+        flags.WithPathEffect(current_.getPathEffectPtr(), is_stroked);
     if (current_.getPathEffect()) {
       auto effect_bounds = current_.getPathEffect()->effect_bounds(bounds);
       if (!effect_bounds.has_value()) {
@@ -1194,7 +1178,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
       bounds = effect_bounds.value();
     }
 
-    if (flags.is_stroked(current_.getDrawStyle())) {
+    if (is_stroked) {
       // Determine the max multiplier to the stroke width first.
       SkScalar pad = 1.0f;
       if (current_.getStrokeJoin() == DlStrokeJoin::kMiter &&
@@ -1212,18 +1196,14 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
   }
 
   if (flags.applies_mask_filter()) {
-    if (current_.getMaskFilter()) {
-      const DlBlurMaskFilter* blur_filter = current_.getMaskFilter()->asBlur();
-      if (blur_filter) {
-        SkScalar mask_sigma_pad = blur_filter->sigma() * 3.0;
-        bounds.outset(mask_sigma_pad, mask_sigma_pad);
-      } else {
-        SkPaint p;
-        p.setMaskFilter(current_.getMaskFilter()->skia_object());
-        if (!p.canComputeFastBounds()) {
-          return false;
+    auto filter = current_.getMaskFilter();
+    if (filter) {
+      switch (filter->type()) {
+        case DlMaskFilterType::kBlur: {
+          FML_DCHECK(filter->asBlur());
+          SkScalar mask_sigma_pad = filter->asBlur()->sigma() * 3.0;
+          bounds.outset(mask_sigma_pad, mask_sigma_pad);
         }
-        bounds = p.computeFastBounds(bounds, &bounds);
       }
     }
   }

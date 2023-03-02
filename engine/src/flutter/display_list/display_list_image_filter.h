@@ -23,10 +23,7 @@ namespace flutter {
 // The objects here define operations that can take a location and one or
 // more input pixels and produce a color for that output pixel
 
-// An enumerated type for the recognized ImageFilter operations.
-// If a custom ImageFilter outside of the recognized types is needed
-// then a |kUnknown| type that simply defers to an SkImageFilter is
-// provided as a fallback.
+// An enumerated type for the supported ImageFilter operations.
 enum class DlImageFilterType {
   kBlur,
   kDilate,
@@ -35,7 +32,6 @@ enum class DlImageFilterType {
   kComposeFilter,
   kColorFilter,
   kLocalMatrixFilter,
-  kUnknown
 };
 
 class DlBlurImageFilter;
@@ -54,25 +50,6 @@ class DlImageFilter
     kScaleTranslate,
     kComplex,
   };
-
-  // Return a shared_ptr holding a DlImageFilter representing the indicated
-  // Skia SkImageFilter pointer.
-  //
-  // This method can only detect the ColorFilter type of ImageFilter from an
-  // analogous SkImageFilter as there are no "asA..." methods for the other
-  // types on SkImageFilter.
-  static std::shared_ptr<DlImageFilter> From(const SkImageFilter* sk_filter);
-
-  // Return a shared_ptr holding a DlImageFilter representing the indicated
-  // Skia SkImageFilter pointer.
-  //
-  // This method can only detect the ColorFilter type of ImageFilter from an
-  // analogous SkImageFilter as there are no "asA..." methods for the other
-  // types on SkImageFilter.
-  static std::shared_ptr<DlImageFilter> From(
-      const sk_sp<SkImageFilter> sk_filter) {
-    return From(sk_filter.get());
-  }
 
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.
@@ -725,7 +702,7 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
 
  protected:
   bool equals_(const DlImageFilter& other) const override {
-    FML_DCHECK(other.type() == DlImageFilterType::kMatrix);
+    FML_DCHECK(other.type() == DlImageFilterType::kLocalMatrixFilter);
     auto that = static_cast<const DlLocalMatrixImageFilter*>(&other);
     return (matrix_ == that->matrix_ &&
             Equals(image_filter_, that->image_filter_));
@@ -734,89 +711,6 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
  private:
   SkMatrix matrix_;
   std::shared_ptr<DlImageFilter> image_filter_;
-};
-
-// A wrapper class for a Skia ImageFilter of unknown type. The above 4 types
-// are the only types that can be constructed by Flutter using the
-// ui.ImageFilter class so this class should be rarely used.
-// In fact, now that the DisplayListCanvasRecorder is deleted and the
-// Paragraph code talks directly to a DisplayListBuilder, there may be
-// no more reasons to maintain this sub-class.
-// See: https://github.com/flutter/flutter/issues/121389
-class DlUnknownImageFilter final : public DlImageFilter {
- public:
-  explicit DlUnknownImageFilter(sk_sp<SkImageFilter> sk_filter)
-      : sk_filter_(std::move(sk_filter)) {}
-  explicit DlUnknownImageFilter(const SkImageFilter* sk_filter)
-      : sk_filter_(sk_ref_sp(sk_filter)) {}
-  explicit DlUnknownImageFilter(const DlUnknownImageFilter* filter)
-      : DlUnknownImageFilter(filter->sk_filter_) {}
-  explicit DlUnknownImageFilter(const DlUnknownImageFilter& filter)
-      : DlUnknownImageFilter(&filter) {}
-
-  DlImageFilterType type() const override {
-    return DlImageFilterType::kUnknown;
-  }
-  size_t size() const override { return sizeof(*this); }
-
-  std::shared_ptr<DlImageFilter> shared() const override {
-    return std::make_shared<DlUnknownImageFilter>(this);
-  }
-
-  bool modifies_transparent_black() const override {
-    if (!sk_filter_) {
-      return false;
-    }
-    return !sk_filter_->canComputeFastBounds();
-  }
-
-  SkRect* map_local_bounds(const SkRect& input_bounds,
-                           SkRect& output_bounds) const override {
-    if (!sk_filter_ || modifies_transparent_black()) {
-      output_bounds = input_bounds;
-      return nullptr;
-    }
-    output_bounds = sk_filter_->computeFastBounds(input_bounds);
-    return &output_bounds;
-  }
-
-  SkIRect* map_device_bounds(const SkIRect& input_bounds,
-                             const SkMatrix& ctm,
-                             SkIRect& output_bounds) const override {
-    if (!sk_filter_ || modifies_transparent_black()) {
-      output_bounds = input_bounds;
-      return nullptr;
-    }
-    output_bounds = sk_filter_->filterBounds(
-        input_bounds, ctm, SkImageFilter::kForward_MapDirection);
-    return &output_bounds;
-  }
-
-  SkIRect* get_input_device_bounds(const SkIRect& output_bounds,
-                                   const SkMatrix& ctm,
-                                   SkIRect& input_bounds) const override {
-    if (!sk_filter_ || modifies_transparent_black()) {
-      input_bounds = output_bounds;
-      return nullptr;
-    }
-    input_bounds = sk_filter_->filterBounds(
-        output_bounds, ctm, SkImageFilter::kReverse_MapDirection);
-    return &input_bounds;
-  }
-
-  sk_sp<SkImageFilter> skia_object() const override { return sk_filter_; }
-
-  virtual ~DlUnknownImageFilter() = default;
-
- protected:
-  bool equals_(const DlImageFilter& other) const override {
-    FML_DCHECK(other.type() == DlImageFilterType::kUnknown);
-    auto that = static_cast<DlUnknownImageFilter const*>(&other);
-    return sk_filter_ == that->sk_filter_;
-  }
-
- private:
-  sk_sp<SkImageFilter> sk_filter_;
 };
 
 }  // namespace flutter

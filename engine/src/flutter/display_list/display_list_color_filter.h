@@ -20,37 +20,17 @@ class DlMatrixColorFilter;
 // facilities and adheres to the design goals of the |DlAttribute| base
 // class.
 
-// An enumerated type for the recognized ColorFilter operations.
-// If a custom ColorFilter outside of the recognized types is needed
-// then a |kUnknown| type that simply defers to an SkColorFilter is
-// provided as a fallback.
+// An enumerated type for the supported ColorFilter operations.
 enum class DlColorFilterType {
   kBlend,
   kMatrix,
   kSrgbToLinearGamma,
   kLinearToSrgbGamma,
-  kUnknown
 };
 
 class DlColorFilter
     : public DlAttribute<DlColorFilter, SkColorFilter, DlColorFilterType> {
  public:
-  // Return a shared_ptr holding a DlColorFilter representing the indicated
-  // Skia SkColorFilter pointer.
-  //
-  // This method can detect each of the 4 recognized types from an analogous
-  // SkColorFilter.
-  static std::shared_ptr<DlColorFilter> From(SkColorFilter* sk_filter);
-
-  // Return a shared_ptr holding a DlColorFilter representing the indicated
-  // Skia SkColorFilter pointer.
-  //
-  // This method can detect each of the 4 recognized types from an analogous
-  // SkColorFilter.
-  static std::shared_ptr<DlColorFilter> From(sk_sp<SkColorFilter> sk_filter) {
-    return From(sk_filter.get());
-  }
-
   // Return a boolean indicating whether the color filtering operation will
   // modify transparent black. This is typically used to determine if applying
   // the ColorFilter to a temporary saveLayer buffer will turn the surrounding
@@ -70,9 +50,8 @@ class DlColorFilter
   // type of ColorFilter, otherwise return nullptr.
   virtual const DlMatrixColorFilter* asMatrix() const { return nullptr; }
 
-  // asSrgb<->Linear and asUnknown are not needed because they
-  // have no properties to query. Their type fully specifies their
-  // operation or can be accessed via the common skia_object() method.
+  // asSrgb<->Linear is not needed because it has no properties to query.
+  // Its type fully specifies its operation.
 };
 
 // The Blend type of ColorFilter which specifies modifying the
@@ -251,49 +230,6 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
  private:
   static const sk_sp<SkColorFilter> sk_filter_;
   friend class DlColorFilter;
-};
-
-// A wrapper class for a Skia ColorFilter of unknown type. The above 4 types
-// are the only types that can be constructed by Flutter using the
-// ui.ColorFilter class so this class should be rarely used.
-// In fact, now that the DisplayListCanvasRecorder is deleted and the
-// Paragraph code talks directly to a DisplayListBuilder, there may be
-// no more reasons to maintain this sub-class.
-// See: https://github.com/flutter/flutter/issues/121389
-class DlUnknownColorFilter final : public DlColorFilter {
- public:
-  DlUnknownColorFilter(sk_sp<SkColorFilter> sk_filter)
-      : sk_filter_(std::move(sk_filter)) {}
-  DlUnknownColorFilter(const DlUnknownColorFilter& filter)
-      : DlUnknownColorFilter(filter.sk_filter_) {}
-  DlUnknownColorFilter(const DlUnknownColorFilter* filter)
-      : DlUnknownColorFilter(filter->sk_filter_) {}
-
-  DlColorFilterType type() const override {
-    return DlColorFilterType::kUnknown;
-  }
-  size_t size() const override { return sizeof(*this); }
-  bool modifies_transparent_black() const override {
-    return sk_filter_->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
-  }
-
-  std::shared_ptr<DlColorFilter> shared() const override {
-    return std::make_shared<DlUnknownColorFilter>(this);
-  }
-
-  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
-
-  virtual ~DlUnknownColorFilter() = default;
-
- protected:
-  bool equals_(const DlColorFilter& other) const override {
-    FML_DCHECK(other.type() == DlColorFilterType::kUnknown);
-    auto that = static_cast<DlUnknownColorFilter const*>(&other);
-    return sk_filter_ == that->sk_filter_;
-  }
-
- private:
-  sk_sp<SkColorFilter> sk_filter_;
 };
 
 }  // namespace flutter

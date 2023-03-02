@@ -200,9 +200,6 @@ struct SetBlendModeOp final : DLOp {
 //      instance copied to the memory following the record
 //      yields a size and efficiency that has somewhere between
 //      4 and 8 bytes unused
-// SetSk: 4 byte header + an sk_sp (ptr) uses 16 bytes due to the
-//        alignment of the ptr.
-//        (4 bytes unused)
 #define DEFINE_SET_CLEAR_DLATTR_OP(name, sk_name, field)                    \
   struct Clear##name##Op final : DLOp {                                     \
     static const auto kType = DisplayListOpType::kClear##name;              \
@@ -221,18 +218,6 @@ struct SetBlendModeOp final : DLOp {
     void dispatch(DispatchContext& ctx) const {                             \
       const Dl##name* filter = reinterpret_cast<const Dl##name*>(this + 1); \
       ctx.dispatcher.set##name(filter);                                     \
-    }                                                                       \
-  };                                                                        \
-  struct SetSk##name##Op final : DLOp {                                     \
-    static const auto kType = DisplayListOpType::kSetSk##name;              \
-                                                                            \
-    SetSk##name##Op(sk_sp<Sk##sk_name> field) : field(field) {}             \
-                                                                            \
-    sk_sp<Sk##sk_name> field;                                               \
-                                                                            \
-    void dispatch(DispatchContext& ctx) const {                             \
-      DlUnknown##name dl_filter(field);                                     \
-      ctx.dispatcher.set##name(&dl_filter);                                 \
     }                                                                       \
   };
 DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)

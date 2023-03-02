@@ -24,22 +24,6 @@ TEST(DisplayListMaskFilter, BuilderSetGet) {
   ASSERT_EQ(builder.getMaskFilter(), nullptr);
 }
 
-TEST(DisplayListMaskFilter, FromSkiaNullFilter) {
-  std::shared_ptr<DlMaskFilter> filter = DlMaskFilter::From(nullptr);
-  ASSERT_EQ(filter, nullptr);
-  ASSERT_EQ(filter.get(), nullptr);
-}
-
-TEST(DisplayListMaskFilter, FromSkiaBlurFilter) {
-  sk_sp<SkMaskFilter> sk_filter =
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
-  std::shared_ptr<DlMaskFilter> filter = DlMaskFilter::From(sk_filter);
-  ASSERT_EQ(filter->type(), DlMaskFilterType::kUnknown);
-  // We cannot recapture the blur parameters from an SkBlurMaskFilter
-  ASSERT_EQ(filter->asBlur(), nullptr);
-  ASSERT_EQ(filter->skia_object(), sk_filter);
-}
-
 TEST(DisplayListMaskFilter, BlurConstructor) {
   DlBlurMaskFilter filter(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
 }
@@ -74,45 +58,6 @@ TEST(DisplayListMaskFilter, BlurNotEquals) {
   DlBlurMaskFilter filter3(SkBlurStyle::kNormal_SkBlurStyle, 6.0);
   TestNotEquals(filter1, filter2, "Blur style differs");
   TestNotEquals(filter1, filter3, "blur radius differs");
-}
-
-TEST(DisplayListMaskFilter, UnknownConstructor) {
-  DlUnknownMaskFilter filter(
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
-}
-
-TEST(DisplayListMaskFilter, UnknownShared) {
-  DlUnknownMaskFilter filter(
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
-  ASSERT_NE(filter.shared().get(), &filter);
-  ASSERT_EQ(*filter.shared(), filter);
-}
-
-TEST(DisplayListMaskFilter, UnknownContents) {
-  sk_sp<SkMaskFilter> sk_filter =
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
-  DlUnknownMaskFilter filter(sk_filter);
-  ASSERT_EQ(filter.skia_object(), sk_filter);
-  ASSERT_EQ(filter.skia_object().get(), sk_filter.get());
-}
-
-TEST(DisplayListMaskFilter, UnknownEquals) {
-  sk_sp<SkMaskFilter> sk_filter =
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
-  DlUnknownMaskFilter filter1(sk_filter);
-  DlUnknownMaskFilter filter2(sk_filter);
-  TestEquals(filter1, filter2);
-}
-
-TEST(DisplayListMaskFilter, UnknownNotEquals) {
-  // Even though the filter is the same, it is a different instance
-  // and we cannot currently tell them apart because the Skia
-  // MaskFilter objects do not implement ==
-  DlUnknownMaskFilter filter1(
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
-  DlUnknownMaskFilter filter2(
-      SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 5.0));
-  TestNotEquals(filter1, filter2, "SkMaskFilter instance differs");
 }
 
 void testEquals(DlMaskFilter* a, DlMaskFilter* b) {

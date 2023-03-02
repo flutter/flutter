@@ -17,10 +17,6 @@
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkDiscretePathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/effects/SkImageFilters.h"
 
 namespace flutter {
 namespace testing {
@@ -668,20 +664,21 @@ class TestParameters {
       return false;
     }
 
+    bool is_stroked = flags_.is_stroked(attr.getDrawStyle());
+    if (flags_.is_stroked(ref_attr.getDrawStyle()) != is_stroked) {
+      return false;
+    }
     DisplayListSpecialGeometryFlags geo_flags =
-        flags_.WithPathEffect(attr.getPathEffect().get());
+        flags_.WithPathEffect(attr.getPathEffect().get(), is_stroked);
     if (flags_.applies_path_effect() &&  //
         ref_attr.getPathEffect() != attr.getPathEffect()) {
-      if (attr.getPathEffect()->asDash() == nullptr) {
-        return false;
+      switch (attr.getPathEffect()->type()) {
+        case DlPathEffectType::kDash: {
+          if (is_stroked && !ignores_dashes()) {
+            return false;
+          }
+        }
       }
-      if (!ignores_dashes()) {
-        return false;
-      }
-    }
-    bool is_stroked = flags_.is_stroked(ref_attr.getDrawStyle());
-    if (flags_.is_stroked(attr.getDrawStyle()) != is_stroked) {
-      return false;
     }
     if (!is_stroked) {
       return true;
@@ -766,7 +763,7 @@ class TestParameters {
     auto path_effect = paint.getPathEffect();
 
     DisplayListSpecialGeometryFlags geo_flags =
-        flags_.WithPathEffect(path_effect.get());
+        flags_.WithPathEffect(path_effect.get(), true);
     if (paint.getStrokeCap() == DlStrokeCap::kButt &&
         !geo_flags.butt_cap_becomes_square()) {
       adjust = std::max(adjust, half_width);
@@ -1117,10 +1114,18 @@ class CanvasCompareTester {
                        .with_restore(sk_safe_restore, dl_safe_restore, true));
       }
     }
+
     {
-      sk_sp<SkImageFilter> sk_filter = SkImageFilters::Arithmetic(
-          0.1, 0.1, 0.1, 0.25, true, nullptr, nullptr);
-      DlUnknownImageFilter filter(sk_filter);
+      // clang-format off
+      constexpr float color_matrix[20] = {
+          0.5, 0, 0, 0, 0.5,
+          0, 0.5, 0, 0, 0.5,
+          0, 0, 0.5, 0, 0.5,
+          0, 0, 0, 1, 0,
+      };
+      // clang-format on
+      DlMatrixColorFilter color_filter(color_matrix);
+      DlColorFilterImageFilter filter(color_filter);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
@@ -1464,67 +1469,6 @@ class CanvasCompareTester {
     }
 
     {
-      sk_sp<SkPathEffect> effect = SkDiscretePathEffect::Make(3, 5);
-      {
-        // Discrete path effects need a stroke width for drawPointsAsPoints
-        // to do something realistic
-        // And a Discrete(3, 5) effect produces miters that are near
-        // maximal for a miter limit of 3.0.
-        BoundsTolerance discrete_tolerance =
-            tolerance
-                // register the discrete offset so adjusters can compensate
-                .addDiscreteOffset(5)
-                // the miters in the 3-5 discrete effect don't always fill
-                // their conservative bounds, so tolerate a couple of pixels
-                .addBoundsPadding(2, 2);
-        RenderWith(testP, env, discrete_tolerance,
-                   CaseParameters(
-                       "PathEffect == Discrete-3-5",
-                       [=](SkCanvas*, SkPaint& p) {
-                         p.setStrokeWidth(5.0);
-                         p.setStrokeMiter(3.0);
-                         p.setPathEffect(effect);
-                       },
-                       [=](DlCanvas*, DlPaint& p) {
-                         p.setStrokeWidth(5.0);
-                         p.setStrokeMiter(3.0);
-                         p.setPathEffect(DlPathEffect::From(effect));
-                       }));
-      }
-      EXPECT_TRUE(testP.is_draw_text_blob() || effect->unique())
-          << "PathEffect == Discrete-3-5 Cleanup";
-      effect = SkDiscretePathEffect::Make(2, 3);
-      {
-        // Discrete path effects need a stroke width for drawPointsAsPoints
-        // to do something realistic
-        // And a Discrete(2, 3) effect produces miters that are near
-        // maximal for a miter limit of 2.5.
-        BoundsTolerance discrete_tolerance =
-            tolerance
-                // register the discrete offset so adjusters can compensate
-                .addDiscreteOffset(3)
-                // the miters in the 3-5 discrete effect don't always fill
-                // their conservative bounds, so tolerate a couple of pixels
-                .addBoundsPadding(2, 2);
-        RenderWith(testP, env, discrete_tolerance,
-                   CaseParameters(
-                       "PathEffect == Discrete-2-3",
-                       [=](SkCanvas*, SkPaint& p) {
-                         p.setStrokeWidth(5.0);
-                         p.setStrokeMiter(2.5);
-                         p.setPathEffect(effect);
-                       },
-                       [=](DlCanvas*, DlPaint& p) {
-                         p.setStrokeWidth(5.0);
-                         p.setStrokeMiter(2.5);
-                         p.setPathEffect(DlPathEffect::From(effect));
-                       }));
-      }
-      EXPECT_TRUE(testP.is_draw_text_blob() || effect->unique())
-          << "PathEffect == Discrete-2-3 Cleanup";
-    }
-
-    {
       const DlBlurMaskFilter filter(kNormal_SkBlurStyle, 5.0);
       BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
       {
@@ -1754,6 +1698,21 @@ class CanvasCompareTester {
       const SkScalar test_dashes_1[] = {29.0, 2.0};
       const SkScalar test_dashes_2[] = {17.0, 1.5};
       auto effect = DlDashPathEffect::Make(test_dashes_1, 2, 0.0f);
+      {
+        RenderWith(testP, stroke_base_env, tolerance,
+                   CaseParameters(
+                       "PathEffect without forced stroking == Dash-29-2",
+                       [=](SkCanvas*, SkPaint& p) {
+                         // Provide some non-trivial stroke size to get dashed
+                         p.setStrokeWidth(5.0);
+                         p.setPathEffect(effect->skia_object());
+                       },
+                       [=](DlCanvas*, DlPaint& p) {
+                         // Provide some non-trivial stroke size to get dashed
+                         p.setStrokeWidth(5.0);
+                         p.setPathEffect(effect);
+                       }));
+      }
       {
         RenderWith(testP, stroke_base_env, tolerance,
                    CaseParameters(
