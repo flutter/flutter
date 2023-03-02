@@ -153,7 +153,10 @@ bool RunFlutter(GLFWwindow* window,
   config.open_gl.present_with_info =
       [](void* userdata, const FlutterPresentInfo* info) -> bool {
     // Free the existing damage that was allocated to this frame.
-    free(existing_damage_map_[info->fbo_id]);
+    if (existing_damage_map_[info->fbo_id] != nullptr) {
+      free(existing_damage_map_[info->fbo_id]);
+      existing_damage_map_[info->fbo_id] = nullptr;
+    }
 
     // Get list of extensions.
     const char* extensions = eglQueryString(display_, EGL_EXTENSIONS);
