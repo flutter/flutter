@@ -359,10 +359,10 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-
-  /// Called when the [DatePickerDialog] is toggled between [DatePickerEntryMode.calendar],[DatePickerEntryMode.input]
-  /// and return the current [DatePickerEntryMode].
-  ///
+  
+  /// Called when the [DatePickerDialog] is toggled between 
+  /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input] and return 
+  /// the current [DatePickerEntryMode].
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
 
   @override
