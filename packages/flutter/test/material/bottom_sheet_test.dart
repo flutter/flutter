@@ -367,7 +367,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
- // Regression test for https://github.com/flutter/flutter/issues/121098
+  // Regression test for https://github.com/flutter/flutter/issues/121098
   testWidgets('Verify that accessibleNavigation has no impact on the BottomSheet animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       builder: (BuildContext context, Widget? child) {
