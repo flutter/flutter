@@ -37,7 +37,6 @@ tests = [
   "paragraph_test.dart",
   "path_test.dart",
   "picture_test.dart",
-  "platform_dispatcher_test.dart",
   "platform_view_test.dart",
   "plugin_utilities_test.dart",
   "semantics_test.dart",

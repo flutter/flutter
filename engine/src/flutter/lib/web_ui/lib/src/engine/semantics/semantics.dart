@@ -1579,7 +1579,7 @@ class EngineSemanticsOwner {
     final EngineAccessibilityFeatures original =
         EnginePlatformDispatcher.instance.configuration.accessibilityFeatures
         as EngineAccessibilityFeatures;
-    final ui.PlatformConfiguration newConfiguration =
+    final PlatformConfiguration newConfiguration =
         EnginePlatformDispatcher.instance.configuration.copyWith(
             accessibilityFeatures:
                 original.copyWith(accessibleNavigation: value));

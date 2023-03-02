@@ -135,12 +135,7 @@ class PlatformDispatcher {
   static PlatformDispatcher get instance => _instance;
   static final PlatformDispatcher _instance = PlatformDispatcher._();
 
-  /// The current platform configuration.
-  ///
-  /// If values in this configuration change, [onPlatformConfigurationChanged]
-  /// will be called.
-  PlatformConfiguration get configuration => _configuration;
-  PlatformConfiguration _configuration = const PlatformConfiguration();
+  _PlatformConfiguration _configuration = const _PlatformConfiguration();
 
   /// Called when the platform configuration changes.
   ///
@@ -162,7 +157,7 @@ class PlatformDispatcher {
   final Map<Object, FlutterView> _views = <Object, FlutterView>{};
 
   // A map of opaque platform view identifiers to view configurations.
-  final Map<Object, ViewConfiguration> _viewConfigurations = <Object, ViewConfiguration>{};
+  final Map<Object, _ViewConfiguration> _viewConfigurations = <Object, _ViewConfiguration>{};
 
   /// The [FlutterView] provided by the engine if the platform is unable to
   /// create windows, or, for backwards compatibility.
@@ -245,8 +240,8 @@ class PlatformDispatcher {
     List<int> displayFeaturesType,
     List<int> displayFeaturesState,
   ) {
-    final ViewConfiguration previousConfiguration =
-        _viewConfigurations[id] ?? const ViewConfiguration();
+    final _ViewConfiguration previousConfiguration =
+        _viewConfigurations[id] ?? const _ViewConfiguration();
     if (!_views.containsKey(id)) {
       _views[id] = FlutterView._(id, this);
     }
@@ -748,7 +743,7 @@ class PlatformDispatcher {
   external static void _scheduleFrame();
 
   /// Additional accessibility features that may be enabled by the platform.
-  AccessibilityFeatures get accessibilityFeatures => configuration.accessibilityFeatures;
+  AccessibilityFeatures get accessibilityFeatures => _configuration.accessibilityFeatures;
 
   /// A callback that is invoked when the value of [accessibilityFeatures]
   /// changes.
@@ -766,7 +761,7 @@ class PlatformDispatcher {
   // Called from the engine, via hooks.dart
   void _updateAccessibilityFeatures(int values) {
     final AccessibilityFeatures newFeatures = AccessibilityFeatures._(values);
-    final PlatformConfiguration previousConfiguration = configuration;
+    final _PlatformConfiguration previousConfiguration = _configuration;
     if (newFeatures == previousConfiguration.accessibilityFeatures) {
       return;
     }
@@ -826,7 +821,7 @@ class PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  List<Locale> get locales => configuration.locales;
+  List<Locale> get locales => _configuration.locales;
 
   /// Performs the platform-native locale resolution.
   ///
@@ -881,7 +876,7 @@ class PlatformDispatcher {
   void _updateLocales(List<String> locales) {
     const int stringsPerLocale = 4;
     final int numLocales = locales.length ~/ stringsPerLocale;
-    final PlatformConfiguration previousConfiguration = configuration;
+    final _PlatformConfiguration previousConfiguration = _configuration;
     final List<Locale> newLocales = <Locale>[];
     bool localesDiffer = numLocales != previousConfiguration.locales.length;
     for (int localeIndex = 0; localeIndex < numLocales; localeIndex++) {
@@ -939,7 +934,7 @@ class PlatformDispatcher {
   /// format.
   ///
   /// This option is used by [showTimePicker].
-  bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
   /// The system-reported text scale.
   ///
@@ -953,7 +948,7 @@ class PlatformDispatcher {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  double get textScaleFactor => configuration.textScaleFactor;
+  double get textScaleFactor => _configuration.textScaleFactor;
 
   /// A callback that is invoked whenever [textScaleFactor] changes value.
   ///
@@ -993,7 +988,7 @@ class PlatformDispatcher {
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to
   /// [Brightness.light].
-  Brightness get platformBrightness => configuration.platformBrightness;
+  Brightness get platformBrightness => _configuration.platformBrightness;
 
   /// A callback that is invoked whenever [platformBrightness] changes value.
   ///
@@ -1013,7 +1008,7 @@ class PlatformDispatcher {
   }
 
   /// The setting indicating the current system font of the host platform.
-  String? get systemFontFamily => configuration.systemFontFamily;
+  String? get systemFontFamily => _configuration.systemFontFamily;
 
   /// A callback that is invoked whenever [systemFontFamily] changes value.
   ///
@@ -1055,7 +1050,7 @@ class PlatformDispatcher {
     final Brightness platformBrightness =
     data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
     final String? systemFontFamily = data['systemFontFamily'] as String?;
-    final PlatformConfiguration previousConfiguration = configuration;
+    final _PlatformConfiguration previousConfiguration = _configuration;
     final bool platformBrightnessChanged = previousConfiguration.platformBrightness != platformBrightness;
     final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
     final bool alwaysUse24HourFormatChanged =
@@ -1088,7 +1083,7 @@ class PlatformDispatcher {
   ///
   /// The [onSemanticsEnabledChanged] callback is called whenever this value
   /// changes.
-  bool get semanticsEnabled => configuration.semanticsEnabled;
+  bool get semanticsEnabled => _configuration.semanticsEnabled;
 
   /// A callback that is invoked when the value of [semanticsEnabled] changes.
   ///
@@ -1104,7 +1099,7 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateSemanticsEnabled(bool enabled) {
-    final PlatformConfiguration previousConfiguration = configuration;
+    final _PlatformConfiguration previousConfiguration = _configuration;
     if (previousConfiguration.semanticsEnabled == enabled) {
       return;
     }
@@ -1247,9 +1242,8 @@ class PlatformDispatcher {
 /// Configuration of the platform.
 ///
 /// Immutable class (but can't use @immutable in dart:ui)
-class PlatformConfiguration {
-  /// Const constructor for [PlatformConfiguration].
-  const PlatformConfiguration({
+class _PlatformConfiguration {
+  const _PlatformConfiguration({
     this.accessibilityFeatures = const AccessibilityFeatures._(0),
     this.alwaysUse24HourFormat = false,
     this.semanticsEnabled = false,
@@ -1260,8 +1254,7 @@ class PlatformConfiguration {
     this.systemFontFamily,
   });
 
-  /// Copy a [PlatformConfiguration] with some fields replaced.
-  PlatformConfiguration copyWith({
+  _PlatformConfiguration copyWith({
     AccessibilityFeatures? accessibilityFeatures,
     bool? alwaysUse24HourFormat,
     bool? semanticsEnabled,
@@ -1271,7 +1264,7 @@ class PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
   }) {
-    return PlatformConfiguration(
+    return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
@@ -1314,20 +1307,9 @@ class PlatformConfiguration {
 }
 
 /// An immutable view configuration.
-class ViewConfiguration {
-  /// A const constructor for an immutable [ViewConfiguration].
-  ///
-  /// When constructing a view configuration, supply either the [view] or the
-  /// [window] property, but not both since the [view] and [window] property
-  /// are backed by the same instance variable.
-  const ViewConfiguration({
-    FlutterView? view,
-    @Deprecated('''
-      Use the `view` property instead.
-      This change is related to adding multi-view support in Flutter.
-      This feature was deprecated after 3.7.0-1.2.pre.
-    ''')
-    FlutterView? window,
+class _ViewConfiguration {
+  const _ViewConfiguration({
+    this.view,
     this.devicePixelRatio = 1.0,
     this.geometry = Rect.zero,
     this.visible = false,
@@ -1337,18 +1319,11 @@ class ViewConfiguration {
     this.padding = ViewPadding.zero,
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
-  }) : assert(window == null || view == null),
-    _view = view ?? window;
+  });
 
   /// Copy this configuration with some fields replaced.
-  ViewConfiguration copyWith({
+  _ViewConfiguration copyWith({
     FlutterView? view,
-    @Deprecated('''
-      Use the `view` property instead.
-      This change is related to adding multi-view support in Flutter.
-      This feature was deprecated after 3.7.0-1.2.pre.
-    ''')
-    FlutterView? window,
     double? devicePixelRatio,
     Rect? geometry,
     bool? visible,
@@ -1359,9 +1334,8 @@ class ViewConfiguration {
     GestureSettings? gestureSettings,
     List<DisplayFeature>? displayFeatures,
   }) {
-    assert(view == null || window == null);
-    return ViewConfiguration(
-      view: view ?? window ?? _view,
+    return _ViewConfiguration(
+      view: view ?? this.view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       geometry: geometry ?? this.geometry,
       visible: visible ?? this.visible,
@@ -1374,22 +1348,7 @@ class ViewConfiguration {
     );
   }
 
-  /// The top level view for which this [ViewConfiguration]'s properties apply to.
-  ///
-  /// If this property is null, this [ViewConfiguration] is a top level view.
-  @Deprecated('''
-    Use the `view` property instead.
-    This change is related to adding multi-view support in Flutter.
-    This feature was deprecated after 3.7.0-1.2.pre.
-  ''')
-  FlutterView? get window => _view;
-
-  /// The top level view for which this [ViewConfiguration]'s properties apply to.
-  ///
-  /// If this property is null, this [ViewConfiguration] is a top level view.
-  FlutterView? get view => _view;
-
-  final FlutterView?  _view;
+  final FlutterView?  view;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -1449,7 +1408,6 @@ class ViewConfiguration {
   /// touch slop constant.
   final GestureSettings gestureSettings;
 
-  /// {@template dart.ui.ViewConfiguration.displayFeatures}
   /// Areas of the display that are obstructed by hardware features.
   ///
   /// This list is populated only on Android. If the device has no display
@@ -1466,7 +1424,6 @@ class ViewConfiguration {
   /// Folding [DisplayFeature]s like the [DisplayFeatureType.hinge] and
   /// [DisplayFeatureType.fold] also have a [DisplayFeature.state] which can be
   /// used to determine the posture the device is in.
-  /// {@endtemplate}
   final List<DisplayFeature> displayFeatures;
 
   @override
