@@ -55,7 +55,7 @@ class MockRasterCache : public RasterCache {
   explicit MockRasterCache(
       size_t access_threshold = 3,
       size_t picture_and_display_list_cache_limit_per_frame =
-          RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame)
+          RasterCacheUtil::kDefaultPictureAndDisplayListCacheLimitPerFrame)
       : RasterCache(access_threshold,
                     picture_and_display_list_cache_limit_per_frame) {
     preroll_state_stack_.set_preroll_delegate(SkMatrix::I());

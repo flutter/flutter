@@ -517,7 +517,7 @@ TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
   use_mock_raster_cache();
   PrerollContext* context = preroll_context();
   int per_frame =
-      RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame;
+      RasterCacheUtil::kDefaultPictureAndDisplayListCacheLimitPerFrame;
   int layer_count = per_frame + 1;
   SkPoint opacity_offset = {10, 10};
   auto opacity_layer = std::make_shared<OpacityLayer>(0.5f, opacity_offset);
