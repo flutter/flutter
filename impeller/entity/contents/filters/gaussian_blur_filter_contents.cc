@@ -276,12 +276,12 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   Vector2 scaled_size = pass_texture_rect.size * scale;
   ISize floored_size = ISize(scaled_size.x, scaled_size.y);
 
-  auto out_texture = renderer.MakeSubpass(floored_size, callback);
+  auto out_texture = renderer.MakeSubpass("Directional Gaussian Blur Filter",
+                                          floored_size, callback);
 
   if (!out_texture) {
     return std::nullopt;
   }
-  out_texture->SetLabel("DirectionalGaussianBlurFilter Texture");
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
