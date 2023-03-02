@@ -142,6 +142,8 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   desc.SetPrimitiveType(primitive_type);
+
+  desc.SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
 }
 
 template <typename PipelineT>
@@ -377,6 +379,10 @@ std::shared_ptr<Context> ContentContext::GetContext() const {
 
 const IDeviceCapabilities& ContentContext::GetDeviceCapabilities() const {
   return context_->GetDeviceCapabilities();
+}
+
+void ContentContext::SetWireframe(bool wireframe) {
+  wireframe_ = wireframe;
 }
 
 }  // namespace impeller

@@ -269,13 +269,14 @@ struct ContentContextOptions {
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   std::optional<PixelFormat> color_attachment_pixel_format;
   bool has_stencil_attachment = true;
+  bool wireframe = false;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
       return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
                               o.stencil_operation, o.primitive_type,
                               o.color_attachment_pixel_format,
-                              o.has_stencil_attachment);
+                              o.has_stencil_attachment, o.wireframe);
     }
   };
 
@@ -289,7 +290,8 @@ struct ContentContextOptions {
              lhs.primitive_type == rhs.primitive_type &&
              lhs.color_attachment_pixel_format ==
                  rhs.color_attachment_pixel_format &&
-             lhs.has_stencil_attachment == rhs.has_stencil_attachment;
+             lhs.has_stencil_attachment == rhs.has_stencil_attachment &&
+             lhs.wireframe == rhs.wireframe;
     }
   };
 
@@ -598,6 +600,8 @@ class ContentContext {
 
   const IDeviceCapabilities& GetDeviceCapabilities() const;
 
+  void SetWireframe(bool wireframe);
+
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
 
@@ -706,6 +710,10 @@ class ContentContext {
       return nullptr;
     }
 
+    if (wireframe_) {
+      opts.wireframe = true;
+    }
+
     if (auto found = container.find(opts); found != container.end()) {
       return found->second->WaitAndGet();
     }
@@ -731,6 +739,7 @@ class ContentContext {
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<GlyphAtlasContext> glyph_atlas_context_;
   std::shared_ptr<scene::SceneContext> scene_context_;
+  bool wireframe_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
 };
