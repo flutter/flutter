@@ -13,6 +13,14 @@ import 'environment.dart';
 import 'pipeline.dart';
 import 'utils.dart';
 
+const Map<String, String> targetAliases = <String, String>{
+  'sdk': 'flutter/web_sdk',
+  'web_sdk': 'flutter/web_sdk',
+  'canvaskit': 'flutter/third_party/canvaskit:canvaskit_group',
+  'canvaskit_chromium': 'flutter/third_party/canvaskit:canvaskit_chromium_group',
+  'skwasm': 'flutter/lib/web_ui/skwasm',
+};
+
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
     argParser.addFlag(
@@ -20,16 +28,6 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
       abbr: 'w',
       help: 'Run the build in watch mode so it rebuilds whenever a change is '
           'made. Disabled by default.',
-    );
-    argParser.addFlag(
-      'build-canvaskit',
-      help: 'Build CanvasKit locally instead of getting it from CIPD. Enabled '
-          'by default.',
-      defaultsTo: true
-    );
-    argParser.addFlag(
-      'build-canvaskit-chromium',
-      help: 'Build the Chromium variant of CanvasKit. Disabled by default.',
     );
     argParser.addFlag(
       'host',
@@ -46,22 +44,19 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
   bool get isWatchMode => boolArg('watch');
 
-  bool get buildCanvasKit => boolArg('build-canvaskit');
-
-  bool get buildCanvasKitChromium => boolArg('build-canvaskit-chromium');
-
   bool get host => boolArg('host');
+
+  List<String> get targets => argResults?.rest ?? <String>[];
 
   @override
   FutureOr<bool> run() async {
     final FilePath libPath = FilePath.fromWebUi('lib');
     final List<PipelineStep> steps = <PipelineStep>[
-      GnPipelineStep(
-        buildCanvasKit: buildCanvasKit,
-        buildCanvasKitChromium: buildCanvasKitChromium,
-        host: host,
+      GnPipelineStep(host: host),
+      NinjaPipelineStep(
+        buildDirectory: host ? environment.hostDebugUnoptDir : environment.wasmReleaseOutDir,
+        targets: targets.map((String target) => targetAliases[target] ?? target),
       ),
-      NinjaPipelineStep(target: host ? environment.hostDebugUnoptDir : environment.wasmReleaseOutDir),
     ];
     final Pipeline buildPipeline = Pipeline(steps: steps);
     await buildPipeline.run();
@@ -86,13 +81,9 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 /// state. GN is pretty quick though, so it's OK to not support interruption.
 class GnPipelineStep extends ProcessStep {
   GnPipelineStep({
-    required this.buildCanvasKit,
-    required this.buildCanvasKitChromium,
     required this.host,
   });
 
-  final bool buildCanvasKit;
-  final bool buildCanvasKitChromium;
   final bool host;
 
   @override
@@ -111,8 +102,6 @@ class GnPipelineStep extends ProcessStep {
       return <String>[
         '--web',
         '--runtime-mode=release',
-        if (buildCanvasKit) '--build-canvaskit',
-        if (buildCanvasKitChromium) '--build-canvaskit-chromium',
       ];
     }
   }
@@ -131,7 +120,7 @@ class GnPipelineStep extends ProcessStep {
 ///
 /// Can be safely interrupted.
 class NinjaPipelineStep extends ProcessStep {
-  NinjaPipelineStep({required this.target});
+  NinjaPipelineStep({required this.buildDirectory, required this.targets});
 
   @override
   String get description => 'ninja';
@@ -139,8 +128,10 @@ class NinjaPipelineStep extends ProcessStep {
   @override
   bool get isSafeToInterrupt => true;
 
-  /// The target directory to build.
-  final Directory target;
+  /// The directory to build.
+  final Directory buildDirectory;
+
+  final Iterable<String> targets;
 
   @override
   Future<ProcessManager> createProcess() {
@@ -149,7 +140,8 @@ class NinjaPipelineStep extends ProcessStep {
       'autoninja',
       <String>[
         '-C',
-        target.path,
+        buildDirectory.path,
+        ...targets,
       ],
     );
   }

@@ -70,7 +70,7 @@ class RunTestsStep implements PipelineStep {
     final SkiaGoldClient? skiaClient = await _createSkiaClient();
     final List<FilePath> testFiles = this.testFiles ?? findAllTests();
 
-    final TestsByRenderer sortedTests = sortTestsByRenderer(testFiles);
+    final TestsByRenderer sortedTests = sortTestsByRenderer(testFiles, isWasm);
 
     bool testsPassed = true;
 

@@ -8,6 +8,8 @@ library js_promise;
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 
+import '../util.dart';
+
 @JS()
 @staticInterop
 class PromiseResolver<T extends Object?> {}
@@ -39,6 +41,9 @@ Promise<T> futureToPromise<T extends Object>(Future<T> future) {
   return Promise<T>(allowInterop((PromiseResolver<T> resolver, PromiseRejecter rejecter) {
     future.then(
       (T value) => resolver.resolve(value),
-      onError: (Object? error) => rejecter.reject(error));
+      onError: (Object? error) {
+        printWarning('Rejecting promise with error: $error');
+        rejecter.reject(error);
+      });
   }));
 }

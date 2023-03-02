@@ -10,7 +10,5 @@ import("//flutter/common/config.gni")
 
 # This is the default target when building when the target CPU is WASM.
 group("wasm") {
-  if (flutter_build_web_sdk) {
-    deps = [ "//flutter/web_sdk" ]
-  }
+  deps = [ "//flutter/web_sdk:flutter_web_sdk_archive" ]
 }

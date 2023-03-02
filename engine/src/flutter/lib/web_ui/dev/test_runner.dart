@@ -137,7 +137,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      CompileTestsStep(testFiles: testFiles, useLocalCanvasKit: useLocalCanvasKit, isWasm: isWasm),
+      CompileTestsStep(
+        testFiles: testFiles,
+        useLocalCanvasKit: useLocalCanvasKit,
+        isWasm: isWasm
+      ),
       RunTestsStep(
         browserName: browserName,
         testFiles: testFiles,

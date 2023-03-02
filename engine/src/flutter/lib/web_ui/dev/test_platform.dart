@@ -40,6 +40,11 @@ import 'browser.dart';
 import 'environment.dart' as env;
 import 'utils.dart';
 
+const Map<String, String> coopCoepHeaders = <String, String>{
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+};
+
 /// Custom test platform that serves web engine unit tests.
 class BrowserPlatform extends PlatformPlugin {
   BrowserPlatform._({
@@ -472,10 +477,16 @@ class BrowserPlatform extends PlatformPlugin {
       return shelf.Response.internalServerError(body: error);
     }
 
+    final bool needsCoopCoep =
+      extension == '.js' ||
+      extension == '.mjs' ||
+      extension == '.html';
     return shelf.Response.ok(
       fileInBuild.readAsBytesSync(),
       headers: <String, Object>{
         HttpHeaders.contentTypeHeader: contentType,
+        if (needsCoopCoep && isWasm && renderer == Renderer.skwasm)
+          ...coopCoepHeaders,
       },
     );
   }
@@ -489,7 +500,7 @@ class BrowserPlatform extends PlatformPlugin {
 
       // Link to the Dart wrapper.
       final String scriptBase = htmlEscape.convert(p.basename(test));
-      final String link = '<link rel="x-dart-test" href="$scriptBase">';
+      final String link = '<link rel="x-dart-test" href="$scriptBase"${renderer == Renderer.skwasm ? " skwasm" : ""}>';
 
       final String testRunner = isWasm ? '/test_dart2wasm.js' : 'packages/test/dart.js';
 
@@ -508,7 +519,11 @@ class BrowserPlatform extends PlatformPlugin {
           <script src="$testRunner"></script>
         </head>
         </html>
-      ''', headers: <String, String>{'Content-Type': 'text/html'});
+      ''', headers: <String, String>{
+        'Content-Type': 'text/html',
+        if (isWasm && renderer == Renderer.skwasm)
+          ...coopCoepHeaders
+      });
     }
 
     return shelf.Response.notFound('Not found.');

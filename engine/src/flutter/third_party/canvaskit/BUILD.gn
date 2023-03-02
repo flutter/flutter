@@ -3,36 +3,30 @@
 # found in the LICENSE file.
 
 import("//build/toolchain/wasm.gni")
-import("canvaskit.gni")
 
-if (build_canvaskit) {
-  # This toolchain is only to be used by canvaskit_group below.
-  wasm_toolchain("canvaskit") {
-    extra_toolchain_args = {
-      skia_use_icu = true
-      skia_use_client_icu = false
-    }
-  }
-
-  group("canvaskit_group") {
-    visibility = [ "//flutter/web_sdk:*" ]
-    public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit)" ]
+# This toolchain is only to be used by the canvaskit target below.
+wasm_toolchain("canvaskit") {
+  extra_toolchain_args = {
+    skia_use_icu = true
+    skia_use_client_icu = false
   }
 }
 
-if (build_canvaskit_chromium) {
-  # This toolchain is only to be used by canvaskit_chromium_group below.
-  wasm_toolchain("canvaskit_chromium") {
-    extra_toolchain_args = {
-      skia_use_icu = false
-      skia_use_client_icu = true
-      skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
-    }
-  }
+group("canvaskit_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit)" ]
+}
 
-  group("canvaskit_chromium_group") {
-    visibility = [ "//flutter/web_sdk:*" ]
-    public_deps =
-        [ "//third_party/skia/modules/canvaskit(:canvaskit_chromium)" ]
+# This toolchain is only to be used by canvaskit_chromium_group below.
+wasm_toolchain("canvaskit_chromium") {
+  extra_toolchain_args = {
+    skia_use_icu = false
+    skia_use_client_icu = true
+    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
   }
+}
+
+group("canvaskit_chromium_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit_chromium)" ]
 }

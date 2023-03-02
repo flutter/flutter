@@ -1,0 +1,56 @@
+# Copyright 2019 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/wasm.gni")
+
+wasm_lib("skwasm") {
+  sources = [
+    "canvas.cpp",
+    "contour_measure.cpp",
+    "export.h",
+    "helpers.h",
+    "paint.cpp",
+    "path.cpp",
+    "picture.cpp",
+    "surface.cpp",
+    "wrappers.h",
+  ]
+
+  ldflags = [
+    "-std=c++20",
+    "-lGL",
+    "-sUSE_WEBGL2=1",
+    "-sMAX_WEBGL_VERSION=2",
+    "-sOFFSCREENCANVAS_SUPPORT",
+    "-sPTHREAD_POOL_SIZE=1",
+    "-sALLOW_MEMORY_GROWTH",
+    "-sUSE_PTHREADS=1",
+  ]
+
+  cflags = [ "-pthread" ]
+
+  if (is_debug) {
+    ldflags += [
+      "-O0",
+      "-sDEMANGLE_SUPPORT=1",
+      "-sASSERTIONS=1",
+      "-sGL_ASSERTIONS=1",
+      "-g3",
+    ]
+  } else {
+    ldflags += [
+      "-O1",
+      "--closure=0",
+      "-flto",
+      "-sEXPORTED_FUNCTIONS=[stackAlloc]",
+    ]
+
+    cflags += [
+      "-flto",
+      "-fvisibility=hidden",
+    ]
+  }
+
+  deps = [ "//third_party/skia" ]
+}

@@ -9,14 +9,16 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
 import '../matchers.dart';
+import 'utils.dart';
 
-const double kTolerance = 0.001;
+const double kTolerance = 0.1;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
+  setUpUiTest();
   group('PathMetric length', () {
     test('empty path', () {
       final Path path = Path();

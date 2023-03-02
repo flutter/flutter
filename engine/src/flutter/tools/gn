@@ -261,10 +261,7 @@ def to_gn_args(args):
     to_gn_wasm_args(args, gn_args)
     return gn_args
 
-  gn_args['flutter_build_web_sdk'] = args.build_web_sdk
   gn_args['full_dart_sdk'] = args.full_dart_sdk
-  if args.build_web_sdk or args.full_dart_sdk:
-    gn_args['build_canvaskit'] = args.build_canvaskit
 
   if args.enable_unittests:
     gn_args['enable_unittests'] = args.enable_unittests
@@ -652,13 +649,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_profile_build'] = is_profile_build
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
-  # TODO(jacksongardner): Make this based off of the input argument rather
-  # than forced to true, once the recipes are updated.
-  # https://github.com/flutter/flutter/issues/113303
-  gn_args['build_canvaskit'] = True
-  gn_args['build_canvaskit_chromium'] = args.build_canvaskit_chromium
-  gn_args['flutter_build_web_sdk'] = True
-
 
 def parse_args(args):
   args = args[1:]
@@ -857,31 +847,10 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--build-web-sdk',
-      default=False,
-      action='store_true',
-      help='build the flutter web sdk'
-  )
-  parser.add_argument(
-      '--no-build-web-sdk', dest='build_web_sdk', action='store_false'
-  )
-
-  parser.add_argument(
       '--build-canvaskit',
       default=False,
       action='store_true',
-      help='build canvaskit from source'
-  )
-  parser.add_argument(
-      '--no-build-canvaskit', dest='build_canvaskit', action='store_false'
-  )
-
-  parser.add_argument(
-      '--build-canvaskit-chromium',
-      default=False,
-      dest='build_canvaskit_chromium',
-      action='store_true',
-      help='build the Chromium variant of CanvasKit from sources'
+      help='build canvaskit from source (DEPRECATED: use ninja targets to select what to build)'
   )
 
   parser.add_argument(

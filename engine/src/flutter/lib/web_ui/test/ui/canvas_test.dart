@@ -8,18 +8,20 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-
 import 'package:ui/ui.dart' as ui;
 
 import '../matchers.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  await ui.webOnlyInitializePlatform();
-  runCanvasTests(deviceClipRoundsOut: false);
+  setUpUiTest();
+
+  final bool deviceClipRoundsOut = renderer is! HtmlRenderer;
+  runCanvasTests(deviceClipRoundsOut: deviceClipRoundsOut);
 }
 
 void runCanvasTests({required bool deviceClipRoundsOut}) {
