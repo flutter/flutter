@@ -13,6 +13,12 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/lib/ui/painting/image_encoding_impeller.h"
+#include "impeller/renderer/testing/mocks.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -22,7 +28,18 @@ namespace testing {
 
 namespace {
 fml::AutoResetWaitableEvent message_latch;
+
+class MockDlImage : public DlImage {
+ public:
+  MOCK_CONST_METHOD0(skia_image, sk_sp<SkImage>());
+  MOCK_CONST_METHOD0(impeller_texture, std::shared_ptr<impeller::Texture>());
+  MOCK_CONST_METHOD0(isOpaque, bool());
+  MOCK_CONST_METHOD0(isTextureBacked, bool());
+  MOCK_CONST_METHOD0(dimensions, SkISize());
+  MOCK_CONST_METHOD0(GetApproximateByteSize, size_t());
 };
+
+}  // namespace
 
 class MockSyncSwitch {
  public:
@@ -165,6 +182,96 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
   message_latch.Wait();
   DestroyShell(std::move(shell), task_runners);
 }
+
+#if IMPELLER_SUPPORTS_RENDERING
+using ::impeller::testing::MockAllocator;
+using ::impeller::testing::MockBlitPass;
+using ::impeller::testing::MockCommandBuffer;
+using ::impeller::testing::MockDeviceBuffer;
+using ::impeller::testing::MockImpellerContext;
+using ::impeller::testing::MockTexture;
+using ::testing::_;
+using ::testing::DoAll;
+using ::testing::InvokeArgument;
+using ::testing::Return;
+
+namespace {
+std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
+    std::vector<uint8_t>& buffer) {
+  auto context = std::make_shared<MockImpellerContext>();
+  auto command_buffer = std::make_shared<MockCommandBuffer>(context);
+  auto allocator = std::make_shared<MockAllocator>();
+  auto blit_pass = std::make_shared<MockBlitPass>();
+  impeller::DeviceBufferDescriptor device_buffer_desc;
+  device_buffer_desc.size = buffer.size();
+  auto device_buffer = std::make_shared<MockDeviceBuffer>(device_buffer_desc);
+  EXPECT_CALL(*allocator, OnCreateBuffer).WillOnce(Return(device_buffer));
+  EXPECT_CALL(*blit_pass, IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*command_buffer, IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnSubmitCommands(_))
+      .WillOnce(
+          DoAll(InvokeArgument<0>(impeller::CommandBuffer::Status::kCompleted),
+                Return(true)));
+  EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
+  EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
+  EXPECT_CALL(*device_buffer, OnGetContents).WillOnce(Return(buffer.data()));
+  return context;
+}
+}  // namespace
+
+TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
+  sk_sp<MockDlImage> image(new MockDlImage());
+  EXPECT_CALL(*image, dimensions)
+      .WillRepeatedly(Return(SkISize::Make(100, 100)));
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR16G16B16A16Float;
+  auto texture = std::make_shared<MockTexture>(desc);
+  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  std::vector<uint8_t> buffer;
+  buffer.reserve(100 * 100 * 8);
+  auto context = MakeConvertDlImageToSkImageContext(buffer);
+  bool did_call = false;
+  ImageEncodingImpeller::ConvertDlImageToSkImage(
+      image,
+      [&did_call](const sk_sp<SkImage>& image) {
+        did_call = true;
+        ASSERT_TRUE(image);
+        EXPECT_EQ(100, image->width());
+        EXPECT_EQ(100, image->height());
+        EXPECT_EQ(kRGBA_F16_SkColorType, image->colorType());
+        EXPECT_EQ(nullptr, image->colorSpace());
+      },
+      context);
+  EXPECT_TRUE(did_call);
+}
+
+TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
+  sk_sp<MockDlImage> image(new MockDlImage());
+  EXPECT_CALL(*image, dimensions)
+      .WillRepeatedly(Return(SkISize::Make(100, 100)));
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kB10G10R10XR;
+  auto texture = std::make_shared<MockTexture>(desc);
+  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  std::vector<uint8_t> buffer;
+  buffer.reserve(100 * 100 * 4);
+  auto context = MakeConvertDlImageToSkImageContext(buffer);
+  bool did_call = false;
+  ImageEncodingImpeller::ConvertDlImageToSkImage(
+      image,
+      [&did_call](const sk_sp<SkImage>& image) {
+        did_call = true;
+        ASSERT_TRUE(image);
+        EXPECT_EQ(100, image->width());
+        EXPECT_EQ(100, image->height());
+        EXPECT_EQ(kBGR_101010x_XR_SkColorType, image->colorType());
+        EXPECT_EQ(nullptr, image->colorSpace());
+      },
+      context);
+  EXPECT_TRUE(did_call);
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace testing
 }  // namespace flutter
