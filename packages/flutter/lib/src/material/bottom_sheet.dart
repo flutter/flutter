@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -23,7 +24,6 @@ const Duration _bottomSheetEnterDuration = Duration(milliseconds: 250);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = decelerateEasing;
 const double _minFlingVelocity = 700.0;
-const double _kMinInteractiveSize = 48.0;
 const double _closeProgressThreshold = 0.5;
 
 /// A callback for when the user begins dragging the bottom sheet.
@@ -338,7 +338,7 @@ class _BottomSheetState extends State<BottomSheet> {
           children: <Widget>[
             _buildDragHandle(context, onSemanticsTap: widget.onClosing),
             Padding(
-              padding: const EdgeInsets.only(top:_kMinInteractiveSize),
+              padding: const EdgeInsets.only(top:kMinInteractiveDimension),
               child: widget.builder(context),
             ),
           ],
@@ -381,8 +381,8 @@ class _BottomSheetState extends State<BottomSheet> {
       container: true,
       onTap: onSemanticsTap,
       child: SizedBox(
-        height: _kMinInteractiveSize,
-        width: _kMinInteractiveSize,
+        height: kMinInteractiveDimension,
+        width: kMinInteractiveDimension,
         child: Center(
           child: Container(
             height: dragHandleSize.height,
