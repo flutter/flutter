@@ -23,6 +23,7 @@ const Duration _bottomSheetEnterDuration = Duration(milliseconds: 250);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = decelerateEasing;
 const double _minFlingVelocity = 700.0;
+const double _kMinInteractiveSize = 48.0;
 const double _closeProgressThreshold = 0.5;
 
 /// A callback for when the user begins dragging the bottom sheet.
@@ -337,7 +338,7 @@ class _BottomSheetState extends State<BottomSheet> {
           children: <Widget>[
             _buildDragHandle(context, onSemanticsTap: widget.onClosing),
             Padding(
-              padding: const EdgeInsets.only(top:48),
+              padding: const EdgeInsets.only(top:_kMinInteractiveSize),
               child: widget.builder(context),
             ),
           ],
@@ -379,15 +380,17 @@ class _BottomSheetState extends State<BottomSheet> {
       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       container: true,
       onTap: onSemanticsTap,
-      child: Padding(
-        // Add padding to make sure target size is larger than 48dp.
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
-        child: Container(
-          height: dragHandleSize.height,
-          width: dragHandleSize.width,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(dragHandleSize.height/2),
-            color: MaterialStateProperty.resolveAs(dragHandleColor, dragHandleMaterialState),
+      child: SizedBox(
+        height: _kMinInteractiveSize,
+        width: _kMinInteractiveSize,
+        child: Center(
+          child: Container(
+            height: dragHandleSize.height,
+            width: dragHandleSize.width,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(dragHandleSize.height/2),
+              color: MaterialStateProperty.resolveAs(dragHandleColor, dragHandleMaterialState),
+            ),
           ),
         ),
       ),

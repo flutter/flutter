@@ -91,7 +91,6 @@ void main() {
   });
 
   testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
-
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -939,7 +938,6 @@ void main() {
       ),
     ));
 
-
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
@@ -977,6 +975,71 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light(useMaterial3: true),
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+
+    showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
+      return const Text('BottomSheet');
+    });
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: 'Dismiss',
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -1610,7 +1673,7 @@ void main() {
   });
 
   group('constraints', () {
-      testWidgets('default constraints have max width 640 in material 3', (WidgetTester tester) async {
+      testWidgets('default constraints is max width 640 in material 3', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(useMaterial3: true),
