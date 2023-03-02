@@ -14,8 +14,8 @@ import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 

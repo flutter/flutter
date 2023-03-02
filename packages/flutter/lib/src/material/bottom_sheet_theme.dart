@@ -82,10 +82,10 @@ class BottomSheetThemeData with Diagnosticable {
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
 
-  /// Overrides the default value for [BottomSheet.dragHandleColor].
+  /// Overrides the default value for drag handle color.
   final Color? dragHandleColor;
 
-  /// Overrides the default value for [BottomSheet.dragHandleSize].
+  /// Overrides the default value for drag handle size.
   final Size? dragHandleSize;
 
   /// Overrides the default value for [BottomSheet.clipBehavior].
