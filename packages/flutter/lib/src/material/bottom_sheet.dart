@@ -339,7 +339,11 @@ class _BottomSheetState extends State<BottomSheet> {
           : Stack(
               alignment: Alignment.topCenter,
               children: <Widget>[
-                _dragHandle(context, onSemanticsTap: widget.onClosing),
+                _DragHandle(
+                  onSemanticsTap: widget.onClosing,
+                  handleHover: _handleDragHandleHover,
+                  materialState: dragHandleMaterialState,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(top: kMinInteractiveDimension),
                   child: widget.builder(context),
@@ -369,15 +373,36 @@ class _BottomSheetState extends State<BottomSheet> {
     );
   }
 
-  Widget _dragHandle(BuildContext context, {required VoidCallback onSemanticsTap}) {
+}
+
+// PERSISTENT BOTTOM SHEETS
+
+// See scaffold.dart
+
+typedef _SizeChangeCallback<Size> = void Function(Size);
+
+class _DragHandle extends StatelessWidget {
+    const _DragHandle({
+    required this.onSemanticsTap,
+    required this.handleHover,
+    required this.materialState,
+  });
+
+
+  final VoidCallback? onSemanticsTap;
+  final Function(bool) handleHover;
+  final Set<MaterialState> materialState;
+
+  @override
+  Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
 
     final Size dragHandleSize = bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
 
     return MouseRegion(
-      onEnter: (PointerEnterEvent event) => _handleDragHandleHover(true),
-      onExit: (PointerExitEvent event) => _handleDragHandleHover(false),
+      onEnter: (PointerEnterEvent event) => handleHover(true),
+      onExit: (PointerExitEvent event) => handleHover(false),
       child: Semantics(
         label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         container: true,
@@ -391,7 +416,7 @@ class _BottomSheetState extends State<BottomSheet> {
               width: dragHandleSize.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(dragHandleSize.height/2),
-                color: MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, dragHandleMaterialState) ?? m3Defaults.dragHandleColor!,
+                color: MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState) ?? m3Defaults.dragHandleColor!,
               ),
             ),
           ),
@@ -400,12 +425,6 @@ class _BottomSheetState extends State<BottomSheet> {
     );
   }
 }
-
-// PERSISTENT BOTTOM SHEETS
-
-// See scaffold.dart
-
-typedef _SizeChangeCallback<Size> = void Function(Size);
 
 class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 
