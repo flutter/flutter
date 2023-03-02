@@ -461,16 +461,6 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
-  ui.ViewConfiguration? _viewConfiguration;
-
-  /// Hide the real view configuration and report the provided [value] instead.
-  set viewConfigurationTestValue(ui.ViewConfiguration? value) { // ignore: avoid_setters_without_getters
-    _viewConfiguration = value;
-    onMetricsChanged?.call();
-  }
-
-  @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
@@ -938,9 +928,6 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.Locale? computePlatformResolvedLocale(List<ui.Locale> supportedLocales) => _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
-
-  @override
-  ui.PlatformConfiguration get configuration => _platformDispatcher.configuration;
 
   @override
   ui.FrameData get frameData => _platformDispatcher.frameData;
