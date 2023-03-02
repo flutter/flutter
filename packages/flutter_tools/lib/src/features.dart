@@ -67,116 +67,43 @@ const List<Feature> allFeatures = <Feature>[
 ];
 
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature(
+const Feature flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature(
+const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature(
+const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature(
+const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Android devices.
-const Feature flutterAndroidFeature = Feature(
+const Feature flutterAndroidFeature = Feature.fullyEnabled(
   name: 'Flutter for Android',
   configSetting: 'enable-android',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
-
 /// The [Feature] for iOS devices.
-const Feature flutterIOSFeature = Feature(
+const Feature flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Fuchsia support.
@@ -237,6 +164,25 @@ class Feature {
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting()
   });
+
+  /// Creates a [Feature] that is fully enabled across channels.
+  const Feature.fullyEnabled(
+      {required this.name,
+      this.environmentOverride,
+      this.configSetting,
+      this.extraHelpText})
+      : master = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        beta = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        stable = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        );
 
   /// The user visible name for this feature.
   final String name;
