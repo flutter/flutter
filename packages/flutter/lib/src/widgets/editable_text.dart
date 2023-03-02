@@ -3557,6 +3557,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final TextSelection oldTextSelection = textEditingValue.selection;
+
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
@@ -3570,6 +3572,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     final String currentText = _value.text;
     if (oldValue.text != currentText) {
@@ -3585,6 +3588,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     endBatchEdit();
+  }
+
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          if (oldSelection.baseOffset != newSelection.baseOffset) {
+            bringIntoView(newSelection.base);
+          } else if (oldSelection.extentOffset != newSelection.extentOffset) {
+            bringIntoView(newSelection.extent);
+          }
+        }
+        break;
+    }
   }
 
   void _onCursorColorTick() {
