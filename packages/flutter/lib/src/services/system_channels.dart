@@ -134,7 +134,7 @@ class SystemChannels {
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
   ///
-  ///  * `System.requestAppExit`: The the application has requested that it be
+  ///  * `System.requestAppExit`: The application has requested that it be
   ///    terminated. See [ServicesBinding.exitApplication].
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
