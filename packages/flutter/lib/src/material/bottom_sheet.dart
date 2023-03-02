@@ -234,7 +234,7 @@ class _BottomSheetState extends State<BottomSheet> {
   bool _isDragging = false;
 
   void _handleDragStart(DragStartDetails details) {
-    _isDragging=true;
+    _isDragging = true;
     widget.onDragStart?.call(details);
   }
 
@@ -259,7 +259,7 @@ class _BottomSheetState extends State<BottomSheet> {
     if (_dismissUnderway) {
       return;
     }
-    _isDragging=false;
+    _isDragging = false;
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;

@@ -2014,9 +2014,3 @@ class _TestPage extends StatelessWidget {
     );
   }
 }
-Finder findBorderPainter() {
-  return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
-    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
-  );
-}
