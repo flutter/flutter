@@ -166,18 +166,18 @@ static gboolean send_pointer_button_event(FlView* self, GdkEventButton* event) {
 }
 
 // Generates a mouse pointer event if the pointer appears inside the window.
-static void check_pointer_inside(FlView* view, GdkEvent* event) {
-  if (!view->pointer_inside) {
-    view->pointer_inside = TRUE;
+static void check_pointer_inside(FlView* self, GdkEvent* event) {
+  if (!self->pointer_inside) {
+    self->pointer_inside = TRUE;
 
     gdouble x, y;
     if (gdk_event_get_coords(event, &x, &y)) {
-      gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+      gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
       fl_engine_send_mouse_pointer_event(
-          view->engine, kAdd,
+          self->engine, kAdd,
           gdk_event_get_time(event) * kMicrosecondsPerMillisecond,
-          x * scale_factor, y * scale_factor, 0, 0, view->button_state);
+          x * scale_factor, y * scale_factor, 0, 0, self->button_state);
     }
   }
 }
@@ -332,58 +332,58 @@ static void fl_view_text_input_delegate_iface_init(
 // Signal handler for GtkWidget::button-press-event
 static gboolean button_press_event_cb(GtkWidget* widget,
                                       GdkEventButton* event,
-                                      FlView* view) {
+                                      FlView* self) {
   // Flutter doesn't handle double and triple click events.
   if (event->type == GDK_DOUBLE_BUTTON_PRESS ||
       event->type == GDK_TRIPLE_BUTTON_PRESS) {
     return FALSE;
   }
 
-  if (!gtk_widget_has_focus(GTK_WIDGET(view))) {
-    gtk_widget_grab_focus(GTK_WIDGET(view));
+  if (!gtk_widget_has_focus(GTK_WIDGET(self))) {
+    gtk_widget_grab_focus(GTK_WIDGET(self));
   }
 
-  return send_pointer_button_event(view, event);
+  return send_pointer_button_event(self, event);
 }
 
 // Signal handler for GtkWidget::button-release-event
 static gboolean button_release_event_cb(GtkWidget* widget,
                                         GdkEventButton* event,
-                                        FlView* view) {
-  return send_pointer_button_event(view, event);
+                                        FlView* self) {
+  return send_pointer_button_event(self, event);
 }
 
 // Signal handler for GtkWidget::scroll-event
 static gboolean scroll_event_cb(GtkWidget* widget,
                                 GdkEventScroll* event,
-                                FlView* view) {
+                                FlView* self) {
   // TODO(robert-ancell): Update to use GtkEventControllerScroll when we can
   // depend on GTK 3.24.
 
   fl_scrolling_manager_handle_scroll_event(
-      view->scrolling_manager, event,
-      gtk_widget_get_scale_factor(GTK_WIDGET(view)));
+      self->scrolling_manager, event,
+      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
   return TRUE;
 }
 
 // Signal handler for GtkWidget::motion-notify-event
 static gboolean motion_notify_event_cb(GtkWidget* widget,
                                        GdkEventMotion* event,
-                                       FlView* view) {
-  if (view->engine == nullptr) {
+                                       FlView* self) {
+  if (self->engine == nullptr) {
     return FALSE;
   }
 
-  check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
+  check_pointer_inside(self, reinterpret_cast<GdkEvent*>(event));
 
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
-  fl_keyboard_manager_sync_modifier_if_needed(view->keyboard_manager,
+  fl_keyboard_manager_sync_modifier_if_needed(self->keyboard_manager,
                                               event->state, event->time);
   fl_engine_send_mouse_pointer_event(
-      view->engine, view->button_state != 0 ? kMove : kHover,
+      self->engine, self->button_state != 0 ? kMove : kHover,
       event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
-      event->y * scale_factor, 0, 0, view->button_state);
+      event->y * scale_factor, 0, 0, self->button_state);
 
   return TRUE;
 }
@@ -391,12 +391,12 @@ static gboolean motion_notify_event_cb(GtkWidget* widget,
 // Signal handler for GtkWidget::enter-notify-event
 static gboolean enter_notify_event_cb(GtkWidget* widget,
                                       GdkEventCrossing* event,
-                                      FlView* view) {
-  if (view->engine == nullptr) {
+                                      FlView* self) {
+  if (self->engine == nullptr) {
     return FALSE;
   }
 
-  check_pointer_inside(view, reinterpret_cast<GdkEvent*>(event));
+  check_pointer_inside(self, reinterpret_cast<GdkEvent*>(event));
 
   return TRUE;
 }
@@ -404,70 +404,70 @@ static gboolean enter_notify_event_cb(GtkWidget* widget,
 // Signal handler for GtkWidget::leave-notify-event
 static gboolean leave_notify_event_cb(GtkWidget* widget,
                                       GdkEventCrossing* event,
-                                      FlView* view) {
-  if (view->engine == nullptr) {
+                                      FlView* self) {
+  if (self->engine == nullptr) {
     return FALSE;
   }
 
   // Don't remove pointer while button is down; In case of dragging outside of
   // window with mouse grab active Gtk will send another leave notify on
   // release.
-  if (view->pointer_inside && view->button_state == 0) {
-    gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+  if (self->pointer_inside && self->button_state == 0) {
+    gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
     fl_engine_send_mouse_pointer_event(
-        view->engine, kRemove, event->time * kMicrosecondsPerMillisecond,
+        self->engine, kRemove, event->time * kMicrosecondsPerMillisecond,
         event->x * scale_factor, event->y * scale_factor, 0, 0,
-        view->button_state);
-    view->pointer_inside = FALSE;
+        self->button_state);
+    self->pointer_inside = FALSE;
   }
 
   return TRUE;
 }
 
-static void keymap_keys_changed_cb(GdkKeymap* self, FlView* view) {
-  if (view->keyboard_layout_notifier == nullptr) {
+static void keymap_keys_changed_cb(GdkKeymap* keymapf, FlView* self) {
+  if (self->keyboard_layout_notifier == nullptr) {
     return;
   }
 
-  view->keyboard_layout_notifier();
+  self->keyboard_layout_notifier();
 }
 
 static void gesture_rotation_begin_cb(GtkGestureRotate* gesture,
                                       GdkEventSequence* sequence,
-                                      FlView* view) {
-  fl_scrolling_manager_handle_rotation_begin(view->scrolling_manager);
+                                      FlView* self) {
+  fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
 }
 
 static void gesture_rotation_update_cb(GtkGestureRotate* widget,
                                        gdouble rotation,
                                        gdouble delta,
-                                       FlView* view) {
-  fl_scrolling_manager_handle_rotation_update(view->scrolling_manager,
+                                       FlView* self) {
+  fl_scrolling_manager_handle_rotation_update(self->scrolling_manager,
                                               rotation);
 }
 
 static void gesture_rotation_end_cb(GtkGestureRotate* gesture,
                                     GdkEventSequence* sequence,
-                                    FlView* view) {
-  fl_scrolling_manager_handle_rotation_end(view->scrolling_manager);
+                                    FlView* self) {
+  fl_scrolling_manager_handle_rotation_end(self->scrolling_manager);
 }
 
 static void gesture_zoom_begin_cb(GtkGestureZoom* gesture,
                                   GdkEventSequence* sequence,
-                                  FlView* view) {
-  fl_scrolling_manager_handle_zoom_begin(view->scrolling_manager);
+                                  FlView* self) {
+  fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager);
 }
 
 static void gesture_zoom_update_cb(GtkGestureZoom* widget,
                                    gdouble scale,
-                                   FlView* view) {
-  fl_scrolling_manager_handle_zoom_update(view->scrolling_manager, scale);
+                                   FlView* self) {
+  fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, scale);
 }
 
 static void gesture_zoom_end_cb(GtkGestureZoom* gesture,
                                 GdkEventSequence* sequence,
-                                FlView* view) {
-  fl_scrolling_manager_handle_zoom_end(view->scrolling_manager);
+                                FlView* self) {
+  fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
 
 static void fl_view_constructed(GObject* object) {
