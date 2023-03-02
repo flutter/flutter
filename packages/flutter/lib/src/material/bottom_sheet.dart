@@ -5,6 +5,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +14,7 @@ import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -227,7 +229,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
+  bool _isHoveringDragHandle = false;
+  bool _isDragging = false;
+
   void _handleDragStart(DragStartDetails details) {
+    _isDragging=true;
     widget.onDragStart?.call(details);
   }
 
@@ -252,6 +258,7 @@ class _BottomSheetState extends State<BottomSheet> {
     if (_dismissUnderway) {
       return;
     }
+    _isDragging=false;
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
@@ -287,6 +294,21 @@ class _BottomSheetState extends State<BottomSheet> {
     return false;
   }
 
+  void _handleDragHandleHover(bool hovering) {
+    if (hovering != _isHoveringDragHandle) {
+      setState(() {
+        _isHoveringDragHandle = hovering;
+      });
+    }
+  }
+
+  Set<MaterialState> get dragHandleMaterialState {
+    return <MaterialState>{
+      if (_isHoveringDragHandle) MaterialState.hovered,
+      if (_isDragging) MaterialState.focused,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
@@ -313,10 +335,10 @@ class _BottomSheetState extends State<BottomSheet> {
         child: (widget.enableDrag && hasDragHandle) ? Stack(
           alignment: Alignment.topCenter,
           children: <Widget>[
-              _DragHandle(onSemanticsTap: widget.onClosing),
-              Padding(
-                padding: const EdgeInsets.only(top:48),
-                child: widget.builder(context),
+            _buildDragHandle(context, onSemanticsTap: widget.onClosing),
+            Padding(
+              padding: const EdgeInsets.only(top:48),
+              child: widget.builder(context),
             ),
           ],
         ) : widget.builder(context),
@@ -342,24 +364,18 @@ class _BottomSheetState extends State<BottomSheet> {
       child: bottomSheet,
     );
   }
-}
 
-class _DragHandle extends StatelessWidget {
-  const _DragHandle({required this.onSemanticsTap});
-  final VoidCallback onSemanticsTap;
-
-  @override
-  Widget build(BuildContext context) {
-
+  Widget _buildDragHandle(BuildContext context, {required VoidCallback onSemanticsTap}) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
-    final BottomSheetThemeData m3Defaults =  _BottomSheetDefaultsM3(context) ;
+    final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
 
     final Size dragHandleSize = bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
     final Color dragHandleColor = bottomSheetTheme.dragHandleColor ?? m3Defaults.dragHandleColor!;
 
-     MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
-
-    return Semantics(
+    return MouseRegion(
+      onEnter: (PointerEnterEvent event) => _handleDragHandleHover(true),
+      onExit: (PointerExitEvent event) => _handleDragHandleHover(false),
+      child: Semantics(
       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       container: true,
       onTap: onSemanticsTap,
@@ -371,11 +387,11 @@ class _DragHandle extends StatelessWidget {
           width: dragHandleSize.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(dragHandleSize.height/2),
-            color: dragHandleColor,
+            color: MaterialStateProperty.resolveAs(dragHandleColor, dragHandleMaterialState),
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

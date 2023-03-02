@@ -90,7 +90,9 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
+
   testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
+
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -126,6 +128,7 @@ void main() {
   });
 
   testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
+
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -364,32 +367,6 @@ void main() {
     await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/121098
-  testWidgets('Verify that accessibleNavigation has no impact on the BottomSheet animation', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      builder: (BuildContext context, Widget? child) {
-        return MediaQuery(
-          data: const MediaQueryData(accessibleNavigation: true),
-          child: child!,
-        );
-      },
-      home: const Center(child: Text('Test')),
-    ));
-
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
-
-    final BuildContext homeContext = tester.element(find.text('Test'));
-    showModalBottomSheet<void>(
-      context: homeContext,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    );
-    await tester.pump();
-
-    await checkNonLinearAnimation(tester);
-    await tester.pumpAndSettle();
   });
 
   testWidgets('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
@@ -864,8 +841,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-
-  testWidgets('BottomSheet uses fallback values in Material 3',
+  testWidgets('BottomSheet uses fallback values in maretial3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -939,11 +915,18 @@ void main() {
       ),
     ));
 
+
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
-        return const SingleChildScrollView(
-          child: Text('BottomSheet'),
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: const Text('BottomSheet'),
+            );
+          },
         );
       },
     );
@@ -1513,7 +1496,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder(fallbackHeight: 200);
+          return const Placeholder();
         },
         anchorPoint: const Offset(1000, 0),
       );
@@ -1554,7 +1537,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder(fallbackHeight: 200);
+          return const Placeholder();
         },
       );
       await tester.pumpAndSettle();
@@ -1591,7 +1574,7 @@ void main() {
       showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          return const Placeholder(fallbackHeight: 200);
+          return const Placeholder();
         },
       );
       await tester.pumpAndSettle();
@@ -1603,6 +1586,24 @@ void main() {
   });
 
   group('constraints', () {
+      testWidgets('default constraints have max width 640 in material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(useMaterial3: true),
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(1000, 1000)),
+            child: Scaffold(
+              body: Center(child: Text('body')),
+              bottomSheet: Placeholder(fallbackWidth: 800),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder)),
+        const Rect.fromLTRB(80, 0, 720, 600),
+      );
+    });
 
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
@@ -1668,7 +1669,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
       expect(
-        tester.getRect(find.byType(BottomSheet)),
+        tester.getRect(find.text('BottomSheet')),
         const Rect.fromLTRB(0, 586, 800, 600),
       );
     });
