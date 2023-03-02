@@ -29,6 +29,8 @@ import 'theme_data.dart';
 const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
+const double _kVerticalPaddingMaterial2 = 4.0;
+const double _kVerticalPaddingMaterial3 = 8.0;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -2408,8 +2410,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
-      // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      final double verticalPadding = Theme.of(context).useMaterial3
+          ? _kVerticalPaddingMaterial3
+          : _kVerticalPaddingMaterial2;
+      floatingLabelHeight = (verticalPadding + _kFinalLabelScale * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
