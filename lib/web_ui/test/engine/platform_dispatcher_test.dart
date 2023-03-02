@@ -10,8 +10,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../matchers.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -174,42 +172,6 @@ void testMain() {
       expect(isCalled, isTrue);
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
-  });
-
-  test('A ViewConfiguration asserts that both window and view are not provided', () {
-    expect(() {
-      // ignore: deprecated_member_use
-      final EngineFlutterWindow window = EngineFlutterWindow(0, ui.PlatformDispatcher.instance);
-      ui.ViewConfiguration(
-        window: window,
-        view: window,
-      );
-    }, throwsAssertionError);
-  });
-
-  test("A ViewConfiguration's view and window are backed with the same property", () {
-    final ui.FlutterView window = EngineFlutterWindow(0, ui.PlatformDispatcher.instance);
-    final ui.ViewConfiguration viewConfiguration = ui.ViewConfiguration(view: window);
-    // ignore: deprecated_member_use
-    expect(viewConfiguration.view, window);
-    // ignore: deprecated_member_use
-    expect(viewConfiguration.window, viewConfiguration.view);
-  });
-
-  test('Initialize a ViewConfiguration with a window', () {
-    final ui.FlutterView window = EngineFlutterWindow(0, ui.PlatformDispatcher.instance);
-    // ignore: deprecated_member_use
-    final ui.ViewConfiguration configuration = ui.ViewConfiguration(window: window);
-    // ignore: deprecated_member_use
-    expect(window, configuration.window);
-  });
-
-  test("copyWith() on a ViewConfiguration asserts that both a window aren't provided", () {
-    final ui.FlutterView window = EngineFlutterWindow(0, ui.PlatformDispatcher.instance);
-    // ignore: deprecated_member_use
-    expect(() {
-      ui.ViewConfiguration(view: window).copyWith(view: window, window: window);
-    }, throwsAssertionError);
   });
 }
 

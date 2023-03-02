@@ -6,17 +6,16 @@ part of ui;
 
 abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
-  ViewConfiguration get viewConfiguration;
   Object get viewId;
-  double get devicePixelRatio => viewConfiguration.devicePixelRatio;
-  Rect get physicalGeometry => viewConfiguration.geometry;
-  Size get physicalSize => viewConfiguration.geometry.size;
-  ViewPadding get viewInsets => viewConfiguration.viewInsets;
-  ViewPadding get viewPadding => viewConfiguration.viewPadding;
-  ViewPadding get systemGestureInsets => viewConfiguration.systemGestureInsets;
-  ViewPadding get padding => viewConfiguration.padding;
-  GestureSettings get gestureSettings => viewConfiguration.gestureSettings;
-  List<DisplayFeature> get displayFeatures => viewConfiguration.displayFeatures;
+  double get devicePixelRatio;
+  Rect get physicalGeometry;
+  Size get physicalSize;
+  ViewPadding get viewInsets;
+  ViewPadding get viewPadding;
+  ViewPadding get systemGestureInsets;
+  ViewPadding get padding;
+  GestureSettings get gestureSettings;
+  List<DisplayFeature> get displayFeatures;
   void render(Scene scene) => platformDispatcher.render(scene, this);
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }

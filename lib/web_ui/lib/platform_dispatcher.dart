@@ -26,7 +26,6 @@ class RootIsolateToken {
 abstract class PlatformDispatcher {
   static PlatformDispatcher get instance => engine.EnginePlatformDispatcher.instance;
 
-  PlatformConfiguration get configuration;
   VoidCallback? get onPlatformConfigurationChanged;
   set onPlatformConfigurationChanged(VoidCallback? callback);
 
@@ -96,7 +95,7 @@ abstract class PlatformDispatcher {
 
   Locale get locale;
 
-  List<Locale> get locales => configuration.locales;
+  List<Locale> get locales;
 
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales);
 
@@ -105,9 +104,9 @@ abstract class PlatformDispatcher {
 
   String get initialLifecycleState => 'AppLifecycleState.resumed';
 
-  bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat;
 
-  double get textScaleFactor => configuration.textScaleFactor;
+  double get textScaleFactor;
 
   bool get nativeSpellCheckServiceDefined => false;
 
@@ -116,17 +115,17 @@ abstract class PlatformDispatcher {
   VoidCallback? get onTextScaleFactorChanged;
   set onTextScaleFactorChanged(VoidCallback? callback);
 
-  Brightness get platformBrightness => configuration.platformBrightness;
+  Brightness get platformBrightness;
 
   VoidCallback? get onPlatformBrightnessChanged;
   set onPlatformBrightnessChanged(VoidCallback? callback);
 
-  String? get systemFontFamily => configuration.systemFontFamily;
+  String? get systemFontFamily;
 
   VoidCallback? get onSystemFontFamilyChanged;
   set onSystemFontFamilyChanged(VoidCallback? callback);
 
-  bool get semanticsEnabled => configuration.semanticsEnabled;
+  bool get semanticsEnabled;
 
   VoidCallback? get onSemanticsEnabledChanged;
   set onSemanticsEnabledChanged(VoidCallback? callback);
@@ -143,128 +142,6 @@ abstract class PlatformDispatcher {
 
   VoidCallback? get onFrameDataChanged => null;
   set onFrameDataChanged(VoidCallback? callback) {}
-}
-
-class PlatformConfiguration {
-  const PlatformConfiguration({
-    this.accessibilityFeatures = const engine.EngineAccessibilityFeatures(0),
-    this.alwaysUse24HourFormat = false,
-    this.semanticsEnabled = false,
-    this.platformBrightness = Brightness.light,
-    this.textScaleFactor = 1.0,
-    this.locales = const <Locale>[],
-    this.defaultRouteName = '/',
-    this.systemFontFamily,
-  });
-
-  PlatformConfiguration copyWith({
-    AccessibilityFeatures? accessibilityFeatures,
-    bool? alwaysUse24HourFormat,
-    bool? semanticsEnabled,
-    Brightness? platformBrightness,
-    double? textScaleFactor,
-    List<Locale>? locales,
-    String? defaultRouteName,
-    String? systemFontFamily,
-  }) {
-    return PlatformConfiguration(
-      accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
-      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
-      semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
-      platformBrightness: platformBrightness ?? this.platformBrightness,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
-      locales: locales ?? this.locales,
-      defaultRouteName: defaultRouteName ?? this.defaultRouteName,
-      systemFontFamily: systemFontFamily ?? this.systemFontFamily,
-    );
-  }
-
-  final AccessibilityFeatures accessibilityFeatures;
-  final bool alwaysUse24HourFormat;
-  final bool semanticsEnabled;
-  final Brightness platformBrightness;
-  final double textScaleFactor;
-  final List<Locale> locales;
-  final String defaultRouteName;
-  final String? systemFontFamily;
-}
-
-class ViewConfiguration {
-  const ViewConfiguration({
-    FlutterView? view,
-    @Deprecated('''
-      Use the `view` property instead.
-      This change is related to adding multi-view support in Flutter.
-      This feature was deprecated after 3.7.0-1.2.pre.
-    ''')
-    FlutterView? window,
-    this.devicePixelRatio = 1.0,
-    this.geometry = Rect.zero,
-    this.visible = false,
-    this.viewInsets = ViewPadding.zero,
-    this.viewPadding = ViewPadding.zero,
-    this.systemGestureInsets = ViewPadding.zero,
-    this.padding = ViewPadding.zero,
-    this.gestureSettings = const GestureSettings(),
-    this.displayFeatures = const <DisplayFeature>[],
-  }) : assert(window == null || view == null),
-  _view = view ?? window;
-
-  ViewConfiguration copyWith({
-    FlutterView? view,
-    @Deprecated('''
-      Use the `view` property instead.
-      This change is related to adding multi-view support in Flutter.
-      This feature was deprecated after 3.7.0-1.2.pre.
-    ''')
-    FlutterView? window,
-    double? devicePixelRatio,
-    Rect? geometry,
-    bool? visible,
-    ViewPadding? viewInsets,
-    ViewPadding? viewPadding,
-    ViewPadding? systemGestureInsets,
-    ViewPadding? padding,
-    GestureSettings? gestureSettings,
-    List<DisplayFeature>? displayFeatures,
-  }) {
-    assert(view == null || window == null);
-    return ViewConfiguration(
-      view: view ?? window ?? _view,
-      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      geometry: geometry ?? this.geometry,
-      visible: visible ?? this.visible,
-      viewInsets: viewInsets ?? this.viewInsets,
-      viewPadding: viewPadding ?? this.viewPadding,
-      systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      padding: padding ?? this.padding,
-      gestureSettings: gestureSettings ?? this.gestureSettings,
-      displayFeatures: displayFeatures ?? this.displayFeatures,
-    );
-  }
-
-  @Deprecated('''
-    Use the `view` property instead.
-    This change is related to adding multi-view support in Flutter.
-    This feature was deprecated after 3.7.0-1.2.pre.
-  ''')
-  FlutterView? get window => _view;
-  FlutterView? get view => _view;
-  final FlutterView? _view;
-  final double devicePixelRatio;
-  final Rect geometry;
-  final bool visible;
-  final ViewPadding viewInsets;
-  final ViewPadding viewPadding;
-  final ViewPadding systemGestureInsets;
-  final ViewPadding padding;
-  final GestureSettings gestureSettings;
-  final List<DisplayFeature> displayFeatures;
-
-  @override
-  String toString() {
-    return '$runtimeType[view: $view, geometry: $geometry]';
-  }
 }
 
 enum FramePhase {

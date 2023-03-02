@@ -62,7 +62,7 @@ class FlutterView {
   final PlatformDispatcher platformDispatcher;
 
   /// The configuration of this view.
-  ViewConfiguration get viewConfiguration {
+  _ViewConfiguration get _viewConfiguration {
     assert(platformDispatcher._viewConfigurations.containsKey(viewId));
     return platformDispatcher._viewConfigurations[viewId]!;
   }
@@ -92,7 +92,7 @@ class FlutterView {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  double get devicePixelRatio => viewConfiguration.devicePixelRatio;
+  double get devicePixelRatio => _viewConfiguration.devicePixelRatio;
 
   /// The dimensions and location of the rectangle into which the scene rendered
   /// in this view will be drawn on the screen, in physical pixels.
@@ -111,7 +111,7 @@ class FlutterView {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  Rect get physicalGeometry => viewConfiguration.geometry;
+  Rect get physicalGeometry => _viewConfiguration.geometry;
 
   /// The dimensions of the rectangle into which the scene rendered in this view
   /// will be drawn on the screen, in physical pixels.
@@ -134,7 +134,7 @@ class FlutterView {
   ///    its size.
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  Size get physicalSize => viewConfiguration.geometry.size;
+  Size get physicalSize => _viewConfiguration.geometry.size;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely
@@ -153,7 +153,7 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism for the same.
   ///  * [Scaffold], which automatically applies the view insets in material
   ///    design applications.
-  ViewPadding get viewInsets => viewConfiguration.viewInsets;
+  ViewPadding get viewInsets => _viewConfiguration.viewInsets;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but which may be partially obscured by system
@@ -179,7 +179,7 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism for the same.
   ///  * [Scaffold], which automatically applies the padding in material design
   ///    applications.
-  ViewPadding get viewPadding => viewConfiguration.viewPadding;
+  ViewPadding get viewPadding => _viewConfiguration.viewPadding;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but where the operating system will consume
@@ -196,7 +196,7 @@ class FlutterView {
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
   ///  * [MediaQuery.of], a simpler mechanism for the same.
-  ViewPadding get systemGestureInsets => viewConfiguration.systemGestureInsets;
+  ViewPadding get systemGestureInsets => _viewConfiguration.systemGestureInsets;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but which may be partially obscured by system
@@ -224,16 +224,31 @@ class FlutterView {
   /// * [MediaQuery.of], a simpler mechanism for the same.
   /// * [Scaffold], which automatically applies the padding in material design
   ///   applications.
-  ViewPadding get padding => viewConfiguration.padding;
+  ViewPadding get padding => _viewConfiguration.padding;
 
   /// Additional configuration for touch gestures performed on this view.
   ///
   /// For example, the touch slop defined in physical pixels may be provided
   /// by the gesture settings and should be preferred over the framework
   /// touch slop constant.
-  GestureSettings get gestureSettings => viewConfiguration.gestureSettings;
+  GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;
 
-  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  /// Areas of the display that are obstructed by hardware features.
+  ///
+  /// This list is populated only on Android. If the device has no display
+  /// features, this list is empty.
+  ///
+  /// The coordinate space in which the [DisplayFeature.bounds] are defined spans
+  /// across the screens currently in use. This means that the space between the screens
+  /// is virtually part of the Flutter view space, with the [DisplayFeature.bounds]
+  /// of the display feature as an obstructed area. The [DisplayFeature.type] can
+  /// be used to determine if this display feature obstructs the screen or not.
+  /// For example, [DisplayFeatureType.hinge] and [DisplayFeatureType.cutout] both
+  /// obstruct the display, while [DisplayFeatureType.fold] is a crease in the display.
+  ///
+  /// Folding [DisplayFeature]s like the [DisplayFeatureType.hinge] and
+  /// [DisplayFeatureType.fold] also have a [DisplayFeature.state] which can be
+  /// used to determine the posture the device is in.
   ///
   /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
@@ -242,7 +257,7 @@ class FlutterView {
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
   ///  * [MediaQuery.of], a simpler mechanism to access this data.
-  List<DisplayFeature> get displayFeatures => viewConfiguration.displayFeatures;
+  List<DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
@@ -921,8 +936,9 @@ class FrameData {
 
 /// Platform specific configuration for gesture behavior, such as touch slop.
 ///
-/// These settings are provided via [ViewConfiguration] to each window, and should
-/// be favored for configuring gesture behavior over the framework constants.
+/// These settings are provided via [FlutterView.gestureSettings] to each
+/// view, and should be favored for configuring gesture behavior over the
+/// framework constants.
 ///
 /// A `null` field indicates that the platform or view does not have a preference
 /// and the fallback constants should be used instead.

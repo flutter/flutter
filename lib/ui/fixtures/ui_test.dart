@@ -622,8 +622,6 @@ void hooksTests() async {
       <int>[],     // display features states
     );
 
-    expectEquals(window.viewConfiguration.gestureSettings,
-      GestureSettings(physicalTouchSlop: 11.0));
     expectEquals(window.gestureSettings,
       GestureSettings(physicalTouchSlop: 11.0));
 
@@ -652,8 +650,6 @@ void hooksTests() async {
       <int>[],     // display features states
     );
 
-    expectEquals(window.viewConfiguration.gestureSettings,
-      GestureSettings(physicalTouchSlop: null));
     expectEquals(window.gestureSettings,
       GestureSettings(physicalTouchSlop: null));
 
@@ -682,8 +678,6 @@ void hooksTests() async {
       <int>[],     // display features states
     );
 
-    expectEquals(window.viewConfiguration.gestureSettings,
-      GestureSettings(physicalTouchSlop: 22.0));
     expectEquals(window.gestureSettings,
       GestureSettings(physicalTouchSlop: 22.0));
   });
