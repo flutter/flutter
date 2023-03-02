@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "impeller/base/validation.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 #include "third_party/skia/include/core/SkPixmap.h"
