@@ -25,11 +25,6 @@ class PageTransitionsThemeApp extends StatelessWidget {
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
             TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
             TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
-            // The snapshotting optimization for entering route can be
-            // deactivated.
-            TargetPlatform.android: ZoomPageTransitionsBuilder(
-              allowEnterRouteSnapshotting: false,
-            ),
           },
         ),
       ),

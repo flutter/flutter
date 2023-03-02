@@ -196,9 +196,15 @@ class _ZoomPageTransition extends StatelessWidget {
 
   /// Whether the [SnapshotWidget] will be used.
   ///
-  /// Notably, this improves performance by disabling animations on both the outgoing and
-  /// incoming route. This also implies that ink-splashes or similar animations will
-  /// not animate during the transition.
+  /// When this value is true, performance is improved by disabling animations
+  /// on both the outgoing and incoming route. This also implies that ink-splashes
+  /// or similar animations will not animate during the transition.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.allowSnapshotting], which defines wether the route
+  ///    transition will prefer to animate a snapshot of the entering and exiting
+  ///    routes.
   final bool allowSnapshotting;
 
   /// The widget below this widget in the tree.
@@ -731,8 +737,8 @@ class PageTransitionsTheme with Diagnosticable {
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
-  // Map the builders to a list with one PageTransitionsBuilder per platform
-  // for the operator == overload.
+  // Map the builders to a list with one PageTransitionsBuilder per platform for
+  // the operator == overload.
   List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
