@@ -9,6 +9,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 
