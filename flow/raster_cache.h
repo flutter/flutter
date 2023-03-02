@@ -133,7 +133,7 @@ class RasterCache {
   explicit RasterCache(
       size_t access_threshold = 3,
       size_t picture_and_display_list_cache_limit_per_frame =
-          RasterCacheUtil::kDefaultPictureAndDispLayListCacheLimitPerFrame);
+          RasterCacheUtil::kDefaultPictureAndDisplayListCacheLimitPerFrame);
 
   virtual ~RasterCache() = default;
 

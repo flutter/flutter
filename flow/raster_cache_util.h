@@ -17,7 +17,7 @@ struct RasterCacheUtil {
   // generated per frame. Generating too many caches in one frame may cause jank
   // on that frame. This limit allows us to throttle the cache and distribute
   // the work across multiple frames.
-  static constexpr int kDefaultPictureAndDispLayListCacheLimitPerFrame = 3;
+  static constexpr int kDefaultPictureAndDisplayListCacheLimitPerFrame = 3;
 
   // The ImageFilterLayer might cache the filtered output of this layer
   // if the layer remains stable (if it is not animating for instance).
