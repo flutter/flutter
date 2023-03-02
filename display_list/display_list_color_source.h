@@ -39,7 +39,6 @@ class DlRadialGradientColorSource;
 class DlConicalGradientColorSource;
 class DlSweepGradientColorSource;
 class DlRuntimeEffectColorSource;
-class DlUnknownColorSource;
 
 // The DisplayList ColorSource class. This class implements all of the
 // facilities and adheres to the design goals of the |DlAttribute| base
@@ -62,28 +61,11 @@ enum class DlColorSourceType {
 #ifdef IMPELLER_ENABLE_3D
   kScene,
 #endif  // IMPELLER_ENABLE_3D
-  kUnknown
 };
 
 class DlColorSource
     : public DlAttribute<DlColorSource, SkShader, DlColorSourceType> {
  public:
-  // Return a shared_ptr holding a DlColorSource representing the indicated
-  // Skia SkShader pointer.
-  //
-  // This method can detect each of the 4 recognized types from an analogous
-  // SkShader.
-  static std::shared_ptr<DlColorSource> From(SkShader* sk_filter);
-
-  // Return a shared_ptr holding a DlColorFilter representing the indicated
-  // Skia SkShader pointer.
-  //
-  // This method can detect each of the 4 recognized types from an analogous
-  // SkShader.
-  static std::shared_ptr<DlColorSource> From(sk_sp<SkShader> sk_filter) {
-    return From(sk_filter.get());
-  }
-
   static std::shared_ptr<DlColorSource> MakeLinear(
       const SkPoint start_point,
       const SkPoint end_point,
@@ -810,41 +792,6 @@ class DlSceneColorSource final : public DlColorSource {
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlSceneColorSource);
 };
 #endif  // IMPELLER_ENABLE_3D
-
-// Now that the DisplayListCanvasRecorder is deleted and the
-// Paragraph code talks directly to a DisplayListBuilder, there may be
-// no more reasons to maintain this sub-class.
-// See: https://github.com/flutter/flutter/issues/121389
-class DlUnknownColorSource final : public DlColorSource {
- public:
-  DlUnknownColorSource(sk_sp<SkShader> shader)
-      : sk_shader_(std::move(shader)) {}
-
-  std::shared_ptr<DlColorSource> shared() const override {
-    return std::make_shared<DlUnknownColorSource>(sk_shader_);
-  }
-
-  DlColorSourceType type() const override {
-    return DlColorSourceType::kUnknown;
-  }
-  size_t size() const override { return sizeof(*this); }
-
-  bool is_opaque() const override { return sk_shader_->isOpaque(); }
-
-  sk_sp<SkShader> skia_object() const override { return sk_shader_; }
-
- protected:
-  bool equals_(DlColorSource const& other) const override {
-    FML_DCHECK(other.type() == DlColorSourceType::kUnknown);
-    auto that = static_cast<DlUnknownColorSource const*>(&other);
-    return (sk_shader_ == that->sk_shader_);
-  }
-
- private:
-  sk_sp<SkShader> sk_shader_;
-
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlUnknownColorSource);
-};
 
 }  // namespace flutter
 

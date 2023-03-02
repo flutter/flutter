@@ -569,11 +569,15 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << "DlComposeImageFilter(" << std::endl;
       indent();
       startl() << "outer: ";
+      indent(7);
       out(compose->outer().get());
       os_ << "," << std::endl;
+      outdent(7);
       startl() << "inner: ";
+      indent(7);
       out(compose->inner().get());
-      os_ << "," << std::endl;
+      os_ << std::endl;
+      outdent(7);
       outdent();
       startl() << ")";
       break;
@@ -586,9 +590,19 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << ")";
       break;
     }
-    default:
-      os_ << "DlUnknownImageFilter(" << filter.skia_object().get() << ")";
+    case DlImageFilterType::kLocalMatrixFilter: {
+      const DlLocalMatrixImageFilter* local_matrix = filter.asLocalMatrix();
+      FML_DCHECK(local_matrix);
+      os_ << "DlLocalMatrixImageFilter(" << local_matrix->matrix();
+      os_ << "," << std::endl;
+      indent(25);
+      startl() << "filter: ";
+      out(local_matrix->image_filter().get());
+      os_ << std::endl;
+      outdent(25);
+      startl() << ")";
       break;
+    }
   }
 }
 void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
@@ -596,12 +610,16 @@ void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
     os_ << "no ImageFilter";
   } else {
     os_ << "&";
+    indent(1);
     out(*filter);
+    outdent(1);
   }
 }
 void DisplayListStreamDispatcher::setImageFilter(const DlImageFilter* filter) {
   startl() << "setImageFilter(";
+  indent(15);
   out(filter);
+  outdent(15);
   os_ << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::save() {

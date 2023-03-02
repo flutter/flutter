@@ -6,13 +6,6 @@
 
 namespace flutter {
 
-std::shared_ptr<DlMaskFilter> DlMaskFilter::From(SkMaskFilter* sk_filter) {
-  if (sk_filter == nullptr) {
-    return nullptr;
-  }
-  // There are no inspection methods for SkMaskFilter so we cannot break
-  // the Skia filter down into a specific subclass (i.e. Blur).
-  return std::make_shared<DlUnknownMaskFilter>(sk_ref_sp(sk_filter));
-}
+// Just exists to ensure that the header can be cleanly imported.
 
 }  // namespace flutter
