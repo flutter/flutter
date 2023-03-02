@@ -71,7 +71,7 @@ const List<Feature> allFeatures = <Feature>[
 ];
 
 /// All current Flutter feature flags that can be configured.
-/// 
+///
 /// [Feature.configSetting] is not `null`.
 Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
 
