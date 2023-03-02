@@ -416,44 +416,23 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedSwitcher can handle multiple children with the same key.', (WidgetTester tester) async {
-    final UniqueKey containerA = UniqueKey();
-    final UniqueKey containerB = UniqueKey();
-
-    // Pump an AnimatedSwitcher with a child container with the given key.
-    Future<void> pump(Key key) async {
+  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
+    Future<void> pumpChild(Widget child) async {
       return tester.pumpWidget(
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 1000),
-          child: Container(key: key),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 1000),
+            child: child,
+          ),
         ),
       );
     }
-
-    // Pump four widgets with the two keys A and B in alternating order.
-    await pump(containerA);
+    await pumpChild(const Text('1', key: Key('1')));
+    await pumpChild(const Text('2', key: Key('2')));
+    await pumpChild(const Text('1', key: Key('1')));
     await tester.pump(const Duration(milliseconds: 1000));
-    await pump(containerB);
-    await tester.pump(const Duration(milliseconds: 500));
-    await pump(containerA);
-    await tester.pump(const Duration(milliseconds: 250));
-    await pump(containerB);
-    await tester.pump(const Duration(milliseconds: 125));
-
-    // All four widgets should still be animating in (the one pumped last) or
-    // out (the other ones), and thus have an associated FadeTransition each.
-    expect(find.byType(FadeTransition), findsNWidgets(4));
-    final Iterable<FadeTransition> transitions = tester.widgetList(
-      find.byType(FadeTransition),
-    );
-
-    // The exponentially decaying timing used in pumping the widgets should have
-    // lined up all of the FadeTransitions' values to be the same.
-    for (final FadeTransition transition in transitions) {
-      expect(transition.opacity.value, moreOrLessEquals(0.125, epsilon: 0.001));
-    }
-
-    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
   });
 }
 
