@@ -1107,7 +1107,7 @@ void main() {
     await gesture.addPointer(location: edge);
     await tester.pump();
     BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
-      of: dragHandle, 
+      of: dragHandle,
       matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration !=null),
     )).decoration! as BoxDecoration;
     expect(boxDecoration.color,defaultColor);
