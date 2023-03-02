@@ -6,6 +6,10 @@
 // documentation of APIs.
 part of ui;
 
+double toDegrees(double radians) {
+  return radians * 180 / math.pi;
+}
+
 abstract class OffsetBase {
   const OffsetBase(this._dx, this._dy);
 
