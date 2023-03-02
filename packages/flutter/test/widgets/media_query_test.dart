@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewConfiguration, ViewPadding;
+import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewPadding;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1538,8 +1538,6 @@ class TestView implements FlutterView {
   final ViewPadding viewInsets;
   @override
   final ViewPadding systemGestureInsets;
-  @override
-  final ViewConfiguration viewConfiguration = const ViewConfiguration();
   @override
   final List<DisplayFeature> displayFeatures = <DisplayFeature>[];
   @override
