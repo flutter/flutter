@@ -6,6 +6,8 @@
 
 #include "impeller/aiks/aiks_context.h"
 
+#include "third_party/imgui/imgui.h"
+
 namespace impeller {
 
 AiksPlayground::AiksPlayground() = default;
@@ -32,6 +34,11 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
 
   return Playground::OpenPlaygroundHere(
       [&renderer, &callback](RenderTarget& render_target) -> bool {
+        static bool wireframe = false;
+        if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
+          wireframe = !wireframe;
+          renderer.GetContentContext().SetWireframe(wireframe);
+        }
         return callback(renderer, render_target);
       });
 }

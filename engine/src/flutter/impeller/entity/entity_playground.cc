@@ -6,6 +6,8 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include "third_party/imgui/imgui.h"
+
 namespace impeller {
 
 EntityPlayground::EntityPlayground() = default;
@@ -37,6 +39,11 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     return false;
   }
   SinglePassCallback pass_callback = [&](RenderPass& pass) -> bool {
+    static bool wireframe = false;
+    if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
+      wireframe = !wireframe;
+      content_context.SetWireframe(wireframe);
+    }
     return callback(content_context, pass);
   };
   return Playground::OpenPlaygroundHere(pass_callback);
