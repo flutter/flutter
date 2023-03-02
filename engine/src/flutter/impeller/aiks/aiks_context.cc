@@ -32,7 +32,7 @@ std::shared_ptr<Context> AiksContext::GetContext() const {
   return context_;
 }
 
-const ContentContext& AiksContext::GetContentContext() const {
+ContentContext& AiksContext::GetContentContext() const {
   return *content_context_;
 }
 
