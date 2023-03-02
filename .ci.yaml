@@ -706,7 +706,8 @@ targets:
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "version:3.16.1"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "curl", "version": "version:7.64.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
