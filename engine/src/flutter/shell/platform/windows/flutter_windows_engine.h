@@ -231,8 +231,9 @@ class FlutterWindowsEngine {
   // Returns true if the high contrast feature is enabled.
   bool high_contrast_enabled() const { return high_contrast_enabled_; }
 
-  // Returns the native accessibility node with the given id.
-  gfx::NativeViewAccessible GetNativeAccessibleFromId(AccessibilityNodeId id);
+  // Returns the native accessibility root node, or nullptr if one does not
+  // exist.
+  gfx::NativeViewAccessible GetNativeViewAccessible();
 
   // Register a root isolate create callback.
   //

@@ -679,17 +679,12 @@ void FlutterWindowsEngine::OnPreEngineRestart() {
   }
 }
 
-gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeAccessibleFromId(
-    AccessibilityNodeId id) {
+gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeViewAccessible() {
   if (!accessibility_bridge_) {
     return nullptr;
   }
-  std::shared_ptr<FlutterPlatformNodeDelegate> node_delegate =
-      accessibility_bridge_->GetFlutterPlatformNodeDelegateFromID(id).lock();
-  if (!node_delegate) {
-    return nullptr;
-  }
-  return node_delegate->GetNativeViewAccessible();
+
+  return accessibility_bridge_->GetChildOfAXFragmentRoot();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {

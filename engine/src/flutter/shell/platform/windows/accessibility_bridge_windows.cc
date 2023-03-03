@@ -190,7 +190,12 @@ void AccessibilityBridgeWindows::SetFocus(
 
 gfx::NativeViewAccessible
 AccessibilityBridgeWindows::GetChildOfAXFragmentRoot() {
-  return view_->GetNativeViewAccessible();
+  ui::AXPlatformNodeDelegate* root_delegate = RootDelegate();
+  if (!root_delegate) {
+    return nullptr;
+  }
+
+  return root_delegate->GetNativeViewAccessible();
 }
 
 gfx::NativeViewAccessible
