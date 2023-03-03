@@ -92,6 +92,37 @@ void testMain() {
       expect(await matchImage(tabImage, spaceImage), isTrue);
       expect(await matchImage(tabImage, tofuImage), isFalse);
     });
+
+    group('test fonts in flutterTester environment', () {
+      final bool resetValue = ui.debugEmulateFlutterTesterEnvironment;
+      ui.debugEmulateFlutterTesterEnvironment = true;
+      tearDownAll(() => ui.debugEmulateFlutterTesterEnvironment = resetValue);
+      const List<String> testFonts = <String>['Ahem', 'FlutterTest'];
+
+      test('The default test font is used when a non-test fontFamily is specified', () {
+        final String defaultTestFontFamily = testFonts.first;
+
+        expect(CkTextStyle(fontFamily: 'BogusFontFamily').fontFamily, defaultTestFontFamily);
+        expect(CkParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().fontFamily, defaultTestFontFamily);
+        expect(CkStrutStyle(fontFamily: 'BogusFontFamily'), CkStrutStyle(fontFamily: defaultTestFontFamily));
+      });
+
+      test('The default test font is used when fontFamily is unspecified', () {
+        final String defaultTestFontFamily = testFonts.first;
+
+        expect(CkTextStyle().fontFamily, defaultTestFontFamily);
+        expect(CkParagraphStyle().getTextStyle().fontFamily, defaultTestFontFamily);
+        expect(CkStrutStyle(), CkStrutStyle(fontFamily: defaultTestFontFamily));
+      });
+
+      test('Can specify test fontFamily to use', () {
+        for (final String testFont in testFonts) {
+          expect(CkTextStyle(fontFamily: testFont).fontFamily, testFont);
+          expect(CkParagraphStyle(fontFamily: testFont).getTextStyle().fontFamily, testFont);
+        }
+      });
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
+
 }

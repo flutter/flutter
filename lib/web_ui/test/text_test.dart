@@ -358,4 +358,24 @@ Future<void> testMain() async {
     expect(FontWeight.w800.value, 800);
     expect(FontWeight.w900.value, 900);
   });
+
+  group('test fonts in flutterTester environment', () {
+    final bool resetValue = debugEmulateFlutterTesterEnvironment;
+    debugEmulateFlutterTesterEnvironment = true;
+    tearDownAll(() => debugEmulateFlutterTesterEnvironment = resetValue);
+    const List<String> testFonts = <String>['Ahem', 'FlutterTest'];
+
+    test('The default test font is used when a non-test fontFamily is specified, or fontFamily is not specified', () {
+      final String defaultTestFontFamily = testFonts.first;
+
+      expect(EngineTextStyle.only().effectiveFontFamily, defaultTestFontFamily);
+      expect(EngineTextStyle.only(fontFamily: 'BogusFontFamily').effectiveFontFamily, defaultTestFontFamily);
+    });
+
+    test('Can specify test fontFamily to use', () {
+      for (final String testFont in testFonts) {
+        expect(EngineTextStyle.only(fontFamily: testFont).effectiveFontFamily, testFont);
+      }
+    });
+  });
 }

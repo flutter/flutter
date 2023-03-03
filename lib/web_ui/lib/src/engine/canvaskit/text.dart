@@ -16,6 +16,13 @@ import 'skia_object_cache.dart';
 import 'text_fragmenter.dart';
 import 'util.dart';
 
+final List<String> _testFonts = <String>['Ahem', 'FlutterTest'];
+String? _effectiveFontFamily(String? fontFamily) {
+  return ui.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
+    ? _testFonts.first
+    : fontFamily;
+}
+
 @immutable
 class CkParagraphStyle implements ui.ParagraphStyle {
   CkParagraphStyle({
@@ -35,7 +42,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           textAlign,
           textDirection,
           maxLines,
-          ui.debugEmulateFlutterTesterEnvironment ? 'Ahem' : fontFamily,
+          _effectiveFontFamily(fontFamily),
           fontSize,
           height,
           textHeightBehavior,
@@ -45,7 +52,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           ellipsis,
           locale,
         ),
-        _fontFamily = ui.debugEmulateFlutterTesterEnvironment ? 'Ahem' : fontFamily,
+        _fontFamily = _effectiveFontFamily(fontFamily),
         _fontSize = fontSize,
         _height = height,
         _leadingDistribution = textHeightBehavior?.leadingDistribution,
@@ -231,7 +238,7 @@ class CkTextStyle implements ui.TextStyle {
       fontWeight,
       fontStyle,
       textBaseline,
-      ui.debugEmulateFlutterTesterEnvironment ? 'Ahem' : fontFamily,
+      _effectiveFontFamily(fontFamily),
       ui.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
       fontSize,
       letterSpacing,
@@ -483,7 +490,7 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  })  : _fontFamily = ui.debugEmulateFlutterTesterEnvironment ? 'Ahem' : fontFamily,
+  })  : _fontFamily = _effectiveFontFamily(fontFamily),
         _fontFamilyFallback = ui.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
         _fontSize = fontSize,
         _height = height,

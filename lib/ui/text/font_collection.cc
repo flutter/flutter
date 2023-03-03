@@ -121,19 +121,16 @@ void FontCollection::RegisterFonts(
 }
 
 void FontCollection::RegisterTestFonts() {
-  std::vector<sk_sp<SkTypeface>> test_typefaces;
-  std::vector<std::unique_ptr<SkStreamAsset>> font_data = GetTestFontData();
-  for (auto& font : font_data) {
-    test_typefaces.push_back(SkTypeface::MakeFromStream(std::move(font)));
-  }
-
+  std::vector<sk_sp<SkTypeface>> test_typefaces = GetTestFontData();
   std::unique_ptr<txt::TypefaceFontAssetProvider> font_provider =
       std::make_unique<txt::TypefaceFontAssetProvider>();
 
   size_t index = 0;
   std::vector<std::string> names = GetTestFontFamilyNames();
   for (sk_sp<SkTypeface> typeface : test_typefaces) {
-    font_provider->RegisterTypeface(std::move(typeface), names[index]);
+    if (typeface) {
+      font_provider->RegisterTypeface(std::move(typeface), names[index]);
+    }
     index++;
   }
 
