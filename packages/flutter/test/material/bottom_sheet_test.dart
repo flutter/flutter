@@ -1120,7 +1120,7 @@ void main() {
      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration !=null),
    )).decoration! as BoxDecoration;
 
-    expect(boxDecoration.color,hoveringColor);
+    expect(boxDecoration.color, hoveringColor);
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
