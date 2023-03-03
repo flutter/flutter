@@ -233,6 +233,7 @@ class FlutterView {
   /// touch slop constant.
   GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;
 
+  /// {@template dart.ui.ViewConfiguration.displayFeatures}
   /// Areas of the display that are obstructed by hardware features.
   ///
   /// This list is populated only on Android. If the device has no display
@@ -249,6 +250,7 @@ class FlutterView {
   /// Folding [DisplayFeature]s like the [DisplayFeatureType.hinge] and
   /// [DisplayFeatureType.fold] also have a [DisplayFeature.state] which can be
   /// used to determine the posture the device is in.
+  /// {@endtemplate}
   ///
   /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
   ///
