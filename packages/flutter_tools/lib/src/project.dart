@@ -27,7 +27,7 @@ import 'xcode_project.dart';
 export 'cmake_project.dart';
 export 'xcode_project.dart';
 
-/// Emum for each officially supported platform.
+/// Enum for each officially supported platform.
 enum SupportedPlatform {
   android,
   ios,

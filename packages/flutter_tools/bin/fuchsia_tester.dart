@@ -138,7 +138,7 @@ Future<void> run(List<String> args) async {
     // TODO(dnfield): This should be injected.
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
-      tests.keys.toList(),
+      tests.keys.map(Uri.file).toList(),
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo(
           BuildMode.debug,
@@ -148,7 +148,7 @@ Future<void> run(List<String> args) async {
         ),
       ),
       watcher: collector,
-      enableObservatory: collector != null,
+      enableVmService: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),

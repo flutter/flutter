@@ -3568,7 +3568,7 @@ void main() {
     expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
   });
 
-  testWidgets('Do not throw when switching beetween a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
+  testWidgets('Do not throw when switching between a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/120649
     final TabController controller1 = TabController(
       vsync: const TestVSync(),
