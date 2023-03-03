@@ -1268,6 +1268,10 @@ FlutterSemanticsNode CreateEmbedderSemanticsNode(
       transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
       transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
       transform.get(SkMatrix::kMPersp2)};
+  // Do not add new members to FlutterSemanticsNode.
+  // This would break the forward compatibility of FlutterSemanticsUpdate.
+  // TODO(loicsharma): Introduce FlutterSemanticsNode2.
+  // https://github.com/flutter/flutter/issues/121176
   return {
       sizeof(FlutterSemanticsNode),
       node.id,
@@ -1305,6 +1309,10 @@ FlutterSemanticsNode CreateEmbedderSemanticsNode(
 // actions.
 FlutterSemanticsCustomAction CreateEmbedderSemanticsCustomAction(
     const flutter::CustomAccessibilityAction& action) {
+  // Do not add new members to FlutterSemanticsCustomAction.
+  // This would break the forward compatibility of FlutterSemanticsUpdate.
+  // TODO(loicsharma): Introduce FlutterSemanticsCustomAction2.
+  // https://github.com/flutter/flutter/issues/121176
   return {
       sizeof(FlutterSemanticsCustomAction),
       action.id,
