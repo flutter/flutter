@@ -222,7 +222,9 @@ class FakeDeviceManager implements DeviceManager {
     String deviceId, {
     DeviceDiscoveryFilter? filter,
   }) async {
-    return devices.where((Device device) => device.id == deviceId).toList();
+    return devices.where((Device device) {
+      return device.id == deviceId || device.id.startsWith(deviceId);
+    }).toList();
   }
 
   @override
@@ -244,15 +246,6 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
-
-  @override
-  Future<List<Device>> findTargetDevices({
-    bool includeDevicesUnsupportedByProject = false,
-    Duration? timeout,
-    bool promptUserToChooseDevice = true,
-  }) async {
-    return devices;
-  }
 
   @override
   DeviceDiscoverySupportFilter deviceSupportFilter({
