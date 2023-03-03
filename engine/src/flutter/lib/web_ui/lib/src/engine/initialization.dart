@@ -273,8 +273,18 @@ Future<void> _downloadAssetFonts() async {
 
 void _addUrlStrategyListener() {
   jsSetUrlStrategy = allowInterop((JsUrlStrategy? jsStrategy) {
-    customUrlStrategy =
-        jsStrategy == null ? null : CustomUrlStrategy.fromJs(jsStrategy);
+    if (jsStrategy == null) {
+      customUrlStrategy = null;
+    } else {
+      // Because `JSStrategy` could be anything, we check for the
+      // `addPopStateListener` property and throw if it is missing.
+      if (!hasJsProperty(jsStrategy, 'addPopStateListener')) {
+        throw StateError(
+            'Unexpected JsUrlStrategy: $jsStrategy is missing '
+            '`addPopStateListener` property');
+      }
+      customUrlStrategy = CustomUrlStrategy.fromJs(jsStrategy);
+    }
   });
   registerHotRestartListener(() {
     jsSetUrlStrategy = null;

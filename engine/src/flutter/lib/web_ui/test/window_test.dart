@@ -435,6 +435,7 @@ void testMain() {
     expect(() => jsSetUrlStrategy(123), throwsA(anything));
     expect(() => jsSetUrlStrategy('foo'), throwsA(anything));
     expect(() => jsSetUrlStrategy(false), throwsA(anything));
+    expect(() => jsSetUrlStrategy(<Object?>[]), throwsA(anything));
   });
 
   test('cannot set url strategy after it is initialized', () async {
