@@ -1732,7 +1732,7 @@ void main() {
   });
 
   group('constraints', () {
-      testWidgets('default constraints is max width 640 in material 3', (WidgetTester tester) async {
+      testWidgets('default constraints are max width 640 in material 3', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(useMaterial3: true),
