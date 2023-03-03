@@ -251,6 +251,16 @@ enum AppLifecycleState {
   detached,
 }
 
+enum AppExitResponse {
+  exit,
+  cancel,
+}
+
+enum AppExitType {
+  cancelable,
+  required,
+}
+
 abstract class ViewPadding {
   const factory ViewPadding._(
       {required double left,
