@@ -10,7 +10,7 @@ void main() {
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.
   const double kAhemBaselineRatio = 1.25;
 
-  test('predictably lays out a single-line paragraph', () {
+  test('predictably lays out a single-line paragraph - Ahem', () {
     for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
         fontFamily: 'Ahem',
@@ -31,6 +31,27 @@ void main() {
         paragraph.ideographicBaseline,
         closeTo(paragraph.alphabeticBaseline * kAhemBaselineRatio, 0.001),
       );
+    }
+  });
+
+  test('predictably lays out a single-line paragraph - FlutterTest', () {
+    for (final double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+        fontFamily: 'FlutterTest',
+        fontStyle: FontStyle.normal,
+        fontWeight: FontWeight.normal,
+        fontSize: fontSize,
+      ));
+      builder.addText('Test');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 400.0));
+
+      expect(paragraph.height, fontSize);
+      expect(paragraph.width, 400.0);
+      expect(paragraph.minIntrinsicWidth, fontSize * 4.0);
+      expect(paragraph.maxIntrinsicWidth, fontSize * 4.0);
+      expect(paragraph.alphabeticBaseline, fontSize * 0.75);
+      expect(paragraph.ideographicBaseline, fontSize);
     }
   });
 
