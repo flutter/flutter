@@ -362,6 +362,10 @@ class DatePickerDialog extends StatefulWidget {
 
   /// Called when the [DatePickerDialog] is toggled between
   /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
+  ///
+  /// An example of how this callback might be used is an app that saves the
+  /// user's preferred entry mode and uses it to initialize the
+  /// `initialEntryMode` parameter the next time the date picker is shown.
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
 
   @override
