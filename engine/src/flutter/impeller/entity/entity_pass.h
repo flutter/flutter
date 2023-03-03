@@ -99,15 +99,16 @@ class EntityPass {
                                    uint32_t pass_depth,
                                    size_t stencil_depth_floor) const;
 
-  bool OnRender(
-      ContentContext& renderer,
-      ISize root_pass_size,
-      const RenderTarget& render_target,
-      Point position,
-      Point parent_position,
-      uint32_t pass_depth,
-      size_t stencil_depth_floor = 0,
-      std::shared_ptr<Contents> backdrop_filter_contents = nullptr) const;
+  bool OnRender(ContentContext& renderer,
+                ISize root_pass_size,
+                const RenderTarget& render_target,
+                Point position,
+                Point parent_position,
+                uint32_t pass_depth,
+                size_t stencil_depth_floor = 0,
+                std::shared_ptr<Contents> backdrop_filter_contents = nullptr,
+                std::optional<InlinePassContext::RenderPassResult>
+                    collapsed_parent_pass = std::nullopt) const;
 
   std::vector<Element> elements_;
 

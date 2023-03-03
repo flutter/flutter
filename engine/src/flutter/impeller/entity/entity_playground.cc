@@ -14,6 +14,22 @@ EntityPlayground::EntityPlayground() = default;
 
 EntityPlayground::~EntityPlayground() = default;
 
+bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
+  if (!Playground::is_enabled()) {
+    return true;
+  }
+
+  ContentContext content_context(GetContext());
+  if (!content_context.IsValid()) {
+    return false;
+  }
+
+  auto callback = [&](RenderTarget& render_target) -> bool {
+    return entity_pass.Render(content_context, render_target);
+  };
+  return Playground::OpenPlaygroundHere(callback);
+}
+
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
   if (!Playground::is_enabled()) {
     return true;

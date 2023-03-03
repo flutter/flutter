@@ -294,12 +294,13 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    if (subpass->delegate_->CanCollapseIntoParentPass() &&
-        !subpass->backdrop_filter_proc_.has_value()) {
+    if (!subpass->backdrop_filter_proc_.has_value() &&
+        subpass->delegate_->CanCollapseIntoParentPass()) {
       // Directly render into the parent target and move on.
       if (!subpass->OnRender(renderer, root_pass_size,
                              pass_context.GetRenderTarget(), position, position,
-                             stencil_depth_floor)) {
+                             pass_depth, stencil_depth_, nullptr,
+                             pass_context.GetRenderPass(pass_depth))) {
         return EntityPass::EntityResult::Failure();
       }
       return EntityPass::EntityResult::Skip();
@@ -405,20 +406,22 @@ struct StencilLayer {
   size_t stencil_depth;
 };
 
-bool EntityPass::OnRender(
-    ContentContext& renderer,
-    ISize root_pass_size,
-    const RenderTarget& render_target,
-    Point position,
-    Point parent_position,
-    uint32_t pass_depth,
-    size_t stencil_depth_floor,
-    std::shared_ptr<Contents> backdrop_filter_contents) const {
+bool EntityPass::OnRender(ContentContext& renderer,
+                          ISize root_pass_size,
+                          const RenderTarget& render_target,
+                          Point position,
+                          Point parent_position,
+                          uint32_t pass_depth,
+                          size_t stencil_depth_floor,
+                          std::shared_ptr<Contents> backdrop_filter_contents,
+                          std::optional<InlinePassContext::RenderPassResult>
+                              collapsed_parent_pass) const {
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
   auto context = renderer.GetContext();
   InlinePassContext pass_context(context, render_target,
-                                 reads_from_pass_texture_);
+                                 reads_from_pass_texture_,
+                                 std::move(collapsed_parent_pass));
   if (!pass_context.IsValid()) {
     return false;
   }
