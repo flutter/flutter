@@ -604,7 +604,12 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       frame->Submit();
     }
 
-    compositor_context_->raster_cache().EndFrame();
+    // Do not update raster cache metrics for kResubmit because that status
+    // indicates that the frame was not actually painted.
+    if (raster_status != RasterStatus::kResubmit) {
+      compositor_context_->raster_cache().EndFrame();
+    }
+
     frame_timings_recorder.RecordRasterEnd(
         &compositor_context_->raster_cache());
     FireNextFrameCallbackIfPresent();
