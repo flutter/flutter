@@ -1,4 +1,4 @@
-Signature: 0ed7c8dcd4dfcb3b158db76ee399d14a
+Signature: ec604b660ee47636fea4cf3833c7fa19
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7305,7 +7305,7 @@ ORIGIN: ../../../third_party/skia/gm/largeclippedpath.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/gm/skbug_12212.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/slug.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrMtlTypesPriv.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/gpu/graphite/MtlTypesPriv.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/gpu/graphite/MtlGraphiteTypesPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/jetski/src/Canvas.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/jetski/src/ColorFilters.cpp + ../../../third_party/skia/LICENSE
@@ -7370,8 +7370,9 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/BufferManager.h + ../../../th
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBlitCommandEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.mm + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteUtils.mm + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlRenderCommandEncoder.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtils.mm + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/mtl/MtlUtils.mm + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/CullTest.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/Tessellation.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkTransformShader.cpp + ../../../third_party/skia/LICENSE
@@ -7391,7 +7392,7 @@ FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
 FILE: ../../../third_party/skia/gm/skbug_12212.cpp
 FILE: ../../../third_party/skia/gm/slug.cpp
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMtlTypesPriv.h
-FILE: ../../../third_party/skia/include/private/gpu/graphite/MtlTypesPriv.h
+FILE: ../../../third_party/skia/include/private/gpu/graphite/MtlGraphiteTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/modules/jetski/src/Canvas.cpp
 FILE: ../../../third_party/skia/modules/jetski/src/ColorFilters.cpp
@@ -7456,8 +7457,9 @@ FILE: ../../../third_party/skia/src/gpu/graphite/BufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBlitCommandEncoder.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteUtils.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlRenderCommandEncoder.h
-FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtils.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/MtlUtils.mm
 FILE: ../../../third_party/skia/src/gpu/tessellate/CullTest.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.h
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.cpp
@@ -7528,7 +7530,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/graphite/Recorder.h + ../../../thi
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/Recording.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlTypes.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrSlug.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/Slug.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h + ../../../third_party/skia/LICENSE
@@ -7647,16 +7649,17 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h + ../.
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.mm + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteTypes.mm + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.mm + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.mm + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.mm + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTypesPriv.mm + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.mm + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/mtl/MtlUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLContext.cpp + ../../../third_party/skia/LICENSE
@@ -7752,7 +7755,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/Recorder.h
 FILE: ../../../third_party/skia/include/gpu/graphite/Recording.h
 FILE: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h
-FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlTypes.h
+FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteTypes.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
 FILE: ../../../third_party/skia/include/private/chromium/Slug.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h
@@ -7871,16 +7874,17 @@ FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlCommandBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteTypes.mm
+FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlGraphiteUtilsPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlResourceProvider.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlSharedContext.mm
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTexture.mm
-FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlTypesPriv.mm
-FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlUtilsPriv.h
 FILE: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.h
 FILE: ../../../third_party/skia/src/gpu/mtl/MtlMemoryAllocatorImpl.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/MtlUtilsPriv.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
@@ -8287,7 +8291,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h + ../../
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/dawn/DawnUtils.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlUtils.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkAPI.h + ../../../third_party/skia/LICENSE
@@ -8512,7 +8516,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h
 FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnUtils.h
-FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlUtils.h
+FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteUtils.h
 FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
 FILE: ../../../third_party/skia/include/private/base/SkAPI.h
