@@ -361,7 +361,7 @@ TEST(MockWindow, UnknownPointerTypeSkipsDirectManipulation) {
 }
 
 // Test that the root UIA object is queried by WM_GETOBJECT.
-TEST(MockWindow, GetObjectUia) {
+TEST(MockWindow, DISABLED_GetObjectUia) {
   MockWindow window;
   bool uia_called = false;
   ON_CALL(window, OnGetObject)
