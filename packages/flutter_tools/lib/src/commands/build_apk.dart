@@ -44,8 +44,8 @@ class BuildApkCommand extends BuildSubCommand {
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
       ..addFlag('config-only',
-          help: 'Update the project configuration without performing a build. '
-              'THIS IS TODO FILL OUT DO NOT MERGE')
+          help: 'Generate build files used by flutter but '
+                'do not build any artifacts.')
       ..addMultiOption('target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
