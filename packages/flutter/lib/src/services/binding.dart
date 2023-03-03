@@ -259,6 +259,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
+    print('flutter: _handleLifecycleMessage message: $message ');
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
     return null;
   }

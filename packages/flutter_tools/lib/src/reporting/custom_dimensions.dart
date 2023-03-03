@@ -68,6 +68,7 @@ class CustomDimensions {
     this.hotEventReloadVMTimeInMs,
     this.commandRunEnableImpeller,
     this.commandRunIOSInterfaceType,
+    this.commandRunEnableEmbedderApi,
   });
 
   final String? sessionHostOsDetails;  // cd1
@@ -127,6 +128,7 @@ class CustomDimensions {
   final int? hotEventReloadVMTimeInMs;  // cd 55
   final bool? commandRunEnableImpeller;  // cd 56
   final String? commandRunIOSInterfaceType; // cd 57
+  final bool? commandRunEnableEmbedderApi; // cd 58
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -187,6 +189,7 @@ class CustomDimensions {
       if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
       if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
       if (commandRunIOSInterfaceType != null) cdKey(CustomDimensionsEnum.commandRunIOSInterfaceType): commandRunIOSInterfaceType.toString(),
+      if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableEmbedderApi): commandRunEnableEmbedderApi.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -254,6 +257,7 @@ class CustomDimensions {
       hotEventReloadVMTimeInMs: other.hotEventReloadVMTimeInMs ?? hotEventReloadVMTimeInMs,
       commandRunEnableImpeller: other.commandRunEnableImpeller ?? commandRunEnableImpeller,
       commandRunIOSInterfaceType: other.commandRunIOSInterfaceType ?? commandRunIOSInterfaceType,
+      commandRunEnableEmbedderApi: other.commandRunEnableEmbedderApi ?? commandRunEnableEmbedderApi,
     );
   }
 
@@ -315,6 +319,7 @@ class CustomDimensions {
       hotEventReloadVMTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReloadVMTimeInMs),
       commandRunEnableImpeller: _extractBool(map, CustomDimensionsEnum.commandRunEnableImpeller),
       commandRunIOSInterfaceType: _extractString(map, CustomDimensionsEnum.commandRunIOSInterfaceType),
+      commandRunEnableEmbedderApi: _extractBool(map, CustomDimensionsEnum.commandRunEnableEmbedderApi),
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
@@ -402,6 +407,7 @@ enum CustomDimensionsEnum {
   hotEventReloadVMTimeInMs,  // cd55
   commandRunEnableImpeller,  // cd56
   commandRunIOSInterfaceType,  // cd57
+  commandRunEnableEmbedderApi, // cd58
 }
 
 String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';
