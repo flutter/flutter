@@ -177,20 +177,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   final shelf.Server _server;
   Uri get url => _server.url;
 
-  /// The ahem font file.
+  /// The ahem text file.
   File get _ahem => _fileSystem.file(_fileSystem.path.join(
     Cache.flutterRoot!,
     'packages',
     'flutter_tools',
     'static',
     'Ahem.ttf',
-  ));
-
-  /// The FlutterTest test font file.
-  File get _flutterTestFont => _fileSystem.file(_fileSystem.path.join(
-    _cache.getWebSdkDirectory().path,
-    'assets',
-    'flutter_test.ttf',
   ));
 
   /// The require js binary.
@@ -291,8 +284,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       );
     } else if (request.requestedUri.path.contains('ahem.ttf')) {
       return shelf.Response.ok(_ahem.openRead());
-    } else if (request.requestedUri.path.contains('flutter_test.ttf')) {
-      return shelf.Response.ok(_flutterTestFont.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
       return shelf.Response.ok(
         _dartSdk.openRead(),
