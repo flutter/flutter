@@ -17,7 +17,7 @@ class _ExtensionServer {
   final SendPort _sendPort;
   final List<Extension> _extensions;
   void send(Object message) => _sendPort.send(message);
-  final Map<Type, List<void Function(Object?)>> _registeredHandlers = <Type, List<void Function(Object?)>>{};
+  final Map<Type, List<RequestHandler>> _registeredHandlers = <Type, List<RequestHandler>>{};
 
   void _messageHandler(Object? message) {
     if (message is RequestWrapper) {
@@ -25,6 +25,11 @@ class _ExtensionServer {
       if (handlers == null) {
         print('no-op for type ${message.request.runtimeType}');
         return;
+      }
+      for (final RequestHandler handler in handlers) {
+        // We pass a `null` initial [Response], because we don't know what
+        // type of [Response] should be constructed
+        handler(message, null);
       }
     } else {
       throw UnimplementedError('Do not know how to handle a ${message.runtimeType}');
@@ -38,6 +43,6 @@ typedef ExtensionsIsolateBootstrap = void Function(SendPort);
 /// Returns a function that the child isolate can be spawned with.
 ExtensionsIsolateBootstrap bootstrapFactory(List<Extension> extensions) {
   return (SendPort sendPort) {
-    final _ExtensionServer server = _ExtensionServer(sendPort, extensions);
+    _ExtensionServer(sendPort, extensions);
   };
 }

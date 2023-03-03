@@ -8,15 +8,20 @@ abstract class Extension {
 }
 
 class TemplateExtension extends Extension {
+  @override
   void registerHandlers(Map<Type, List<RequestHandler>> registeredHandlers) {
-    // TODO make this a field;
     final List<RequestHandler> handlers = registeredHandlers[ListTemplatesRequest] ?? <RequestHandler>[];
     handlers.add(_handleListTemplatesRequest);
+    // assign in case this was previously null
+    registeredHandlers[ListTemplatesRequest] = handlers;
   }
 
-  void _handleListTemplatesRequest(Object? _) {
-
+  void _handleListTemplatesRequest(RequestWrapper<Request> message, Response? response) {
+    response ??= ListTemplatesResponse(id: message.id)..templates.addAll(templates);
+    throw 'foo';
   }
+
+  final List<String> templates = <String>['foo template', 'bar template'];
 }
 
 class ListTemplatesRequest implements Request {

@@ -18,7 +18,7 @@ class ExtensionException implements Exception {
 }
 
 /// A request from the root to child isolate.
-class RequestWrapper {
+class RequestWrapper<T extends Request> {
   /// Create a new [RequestWrapper].
   RequestWrapper({
     required this.id,
@@ -27,7 +27,7 @@ class RequestWrapper {
 
   /// Unique identifier for this request that will match with its response.
   final int id;
-  final Request request;
+  final T request;
 
   @override
   String toString() => 'Request (ID $id)';
@@ -35,7 +35,7 @@ class RequestWrapper {
 
 abstract class Request {}
 
-typedef RequestHandler = void Function(Object, Response?);
+typedef RequestHandler<T extends Request> = void Function(RequestWrapper<T>, Response?);
 
 /// A response to the root from the child isolate.
 abstract class Response {
