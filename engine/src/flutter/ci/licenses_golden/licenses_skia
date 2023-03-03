@@ -1,4 +1,4 @@
-Signature: d93e2f6f4c85f6080c442d64772f0d99
+Signature: c3dbb7d5e0f504695a838d1c0dfe26f5
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1926,6 +1926,7 @@ ORIGIN: ../../../third_party/skia/src/image/SkSurface.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Base.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Gpu.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Raster.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkSurface_Raster.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkAddIntersections.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkAddIntersections.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkDCubicLineIntersection.cpp + ../../../third_party/skia/LICENSE
@@ -2084,6 +2085,7 @@ FILE: ../../../third_party/skia/src/image/SkSurface.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Base.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Gpu.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Raster.cpp
+FILE: ../../../third_party/skia/src/image/SkSurface_Raster.h
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.cpp
 FILE: ../../../third_party/skia/src/pathops/SkAddIntersections.h
 FILE: ../../../third_party/skia/src/pathops/SkDCubicLineIntersection.cpp
@@ -8975,6 +8977,10 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.h + ../../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkImage_Base.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkImage_Raster.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkSurface_Base.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkSurface_Null.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLIsDynamicallyUniformExpression.cpp + ../../../third_party/skia/LICENSE
@@ -9006,6 +9012,10 @@ FILE: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.h
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/ComputeStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h
+FILE: ../../../third_party/skia/src/image/SkImage_Base.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_Raster.h
+FILE: ../../../third_party/skia/src/image/SkSurface_Base.cpp
+FILE: ../../../third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsDynamicallyUniformExpression.cpp
