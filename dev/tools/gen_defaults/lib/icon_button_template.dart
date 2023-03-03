@@ -223,7 +223,7 @@ class IconButtonTemplate extends TokenTemplate {
       }
     })''';
     }
-    return '''null''';
+    return ''' null''';
   }
 
   String _elevationColor(String token) {
@@ -289,7 +289,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<double>(${tokens["$tokenGroup.icon.size"]});
 
   @override
-  MaterialStateProperty<BorderSide?>? get side => ${_side()};
+  MaterialStateProperty<BorderSide?>? get side =>${_side()};
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>${_shape()};

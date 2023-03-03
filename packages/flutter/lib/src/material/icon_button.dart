@@ -1601,7 +1601,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<double>(24.0);
 
   @override
-  MaterialStateProperty<BorderSide?>? get side => 
+  MaterialStateProperty<BorderSide?>? get side =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;
