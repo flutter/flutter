@@ -61,8 +61,8 @@ TEST_P(EntityTest, CanCreateEntity) {
 
 class TestPassDelegate final : public EntityPassDelegate {
  public:
-  explicit TestPassDelegate(std::optional<Rect> coverage)
-      : coverage_(coverage) {}
+  explicit TestPassDelegate(std::optional<Rect> coverage, bool collapse = false)
+      : coverage_(coverage), collapse_(collapse) {}
 
   // |EntityPassDelegate|
   ~TestPassDelegate() override = default;
@@ -74,7 +74,7 @@ class TestPassDelegate final : public EntityPassDelegate {
   bool CanElide() override { return false; }
 
   // |EntityPassDelgate|
-  bool CanCollapseIntoParentPass() override { return false; }
+  bool CanCollapseIntoParentPass() override { return collapse_; }
 
   // |EntityPassDelgate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
@@ -85,15 +85,19 @@ class TestPassDelegate final : public EntityPassDelegate {
 
  private:
   const std::optional<Rect> coverage_;
+  const bool collapse_;
 };
 
-auto CreatePassWithRectPath(Rect rect, std::optional<Rect> bounds_hint) {
+auto CreatePassWithRectPath(Rect rect,
+                            std::optional<Rect> bounds_hint,
+                            bool collapse = false) {
   auto subpass = std::make_unique<EntityPass>();
   Entity entity;
   entity.SetContents(SolidColorContents::Make(
       PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
   subpass->AddEntity(entity);
-  subpass->SetDelegate(std::make_unique<TestPassDelegate>(bounds_hint));
+  subpass->SetDelegate(
+      std::make_unique<TestPassDelegate>(bounds_hint, collapse));
   return subpass;
 }
 
@@ -122,6 +126,27 @@ TEST_P(EntityTest, EntityPassCoverageRespectsDelegateBoundsHint) {
   auto coverage = pass.GetElementsCoverage(std::nullopt);
   ASSERT_TRUE(coverage.has_value());
   ASSERT_RECT_NEAR(coverage.value(), Rect::MakeLTRB(50, 50, 900, 900));
+}
+
+TEST_P(EntityTest, EntityPassCanMergeSubpassIntoParent) {
+  // Both a red and a blue box should appear if the pass merging has worked
+  // correctly.
+
+  EntityPass pass;
+  auto subpass = CreatePassWithRectPath(Rect::MakeLTRB(0, 0, 100, 100),
+                                        Rect::MakeLTRB(50, 50, 150, 150), true);
+  pass.AddSubpass(std::move(subpass));
+
+  Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  auto contents = std::make_unique<SolidColorContents>();
+  contents->SetGeometry(Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
+  contents->SetColor(Color::Blue());
+  entity.SetContents(std::move(contents));
+
+  pass.AddEntity(entity);
+
+  ASSERT_TRUE(OpenPlaygroundHere(pass));
 }
 
 TEST_P(EntityTest, EntityPassCoverageRespectsCoverageLimit) {
