@@ -10,10 +10,11 @@
 #include <vector>
 
 #include "third_party/skia/include/core/SkStream.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace flutter {
 
-std::vector<std::unique_ptr<SkStreamAsset>> GetTestFontData();
+std::vector<sk_sp<SkTypeface>> GetTestFontData();
 std::vector<std::string> GetTestFontFamilyNames();
 
 }  // namespace flutter

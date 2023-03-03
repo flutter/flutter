@@ -23,6 +23,9 @@
       },
       "_web_locale_keymap": {
         "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
+      },
+      "_web_test_fonts": {
+        "uri": "lib/_web_test_fonts/web_test_fonts.dart"
       }
     }
   },
@@ -48,6 +51,9 @@
       },
       "_web_locale_keymap": {
         "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
+      },
+      "_web_test_fonts": {
+        "uri": "lib/_web_test_fonts/web_test_fonts.dart"
       }
     }
   },
@@ -73,6 +79,9 @@
       },
       "_web_locale_keymap": {
         "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
+      },
+      "_web_test_fonts": {
+        "uri": "lib/_web_test_fonts/web_test_fonts.dart"
       }
     }
   }

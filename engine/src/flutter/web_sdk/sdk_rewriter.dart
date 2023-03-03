@@ -94,6 +94,7 @@ final Map<Pattern, String> extraImportsMap = <Pattern, String>{
   RegExp('skwasm_(stub|impl)'): "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';",
   'engine': "import 'dart:_engine';",
   'web_unicode': "import 'dart:_web_unicode';",
+  'web_test_fonts': "import 'dart:_web_test_fonts';",
   'web_locale_keymap': "import 'dart:_web_locale_keymap' as locale_keymap;",
 };
 

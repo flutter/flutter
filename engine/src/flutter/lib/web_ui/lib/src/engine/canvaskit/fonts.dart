@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:web_test_fonts/web_test_fonts.dart';
+
 import '../assets.dart';
 import '../dom.dart';
 import '../fonts.dart';
@@ -176,17 +178,17 @@ class SkiaFontCollection implements FontCollection {
   @override
   Future<void> debugDownloadTestFonts() async {
     final List<Future<UnregisteredFont?>> pendingFonts = <Future<UnregisteredFont?>>[];
-    if (!_isFontFamilyDownloaded(ahemFontFamily)) {
-      _downloadFont(pendingFonts, ahemFontUrl, ahemFontFamily);
+    for (final MapEntry<String, String> fontEntry in testFontUrls.entries) {
+      if (!_isFontFamilyDownloaded(fontEntry.key)) {
+        _downloadFont(pendingFonts, fontEntry.value, fontEntry.key);
+      }
     }
-    if (!_isFontFamilyDownloaded(robotoFontFamily)) {
-      _downloadFont(pendingFonts, robotoTestFontUrl, robotoFontFamily);
-    }
-    if (!_isFontFamilyDownloaded(robotoVariableFontFamily)) {
-      _downloadFont(pendingFonts, robotoVariableTestFontUrl, robotoVariableFontFamily);
-    }
-
     final List<UnregisteredFont?> completedPendingFonts = await Future.wait(pendingFonts);
+    completedPendingFonts.add(UnregisteredFont(
+        EmbeddedTestFont.flutterTest.data.buffer,
+        '<embedded>',
+        EmbeddedTestFont.flutterTest.fontFamily,
+    ));
     _unregisteredFonts.addAll(completedPendingFonts.whereType<UnregisteredFont>());
 
     // Ahem must be added to font fallbacks list regardless of where it was
