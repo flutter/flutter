@@ -39,6 +39,7 @@ class SwitchThemeData with Diagnosticable {
   const SwitchThemeData({
     this.thumbColor,
     this.trackColor,
+    this.trackOutlineColor,
     this.materialTapTargetSize,
     this.mouseCursor,
     this.overlayColor,
@@ -55,6 +56,11 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [Switch.trackColor].
   final MaterialStateProperty<Color?>? trackColor;
+
+  /// {@macro flutter.material.switch.trackOutlineColor}
+  ///
+  /// If specified, overrides the default value of [Switch.trackOutlineColor].
+  final MaterialStateProperty<Color?>? trackOutlineColor;
 
   /// {@macro flutter.material.switch.materialTapTargetSize}
   ///
@@ -87,6 +93,7 @@ class SwitchThemeData with Diagnosticable {
   SwitchThemeData copyWith({
     MaterialStateProperty<Color?>? thumbColor,
     MaterialStateProperty<Color?>? trackColor,
+    MaterialStateProperty<Color?>? trackOutlineColor,
     MaterialTapTargetSize? materialTapTargetSize,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? overlayColor,
@@ -96,6 +103,7 @@ class SwitchThemeData with Diagnosticable {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
       trackColor: trackColor ?? this.trackColor,
+      trackOutlineColor: trackOutlineColor ?? this.trackOutlineColor,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       overlayColor: overlayColor ?? this.overlayColor,
@@ -108,9 +116,13 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return SwitchThemeData(
       thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
+      trackOutlineColor: MaterialStateProperty.lerp<Color?>(a?.trackOutlineColor, b?.trackOutlineColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
@@ -123,6 +135,7 @@ class SwitchThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     thumbColor,
     trackColor,
+    trackOutlineColor,
     materialTapTargetSize,
     mouseCursor,
     overlayColor,
@@ -141,6 +154,7 @@ class SwitchThemeData with Diagnosticable {
     return other is SwitchThemeData
       && other.thumbColor == thumbColor
       && other.trackColor == trackColor
+      && other.trackOutlineColor == trackOutlineColor
       && other.materialTapTargetSize == materialTapTargetSize
       && other.mouseCursor == mouseCursor
       && other.overlayColor == overlayColor
@@ -153,6 +167,7 @@ class SwitchThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackOutlineColor', trackOutlineColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));

@@ -83,7 +83,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
+final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
   if (Platform.isWindows) {
@@ -256,7 +256,7 @@ Future<void> main(List<String> args) async {
       'web_canvaskit_tests': _runWebCanvasKitUnitTests,
       // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
-      'flutter_plugins': _runFlutterPluginsTests,
+      'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -271,11 +271,9 @@ Future<void> main(List<String> args) async {
     system.exit(255);
   }
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Test failed.$reset');
   }
-  printProgress('${bold}Test successful.$reset');
-  system.exit(0);
+  reportSuccessAndExit('${bold}Test successful.$reset');
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
@@ -1392,56 +1390,56 @@ Future<void> _runWebTreeshakeTest() async {
   }
 }
 
-/// Returns the commit hash of the flutter/plugins repository that's rolled in.
+/// Returns the commit hash of the flutter/packages repository that's rolled in.
 ///
-/// The flutter/plugins repository is a downstream dependency, it is only used
+/// The flutter/packages repository is a downstream dependency, it is only used
 /// by flutter/flutter for testing purposes, to assure stable tests for a given
-/// flutter commit the flutter/plugins commit hash to test against is coded in
-/// the bin/internal/flutter_plugins.version file.
+/// flutter commit the flutter/packages commit hash to test against is coded in
+/// the bin/internal/flutter_packages.version file.
 ///
-/// The `filesystem` parameter specified filesystem to read the plugins version file from.
-/// The `pluginsVersionFile` parameter allows specifying an alternative path for the
-/// plugins version file, when null [flutterPluginsVersionFile] is used.
-Future<String> getFlutterPluginsVersion({
+/// The `filesystem` parameter specified filesystem to read the packages version file from.
+/// The `packagesVersionFile` parameter allows specifying an alternative path for the
+/// packages version file, when null [flutterPackagesVersionFile] is used.
+Future<String> getFlutterPackagesVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
-  String? pluginsVersionFile,
+  String? packagesVersionFile,
 }) async {
-  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
+  final File versionFile = fileSystem.file(packagesVersionFile ?? flutterPackagesVersionFile);
   final String versionFileContents = await versionFile.readAsString();
   return versionFileContents.trim();
 }
 
-/// Executes the test suite for the flutter/plugins repo.
-Future<void> _runFlutterPluginsTests() async {
+/// Executes the test suite for the flutter/packages repo.
+Future<void> _runFlutterPackagesTests() async {
   Future<void> runAnalyze() async {
-    printProgress('${green}Running analysis for flutter/plugins$reset');
-    final Directory checkout = Directory.systemTemp.createTempSync('flutter_plugins.');
+    printProgress('${green}Running analysis for flutter/packages$reset');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_packages.');
     await runCommand(
       'git',
       <String>[
         '-c',
         'core.longPaths=true',
         'clone',
-        'https://github.com/flutter/plugins.git',
+        'https://github.com/flutter/packages.git',
         '.',
       ],
       workingDirectory: checkout.path,
     );
-    final String pluginsCommit = await getFlutterPluginsVersion();
+    final String packagesCommit = await getFlutterPackagesVersion();
     await runCommand(
       'git',
       <String>[
         '-c',
         'core.longPaths=true',
         'checkout',
-        pluginsCommit,
+        packagesCommit,
       ],
       workingDirectory: checkout.path,
     );
     // Prep the repository tooling.
     // This test does not use tool_runner.sh because in this context the test
-    // should always run on the entire plugins repo, while tool_runner.sh
-    // is designed for flutter/plugins CI and only analyzes changed repository
+    // should always run on the entire packages repo, while tool_runner.sh
+    // is designed for flutter/packages CI and only analyzes changed repository
     // files when run for anything but master.
     final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(
@@ -1802,6 +1800,7 @@ Future<void> _runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
     if (!hasColor)
@@ -1813,8 +1812,6 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
-    if (collectMetrics)
-      '--file-reporter=json:${metricFile.path}',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1840,19 +1837,24 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
+  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
+  final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
+  info.writeAsStringSync(json.encode(test.errors));
+
   if (collectMetrics) {
     try {
       final List<String> testList = <String>[];
-      final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
+      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
       for (final TestSpecs testSpecs in allTestSpecs.values) {
         testList.add(testSpecs.toJson());
       }
       if (testList.isNotEmpty) {
         final String testJson = json.encode(testList);
-        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+        final File testResults = fileSystem.file(
+            path.join(flutterRoot, 'test_results.json'));
         testResults.writeAsStringSync(testJson);
       }
-    } on fs.FileSystemException catch (e){
+    } on fs.FileSystemException catch (e) {
       print('Failed to generate metrics: $e');
     }
   }

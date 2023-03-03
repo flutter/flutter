@@ -86,7 +86,7 @@ class Template {
           from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
-        // is a candidate for rendering. This catches cases where the folder
+        // a candidate for rendering. This catches cases where the folder
         // itself is a template.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }

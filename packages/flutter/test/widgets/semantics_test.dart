@@ -60,6 +60,42 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
+  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Container(padding: const EdgeInsets.only(top: 20.0)),
+                      const Text('label'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    await tester.pump();
+    // Semantics should stay the same after a frame update.
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
   testWidgets('Semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -551,7 +587,7 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Note: checked state and toggled state are mutually exclusive.
+    // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         Semantics(
           key: const Key('a'),
@@ -1001,14 +1037,14 @@ void main() {
       },
     );
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            const Text('Label 1'),
-            const Text('Label 2'),
+            Text('Label 1'),
+            Text('Label 2'),
             Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Label 3'),
                 Text('Label 4'),
                 Text('Label 5'),
@@ -1070,8 +1106,8 @@ void main() {
             const Text('Label 2'),
             Transform.rotate(
               angle: pi / 2.0,
-              child: Row(
-                children: const <Widget>[
+              child: const Row(
+                children: <Widget>[
                   Text('Label 3'),
                   Text('Label 4'),
                   Text('Label 5'),
@@ -1638,7 +1674,7 @@ void main() {
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
     // Assert that this subtree gets dropped (the root node has no children).
-    await tester.pumpWidget(Column(
+    await tester.pumpWidget(const Column(
       children: <Widget>[
         SizedBox(
           height: 0,

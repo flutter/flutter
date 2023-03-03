@@ -251,7 +251,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The padding of the menu item.
   ///
-  /// Note that [height] may interact with the applied padding. For example,
+  /// The [height] property may interact with the applied padding. For example,
   /// If a [height] greater than the height of the sum of the padding and [child]
   /// is provided, then the padding's effect will not be visible.
   ///
@@ -1371,7 +1371,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)

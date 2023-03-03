@@ -587,10 +587,16 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   String? specifiedDeviceId;
 
   @override
-  Future<List<Device>> getDevices() async => devices;
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async => devices;
 }
 
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
@@ -605,7 +611,7 @@ class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFacto
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
-/// This is to similate when the test will take a long time, but a signal is
+/// This is to simulate when the test will take a long time, but a signal is
 /// expected to interrupt the process.
 class NeverEndingDriverService extends Fake implements DriverService {
   NeverEndingDriverService(this.callback);

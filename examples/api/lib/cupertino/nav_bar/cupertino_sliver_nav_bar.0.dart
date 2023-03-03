@@ -82,14 +82,14 @@ class NextPage extends StatelessWidget {
             ),
             // The middle widget is visible in both collapsed and expanded states.
             middle: const Text('Contacts Group'),
-            // When the "middle" parameter is implemented, the larget title is only visible
+            // When the "middle" parameter is implemented, the largest title is only visible
             // when the CupertinoSliverNavigationBar is fully expanded.
             largeTitle: const Text('Family'),
           ),
-          SliverFillRemaining(
+          const SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.

@@ -317,7 +317,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
   ///
-  /// Rebuilding the sheet with a new [initialChildSize] will only move the
+  /// Rebuilding the sheet with a new [initialChildSize] will only move
   /// the sheet to the new value if the sheet has not yet been dragged since it
   /// was first built or since the last call to [DraggableScrollableActuator.reset].
   ///
@@ -531,8 +531,8 @@ class _DraggableSheetExtent {
   /// Start an activity that affects the sheet and register a cancel call back
   /// that will be called if another activity starts.
   ///
-  /// Note that `onCanceled` will get called even if the subsequent activity
-  /// started after this one finished so `onCanceled` should be safe to call at
+  /// The `onCanceled` callback will get called even if the subsequent activity
+  /// started after this one finished, so `onCanceled` must be safe to call at
   /// any time.
   void startActivity({required VoidCallback onCanceled}) {
     _cancelActivity?.call();

@@ -146,7 +146,7 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -156,7 +156,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -2297,6 +2297,7 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
@@ -2705,14 +2706,6 @@ void main() {
     ));
 
     semantics.dispose();
-  });
-
-  testWidgets('SelectableText throws when not descended from a MediaQuery widget', (WidgetTester tester) async {
-    const Widget selectableText = SelectableText('something');
-    await tester.pumpWidget(selectableText);
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
@@ -5087,11 +5080,11 @@ void main() {
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
@@ -5139,11 +5132,11 @@ void main() {
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[

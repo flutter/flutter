@@ -738,10 +738,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
@@ -973,7 +974,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// * [SelectableRegion.getSelectableButtonItems], which performs a similar role,
   ///   but for any selectable text, not just specifically SelectableRegion.
-  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  /// * [EditableTextState.contextMenuButtonItems], which performs a similar role
   ///   but for content that is not just selectable but also editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.
@@ -1771,11 +1772,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect drawableArea = Rect
+      final Rect? drawableArea = hasSize ? Rect
         .fromLTWH(0, 0, containerSize.width, containerSize.height)
-        .inflate(_kSelectionHandleDrawableAreaPadding);
-      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
+        .inflate(_kSelectionHandleDrawableAreaPadding) : null;
+      final bool hideStartHandle = value.startSelectionPoint == null || drawableArea ==  null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle = value.endSelectionPoint == null || drawableArea ==  null|| !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }

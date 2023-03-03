@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -2193,7 +2195,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      alwaysIncludeSemantics: isEmpty || (decoration.labelText == null && decoration.label == null),
       child: Text(
         hintText,
         style: hintStyle,
@@ -2308,19 +2309,27 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           cursor: SystemMouseCursors.basic,
           child: ConstrainedBox(
             constraints: decoration.prefixIconConstraints ??
-                themeData.visualDensity.effectiveConstraints(
-                  const BoxConstraints(
-                    minWidth: kMinInteractiveDimension,
-                    minHeight: kMinInteractiveDimension,
-                  ),
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
                 ),
+              ),
             child: IconTheme.merge(
               data: IconThemeData(
                 color: _getPrefixIconColor(themeData, defaults),
                 size: iconSize,
               ),
-              child: Semantics(
-                child: decoration.prefixIcon,
+              child: IconButtonTheme(
+                data: IconButtonThemeData(
+                style: IconButton.styleFrom(
+                  foregroundColor: _getPrefixIconColor(themeData, defaults),
+                  iconSize: iconSize,
+                  ),
+                ),
+                child: Semantics(
+                  child: decoration.prefixIcon,
+                ),
               ),
             ),
           ),
@@ -2335,24 +2344,32 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           cursor: SystemMouseCursors.basic,
           child: ConstrainedBox(
             constraints: decoration.suffixIconConstraints ??
-                themeData.visualDensity.effectiveConstraints(
-                  const BoxConstraints(
-                    minWidth: kMinInteractiveDimension,
-                    minHeight: kMinInteractiveDimension,
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
+                ),
+              ),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: _getSuffixIconColor(themeData, defaults),
+                  size: iconSize,
+                ),
+                child: IconButtonTheme(
+                  data: IconButtonThemeData(
+                  style: IconButton.styleFrom(
+                    foregroundColor: _getSuffixIconColor(themeData, defaults),
+                    iconSize: iconSize,
+                    ),
+                  ),
+                  child: Semantics(
+                    child: decoration.suffixIcon,
                   ),
                 ),
-            child: IconTheme.merge(
-              data: IconThemeData(
-                color: _getSuffixIconColor(themeData, defaults),
-                size: iconSize,
-              ),
-              child: Semantics(
-                child: decoration.suffixIcon,
               ),
             ),
           ),
-        ),
-      );
+        );
 
     final Widget helperError = _HelperError(
       textAlign: textAlign,
@@ -2724,7 +2741,7 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
@@ -2754,7 +2771,7 @@ class InputDecoration {
   ///
   /// If null, defaults to [labelStyle].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
@@ -2854,8 +2871,8 @@ class InputDecoration {
   /// By default the color of style will be used by the label of
   /// [InputDecoration] if [InputDecoration.errorText] is not null. See
   /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
-  /// an example of how to replicate this behavior if you have specified either
-  /// style.
+  /// an example of how to replicate this behavior when specifying those
+  /// styles.
   /// {@endtemplate}
   final TextStyle? errorStyle;
 
@@ -3005,7 +3022,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
@@ -3182,7 +3199,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
@@ -4525,7 +4542,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_158
 
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
@@ -4628,23 +4645,23 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
@@ -4652,38 +4669,38 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    return textStyle.copyWith(color:_colors.error);
+    return textStyle.copyWith(color: _colors.error);
   });
 }
 
