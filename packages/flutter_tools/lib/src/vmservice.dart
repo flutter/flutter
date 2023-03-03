@@ -73,7 +73,7 @@ abstract class RPCErrorCodes {
 /// The VM Service Protocol allows clients to register custom services that
 /// can be invoked by other clients through the service protocol itself.
 ///
-/// Clients like Observatory use external 'reloadSources' services,
+/// Clients like VmService use external 'reloadSources' services,
 /// when available, instead of the VM internal one. This allows these clients to
 /// invoke Flutter HotReload when connected to a Flutter Application started in
 /// hot mode.

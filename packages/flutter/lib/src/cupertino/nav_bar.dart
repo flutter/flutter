@@ -897,7 +897,7 @@ class _LargeTitleNavigationBarSliverDelegate
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
-        hasUserMiddle: userMiddle != null,
+        hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
         child: navBar,
       ),

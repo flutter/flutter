@@ -144,6 +144,20 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  ui.GestureSettings get gestureSettings => _gestureSettings ?? _window.gestureSettings;
+  ui.GestureSettings? _gestureSettings;
+  /// Hides the real gesture settings and reports the given [gestureSettingsTestValue] instead.
+  set gestureSettingsTestValue(ui.GestureSettings gestureSettingsTestValue) { // ignore: avoid_setters_without_getters
+    _gestureSettings = gestureSettingsTestValue;
+    onMetricsChanged?.call();
+  }
+  /// Deletes any existing test gesture settings and returns to using the real gesture settings.
+  void clearGestureSettingsTestValue() {
+    _paddingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
   List<ui.DisplayFeature> get displayFeatures => _displayFeaturesTestValue ?? _window.displayFeatures;
   List<ui.DisplayFeature>? _displayFeaturesTestValue;
   /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
@@ -447,16 +461,6 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  ui.ViewConfiguration get viewConfiguration => _viewConfiguration ?? _window.viewConfiguration;
-  ui.ViewConfiguration? _viewConfiguration;
-
-  /// Hide the real view configuration and report the provided [value] instead.
-  set viewConfigurationTestValue(ui.ViewConfiguration? value) { // ignore: avoid_setters_without_getters
-    _viewConfiguration = value;
-    onMetricsChanged?.call();
-  }
-
-  @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
@@ -508,6 +512,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   void clearAllTestValues() {
     clearDevicePixelRatioTestValue();
     clearPaddingTestValue();
+    clearGestureSettingsTestValue();
     clearDisplayFeaturesTestValue();
     clearPhysicalSizeTestValue();
     clearViewInsetsTestValue();
@@ -923,9 +928,6 @@ class TestPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.Locale? computePlatformResolvedLocale(List<ui.Locale> supportedLocales) => _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
-
-  @override
-  ui.PlatformConfiguration get configuration => _platformDispatcher.configuration;
 
   @override
   ui.FrameData get frameData => _platformDispatcher.frameData;
