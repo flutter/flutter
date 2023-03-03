@@ -397,13 +397,14 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   if (!image.has_value()) {
     return nullptr;
   }
-  return CreateTextureForFixture(image.value());
+  return CreateTextureForFixture(image.value(), enable_mipmapping);
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
-  return CreateTextureForFixture(OpenAssetAsMapping(fixture_name));
+  return CreateTextureForFixture(OpenAssetAsMapping(fixture_name),
+                                 enable_mipmapping);
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
