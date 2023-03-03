@@ -5,6 +5,7 @@
 #import "flutter/shell/common/shell.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 extern NSString* const kFlutterEngineWillDealloc;
 
@@ -16,6 +17,10 @@ class ThreadHost;
 
 // Category to add test-only visibility.
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>
+
+@property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
+@property(readonly, nonatomic) BOOL enableEmbedderAPI;
+
 - (flutter::Shell&)shell;
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI;

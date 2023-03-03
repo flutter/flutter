@@ -217,6 +217,14 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height * scale;
   settings.resource_cache_max_bytes_threshold = screenWidth * screenHeight * 12 * 4;
 
+  // Whether to enable ios embedder api.
+  NSNumber* enable_embedder_api =
+      [mainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"];
+  // Change the default only if the option is present.
+  if (enable_embedder_api) {
+    settings.enable_embedder_api = enable_embedder_api.boolValue;
+  }
+
   return settings;
 }
 

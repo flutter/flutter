@@ -15,8 +15,6 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
 
-// Embedder header included as an implementation detail (See BUILD.gn), iOS
-// doesn't use the embedding API, just some structures from it.
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
@@ -29,7 +27,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
-extern NSString* _Nonnull const kFlutterEngineWillDealloc;
+NS_ASSUME_NONNULL_BEGIN
+
+extern NSString* const kFlutterEngineWillDealloc;
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
@@ -46,10 +46,10 @@ extern NSString* _Nonnull const kFlutterEngineWillDealloc;
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;
 
-- (nonnull FlutterPlatformPlugin*)platformPlugin;
+- (FlutterPlatformPlugin*)platformPlugin;
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
-- (nonnull FlutterTextInputPlugin*)textInputPlugin;
-- (nonnull FlutterRestorationPlugin*)restorationPlugin;
+- (FlutterTextInputPlugin*)textInputPlugin;
+- (FlutterRestorationPlugin*)restorationPlugin;
 - (void)launchEngine:(nullable NSString*)entrypoint
           libraryURI:(nullable NSString*)libraryOrNil
       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
@@ -58,10 +58,9 @@ extern NSString* _Nonnull const kFlutterEngineWillDealloc;
        initialRoute:(nullable NSString*)initialRoute;
 - (void)attachView;
 - (void)notifyLowMemory;
-- (nonnull flutter::PlatformViewIOS*)iosPlatformView;
+- (flutter::PlatformViewIOS*)iosPlatformView;
 
-- (void)waitForFirstFrame:(NSTimeInterval)timeout
-                 callback:(nonnull void (^)(BOOL didTimeout))callback;
+- (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
 
 /**
  * Creates one running FlutterEngine from another, sharing components between them.
@@ -69,10 +68,10 @@ extern NSString* _Nonnull const kFlutterEngineWillDealloc;
  * This results in a faster creation time and a smaller memory footprint engine.
  * This should only be called on a FlutterEngine that is running.
  */
-- (nonnull FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
-                                   libraryURI:(nullable NSString*)libraryURI
-                                 initialRoute:(nullable NSString*)initialRoute
-                               entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+- (FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
+                           libraryURI:(nullable NSString*)libraryURI
+                         initialRoute:(nullable NSString*)initialRoute
+                       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
 
 /**
  * Dispatches the given key event data to the framework through the engine.
@@ -82,7 +81,9 @@ extern NSString* _Nonnull const kFlutterEngineWillDealloc;
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
 
-@property(nonatomic, readonly, nonnull) FlutterDartProject* project;
+@property(nonatomic, readonly) FlutterDartProject* project;
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_ENGINE_INTERNAL_H_
