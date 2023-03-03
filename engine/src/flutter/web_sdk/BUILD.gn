@@ -611,11 +611,11 @@ if (!is_fuchsia) {
         destination = "canvaskit/canvaskit.wasm"
       },
       {
-        source = rebase_path("$root_out_dir/canvaskit_chromium/canvaskit.js")
+        source = rebase_path("$root_out_dir/canvaskit/chromium/canvaskit.js")
         destination = "canvaskit/chromium/canvaskit.js"
       },
       {
-        source = rebase_path("$root_out_dir/canvaskit_chromium/canvaskit.wasm")
+        source = rebase_path("$root_out_dir/canvaskit/chromium/canvaskit.wasm")
         destination = "canvaskit/chromium/canvaskit.wasm"
       },
       {
