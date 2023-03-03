@@ -335,7 +335,7 @@ class _BottomSheetState extends State<BottomSheet> {
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: (!widget.enableDrag || !hasDragHandle)
-          ? widget.builder(context) 
+          ? widget.builder(context)
           : Stack(
               alignment: Alignment.topCenter,
               children: <Widget>[

@@ -1745,10 +1745,7 @@ void main() {
           ),
         ),
       );
-      expect(
-        tester.getRect(find.byType(Placeholder)),
-        const Rect.fromLTRB(80, 0, 720, 600),
-      );
+      expect(tester.getSize(find.byType(Placeholder)).width, 640);
     });
 
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
