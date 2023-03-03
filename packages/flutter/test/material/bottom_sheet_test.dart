@@ -1110,7 +1110,7 @@ void main() {
       of: dragHandle,
       matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration !=null),
     )).decoration! as BoxDecoration;
-    expect(boxDecoration.color,defaultColor);
+    expect(boxDecoration.color, defaultColor);
 
     // Shows hovering drag handle color
     await gesture.moveTo(center);
