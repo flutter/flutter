@@ -156,7 +156,6 @@ void main() {
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
     final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
     expect(boxes.length, 1);
     // There is a selection now.
@@ -168,12 +167,10 @@ void main() {
     final Offset handlePos = paragraph2.localToGlobal(boxes[0].toRect().bottomRight);
     await gesture.down(handlePos);
     await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
 
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
 
     // After lifting the finger up, the selection toolbar should be showing again.
     expect(find.text('Copy'), findsOneWidget);
