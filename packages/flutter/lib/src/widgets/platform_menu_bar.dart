@@ -805,7 +805,7 @@ class PlatformMenuItem with Diagnosticable {
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
-      _kEnabledKey: item.onSelected != null,
+      _kEnabledKey: item.onSelected != null || item.onSelectedIntent != null,
       if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }

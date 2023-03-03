@@ -53,6 +53,7 @@ void main() {
             child: PlatformMenuBar(
               menus: createTestMenus(
                 onActivate: onActivate,
+                onActivateIntent: (String item) => TestPlatformMenuBarIntent(item),
                 onOpen: onOpen,
                 onClose: onClose,
                 shortcuts: <String, MenuSerializableShortcut>{
@@ -288,6 +289,7 @@ const List<String> subMenu2 = <String>[
 
 List<PlatformMenuItem> createTestMenus({
   void Function(String)? onActivate,
+  Intent Function(String)? onActivateIntent,
   void Function(String)? onOpen,
   void Function(String)? onClose,
   Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
@@ -315,7 +317,7 @@ List<PlatformMenuItem> createTestMenus({
           members: <PlatformMenuItem>[
             PlatformMenuItem(
               label: subMenu1[0],
-              onSelected: onActivate != null ? () => onActivate(subMenu1[0]) : null,
+              onSelectedIntent: onActivateIntent?.call(subMenu1[0]),
               shortcut: shortcuts[subMenu1[0]],
             ),
           ],
@@ -387,6 +389,11 @@ List<PlatformMenuItem> createTestMenus({
     ),
   ];
   return result;
+}
+
+class TestPlatformMenuBarIntent extends Intent {
+  const TestPlatformMenuBarIntent(this.item);
+  final String item;
 }
 
 class FakeMenuChannel implements MethodChannel {
