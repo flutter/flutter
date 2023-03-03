@@ -52,7 +52,6 @@ class ButtonTypesGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final VoidCallback? onPressed = enabled ? () {} : null;
-    final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.all(4.0),
