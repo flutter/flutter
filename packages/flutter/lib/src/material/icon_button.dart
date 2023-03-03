@@ -1116,7 +1116,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     });
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>    
+  MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
@@ -1253,7 +1253,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     });
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>    
+  MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
@@ -1401,7 +1401,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     });
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>    
+  MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
@@ -1601,7 +1601,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<double>(24.0);
 
   @override
-  MaterialStateProperty<BorderSide?>? get side =>       
+  MaterialStateProperty<BorderSide?>? get side => 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;

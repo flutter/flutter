@@ -92,7 +92,7 @@ class IconButtonTemplate extends TokenTemplate {
       case 'md.comp.filled-icon-button':
       case 'md.comp.filled-tonal-icon-button':
         return '''
-    
+
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
@@ -154,7 +154,7 @@ class IconButtonTemplate extends TokenTemplate {
     })''';
       case 'md.comp.icon-button':
         return '''
-    
+
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
@@ -211,7 +211,7 @@ class IconButtonTemplate extends TokenTemplate {
   String _side() {
     if (tokens.containsKey('$tokenGroup.unselected.outline.color')) {
       return '''
-      
+
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;
