@@ -447,6 +447,7 @@
 ../../../fuchsia/sdk/linux/docs
 ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.tts/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.virtualkeyboard/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
@@ -497,8 +498,10 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
@@ -570,7 +573,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer.augment/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
@@ -607,6 +609,7 @@
 ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 ../../../fuchsia/sdk/linux/pkg/async/meta.json
 ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
