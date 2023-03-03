@@ -310,7 +310,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Exits the application by calling the native application API method for
   /// exiting an application cleanly.
   ///
-  /// The [ui.AppExitType] determines what kind of exit to perform. For
+  /// The [ui.AppExitType] indicates what kind of exit to perform. For
   /// [ui.AppExitType.cancelable] exits, the application is queried through a
   /// call to [handleRequestAppExit], where the application can optionally
   /// cancel the request for exit. If the [exitType] is

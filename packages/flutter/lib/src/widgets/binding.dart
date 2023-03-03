@@ -543,7 +543,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     for (final WidgetsBindingObserver observer in _observers) {
       if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
         didCancel = true;
-        // Don't early return. In the case where someone is just using the
+        // Don't early return. For the case where someone is just using the
         // observer to know when exit happens, we want to call all the
         // observers.
       }
