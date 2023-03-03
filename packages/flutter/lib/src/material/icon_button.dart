@@ -117,7 +117,7 @@ enum _IconButtonVariant { standard, filled, filledTonal, outlined }
 /// {@end-tool}
 ///
 /// Material Design 3 introduced new types (standard and contained) of [IconButton]s.
-/// The default [IconButton] is the standard type.To create a filled icon button,
+/// The default [IconButton] is the standard type. To create a filled icon button,
 /// use [IconButton.filled]; to create a filled tonal icon button, use [IconButton.filledTonal];
 /// to create a outlined icon button, use [IconButton.outlined].
 ///
