@@ -1690,6 +1690,43 @@ enum AppLifecycleState {
   detached,
 }
 
+/// The possible responses to a request to exit the application.
+///
+/// The request is typically responded to by a [WidgetsBindingObserver].
+// TODO(gspencergoog): Insert doc references here to AppLifecycleListener and to
+// the actual function called on WidgetsBindingObserver once those have landed
+// in the framework. https://github.com/flutter/flutter/issues/121721
+enum AppExitResponse {
+  /// Exiting the application can proceed.
+  exit,
+  /// Cancel the exit: do not exit the application.
+  cancel,
+}
+
+/// The type of application exit to perform when calling
+/// `ServicesBinding.exitApplication`.
+// TODO(gspencergoog): Insert doc references here to
+// ServicesBinding.exitApplication that has landed in the framework.
+// https://github.com/flutter/flutter/issues/121721
+enum AppExitType {
+  /// Requests that the application start an orderly exit, sending a request
+  /// back to the framework through the [WidgetsBinding]. If that responds
+  /// with [AppExitResponse.exit], then proceed with the same steps as a
+  /// [required] exit. If that responds with [AppExitResponse.cancel], then the
+  /// exit request is canceled and the application continues executing normally.
+  cancelable,
+
+  /// A non-cancelable orderly exit request. The engine will shut down the
+  /// engine and call the native UI toolkit's exit API.
+  ///
+  /// If you need an even faster and more dangerous exit, then call `dart:io`'s
+  /// `exit()` directly, and even the native toolkit's exit API won't be called.
+  /// This is quite dangerous, though, since it's possible that the engine will
+  /// crash because it hasn't been properly shut down, causing the app to crash
+  /// on exit.
+  required,
+}
+
 /// A representation of distances for each of the four edges of a rectangle,
 /// used to encode the view insets and padding that applications should place
 /// around their user interface, as exposed by [FlutterView.viewInsets] and

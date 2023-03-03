@@ -14,7 +14,6 @@
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
