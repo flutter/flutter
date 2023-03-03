@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
+import 'package:retry/retry.dart';
 
 import 'utils.dart';
 
@@ -117,6 +118,9 @@ abstract class DeviceDiscovery {
 
   /// Prepares the system to run tasks.
   Future<void> performPreflightTasks();
+
+  /// Waits for the device to come to a ready state.
+  Future<void> deviceReady(String deviceId);
 }
 
 /// A proxy for one specific device.
@@ -330,6 +334,38 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return results;
   }
 
+  /// Collect the device state for specified deviceId.
+  Future<String?> getDeviceState({required String deviceId}) async {
+    final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
+        .trim().split('\n');
+    String? deviceState;
+
+    for (final String line in output) {
+      // Skip lines like: * daemon started successfully *
+      if (line.startsWith('* daemon ')) {
+        continue;
+      }
+
+      if (line.startsWith('List of devices')) {
+        continue;
+      }
+
+      if (_kDeviceRegex.hasMatch(line)) {
+        final Match match = _kDeviceRegex.firstMatch(line)!;
+
+        final String deviceID = match[1]!;
+        if (deviceID == deviceId) {
+          deviceState = match[2];
+          break;
+        }
+      } else {
+        throw FormatException('Failed to parse device from adb output: "$line"');
+      }
+    }
+
+    return deviceState;
+  }
+
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
@@ -356,6 +392,23 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // runs non-stop for too long it loses connections to devices. There may be
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server']);
+  }
+  
+  @override
+  Future<void> deviceReady(String deviceId, {RetryOptions retryOptions = const RetryOptions(
+    maxAttempts: 5,
+    delayFactor: Duration(seconds: 15),
+    maxDelay: Duration(seconds: 15),
+  ), }) async {
+    // Wait for the device through adb
+    await retryOptions.retry(
+      () async {
+        final String? state = await getDeviceState(deviceId: deviceId);
+        if (state != 'device') {
+          throw DeviceException('Device not ready, current state = $state');
+        }
+      },
+      retryIf: (Exception e) => e is TimeoutException || e is FormatException || e is DeviceException);
   }
 }
 
@@ -391,6 +444,9 @@ class LinuxDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
+  
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }
 
 class MacosDeviceDiscovery implements DeviceDiscovery {
@@ -425,6 +481,9 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
+
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }
 
 class WindowsDeviceDiscovery implements DeviceDiscovery {
@@ -459,6 +518,9 @@ class WindowsDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
+
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }
 
 class FuchsiaDeviceDiscovery implements DeviceDiscovery {
@@ -565,6 +627,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> performPreflightTasks() async {}
+
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }
 
 class AndroidDevice extends Device {
@@ -965,6 +1030,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<void> performPreflightTasks() async {
     // Currently we do not have preflight tasks for iOS.
   }
+
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }
 
 /// iOS device.
@@ -1428,6 +1496,8 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> performPreflightTasks() async {
-  }
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<void> deviceReady(String deviceId) async { }
 }

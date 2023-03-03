@@ -790,6 +790,12 @@ class StartupTest {
           }
         }
 
+        try {
+          await devices.deviceReady(device.deviceId);
+        } catch (e) {
+          print('Device did not come back to active state in time.');
+        }
+
         await flutter('install', options: <String>[
           '--uninstall-only',
           '-d',
