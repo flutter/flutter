@@ -1347,7 +1347,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
 // END GENERATED TOKEN PROPERTIES - FilledIconButton
 
-// BEGIN GENERATED TOKEN PROPERTIES - TonalIconButton
+// BEGIN GENERATED TOKEN PROPERTIES - FilledTonalIconButton
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -1493,7 +1493,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 
-// END GENERATED TOKEN PROPERTIES - TonalIconButton
+// END GENERATED TOKEN PROPERTIES - FilledTonalIconButton
 
 // BEGIN GENERATED TOKEN PROPERTIES - OutlinedIconButton
 
