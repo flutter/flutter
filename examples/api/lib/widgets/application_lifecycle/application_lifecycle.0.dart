@@ -6,6 +6,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -38,17 +39,41 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   late final AppLifecycleListener listener;
+  late final ShortcutRegistryEntry shortcutEntry;
+  final CharacterActivator quitKey = CharacterActivator('q',
+      control: !(defaultTargetPlatform != TargetPlatform.macOS || defaultTargetPlatform != TargetPlatform.iOS),
+      meta: defaultTargetPlatform != TargetPlatform.macOS || defaultTargetPlatform != TargetPlatform.iOS);
+
   bool _shouldExit = true;
 
   @override
   void initState() {
     super.initState();
-    listener = AppLifecycleListener(binding: WidgetsBinding.instance, onExitRequested: _handleExitRequest);
+    listener = AppLifecycleListener(
+      binding: WidgetsBinding.instance,
+      onExitRequested: _handleExitRequest,
+    );
+    shortcutEntry = ShortcutRegistry.of(context).addAll(
+      <ShortcutActivator, Intent>{
+        quitKey: VoidCallbackIntent(_quit),
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    shortcutEntry.dispose();
+    super.dispose();
+  }
+
+  Future<void> _quit() async {
+    await ServicesBinding.instance.exitApplication(AppExitType.cancelable);
   }
 
   Future<AppExitResponse> _handleExitRequest() async {
-    debugPrint('Sample App responding ${_shouldExit ? AppExitResponse.exit : AppExitResponse.cancel}');
-    return _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    debugPrint('Sample App responding $response');
+    return response;
   }
 
   void _radioChanged(bool? value) {
@@ -65,13 +90,34 @@ class _BodyState extends State<Body> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        LabeledRadio(label: const Text('Should Exit'), groupValue: _shouldExit, value: true, onChanged: _radioChanged),
-        LabeledRadio(label: const Text('Should Abort'), groupValue: _shouldExit, value: false, onChanged: _radioChanged),
+        MenuBar(
+          children: <Widget>[
+            SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  shortcut: quitKey,
+                  child: const Text('Quit'),
+                ),
+              ],
+              child: const Text('File'),
+            ),
+          ],
+        ),
+        LabeledRadio(
+          label: const Text('Do Not Allow Exit'),
+          groupValue: _shouldExit,
+          value: false,
+          onChanged: _radioChanged,
+        ),
+        LabeledRadio(
+          label: const Text('Allow Exit'),
+          groupValue: _shouldExit,
+          value: true,
+          onChanged: _radioChanged,
+        ),
         TextButton(
-          child: const Text('Quit'),
-          onPressed: () async {
-            await ServicesBinding.instance.exitApplication(AppExitType.cancelable);
-          },
+          onPressed: _quit,
+          child: const Text('Try To Quit'),
         ),
       ],
     );

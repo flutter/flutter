@@ -11,7 +11,10 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 ///
 /// To listen for requests for the application to exit, and to decide whether or
 /// not the application should exit when requested, create an
-/// [AppLifecycleListener] and set the [onExitRequested] callback.
+/// [AppLifecycleListener] and set the [onExitRequested] callback. On macOS, in
+/// order to receive application exit requests originating from the OS, the
+/// `NSPrincipalClass` in your `Info.plist` file must be set to
+/// `FlutterApplication`, or a subclass of `FlutterApplication`.
 ///
 /// To listen for changes in the application lifecycle state, define an
 /// [onStateChange] callback. The most recent state seen by this
@@ -19,8 +22,8 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// See the [AppLifecycleState] enum for details on the various states.
 ///
 /// {@tool dartpad}
-/// This examples shows how an application can optionally decide to abort a
-/// request for quitting instead of obeying the request.
+/// This examples shows how an application can optionally decide
+/// to abort a request for exiting instead of obeying the request.
 ///
 /// ** See code in examples/api/lib/widgets/application_lifecycle/application_lifecycle.0.dart **
 /// {@end-tool}
