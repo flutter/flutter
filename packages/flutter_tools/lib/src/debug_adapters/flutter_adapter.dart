@@ -395,7 +395,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
 
     // Notify the client whether it can call 'restartRequest' when the user
     // clicks restart, instead of terminating and re-starting its own debug
-    //session (which is much slower, but required for profile/release mode).
+    // session (which is much slower, but required for profile/release mode).
     final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
     sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
   }
