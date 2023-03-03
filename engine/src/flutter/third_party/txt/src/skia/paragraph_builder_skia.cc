@@ -169,11 +169,11 @@ skt::TextStyle ParagraphBuilderSkia::TxtToSkia(const TextStyle& txt) {
   skia.setHalfLeading(txt.half_leading);
 
   skia.setLocale(SkString(txt.locale.c_str()));
-  if (txt.has_background) {
-    skia.setBackgroundPaintID(CreatePaintID(txt.background_dl));
+  if (txt.background.has_value()) {
+    skia.setBackgroundPaintID(CreatePaintID(txt.background.value()));
   }
-  if (txt.has_foreground) {
-    skia.setForegroundPaintID(CreatePaintID(txt.foreground_dl));
+  if (txt.foreground.has_value()) {
+    skia.setForegroundPaintID(CreatePaintID(txt.foreground.value()));
   } else {
     flutter::DlPaint dl_paint;
     dl_paint.setColor(txt.color);
