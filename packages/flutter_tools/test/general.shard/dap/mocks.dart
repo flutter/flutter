@@ -18,6 +18,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     bool simulateAppStarted = true,
+    bool supportsRestart = true,
     FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
@@ -31,6 +32,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
       fileSystem: fileSystem,
       platform: platform,
       simulateAppStarted: simulateAppStarted,
+      supportsRestart: supportsRestart,
       preAppStart: preAppStart,
     );
   }
@@ -41,6 +43,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required super.fileSystem,
     required super.platform,
     this.simulateAppStarted = true,
+    this.supportsRestart = true,
     this.preAppStart,
   }) {
     clientChannel.listen((ProtocolMessage message) {
@@ -51,6 +54,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   int _seq = 1;
   final ByteStreamServerChannel clientChannel;
   final bool simulateAppStarted;
+  final bool supportsRestart;
   final FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart;
 
   late String executable;
@@ -110,6 +114,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
         'event': 'app.start',
         'params': <String, Object?>{
           'appId': 'TEST',
+          'supportsRestart': supportsRestart,
         }
       });
     }
