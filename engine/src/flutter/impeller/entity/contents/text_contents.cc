@@ -58,6 +58,12 @@ std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
   return bounds->TransformBounds(entity.GetTransformation());
 }
 
+static Vector4 PositionForGlyphPosition(const Matrix& translation,
+                                        Point unit_position,
+                                        Size destination_size) {
+  return translation * (unit_position * destination_size);
+}
+
 template <class TPipeline>
 static bool CommonRender(
     const ContentContext& renderer,
@@ -94,9 +100,6 @@ static bool CommonRender(
 
   typename FS::FragInfo frag_info;
   frag_info.text_color = ToVector(color.Premultiply());
-  frag_info.atlas_size =
-      Point{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
-            static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   // Common fragment uniforms for all glyphs.
@@ -136,6 +139,10 @@ static bool CommonRender(
     offset += 4;
   }
 
+  auto atlas_size =
+      Point{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
+            static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};
+
   for (const auto& run : frame.GetRuns()) {
     auto font = run.GetFont();
 
@@ -147,23 +154,26 @@ static bool CommonRender(
         return false;
       }
 
-      auto atlas_position = atlas_glyph_pos->origin;
-      auto atlas_glyph_size =
-          Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height};
       auto offset_glyph_position =
           glyph_position.position + glyph_position.glyph.bounds.origin;
 
+      auto uv_scaler_a = atlas_glyph_pos->size / atlas_size;
+      auto uv_scaler_b = (Point::Round(atlas_glyph_pos->origin) / atlas_size);
+      auto translation = Matrix::MakeTranslation(
+          Vector3(offset_glyph_position.x, offset_glyph_position.y, 0));
+
       for (const auto& point : unit_points) {
         typename VS::PerVertexData vtx;
-        vtx.unit_position = point;
-        vtx.destination_position = offset_glyph_position;
-        vtx.destination_size = Point(glyph_position.glyph.bounds.size);
-        vtx.source_position = atlas_position;
-        vtx.source_glyph_size = atlas_glyph_size;
+        auto position = PositionForGlyphPosition(
+            translation, point, glyph_position.glyph.bounds.size);
+        vtx.uv = point * uv_scaler_a + uv_scaler_b;
+        vtx.position = position;
+
         if constexpr (std::is_same_v<TPipeline, GlyphAtlasPipeline>) {
           vtx.has_color =
               glyph_position.glyph.type == Glyph::Type::kBitmap ? 1.0 : 0.0;
         }
+
         vertex_builder.AppendVertex(std::move(vtx));
       }
     }

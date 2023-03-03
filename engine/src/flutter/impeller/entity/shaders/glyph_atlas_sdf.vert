@@ -11,20 +11,12 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec2 unit_position;
-in vec2 destination_position;
-in vec2 destination_size;
-in vec2 source_position;
-in vec2 source_glyph_size;
+in vec4 position;
+in vec2 uv;
 
-out vec2 v_unit_position;
-out vec2 v_source_position;
-out vec2 v_source_glyph_size;
+out vec2 v_uv;
 
 void main() {
-  gl_Position = IPPositionForGlyphPosition(
-      frame_info.mvp, unit_position, destination_position, destination_size);
-  v_unit_position = unit_position;
-  v_source_position = source_position;
-  v_source_glyph_size = source_glyph_size;
+  gl_Position = frame_info.mvp * position;
+  v_uv = uv;
 }

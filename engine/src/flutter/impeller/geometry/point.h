@@ -38,6 +38,12 @@ struct TPoint {
 
   static constexpr TPoint<Type> MakeXY(Type x, Type y) { return {x, y}; }
 
+  template <class U>
+  static constexpr TPoint Round(const TPoint<U>& other) {
+    return TPoint{static_cast<Type>(std::round(other.x)),
+                  static_cast<Type>(std::round(other.y))};
+  }
+
   constexpr bool operator==(const TPoint& p) const {
     return p.x == x && p.y == y;
   }
