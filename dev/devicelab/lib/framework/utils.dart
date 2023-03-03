@@ -470,11 +470,30 @@ Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
-}) {
+}) async {
   final List<String> args = flutterCommandArgs(command, options);
-  return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
+  final int rc = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment);
+  
+  // When uninstalling an application we need to make sure the device is back
+  // before proceeding.
+  if (command == 'install' && options.contains('--uninstall-only')) {
+    print('Checking for device status.');
+    int deviceIndex = options.indexOf('-d');
+    final String deviceId = options.elementAt(deviceIndex++);
+    sleep(const Duration(seconds: 1));
+    try {
+      await devices.deviceReady(deviceId);
+    } catch (e) {
+      print('Device did not come back to active state in time.');
+    }
+  }
+
+  return rc;
 }
+
+
+
 
 /// Starts a Flutter subprocess.
 ///
