@@ -574,6 +574,8 @@ class AndroidDevice extends Device {
       await androidBuilder!.buildApk(
           project: project,
           target: mainPath ?? 'lib/main.dart',
+        // android_device deals with building and deploying not configuration.
+        configOnly: false,
           androidBuildInfo: AndroidBuildInfo(
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],

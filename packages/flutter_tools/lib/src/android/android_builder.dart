@@ -27,6 +27,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required bool configOnly, /// TODO make not required and set to default false.
   });
 
   /// Builds an App Bundle artifact.

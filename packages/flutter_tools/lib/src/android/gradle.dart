@@ -181,6 +181,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required bool configOnly,
   }) async {
     await buildGradleApp(
       project: project,
@@ -188,6 +189,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       target: target,
       isBuildingBundle: false,
       localGradleErrors: gradleErrors,
+      configOnly: configOnly,
     );
   }
 
@@ -199,6 +201,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   }) async {
     await buildGradleApp(
       project: project,
@@ -208,6 +211,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       localGradleErrors: gradleErrors,
       validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
+      configOnly: configOnly,
     );
   }
 
@@ -225,6 +229,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required String target,
     required bool isBuildingBundle,
     required List<GradleHandledError> localGradleErrors,
+    required bool configOnly,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,
@@ -249,7 +254,17 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+    updateLocalProperties(
+        project: project, buildInfo: androidBuildInfo.buildInfo);
+
+    final List<String> command = <String>[
+      _gradleUtils.getExecutable(project),
+    ];
+
+    if (configOnly) {
+      _logger.printStatus('Config complete.');
+      return;
+    }
 
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String assembleTask = isBuildingBundle
@@ -260,9 +275,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       "Running Gradle task '$assembleTask'...",
     );
 
-    final List<String> command = <String>[
-      _gradleUtils.getExecutable(project),
-    ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
       command.add('--info');
@@ -428,6 +440,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               localGradleErrors: localGradleErrors,
               retry: retry,
               maxRetries: maxRetries,
+              configOnly: configOnly,
             );
             final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
             BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
