@@ -63,54 +63,15 @@ class ButtonTypesGroup extends StatelessWidget {
 
           // Use a standard IconButton with specific style to implement the
           // 'Filled' type.
-          IconButton(
-            icon: const Icon(Icons.filter_drama),
-            onPressed: onPressed,
-            style: IconButton.styleFrom(
-              foregroundColor: colors.onPrimary,
-              backgroundColor: colors.primary,
-              disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
-              hoverColor: colors.onPrimary.withOpacity(0.08),
-              focusColor: colors.onPrimary.withOpacity(0.12),
-              highlightColor: colors.onPrimary.withOpacity(0.12),
-            )
-          ),
+          IconButton.filled(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
 
           // Use a standard IconButton with specific style to implement the
           // 'Filled Tonal' type.
-          IconButton(
-            icon: const Icon(Icons.filter_drama),
-            onPressed: onPressed,
-            style: IconButton.styleFrom(
-              foregroundColor: colors.onSecondaryContainer,
-              backgroundColor: colors.secondaryContainer,
-              disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
-              hoverColor: colors.onSecondaryContainer.withOpacity(0.08),
-              focusColor: colors.onSecondaryContainer.withOpacity(0.12),
-              highlightColor: colors.onSecondaryContainer.withOpacity(0.12),
-            ),
-          ),
+          IconButton.filledTonal(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
 
           // Use a standard IconButton with specific style to implement the
           // 'Outlined' type.
-          IconButton(
-            icon: const Icon(Icons.filter_drama),
-            onPressed: onPressed,
-            style: IconButton.styleFrom(
-              focusColor: colors.onSurfaceVariant.withOpacity(0.12),
-              highlightColor: colors.onSurface.withOpacity(0.12),
-              side: onPressed == null
-                ? BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-                : BorderSide(color: colors.outline),
-            ).copyWith(
-              foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) {
-                  return colors.onSurface;
-                }
-                return null;
-              }),
-            ),
-          ),
+          IconButton.outlined(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
         ],
       ),
     );
