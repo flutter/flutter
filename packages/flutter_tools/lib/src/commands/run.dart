@@ -486,7 +486,6 @@ class RunCommand extends RunCommandBase {
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller,
       commandRunIOSInterfaceType: iOSInterfaceType,
-      commandRunEnableEmbedderApi: enableEmbedderApi,
     );
   }
 

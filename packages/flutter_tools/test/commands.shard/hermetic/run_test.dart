@@ -428,7 +428,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false', 'cd57': 'usb', 'cd58': 'false',
+            'cd56': 'false', 'cd57': 'usb',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -683,7 +683,6 @@ void main() {
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
-          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -708,7 +707,6 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'usb',
-          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -733,7 +731,6 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
-          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -759,7 +756,6 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
-          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
