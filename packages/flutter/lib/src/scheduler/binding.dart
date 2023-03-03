@@ -385,7 +385,6 @@ mixin SchedulerBinding on BindingBase {
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    print('flutter: handle life cycle changes $state');
     _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:

@@ -189,7 +189,7 @@ class CustomDimensions {
       if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
       if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
       if (commandRunIOSInterfaceType != null) cdKey(CustomDimensionsEnum.commandRunIOSInterfaceType): commandRunIOSInterfaceType.toString(),
-      if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableEmbedderApi): commandRunEnableEmbedderApi.toString(),
+      if (commandRunEnableEmbedderApi != null) cdKey(CustomDimensionsEnum.commandRunEnableEmbedderApi): commandRunEnableEmbedderApi.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
