@@ -79,11 +79,9 @@ def DoJavac(
       '-encoding', 'UTF-8',
       '-classpath', ':'.join(classpath),
       '-d', classes_dir,
-      # TODO(camsim99): Make deprecation warnings fatal and remove limit 
-      # when all 123 (at the time of this comment) deprecations are fixed:
+      # TODO(camsim99): Fix deprecations:
       # https://github.com/flutter/flutter/issues/98602.
-      '-Xlint:deprecation',
-      '-Xmaxwarns', '123']
+      '-Xlint:-deprecation']
 
   if bootclasspath:
     javac_args.extend([
