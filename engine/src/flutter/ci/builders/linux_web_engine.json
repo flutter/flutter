@@ -1,0 +1,75 @@
+{
+    "builds": [
+        {
+            "archives": [
+                {
+                    "name": "wasm_release",
+                    "base_path": "out/wasm_release/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/wasm_release/zip_archives/flutter-web-sdk.zip"
+                    ]
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "download_emsdk": true
+            },
+            "gn": [
+                "--build-canvaskit",
+                "--web",
+                "--runtime-mode=release"
+            ],
+            "name": "wasm_release",
+            "ninja": {
+                "config": "wasm_release",
+                "targets": [
+                    "flutter/web_sdk:flutter_web_sdk_archive"
+                ]
+            },
+            "generators": {
+                "pub_dirs": [
+                    "flutter/lib/web_ui/",
+                    "flutter/web_sdk/web_engine_tester/"
+                ],
+                "tasks": [
+                    {
+                        "name": "compile web_tests",
+                        "parameters": [
+                            "run",
+                            "compile_tests"
+                        ],
+                        "scripts": [
+                            "third_party/dart/tools/sdks/dart-sdk/bin/dart",
+                            "flutter/lib/web_ui/dev/felt.dart"
+                        ]
+                    },
+                    {
+                        "name": "check licenses",
+                        "parameters": [
+                            "check-licenses"
+                        ],
+                        "scripts": [
+                            "flutter/lib/web_ui/dev/felt"
+                        ]
+                    },
+                    {
+                        "name": "web engine analysis",
+                        "parameters": [
+                            "analyze"
+                        ],
+                        "scripts": [
+                            "flutter/lib/web_ui/dev/felt"
+                        ]
+                    }
+                ]
+            },
+            "tests": []
+        }
+    ],
+    "tests": []
+}
