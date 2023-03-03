@@ -50,7 +50,7 @@ void main() {
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -66,7 +66,7 @@ void main() {
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -82,7 +82,7 @@ void main() {
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -98,7 +98,7 @@ void main() {
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      List<Device> devices = await discoverer.devices;
+      List<Device> devices = await discoverer.devices();
       expect(devices, hasLength(1));
 
       final Device device = devices.single;

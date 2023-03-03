@@ -98,7 +98,7 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final bool supportsRuntimeMode = await device.supportsRuntimeMode(BuildMode.release);
@@ -121,7 +121,7 @@ void main() {
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final DeviceLogReader logReader = await device.getLogReader();
@@ -153,7 +153,7 @@ void main() {
       dummyApplicationBinary.writeAsStringSync('dummy content');
       prebuiltApplicationPackage.applicationPackage = dummyApplicationBinary;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -200,7 +200,7 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 

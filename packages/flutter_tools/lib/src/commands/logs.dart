@@ -36,7 +36,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    device = await findTargetDevice(includeUnsupportedDevices: true);
+    device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
     if (device == null) {
       throwToolExit(null);
     }

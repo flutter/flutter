@@ -1241,6 +1241,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool isSupported() => true;
 
   @override
+  bool get isConnected => true;
+
+  @override
   bool get supportsHotRestart => true;
 
   @override
@@ -1340,6 +1343,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
+
+  @override
+  bool get isConnected => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {

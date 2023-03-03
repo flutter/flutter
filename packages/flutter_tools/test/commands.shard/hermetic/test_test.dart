@@ -920,7 +920,9 @@ class _FakeDeviceManager extends DeviceManager {
   final List<Device> _connectedDevices;
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => _connectedDevices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => _connectedDevices;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];

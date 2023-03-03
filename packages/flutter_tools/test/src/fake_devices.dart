@@ -62,6 +62,8 @@ class FakeDevice extends Device {
     bool ephemeral = true,
     bool isSupported = true,
     bool isSupportedForProject = true,
+    this.isConnected = true,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
   }) : _isSupported = isSupported,
@@ -119,6 +121,12 @@ class FakeDevice extends Device {
   bool isSupported() => _isSupported;
 
   @override
+  bool isConnected;
+
+  @override
+  DeviceConnectionInterface connectionInterface;
+
+  @override
   Future<bool> isLocalEmulator = Future<bool>.value(true);
 
   @override
@@ -174,7 +182,10 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool discoverDevicesCalled = false;
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
     discoverDevicesCalled = true;
     return super.discoverDevices(timeout: timeout);
   }
