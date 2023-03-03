@@ -6,7 +6,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -39,12 +38,7 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   late final AppLifecycleListener listener;
-  late final ShortcutRegistryEntry shortcutEntry;
-  final CharacterActivator quitKey = CharacterActivator('q',
-      control: !(defaultTargetPlatform != TargetPlatform.macOS || defaultTargetPlatform != TargetPlatform.iOS),
-      meta: defaultTargetPlatform != TargetPlatform.macOS || defaultTargetPlatform != TargetPlatform.iOS);
-
-  bool _shouldExit = true;
+  bool _shouldExit = false;
 
   @override
   void initState() {
@@ -53,17 +47,6 @@ class _BodyState extends State<Body> {
       binding: WidgetsBinding.instance,
       onExitRequested: _handleExitRequest,
     );
-    shortcutEntry = ShortcutRegistry.of(context).addAll(
-      <ShortcutActivator, Intent>{
-        quitKey: VoidCallbackIntent(_quit),
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    shortcutEntry.dispose();
-    super.dispose();
   }
 
   Future<void> _quit() async {
@@ -72,7 +55,7 @@ class _BodyState extends State<Body> {
 
   Future<AppExitResponse> _handleExitRequest() async {
     final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
-    debugPrint('Sample App responding $response');
+    debugPrint('Sample App responding $response to exit request');
     return response;
   }
 
@@ -88,38 +71,33 @@ class _BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        MenuBar(
-          children: <Widget>[
-            SubmenuButton(
-              menuChildren: <Widget>[
-                MenuItemButton(
-                  shortcut: quitKey,
-                  child: const Text('Quit'),
-                ),
-              ],
-              child: const Text('File'),
-            ),
-          ],
+    return Center(
+      child: SizedBox(
+        width: 160,
+        child: IntrinsicHeight(
+          child: Column(
+            children: <Widget>[
+              LabeledRadio(
+                label: const Text('Do Not Allow Exit'),
+                groupValue: _shouldExit,
+                value: false,
+                onChanged: _radioChanged,
+              ),
+              LabeledRadio(
+                label: const Text('Allow Exit'),
+                groupValue: _shouldExit,
+                value: true,
+                onChanged: _radioChanged,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _quit,
+                child: const Text('Quit'),
+              ),
+            ],
+          ),
         ),
-        LabeledRadio(
-          label: const Text('Do Not Allow Exit'),
-          groupValue: _shouldExit,
-          value: false,
-          onChanged: _radioChanged,
-        ),
-        LabeledRadio(
-          label: const Text('Allow Exit'),
-          groupValue: _shouldExit,
-          value: true,
-          onChanged: _radioChanged,
-        ),
-        TextButton(
-          onPressed: _quit,
-          child: const Text('Try To Quit'),
-        ),
-      ],
+      ),
     );
   }
 }
