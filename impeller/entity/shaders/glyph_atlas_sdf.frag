@@ -7,21 +7,15 @@
 uniform sampler2D glyph_atlas_sampler;
 
 uniform FragInfo {
-  vec2 atlas_size;
   vec4 text_color;
 }
 frag_info;
 
-in vec2 v_unit_position;
-in vec2 v_source_position;
-in vec2 v_source_glyph_size;
+in vec2 v_uv;
 
 out vec4 frag_color;
 
 void main() {
-  vec2 scale_perspective = v_source_glyph_size / frag_info.atlas_size;
-  vec2 offset = v_source_position / frag_info.atlas_size;
-
   // Inspired by Metal by Example's SDF text rendering shader:
   // https://github.com/metal-by-example/sample-code/blob/master/objc/12-TextRendering/TextRendering/Shaders.metal
 
@@ -29,9 +23,7 @@ void main() {
   float edge_distance = 0.5;
   // Sample the signed-distance field to find distance from this fragment to the
   // glyph outline
-  float sample_distance =
-      texture(glyph_atlas_sampler, v_unit_position * scale_perspective + offset)
-          .a;
+  float sample_distance = texture(glyph_atlas_sampler, v_uv).a;
   // Use local automatic gradients to find anti-aliased anisotropic edge width,
   // cf. Gustavson 2012
   float edge_width = length(vec2(dFdx(sample_distance), dFdy(sample_distance)));
