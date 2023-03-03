@@ -229,6 +229,7 @@ if (enable_unittests) {
       "platform_view_embedder_unittests.cc",
       "tests/embedder_config_builder.cc",
       "tests/embedder_config_builder.h",
+      "tests/embedder_frozen.h",
       "tests/embedder_test.cc",
       "tests/embedder_test.h",
       "tests/embedder_test_backingstore_producer.cc",
@@ -312,7 +313,10 @@ if (enable_unittests) {
 
     include_dirs = [ "." ]
 
-    sources = [ "tests/embedder_unittests.cc" ]
+    sources = [
+      "tests/embedder_frozen_unittests.cc",
+      "tests/embedder_unittests.cc",
+    ]
 
     deps = [ ":embedder_unittests_library" ]
 
