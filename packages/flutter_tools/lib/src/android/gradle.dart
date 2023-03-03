@@ -262,7 +262,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     ];
 
     if (configOnly) {
-      _logger.printStatus('Config complete.');
+      _logger.printStatus('Config complete');
       return;
     }
 
