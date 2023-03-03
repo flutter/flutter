@@ -400,12 +400,15 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     delayFactor: Duration(seconds: 15),
     maxDelay: Duration(seconds: 15),
   ), }) async {
+    print('Checking device ready...');
     // Wait for the device through adb
     await retryOptions.retry(
       () async {
         final String? state = await getDeviceState(deviceId: deviceId);
         if (state != 'device') {
           throw DeviceException('Device not ready, current state = $state');
+        } else {
+          print('Found device $deviceId ready.');
         }
       },
       retryIf: (Exception e) => e is TimeoutException || e is FormatException || e is DeviceException);
