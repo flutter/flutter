@@ -1285,7 +1285,7 @@ class PubspecDependency extends PubspecLine {
   /// dependencies/dev_dependencies section, or a dependency_overrides section.
   /// We track this so that we can put ourselves in the right section when
   /// generating the fake pubspec.yaml.
-  bool? _lockIsOverride;
+  bool _lockIsOverride = false;
 
   static const String _pathPrefix = '    path: ';
   static const String _sdkPrefix = '    sdk: ';
@@ -1382,7 +1382,7 @@ class PubspecDependency extends PubspecLine {
         }
         break;
       case DependencyKind.path:
-        if (_lockIsOverride!) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    path: $_lockTarget');
@@ -1392,7 +1392,7 @@ class PubspecDependency extends PubspecLine {
         }
         break;
       case DependencyKind.sdk:
-        if (_lockIsOverride!) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    sdk: $_lockTarget');
@@ -1402,7 +1402,7 @@ class PubspecDependency extends PubspecLine {
         }
         break;
       case DependencyKind.git:
-        if (_lockIsOverride!) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln(lockLine);
