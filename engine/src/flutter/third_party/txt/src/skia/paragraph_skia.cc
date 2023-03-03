@@ -300,22 +300,12 @@ TextStyle ParagraphSkia::SkiaToTxt(const skt::TextStyle& skia) {
 
   txt.locale = skia.getLocale().c_str();
   if (skia.hasBackground()) {
-    skt::ParagraphPainter::SkPaintOrID background =
-        skia.getBackgroundPaintOrID();
-    if (std::holds_alternative<SkPaint>(background)) {
-      txt.background = std::get<SkPaint>(background);
-    } else if (std::holds_alternative<PaintID>(background)) {
-      txt.background_dl = dl_paints_[std::get<PaintID>(background)];
-    }
+    PaintID background_id = std::get<PaintID>(skia.getBackgroundPaintOrID());
+    txt.background = dl_paints_[background_id];
   }
   if (skia.hasForeground()) {
-    skt::ParagraphPainter::SkPaintOrID foreground =
-        skia.getForegroundPaintOrID();
-    if (std::holds_alternative<SkPaint>(foreground)) {
-      txt.foreground = std::get<SkPaint>(foreground);
-    } else if (std::holds_alternative<PaintID>(foreground)) {
-      txt.foreground_dl = dl_paints_[std::get<PaintID>(foreground)];
-    }
+    PaintID foreground_id = std::get<PaintID>(skia.getForegroundPaintOrID());
+    txt.foreground = dl_paints_[foreground_id];
   }
 
   txt.text_shadows.clear();

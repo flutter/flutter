@@ -17,6 +17,7 @@
 #ifndef LIB_TXT_SRC_TEXT_STYLE_H_
 #define LIB_TXT_SRC_TEXT_STYLE_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -55,12 +56,8 @@ class TextStyle {
   double height = 1.0;
   bool has_height_override = false;
   std::string locale;
-  bool has_background = false;
-  SkPaint background;
-  flutter::DlPaint background_dl;
-  bool has_foreground = false;
-  SkPaint foreground;
-  flutter::DlPaint foreground_dl;
+  std::optional<flutter::DlPaint> background;
+  std::optional<flutter::DlPaint> foreground;
   // An ordered list of shadows where the first shadow will be drawn first (at
   // the bottom).
   std::vector<TextShadow> text_shadows;
