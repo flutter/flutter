@@ -1883,7 +1883,75 @@ void main() {
         lastSize = controller.size;
       }
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Drags smoothly after sheet went ballistic via another child', (WidgetTester tester) async {
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(buildWidget(controller: controller));
+
+      await tester.fling(
+        find.byType(ListView),
+        const Offset(0, -100),
+        1000,
+      );
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(SingleChildScrollView)));
+
+      double lastSize = controller.size;
+
+      for (int i = 0; i < 10; ++i) {
+        await gesture.moveBy(const Offset(0, 10));
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(controller.size, lessThan(lastSize));
+        lastSize = controller.size;
+      }
+    }, variant: TargetPlatformVariant.all());
   });
+
+  testWidgets('Nested scrollables should not snap after ballistic interrupted by drag', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          // Turn scrollbars off so we don't have to wrap our scroll controllers
+          // on platforms that would normally show scrollbars.
+          behavior: const ScrollBehavior().copyWith(scrollbars: false),
+          child: DraggableScrollableSheet(
+            controller: controller,
+            snap: true,
+            builder: (BuildContext context, ScrollController controller) =>
+              CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverFillRemaining(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: 100,
+                      itemBuilder: (BuildContext context, int index) =>
+                        Text('Item $index'),
+                    ),
+                  ),
+                ],
+              ),
+          ),
+        ),
+      ));
+
+    await tester.fling(find.text('Item 1'), const Offset(0, -100), 1000);
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Item 1')));
+
+    double lastSize = controller.size;
+
+    for (int i = 0; i < 10; ++i) {
+      await gesture.moveBy(const Offset(0, 10));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(controller.size, lessThanOrEqualTo(lastSize));
+      lastSize = controller.size;
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Scrollable can be wrapped in a DraggableScrollableSheet while animating', (WidgetTester tester) async {
     final Key innerKey = GlobalKey();

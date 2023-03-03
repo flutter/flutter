@@ -1001,7 +1001,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       );
     }
 
-    beginActivity(_SheetBallisticScrollActivity(this, simulation));
+    final ScrollActivity outerActivity = _SheetBallisticScrollActivity(this, simulation);
+    extent.startActivity(onCanceled: () {
+      if (activity == outerActivity) {
+        goIdle();
+      }
+    });
+    beginActivity(outerActivity);
   }
 }
 
