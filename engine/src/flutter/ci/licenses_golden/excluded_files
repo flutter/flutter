@@ -250,6 +250,7 @@
 ../../../flutter/shell/platform/darwin/Doxyfile
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/macos/README.md
 ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures
 ../../../flutter/shell/platform/embedder/fixtures
 ../../../flutter/shell/platform/embedder/platform_view_embedder_unittests.cc
