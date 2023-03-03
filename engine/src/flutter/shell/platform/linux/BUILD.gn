@@ -276,11 +276,7 @@ copy("publish_headers_linux") {
 }
 
 zip_bundle("flutter_gtk") {
-  prefix = "$full_target_platform_name/"
-  if (flutter_runtime_mode != "debug" ||
-      (flutter_runtime_mode == "debug" && target_cpu != "x64")) {
-    prefix = "$full_target_platform_name-$flutter_runtime_mode/"
-  }
+  prefix = "$full_target_platform_name-$flutter_runtime_mode/"
   output = "${prefix}${full_target_platform_name}-flutter-gtk.zip"
   deps = [
     ":flutter_linux_gtk",
