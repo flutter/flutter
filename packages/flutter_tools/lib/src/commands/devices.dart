@@ -62,9 +62,27 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
+    final DevicesCommandOutput output = DevicesCommandOutput(
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+    );
+
+    await output.findAndOutputAllTargetDevices(
+      machine: boolArgDeprecated('machine'),
+    );
+
+    return FlutterCommandResult.success();
+  }
+}
+
+class DevicesCommandOutput {
+  DevicesCommandOutput({this.deviceDiscoveryTimeout});
+
+  final Duration? deviceDiscoveryTimeout;
+
+  Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
     final List<Device> devices = await globals.deviceManager?.refreshAllDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
 
-    if (boolArgDeprecated('machine')) {
+    if (machine) {
       await printDevicesAsJson(devices);
     } else {
       if (devices.isEmpty) {
@@ -86,7 +104,6 @@ class DevicesCommand extends FlutterCommand {
       }
       await _printDiagnostics();
     }
-    return FlutterCommandResult.success();
   }
 
   Future<void> _printDiagnostics() async {
