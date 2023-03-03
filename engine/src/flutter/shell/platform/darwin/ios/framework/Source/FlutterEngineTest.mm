@@ -28,7 +28,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testCreate {
-  id project = OCMClassMock([FlutterDartProject class]);
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   XCTAssertNotNil(engine);
 }
@@ -101,7 +101,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testSendMessageBeforeRun {
-  id project = OCMClassMock([FlutterDartProject class]);
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   XCTAssertNotNil(engine);
   XCTAssertThrows([engine.binaryMessenger
@@ -111,7 +111,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testSetMessageHandlerBeforeRun {
-  id project = OCMClassMock([FlutterDartProject class]);
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   XCTAssertNotNil(engine);
   XCTAssertThrows([engine.binaryMessenger
@@ -122,7 +122,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testNilSetMessageHandlerBeforeRun {
-  id project = OCMClassMock([FlutterDartProject class]);
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   XCTAssertNotNil(engine);
   XCTAssertNoThrow([engine.binaryMessenger setMessageHandlerOnChannel:@"foo"
@@ -133,7 +133,7 @@ FLUTTER_ASSERT_ARC
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
   {
-    id project = OCMClassMock([FlutterDartProject class]);
+    FlutterDartProject* project = [[FlutterDartProject alloc] init];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
     NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
     [registrar publish:plugin];
@@ -289,6 +289,28 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectationsWithTimeout:1 handler:nil];
 
   method_setImplementation(method, originalSetThreadPriority);
+}
+
+- (void)testCanEnableDisableEmbedderAPIThroughInfoPlist {
+  {
+    // Not enable embedder API by default
+    auto settings = FLTDefaultSettingsForBundle();
+    settings.enable_software_rendering = true;
+    FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+    XCTAssertFalse(engine.enableEmbedderAPI);
+  }
+  {
+    // Enable embedder api
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"])
+        .andReturn(@"YES");
+    auto settings = FLTDefaultSettingsForBundle();
+    settings.enable_software_rendering = true;
+    FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+    XCTAssertTrue(engine.enableEmbedderAPI);
+  }
 }
 
 @end

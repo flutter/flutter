@@ -55,7 +55,7 @@ FLUTTER_ASSERT_ARC
   __weak FlutterEngine* weakEngine;
   NSObject<FlutterTextureRegistry>* strongRelay;
   @autoreleasepool {
-    id project = OCMClassMock([FlutterDartProject class]);
+    FlutterDartProject* project = [[FlutterDartProject alloc] init];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
     strongRelay = [engine textureRegistry];
     weakEngine = engine;

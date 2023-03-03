@@ -446,6 +446,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_impeller =
       command_line.HasOption(FlagForSwitch(Switch::EnableImpeller));
 
+  settings.enable_embedder_api =
+      command_line.HasOption(FlagForSwitch(Switch::EnableEmbedderAPI));
+
   settings.prefetched_default_font_manager = command_line.HasOption(
       FlagForSwitch(Switch::PrefetchedDefaultFontManager));
 
@@ -513,6 +516,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                       << "' (expected 0, 1, 2, 4, 8, or 16).";
     }
   }
+
   return settings;
 }
 
