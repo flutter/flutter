@@ -1045,7 +1045,6 @@ abstract class FlutterCommand extends Command<void> {
 
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
-        negatable: false,
         hide: !verboseHelp,
         help: 'Whether to enable embedder api. '
               'This flag only currently supports iOS, it is '
