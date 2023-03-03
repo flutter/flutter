@@ -683,6 +683,7 @@ void main() {
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
+          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -707,6 +708,7 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'usb',
+          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -731,6 +733,7 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
+          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -756,6 +759,7 @@ void main() {
           commandRunProjectHostLanguage: '',
           commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
+          commandRunEnableEmbedderApi: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
