@@ -122,10 +122,7 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
-  defines = [
-    "FLUTTER_ENGINE_NO_PROTOTYPES",
-    "FLUTTER_ENGINE_USE_UIA",
-  ]
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
 
   public_deps = [
     "//flutter/fml:string_conversion",
@@ -229,8 +226,6 @@ executable("flutter_windows_unittests") {
       [ "//flutter/shell/platform/common:desktop_library_implementation" ]
 
   public_configs = [ "//flutter:config" ]
-
-  defines = [ "FLUTTER_ENGINE_USE_UIA" ]
 
   deps = [
     ":flutter_windows_fixtures",
