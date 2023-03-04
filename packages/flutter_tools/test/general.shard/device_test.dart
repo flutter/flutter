@@ -737,6 +737,7 @@ void main() {
         deviceVmServicePort: 1234,
         enableImpeller: true,
         enableDartProfiling: false,
+        enableEmbedderApi: true,
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -749,6 +750,7 @@ void main() {
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
       expect(deserialized.enableImpeller, original.enableImpeller);
       expect(deserialized.enableDartProfiling, original.enableDartProfiling);
+      expect(deserialized.enableEmbedderApi, original.enableEmbedderApi);
     });
   });
 

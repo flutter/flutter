@@ -164,6 +164,7 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
+  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange
 }) async {
   initialDate = DateUtils.dateOnly(initialDate);
   firstDate = DateUtils.dateOnly(firstDate);
@@ -202,6 +203,7 @@ Future<DateTime?> showDatePicker({
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
     keyboardType: keyboardType,
+    onDatePickerModeChange: onDatePickerModeChange,
   );
 
   if (textDirection != null) {
@@ -259,6 +261,7 @@ class DatePickerDialog extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.restorationId,
+    this.onDatePickerModeChange
   }) : initialDate = DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -356,6 +359,15 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
+
+  /// Called when the [DatePickerDialog] is toggled between
+  /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
+  ///
+  /// An example of how this callback might be used is an app that saves the
+  /// user's preferred entry mode and uses it to initialize the
+  /// `initialEntryMode` parameter the next time the date picker is shown.
+  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
+
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
@@ -394,16 +406,24 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     Navigator.pop(context);
   }
 
+  void _handleOnDatePickerModeChange() {
+    if (widget.onDatePickerModeChange != null) {
+      widget.onDatePickerModeChange!(_entryMode.value);
+    }
+  }
+
   void _handleEntryModeToggle() {
     setState(() {
       switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
           _autovalidateMode.value = AutovalidateMode.disabled;
           _entryMode.value = DatePickerEntryMode.input;
+          _handleOnDatePickerModeChange();
           break;
         case DatePickerEntryMode.input:
           _formKey.currentState!.save();
           _entryMode.value = DatePickerEntryMode.calendar;
+           _handleOnDatePickerModeChange();
           break;
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:

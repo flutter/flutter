@@ -1043,6 +1043,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-embedder-api',
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.

@@ -938,6 +938,7 @@ void main() {
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
