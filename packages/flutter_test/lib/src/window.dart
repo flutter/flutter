@@ -6,543 +6,6 @@ import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
 
-/// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
-/// allows faking of some properties for testing purposes.
-///
-/// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
-/// properties of a [SingletonFlutterWindow]. [TestWindow] facilitates the
-/// faking of these properties by overriding the properties of a real
-/// [SingletonFlutterWindow] with desired fake values. The binding used within
-/// tests, [TestWidgetsFlutterBinding], contains a [TestWindow] that is used by
-/// all tests.
-///
-/// ## Sample Code
-///
-/// A test can utilize a [TestWindow] in the following way:
-///
-/// ```dart
-/// testWidgets('your test name here', (WidgetTester tester) async {
-///   // Retrieve the TestWidgetsFlutterBinding.
-///   final TestWidgetsFlutterBinding testBinding = tester.binding;
-///
-///   // Fake the desired properties of the TestWindow. All code running
-///   // within this test will perceive the following fake text scale
-///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorFakeValue = 2.5;
-///
-///   // Test code that depends on text scale factor here.
-/// });
-/// ```
-///
-/// The [TestWidgetsFlutterBinding] is recreated for each test and
-/// therefore any fake values defined in one test will not persist
-/// to the next.
-///
-/// If a test needs to override a real [SingletonFlutterWindow] property and
-/// then later return to using the real [SingletonFlutterWindow] property,
-/// [TestWindow] provides methods to clear each individual test value, e.g.,
-/// [clearLocaleTestValue()].
-///
-/// To clear all fake test values in a [TestWindow], consider using
-/// [clearAllTestValues()].
-///
-/// See also:
-///
-///   * [TestPlatformDispatcher], which wraps a [PlatformDispatcher] for
-///     testing purposes and is used by the [platformDispatcher] property of
-///     this class.
-class TestWindow implements SingletonFlutterWindow {
-  /// Constructs a [TestWindow] that defers all behavior to the given
-  /// [SingletonFlutterWindow] unless explicitly overridden for test purposes.
-  TestWindow({
-    required SingletonFlutterWindow window,
-  }) : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
-
-  /// Constructs a [TestWindow] that defers all behavior to the given
-  /// [TestPlatformDispatcher] and its [TestPlatformDispatcher.implicitView].
-  ///
-  /// This class will not work when multiple views are present. If multiple view
-  /// support is needed use [WidgetTester.platformDispatcher] and
-  /// [WidgetTester.viewOf].
-  ///
-  /// See also:
-  ///
-  ///   * [TestPlatformDispatcher] which allows faking of platform-wide values for
-  ///     testing purposes.
-  ///   * [TestFlutterView] which allows faking of view-specific values for
-  ///     testing purposes.
-  TestWindow.fromPlatformDispatcher({
-    required this.platformDispatcher,
-  });
-
-  @override
-  final TestPlatformDispatcher platformDispatcher;
-
-  TestFlutterView get _view => platformDispatcher.implicitView!;
-
-  @override
-  double get devicePixelRatio => _view.devicePixelRatio;
-  /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
-  /// instead.
-  // ignore: avoid_setters_without_getters
-  set devicePixelRatioTestValue(double devicePixelRatio) {
-    _view.devicePixelRatio = devicePixelRatio;
-  }
-
-  /// Deletes any existing test device pixel ratio and returns to using the real
-  /// device pixel ratio.
-  void clearDevicePixelRatioTestValue() {
-    _view.resetDevicePixelRatio();
-  }
-
-  @override
-  Size get physicalSize => _view.physicalSize;
-  /// Hides the real physical size and reports the given [physicalSizeTestValue]
-  /// instead.
-  // ignore: avoid_setters_without_getters
-  set physicalSizeTestValue (Size physicalSizeTestValue) {
-    _view.physicalSize = physicalSizeTestValue;
-  }
-
-  /// Deletes any existing test physical size and returns to using the real
-  /// physical size.
-  void clearPhysicalSizeTestValue() {
-    _view.resetPhysicalSize();
-  }
-
-  @override
-  ViewPadding get viewInsets => _view.viewInsets;
-  /// Hides the real view insets and reports the given [viewInsetsTestValue]
-  /// instead.
-  ///
-  /// Use [FakeViewPadding] to set this value for testing.
-  // ignore: avoid_setters_without_getters
-  set viewInsetsTestValue(ViewPadding value) {
-    _view.viewInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
-  }
-
-  /// Deletes any existing test view insets and returns to using the real view
-  /// insets.
-  void clearViewInsetsTestValue() {
-    _view.resetViewInsets();
-  }
-
-  @override
-  ViewPadding get viewPadding => _view.viewPadding;
-  /// Hides the real view padding and reports the given [paddingTestValue]
-  /// instead.
-  ///
-  /// Use [FakeViewPadding] to set this value for testing.
-  // ignore: avoid_setters_without_getters
-  set viewPaddingTestValue(ViewPadding value) {
-    _view.viewPadding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
-  }
-
-  /// Deletes any existing test view padding and returns to using the real
-  /// viewPadding.
-  void clearViewPaddingTestValue() {
-    _view.resetViewPadding();
-  }
-
-  @override
-  ViewPadding get padding => _view.padding;
-  /// Hides the real padding and reports the given [paddingTestValue] instead.
-  ///
-  /// Use [FakeViewPadding] to set this value for testing.
-  // ignore: avoid_setters_without_getters
-  set paddingTestValue(ViewPadding value) {
-    _view.padding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
-  }
-
-  /// Deletes any existing test padding and returns to using the real padding.
-  void clearPaddingTestValue() {
-    _view.resetPadding();
-  }
-
-  @override
-  GestureSettings get gestureSettings => _view.gestureSettings;
-  /// Hides the real gesture settings and reports the given [gestureSettingsTestValue] instead.
-  // ignore: avoid_setters_without_getters
-  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) {
-    _view.gestureSettings = gestureSettingsTestValue;
-  }
-
-  /// Deletes any existing test gesture settings and returns to using the real gesture settings.
-  void clearGestureSettingsTestValue() {
-    _view.resetGestureSettings();
-  }
-
-  @override
-  List<DisplayFeature> get displayFeatures => _view.displayFeatures;
-  /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
-  // ignore: avoid_setters_without_getters
-  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) {
-    _view.displayFeatures = displayFeaturesTestValue;
-  }
-
-  /// Deletes any existing test padding and returns to using the real padding.
-  void clearDisplayFeaturesTestValue() {
-    _view.resetDisplayFeatures();
-  }
-
-  @override
-  ViewPadding get systemGestureInsets => _view.systemGestureInsets;
-  /// Hides the real system gesture insets and reports the given
-  /// [systemGestureInsetsTestValue] instead.
-  ///
-  /// Use [FakeViewPadding] to set this value for testing.
-  set systemGestureInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
-    _view.systemGestureInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
-  }
-
-  /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
-  void clearSystemGestureInsetsTestValue() {
-    _view.resetSystemGestureInsets();
-  }
-
-  @override
-  VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
-  @override
-  set onMetricsChanged(VoidCallback? callback) {
-    platformDispatcher.onMetricsChanged = callback;
-  }
-
-  @override
-  Locale get locale => platformDispatcher.locale;
-  /// Hides the real locale and reports the given [localeTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.localeTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set localeTestValue(Locale localeTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.localeTestValue = localeTestValue;
-  }
-  @Deprecated(
-    'Use platformDispatcher.clearLocaleTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  /// Deletes any existing test locale and returns to using the real locale.
-  void clearLocaleTestValue() {
-    platformDispatcher.clearLocaleTestValue();
-  }
-
-  @override
-  List<Locale> get locales => platformDispatcher.locales;
-  /// Hides the real locales and reports the given [localesTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.localesTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set localesTestValue(List<Locale> localesTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.localesTestValue = localesTestValue;
-  }
-  /// Deletes any existing test locales and returns to using the real locales.
-  @Deprecated(
-    'Use platformDispatcher.clearLocalesTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearLocalesTestValue() {
-    platformDispatcher.clearLocalesTestValue();
-  }
-
-  @override
-  VoidCallback? get onLocaleChanged => platformDispatcher.onLocaleChanged;
-  @override
-  set onLocaleChanged(VoidCallback? callback) {
-    platformDispatcher.onLocaleChanged = callback;
-  }
-
-  @override
-  String get initialLifecycleState => platformDispatcher.initialLifecycleState;
-  /// Sets a faked initialLifecycleState for testing.
-  @Deprecated(
-    'Use platformDispatcher.initialLifecycleStateTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
-    platformDispatcher.initialLifecycleStateTestValue = state;
-  }
-
-  @override
-  double get textScaleFactor => platformDispatcher.textScaleFactor;
-  /// Hides the real text scale factor and reports the given
-  /// [textScaleFactorTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.textScaleFactorTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
-  }
-  /// Deletes any existing test text scale factor and returns to using the real
-  /// text scale factor.
-  @Deprecated(
-    'Use platformDispatcher.clearTextScaleFactorTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearTextScaleFactorTestValue() {
-    platformDispatcher.clearTextScaleFactorTestValue();
-  }
-
-  @override
-  Brightness get platformBrightness => platformDispatcher.platformBrightness;
-  @override
-  VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
-  @override
-  set onPlatformBrightnessChanged(VoidCallback? callback) {
-    platformDispatcher.onPlatformBrightnessChanged = callback;
-  }
-  /// Hides the real text scale factor and reports the given
-  /// [platformBrightnessTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.platformBrightnessTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
-  }
-  /// Deletes any existing test platform brightness and returns to using the
-  /// real platform brightness.
-  @Deprecated(
-    'Use platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearPlatformBrightnessTestValue() {
-    platformDispatcher.clearPlatformBrightnessTestValue();
-  }
-
-  @override
-  bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
-  /// Hides the real clock format and reports the given
-  /// [alwaysUse24HourFormatTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.alwaysUse24HourFormatTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
-  }
-  /// Deletes any existing test clock format and returns to using the real clock
-  /// format.
-  @Deprecated(
-    'Use platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearAlwaysUse24HourTestValue() {
-    platformDispatcher.clearAlwaysUse24HourTestValue();
-  }
-
-  @override
-  VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
-  @override
-  set onTextScaleFactorChanged(VoidCallback? callback) {
-    platformDispatcher.onTextScaleFactorChanged = callback;
-  }
-
-  @override
-  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
-  }
-
-  @override
-  bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
-  /// Hides the real [brieflyShowPassword] and reports the given
-  /// `brieflyShowPasswordTestValue` instead.
-  @Deprecated(
-    'Use platformDispatcher.brieflyShowPasswordTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
-  }
-
-  @override
-  FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
-  @override
-  set onBeginFrame(FrameCallback? callback) {
-    platformDispatcher.onBeginFrame = callback;
-  }
-
-  @override
-  VoidCallback? get onDrawFrame => platformDispatcher.onDrawFrame;
-  @override
-  set onDrawFrame(VoidCallback? callback) {
-    platformDispatcher.onDrawFrame = callback;
-  }
-
-  @override
-  TimingsCallback? get onReportTimings => platformDispatcher.onReportTimings;
-  @override
-  set onReportTimings(TimingsCallback? callback) {
-    platformDispatcher.onReportTimings = callback;
-  }
-
-  @override
-  PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
-  @override
-  set onPointerDataPacket(PointerDataPacketCallback? callback) {
-    platformDispatcher.onPointerDataPacket = callback;
-  }
-
-  @override
-  String get defaultRouteName => platformDispatcher.defaultRouteName;
-  /// Hides the real default route name and reports the given
-  /// [defaultRouteNameTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.defaultRouteNameTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.defaultRouteNameTestValue = defaultRouteNameTestValue;
-  }
-  /// Deletes any existing test default route name and returns to using the real
-  /// default route name.
-  @Deprecated(
-    'Use platformDispatcher.clearDefaultRouteNameTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearDefaultRouteNameTestValue() {
-    platformDispatcher.clearDefaultRouteNameTestValue();
-  }
-
-  @override
-  void scheduleFrame() {
-    platformDispatcher.scheduleFrame();
-  }
-
-  @override
-  void render(Scene scene) {
-    _view.render(scene);
-  }
-
-  @override
-  bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
-  /// Hides the real semantics enabled and reports the given
-  /// [semanticsEnabledTestValue] instead.
-  @Deprecated(
-    'Use platformDispatcher.semanticsEnabledTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.semanticsEnabledTestValue = semanticsEnabledTestValue;
-  }
-  /// Deletes any existing test semantics enabled and returns to using the real
-  /// semantics enabled.
-  @Deprecated(
-    'Use platformDispatcher.clearSemanticsEnabledTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearSemanticsEnabledTestValue() {
-    platformDispatcher.clearSemanticsEnabledTestValue();
-  }
-
-  @override
-  VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
-  @override
-  set onSemanticsEnabledChanged(VoidCallback? callback) {
-    platformDispatcher.onSemanticsEnabledChanged = callback;
-  }
-
-  @override
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
-  @override
-  AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
-  /// Hides the real accessibility features and reports the given
-  /// [accessibilityFeaturesTestValue] instead.
-  ///
-  /// Consider using [FakeAccessibilityFeatures] to provide specific
-  /// values for the various accessibility features under test.
-  @Deprecated(
-    'Use platformDispatcher.accessibilityFeaturesTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
-  }
-  /// Deletes any existing test accessibility features and returns to using the
-  /// real accessibility features.
-  @Deprecated(
-    'Use platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearAccessibilityFeaturesTestValue() {
-    platformDispatcher.clearAccessibilityFeaturesTestValue();
-  }
-
-  @override
-  VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
-  @override
-  set onAccessibilityFeaturesChanged(VoidCallback? callback) {
-    platformDispatcher.onAccessibilityFeaturesChanged = callback;
-  }
-
-  @override
-  void updateSemantics(SemanticsUpdate update) {
-    _view.updateSemantics(update);
-  }
-
-  @override
-  void setIsolateDebugName(String name) {
-    platformDispatcher.setIsolateDebugName(name);
-  }
-
-  @override
-  void sendPlatformMessage(
-    String name,
-    ByteData? data,
-    PlatformMessageResponseCallback? callback,
-  ) {
-    platformDispatcher.sendPlatformMessage(name, data, callback);
-  }
-
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    platformDispatcher.onPlatformMessage = callback;
-  }
-
-  /// Delete any test value properties that have been set on this [TestWindow]
-  /// as well as its [platformDispatcher].
-  ///
-  /// After calling this, the real [SingletonFlutterWindow] and
-  /// [PlatformDispatcher] values are reported again.
-  ///
-  /// If desired, clearing of properties can be done on an individual basis,
-  /// e.g., [clearLocaleTestValue].
-  void clearAllTestValues() {
-    clearDevicePixelRatioTestValue();
-    clearPaddingTestValue();
-    clearGestureSettingsTestValue();
-    clearDisplayFeaturesTestValue();
-    clearPhysicalSizeTestValue();
-    clearViewInsetsTestValue();
-    platformDispatcher.clearAllTestValues();
-  }
-
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
-  /// us time to catch up.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
-}
-
 /// Test version of [AccessibilityFeatures] in which specific features may
 /// be set to arbitrary values.
 ///
@@ -1351,6 +814,543 @@ class TestFlutterView implements FlutterView {
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [FlutterView], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+}
+
+/// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
+/// allows faking of some properties for testing purposes.
+///
+/// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
+/// properties of a [SingletonFlutterWindow]. [TestWindow] facilitates the
+/// faking of these properties by overriding the properties of a real
+/// [SingletonFlutterWindow] with desired fake values. The binding used within
+/// tests, [TestWidgetsFlutterBinding], contains a [TestWindow] that is used by
+/// all tests.
+///
+/// ## Sample Code
+///
+/// A test can utilize a [TestWindow] in the following way:
+///
+/// ```dart
+/// testWidgets('your test name here', (WidgetTester tester) async {
+///   // Retrieve the TestWidgetsFlutterBinding.
+///   final TestWidgetsFlutterBinding testBinding = tester.binding;
+///
+///   // Fake the desired properties of the TestWindow. All code running
+///   // within this test will perceive the following fake text scale
+///   // factor as the real text scale factor of the window.
+///   testBinding.window.textScaleFactorFakeValue = 2.5;
+///
+///   // Test code that depends on text scale factor here.
+/// });
+/// ```
+///
+/// The [TestWidgetsFlutterBinding] is recreated for each test and
+/// therefore any fake values defined in one test will not persist
+/// to the next.
+///
+/// If a test needs to override a real [SingletonFlutterWindow] property and
+/// then later return to using the real [SingletonFlutterWindow] property,
+/// [TestWindow] provides methods to clear each individual test value, e.g.,
+/// [clearLocaleTestValue()].
+///
+/// To clear all fake test values in a [TestWindow], consider using
+/// [clearAllTestValues()].
+///
+/// See also:
+///
+///   * [TestPlatformDispatcher], which wraps a [PlatformDispatcher] for
+///     testing purposes and is used by the [platformDispatcher] property of
+///     this class.
+class TestWindow implements SingletonFlutterWindow {
+  /// Constructs a [TestWindow] that defers all behavior to the given
+  /// [SingletonFlutterWindow] unless explicitly overridden for test purposes.
+  TestWindow({
+    required SingletonFlutterWindow window,
+  }) : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
+
+  /// Constructs a [TestWindow] that defers all behavior to the given
+  /// [TestPlatformDispatcher] and its [TestPlatformDispatcher.implicitView].
+  ///
+  /// This class will not work when multiple views are present. If multiple view
+  /// support is needed use [WidgetTester.platformDispatcher] and
+  /// [WidgetTester.viewOf].
+  ///
+  /// See also:
+  ///
+  ///   * [TestPlatformDispatcher] which allows faking of platform-wide values for
+  ///     testing purposes.
+  ///   * [TestFlutterView] which allows faking of view-specific values for
+  ///     testing purposes.
+  TestWindow.fromPlatformDispatcher({
+    required this.platformDispatcher,
+  });
+
+  @override
+  final TestPlatformDispatcher platformDispatcher;
+
+  TestFlutterView get _view => platformDispatcher.implicitView!;
+
+  @override
+  double get devicePixelRatio => _view.devicePixelRatio;
+  /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
+  /// instead.
+  // ignore: avoid_setters_without_getters
+  set devicePixelRatioTestValue(double devicePixelRatio) {
+    _view.devicePixelRatio = devicePixelRatio;
+  }
+
+  /// Deletes any existing test device pixel ratio and returns to using the real
+  /// device pixel ratio.
+  void clearDevicePixelRatioTestValue() {
+    _view.resetDevicePixelRatio();
+  }
+
+  @override
+  Size get physicalSize => _view.physicalSize;
+  /// Hides the real physical size and reports the given [physicalSizeTestValue]
+  /// instead.
+  // ignore: avoid_setters_without_getters
+  set physicalSizeTestValue (Size physicalSizeTestValue) {
+    _view.physicalSize = physicalSizeTestValue;
+  }
+
+  /// Deletes any existing test physical size and returns to using the real
+  /// physical size.
+  void clearPhysicalSizeTestValue() {
+    _view.resetPhysicalSize();
+  }
+
+  @override
+  ViewPadding get viewInsets => _view.viewInsets;
+  /// Hides the real view insets and reports the given [viewInsetsTestValue]
+  /// instead.
+  ///
+  /// Use [FakeViewPadding] to set this value for testing.
+  // ignore: avoid_setters_without_getters
+  set viewInsetsTestValue(ViewPadding value) {
+    _view.viewInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+  }
+
+  /// Deletes any existing test view insets and returns to using the real view
+  /// insets.
+  void clearViewInsetsTestValue() {
+    _view.resetViewInsets();
+  }
+
+  @override
+  ViewPadding get viewPadding => _view.viewPadding;
+  /// Hides the real view padding and reports the given [paddingTestValue]
+  /// instead.
+  ///
+  /// Use [FakeViewPadding] to set this value for testing.
+  // ignore: avoid_setters_without_getters
+  set viewPaddingTestValue(ViewPadding value) {
+    _view.viewPadding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+  }
+
+  /// Deletes any existing test view padding and returns to using the real
+  /// viewPadding.
+  void clearViewPaddingTestValue() {
+    _view.resetViewPadding();
+  }
+
+  @override
+  ViewPadding get padding => _view.padding;
+  /// Hides the real padding and reports the given [paddingTestValue] instead.
+  ///
+  /// Use [FakeViewPadding] to set this value for testing.
+  // ignore: avoid_setters_without_getters
+  set paddingTestValue(ViewPadding value) {
+    _view.padding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+  }
+
+  /// Deletes any existing test padding and returns to using the real padding.
+  void clearPaddingTestValue() {
+    _view.resetPadding();
+  }
+
+  @override
+  GestureSettings get gestureSettings => _view.gestureSettings;
+  /// Hides the real gesture settings and reports the given [gestureSettingsTestValue] instead.
+  // ignore: avoid_setters_without_getters
+  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) {
+    _view.gestureSettings = gestureSettingsTestValue;
+  }
+
+  /// Deletes any existing test gesture settings and returns to using the real gesture settings.
+  void clearGestureSettingsTestValue() {
+    _view.resetGestureSettings();
+  }
+
+  @override
+  List<DisplayFeature> get displayFeatures => _view.displayFeatures;
+  /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
+  // ignore: avoid_setters_without_getters
+  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) {
+    _view.displayFeatures = displayFeaturesTestValue;
+  }
+
+  /// Deletes any existing test padding and returns to using the real padding.
+  void clearDisplayFeaturesTestValue() {
+    _view.resetDisplayFeatures();
+  }
+
+  @override
+  ViewPadding get systemGestureInsets => _view.systemGestureInsets;
+  /// Hides the real system gesture insets and reports the given
+  /// [systemGestureInsetsTestValue] instead.
+  ///
+  /// Use [FakeViewPadding] to set this value for testing.
+  set systemGestureInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+    _view.systemGestureInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
+  }
+
+  /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
+  void clearSystemGestureInsetsTestValue() {
+    _view.resetSystemGestureInsets();
+  }
+
+  @override
+  VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
+  @override
+  set onMetricsChanged(VoidCallback? callback) {
+    platformDispatcher.onMetricsChanged = callback;
+  }
+
+  @override
+  Locale get locale => platformDispatcher.locale;
+  /// Hides the real locale and reports the given [localeTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.localeTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set localeTestValue(Locale localeTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.localeTestValue = localeTestValue;
+  }
+  @Deprecated(
+    'Use platformDispatcher.clearLocaleTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  /// Deletes any existing test locale and returns to using the real locale.
+  void clearLocaleTestValue() {
+    platformDispatcher.clearLocaleTestValue();
+  }
+
+  @override
+  List<Locale> get locales => platformDispatcher.locales;
+  /// Hides the real locales and reports the given [localesTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.localesTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set localesTestValue(List<Locale> localesTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.localesTestValue = localesTestValue;
+  }
+  /// Deletes any existing test locales and returns to using the real locales.
+  @Deprecated(
+    'Use platformDispatcher.clearLocalesTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearLocalesTestValue() {
+    platformDispatcher.clearLocalesTestValue();
+  }
+
+  @override
+  VoidCallback? get onLocaleChanged => platformDispatcher.onLocaleChanged;
+  @override
+  set onLocaleChanged(VoidCallback? callback) {
+    platformDispatcher.onLocaleChanged = callback;
+  }
+
+  @override
+  String get initialLifecycleState => platformDispatcher.initialLifecycleState;
+  /// Sets a faked initialLifecycleState for testing.
+  @Deprecated(
+    'Use platformDispatcher.initialLifecycleStateTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
+    platformDispatcher.initialLifecycleStateTestValue = state;
+  }
+
+  @override
+  double get textScaleFactor => platformDispatcher.textScaleFactor;
+  /// Hides the real text scale factor and reports the given
+  /// [textScaleFactorTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.textScaleFactorTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
+  }
+  /// Deletes any existing test text scale factor and returns to using the real
+  /// text scale factor.
+  @Deprecated(
+    'Use platformDispatcher.clearTextScaleFactorTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearTextScaleFactorTestValue() {
+    platformDispatcher.clearTextScaleFactorTestValue();
+  }
+
+  @override
+  Brightness get platformBrightness => platformDispatcher.platformBrightness;
+  @override
+  VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
+  @override
+  set onPlatformBrightnessChanged(VoidCallback? callback) {
+    platformDispatcher.onPlatformBrightnessChanged = callback;
+  }
+  /// Hides the real text scale factor and reports the given
+  /// [platformBrightnessTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.platformBrightnessTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
+  }
+  /// Deletes any existing test platform brightness and returns to using the
+  /// real platform brightness.
+  @Deprecated(
+    'Use platformDispatcher.clearPlatformBrightnessTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearPlatformBrightnessTestValue() {
+    platformDispatcher.clearPlatformBrightnessTestValue();
+  }
+
+  @override
+  bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
+  /// Hides the real clock format and reports the given
+  /// [alwaysUse24HourFormatTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.alwaysUse24HourFormatTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
+  }
+  /// Deletes any existing test clock format and returns to using the real clock
+  /// format.
+  @Deprecated(
+    'Use platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearAlwaysUse24HourTestValue() {
+    platformDispatcher.clearAlwaysUse24HourTestValue();
+  }
+
+  @override
+  VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
+  @override
+  set onTextScaleFactorChanged(VoidCallback? callback) {
+    platformDispatcher.onTextScaleFactorChanged = callback;
+  }
+
+  @override
+  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  }
+
+  @override
+  bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
+  /// Hides the real [brieflyShowPassword] and reports the given
+  /// `brieflyShowPasswordTestValue` instead.
+  @Deprecated(
+    'Use platformDispatcher.brieflyShowPasswordTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
+  }
+
+  @override
+  FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
+  @override
+  set onBeginFrame(FrameCallback? callback) {
+    platformDispatcher.onBeginFrame = callback;
+  }
+
+  @override
+  VoidCallback? get onDrawFrame => platformDispatcher.onDrawFrame;
+  @override
+  set onDrawFrame(VoidCallback? callback) {
+    platformDispatcher.onDrawFrame = callback;
+  }
+
+  @override
+  TimingsCallback? get onReportTimings => platformDispatcher.onReportTimings;
+  @override
+  set onReportTimings(TimingsCallback? callback) {
+    platformDispatcher.onReportTimings = callback;
+  }
+
+  @override
+  PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
+  @override
+  set onPointerDataPacket(PointerDataPacketCallback? callback) {
+    platformDispatcher.onPointerDataPacket = callback;
+  }
+
+  @override
+  String get defaultRouteName => platformDispatcher.defaultRouteName;
+  /// Hides the real default route name and reports the given
+  /// [defaultRouteNameTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.defaultRouteNameTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.defaultRouteNameTestValue = defaultRouteNameTestValue;
+  }
+  /// Deletes any existing test default route name and returns to using the real
+  /// default route name.
+  @Deprecated(
+    'Use platformDispatcher.clearDefaultRouteNameTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearDefaultRouteNameTestValue() {
+    platformDispatcher.clearDefaultRouteNameTestValue();
+  }
+
+  @override
+  void scheduleFrame() {
+    platformDispatcher.scheduleFrame();
+  }
+
+  @override
+  void render(Scene scene) {
+    _view.render(scene);
+  }
+
+  @override
+  bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
+  /// Hides the real semantics enabled and reports the given
+  /// [semanticsEnabledTestValue] instead.
+  @Deprecated(
+    'Use platformDispatcher.semanticsEnabledTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.semanticsEnabledTestValue = semanticsEnabledTestValue;
+  }
+  /// Deletes any existing test semantics enabled and returns to using the real
+  /// semantics enabled.
+  @Deprecated(
+    'Use platformDispatcher.clearSemanticsEnabledTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearSemanticsEnabledTestValue() {
+    platformDispatcher.clearSemanticsEnabledTestValue();
+  }
+
+  @override
+  VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
+  @override
+  set onSemanticsEnabledChanged(VoidCallback? callback) {
+    platformDispatcher.onSemanticsEnabledChanged = callback;
+  }
+
+  @override
+  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
+  @override
+  set onSemanticsAction(SemanticsActionCallback? callback) {
+    platformDispatcher.onSemanticsAction = callback;
+  }
+
+  @override
+  AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
+  /// Hides the real accessibility features and reports the given
+  /// [accessibilityFeaturesTestValue] instead.
+  ///
+  /// Consider using [FakeAccessibilityFeatures] to provide specific
+  /// values for the various accessibility features under test.
+  @Deprecated(
+    'Use platformDispatcher.accessibilityFeaturesTestValue instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
+    platformDispatcher.accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
+  }
+  /// Deletes any existing test accessibility features and returns to using the
+  /// real accessibility features.
+  @Deprecated(
+    'Use platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
+    'This feature was deprecated after v2.11.0-0.0.pre.'
+  )
+  void clearAccessibilityFeaturesTestValue() {
+    platformDispatcher.clearAccessibilityFeaturesTestValue();
+  }
+
+  @override
+  VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
+  @override
+  set onAccessibilityFeaturesChanged(VoidCallback? callback) {
+    platformDispatcher.onAccessibilityFeaturesChanged = callback;
+  }
+
+  @override
+  void updateSemantics(SemanticsUpdate update) {
+    _view.updateSemantics(update);
+  }
+
+  @override
+  void setIsolateDebugName(String name) {
+    platformDispatcher.setIsolateDebugName(name);
+  }
+
+  @override
+  void sendPlatformMessage(
+    String name,
+    ByteData? data,
+    PlatformMessageResponseCallback? callback,
+  ) {
+    platformDispatcher.sendPlatformMessage(name, data, callback);
+  }
+
+  @Deprecated(
+    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
+  @override
+  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
+  @Deprecated(
+    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
+    'This feature was deprecated after v2.1.0-10.0.pre.'
+  )
+  @override
+  set onPlatformMessage(PlatformMessageCallback? callback) {
+    platformDispatcher.onPlatformMessage = callback;
+  }
+
+  /// Delete any test value properties that have been set on this [TestWindow]
+  /// as well as its [platformDispatcher].
+  ///
+  /// After calling this, the real [SingletonFlutterWindow] and
+  /// [PlatformDispatcher] values are reported again.
+  ///
+  /// If desired, clearing of properties can be done on an individual basis,
+  /// e.g., [clearLocaleTestValue].
+  void clearAllTestValues() {
+    clearDevicePixelRatioTestValue();
+    clearPaddingTestValue();
+    clearGestureSettingsTestValue();
+    clearDisplayFeaturesTestValue();
+    clearPhysicalSizeTestValue();
+    clearViewInsetsTestValue();
+    platformDispatcher.clearAllTestValues();
+  }
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
   /// us time to catch up.
   @override
   dynamic noSuchMethod(Invocation invocation) {
