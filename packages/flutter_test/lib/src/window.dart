@@ -91,6 +91,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 ///   * [TestFlutterView.padding], [TestFlutterView.systemGestureInsets],
 ///     [TestFlutterView.viewInsets], and [TestFlutterView.viewPadding] for test
 ///     properties that make use of [FakeViewPadding].
+@immutable
 class FakeViewPadding implements ViewPadding {
   /// Instantiates a new [FakeViewPadding] object for faking insets and padding
   /// during tests.
