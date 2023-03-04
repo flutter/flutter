@@ -43,15 +43,15 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
-        horizontal: math.max(
-          _kTopLevelMenuHorizontalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
-        ),
+        horizontal: _kTopLevelMenuHorizontalMinPadding
       ),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
@@ -188,10 +188,25 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+    VisualDensity visualDensity = Theme.of(context).visualDensity;
+    // When horizontal VisualDensity is greater than zero, set it to zero
+    // because the [ButtonStyleButton] has already handle the padding based on the density.
+    // However, the [ButtonStyleButton] doesn't allow the [VisualDensity] adjustment
+    // to reduce the width of the left/right padding, so we need to handle it here if
+    // the density is less than zero, such as on desktop platforms.
+    if (visualDensity.horizontal > 0) {
+      visualDensity = VisualDensity(vertical: visualDensity.vertical);
+    }
     return ButtonStyleButton.scaledPadding(
-      const EdgeInsets.symmetric(horizontal: 12),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
+      )),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        8 + visualDensity.baseSizeAdjustment.dx,
+      )),
+      const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
       MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
@@ -229,15 +244,13 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(
-        vertical: math.max(
-          _kMenuVerticalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dy,
-        ),
-      ),
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 ''';
 }
