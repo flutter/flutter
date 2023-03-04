@@ -335,7 +335,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 
   /// Collect the device state for specified deviceId.
+  /// static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
   Future<String?> getDeviceState({required String deviceId}) async {
+    final RegExp deviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
     final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
         .trim().split('\n');
     String? deviceState;
@@ -351,10 +353,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       }
 
       if (_kDeviceRegex.hasMatch(line)) {
-        final Match match = _kDeviceRegex.firstMatch(line)!;
+        final Match match = deviceRegex.firstMatch(line)!;
 
         final String deviceID = match[1]!;
         if (deviceID == deviceId) {
+          print('Found device.');
           deviceState = match[2];
           break;
         }
