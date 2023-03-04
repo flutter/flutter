@@ -406,6 +406,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       () async {
         print('Attempt ${count++}');
         final String? state = await getDeviceState(deviceId: deviceId);
+        print('Found state: $state');
         if (state != 'device') {
           throw DeviceException('Device not ready, current state = $state');
         } else {
