@@ -163,7 +163,7 @@ void main() {
     // is showing.
     expect(find.text('Copy'), findsOneWidget);
 
-    // This is the position of the selection handle displayed at the end
+    // This is the position of the selection handle displayed at the end.
     final Offset handlePos = paragraph2.localToGlobal(boxes[0].toRect().bottomRight);
     await gesture.down(handlePos);
     await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
