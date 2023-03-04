@@ -44,8 +44,7 @@
                             "compile_tests"
                         ],
                         "scripts": [
-                            "third_party/dart/tools/sdks/dart-sdk/bin/dart",
-                            "flutter/lib/web_ui/dev/felt.dart"
+                            "flutter/lib/web_ui/dev/felt"
                         ]
                     },
                     {
