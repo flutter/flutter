@@ -261,6 +261,14 @@ targets:
       release_build: "true"
       config_name: linux_host_engine
 
+  - name: Linux linux_host_desktop_engine
+    bringup: true
+    recipe: engine_v2/engine_v2
+    timeout: 60
+    properties:
+      release_build: "true"
+      config_name: linux_host_desktop_engine
+
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 60

@@ -77,8 +77,7 @@
                         "out/host_debug/zip_archives/linux-x64/linux-x64-embedder.zip",
                         "out/host_debug/zip_archives/linux-x64/font-subset.zip",
                         "out/host_debug/zip_archives/flutter_patched_sdk.zip",
-                        "out/host_debug/zip_archives/dart-sdk-linux-x64.zip",
-                        "out/host_debug/zip_archives/linux-x64-debug/linux-x64-flutter-gtk.zip"
+                        "out/host_debug/zip_archives/dart-sdk-linux-x64.zip"
                     ]
                 }
             ],
@@ -105,7 +104,6 @@
                     "flutter/build/archives:embedder",
                     "flutter/build/archives:flutter_patched_sdk",
                     "flutter/build/dart:copy_dart_sdk",
-                    "flutter/shell/platform/linux:flutter_gtk",
                     "flutter/tools/font-subset"
                 ]
             },
@@ -131,9 +129,7 @@
                     "name": "host_profile",
                     "base_path": "out/host_profile/zip_archives/",
                     "type": "gcs",
-                    "include_paths": [
-                        "out/host_profile/zip_archives/linux-x64-profile/linux-x64-flutter-gtk.zip"
-                    ]
+                    "include_paths": []
                 }
             ],
             "drone_dimensions": [
@@ -157,7 +153,6 @@
                     "flutter/build/dart:copy_dart_sdk",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops",
-                    "flutter/shell/platform/linux:flutter_gtk",
                     "flutter:unittests"
                 ]
             },
@@ -184,8 +179,7 @@
                     "base_path": "out/host_release/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_release/zip_archives/flutter_patched_sdk_product.zip",
-                        "out/host_release/zip_archives/linux-x64-release/linux-x64-flutter-gtk.zip"
+                        "out/host_release/zip_archives/flutter_patched_sdk_product.zip"
                     ]
                 }
             ],
@@ -217,7 +211,6 @@
                     "flutter/third_party/txt:txt_benchmarks",
                     "flutter/tools/path_ops",
                     "flutter/build/archives:flutter_patched_sdk",
-                    "flutter/shell/platform/linux:flutter_gtk",
                     "flutter:unittests"
                 ]
             },
