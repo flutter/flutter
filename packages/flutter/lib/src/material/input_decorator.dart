@@ -31,6 +31,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 const double _kVerticalPaddingMaterial2 = 4.0;
 const double _kVerticalPaddingMaterial3 = 8.0;
+const double _kHorizontalPaddingMaterial3 = 16.0;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -995,6 +996,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       label,
       boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
     );
+    if (label != null) {
+      print('justin label height after layout ${label!.size.height} with maxHeight ${boxConstraints.maxHeight}');
+    }
     boxToBaseline[hint] = _layoutLineBox(
       hint,
       boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
@@ -1015,6 +1019,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double labelHeight = label == null
       ? 0
       : decoration.floatingLabelHeight;
+    print('justin labelHeight $labelHeight');
     final double topHeight = decoration.border.isOutline
       ? math.max(labelHeight - boxToBaseline[label]!, 0)
       : labelHeight;
@@ -1078,14 +1083,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
     final double contentHeight = math.max(
       fixIconHeight,
-      topHeight
-      + contentPadding.top
+      contentPadding.top
+      + topHeight
       + fixAboveInput
       + inputHeight
       + fixBelowInput
       + contentPadding.bottom
       + densityOffset.dy,
     );
+    print('justin contentHeight $contentHeight = $fixIconHeight + ${contentPadding.top} + $topHeight + $fixAboveInput + $inputHeight + $fixBelowInput + ${contentPadding.bottom} + ${densityOffset.dy}');
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension;
@@ -1119,11 +1125,14 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + baselineAdjustment
       + interactiveAdjustment
       + densityOffset.dy / 2.0;
+    print('justin topInputBaseline $topInputBaseline = ${contentPadding.top} + $topHeight + $inputInternalBaseline + $baselineAdjustment + $interactiveAdjustment + ${densityOffset.dy / 2.0}.');
     final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
     final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
+    // TODO(justinmc): I think the correct value here is 41.
+    print('justin inputBaseline $inputBaseline =  $topInputBaseline + $textAlignVerticalOffset');
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1171,6 +1180,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       subtextHelperHeight,
     );
 
+    print('justin container height $containerHeight. Input baseline: $inputBaseline.');
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
@@ -1456,6 +1466,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           start += baselineLayout(prefix!, start);
         }
         if (input != null) {
+          print('justin when I lay out input, baseline is $baseline and input distance to baseline is ${layout.boxToBaseline[input]}');
           baselineLayout(input!, start);
         }
         if (hint != null) {
@@ -1536,6 +1547,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     size = constraints.constrain(Size(overallWidth, overallHeight));
     assert(size.width == constraints.constrainWidth(overallWidth));
     assert(size.height == constraints.constrainHeight(overallHeight));
+    print('justin finished perform layout.');
+    //print('justin label: size ${label?.size}, position ${label?.localToGlobal(Offset.zero)}');
+    //print('justin input: size ${input?.size}, position ${input?.localToGlobal(Offset.zero)}');
   }
 
   void _paintLabel(PaintingContext context, Offset offset) {
@@ -1590,6 +1604,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
       final double dx = lerpDouble(startX, floatEndX, t)!;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
+      // TODO(justinmc): Here is where the label actually gets scaled. I think the big (empty) label size is not big enough. The spec says it should be the same size as the input text.
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
@@ -2226,7 +2241,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
     );
-
+    print('justin label style says its font size is ${_getFloatingLabelStyle(themeData, defaults).fontSize}, ${widget._labelShouldWithdraw}');
+    print('justin lable animates between ${labelStyle.fontSize} and ${_getFloatingLabelStyle(themeData, defaults).fontSize}');
     final Widget? label = decoration.labelText == null && decoration.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2410,14 +2426,29 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
-      final double verticalPadding = Theme.of(context).useMaterial3
+      final bool useMaterial3 = Theme.of(context).useMaterial3;
+      final double verticalPadding = useMaterial3
           ? _kVerticalPaddingMaterial3
           : _kVerticalPaddingMaterial2;
-      floatingLabelHeight = (verticalPadding + _kFinalLabelScale * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      // TODO(justinmc): In M3, the input font size is bodyLarge and the label font size is bodySmall.
+      //floatingLabelHeight = (verticalPadding + _kFinalLabelScale * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      // TODO(justinmc): I think that including padding here is a problem. Yes I see that it allows you to scale down the padding, but maybe that's not taken into consideration elsewhere.
+      // TODO(justinmc): label height should be 16!
+      floatingLabelHeight = _kFinalLabelScale * labelStyle.fontSize! * MediaQuery.textScaleFactorOf(context);
+      print('justin floatingLabelHeight is $floatingLabelHeight = $_kFinalLabelScale * ${labelStyle.fontSize!} * ${MediaQuery.textScaleFactorOf(context)}');
       if (decoration.filled ?? false) {
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+        if (decorationContentPadding != null) {
+          contentPadding = decorationContentPadding;
+        } else if (useMaterial3) {
+          // TODO(justinmc): What about isDense? Also the other cases around here.
+          contentPadding = decorationIsDense
+            ? EdgeInsets.fromLTRB(_kHorizontalPaddingMaterial3, verticalPadding, _kHorizontalPaddingMaterial3, verticalPadding)
+            : EdgeInsets.fromLTRB(_kHorizontalPaddingMaterial3, verticalPadding, _kHorizontalPaddingMaterial3, verticalPadding);
+        } else {
+          contentPadding = decorationIsDense
+            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+        }
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
@@ -4632,7 +4663,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return _colors.onErrorContainer;
       }
@@ -4647,7 +4678,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
@@ -4668,10 +4699,12 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
+  // TODO(justinmc): Here is where the M3 floating label style is created. If I
+  // log the fontSize here, it is 16, but that seems too small for bodyLarge?
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }

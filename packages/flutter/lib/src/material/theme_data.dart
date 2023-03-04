@@ -243,7 +243,6 @@ enum MaterialTapTargetSize {
 ///
 /// See <https://material.io/design/color/> for
 /// more discussion on how to pick the right colors.
-
 @immutable
 class ThemeData with Diagnosticable {
   /// Create a [ThemeData] that's used to configure a [Theme].

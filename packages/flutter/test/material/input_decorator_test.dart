@@ -2821,7 +2821,6 @@ void main() {
     });
   });
 
-  /*
   group('OutlineInputBorder', () {
     group('default alignment', () {
       testWidgets('Centers when border', (WidgetTester tester) async {
@@ -2834,7 +2833,7 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 52.0 + materialGap));
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
         expect(tester.getTopLeft(find.text('text')).dy, 19.0);
         expect(tester.getBottomLeft(find.text('text')).dy, 35.0);
         expect(getBorderBottom(tester), 56.0);
@@ -3061,6 +3060,7 @@ void main() {
     });
   });
 
+  /*
   testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
