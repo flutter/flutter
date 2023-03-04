@@ -453,6 +453,13 @@ class Border extends BoxBorder {
   EdgeInsetsGeometry get dimensions {
     if (_widthIsUniform) {
       return EdgeInsets.all(top.strokeInset);
+    } else if (_colorIsUniform && _styleIsUniform) {
+      return EdgeInsets.fromLTRB(
+        left.width * (1 - (1 + left.strokeAlign) / 2),
+        top.width * (1 - (1 + top.strokeAlign) / 2),
+        right.width * (1 - (1 + right.strokeAlign) / 2),
+        bottom.width * (1 - (1 + bottom.strokeAlign) / 2),
+      );
     }
     return EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset);
   }
@@ -597,8 +604,8 @@ class Border extends BoxBorder {
     //  * <https://pub.dev/packages/non_uniform_border>, a package that
     // implements a Non-Uniform Border on ShapeBorder, so can be used on
     // shape fields.
-    if (top.style == BorderStyle.solid && shape == BoxShape.rectangle && borderRadius != null && _colorIsUniform) {
-      final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+    if (shape == BoxShape.rectangle && _colorIsUniform && _styleIsUniform) {
+      final RRect borderRect = (borderRadius ?? BorderRadius.zero).resolve(textDirection).toRRect(rect);
       BoxBorder._paintNonUniformBorder(canvas, borderRect, left, top, right, bottom);
       return;
     }
@@ -758,38 +765,33 @@ class BorderDirectional extends BoxBorder {
   EdgeInsetsGeometry get dimensions {
     if (isUniform) {
       return EdgeInsetsDirectional.all(top.strokeInset);
+    } else if (_colorIsUniform && _styleIsUniform) {
+      return EdgeInsetsDirectional.fromSTEB(
+        start.width * (1 - (1 + start.strokeAlign) / 2),
+        top.width * (1 - (1 + top.strokeAlign) / 2),
+        end.width * (1 - (1 + end.strokeAlign) / 2),
+        bottom.width * (1 - (1 + bottom.strokeAlign) / 2),
+      );
     }
     return EdgeInsetsDirectional.fromSTEB(start.strokeInset, top.strokeInset, end.strokeInset, bottom.strokeInset);
   }
 
   @override
-  bool get isUniform {
+  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform && _strokeAlignIsUniform;
+
+  bool get _colorIsUniform {
     final Color topColor = top.color;
-    if (start.color != topColor ||
-        end.color != topColor ||
-        bottom.color != topColor) {
-      return false;
-    }
+    return end.color == topColor && bottom.color == topColor && start.color == topColor;
+  }
 
+  bool get _widthIsUniform {
     final double topWidth = top.width;
-    if (start.width != topWidth ||
-        end.width != topWidth ||
-        bottom.width != topWidth) {
-      return false;
-    }
+    return end.width == topWidth && bottom.width == topWidth && start.width == topWidth;
+  }
 
+  bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
-    if (start.style != topStyle ||
-        end.style != topStyle ||
-        bottom.style != topStyle) {
-      return false;
-    }
-
-    if (_strokeAlignIsUniform == false) {
-      return false;
-    }
-
-    return true;
+    return end.style == topStyle && bottom.style == topStyle && start.style == topStyle;
   }
 
   bool get _strokeAlignIsUniform {
@@ -944,7 +946,18 @@ class BorderDirectional extends BoxBorder {
       }
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
+    // Allow painting non-uniform borders if the color is uniform.
+    //
+    // See also:
+    //  * <https://pub.dev/packages/non_uniform_border>, a package that
+    // implements a Non-Uniform Border on ShapeBorder, so can be used on
+    // shape fields.
+    if (shape == BoxShape.rectangle && _colorIsUniform && _styleIsUniform) {
+      final RRect borderRect = (borderRadius ?? BorderRadius.zero).resolve(textDirection).toRRect(rect);
+      BoxBorder._paintNonUniformBorder(canvas, borderRect, start, top, end, bottom);
+      return;
+    }
+
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
     assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on uniform borders.');
 
