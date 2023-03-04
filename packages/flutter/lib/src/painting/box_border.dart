@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -238,6 +239,60 @@ abstract class BoxBorder extends ShapeBorder {
       final RRect outer = borderRect.inflate(side.strokeOutset);
       canvas.drawDRRect(outer, inner, paint);
     }
+  }
+
+  static void _paintNonUniformBorder(Canvas canvas, RRect borderRect, BorderSide left, BorderSide top, BorderSide right, BorderSide bottom) {
+    final Paint paint = Paint()..color = top.color;
+
+    // Similar process to strokeInset calculation.
+    final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(
+      left.width * (1 - (1 + left.strokeAlign) / 2),
+      top.width * (1 - (1 + top.strokeAlign) / 2),
+      right.width * (1 - (1 + right.strokeAlign) / 2),
+      bottom.width * (1 - (1 + bottom.strokeAlign) / 2),
+    ));
+
+    // Similar process to strokeOutset calculation.
+    final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(
+      left.width * (1 + left.strokeAlign) / 2,
+      top.width * (1 + top.strokeAlign) / 2,
+      right.width * (1 + right.strokeAlign) / 2,
+      bottom.width * (1 + bottom.strokeAlign) / 2,
+    ));
+    canvas.drawDRRect(outer, inner, paint);
+  }
+
+  static RRect _inflateRRect(RRect rect, EdgeInsets insets) {
+    return RRect.fromLTRBAndCorners(
+      rect.left - insets.left,
+      rect.top - insets.top,
+      rect.right + insets.right,
+      rect.bottom + insets.bottom,
+      topLeft: _clampRadius(rect.tlRadius + Radius.elliptical(insets.left, insets.top)),
+      topRight: _clampRadius(rect.trRadius + Radius.elliptical(insets.right, insets.top)),
+      bottomRight: _clampRadius(rect.brRadius + Radius.elliptical(insets.right, insets.bottom)),
+      bottomLeft: _clampRadius(rect.blRadius + Radius.elliptical(insets.left, insets.bottom)),
+    );
+  }
+
+  static RRect _deflateRRect(RRect rect, EdgeInsets insets) {
+    return RRect.fromLTRBAndCorners(
+      rect.left + insets.left,
+      rect.top + insets.top,
+      rect.right - insets.right,
+      rect.bottom - insets.bottom,
+      topLeft: _clampRadius(rect.tlRadius - Radius.elliptical(insets.left, insets.top)),
+      topRight: _clampRadius(rect.trRadius - Radius.elliptical(insets.right, insets.top)),
+      bottomRight: _clampRadius(rect.brRadius - Radius.elliptical(insets.right, insets.bottom)),
+      bottomLeft:_clampRadius(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)),
+    );
+  }
+
+  static Radius _clampRadius(Radius radius) {
+    if (radius.x.isNegative || radius.y.isNegative) {
+      return Radius.elliptical(math.max(radius.x, 0), math.max(radius.y, 0));
+    }
+    return radius;
   }
 
   static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
@@ -536,15 +591,25 @@ class Border extends BoxBorder {
       }
     }
 
+    // Allow painting non-uniform borders if the color is uniform.
+    //
+    // See also:
+    //  * <https://pub.dev/packages/non_uniform_border>, a package that
+    // implements a Non-Uniform Border on ShapeBorder, so can be used on
+    // shape fields.
+    if (top.style == BorderStyle.solid && shape == BoxShape.rectangle && borderRadius != null && _colorIsUniform) {
+      final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+      BoxBorder._paintNonUniformBorder(canvas, borderRect, left, top, right, bottom);
+      return;
+    }
+
     assert(() {
       if (borderRadius != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A borderRadius can only be given for a uniform Border.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
-          if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
-          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
         ]);
       }
       return true;
