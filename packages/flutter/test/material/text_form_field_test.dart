@@ -1170,11 +1170,11 @@ void main() {
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
   });
 
-  testWidgets('Error color for cursor while validation', (WidgetTester tester) async {
+  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
     const Color errorColor = Color(0xff123456);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        colorScheme: const ColorScheme.light(error: errorColor)
+        colorScheme: const ColorScheme.light(error: errorColor),
       ),
       home: Material(
         child: Center(
