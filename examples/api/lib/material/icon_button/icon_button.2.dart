@@ -60,16 +60,13 @@ class ButtonTypesGroup extends StatelessWidget {
         children: <Widget>[
           IconButton(icon: const Icon(Icons.filter_drama), onPressed: onPressed),
 
-          // Use a standard IconButton with specific style to implement the
-          // 'Filled' type.
+          // Filled icon button
           IconButton.filled(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
 
-          // Use a standard IconButton with specific style to implement the
-          // 'Filled Tonal' type.
+          // Filled tonal icon button
           IconButton.filledTonal(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
 
-          // Use a standard IconButton with specific style to implement the
-          // 'Outlined' type.
+          // Outlined icon button
           IconButton.outlined(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
         ],
       ),

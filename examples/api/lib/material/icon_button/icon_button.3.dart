@@ -59,7 +59,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
                 });
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(width: 10),
             IconButton(
               isSelected: standardSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -81,7 +81,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
                 });
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(width: 10),
             IconButton.filled(
               isSelected: filledSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -103,7 +103,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
                 });
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(width: 10),
             IconButton.filledTonal(
               isSelected: tonalSelected,
               icon: const Icon(Icons.settings_outlined),
@@ -125,7 +125,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
                 });
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(width: 10),
             IconButton.outlined(
               isSelected: outlinedSelected,
               icon: const Icon(Icons.settings_outlined),
