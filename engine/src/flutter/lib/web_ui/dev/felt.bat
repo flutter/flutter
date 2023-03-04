@@ -5,13 +5,6 @@
 @ECHO OFF
 SETLOCAL
 
-:: Make sure gclient and ninja exist. Otherwise felt won't work.
-FOR /F "tokens=1-2 delims=:" %%a in ('where gclient') DO SET GCLIENT_PATH=%%b
-IF %GCLIENT_PATH%==[] (ECHO "ERROR: gclient is not in your PATH")
-
-FOR /F "tokens=1-2 delims=:" %%a in ('where ninja') DO SET NINJA_PATH=%%b
-IF %NINJA_PATH%==[] (ECHO "ERROR: ninja is not in your PATH")
-
 :: Starting from this script's path, walk up to engine source directory.
 SET SCRIPT_DIR=%~dp0
 FOR %%a IN ("%SCRIPT_DIR:~0,-1%") DO SET TMP=%%~dpa
