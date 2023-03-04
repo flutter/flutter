@@ -76,11 +76,10 @@ struct QuadraticPathComponent : public PathComponent {
   //   making it trivially parallelizable.
   //
   // See also the implementation in kurbo: https://github.com/linebender/kurbo.
-  std::vector<Point> CreatePolyline(
-      Scalar tolerance = kDefaultCurveTolerance) const;
+  std::vector<Point> CreatePolyline(Scalar scale) const;
 
   void FillPointsForPolyline(std::vector<Point>& points,
-                             Scalar tolerance = kDefaultCurveTolerance) const;
+                             Scalar scale_factor) const;
 
   std::vector<Point> Extrema() const;
 
@@ -118,8 +117,7 @@ struct CubicPathComponent : public PathComponent {
   // generates a polyline from those quadratics.
   //
   // See the note on QuadraticPathComponent::CreatePolyline for references.
-  std::vector<Point> CreatePolyline(
-      Scalar tolerance = kDefaultCurveTolerance) const;
+  std::vector<Point> CreatePolyline(Scalar scale) const;
 
   std::vector<Point> Extrema() const;
 
