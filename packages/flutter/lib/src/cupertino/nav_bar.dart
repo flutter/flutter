@@ -1,7 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -878,6 +878,26 @@ class _LargeTitleNavigationBarSliverDelegate
     if (!transitionBetweenRoutes || !_isTransitionable(context)) {
       return navBar;
     }
+    
+    
+
+    int _iosSpecificLargeTitleResizer = 0;
+
+    
+    // this is added for declare ios version as int, i can get it directly, if you can please replace it
+    if (Platform.isIOS) {
+      final _iosVersion = int.tryParse(
+          Platform.operatingSystemVersion.split(' ')[1].split('.').first);
+      _iosSpecificLargeTitleResizer = ((_iosVersion ?? 15) < 14 ? 0 : 4);
+    }
+
+    //and here i have changed fontSize of textStyle for ios 14+
+    
+    TextStyle _transitionableNavigationBarTextStyle =
+        CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle;
+    _transitionableNavigationBarTextStyle =
+        _transitionableNavigationBarTextStyle.copyWith(
+            fontSize: _transitionableNavigationBarTextStyle.fontSize! + 4);
 
     return Hero(
       tag: heroTag == _defaultHeroTag
@@ -892,10 +912,12 @@ class _LargeTitleNavigationBarSliverDelegate
       // needs to wrap the top level RenderBox rather than a RenderSliver.
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
-        backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
-        backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+        backgroundColor:
+            CupertinoDynamicColor.resolve(backgroundColor, context),
+        backButtonTextStyle:
+            CupertinoTheme.of(context).textTheme.navActionTextStyle,
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-        largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+        largeTitleTextStyle: _transitionableNavigationBarTextStyle,
         border: border,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
