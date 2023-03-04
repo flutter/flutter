@@ -388,6 +388,7 @@ void main() {
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -587,10 +588,16 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   String? specifiedDeviceId;
 
   @override
-  Future<List<Device>> getDevices() async => devices;
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async => devices;
 }
 
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].

@@ -47,6 +47,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether WebAssembly compilation for Flutter Web is enabled.
+  bool get isFlutterWebWasmEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -64,7 +67,13 @@ const List<Feature> allFeatures = <Feature>[
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
+  flutterWebWasm,
 ];
+
+/// All current Flutter feature flags that can be configured.
+///
+/// [Feature.configSetting] is not `null`.
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -142,6 +151,16 @@ const Feature singleWidgetReload = Feature(
   ),
   beta: FeatureChannelSetting(
     available: true,
+  ),
+);
+
+/// Enabling WebAssembly compilation from `flutter build web`
+const Feature flutterWebWasm = Feature(
+  name: 'WebAssembly compilation from flutter build web',
+  environmentOverride: 'FLUTTER_WEB_WASM',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
   ),
 );
 
