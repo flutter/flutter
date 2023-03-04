@@ -8,22 +8,6 @@ set -e
 
 FELT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [ -z "`which gclient`" ]
-then
-  echo "ERROR: gclient is not in your PATH"
-  echo "Fix: add the path to your installation of depot_tools to your PATH"
-  exit 1
-fi
-GCLIENT_PATH=`which gclient`
-
-if [ -z "`which autoninja`" ]
-then
-  echo "ERROR: autoninja is not in your PATH"
-  echo "Fix: add the path to your installation of depot_tools to your PATH"
-  exit 1
-fi
-NINJA_PATH=`which autoninja`
-
 KERNEL_NAME=`uname`
 CPU_NAME=`uname -m`
 ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname ${FELT_DIR}))))"
