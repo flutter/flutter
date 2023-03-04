@@ -96,15 +96,15 @@ static Scalar ApproximateParabolaIntegral(Scalar x) {
   return x / (1.0 - d + sqrt(sqrt(pow(d, 4) + 0.25 * x * x)));
 }
 
-std::vector<Point> QuadraticPathComponent::CreatePolyline(
-    Scalar tolerance) const {
+std::vector<Point> QuadraticPathComponent::CreatePolyline(Scalar scale) const {
   std::vector<Point> points;
-  FillPointsForPolyline(points, tolerance);
+  FillPointsForPolyline(points, scale);
   return points;
 }
 
 void QuadraticPathComponent::FillPointsForPolyline(std::vector<Point>& points,
-                                                   Scalar tolerance) const {
+                                                   Scalar scale_factor) const {
+  auto tolerance = kDefaultCurveTolerance / scale_factor;
   auto sqrt_tolerance = sqrt(tolerance);
 
   auto d01 = cp - p1;
@@ -171,11 +171,11 @@ Point CubicPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
-std::vector<Point> CubicPathComponent::CreatePolyline(Scalar tolerance) const {
+std::vector<Point> CubicPathComponent::CreatePolyline(Scalar scale) const {
   auto quads = ToQuadraticPathComponents(.1);
   std::vector<Point> points;
   for (const auto& quad : quads) {
-    quad.FillPointsForPolyline(points, tolerance);
+    quad.FillPointsForPolyline(points, scale);
   }
   return points;
 }
