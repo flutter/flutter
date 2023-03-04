@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'expand_icon.dart';
+import 'icons.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
@@ -76,13 +77,68 @@ class ExpansionPanel {
   /// See [ExpansionPanelList] for an example on how to use this widget.
   ///
   /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
+  ///
+  /// The [icon] argument defaults to [Icons.expand_more].
+  ///
+  /// The [beginIconRotation] and [endIconRotation] arguments defaults to [0.0] and
+  /// [0.5] respectively.
   ExpansionPanel({
     required this.headerBuilder,
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.beginIconRotation = 0.0,
+    this.endIconRotation = 0.5,
     this.backgroundColor,
-  });
+  }) : icon = Icons.expand_more,
+       assert(beginIconRotation >= 0.0 && beginIconRotation <= 1.0, 'The beginIconRotation must be between 0.0 and 1.0.'),
+       assert(endIconRotation >= 0.0 && endIconRotation <= 1.0, 'The endIconRotation must be between 0.0 and 1.0.');
+
+    /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
+    ///
+    /// See [ExpansionPanelList] for an example on how to use this widget.
+    ///
+    /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
+    ///
+    /// The [icon] argument is required since it is going to add a custom
+    /// icon.
+    ///
+    /// The [beginIconRotation] and [endIconRotation] arguments defaults to [0.0] and
+    /// [0.5] respectively.
+    ExpansionPanel.withCustomIcon({
+    required this.headerBuilder,
+    required this.body,
+    this.isExpanded = false,
+    this.canTapOnHeader = false,
+    this.beginIconRotation = 0.0,
+    this.endIconRotation = 0.5,
+    required this.icon,
+    this.backgroundColor,
+    }) : assert(beginIconRotation >= 0.0 && beginIconRotation <= 1.0, 'The beginIconRotation must be between 0.0 and 1.0.'),
+        assert(endIconRotation >= 0.0 && endIconRotation <= 1.0, 'The endIconRotation must be between 0.0 and 1.0.');
+
+    /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
+    ///
+    /// See [ExpansionPanelList] for an example on how to use this widget.
+    ///
+    /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
+    ///
+    /// The [icon] argument defaults to [null] since it is not going to be used.
+    ///
+    /// The [beginIconRotation] and [endIconRotation] arguments defaults to [null]
+    /// since it is not going to be used.
+    ///
+    /// The [canTapOnHeader] argument defaults to [true] since it does not have any
+    /// icon to expand.
+    ExpansionPanel.withoutIcon({
+    required this.headerBuilder,
+    required this.body,
+    this.isExpanded = false,
+    this.backgroundColor,
+    }) : icon = null,
+         canTapOnHeader = true,
+         beginIconRotation = 0.0,
+         endIconRotation = 0.0;
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -106,6 +162,19 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// Defines icon of the panel.
+  final IconData? icon;
+
+  /// Defines the rotation of the icon when the panel is collapsed.
+  ///
+  /// Defaults to 0.0.
+  final double beginIconRotation;
+
+  /// Defines the rotation of the icon when the panel is expanded.
+  ///
+  /// Defaults to 0.5.
+  final double endIconRotation;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -357,25 +426,34 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
-          color: widget.expandIconColor,
-          isExpanded: _isChildExpanded(index),
-          padding: _kExpandIconPadding,
-          onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
-              : null,
-        ),
-      );
-      if (!child.canTapOnHeader) {
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        expandIconContainer = Semantics(
-          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
-          container: true,
-          child: expandIconContainer,
+      late Widget expandIconContainer;
+
+      if (child.icon != null) {
+        expandIconContainer = Container(
+          margin: const EdgeInsetsDirectional.only(end: 8.0),
+          child: ExpandIcon(
+            icon: child.icon!,
+            beginIconRotation: child.beginIconRotation,
+            endIconRotation: child.endIconRotation,
+            color: widget.expandIconColor,
+            isExpanded: _isChildExpanded(index),
+            padding: _kExpandIconPadding,
+            onPressed: !child.canTapOnHeader
+                ? (bool isExpanded) => _handlePressed(isExpanded, index)
+                : null,
+          ),
         );
+
+        if (!child.canTapOnHeader) {
+          final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+          expandIconContainer = Semantics(
+            label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+            container: true,
+            child: expandIconContainer,
+          );
+        }
       }
+
       Widget header = Row(
         children: <Widget>[
           Expanded(
@@ -389,10 +467,18 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          expandIconContainer,
+          // If the icon is null, we don't want to add the icon container to the row.
+          if (child.icon != null) expandIconContainer,
         ],
       );
-      if (child.canTapOnHeader) {
+
+      // If the icon is null, we still want to wrap the header in an InkWell
+      // so that the entire header is tappable.
+      //
+      // We have to check if the icon is null because if there is no icon
+      // than the header won't be tappable. That's why we have to wrap the
+      // header in an InkWell if the icon is null.
+      if (child.canTapOnHeader || child.icon == null) {
         header = MergeSemantics(
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
@@ -400,6 +486,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ),
         );
       }
+
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),

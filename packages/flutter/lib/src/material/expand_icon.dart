@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
+import 'expansion_panel.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -38,6 +37,9 @@ class ExpandIcon extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.color,
     this.disabledColor,
+    this.icon = Icons.expand_more,
+    this.beginIconRotation = 0.0,
+    this.endIconRotation = 0.5,
     this.expandedColor,
   });
 
@@ -94,6 +96,23 @@ class ExpandIcon extends StatefulWidget {
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
 
+  /// The icon to display.
+  ///
+  /// Defaults to [Icons.expand_more].
+  ///
+  /// This property must not be null.
+  final IconData icon;
+
+  /// Defines the rotation of the icon when the panel is collapsed.
+  ///
+  /// Defaults to 0.0.
+  final double beginIconRotation;
+
+  /// Defines the rotation of the icon when the panel is expanded.
+  ///
+  /// Defaults to 0.5.
+  final double endIconRotation;
+
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
 }
@@ -102,7 +121,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   late AnimationController _controller;
   late Animation<double> _iconTurns;
 
-  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
+  late final Animatable<double> _iconTurnTween = Tween<double>(begin: widget.beginIconRotation, end: widget.endIconRotation)
     .chain(CurveTween(curve: Curves.fastOutSlowIn));
 
   @override
@@ -112,7 +131,11 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     _iconTurns = _controller.drive(_iconTurnTween);
     // If the widget is initially expanded, rotate the icon without animating it.
     if (widget.isExpanded) {
-      _controller.value = math.pi;
+        /// If the widget is initially expanded, rotate the icon without animating it.
+        ///
+        /// It rotates to the [endIconRotation] value.
+        ///
+        _controller.value = 1.0;
     }
   }
 
@@ -177,7 +200,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more),
+          child: Icon(widget.icon),
         ),
       ),
     );

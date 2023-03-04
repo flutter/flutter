@@ -1619,4 +1619,200 @@ void main() {
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
+
+  testWidgets('When using ExpansionPanel.withoutIcon canTapOnHeader should be true', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel.withoutIcon(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.canTapOnHeader, isTrue);
+  });
+
+  testWidgets('When using ExpansionPanel.withoutIcon icon should be null', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel.withoutIcon(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.icon, isNull);
+  });
+
+  testWidgets('When using ExpansionPanel.withCustomIcon icon should be not null when passing an icon', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel.withCustomIcon(
+      icon: Icons.ac_unit,
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.icon, isNotNull);
+  });
+
+  testWidgets('When using ExpansionPanel.withCustomIcon icon should be not null without passing an icon', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel.withCustomIcon(
+      icon: Icons.ac_unit,
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.icon, isNotNull);
+  });
+
+  testWidgets('ExpansionPanel default beginIconRotation should be 0.0', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.beginIconRotation, 0.0);
+  });
+
+  testWidgets('ExpansionPanel default endIconRotation should be 0.5', (WidgetTester tester) async {
+    final ExpansionPanel expansionPanel = ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+    );
+
+    expect(expansionPanel.endIconRotation, 0.5);
+  });
+
+  testWidgets('ExpansionPanel with beginIconRotation greater than 1.0 throws assertion error', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+      beginIconRotation: 1.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The beginIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+
+
+
+  testWidgets('ExpansionPanel with endIconRotation greater than 1.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+      endIconRotation: 1.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The endIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+    });
+
+  testWidgets('ExpansionPanel with beginIconRotation less than 0.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+      headerBuilder: (BuildContext context, bool isExpanded) =>
+          const Text('Demo'),
+      body: const SizedBox(height: 100.0),
+      beginIconRotation: -0.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The beginIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+
+  testWidgets('ExpansionPanel with endIconRotation less than 0.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            const Text('Demo'),
+        body: const SizedBox(height: 100.0),
+        endIconRotation: -0.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The endIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+
+  testWidgets('ExpansionPanel with endIconRotation less than 0.0 and beginIconRotation greater than 1.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            const Text('Demo'),
+        body: const SizedBox(height: 100.0),
+        endIconRotation: -0.1,
+        beginIconRotation: 1.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The beginIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+
+  testWidgets('ExpansionPanel with beginIconRotation less than 0.0 and endIconRotation greater than 1.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            const Text('Demo'),
+        body: const SizedBox(height: 100.0),
+        beginIconRotation: -0.1,
+        endIconRotation: 1.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The beginIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+  testWidgets('ExpansionPanel with beginIconRotation and endIconRotation less than 0.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+      final ExpansionPanel expansionPanel = ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            const Text('Demo'),
+        body: const SizedBox(height: 100.0),
+        beginIconRotation: -0.1,
+        endIconRotation: -0.1,
+      );
+    } catch (e) {
+      expect(e, isAssertionError);
+      expect((e as AssertionError).toString(), contains(
+          'The beginIconRotation must be between 0.0 and 1.0.',
+      ));
+    }
+  });
+
+  testWidgets('ExpansionPanel with beginIconRotation and endIconRotation greater than 1.0 throws assertion error ', (WidgetTester tester) async {
+    try {
+        final ExpansionPanel expansionPanel = ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) =>
+            const Text('Demo'),
+        body: const SizedBox(height: 100.0),
+        beginIconRotation: 1.1,
+        endIconRotation: 1.1,
+        );
+    } catch (e) {
+        expect(e, isAssertionError);
+        expect((e as AssertionError).toString(), contains(
+            'The beginIconRotation must be between 0.0 and 1.0.',
+        ));
+    }
+  });
+
 }

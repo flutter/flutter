@@ -312,4 +312,46 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.cyan));
   });
+
+  testWidgets('ExpandIcon default icon should be [Icons.expand_more]', (WidgetTester tester) async {
+    ExpandIcon expandIcon =  ExpandIcon(
+      onPressed: (bool isExpanded) {},
+    );
+    await tester.pumpWidget(wrap(
+      child: expandIcon,
+    ));
+    expect(expandIcon.icon, Icons.expand_more);
+  });
+
+  testWidgets('ExpandIcon default beginIconRotation should be 0.0', (WidgetTester tester) async {
+    ExpandIcon expandIcon =  ExpandIcon(
+      onPressed: (bool isExpanded) {},
+    );
+    await tester.pumpWidget(wrap(
+      child: expandIcon,
+    ));
+    expect(expandIcon.beginIconRotation, 0.0);
+  });
+
+  testWidgets('ExpandIcon default endIconRotation should be 0.5', (WidgetTester tester) async {
+    ExpandIcon expandIcon =  ExpandIcon(
+      onPressed: (bool isExpanded) {},
+    );
+    await tester.pumpWidget(wrap(
+      child: expandIcon,
+    ));
+    expect(expandIcon.endIconRotation, 0.5);
+  });
+
+  testWidgets('ExpandIcon icon should be Icons.ac_unit', (WidgetTester tester) async {
+    ExpandIcon expandIcon =  ExpandIcon(
+      size: 36,
+      icon: Icons.ac_unit,
+      onPressed: (bool isExpanded) {},
+    );
+    await tester.pumpWidget(wrap(
+      child: expandIcon,
+    ));
+    expect(expandIcon.icon, Icons.ac_unit);
+  });
 }
