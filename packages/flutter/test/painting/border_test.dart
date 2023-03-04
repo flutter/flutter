@@ -264,8 +264,8 @@ void main() {
       // Border.all supports all StrokeAlign values.
       // Border() supports [BorderSide.strokeAlignInside] only.
       const Border(
-        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter),
-        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter, color: Color(0xff000000)),
+        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside, color: Color(0xff000001)),
       ).paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0));
     } on FlutterError catch (e) {
       error = e;
@@ -274,7 +274,7 @@ void main() {
     expect(error.diagnostics.length, 1);
     expect(
       error.diagnostics[0].toStringDeep(),
-      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on uniform borders.\n',
+      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors.\n',
     );
   });
 
