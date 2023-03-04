@@ -15,12 +15,12 @@ void main() {
   late FakeMenuChannel fakeMenuChannel;
   late PlatformMenuDelegate originalDelegate;
   late DefaultPlatformMenuDelegate delegate;
-  final List<String> activated = <String>[];
+  final List<String> selected = <String>[];
   final List<String> opened = <String>[];
   final List<String> closed = <String>[];
 
-  void onActivate(String item) {
-    activated.add(item);
+  void onSelected(String item) {
+    selected.add(item);
   }
 
   void onOpen(String item) {
@@ -36,7 +36,7 @@ void main() {
     delegate = DefaultPlatformMenuDelegate(channel: fakeMenuChannel);
     originalDelegate = WidgetsBinding.instance.platformMenuDelegate;
     WidgetsBinding.instance.platformMenuDelegate = delegate;
-    activated.clear();
+    selected.clear();
     opened.clear();
     closed.clear();
   });
@@ -52,8 +52,8 @@ void main() {
           home: Material(
             child: PlatformMenuBar(
               menus: createTestMenus(
-                onActivate: onActivate,
-                onActivateIntent: (String item) => TestPlatformMenuBarIntent(item),
+                onSelected: onSelected,
+                onSelectedIntent: (String item) => TestPlatformMenuBarIntent(item),
                 onOpen: onOpen,
                 onClose: onClose,
                 shortcuts: <String, MenuSerializableShortcut>{
@@ -288,8 +288,8 @@ const List<String> subMenu2 = <String>[
 ];
 
 List<PlatformMenuItem> createTestMenus({
-  void Function(String)? onActivate,
-  Intent Function(String)? onActivateIntent,
+  void Function(String)? onSelected,
+  Intent Function(String)? onSelectedIntent,
   void Function(String)? onOpen,
   void Function(String)? onClose,
   Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
@@ -303,7 +303,7 @@ List<PlatformMenuItem> createTestMenus({
       menus: <PlatformMenuItem>[
         PlatformMenuItem(
           label: subMenu0[0],
-          onSelected: onActivate != null ? () => onActivate(subMenu0[0]) : null,
+          onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
           shortcut: shortcuts[subMenu0[0]],
         ),
       ],
@@ -317,7 +317,7 @@ List<PlatformMenuItem> createTestMenus({
           members: <PlatformMenuItem>[
             PlatformMenuItem(
               label: subMenu1[0],
-              onSelectedIntent: onActivateIntent?.call(subMenu1[0]),
+              onSelectedIntent: onSelectedIntent?.call(subMenu1[0]),
               shortcut: shortcuts[subMenu1[0]],
             ),
           ],
@@ -331,7 +331,7 @@ List<PlatformMenuItem> createTestMenus({
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[0],
-                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[0]) : null,
+                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[0]) : null,
                   shortcut: shortcuts[subSubMenu10[0]],
                 ),
               ],
@@ -340,21 +340,21 @@ List<PlatformMenuItem> createTestMenus({
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[1],
-                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
+                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[1]) : null,
                   shortcut: shortcuts[subSubMenu10[1]],
                 ),
               ],
             ),
             PlatformMenuItem(
               label: subSubMenu10[2],
-              onSelected: onActivate != null ? () => onActivate(subSubMenu10[2]) : null,
+              onSelected: onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
               shortcut: shortcuts[subSubMenu10[2]],
             ),
             PlatformMenuItemGroup(
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[3],
-                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
+                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[3]) : null,
                   shortcut: shortcuts[subSubMenu10[3]],
                 ),
               ],
@@ -363,7 +363,7 @@ List<PlatformMenuItem> createTestMenus({
         ),
         PlatformMenuItem(
           label: subMenu1[2],
-          onSelected: onActivate != null ? () => onActivate(subMenu1[2]) : null,
+          onSelected: onSelected != null ? () => onSelected(subMenu1[2]) : null,
           shortcut: shortcuts[subMenu1[2]],
         ),
       ],
