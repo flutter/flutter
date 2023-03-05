@@ -23,7 +23,8 @@ typedef AsyncListenableBuilder<T extends Listenable> = Widget Function(
 
 /// A widget that awaits initialization and then rebuilds when the it receives
 /// a notification from the `Listenable`. Use this widget with `ChangeNotifier`
-/// or `ValueNotifier` to rebuild the widget when the value changes.
+/// `ValueNotifier`, or other `Listenable` controllers to rebuild the widget
+/// when the value changes.
 ///
 /// Given a [AsyncListenableBuilder<T>] and a [builder] which builds widgets from
 /// the state of the `Listenable`, this class will automatically register itself as a
@@ -166,6 +167,9 @@ class _ListenableFutureBuilderState<T extends Listenable>
   Object? _activeCallbackIdentity;
   late AsyncSnapshot<T> _snapshot;
 
+  ///Use this to access the last snapshot that was passed to the builder
+  AsyncSnapshot<T> get lastSnapshot => _snapshot;
+
   @override
   void initState() {
     super.initState();
@@ -182,6 +186,7 @@ class _ListenableFutureBuilderState<T extends Listenable>
   @override
   void dispose() {
     _unsubscribe();
+    _snapshot = AsyncSnapshot<T>.nothing();
     super.dispose();
   }
 

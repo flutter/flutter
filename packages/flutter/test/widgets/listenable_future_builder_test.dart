@@ -167,4 +167,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1'), findsOneWidget);
   });
+
+  ///Notes: we need to confirm that the builder drops its reference to the
+  ///Listenable when the widget is disposed. If the state holds onto a
+  ///previous AsyncSnapshot, it will hold onto the Listenable as well. This
+  ///test ensures that the State doesn't hold onto the Listenable after
+  ///disposal.
+  testWidgets('ListenableFutureBuilder disposes correctly',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListenableFutureBuilder<ValueNotifier<int?>>(
+          listenable: () async => ValueNotifier<int?>(3),
+          builder: (BuildContext context, Widget? child,
+                  AsyncSnapshot<ValueNotifier<int?>> snapshot) =>
+              snapshot.connectionState == ConnectionState.done
+                  ? Text('${snapshot.data!.value}')
+                  : const CircularProgressIndicator(),
+        ),
+      ),
+    );
+
+    //_ListenableFutureBuilderState is private so we cannot access the state
+    //without dynamic
+    final dynamic state =
+        tester.state(find.byType(ListenableFutureBuilder<ValueNotifier<int?>>));
+
+    //Triggers disposal
+    await tester.pumpWidget(const SizedBox());
+
+    final AsyncSnapshot<ValueNotifier<int?>> snapshot =
+        //We have lastSnapshot so we can test this. Alternative approaches to
+        //testing for this are absolutely welcome, and we can remove this
+        //getter if it is too problematic.
+        // ignore: avoid_dynamic_calls
+        state.lastSnapshot as AsyncSnapshot<ValueNotifier<int?>>;
+
+    //Verify the state does not hold onto the Listenable after disposal
+    expect(snapshot.data, isNull);
+    expect(snapshot.connectionState, ConnectionState.none);
+  });
 }
