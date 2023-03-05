@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          future: () async => ValueNotifier(42),
+          listenable: () async => ValueNotifier(42),
           builder: (context, child, snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text('${snapshot.data!.value}')
@@ -37,7 +37,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          future: () async => Future<ValueNotifier<int>>.delayed(
+          listenable: () async => Future<ValueNotifier<int>>.delayed(
             const Duration(milliseconds: 500),
             () => throw Exception('Oops'),
           ),
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<String?>>(
-          future: () async => ValueNotifier<String?>(null),
+          listenable: () async => ValueNotifier<String?>(null),
           builder: (context, child, snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text(
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          future: () async => Future.delayed(
+          listenable: () async => Future.delayed(
             const Duration(seconds: 2),
             () => ValueNotifier(42),
           ),
@@ -135,7 +135,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          future: () async => notifier,
+          listenable: () async => notifier,
           builder: (context, child, snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text('${snapshot.data!.value}')

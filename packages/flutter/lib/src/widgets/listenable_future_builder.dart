@@ -115,15 +115,20 @@ typedef AsyncListenableBuilder<T extends Listenable> = Widget Function(
 ///    coming from its descendant widgets rather than a [ValueListenable] that
 ///    you have a direct reference to.
 class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
+  /// Creates a [ListenableFutureBuilder].
+  ///
+  /// The [listenable] and [builder] arguments must not be null.
+  /// The [child] is optional but is good practice to use if part of the widget
+  /// subtree does not depend on the value of the [listenable].
   const ListenableFutureBuilder({
-    required this.future,
+    required this.listenable,
     required this.builder,
     this.child,
     super.key,
   });
 
   ///Set this to a fixed function. The widget will only call this once
-  final Future<T> Function() future;
+  final Future<T> Function() listenable;
 
   final AsyncListenableBuilder builder;
 
@@ -148,7 +153,8 @@ class _ListenableFutureBuilderState<T extends Listenable>
 
   @override
   Widget build(BuildContext context) => Builder(
-        builder: (context) => widget.builder(context, widget.child, _snapshot),
+        builder: (BuildContext context) =>
+            widget.builder(context, widget.child, _snapshot),
       );
 
   @override
@@ -162,8 +168,8 @@ class _ListenableFutureBuilderState<T extends Listenable>
   void _subscribe() {
     final Object callbackIdentity = Object();
     _activeCallbackIdentity = callbackIdentity;
-    widget.future().then<void>(
-      (data) {
+    widget.listenable().then<void>(
+      (T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
