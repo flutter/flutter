@@ -816,6 +816,55 @@ void main() {
     expect(leadingOffset.dy - tileOffset.dy, 8.0);
     expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
+
+  testWidgets('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTileTheme.merge(
+              dense: true,
+              shape: const StadiumBorder(),
+              style: ListTileStyle.drawer,
+              selectedColor: const Color(0x00000001),
+              iconColor: const Color(0x00000002),
+              textColor: const Color(0x00000003),
+              contentPadding: const EdgeInsets.all(100),
+              tileColor: const Color(0x00000007),
+              selectedTileColor: const Color(0x00000008),
+              horizontalTitleGap: 200,
+              minVerticalPadding: 300,
+              minLeadingWidth: 400,
+              enableFeedback: true,
+              titleAlignment: ListTileTitleAlignment.bottom,
+              mouseCursor: MaterialStateMouseCursor.textable,
+              visualDensity: VisualDensity.comfortable,
+              child: const ListTile(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final ListTileThemeData theme = ListTileTheme.of(tester.element(find.byType(ListTile)));
+    expect(theme.dense, true);
+    expect(theme.shape, const StadiumBorder());
+    expect(theme.style, ListTileStyle.drawer);
+    expect(theme.selectedColor, const Color(0x00000001));
+    expect(theme.iconColor, const Color(0x00000002));
+    expect(theme.textColor, const Color(0x00000003));
+    expect(theme.contentPadding, const EdgeInsets.all(100));
+    expect(theme.tileColor, const Color(0x00000007));
+    expect(theme.selectedTileColor, const Color(0x00000008));
+    expect(theme.horizontalTitleGap, 200);
+    expect(theme.minVerticalPadding, 300);
+    expect(theme.minLeadingWidth, 400);
+    expect(theme.enableFeedback, true);
+    expect(theme.titleAlignment, ListTileTitleAlignment.bottom);
+    expect(theme.mouseCursor, MaterialStateMouseCursor.textable);
+    expect(theme.visualDensity, VisualDensity.comfortable);
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {

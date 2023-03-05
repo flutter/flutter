@@ -488,6 +488,8 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     ListTileTitleAlignment? titleAlignment,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    VisualDensity? visualDensity,
     required Widget child,
   }) {
     return Builder(
@@ -510,6 +512,8 @@ class ListTileTheme extends InheritedTheme {
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
             titleAlignment: titleAlignment ?? parent.titleAlignment,
+            mouseCursor: mouseCursor ?? parent.mouseCursor,
+            visualDensity: visualDensity ?? parent.visualDensity,
           ),
           child: child,
         );
