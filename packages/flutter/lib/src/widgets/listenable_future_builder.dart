@@ -4,6 +4,23 @@
 
 import 'package:flutter/material.dart';
 
+/// Builds a [Widget] when given a concrete value of a [AsyncSnapshot<T>] where
+/// `T` is a `Listenable`.
+///
+/// If the `child` parameter provided to the [AsyncListenableBuilder] is not
+/// null, the same `child` widget is passed back to this [ListenableFutureBuilder]
+/// and should typically be incorporated in the returned widget tree.
+///
+/// See also:
+///
+///  * [ListenableFutureBuilder], a widget which invokes this builder each time
+///  after the initial future completes and a value is emited on the [Listener].
+typedef AsyncListenableBuilder<T extends Listenable> = Widget Function(
+  BuildContext context,
+  Widget? child,
+  AsyncSnapshot<T> listenableSnapshot,
+);
+
 class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
   const ListenableFutureBuilder({
     required this.future,
