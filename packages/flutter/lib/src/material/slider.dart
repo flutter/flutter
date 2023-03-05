@@ -1481,12 +1481,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
     if (!_active && isInteractive) {
-      if (allowedInteraction._canTap()
-          || allowedInteraction._isSlideThumb() && _isPointerOnThumb(globalPosition)) {
+      if (allowedInteraction._canTap()) {
         _active = true;
         _currentDragValue = _getValueFromGlobalPosition(globalPosition);
         onChanged!(_discretize(_currentDragValue));
-      } else if (allowedInteraction._isSlideOnly()) {
+      } else if (allowedInteraction._isSlideOnly()
+          || allowedInteraction._isSlideThumb() && _isPointerOnOverlay(globalPosition)) {
         _active = true;
         _currentDragValue = value;
       }
@@ -1567,7 +1567,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _endInteraction();
   }
 
-  bool _isPointerOnThumb(Offset globalPosition) {
+  bool _isPointerOnOverlay(Offset globalPosition) {
     return overlayRect!.contains(globalToLocal(globalPosition));
   }
 

@@ -3844,7 +3844,7 @@ void main() {
       // (slider's left padding (overlayRadius), windowHeight / 2)
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
-      const Offset centerOfTheSlideTrack = Offset(400, 300);
+      const Offset centerOfTheSliderTrack = Offset(400, 300);
 
       Widget buildApp() {
         return MaterialApp(
@@ -3870,7 +3870,7 @@ void main() {
       await tester.pumpWidget(buildApp());
 
       // test tap
-      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
       await tester.pumpAndSettle();
       // has no effect, remains 1.0.
       expect(value, 1.0);
@@ -3887,10 +3887,21 @@ void main() {
       await tester.pump();
       // has no effect, remains 1.0.
       expect(value, 1.0);
-      await gesture.moveTo(centerOfTheSlideTrack);
+      await gesture.moveTo(centerOfTheSliderTrack);
       await tester.pumpAndSettle();
       // changes from 1.0 -> 0.5.
       expect(value, 0.5);
+
+      // test tap inside overlay but not on thumb, then slide.
+      await gesture.up();
+      await gesture.down(centerOfTheSliderTrack.translate(-10, 0));
+      await tester.pumpAndSettle();
+      // has no effect, remains 1.0.
+      expect(value, 0.5);
+      await gesture.moveTo(endOfTheSliderTrack.translate(-10, 0));
+      await tester.pumpAndSettle();
+      // changes from 0.5 -> 1.0.
+      expect(value, 1.0);
     });
   });
 }
