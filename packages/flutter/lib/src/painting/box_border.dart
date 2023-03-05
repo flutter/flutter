@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -268,10 +267,10 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top - insets.top,
       rect.right + insets.right,
       rect.bottom + insets.bottom,
-      topLeft: _clampRadius(rect.tlRadius + Radius.elliptical(insets.left, insets.top)),
-      topRight: _clampRadius(rect.trRadius + Radius.elliptical(insets.right, insets.top)),
-      bottomRight: _clampRadius(rect.brRadius + Radius.elliptical(insets.right, insets.bottom)),
-      bottomLeft: _clampRadius(rect.blRadius + Radius.elliptical(insets.left, insets.bottom)),
+      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
     );
   }
 
@@ -281,18 +280,11 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top + insets.top,
       rect.right - insets.right,
       rect.bottom - insets.bottom,
-      topLeft: _clampRadius(rect.tlRadius - Radius.elliptical(insets.left, insets.top)),
-      topRight: _clampRadius(rect.trRadius - Radius.elliptical(insets.right, insets.top)),
-      bottomRight: _clampRadius(rect.brRadius - Radius.elliptical(insets.right, insets.bottom)),
-      bottomLeft:_clampRadius(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)),
+      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
     );
-  }
-
-  static Radius _clampRadius(Radius radius) {
-    if (radius.x.isNegative || radius.y.isNegative) {
-      return Radius.elliptical(math.max(radius.x, 0), math.max(radius.y, 0));
-    }
-    return radius;
   }
 
   static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
