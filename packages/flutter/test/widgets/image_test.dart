@@ -824,9 +824,9 @@ void main() {
     expect(isSync, isTrue);
   });
 
-  testWidgets('Precache without build context', (WidgetTester tester) async {
+  testWidgets('Precache without default config', (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
-    final Future<void> precache = precacheImage(provider, null);
+    final Future<void> precache = precacheImageWithConfig(provider);
     provider.complete(image10x10);
     await precache;
     expect(provider._lastResolvedConfiguration, isNotNull);

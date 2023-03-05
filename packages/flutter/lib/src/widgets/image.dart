@@ -95,8 +95,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
 /// manifest as immediate process death, sometimes with no other error messages.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration
-/// (see [createLocalImageConfiguration]). If a [BuildContext] is not provided,
-/// the default configuration [ImageConfiguration.empty] is used instead.
+/// (see [createLocalImageConfiguration]).
 ///
 /// The returned future will not complete with error, even if precaching
 /// failed. The `onError` argument can be used to manually handle errors while
@@ -105,15 +104,44 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
 /// See also:
 ///
 ///  * [ImageCache], which holds images that may be reused.
+///  * [precacheImageWithConfig], which this method delegates to.
 Future<void> precacheImage(
   ImageProvider provider,
-  BuildContext? context, {
+  BuildContext context, {
   Size? size,
   ImageErrorListener? onError,
 }) {
-  final ImageConfiguration config = context != null
-    ? createLocalImageConfiguration(context, size: size)
-    : ImageConfiguration.empty;
+  return precacheImageWithConfig(
+    provider,
+    config: createLocalImageConfiguration(context, size: size),
+    onError: onError,
+  );
+}
+
+/// Prefetches an image into the image cache.
+///
+/// Returns a [Future] that will complete when the first image yielded by the
+/// [ImageProvider] is available or failed to load.
+///
+/// This method works identically to [precacheImage], except that it takes an
+/// [ImageConfiguration] directly instead of constructing one from a [BuildContext].
+/// By default, this value is [ImageConfiguration.empty].
+///
+/// In order to cache images which have asset variants, the correct device
+/// pixel ratio would need to be provided. For example, if there are 2x and
+/// 3x variants of an image, supplying an image configuration with a devicePixelRatio
+/// of 3.1 would select the larger variant. Leaving the default value of `1` would
+/// select the 2x variant.
+///
+/// See also:
+///
+///  * [precacheImage], which has more extensive documentation on how this
+///    method functions.
+Future<void> precacheImageWithConfig(
+  ImageProvider provider, {
+  ImageConfiguration config = ImageConfiguration.empty,
+  ImageErrorListener? onError,
+}) {
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   ImageStreamListener? listener;
