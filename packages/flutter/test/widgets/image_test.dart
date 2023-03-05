@@ -824,6 +824,20 @@ void main() {
     expect(isSync, isTrue);
   });
 
+  testWidgets('Precache without build context', (WidgetTester tester) async {
+    final _TestImageProvider provider = _TestImageProvider();
+    final Future<void> precache = precacheImage(provider, null);
+    provider.complete(image10x10);
+    await precache;
+    expect(provider._lastResolvedConfiguration, isNotNull);
+
+    // Check that a second resolve of the same image is synchronous.
+    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
+    late bool isSync;
+    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) { isSync = sync; }));
+    expect(isSync, isTrue);
+  });
+
   testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);

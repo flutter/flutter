@@ -95,7 +95,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
 /// manifest as immediate process death, sometimes with no other error messages.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration
-/// (see [createLocalImageConfiguration]).
+/// (see [createLocalImageConfiguration]). If a [BuildContext] is not provided,
+/// the default configuration [ImageConfiguration.empty] is used instead.
 ///
 /// The returned future will not complete with error, even if precaching
 /// failed. The `onError` argument can be used to manually handle errors while
@@ -106,11 +107,13 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
 ///  * [ImageCache], which holds images that may be reused.
 Future<void> precacheImage(
   ImageProvider provider,
-  BuildContext context, {
+  BuildContext? context, {
   Size? size,
   ImageErrorListener? onError,
 }) {
-  final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
+  final ImageConfiguration config = context != null
+    ? createLocalImageConfiguration(context, size: size)
+    : ImageConfiguration.empty;
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   ImageStreamListener? listener;
