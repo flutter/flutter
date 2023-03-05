@@ -1043,6 +1043,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-embedder-api',
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1491,7 +1498,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
@@ -1499,14 +1506,14 @@ abstract class FlutterCommand extends Command<void> {
     }
     final DeviceManager deviceManager = globals.deviceManager!;
     List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       timeout: deviceDiscoveryTimeout,
     );
 
     if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
         globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        final List<Device> allDevices = await deviceManager.getAllDevices();
         if (allDevices.isNotEmpty) {
           globals.logger.printStatus('');
           globals.logger.printStatus('The following devices were found:');
@@ -1543,7 +1550,7 @@ abstract class FlutterCommand extends Command<void> {
         } else {
           // Show an error message asking the user to specify `-d all` if they
           // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          final List<Device> allDevices = await deviceManager.getAllDevices();
           globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
           globals.logger.printStatus('');
           await Device.printDevices(allDevices, globals.logger);
@@ -1607,18 +1614,20 @@ abstract class FlutterCommand extends Command<void> {
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
   ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
-    List<Device>? deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+    List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
     if (deviceList == null) {
       return null;
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;
