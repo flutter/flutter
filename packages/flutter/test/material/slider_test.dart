@@ -3718,16 +3718,15 @@ void main() {
       // (slider's left padding (overlayRadius), windowHeight / 2)
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
-      Widget buildWidget({required bool allowTapOnly}) => MaterialApp(
+
+      Widget buildWidget() => MaterialApp(
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
               return Slider(
                 value: value,
                 key: sliderKey,
-                allowedInteraction: allowTapOnly
-                    ? SliderInteraction.tapOnly
-                    : SliderInteraction.none,
+                allowedInteraction: SliderInteraction.tapOnly,
                 onChanged: (double newValue) {
                   setState(() {
                     value = newValue;
@@ -3739,30 +3738,11 @@ void main() {
         ),
       );
 
-      // disable all interactions
-      await tester.pumpWidget(buildWidget(allowTapOnly: false));
+      // allow tap only
+      await tester.pumpWidget(buildWidget());
 
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      // test slide
-      await gesture.moveTo(startOfTheSliderTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      // allow tap only
-      await tester.pumpWidget(buildWidget(allowTapOnly: true));
-      await tester.pumpAndSettle();
-
-      // test tap
-      await gesture.down(tester.getCenter(find.byKey(sliderKey)));
       await tester.pumpAndSettle();
       // changes from 1.0 -> 0.5.
       expect(value, 0.5);
@@ -3772,9 +3752,6 @@ void main() {
       await tester.pumpAndSettle();
       // has no effect, remains 0.5
       expect(value, 0.5);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('tapAndSlide', (WidgetTester tester) async {
@@ -3783,16 +3760,15 @@ void main() {
       // (slider's left padding (overlayRadius), windowHeight / 2)
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
-      Widget buildWidget({required bool allowTapAndSlide}) => MaterialApp(
+
+      Widget buildWidget() => MaterialApp(
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
               return Slider(
                 value: value,
                 key: sliderKey,
-                allowedInteraction: allowTapAndSlide
-                    ? SliderInteraction.tapAndSlide
-                    : SliderInteraction.none,
+                // allowedInteraction: SliderInteraction.tapAndSlide, // default
                 onChanged: (double newValue) {
                   setState(() {
                     value = newValue;
@@ -3804,29 +3780,10 @@ void main() {
         ),
       );
 
-      // disable all interactions
-      await tester.pumpWidget(buildWidget(allowTapAndSlide: false));
+      await tester.pumpWidget(buildWidget());
 
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      // test slide
-      await gesture.moveTo(startOfTheSliderTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      // allow tapAndSlide
-      await tester.pumpWidget(buildWidget(allowTapAndSlide: true));
-      await tester.pumpAndSettle();
-
-      await gesture.down(tester.getCenter(find.byKey(sliderKey)));
       await tester.pumpAndSettle();
       // changes from 1.0 -> 0.5.
       expect(value, 0.5);
@@ -3836,9 +3793,6 @@ void main() {
       await tester.pumpAndSettle();
       // changes from 0.5 -> 0.0.
       expect(value, 0.0);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('slideOnTrack', (WidgetTester tester) async {
@@ -3848,7 +3802,7 @@ void main() {
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
 
-      Widget buildApp({required bool allowSlideOnTrack}) {
+      Widget buildApp() {
         return MaterialApp(
           home: Material(
             child: Center(
@@ -3856,9 +3810,7 @@ void main() {
                 return Slider(
                   value: value,
                   key: sliderKey,
-                  allowedInteraction: allowSlideOnTrack
-                      ? SliderInteraction.slideOnTrack
-                      : SliderInteraction.none,
+                  allowedInteraction: SliderInteraction.slideOnTrack,
                   onChanged: (double newValue) {
                     setState(() {
                       value = newValue;
@@ -3871,29 +3823,10 @@ void main() {
         );
       }
 
-      // disallow all interactions
-      await tester.pumpWidget(buildApp(allowSlideOnTrack: false));
+      await tester.pumpWidget(buildApp());
 
       // test tap
-      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      // test slide on track
-      await gesture.moveTo(startOfTheSliderTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      // allow slideOnTrack
-      await tester.pumpWidget(buildApp(allowSlideOnTrack: true));
-
-      // test tap
-      await gesture.down(centerOfTheSlideTrack);
+      final TestGesture gesture =await tester.startGesture(centerOfTheSlideTrack);
       await tester.pumpAndSettle();
       // has no effect as tap is disabled, remains 1.0.
       expect(value, 1.0);
@@ -3903,9 +3836,6 @@ void main() {
       await tester.pumpAndSettle();
       // changes from 1.0 -> 0.5, changing the exact distance of slide.
       expect(value, 0.5);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('slideThumb', (WidgetTester tester) async {
@@ -3916,7 +3846,7 @@ void main() {
       const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
 
-      Widget buildApp({required bool allowSlideThumb}) {
+      Widget buildApp() {
         return MaterialApp(
           home: Material(
             child: Center(
@@ -3924,9 +3854,7 @@ void main() {
                 return Slider(
                   value: value,
                   key: sliderKey,
-                  allowedInteraction: allowSlideThumb
-                      ? SliderInteraction.slideThumb
-                      : SliderInteraction.none,
+                  allowedInteraction: SliderInteraction.slideThumb,
                   onChanged: (double newValue) {
                     setState(() {
                       value = newValue;
@@ -3939,38 +3867,10 @@ void main() {
         );
       }
 
-      // disallow all interactions
-      await tester.pumpWidget(buildApp(allowSlideThumb: false));
+      await tester.pumpWidget(buildApp());
 
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      // test slide on track
-      await gesture.moveTo(startOfTheSliderTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      // test slide thumb
-      await gesture.up();
-      await tester.pumpAndSettle();
-      await gesture.down(endOfTheSliderTrack); // where the thumb is
-      await gesture.moveTo(centerOfTheSlideTrack);
-      await tester.pumpAndSettle();
-      // has no effect, remains 1.0.
-      expect(value, 1.0);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      // allow slideOnTrack
-      await tester.pumpWidget(buildApp(allowSlideThumb: true));
-
-      // test tap
-      await gesture.down(centerOfTheSlideTrack);
       await tester.pumpAndSettle();
       // has no effect, remains 1.0.
       expect(value, 1.0);
@@ -3985,7 +3885,6 @@ void main() {
       await gesture.up();
       await gesture.down(endOfTheSliderTrack); // where the thumb is
       await tester.pump();
-
       // has no effect, remains 1.0.
       expect(value, 1.0);
       await gesture.moveTo(centerOfTheSlideTrack);

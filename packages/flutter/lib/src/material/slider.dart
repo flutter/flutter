@@ -58,12 +58,7 @@ enum SliderInteraction {
   /// Allows the user to interact with a [Slider] only by sliding the thumb.
   ///
   /// Taping and sliding interactions on the track are ignored.
-  slideThumb,
-  /// Disallows the user to interact with a [Slider] in any way.
-  ///
-  /// This is different from setting [Slider.onChanged] to null as the [Slider]
-  /// does not look disabled.
-  none;
+  slideThumb;
 
   bool _isSlideOnTrack() => this == SliderInteraction.slideOnTrack;
   bool _isSlideThumb() => this == SliderInteraction.slideThumb;
