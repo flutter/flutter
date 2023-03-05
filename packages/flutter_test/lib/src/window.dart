@@ -153,7 +153,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
   /// Deletes any existing test gesture settings and returns to using the real gesture settings.
   void clearGestureSettingsTestValue() {
-    _paddingTestValue = null;
+    _gestureSettings = null;
     onMetricsChanged?.call();
   }
 
