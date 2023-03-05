@@ -353,6 +353,7 @@ void main() {
             '--cache-sksl',
             '--purge-persistent-cache',
             '--enable-impeller',
+            '--enable-embedder-api',
           ].join(' '),
         ],
         environment: const <String, String>{
@@ -405,6 +406,7 @@ void main() {
         verboseSystemLogs: true,
         nullAssertions: true,
         enableImpeller: true,
+        enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},
     );

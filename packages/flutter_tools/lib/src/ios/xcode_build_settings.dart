@@ -181,7 +181,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
     //
-    // NOTE: this assumes that local engine binary paths are consistent with
+    // This assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
 

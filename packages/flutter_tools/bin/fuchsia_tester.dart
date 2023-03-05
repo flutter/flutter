@@ -138,7 +138,7 @@ Future<void> run(List<String> args) async {
     // TODO(dnfield): This should be injected.
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
-      tests.keys.toList(),
+      tests.keys.map(Uri.file).toList(),
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo(
           BuildMode.debug,

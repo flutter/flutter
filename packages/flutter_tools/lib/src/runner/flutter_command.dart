@@ -142,6 +142,9 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom VM Service port.
   static const String vmServicePortOption = 'vm-service-port';
 
+  /// The option name for a custom VM Service port.
+  static const String observatoryPortOption = 'observatory-port';
+
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
 
@@ -382,7 +385,14 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({ required bool verboseHelp }) {
     argParser.addOption(vmServicePortOption,
-        aliases: const <String>['observatory-port'],
+        help: '(deprecated; use host-vmservice-port instead) '
+              'Listen to the given port for a Dart VM Service connection.\n'
+              'Specifying port 0 (the default) will find a random free port.\n '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the VmService instance advertised on the command line.',
+        hide: !verboseHelp,
+    );
+    argParser.addOption(observatoryPortOption,
         help: '(deprecated; use host-vmservice-port instead) '
               'Listen to the given port for a Dart VM Service connection.\n'
               'Specifying port 0 (the default) will find a random free port.\n '
@@ -491,11 +501,13 @@ abstract class FlutterCommand extends Command<void> {
     return ddsEnabled;
   }();
 
-  bool get _hostVmServicePortProvided => (argResults?.wasParsed('vm-service-port') ?? false)
+  bool get _hostVmServicePortProvided => (argResults?.wasParsed(vmServicePortOption) ?? false)
+      || (argResults?.wasParsed(observatoryPortOption) ?? false)
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort = stringArgDeprecated('vm-service-port');
+    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
+                                  stringArgDeprecated(observatoryPortOption);
     final String? hostPort = stringArgDeprecated('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
@@ -540,7 +552,8 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if ((argResults?.wasParsed('vm-service-port') ?? false)
+    if ((argResults?.wasParsed(vmServicePortOption) ?? false)
+        && (argResults?.wasParsed(observatoryPortOption) ?? false)
         && (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit('Only one of "--vm-service-port" and '
         '"--host-vmservice-port" may be specified.');
@@ -1030,6 +1043,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-embedder-api',
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1478,7 +1498,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
@@ -1486,14 +1506,14 @@ abstract class FlutterCommand extends Command<void> {
     }
     final DeviceManager deviceManager = globals.deviceManager!;
     List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       timeout: deviceDiscoveryTimeout,
     );
 
     if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
         globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        final List<Device> allDevices = await deviceManager.getAllDevices();
         if (allDevices.isNotEmpty) {
           globals.logger.printStatus('');
           globals.logger.printStatus('The following devices were found:');
@@ -1530,7 +1550,7 @@ abstract class FlutterCommand extends Command<void> {
         } else {
           // Show an error message asking the user to specify `-d all` if they
           // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          final List<Device> allDevices = await deviceManager.getAllDevices();
           globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
           globals.logger.printStatus('');
           await Device.printDevices(allDevices, globals.logger);
@@ -1594,18 +1614,20 @@ abstract class FlutterCommand extends Command<void> {
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
   ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
-    List<Device>? deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+    List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
     if (deviceList == null) {
       return null;
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;

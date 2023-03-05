@@ -303,7 +303,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/flutter
     presubmit: false
-    timeout: 90
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
       dependencies: >-
@@ -321,7 +321,7 @@ targets:
 
   - name: Linux docs_test
     recipe: flutter/flutter
-    timeout: 60
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
       dependencies: >-
@@ -705,7 +705,8 @@ targets:
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "version:3.16.1"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "curl", "version": "version:7.64.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -718,7 +719,6 @@ targets:
 
   - name: Linux run_debug_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       xvfb: "1"
@@ -990,6 +990,7 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/121707
     timeout: 60
     properties:
       dependencies: >-
@@ -2638,7 +2639,6 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      add_recipes_cq: "true"
       validation: customer_testing
       validation_name: Customer testing
       tags: >
@@ -3926,7 +3926,6 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4016,6 +4015,7 @@ targets:
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/121231
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4194,7 +4194,6 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      add_recipes_cq: "true"
       validation: customer_testing
       validation_name: Customer testing
       tags: >
@@ -4399,7 +4398,6 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112939
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4419,7 +4417,6 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test_windows
-    bringup: true # New task
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
