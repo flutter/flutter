@@ -283,7 +283,8 @@ class AssetImage extends AssetBundleImageProvider {
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
-        final Iterable<AssetMetadata> candidateVariants = _getVariants(manifest, keyName);
+        final Iterable<AssetMetadata> candidateVariants =
+          manifest.getAssetVariants(keyName) ?? <AssetMetadata>[];
         final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
           configuration,
@@ -324,21 +325,6 @@ class AssetImage extends AssetBundleImageProvider {
     // completer for it to use when it does run.
     completer = Completer<AssetBundleImageKey>();
     return completer.future;
-  }
-
-  Iterable<AssetMetadata> _getVariants(AssetManifest manifest, String key) {
-    final Iterable<AssetMetadata>? result = manifest.getAssetVariants(key);
-    if (result == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset with key "$key".'),
-        ErrorDescription(
-'''
-The key was not found in the asset manifest.
-Make sure the key is correct and the appropriate file or folder is specified in pubspec.yaml.
-'''),
-      ]);
-    }
-    return result;
   }
 
   AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata> candidateVariants) {
