@@ -1748,11 +1748,7 @@ void main() {
     );
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
-      paints
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor),
+      paints..drrect(color: borderColor),
     );
     expect(
       tester.getTopLeft(find.byType(Table)),

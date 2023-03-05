@@ -469,24 +469,24 @@ class Border extends BoxBorder {
 
   bool get _colorIsUniform {
     final Color topColor = top.color;
-    return right.color == topColor && bottom.color == topColor && left.color == topColor;
+    return left.color == topColor && bottom.color == topColor && right.color == topColor;
   }
 
   bool get _widthIsUniform {
     final double topWidth = top.width;
-    return right.width == topWidth && bottom.width == topWidth && left.width == topWidth;
+    return left.width == topWidth && bottom.width == topWidth && right.width == topWidth;
   }
 
   bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
-    return right.style == topStyle && bottom.style == topStyle && left.style == topStyle;
+    return left.style == topStyle && bottom.style == topStyle && right.style == topStyle;
   }
 
   bool get _strokeAlignIsUniform {
     final double topStrokeAlign = top.strokeAlign;
-    return right.strokeAlign == topStrokeAlign
+    return left.strokeAlign == topStrokeAlign
         && bottom.strokeAlign == topStrokeAlign
-        && left.strokeAlign == topStrokeAlign;
+        && right.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -781,17 +781,17 @@ class BorderDirectional extends BoxBorder {
 
   bool get _colorIsUniform {
     final Color topColor = top.color;
-    return end.color == topColor && bottom.color == topColor && start.color == topColor;
+    return start.color == topColor && bottom.color == topColor && end.color == topColor;
   }
 
   bool get _widthIsUniform {
     final double topWidth = top.width;
-    return end.width == topWidth && bottom.width == topWidth && start.width == topWidth;
+    return start.width == topWidth && bottom.width == topWidth && end.width == topWidth;
   }
 
   bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
-    return end.style == topStyle && bottom.style == topStyle && start.style == topStyle;
+    return start.style == topStyle && bottom.style == topStyle && end.style == topStyle;
   }
 
   bool get _strokeAlignIsUniform {

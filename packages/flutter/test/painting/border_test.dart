@@ -264,8 +264,8 @@ void main() {
       // Border.all supports all StrokeAlign values.
       // Border() supports [BorderSide.strokeAlignInside] only.
       const Border(
-        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter, color: Color(0xff000000)),
-        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside, color: Color(0xff000001)),
+        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter, color: Color(0xff000001)),
+        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside, color: Color(0xff000002)),
       ).paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0));
     } on FlutterError catch (e) {
       error = e;
@@ -299,5 +299,21 @@ void main() {
     const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
     const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
     expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
+
+    const Border nonUniformBorder = Border(
+      left: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+    expect(nonUniformBorder.dimensions, const EdgeInsets.fromLTRB(5, 5, 0, 20));
+
+    const BorderDirectional nonUniformBorderDirectional = BorderDirectional(
+      start: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+    expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
   });
 }
