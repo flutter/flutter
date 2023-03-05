@@ -117,7 +117,10 @@ typedef AsyncListenableBuilder<T extends Listenable> = Widget Function(
 class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
   /// Creates a [ListenableFutureBuilder].
   ///
-  /// The [listenable] and [builder] arguments must not be null.
+  /// The [listenable] and [builder] arguments must not be null. [listenable]
+  /// should perform initialization logic for the [Listenable] and return the
+  /// instance.
+  ///
   /// The [child] is optional but is good practice to use if part of the widget
   /// subtree does not depend on the value of the [listenable].
   const ListenableFutureBuilder({
@@ -127,9 +130,21 @@ class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
     super.key,
   });
 
-  ///Set this to a fixed function. The widget will only call this once
+  /// Instantiates the [Future] whose return value you depend on in order to build.
+  /// This should perform initialization logic for the [Listenable] and return it
   final Future<T> Function() listenable;
 
+  /// A [AsyncListenableBuilder] which builds a widget depending on the
+  /// [Listenable] such as a [ChangeNotifier]
+  ///
+  /// Exposes a [AsyncSnapshot] which contains the [Listenable] instance once the
+  /// initialization completes. It is important to check the `connectionState` of the 
+  /// snapshot, and the `data` and `error` properties of the snapshot to determine 
+  /// if the [Listenable] is ready to be used. The builder should usually return a
+  /// progress indicator until the connection state is [ConnectionState.done].
+  ///
+  /// Can incorporate a value-independent widget subtree
+  /// from the [child] parameter into the returned widget tree.
   final AsyncListenableBuilder builder;
 
   final Widget? child;
