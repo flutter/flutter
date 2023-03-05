@@ -327,9 +327,8 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   Iterable<AssetMetadata> _getVariants(AssetManifest manifest, String key) {
-    try {
-      return manifest.getAssetVariants(key);
-    } catch (e) {
+    final Iterable<AssetMetadata>? result = manifest.getAssetVariants(key);
+    if (result == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Unable to load asset with key "$key".'),
         ErrorDescription(
@@ -339,6 +338,7 @@ Make sure the key is correct and the appropriate file or folder is specified in 
 '''),
       ]);
     }
+    return result;
   }
 
   AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata> candidateVariants) {
