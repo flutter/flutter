@@ -140,7 +140,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag('enable-dart-profiling',
         defaultsTo: true,
         help: 'Whether the Dart VM sampling CPU profiler is enabled. This flag '
-              'is only meaningnful in debug and profile builds.',
+              'is only meaningful in debug and profile builds.',
       )
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -179,9 +179,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArgDeprecated('trace-startup');
@@ -195,6 +197,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArgDeprecated('track-widget-creation');
   bool get enableImpeller => boolArgDeprecated('enable-impeller');
   bool get uninstallFirst => boolArgDeprecated('uninstall-first');
+  bool get enableEmbedderApi => boolArgDeprecated('enable-embedder-api');
 
   @override
   bool get reportNullSafety => true;
@@ -233,6 +236,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -279,7 +283,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        serveObservatory: boolArgDeprecated('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     }
   }
