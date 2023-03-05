@@ -7,12 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListenableFutureBuilder updates UI when future resolves',
-      (tester) async {
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          listenable: () async => ValueNotifier(42),
-          builder: (context, child, snapshot) =>
+          listenable: () async => ValueNotifier<int>(42),
+          builder: (BuildContext context, Widget? child,
+                  AsyncSnapshot<ValueNotifier<int>> snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text('${snapshot.data!.value}')
                   : const CircularProgressIndicator(),
@@ -33,7 +34,7 @@ void main() {
   });
 
   testWidgets('ListenableFutureBuilder updates UI when future errors',
-      (tester) async {
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
@@ -41,12 +42,13 @@ void main() {
             const Duration(milliseconds: 500),
             () => throw Exception('Oops'),
           ),
-          builder: (context, child, snapshot) {
+          builder: (BuildContext context, Widget? child,
+              AsyncSnapshot<Listenable> snapshot) {
             if (snapshot.connectionState == ConnectionState.done &&
                 snapshot.error != null) {
               final dynamic error = snapshot.error as dynamic;
               // ignore: avoid_dynamic_calls
-              final errorMessage = 'Error: ${error.message}';
+              final String errorMessage = 'Error: ${error.message}';
               return Text(errorMessage);
             } else {
               return const CircularProgressIndicator();
@@ -69,12 +71,13 @@ void main() {
   });
 
   testWidgets('ListenableFutureBuilder updates UI when future returns null',
-      (tester) async {
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<String?>>(
           listenable: () async => ValueNotifier<String?>(null),
-          builder: (context, child, snapshot) =>
+          builder: (BuildContext context, Widget? child,
+                  AsyncSnapshot<ValueNotifier<String?>> snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text(
                       snapshot.data?.value == null
@@ -100,15 +103,16 @@ void main() {
 
   testWidgets(
       'ListenableFutureBuilder updates UI when future takes a while to resolve',
-      (tester) async {
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
-          listenable: () async => Future.delayed(
+          listenable: () async => Future<ValueNotifier<int>>.delayed(
             const Duration(seconds: 2),
-            () => ValueNotifier(42),
+            () => ValueNotifier<int>(42),
           ),
-          builder: (context, child, snapshot) =>
+          builder: (BuildContext context, Widget? child,
+                  AsyncSnapshot<ValueNotifier<int>> snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text('${snapshot.data!.value}')
                   : const CircularProgressIndicator(),
@@ -129,14 +133,15 @@ void main() {
   });
 
   testWidgets('ListenableFutureBuilder updates UI when the notifier is changed',
-      (tester) async {
-    final notifier = ValueNotifier<int>(0);
+      (WidgetTester tester) async {
+    final ValueNotifier<int> notifier = ValueNotifier<int>(0);
 
     await tester.pumpWidget(
       MaterialApp(
         home: ListenableFutureBuilder<ValueNotifier<int>>(
           listenable: () async => notifier,
-          builder: (context, child, snapshot) =>
+          builder: (BuildContext context, Widget? child,
+                  AsyncSnapshot<ValueNotifier<int>> snapshot) =>
               snapshot.connectionState == ConnectionState.done
                   ? Text('${snapshot.data!.value}')
                   : const CircularProgressIndicator(),

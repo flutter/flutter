@@ -138,15 +138,22 @@ class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
   /// [Listenable] such as a [ChangeNotifier]
   ///
   /// Exposes a [AsyncSnapshot] which contains the [Listenable] instance once the
-  /// initialization completes. It is important to check the `connectionState` of the 
-  /// snapshot, and the `data` and `error` properties of the snapshot to determine 
+  /// initialization completes. It is important to check the `connectionState` of the
+  /// snapshot, and the `data` and `error` properties of the snapshot to determine
   /// if the [Listenable] is ready to be used. The builder should usually return a
   /// progress indicator until the connection state is [ConnectionState.done].
   ///
-  /// Can incorporate a value-independent widget subtree
-  /// from the [child] parameter into the returned widget tree.
-  final AsyncListenableBuilder builder;
+  /// Can incorporate the [child] parameter into the returned widget tree to improve
+  /// performance.
+  final AsyncListenableBuilder<T> builder;
 
+  /// A predefined widget which is passed back to the [builder].
+  ///
+  /// This argument is optional and can be null if the entire widget subtree the
+  /// [builder] builds depends on the value of the [Listenable]. For
+  /// example, in the case where the [Listenable] has a [String] and the
+  /// [builder] returns a [Text] widget with the current [String] value, there
+  /// would be no useful [child].
   final Widget? child;
 
   @override
