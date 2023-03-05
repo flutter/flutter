@@ -3795,7 +3795,7 @@ void main() {
       expect(value, 0.0);
     });
 
-    testWidgets('slideOnTrack', (WidgetTester tester) async {
+    testWidgets('slideOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -3810,7 +3810,7 @@ void main() {
                 return Slider(
                   value: value,
                   key: sliderKey,
-                  allowedInteraction: SliderInteraction.slideOnTrack,
+                  allowedInteraction: SliderInteraction.slideOnly,
                   onChanged: (double newValue) {
                     setState(() {
                       value = newValue;
@@ -3831,7 +3831,7 @@ void main() {
       // has no effect as tap is disabled, remains 1.0.
       expect(value, 1.0);
 
-      // test slide on track
+      // test slide only
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pumpAndSettle();
       // changes from 1.0 -> 0.5, changing the exact distance of slide.
@@ -3875,7 +3875,7 @@ void main() {
       // has no effect, remains 1.0.
       expect(value, 1.0);
 
-      // test slide on track
+      // test slide only
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pumpAndSettle();
       // has no effect, remains 1.0.

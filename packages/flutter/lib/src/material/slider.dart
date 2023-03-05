@@ -41,7 +41,7 @@ enum SliderInteraction {
   ///
   /// Essentially all possible interactions are allowed.
   ///
-  /// This is different from [SliderInteraction.slideOnTrack] as when you try
+  /// This is different from [SliderInteraction.slideOnly] as when you try
   /// to slide anywhere other than the thumb, the thumb will move to the first
   /// point of contact.
   tapAndSlide,
@@ -54,13 +54,13 @@ enum SliderInteraction {
   /// the track.
   ///
   /// Tapping interaction is ignored.
-  slideOnTrack,
+  slideOnly,
   /// Allows the user to interact with a [Slider] only by sliding the thumb.
   ///
   /// Taping and sliding interactions on the track are ignored.
   slideThumb;
 
-  bool _isSlideOnTrack() => this == SliderInteraction.slideOnTrack;
+  bool _isSlideOnly() => this == SliderInteraction.slideOnly;
   bool _isSlideThumb() => this == SliderInteraction.slideThumb;
   bool _isTapAndSlide() => this == SliderInteraction.tapAndSlide;
   bool _isTapOnly() => this == SliderInteraction.tapOnly;
@@ -1486,7 +1486,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _active = true;
         _currentDragValue = _getValueFromGlobalPosition(globalPosition);
         onChanged!(_discretize(_currentDragValue));
-      } else if (allowedInteraction._isSlideOnTrack()) {
+      } else if (allowedInteraction._isSlideOnly()) {
         _active = true;
         _currentDragValue = value;
       }
@@ -1540,9 +1540,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    // for slide on track, there is no start interaction trigger, so _active
+    // for slide only, there is no start interaction trigger, so _active
     // will be false.
-    if ((_active || allowedInteraction._isSlideOnTrack()) && isInteractive
+    if ((_active || allowedInteraction._isSlideOnly()) && isInteractive
         && allowedInteraction._canSlide()) {
       final double valueDelta = details.primaryDelta! / _trackRect.width;
       switch (textDirection) {
