@@ -15,6 +15,7 @@ import 'package:flutter/semantics.dart';
 
 import 'debug.dart';
 import 'layer.dart';
+import 'proxy_box.dart';
 
 export 'package:flutter/foundation.dart' show
   DiagnosticPropertiesBuilder,
@@ -1485,7 +1486,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void adoptChild(RenderObject child) {
-    assert(_debugCanPerformMutations);
     setupParentData(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
@@ -1499,7 +1499,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void dropChild(RenderObject child) {
-    assert(_debugCanPerformMutations);
     assert(child.parentData != null);
     child._cleanRelayoutBoundary();
     child.parentData!.detach();
@@ -1642,7 +1641,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
 
         if (!activeLayoutRoot._debugMutationsLocked) {
-          final AbstractNode? p = activeLayoutRoot.parent;
+          final AbstractNode? p = activeLayoutRoot.debugLayoutParent;
           activeLayoutRoot = p is RenderObject ? p : null;
         } else {
           // activeLayoutRoot found.
@@ -1719,6 +1718,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       ]);
     }());
     return result;
+  }
+
+  /// The [RenderObject] that's expected to call [layout] on this [RenderObject]
+  /// in its [performLayout] implementation.
+  ///
+  /// This method is used to implement an assert that ensures the render subtree
+  /// actively performing layout can not get accidently mutated. It's only
+  /// implemented in debug mode and always returns null in release mode.
+  ///
+  /// The default implementation returns [parent] and overriding is rarely
+  /// needed. A [RenderObject] subclass that expects its
+  /// [RenderObject.performLayout] to be called from a different [RenderObject]
+  /// that's not its [parent] should override this property to return the actual
+  /// layout parent.
+  @protected
+  RenderObject? get debugLayoutParent {
+    RenderObject? layoutParent;
+    assert(() {
+      final AbstractNode? parent = this.parent;
+      layoutParent = parent is RenderObject? ? parent : null;
+      return true;
+    }());
+    return layoutParent;
   }
 
   @override
@@ -3227,7 +3249,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
 
-    final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
+    bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
     final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
     final bool explicitChildNode = config.explicitChildNodes || parent is! RenderObject;
@@ -3235,6 +3257,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final Map<SemanticsConfiguration, _InterestingSemanticsFragment> configToFragment = <SemanticsConfiguration, _InterestingSemanticsFragment>{};
     final List<_InterestingSemanticsFragment> mergeUpFragments = <_InterestingSemanticsFragment>[];
     final List<List<_InterestingSemanticsFragment>> siblingMergeFragmentGroups = <List<_InterestingSemanticsFragment>>[];
+    final bool hasTags = config.tagsForChildren?.isNotEmpty ?? false;
     visitChildrenForSemantics((RenderObject renderChild) {
       assert(!_needsLayout);
       final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
@@ -3250,7 +3273,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       for (final _InterestingSemanticsFragment fragment in parentFragment.mergeUpFragments) {
         fragment.addAncestor(this);
-        fragment.addTags(config.tagsForChildren);
+        if (hasTags) {
+          fragment.addTags(config.tagsForChildren!);
+        }
         if (hasChildConfigurationsDelegate && fragment.config != null) {
           // This fragment need to go through delegate to determine whether it
           // merge up or not.
@@ -3266,7 +3291,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         for (final List<_InterestingSemanticsFragment> siblingMergeGroup in parentFragment.siblingMergeGroups) {
           for (final _InterestingSemanticsFragment siblingMergingFragment in siblingMergeGroup) {
             siblingMergingFragment.addAncestor(this);
-            siblingMergingFragment.addTags(config.tagsForChildren);
+            if (hasTags) {
+              siblingMergingFragment.addTags(config.tagsForChildren!);
+            }
           }
           siblingMergeFragmentGroups.add(siblingMergeGroup);
         }
@@ -3279,14 +3306,25 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
         fragment.markAsExplicit();
       }
-    } else if (hasChildConfigurationsDelegate && childConfigurations.isNotEmpty) {
+    } else if (hasChildConfigurationsDelegate) {
       final ChildSemanticsConfigurationsResult result = config.childConfigurationsDelegate!(childConfigurations);
       mergeUpFragments.addAll(
-        result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!),
+        result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
+          final _InterestingSemanticsFragment? fragment = configToFragment[config];
+          if (fragment == null) {
+            // Parent fragment of Incomplete fragments can't be a forking
+            // fragment since they need to be merged.
+            producesForkingFragment = false;
+            return _IncompleteSemanticsFragment(config: config, owner: this);
+          }
+          return fragment;
+        }),
       );
       for (final Iterable<SemanticsConfiguration> group in result.siblingMergeGroups) {
         siblingMergeFragmentGroups.add(
-          group.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!).toList()
+          group.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
+            return configToFragment[config] ?? _IncompleteSemanticsFragment(config: config, owner: this);
+          }).toList(),
         );
       }
     }
@@ -3619,17 +3657,13 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null) {
-      _child!.attach(owner);
-    }
+    _child?.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null) {
-      _child!.detach();
-    }
+    _child?.detach();
   }
 
   @override
@@ -4167,10 +4201,10 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   Set<SemanticsTag>? _tagsForChildren;
 
   /// Tag all children produced by [compileChildren] with `tags`.
-  void addTags(Iterable<SemanticsTag>? tags) {
-    if (tags == null || tags.isEmpty) {
-      return;
-    }
+  ///
+  /// `tags` must not be empty.
+  void addTags(Iterable<SemanticsTag> tags) {
+    assert(tags.isNotEmpty);
     _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren!.addAll(tags);
   }
@@ -4261,6 +4295,48 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     _children.addAll(fragments);
+  }
+}
+
+/// A fragment with partial information that must not form an explicit
+/// semantics node without merging into another _SwitchableSemanticsFragment.
+///
+/// This fragment is generated from synthetic SemanticsConfiguration returned from
+/// [SemanticsConfiguration.childConfigurationsDelegate].
+class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
+  _IncompleteSemanticsFragment({
+    required this.config,
+    required super.owner,
+  }) : super(dropsSemanticsOfPreviousSiblings: false);
+
+  @override
+  void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
+    assert(false, 'This fragment must be a leaf node');
+  }
+
+  @override
+  void compileChildren({
+    required Rect? parentSemanticsClipRect,
+    required Rect? parentPaintClipRect,
+    required double elevationAdjustment,
+    required List<SemanticsNode> result,
+    required List<SemanticsNode> siblingNodes,
+  }) {
+    // There is nothing to do because this fragment must be a leaf node and
+    // must not be explicit.
+  }
+
+  @override
+  final SemanticsConfiguration config;
+
+  @override
+  void markAsExplicit() {
+    assert(
+      false,
+      'SemanticsConfiguration created in '
+      'SemanticsConfiguration.childConfigurationsDelegate must not produce '
+      'its own semantics node'
+    );
   }
 }
 
@@ -4539,6 +4615,17 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       }
       _ensureConfigIsWritable();
       _config.absorb(fragment.config!);
+    }
+  }
+
+  @override
+  void addTags(Iterable<SemanticsTag> tags) {
+    super.addTags(tags);
+    // _ContainerSemanticsFragments add their tags to child fragments through
+    // this method. This fragment must make sure its _config is in sync.
+    if (tags.isNotEmpty) {
+      _ensureConfigIsWritable();
+      tags.forEach(_config.addTagForChildren);
     }
   }
 

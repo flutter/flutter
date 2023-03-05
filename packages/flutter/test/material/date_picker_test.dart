@@ -20,6 +20,7 @@ void main() {
   late SelectableDayPredicate? selectableDayPredicate;
   late DatePickerEntryMode initialEntryMode;
   late DatePickerMode initialCalendarMode;
+  late DatePickerEntryMode currentMode;
 
   String? cancelText;
   String? confirmText;
@@ -56,6 +57,7 @@ void main() {
     fieldLabelText = null;
     helpText = null;
     keyboardType = null;
+    currentMode = initialEntryMode;
   });
 
   Future<void> prepareDatePicker(
@@ -101,6 +103,9 @@ void main() {
       fieldLabelText: fieldLabelText,
       helpText: helpText,
       keyboardType: keyboardType,
+      onDatePickerModeChange: (DatePickerEntryMode value) {
+        currentMode = value;
+      },
       builder: (BuildContext context, Widget? child) {
         return Directionality(
           textDirection: textDirection,
@@ -1369,6 +1374,19 @@ void main() {
     expect(find.byType(TextField), findsNothing);
     expect(find.byIcon(Icons.edit), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('Test Callback on Toggle of DatePicker Mode', (WidgetTester tester) async {
+    prepareDatePicker(tester, (Future<DateTime?> date) async {
+      await tester.tap(find.byIcon(Icons.edit));
+      expect(currentMode, DatePickerEntryMode.input);
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      expect(currentMode, DatePickerEntryMode.calendar);
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+    });
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {

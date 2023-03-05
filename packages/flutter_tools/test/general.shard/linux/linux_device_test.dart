@@ -67,7 +67,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
@@ -78,7 +78,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('LinuxDevice: devices', () async {
@@ -89,7 +89,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, hasLength(1));
+    ).devices(), hasLength(1));
   });
 
   testWithoutContext('LinuxDevice has well known id "linux"', () async {

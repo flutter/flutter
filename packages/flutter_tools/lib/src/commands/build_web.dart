@@ -28,26 +28,20 @@ class BuildWebCommand extends BuildSubCommand {
     usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
-    usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
-    argParser.addFlag('csp',
-      negatable: false,
-      help: 'Disable dynamic generation of code in the generated output. '
-            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
-    );
-    argParser.addFlag(
-      'source-maps',
-      help: 'Generate a sourcemap file. These can be used by browsers '
-            'to view and debug the original source code of a compiled and minified Dart '
-            'application.'
-    );
-    argParser.addFlag(
-      'wasm',
-      help: 'Compile to WebAssembly rather than Javascript (experimental).'
-    );
 
+    //
+    // Flutter web-specific options
+    //
+    argParser.addSeparator('Flutter web options');
+    argParser.addOption('base-href',
+      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is done to web/index.html file if this flag is not provided. '
+          'The value has to start and end with a slash "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
+    );
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
@@ -65,11 +59,22 @@ class BuildWebCommand extends BuildSubCommand {
                        'is not desirable',
       },
     );
-    argParser.addOption('base-href',
-      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
+    usesWebRendererOption();
+
+    //
+    // JavaScript compilation options
+    //
+    argParser.addSeparator('JavaScript compilation options');
+    argParser.addFlag('csp',
+      negatable: false,
+      help: 'Disable dynamic generation of code in the generated output. '
+            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
+    argParser.addFlag(
+      'source-maps',
+      help: 'Generate a sourcemap file. These can be used by browsers '
+            'to view and debug the original source code of a compiled and minified Dart '
+            'application.'
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
@@ -84,6 +89,24 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Disables the frequency based minifier. '
           'Useful for comparing the output between builds.'
     );
+
+    //
+    // Experimental options
+    //
+    if (featureFlags.isFlutterWebWasmEnabled) {
+      argParser.addSeparator('Experimental options');
+      argParser.addFlag(
+        'wasm',
+        help: 'Compile to WebAssembly rather than JavaScript.',
+        negatable: false,
+      );
+    } else {
+      // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
+      argParser.addFlag(
+        'wasm',
+        hide: true,
+      );
+    }
   }
 
   final FileSystem _fileSystem;
@@ -108,6 +131,12 @@ class BuildWebCommand extends BuildSubCommand {
     if (!featureFlags.isWebEnabled) {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
+
+    final bool wasmRequested = boolArg('wasm')!;
+    if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
+      throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+    }
+
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArgDeprecated('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
@@ -146,7 +175,7 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
-      boolArgDeprecated('wasm'),
+      wasmRequested,
       baseHref: baseHref,
       dart2jsOptimization: stringArgDeprecated('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,

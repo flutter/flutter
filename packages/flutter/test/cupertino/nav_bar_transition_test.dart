@@ -625,6 +625,71 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
+  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
+    const Widget userMiddle = Placeholder();
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoSliverNavigationBar(
+        middle: userMiddle,
+        alwaysShowMiddle: false,
+      ),
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
+  });
+
+  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
+    const Widget userMiddle = Placeholder();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Page 1'),
+                middle: userMiddle,
+                alwaysShowMiddle: false,
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is visible when nav bar is collapsed.
+    final RenderAnimatedOpacity userMiddleOpacity = tester
+        .element(find.byWidget(userMiddle))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(userMiddleOpacity.opacity.value, 1.0);
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+          title: 'Page 2',
+          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+        ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
+  });
+
   testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
