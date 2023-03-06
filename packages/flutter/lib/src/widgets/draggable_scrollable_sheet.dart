@@ -918,8 +918,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   _DraggableSheetExtent get extent => controller.extent;
 
   bool shouldScrollList(double direction) =>
-      pixels > 0.0 &&
-      (pixels < maxScrollExtent || direction < 0) ||
+      pixels > 0.0 && (pixels < maxScrollExtent || direction < 0) ||
       extent.isAtMin && direction < 0 ||
       extent.isAtMax && direction > 0;
 

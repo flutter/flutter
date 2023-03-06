@@ -205,8 +205,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Overrides of this method must call `super.absorb` after setting any
   /// metrics-related or activity-related state, since this method may restart
   /// the activity and scroll activities tend to use those metrics when being
-  /// restarted. This includes updating the delegates of absorbed scroll
-  /// activities if they use themselves as a [ScrollActivityDelegate].
+  /// restarted. This includes updating the delegate of an absorbed scroll
+  /// activity if they use themselves as a [ScrollActivityDelegate].
   ///
   /// Overrides of this method might need to start an [IdleScrollActivity] if
   /// they are unable to absorb the activity from the other [ScrollPosition].
