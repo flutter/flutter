@@ -602,17 +602,17 @@ void main() {
         text: TextSpan(
           style: textStyle,
           children: <TextSpan>[
-            const TextSpan(text: 'hello world${rleChar}${rloChar} '),
+            TextSpan(text: 'hello world$rleChar$rloChar '),
             TextSpan(
               text: 'BOY',
               recognizer: LongPressGestureRecognizer()..onLongPress = () { },
             ),
-            const TextSpan(text: ' HOW DO${pdfChar} you ${rloChar} DO '),
+            TextSpan(text: ' HOW DO$pdfChar you $rloChar DO '),
             TextSpan(
               text: 'SIR',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
-            const TextSpan(text: '${pdfChar}${pdfChar} good bye'),
+            TextSpan(text: '$pdfChar$pdfChar good bye'),
           ],
         ),
         textDirection: TextDirection.ltr,
