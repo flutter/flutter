@@ -52,12 +52,12 @@ abstract class PlaceholderSpan extends InlineSpan {
   final TextBaseline? baseline;
 
   /// [PlaceholderSpan]s are flattened to an object replacement character
-  /// (Unicode.OBJECTREPLACEMENTCHAR) in the plain text representation
+  /// (Unicode.ORC) in the plain text representation
   /// when `includePlaceholders` is true.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.writeCharCode(Unicode.OBJECTREPLACEMENTCHAR);
+      buffer.writeCharCode(Unicode.ORC);
     }
   }
 
@@ -70,7 +70,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// to be able to construct a [SemanticsNode].
   ///
   /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (Unicode.OBJECTREPLACEMENTCHAR) that is inserted to represent it.
+  /// replacement character (Unicode.ORC) that is inserted to represent it.
   ///
   /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {

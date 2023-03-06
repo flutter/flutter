@@ -137,7 +137,7 @@ class WidgetSpan extends PlaceholderSpan {
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
     offset.increment(1);
-    return Unicode.OBJECTREPLACEMENTCHAR;
+    return Unicode.ORC;
   }
 
   @override

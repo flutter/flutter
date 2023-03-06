@@ -117,7 +117,7 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  static final String _placeholderCharacter = String.fromCharCode(Unicode.OBJECTREPLACEMENTCHAR);
+  static final String _placeholderCharacter = String.fromCharCode(Unicode.ORC);
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedLabel;
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -181,7 +181,7 @@ class RenderParagraph extends RenderBox
   }
 
   // Should be null if selection is not enabled, i.e. _registrar = null. The
-  // paragraph splits on [Unicode.OBJECTREPLACEMENTCHAR], and stores each
+  // paragraph splits on [Unicode.ORC], and stores each
   // fragment in this list.
   List<_SelectableFragment>? _lastSelectableFragments;
 

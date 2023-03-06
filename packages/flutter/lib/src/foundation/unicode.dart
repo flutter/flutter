@@ -96,10 +96,10 @@ class Unicode {
   static const int ALM = 0x061C;
 
   /// `U+FFFC Object Replacement Character`
-  static const int OBJECTREPLACEMENTCHAR = 0xFFFC;
+  static const int ORC = 0xFFFC;
 
   /// `U+FFFD Replacement Character`
-  static const int REPLACEMENTCHAR = 0xFFFD;
+  static const int RC = 0xFFFD;
 
   // TODO(gspencergoog): replace when we expose this ICU information.
   /// Check if the given code unit is a white space or separator
