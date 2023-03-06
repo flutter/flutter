@@ -2241,7 +2241,7 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(fontSize: 10.0),
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           ),
         ),
       ),
@@ -6913,20 +6913,20 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
+                style: const TextStyle(fontSize: 10.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
+              style: TextStyle(fontSize: 20.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 30.0),
+                style: const TextStyle(fontSize: 30.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
@@ -6935,17 +6935,17 @@ void main() {
       ),
     );
 
-    // The test font extends 0.25 * fontSize below the baseline.
+    // The Ahem font extends 0.2 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
-    //  A    abc  B
-    //  -------------  baseline
-    //  2.5  5    7.5  space below the baseline = 0.25 * fontSize
-    //  -------------  rowBottomY
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 5.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.5);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -6966,19 +6966,19 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
+                style: const TextStyle(fontSize: 10.0),
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
+              style: TextStyle(fontSize: 20.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 30.0),
+                style: const TextStyle(fontSize: 30.0),
               ),
             ),
           ],
@@ -6986,18 +6986,18 @@ void main() {
       ),
     );
 
-    // The test font extends 0.25 * fontSize below the baseline.
+    // The Ahem font extends 0.2 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
-    //  A    abc  B
-    //  -------------  baseline
-    //  2.5  5    7.5  space below the baseline = 0.25 * fontSize
-    //  -------------  rowBottomY
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
     // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 5.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.5);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
