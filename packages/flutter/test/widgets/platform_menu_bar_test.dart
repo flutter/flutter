@@ -349,7 +349,7 @@ List<PlatformMenuItem> createTestMenus({
   return result;
 }
 
-const expectedStructure = <String, Object?>{
+const Map<String, Object?> expectedStructure = <String, Object?>{
   '0': <Map<String, Object?>>[
     <String, Object?>{
       'id': 2,
