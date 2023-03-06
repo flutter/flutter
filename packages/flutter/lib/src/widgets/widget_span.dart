@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
+import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/painting.dart';
 
 import 'framework.dart';
