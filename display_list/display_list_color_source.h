@@ -63,10 +63,9 @@ enum class DlColorSourceType {
 #endif  // IMPELLER_ENABLE_3D
 };
 
-class DlColorSource
-    : public DlAttribute<DlColorSource, SkShader, DlColorSourceType> {
+class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
  public:
-  static std::shared_ptr<DlColorSource> MakeLinear(
+  static std::shared_ptr<DlLinearGradientColorSource> MakeLinear(
       const SkPoint start_point,
       const SkPoint end_point,
       uint32_t stop_count,
@@ -75,7 +74,7 @@ class DlColorSource
       DlTileMode tile_mode,
       const SkMatrix* matrix = nullptr);
 
-  static std::shared_ptr<DlColorSource> MakeRadial(
+  static std::shared_ptr<DlRadialGradientColorSource> MakeRadial(
       SkPoint center,
       SkScalar radius,
       uint32_t stop_count,
@@ -84,7 +83,7 @@ class DlColorSource
       DlTileMode tile_mode,
       const SkMatrix* matrix = nullptr);
 
-  static std::shared_ptr<DlColorSource> MakeConical(
+  static std::shared_ptr<DlConicalGradientColorSource> MakeConical(
       SkPoint start_center,
       SkScalar start_radius,
       SkPoint end_center,
@@ -95,7 +94,7 @@ class DlColorSource
       DlTileMode tile_mode,
       const SkMatrix* matrix = nullptr);
 
-  static std::shared_ptr<DlColorSource> MakeSweep(
+  static std::shared_ptr<DlSweepGradientColorSource> MakeSweep(
       SkPoint center,
       SkScalar start,
       SkScalar end,
@@ -190,10 +189,6 @@ class DlColorColorSource final : public DlColorSource {
 
   DlColor color() const { return color_; }
 
-  sk_sp<SkShader> skia_object() const override {
-    return SkShaders::Color(color_);
-  }
-
  protected:
   bool equals_(DlColorSource const& other) const override {
     FML_DCHECK(other.type() == DlColorSourceType::kColor);
@@ -262,15 +257,6 @@ class DlImageColorSource final : public SkRefCnt,
   DlTileMode horizontal_tile_mode() const { return horizontal_tile_mode_; }
   DlTileMode vertical_tile_mode() const { return vertical_tile_mode_; }
   DlImageSampling sampling() const { return sampling_; }
-
-  virtual sk_sp<SkShader> skia_object() const override {
-    if (!image_->skia_image()) {
-      return nullptr;
-    }
-    return image_->skia_image()->makeShader(ToSk(horizontal_tile_mode_),
-                                            ToSk(vertical_tile_mode_),
-                                            ToSk(sampling_), matrix_ptr());
-  }
 
  protected:
   bool equals_(DlColorSource const& other) const override {
@@ -386,13 +372,6 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
   const SkPoint& start_point() const { return start_point_; }
   const SkPoint& end_point() const { return end_point_; }
 
-  sk_sp<SkShader> skia_object() const override {
-    SkPoint pts[] = {start_point_, end_point_};
-    const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
-    return SkGradientShader::MakeLinear(pts, sk_colors, stops(), stop_count(),
-                                        ToSk(tile_mode()), 0, matrix_ptr());
-  }
-
  protected:
   virtual const void* pod() const override { return this + 1; }
 
@@ -453,13 +432,6 @@ class DlRadialGradientColorSource final : public DlGradientColorSourceBase {
 
   SkPoint center() const { return center_; }
   SkScalar radius() const { return radius_; }
-
-  sk_sp<SkShader> skia_object() const override {
-    const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
-    return SkGradientShader::MakeRadial(center_, radius_, sk_colors, stops(),
-                                        stop_count(), ToSk(tile_mode()), 0,
-                                        matrix_ptr());
-  }
 
  protected:
   virtual const void* pod() const override { return this + 1; }
@@ -524,13 +496,6 @@ class DlConicalGradientColorSource final : public DlGradientColorSourceBase {
   SkScalar start_radius() const { return start_radius_; }
   SkPoint end_center() const { return end_center_; }
   SkScalar end_radius() const { return end_radius_; }
-
-  sk_sp<SkShader> skia_object() const override {
-    const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
-    return SkGradientShader::MakeTwoPointConical(
-        start_center_, start_radius_, end_center_, end_radius_, sk_colors,
-        stops(), stop_count(), ToSk(tile_mode()), 0, matrix_ptr());
-  }
 
  protected:
   virtual const void* pod() const override { return this + 1; }
@@ -603,13 +568,6 @@ class DlSweepGradientColorSource final : public DlGradientColorSourceBase {
   SkPoint center() const { return center_; }
   SkScalar start() const { return start_; }
   SkScalar end() const { return end_; }
-
-  sk_sp<SkShader> skia_object() const override {
-    const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
-    return SkGradientShader::MakeSweep(center_.x(), center_.y(), sk_colors,
-                                       stops(), stop_count(), ToSk(tile_mode()),
-                                       start_, end_, 0, matrix_ptr());
-  }
 
  protected:
   virtual const void* pod() const override { return this + 1; }
@@ -691,35 +649,6 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
   }
   const std::shared_ptr<std::vector<uint8_t>> uniform_data() const {
     return uniform_data_;
-  }
-
-  sk_sp<SkShader> skia_object() const override {
-    if (!runtime_effect_) {
-      return nullptr;
-    }
-    if (!runtime_effect_->skia_runtime_effect()) {
-      return nullptr;
-    }
-    std::vector<sk_sp<SkShader>> sk_samplers(samplers_.size());
-    for (size_t i = 0; i < samplers_.size(); i++) {
-      auto sampler = samplers_[i];
-      if (sampler == nullptr) {
-        return nullptr;
-      }
-      sk_samplers[i] = sampler->skia_object();
-    }
-
-    auto ref = new std::shared_ptr<std::vector<uint8_t>>(uniform_data_);
-    auto uniform_data = SkData::MakeWithProc(
-        uniform_data_->data(), uniform_data_->size(),
-        [](const void* ptr, void* context) {
-          delete reinterpret_cast<std::shared_ptr<std::vector<uint8_t>>*>(
-              context);
-        },
-        ref);
-
-    return runtime_effect_->skia_runtime_effect()->makeShader(
-        uniform_data, sk_samplers.data(), sk_samplers.size());
   }
 
  protected:

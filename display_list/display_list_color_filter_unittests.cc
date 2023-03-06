@@ -17,18 +17,6 @@ static const float kMatrix[20] = {
     16, 17, 18, 19, 20,  //
 };
 
-TEST(DisplayListColorFilter, BuilderSetGet) {
-  DlBlendColorFilter filter(DlColor::kRed(), DlBlendMode::kDstATop);
-  DisplayListBuilder builder;
-  ASSERT_EQ(builder.getColorFilter(), nullptr);
-  builder.setColorFilter(&filter);
-  ASSERT_NE(builder.getColorFilter(), nullptr);
-  ASSERT_TRUE(
-      Equals(builder.getColorFilter(), static_cast<DlColorFilter*>(&filter)));
-  builder.setColorFilter(nullptr);
-  ASSERT_EQ(builder.getColorFilter(), nullptr);
-}
-
 TEST(DisplayListColorFilter, BlendConstructor) {
   DlBlendColorFilter filter(DlColor::kRed(), DlBlendMode::kDstATop);
 }

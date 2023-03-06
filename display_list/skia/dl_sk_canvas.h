@@ -135,7 +135,7 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                  const SkRect* cullRect,
                  const DlPaint* paint = nullptr) override;
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity) override;
+                       SkScalar opacity = SK_Scalar1) override;
   void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,
                     SkScalar y,

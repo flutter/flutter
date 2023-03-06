@@ -25,14 +25,6 @@ enum class DlDrawStyle {
   kDefaultStyle = kFill,
 };
 
-inline DlDrawStyle ToDl(SkPaint::Style style) {
-  return static_cast<DlDrawStyle>(style);
-}
-
-inline SkPaint::Style ToSk(DlDrawStyle style) {
-  return static_cast<SkPaint::Style>(style);
-}
-
 enum class DlStrokeCap {
   kButt,    //!< no stroke extension
   kRound,   //!< adds circle
@@ -42,14 +34,6 @@ enum class DlStrokeCap {
   kDefaultCap = kButt,
 };
 
-inline DlStrokeCap ToDl(SkPaint::Cap cap) {
-  return static_cast<DlStrokeCap>(cap);
-}
-
-inline SkPaint::Cap ToSk(DlStrokeCap cap) {
-  return static_cast<SkPaint::Cap>(cap);
-}
-
 enum class DlStrokeJoin {
   kMiter,  //!< extends to miter limit
   kRound,  //!< adds circle
@@ -58,14 +42,6 @@ enum class DlStrokeJoin {
   kLastJoin = kBevel,
   kDefaultJoin = kMiter,
 };
-
-inline DlStrokeJoin ToDl(SkPaint::Join join) {
-  return static_cast<DlStrokeJoin>(join);
-}
-
-inline SkPaint::Join ToSk(DlStrokeJoin join) {
-  return static_cast<SkPaint::Join>(join);
-}
 
 class DlPaint {
  public:
@@ -174,7 +150,7 @@ class DlPaint {
   }
   const DlColorFilter* getColorFilterPtr() const { return colorFilter_.get(); }
   DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter> filter) {
-    colorFilter_ = filter ? filter->shared() : nullptr;
+    colorFilter_ = filter;
     return *this;
   }
   DlPaint& setColorFilter(const DlColorFilter* filter) {
@@ -214,6 +190,10 @@ class DlPaint {
   const DlPathEffect* getPathEffectPtr() const { return pathEffect_.get(); }
   DlPaint& setPathEffect(std::shared_ptr<DlPathEffect> pathEffect) {
     pathEffect_ = pathEffect;
+    return *this;
+  }
+  DlPaint& setPathEffect(const DlPathEffect* effect) {
+    pathEffect_ = effect ? effect->shared() : nullptr;
     return *this;
   }
 
