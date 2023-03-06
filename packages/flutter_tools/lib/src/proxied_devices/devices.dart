@@ -57,11 +57,14 @@ class ProxiedDevices extends DeviceDiscovery {
   List<Device>? _devices;
 
   @override
-  Future<List<Device>> get devices async =>
-      _devices ?? await discoverDevices();
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async =>
+      _devices ?? await discoverDevices(filter: filter);
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) async {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter
+  }) async {
     final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(await connection.sendRequest('device.discoverDevices')).cast<Map<String, Object?>>();
     final List<ProxiedDevice> devices = <ProxiedDevice>[
       for (final Map<String, Object?> device in discoveredDevices)
