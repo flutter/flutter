@@ -9,20 +9,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget renders a SizedBox by default', (WidgetTester tester) async {
+  testWidgets('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
       ),
     );
-    Finder sizedBox = find.descendant(
-      of: find.byType(Ink),
-      matching: find.byType(SizedBox),
-    );
-    expect(sizedBox, findsOneWidget);
-    expect(tester.getSize(sizedBox).height, 600.0);
-    expect(tester.getSize(sizedBox).width, 800.0);
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(800.0, 600.0));
+  });
 
+  testWidgets('The Ink widget fits the specified size', (WidgetTester tester) async {
     const double height = 150.0;
     const double width = 200.0;
     await tester.pumpWidget(
@@ -36,13 +33,24 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    sizedBox = find.descendant(
-      of: find.byType(Ink),
-      matching: find.byType(SizedBox),
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(width, height));
+  });
+
+  testWidgets('The Ink widget expands on a unspecified dimension', (WidgetTester tester) async {
+    const double height = 150.0;
+    await tester.pumpWidget(
+      Material(
+        child: Center( // used to constrain to child's size
+          child: Ink(
+            height: height,
+          ),
+        ),
+      ),
     );
-    expect(sizedBox, findsNWidgets(2));
-    expect(tester.getSize(sizedBox.at(0)).height, height);
-    expect(tester.getSize(sizedBox.at(0)).width, width);
+    await tester.pumpAndSettle();
+    expect(find.byType(Ink), findsOneWidget);
+    expect(tester.getSize(find.byType(Ink)), const Size(800, height));
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
@@ -444,6 +452,66 @@ void main() {
       }
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
+  });
+
+  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController();
+    controller.show();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: SizedBox.square(
+            dimension: 200,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: SizedBox.square(
+                          dimension: 100,
+                          // The material partially overlaps the overlayChild.
+                          // This is to verify that the `overlayChild`'s ink
+                          // features aren't clipped by it.
+                          child: Material(
+                            color: Colors.black,
+                            child: OverlayPortal(
+                              controller: controller,
+                              overlayChildBuilder: (BuildContext context) {
+                                return Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: InkWell(
+                                    splashColor: Colors.red,
+                                    onTap: () {},
+                                    child: const SizedBox.square(dimension: 100),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    addTearDown(() async {
+      await gesture.up();
+    });
+
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
