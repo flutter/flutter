@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -42,18 +43,24 @@ void main() {
   test(
     'flutter build apk --configOnly should create gradlew and not assemble',
     () async {
+      final gradleFile = fileSystem
+          .directory(exampleAppDir)
+          .childDirectory('android')
+          .childFile('gradlew');
+      // Ensure file is gone prior to configOnly running.
+      await gradleFile.delete();
+
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
         'apk',
         '--target-platform=android-arm',
-        '--configOnly',
+        '--config-only',
       ], workingDirectory: exampleAppDir.path);
 
-      expect(result.stdout, contains(RegExp(r'.*Config complete.*')));
-      expect(
-          result.stdout, isNot(contains(RegExp(r'.*No config.*'))));
+      expect(gradleFile, exists);
+      expect(result.stdout, contains(RegExp(r'Config complete')));
     },
   );
 }
