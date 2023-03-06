@@ -1607,7 +1607,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
-      if (!TextLayoutMetrics.isWhitespace(codeUnit)) {
+      if (!Unicode.isWhitespace(codeUnit)) {
         return false;
       }
     }
@@ -2149,7 +2149,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))
+    if (Unicode.isWhitespace(plainText.codeUnitAt(effectiveOffset))
         && effectiveOffset > 0) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
