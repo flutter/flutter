@@ -275,7 +275,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     TextStyle? resolvedTextStyle = resolve<TextStyle?>((ButtonStyle? style) => style?.textStyle);
     final defaultTextStyle = DefaultTextStyle.of(context);
     if(null!=resolvedTextStyle && resolvedTextStyle.fontFamily==null){
-      resolvedTextStyle.merge(TextStyle(fontFamily: defaultTextStyle.style.fontFamily,fontFamilyFallback: defaultTextStyle.style.fontFamilyFallback));
+      resolvedTextStyle = resolvedTextStyle.merge(TextStyle(fontFamily: defaultTextStyle.style.fontFamily,fontFamilyFallback: defaultTextStyle.style.fontFamilyFallback));
     }
     Color? resolvedBackgroundColor = resolve<Color?>((ButtonStyle? style) => style?.backgroundColor);
     final Color? resolvedForegroundColor = resolve<Color?>((ButtonStyle? style) => style?.foregroundColor);
