@@ -151,6 +151,8 @@ function upgrade_flutter () (
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
     pub_upgrade_with_retry
 
+    >&2 echo Pre-compiling Dart snapshot...
+
     # Move the old snapshot - we can't just overwrite it as the VM might currently have it
     # memory mapped (e.g. on flutter upgrade). For downloading a new dart sdk the folder is moved,
     # so we take the same approach of moving the file here.
