@@ -39,7 +39,7 @@ abstract class ObjectEvent{
   /// long living place as it will prevent garbage collection.
   final Object object;
 
-  /// The representation of the event in a form, acceptible by a
+  /// The representation of the event in a form, acceptable by a
   /// pure dart library, that cannot depend on Flutter.
   ///
   /// The method enables code like:

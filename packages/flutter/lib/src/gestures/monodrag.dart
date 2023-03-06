@@ -222,6 +222,24 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
   Duration? _lastPendingEventTimestamp;
+
+  /// When asserts are enabled, returns the last tracked pending event timestamp
+  /// for this recognizer.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  Duration? get debugLastPendingEventTimestamp {
+    Duration? lastPendingEventTimestamp;
+    assert(() {
+      lastPendingEventTimestamp = _lastPendingEventTimestamp;
+      return true;
+    }());
+    return lastPendingEventTimestamp;
+  }
+
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
@@ -363,7 +381,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
-      final Duration timestamp = _lastPendingEventTimestamp!;
+      final Duration? timestamp = _lastPendingEventTimestamp;
       final Matrix4? transform = _lastTransform;
       final Offset localUpdateDelta;
       switch (dragStartBehavior) {
@@ -449,7 +467,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkStart(Duration timestamp, int pointer) {
+  void _checkStart(Duration? timestamp, int pointer) {
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
         sourceTimeStamp: timestamp,
