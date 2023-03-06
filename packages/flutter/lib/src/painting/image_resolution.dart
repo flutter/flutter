@@ -283,8 +283,7 @@ class AssetImage extends AssetBundleImageProvider {
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
-        final Iterable<AssetMetadata> candidateVariants =
-          manifest.getAssetVariants(keyName) ?? <AssetMetadata>[];
+        final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
         final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
           configuration,
@@ -327,10 +326,15 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata> candidateVariants) {
-    if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
+  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
+    if (candidateVariants == null) {
+      return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
+    }
+
+    if (config.devicePixelRatio == null) {
       return candidateVariants.firstWhere((AssetMetadata variant) => variant.main);
     }
+
     final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
       SplayTreeMap<double, AssetMetadata>();
     for (final AssetMetadata candidate in candidateVariants) {
