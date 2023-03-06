@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
-const String _expText = 'Éxp'; // renders in Ahem as:
+const String _expText = 'Éxp'; // renders in the test font as:
 
 // ########
 // ########
