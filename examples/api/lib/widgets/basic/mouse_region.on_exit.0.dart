@@ -6,35 +6,32 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const MouseRegionApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class MouseRegionApp extends StatelessWidget {
+  const MouseRegionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: MouseRegionExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class MouseRegionExample extends StatefulWidget {
+  const MouseRegionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MouseRegionExample> createState() => _MouseRegionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MouseRegionExampleState extends State<MouseRegionExample> {
   bool hovered = false;
 
   @override

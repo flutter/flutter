@@ -296,7 +296,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
-- 0.6.1: Added `coldBoot` option to `emulator.lauch` command.
+- 0.6.1: Added `coldBoot` option to `emulator.launch` command.
 - 0.6.0: Added `debounce` option to `app.restart` command.
 - 0.5.3: Added `emulatorId` field to device.
 - 0.5.2: Added `platformType` and `category` fields to emulator.

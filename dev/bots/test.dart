@@ -83,7 +83,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
+final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
   if (Platform.isWindows) {
@@ -256,7 +256,7 @@ Future<void> main(List<String> args) async {
       'web_canvaskit_tests': _runWebCanvasKitUnitTests,
       // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
-      'flutter_plugins': _runFlutterPluginsTests,
+      'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -1390,56 +1390,56 @@ Future<void> _runWebTreeshakeTest() async {
   }
 }
 
-/// Returns the commit hash of the flutter/plugins repository that's rolled in.
+/// Returns the commit hash of the flutter/packages repository that's rolled in.
 ///
-/// The flutter/plugins repository is a downstream dependency, it is only used
+/// The flutter/packages repository is a downstream dependency, it is only used
 /// by flutter/flutter for testing purposes, to assure stable tests for a given
-/// flutter commit the flutter/plugins commit hash to test against is coded in
-/// the bin/internal/flutter_plugins.version file.
+/// flutter commit the flutter/packages commit hash to test against is coded in
+/// the bin/internal/flutter_packages.version file.
 ///
-/// The `filesystem` parameter specified filesystem to read the plugins version file from.
-/// The `pluginsVersionFile` parameter allows specifying an alternative path for the
-/// plugins version file, when null [flutterPluginsVersionFile] is used.
-Future<String> getFlutterPluginsVersion({
+/// The `filesystem` parameter specified filesystem to read the packages version file from.
+/// The `packagesVersionFile` parameter allows specifying an alternative path for the
+/// packages version file, when null [flutterPackagesVersionFile] is used.
+Future<String> getFlutterPackagesVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
-  String? pluginsVersionFile,
+  String? packagesVersionFile,
 }) async {
-  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
+  final File versionFile = fileSystem.file(packagesVersionFile ?? flutterPackagesVersionFile);
   final String versionFileContents = await versionFile.readAsString();
   return versionFileContents.trim();
 }
 
-/// Executes the test suite for the flutter/plugins repo.
-Future<void> _runFlutterPluginsTests() async {
+/// Executes the test suite for the flutter/packages repo.
+Future<void> _runFlutterPackagesTests() async {
   Future<void> runAnalyze() async {
-    printProgress('${green}Running analysis for flutter/plugins$reset');
-    final Directory checkout = Directory.systemTemp.createTempSync('flutter_plugins.');
+    printProgress('${green}Running analysis for flutter/packages$reset');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_packages.');
     await runCommand(
       'git',
       <String>[
         '-c',
         'core.longPaths=true',
         'clone',
-        'https://github.com/flutter/plugins.git',
+        'https://github.com/flutter/packages.git',
         '.',
       ],
       workingDirectory: checkout.path,
     );
-    final String pluginsCommit = await getFlutterPluginsVersion();
+    final String packagesCommit = await getFlutterPackagesVersion();
     await runCommand(
       'git',
       <String>[
         '-c',
         'core.longPaths=true',
         'checkout',
-        pluginsCommit,
+        packagesCommit,
       ],
       workingDirectory: checkout.path,
     );
     // Prep the repository tooling.
     // This test does not use tool_runner.sh because in this context the test
-    // should always run on the entire plugins repo, while tool_runner.sh
-    // is designed for flutter/plugins CI and only analyzes changed repository
+    // should always run on the entire packages repo, while tool_runner.sh
+    // is designed for flutter/packages CI and only analyzes changed repository
     // files when run for anything but master.
     final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(

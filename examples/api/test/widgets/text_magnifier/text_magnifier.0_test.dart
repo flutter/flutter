@@ -43,7 +43,7 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester teste
 }
 
 void main() {
-  const Duration durationBetweenActons = Duration(milliseconds: 20);
+  const Duration durationBetweenActions = Duration(milliseconds: 20);
   const String defaultText = 'I am a magnifier, fear me!';
 
   Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
@@ -51,11 +51,11 @@ void main() {
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.up();
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.down(tapOffset);
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.up();
     await tester.pumpAndSettle();
 

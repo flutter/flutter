@@ -55,7 +55,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -105,7 +106,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -155,7 +157,8 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -272,7 +275,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -313,7 +317,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
            'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -353,7 +358,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -393,7 +399,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -431,7 +438,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -472,7 +480,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -519,7 +528,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -543,7 +553,7 @@ void main() {
     );
     const String toolExitMessage = '''
 pub get failed
-command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --directory . get --example"
+command: "bin/cache/dart-sdk/bin/dart --no-analytics pub --directory . get --example"
 pub env: {
   "FLUTTER_ROOT": "",
   "PUB_ENVIRONMENT": "flutter_cli:flutter_tests",
@@ -582,7 +592,8 @@ exit code: 66
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -592,7 +603,8 @@ exit code: 66
           throw const ProcessException(
             'bin/cache/dart-sdk/bin/dart',
             <String>[
-              '__deprecated_pub',
+              '--no-analytics',
+              'pub',
               '--directory',
               '.',
               'get',
@@ -649,7 +661,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -699,7 +712,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -753,18 +767,19 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           'cache',
           'preload',
           '.pub-preload-cache/a.tar.gz',
           '.pub-preload-cache/b.tar.gz',
         ],
-        exitCode: 69,
       ),
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -811,7 +826,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -946,7 +962,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -991,7 +1008,8 @@ exit code: 66
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -1005,7 +1023,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -1015,7 +1034,8 @@ exit code: 66
       FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',
@@ -1029,7 +1049,8 @@ exit code: 66
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          '--no-analytics',
+          'pub',
           '--directory',
           '.',
           'get',

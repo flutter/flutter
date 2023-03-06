@@ -123,10 +123,12 @@ class _DaemonServer {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        });
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            logger.printError('Socket error: $error');
+            logger.printTrace('$stackTrace');
+          });
         final Daemon daemon = Daemon(
           DaemonConnection(
             daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
@@ -278,7 +280,7 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
       return null;
     });
@@ -881,7 +883,7 @@ class DeviceDomain extends Domain {
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices())
           await _deviceToMap(device),
     ];
   }
@@ -1067,7 +1069,7 @@ class DeviceDomain extends Domain {
   /// Return the device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
@@ -1418,7 +1420,9 @@ class ProxyDomain extends Domain {
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+    unawaited(socket.done.then<Object?>(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     }).then((Object? _) {

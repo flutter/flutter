@@ -48,13 +48,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   /// their handlers.
   final Map<int, Completer<Object?>> _flutterRequestCompleters = <int, Completer<Object?>>{};
 
-  /// Whether or not this adapter can handle the restartRequest.
-  ///
-  /// For Flutter apps we can handle this with a Hot Restart rather than having
-  /// the whole debug session stopped and restarted.
-  @override
-  bool get supportsRestartRequest => true;
-
   /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
   static const Set<String> _requestsToForwardToClient = <String>{
     // The 'app.exposeUrl' request is sent by Flutter to request the client
@@ -399,6 +392,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     if (_appId == null) {
       throw DebugAdapterException('Unexpected null `appId` in app.start event');
     }
+
+    // Notify the client whether it can call 'restartRequest' when the user
+    // clicks restart, instead of terminating and re-starting its own debug
+    // session (which is much slower, but required for profile/release mode).
+    final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
+    sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
   }
 
   /// Handles the app.started event from Flutter.
@@ -507,8 +506,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
     completer.future
-        .then((Object? value) => sendResponseToFlutter(id, value))
-        .catchError((Object? e) => sendResponseToFlutter(id, e.toString(), error: true));
+        .then(
+          (Object? value) => sendResponseToFlutter(id, value),
+          onError: (Object? e) => sendResponseToFlutter(id, e.toString(), error: true),
+        );
 
     if (_requestsToForwardToClient.contains(method)) {
       // Forward the request to the client in an event.
@@ -589,7 +590,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // debugging, we must try to detect which messages are likely Flutter
     // messages as reliably as possible, as trying to process users output
     // as a Flutter message may result in an unhandled error that will
-    // terminate the debug adater in a way that does not provide feedback
+    // terminate the debug adapter in a way that does not provide feedback
     // because the standard crash violates the DAP protocol.
     Object? jsonData;
     try {
