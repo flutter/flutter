@@ -1048,7 +1048,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
     Directory(path.join(workingDirectory, '.github', 'ISSUE_TEMPLATE'))
       .listSync()
       .whereType<File>()
-      .where((File file) => path.extension(file.path) == '.md')
+      .where((File file) => path.extension(file.path) == '.md' || path.extension(file.path) == '.yml')
       .map<String>((File file) => path.basename(file.path))
       .toSet();
   final String kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';

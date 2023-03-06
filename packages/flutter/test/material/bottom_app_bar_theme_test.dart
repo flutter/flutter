@@ -196,6 +196,17 @@ void main() {
       expect(widget.surfaceTintColor, babThemeSurfaceTintColor);
     });
 
+    testWidgets('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
+      const Color babThemeShadowColor = Colors.yellow;
+      const BottomAppBarTheme theme = BottomAppBarTheme(
+        shadowColor: babThemeShadowColor, elevation: 0
+      );
+      await tester.pumpWidget(_withTheme(theme, true));
+
+      final Material widget = getBabRenderObject(tester);
+      expect(widget.shadowColor, babThemeShadowColor);
+    });
+
     testWidgets('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
       const Color themeSurfaceTintColor = Colors.white10;
       const Color babThemeSurfaceTintColor = Colors.black87;
