@@ -143,10 +143,14 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
     _flutter,
     <String>[
       'build', 'web', '--web-resources-cdn', '--profile', '-t', target,
-       if(baseHref != null)
-       ...<String>['--base-href', baseHref],
-       if(output != null)
-       ...<String>['--output', output],
+       if(baseHref != null) ...<String>[
+         '--base-href',
+         baseHref,
+       ],
+       if(output != null) ...<String>[
+         '--output',
+         output,
+       ],
     ],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{
