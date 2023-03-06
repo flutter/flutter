@@ -26,6 +26,7 @@ wasm_lib("skwasm") {
     "-sPTHREAD_POOL_SIZE=1",
     "-sALLOW_MEMORY_GROWTH",
     "-sUSE_PTHREADS=1",
+    "-lexports.js",
   ]
 
   cflags = [ "-pthread" ]
@@ -40,8 +41,8 @@ wasm_lib("skwasm") {
     ]
   } else {
     ldflags += [
-      "-O1",
-      "--closure=0",
+      "-Oz",
+      "--closure=1",
       "-flto",
       "-sEXPORTED_FUNCTIONS=[stackAlloc]",
     ]

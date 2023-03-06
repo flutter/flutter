@@ -15,10 +15,8 @@ inline SkMatrix createMatrix(const SkScalar* f) {
 }
 
 inline SkRRect createRRect(const SkScalar* f) {
-  const SkScalar* twelveFloats = reinterpret_cast<const SkScalar*>(f);
-  const SkRect* rect = reinterpret_cast<const SkRect*>(twelveFloats);
-  const SkVector* radiiValues =
-      reinterpret_cast<const SkVector*>(twelveFloats + 4);
+  const SkRect* rect = reinterpret_cast<const SkRect*>(f);
+  const SkVector* radiiValues = reinterpret_cast<const SkVector*>(f + 4);
 
   SkRRect rr;
   rr.setRectRadii(*rect, radiiValues);
