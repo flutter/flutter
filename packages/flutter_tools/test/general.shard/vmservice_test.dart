@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -64,13 +66,8 @@ void main() {
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      reloadSources,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVMService,
+      reloadSources: reloadSources,
+      vmService: mockVMService,
     );
 
     expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
@@ -81,28 +78,31 @@ void main() {
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      mockDevice,
-      null,
-      null,
-      mockVMService,
+      device: mockDevice,
+      vmService: mockVMService,
     );
 
     expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
   });
 
+  testWithoutContext('VmService registers flutterGetIOSBuildOptions service', () async {
+    final MockVMService mockVMService = MockVMService();
+    final FlutterProject mockedVMService = MockFlutterProject(
+      mockedIos: MockIosProject(),
+    );
+    await setUpVmService(
+      flutterProject: mockedVMService,
+      vmService: mockVMService,
+    );
+
+    expect(mockVMService.services, containsPair('flutterGetIOSBuildOptions', 'Flutter Tools'));
+  });
+
   testWithoutContext('VM Service registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      null,
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      vmService: mockVMService,
     );
 
     expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
@@ -113,13 +113,8 @@ void main() {
       ..errorOnRegisterService = true;
 
     await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      null,
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      vmService: mockVMService,
     ), throwsToolExit());
   });
 
@@ -128,26 +123,17 @@ void main() {
       ..errorOnRegisterService = true;
 
     await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      (vm_service.Event event) { },
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      printStructuredErrorLogMethod: (vm_service.Event event) { },
+      vmService: mockVMService,
     ), throwsToolExit());
   });
 
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      (vm_service.Event event) async => 'hello',
-      mockVMService,
+      printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
+      vmService: mockVMService,
     );
     expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
   });
@@ -155,13 +141,7 @@ void main() {
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVMService,
+      vmService: mockVMService,
     );
 
     expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
@@ -297,6 +277,50 @@ void main() {
         containsPair('isolateId', 'def'),
       ])),
     ]));
+  });
+
+  testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly', () async {
+    final MockVMService vmService = MockVMService();
+    final XcodeProjectInfo expectedProjectInfo = XcodeProjectInfo(
+      <String>['target1', 'target2'],
+      <String>['config1', 'config2'],
+      <String>['scheme1', 'scheme2'],
+      MockLogger(),
+    );
+    final FlutterProject mockedVMService = MockFlutterProject(
+      mockedIos: MockIosProject(mockedInfo: expectedProjectInfo),
+    );
+    await setUpVmService(
+      flutterProject: mockedVMService,
+      vmService: vmService
+    );
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks['flutterGetIOSBuildOptions']!;
+
+    final Map<String, dynamic> response = await cb(<String, dynamic>{});
+    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
+    expect(result[kResultType], kResultTypeSuccess);
+    expect(result['targets'], expectedProjectInfo.targets);
+    expect(result['buildConfigurations'], expectedProjectInfo.buildConfigurations);
+    expect(result['schemes'], expectedProjectInfo.schemes);
+  });
+
+  testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly when no iOS project', () async {
+    final MockVMService vmService = MockVMService();
+    final FlutterProject mockedVMService = MockFlutterProject(
+      mockedIos: MockIosProject(),
+    );
+    await setUpVmService(
+        flutterProject: mockedVMService,
+        vmService: vmService
+    );
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks['flutterGetIOSBuildOptions']!;
+
+    final Map<String, dynamic> response = await cb(<String, dynamic>{});
+    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
+    expect(result[kResultType], kResultTypeSuccess);
+    expect(result['targets'], isNull);
+    expect(result['buildConfigurations'], isNull);
+    expect(result['schemes'], isNull);
   });
 
   testWithoutContext('runInView forwards arguments correctly', () async {
@@ -846,13 +870,36 @@ void main() {
   });
 }
 
+class MockFlutterProject extends Fake implements FlutterProject {
+  MockFlutterProject({
+    required IosProject mockedIos
+  }) : ios = mockedIos;
+
+  @override
+  final IosProject ios;
+}
+
+class MockIosProject extends Fake implements IosProject {
+  MockIosProject({this.mockedInfo});
+
+  final XcodeProjectInfo? mockedInfo;
+
+  @override
+  Future<XcodeProjectInfo?> projectInfo() async => mockedInfo;
+}
+
+class MockLogger extends Fake implements Logger { }
+
 class MockVMService extends Fake implements vm_service.VmService {
   final Map<String, String> services = <String, String>{};
+  final Map<String, vm_service.ServiceCallback> serviceCallBacks = <String, vm_service.ServiceCallback>{};
   final Set<String> listenedStreams = <String>{};
   bool errorOnRegisterService = false;
 
   @override
-  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {}
+  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {
+    serviceCallBacks[service] = cb;
+  }
 
   @override
   Future<vm_service.Success> registerService(String service, String alias) async {
