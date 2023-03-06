@@ -136,7 +136,6 @@ GOTO :after_subroutine
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
-      SET VERBOSITY=--verbosity=error
       IF "%CI%" == "true" GOTO on_bot
       IF "%BOT%" == "true" GOTO on_bot
       IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
@@ -144,8 +143,8 @@ GOTO :after_subroutine
       GOTO not_on_bot
       :on_bot
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
-        SET VERBOSITY=--verbosity=normal
       :not_on_bot
+      SET PUB_SUMMARY_ONLY=1
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
         IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
@@ -155,7 +154,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        "%dart%" __deprecated_pub upgrade "%VERBOSITY%" --no-precompile
+        "%dart%" --no-analytics pub upgrade
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL
