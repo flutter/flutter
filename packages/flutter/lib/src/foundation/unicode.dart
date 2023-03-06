@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Constants for useful Unicode characters.
-///
-/// Currently, these characters are all related to bidirectional text.
+/// Constants for useful Unicode characters and utility methods.
 ///
 /// See also:
 ///
