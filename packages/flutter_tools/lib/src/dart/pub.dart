@@ -231,7 +231,7 @@ abstract class Pub {
   /// should be passed appropriately in [arguments]. This ensures output from
   /// pub will refer to relative paths correctly.
   ///
-  /// [touchesPackageConfig] should be true if this is a command expexted to
+  /// [touchesPackageConfig] should be true if this is a command expected to
   /// create a new `.dart_tool/package_config.json` file.
   Future<void> interactively(
     List<String> arguments, {
@@ -607,7 +607,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, '__deprecated_pub', ...arguments];
+    return <String>[sdkPath, '--no-analytics', 'pub', ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.

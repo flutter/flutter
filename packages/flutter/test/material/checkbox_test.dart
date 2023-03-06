@@ -1467,7 +1467,7 @@ void main() {
     await tester.pumpAndSettle();
     expectBorder();
 
-    // Checkbox is selected/interdeterminate, so the specified BorderSide
+    // Checkbox is selected/indeterminate, so the specified BorderSide
     // does not appear.
 
     await tester.pumpWidget(buildApp(value: true));
@@ -1748,7 +1748,6 @@ void main() {
               return Checkbox(
                 value: false,
                 onChanged: (bool? newValue) {},
-
               );
             }),
           ),

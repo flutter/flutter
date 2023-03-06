@@ -1484,6 +1484,7 @@ void main() {
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
@@ -1519,6 +1520,7 @@ void main() {
       label: 'Dismiss',
     ));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {

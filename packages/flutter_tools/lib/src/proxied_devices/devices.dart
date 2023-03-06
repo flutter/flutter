@@ -57,11 +57,14 @@ class ProxiedDevices extends DeviceDiscovery {
   List<Device>? _devices;
 
   @override
-  Future<List<Device>> get devices async =>
-      _devices ?? await discoverDevices();
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async =>
+      _devices ?? await discoverDevices(filter: filter);
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) async {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter
+  }) async {
     final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(await connection.sendRequest('device.discoverDevices')).cast<Map<String, Object?>>();
     final List<ProxiedDevice> devices = <ProxiedDevice>[
       for (final Map<String, Object?> device in discoveredDevices)
@@ -245,12 +248,12 @@ class ProxiedDevice extends Device {
       'userIdentifier': userIdentifier,
     }));
     final bool started = _cast<bool>(result['started']);
-    final String? observatoryUriStr = _cast<String?>(result['observatoryUri']);
-    final Uri? observatoryUri = observatoryUriStr == null ? null : Uri.parse(observatoryUriStr);
+    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']);
+    final Uri? vmServiceUri = vmServiceUriStr == null ? null : Uri.parse(vmServiceUriStr);
     if (started) {
-      if (observatoryUri != null) {
-        final int hostPort = await proxiedPortForwarder.forward(observatoryUri.port);
-        return LaunchResult.succeeded(observatoryUri: observatoryUri.replace(port: hostPort));
+      if (vmServiceUri != null) {
+        final int hostPort = await proxiedPortForwarder.forward(vmServiceUri.port);
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri.replace(port: hostPort));
       } else {
         return LaunchResult.succeeded();
       }

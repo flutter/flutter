@@ -18,6 +18,11 @@ const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
 
 /// Command to proceed from one [pb.ReleasePhase] to the next.
+///
+/// After `conductor start`, the rest of the release steps are initiated by the
+/// user via `conductor next`. Thus this command's behavior is conditional upon
+/// which phase of the release the user is currently in. This is implemented
+/// with a switch case statement.
 class NextCommand extends Command<void> {
   NextCommand({
     required this.checkouts,
@@ -155,20 +160,6 @@ class NextContext extends Context {
         }
         break;
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
-          stdio.printStatus(
-              'This release has no engine cherrypicks, and thus the engine.version file\n'
-              'in the framework does not need to be updated.',
-          );
-
-          if (state.framework.cherrypicks.isEmpty) {
-            stdio.printStatus(
-                'This release also has no framework cherrypicks. Therefore, a framework\n'
-                'pull request is not required.',
-            );
-            break;
-          }
-        }
         final Remote engineUpstreamRemote = Remote(
             name: RemoteName.upstream,
             url: state.engine.upstream.url,

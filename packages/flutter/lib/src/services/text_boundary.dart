@@ -59,7 +59,7 @@ abstract class TextBoundary {
   }
 }
 
-/// A [TextBoundary] subclass for retriving the range of the grapheme the given
+/// A [TextBoundary] subclass for retrieving the range of the grapheme the given
 /// `position` is in.
 ///
 /// The class is implemented using the

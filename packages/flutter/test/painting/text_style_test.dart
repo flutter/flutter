@@ -555,6 +555,12 @@ void main() {
     expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
   });
 
+  test('TextStyle.lerp identical a,b', () {
+    expect(TextStyle.lerp(null, null, 0), null);
+    const TextStyle style = TextStyle();
+    expect(identical(TextStyle.lerp(style, style, 0.5), style), true);
+  });
+
   test('Throws when lerping between inherit:true and inherit:false with unspecified fields', () {
     const TextStyle fromStyle = TextStyle();
     const TextStyle toStyle = TextStyle(inherit: false);
