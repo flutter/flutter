@@ -4,10 +4,12 @@
 
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
@@ -29,6 +31,7 @@
 #include "impeller/scene/node.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
 
 namespace impeller {
@@ -1126,21 +1129,23 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
   return data;
 }
 
+struct TextRenderOptions {
+  Scalar font_size = 50;
+  Scalar alpha = 1;
+  Point position = Vector2(100, 200);
+};
+
 bool RenderTextInCanvas(const std::shared_ptr<Context>& context,
                         Canvas& canvas,
                         const std::string& text,
                         const std::string& font_fixture,
-                        Scalar font_size = 50.0,
-                        Scalar alpha = 1.0) {
-  Scalar baseline = 200.0;
-  Point text_position = {100, baseline};
-
+                        TextRenderOptions options = {}) {
   // Draw the baseline.
-  canvas.DrawRect({50, baseline, 900, 10},
+  canvas.DrawRect({options.position.x - 50, options.position.y, 900, 10},
                   Paint{.color = Color::Aqua().WithAlpha(0.25)});
 
   // Mark the point at which the text is drawn.
-  canvas.DrawCircle(text_position, 5.0,
+  canvas.DrawCircle(options.position, 5.0,
                     Paint{.color = Color::Red().WithAlpha(0.25)});
 
   // Construct the text blob.
@@ -1148,7 +1153,7 @@ bool RenderTextInCanvas(const std::shared_ptr<Context>& context,
   if (!mapping) {
     return false;
   }
-  SkFont sk_font(SkTypeface::MakeFromData(mapping), 50.0);
+  SkFont sk_font(SkTypeface::MakeFromData(mapping), options.font_size);
   auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
   if (!blob) {
     return false;
@@ -1158,8 +1163,8 @@ bool RenderTextInCanvas(const std::shared_ptr<Context>& context,
   auto frame = TextFrameFromTextBlob(blob);
 
   Paint text_paint;
-  text_paint.color = Color::Yellow().WithAlpha(alpha);
-  canvas.DrawTextFrame(frame, text_position, text_paint);
+  text_paint.color = Color::Yellow().WithAlpha(options.alpha);
+  canvas.DrawTextFrame(frame, options.position, text_paint);
   return true;
 }
 
@@ -1169,6 +1174,49 @@ TEST_P(AiksTest, CanRenderTextFrame) {
       GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TextFrameSubpixelAlignment) {
+  std::array<Scalar, 20> phase_offsets;
+  for (Scalar& offset : phase_offsets) {
+    auto rand = std::rand();  // NOLINT
+    offset = (static_cast<float>(rand) / static_cast<float>(RAND_MAX)) * k2Pi;
+  }
+
+  auto callback = [&](AiksContext& renderer,
+                      RenderTarget& render_target) -> bool {
+    static float font_size = 20;
+    static float phase_variation = 0.2;
+    static float speed = 0.5;
+    static float magnitude = 100;
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Font size", &font_size, 5, 50);
+    ImGui::SliderFloat("Phase variation", &phase_variation, 0, 1);
+    ImGui::SliderFloat("Oscillation speed", &speed, 0, 2);
+    ImGui::SliderFloat("Oscillation magnitude", &magnitude, 0, 300);
+    ImGui::End();
+
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+
+    for (size_t i = 0; i < phase_offsets.size(); i++) {
+      auto position = Point(
+          200 + magnitude * std::sin((-phase_offsets[i] * phase_variation +
+                                      GetSecondsElapsed() * speed)),  //
+          200 + i * font_size * 1.1                                   //
+      );
+      if (!RenderTextInCanvas(GetContext(), canvas,
+                              "the quick brown fox jumped over "
+                              "the lazy dog!.?",
+                              "Roboto-Regular.ttf",
+                              {.font_size = font_size, .position = position})) {
+        return false;
+      }
+    }
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderItalicizedText) {
@@ -1196,10 +1244,11 @@ TEST_P(AiksTest, CanRenderEmojiTextFrameWithAlpha) {
   ASSERT_TRUE(RenderTextInCanvas(GetContext(), canvas,
                                  "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊",
 #if FML_OS_MACOSX
-                                 "Apple Color Emoji.ttc", 50, 0.5));
+                                 "Apple Color Emoji.ttc", { .alpha = 0.5 }
 #else
-                                 "NotoColorEmoji.ttf", 50, 0.5));
+                                 "NotoColorEmoji.ttf", {.alpha = 0.5}
 #endif
+                                 ));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
