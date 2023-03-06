@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:characters/characters.dart' show CharacterRange;
+import 'package:flutter/foundation.dart' show Unicode;
 
 import 'text_layout_metrics.dart';
 
@@ -153,12 +154,12 @@ class ParagraphBoundary extends TextBoundary {
 
     if (index > 1 && _text.codeUnitAt(index) == 0x0A && _text.codeUnitAt(index - 1) == 0x0D) {
       index -= 2;
-    } else if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
+    } else if (Unicode.isLineTerminator(_text.codeUnitAt(index))) {
       index -= 1;
     }
 
     while (index > 0) {
-      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
+      if (Unicode.isLineTerminator(_text.codeUnitAt(index))) {
         return index + 1;
       }
       index -= 1;
@@ -183,7 +184,7 @@ class ParagraphBoundary extends TextBoundary {
 
     int index = position;
 
-    while (!TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
+    while (!Unicode.isLineTerminator(_text.codeUnitAt(index))) {
       index += 1;
       if (index == _text.length) {
         return index;
