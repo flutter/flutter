@@ -258,24 +258,8 @@ class AssembleCommand extends FlutterCommand {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
 
-    List<String> dartDefines = <String>[];
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
-    }
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
-        }
-      }
-    }
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
     if(dartDefines.isNotEmpty){
       results[kDartDefines] = dartDefines.join(',');
     }
