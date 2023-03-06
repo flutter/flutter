@@ -922,7 +922,6 @@ abstract class FlutterCommand extends Command<void> {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();

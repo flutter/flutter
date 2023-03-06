@@ -42,7 +42,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject? flutterProject,
     String? shellPath,
     this.updateGoldens,
-    this.nullAssertions,
     required this.buildInfo,
     required this.webMemoryFS,
     required FileSystem fileSystem,
@@ -94,7 +93,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool? updateGoldens;
-  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
@@ -113,7 +111,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String? shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
-    bool nullAssertions = false,
     required BuildInfo buildInfo,
     required WebMemoryFS webMemoryFS,
     required FileSystem fileSystem,
@@ -149,7 +146,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
-      nullAssertions: nullAssertions,
       processManager: processManager,
       cache: cache,
       testTimeRecorder: testTimeRecorder,
@@ -248,7 +244,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
       final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
-        nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
         bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
         entrypoint: '/$generatedFile'

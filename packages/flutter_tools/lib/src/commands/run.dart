@@ -174,7 +174,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
@@ -276,7 +275,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         fastStart: argParser.options.containsKey('fast-start')
           && boolArgDeprecated('fast-start')
           && !runningWithPrebuiltApplication,
-        nullAssertions: boolArgDeprecated('null-assertions'),
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,

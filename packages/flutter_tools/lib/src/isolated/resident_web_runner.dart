@@ -274,7 +274,6 @@ class ResidentWebRunner extends ResidentRunner {
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
-          nullAssertions: debuggingOptions.nullAssertions,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device!.devFS!.create();

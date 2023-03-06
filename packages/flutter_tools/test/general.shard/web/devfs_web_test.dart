@@ -661,7 +661,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -772,7 +771,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -880,7 +878,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -948,7 +945,6 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullAssertions: true,
       nativeNullAssertions: true,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -975,7 +971,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -1017,7 +1012,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -1124,7 +1118,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,

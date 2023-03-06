@@ -1041,7 +1041,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         cacheSkSL: true,
         purgePersistentCache: true,
         dartFlags: '--baz',
-        nullAssertions: true,
         enableImpeller: true,
         hostVmServicePort: 0,
       );

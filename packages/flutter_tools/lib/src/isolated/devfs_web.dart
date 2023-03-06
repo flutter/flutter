@@ -633,7 +633,6 @@ class WebDevFS implements DevFS {
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     this.testMode = false,
   }) : _port = port;
@@ -651,7 +650,6 @@ class WebDevFS implements DevFS {
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int? _port;
 
@@ -837,7 +835,6 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
-          nullAssertions: nullAssertions,
           nativeNullAssertions: nativeNullAssertions,
         ),
       );

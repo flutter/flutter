@@ -571,7 +571,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     argParser.addFlag('codesign',
       defaultsTo: true,

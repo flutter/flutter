@@ -35,7 +35,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);

@@ -278,7 +278,6 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
         enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},

@@ -398,7 +398,6 @@ void main() {
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
     expect(options.verboseSystemLogs, true);
-    expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
     expect(options.enableImpeller, true);
     expect(options.traceSystrace, true);

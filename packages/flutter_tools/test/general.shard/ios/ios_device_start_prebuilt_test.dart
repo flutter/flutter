@@ -404,7 +404,6 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
         enableImpeller: true,
         enableEmbedderApi: true,
       ),

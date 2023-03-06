@@ -49,7 +49,6 @@ void main() {
   test('generateMainModule removes timeout from requireJS', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 
@@ -65,7 +64,6 @@ void main() {
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
     // bootstrap main module has correct defined module.
@@ -76,7 +74,6 @@ void main() {
   test('generateMainModule can set bootstrap name', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
       bootstrapModule: 'foo_module.bootstrap',
     );
@@ -88,7 +85,6 @@ void main() {
   test('generateMainModule includes null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: true,
       nativeNullAssertions: true,
     );
 
@@ -99,7 +95,6 @@ void main() {
   test('generateMainModule can disable null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 

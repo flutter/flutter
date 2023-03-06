@@ -190,7 +190,6 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
       ),
     );
 
