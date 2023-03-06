@@ -112,7 +112,6 @@ class FlutterOptions {
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
-  static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
@@ -792,15 +791,6 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help: 'This flag has no effect. Code shrinking is always enabled in release builds. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code'
-    );
-  }
-
-  void addNullSafetyModeOptions({ required bool hide }) {
-    argParser.addFlag(FlutterOptions.kNullAssertions,
-      help:
-        'Perform additional null assertions on the boundaries of migrated and '
-        'un-migrated code. This setting is not currently supported on desktop '
-        'devices.'
     );
   }
 
