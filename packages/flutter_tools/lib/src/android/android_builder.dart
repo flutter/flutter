@@ -27,7 +27,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    required bool configOnly, /// TODO make not required and set to default false.
+    bool configOnly = false,
   });
 
   /// Builds an App Bundle artifact.
@@ -37,5 +37,6 @@ abstract class AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   });
 }

@@ -181,7 +181,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    required bool configOnly,
+    bool configOnly = false,
   }) async {
     await buildGradleApp(
       project: project,
@@ -258,14 +258,18 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project, buildInfo: androidBuildInfo.buildInfo);
 
     final List<String> command = <String>[
+      // This does more than get gradlewrapper. It creates the file, ensures it
+      // exists and verifies the file is executable.
       _gradleUtils.getExecutable(project),
     ];
 
+    // All automatically created files should exist.
     if (configOnly) {
-      _logger.printStatus('Config complete');
+      _logger.printStatus('Config complete.');
       return;
     }
 
+    // Assembly work starts here.
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String assembleTask = isBuildingBundle
         ? getBundleTaskFor(buildInfo)
