@@ -102,6 +102,9 @@ class Unicode {
   static const int RC = 0xFFFD;
 
   /// `U+FFFC Object Replacement Character` String literal.
+  ///
+  /// This is needed in a few places as const String.fromCharCode() isn't
+  /// possible (see https://github.com/dart-lang/sdk/issues/49407).
   static const String stringORC = '\uFFFC';
 
   // TODO(gspencergoog): replace when we expose this ICU information.
