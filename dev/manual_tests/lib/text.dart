@@ -752,8 +752,8 @@ class Bidi extends StatefulWidget {
 }
 
 class _BidiState extends State<Bidi> {
-  final String rlo = String.fromCharCode(Unicode.RLO);
   final String lro = String.fromCharCode(Unicode.LRO);
+  final String rlo = String.fromCharCode(Unicode.RLO);
 
   @override
   Widget build(BuildContext context) {
