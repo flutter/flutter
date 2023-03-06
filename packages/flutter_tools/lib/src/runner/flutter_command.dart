@@ -708,14 +708,10 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }();
 
-  TargetDevices? _targetDevices;
-  TargetDevices get targetDevices {
-    _targetDevices ??= TargetDevices(
-      deviceManager: globals.deviceManager!,
-      logger: globals.logger,
-    );
-    return _targetDevices!;
-  }
+  late final TargetDevices _targetDevices = TargetDevices(
+    deviceManager: globals.deviceManager!,
+    logger: globals.logger,
+  );
 
   void addBuildModeFlags({
     required bool verboseHelp,
@@ -1503,7 +1499,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    return targetDevices.findAllTargetDevices(
+    return _targetDevices.findAllTargetDevices(
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
