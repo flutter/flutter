@@ -275,11 +275,23 @@ void main() {
 
   testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
+    final ThemeData themeDataM2 = ThemeData(
+      useMaterial3: material3,
+      visualDensity: const VisualDensity(horizontal: 1, vertical: -1),
+    );
+    final ThemeData themeDataM3 = ThemeData(
+      useMaterial3: material3,
+      iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+              visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
+          )
+      ),
+    );
     await tester.pumpWidget(
       wrap(
         useMaterial3: material3,
         child: Theme(
-          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1), useMaterial3: material3),
+          data: material3 ? themeDataM3 : themeDataM2,
           child: IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction.handler,
@@ -376,6 +388,22 @@ void main() {
     expect(box.size, const Size(96.0, 96.0));
   });
 
+  testWidgets('test default alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        useMaterial3: theme.useMaterial3,
+        child: IconButton(
+          onPressed: mockOnPressedFunction.handler,
+          icon: const Icon(Icons.ac_unit),
+          iconSize: 80.0,
+        ),
+      ),
+    );
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+  });
+
   testWidgets('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -419,6 +447,7 @@ void main() {
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -438,7 +467,8 @@ void main() {
 
     final RenderBox barBox = tester.renderObject(find.byType(AppBar));
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
-    expect(iconBox.size.height, equals(barBox.size.height));
+    expect(iconBox.size.height, material3 ? 48 : equals(barBox.size.height));
+    expect(tester.getCenter(find.byType(IconButton)).dy, 28);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -977,6 +1007,48 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 
+  testWidgets('IconTheme opacity test', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              color: Colors.purple,
+              onPressed: () {},
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColor(), Colors.purple);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: IconTheme.merge(
+              data: const IconThemeData(opacity: 0.5),
+              child: IconButton(
+                icon: const Icon(Icons.add),
+                color: Colors.purple,
+                onPressed: () {},
+              ),
+            )
+          ),
+        ),
+      )
+    );
+
+    Color? iconColorWithOpacity() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColorWithOpacity(), Colors.purple.withOpacity(0.5));
+  });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
@@ -1006,13 +1078,14 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
 
     final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
     expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
 
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.startGesture(center);
@@ -1029,7 +1102,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1054,7 +1127,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1568,6 +1641,244 @@ void main() {
     expect(buttonWidget().isSelected, true);
     expect(find.byIcon(Icons.account_box), findsNothing);
     expect(find.byIcon(Icons.ac_unit), findsOneWidget);
+  });
+
+  testWidgets('The visualDensity of M3 IconButton can be configured by IconButtonTheme, '
+      'but cannot be configured by ThemeData - M3' , (WidgetTester tester) async {
+    Future<void> buildTest({VisualDensity? iconButtonThemeVisualDensity, VisualDensity? themeVisualDensity}) async {
+      return tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+              iconButtonTheme: IconButtonThemeData(
+                  style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)
+              ),
+              visualDensity: themeVisualDensity
+          ),
+          home: Material(
+            child: Center(
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.play_arrow),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.standard);
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(40, 40)));
+
+    await buildTest(iconButtonThemeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(64, 64)));
+
+    // ThemeData.visualDensity will be ignored because useMaterial3 is true
+    await buildTest(themeVisualDensity: VisualDensity.standard);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+  });
+
+  group('IconTheme tests in Material 3', () {
+    testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
+      // Theme's IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ).copyWith(
+            iconTheme: const IconThemeData(color: Colors.red, size: 37),
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), Colors.red);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(37, 37)),);
+
+      // custom IconTheme outside of IconButton
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.pink, size: 35),
+            child: IconButton(
+              icon: const Icon(Icons.account_box),
+              onPressed: () {},
+            ),
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.pink);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(35, 35)),);
+    });
+
+    testWidgets('Theme IconButtonTheme overrides IconTheme in Material3', (WidgetTester tester) async {
+      // When IconButtonTheme and IconTheme both exist in ThemeData, the IconButtonTheme can override IconTheme.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ).copyWith(
+            iconTheme: const IconThemeData(color: Colors.red, size: 25),
+            iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.green, iconSize: 27),)
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor(), Colors.green);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(27, 27)),);
+    });
+
+    testWidgets('Button IconButtonTheme always overrides IconTheme in Material3', (WidgetTester tester) async {
+      // When IconButtonTheme is closer to IconButton, IconButtonTheme overrides IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.orange, size: 36),
+            child: IconButtonTheme(
+              data: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.blue, iconSize: 35)),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), Colors.blue);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(35, 35)),);
+
+      // When IconTheme is closer to IconButton, IconButtonTheme still overrides IconTheme
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ),
+          home: IconTheme.merge(
+            data: const IconThemeData(color: Colors.blue, size: 35),
+            child: IconButtonTheme(
+              data: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.orange, iconSize: 36)),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.orange);
+      expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(36, 36)),);
+    });
+
+    testWidgets('White icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.dark(),
+            useMaterial3: true,
+          ).copyWith(
+              iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          home: IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () {},
+          )
+        )
+      );
+
+      Color? iconColor1() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor1(), Colors.white);
+    });
+
+    testWidgets('In light mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+        'if only setting color in IconTheme', (WidgetTester tester) async {
+      final ColorScheme darkScheme = const ColorScheme.dark().copyWith(onSurfaceVariant: const Color(0xffe91e60));
+      // Brightness.dark
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(colorScheme: darkScheme, useMaterial3: true,),
+          home: Scaffold(
+            body: IconTheme.merge(
+              data: const IconThemeData(size: 26),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
+          )
+        )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), darkScheme.onSurfaceVariant); // onSurfaceVariant
+    });
+
+    testWidgets('In dark mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+        'if only setting color in IconTheme', (WidgetTester tester) async {
+      final ColorScheme lightScheme = const ColorScheme.light().copyWith(onSurfaceVariant: const Color(0xffe91e60));
+      // Brightness.dark
+      await tester.pumpWidget(
+          MaterialApp(
+              theme: ThemeData(colorScheme: lightScheme, useMaterial3: true,),
+              home: Scaffold(
+                body: IconTheme.merge(
+                  data: const IconThemeData(size: 26),
+                  child: IconButton(
+                    icon: const Icon(Icons.account_box),
+                    onPressed: () {},
+                  ),
+                ),
+              )
+          )
+      );
+
+      Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
+      expect(iconColor0(), lightScheme.onSurfaceVariant); // onSurfaceVariant
+    });
+
+    testWidgets('black87 icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+
+    });
   });
 }
 

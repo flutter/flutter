@@ -11,6 +11,6 @@ void main() {
     'animated_placeholder_perf',
     kAnimatedPlaceholderRouteName,
     pageDelay: const Duration(seconds: 1),
-    duration: const Duration(seconds: 5),
+    duration: const Duration(seconds: 10),
   );
 }

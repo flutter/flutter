@@ -240,7 +240,7 @@ class ChromiumLauncher {
   }
 
   Future<Process?> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       final ProcessResult result = _processManager.runSync(<String>['file', chromeExecutable]);
       // Check if ARM Chrome is installed.
       // Mach-O 64-bit executable arm64

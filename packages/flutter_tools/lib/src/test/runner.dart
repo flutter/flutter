@@ -13,6 +13,7 @@ import '../web/chrome.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_time_recorder.dart';
 import 'test_wrapper.dart';
 import 'watcher.dart';
 import 'web_test_compiler.dart';
@@ -51,6 +52,7 @@ abstract class FlutterTestRunner {
     int? totalShards,
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   });
 }
 
@@ -87,6 +89,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     int? totalShards,
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -99,8 +102,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--pause-after-load',
       if (machine)
         ...<String>['-r', 'json']
-      else
-        ...<String>['-r', reporter ?? 'compact'],
+      else if (reporter != null)
+        ...<String>['-r', reporter],
       if (timeout != null)
         ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
@@ -173,6 +176,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               logger: globals.logger,
             ),
             cache: globals.cache,
+            testTimeRecorder: testTimeRecorder,
           );
         },
       );
@@ -204,6 +208,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       icudtlPath: icudtlPath,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
+      testTimeRecorder: testTimeRecorder,
     );
 
     try {

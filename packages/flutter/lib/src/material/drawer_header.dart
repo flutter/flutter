@@ -91,7 +91,7 @@ class DrawerHeader extends StatelessWidget {
         duration: duration,
         curve: curve,
         child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1!,
+          style: theme.textTheme.bodyLarge!,
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,

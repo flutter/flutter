@@ -20,7 +20,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-
 import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
@@ -313,7 +312,7 @@ class AndroidDevice extends Device {
     try {
       // If the server is automatically restarted, then we get irrelevant
       // output lines like this, which we want to ignore:
-      //   adb server is out of date.  killing..
+      //   adb server is out of date. killing..
       //   * daemon started successfully *
       await _processUtils.run(
         <String>[adbPath, 'start-server'],
@@ -627,7 +626,8 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-dart-profiling', 'true',
+      if (debuggingOptions.enableDartProfiling)
+        ...<String>['--ez', 'enable-dart-profiling', 'true'],
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)
@@ -721,7 +721,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk app, {
+    AndroidApk? app, {
     String? userIdentifier,
   }) {
     if (app == null) {

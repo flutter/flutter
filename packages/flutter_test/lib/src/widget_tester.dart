@@ -47,14 +47,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // that doesn't apply here.
 // ignore: deprecated_member_use
 export 'package:test_api/test_api.dart' hide
-  test,
-  group,
-  setUpAll,
-  tearDownAll,
-  setUp,
-  tearDown,
   expect,
-  isInstanceOf;
+  group,
+  isInstanceOf,
+  setUp,
+  setUpAll,
+  tearDown,
+  tearDownAll,
+  test;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -502,6 +502,10 @@ Future<void> expectLater(
 ///
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
+///
+/// When the binding is [LiveTestWidgetsFlutterBinding], events from
+/// [LiveTestWidgetsFlutterBinding.deviceEventDispatcher] will be handled in
+/// [dispatchEvent].
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(super.binding) {
     if (binding is LiveTestWidgetsFlutterBinding) {
@@ -817,6 +821,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Handler for device events caught by the binding in live test mode.
+  ///
+  /// [PointerDownEvent]s received here will only print a diagnostic message
+  /// showing possible [Finder]s that can be used to interact with the widget at
+  /// the location of [result].
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
@@ -936,6 +944,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See [TestWidgetsFlutterBinding.takeException] for details.
   dynamic takeException() {
     return binding.takeException();
+  }
+
+  /// {@macro flutter.flutter_test.TakeAccessibilityAnnouncements}
+  ///
+  /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
+    return binding.takeAnnouncements();
   }
 
   /// Acts as if the application went idle.

@@ -22,6 +22,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 final Platform macosPlatform = FakePlatform(
@@ -361,7 +362,7 @@ void main() {
 
       final File screenshot = MemoryFileSystem.test().file('screenshot.png');
       await deviceUnderTest.takeScreenshot(screenshot);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
 
@@ -389,7 +390,7 @@ void main() {
         '/Library/Logs/CoreSimulator/x/system.log',
       ]));
       await launchDeviceSystemLogTool(device);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -428,7 +429,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
       overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
@@ -461,7 +462,7 @@ void main() {
       ]));
 
       await launchDeviceUnifiedLogging(device, null);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
       overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
@@ -514,7 +515,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         expect(lines, <String>[
           'flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -551,7 +552,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -604,7 +605,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           '  and goes...',
           'Single line message, not the part of the above',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -670,7 +671,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           'Single line message', 'Multi line message\n  continues...\n  continues...',
           'Single line message, not the part of the above',
         ]);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -711,7 +712,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, isEmpty);
         expect(logger.errorText, contains('Logger returned non-JSON response'));
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
@@ -724,28 +725,43 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     const String validSimControlOutput = '''
 {
   "devices" : {
-    "watchOS 4.3" : [
+    "com.apple.CoreSimulator.SimRuntime.iOS-14-0" : [
       {
-        "state" : "Shutdown",
-        "availability" : "(available)",
-        "name" : "Apple Watch - 38mm",
-        "udid" : "TEST-WATCH-UDID"
-      }
-    ],
-    "iOS 11.4" : [
-      {
+        "dataPathSize" : 1734569984,
+        "udid" : "iPhone 11-UDID",
+        "isAvailable" : true,
+        "logPathSize" : 9506816,
+        "deviceTypeIdentifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-11",
         "state" : "Booted",
-        "availability" : "(available)",
-        "name" : "iPhone 5s",
-        "udid" : "TEST-PHONE-UDID"
+        "name" : "iPhone 11"
       }
     ],
-    "tvOS 11.4" : [
+    "com.apple.CoreSimulator.SimRuntime.iOS-13-0" : [
+    ],
+    "com.apple.CoreSimulator.SimRuntime.iOS-12-4" : [
+    ],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-16-0" : [
+    ],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-9-0" : [
+    ],
+    "com.apple.CoreSimulator.SimRuntime.iOS-16-0" : [
       {
-        "state" : "Shutdown",
-        "availability" : "(available)",
-        "name" : "Apple TV",
-        "udid" : "TEST-TV-UDID"
+        "dataPathSize" : 552366080,
+        "udid" : "Phone w Watch-UDID",
+        "isAvailable" : true,
+        "logPathSize" : 90112,
+        "deviceTypeIdentifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-11",
+        "state" : "Booted",
+        "name" : "Phone w Watch"
+      },
+      {
+        "dataPathSize" : 2186457088,
+        "udid" : "iPhone 13-UDID",
+        "isAvailable" : true,
+        "logPathSize" : 151552,
+        "deviceTypeIdentifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-13",
+        "state" : "Booted",
+        "name" : "iPhone 13"
       }
     ]
   }
@@ -768,62 +784,57 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       );
     });
 
-    testWithoutContext('getDevices succeeds', () async {
+    testWithoutContext('getConnectedDevices succeeds', () async {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
           'simctl',
           'list',
-          '--json',
           'devices',
+          'booted',
+          'iOS',
+          '--json',
         ],
         stdout: validSimControlOutput,
       ));
 
-      final List<SimDevice> devices = await simControl.getDevices();
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
 
-      final SimDevice watch = devices[0];
-      expect(watch.category, 'watchOS 4.3');
-      expect(watch.state, 'Shutdown');
-      expect(watch.availability, '(available)');
-      expect(watch.name, 'Apple Watch - 38mm');
-      expect(watch.udid, 'TEST-WATCH-UDID');
-      expect(watch.isBooted, isFalse);
+      final BootedSimDevice phone1 = devices[0];
+      expect(phone1.category, 'com.apple.CoreSimulator.SimRuntime.iOS-14-0');
+      expect(phone1.name, 'iPhone 11');
+      expect(phone1.udid, 'iPhone 11-UDID');
 
-      final SimDevice phone = devices[1];
-      expect(phone.category, 'iOS 11.4');
-      expect(phone.state, 'Booted');
-      expect(phone.availability, '(available)');
-      expect(phone.name, 'iPhone 5s');
-      expect(phone.udid, 'TEST-PHONE-UDID');
-      expect(phone.isBooted, isTrue);
+      final BootedSimDevice phone2 = devices[1];
+      expect(phone2.category, 'com.apple.CoreSimulator.SimRuntime.iOS-16-0');
+      expect(phone2.name, 'Phone w Watch');
+      expect(phone2.udid, 'Phone w Watch-UDID');
 
-      final SimDevice tv = devices[2];
-      expect(tv.category, 'tvOS 11.4');
-      expect(tv.state, 'Shutdown');
-      expect(tv.availability, '(available)');
-      expect(tv.name, 'Apple TV');
-      expect(tv.udid, 'TEST-TV-UDID');
-      expect(tv.isBooted, isFalse);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      final BootedSimDevice phone3 = devices[2];
+      expect(phone3.category, 'com.apple.CoreSimulator.SimRuntime.iOS-16-0');
+      expect(phone3.name, 'iPhone 13');
+      expect(phone3.udid, 'iPhone 13-UDID');
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('getDevices handles bad simctl output', () async {
+    testWithoutContext('getConnectedDevices handles bad simctl output', () async {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <String>[
           'xcrun',
           'simctl',
           'list',
-          '--json',
           'devices',
+          'booted',
+          'iOS',
+          '--json',
         ],
         stdout: 'Install Started',
       ));
 
-      final List<SimDevice> devices = await simControl.getDevices();
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
 
       expect(devices, isEmpty);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
@@ -889,6 +900,36 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         () async => simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
+    });
+
+    testWithoutContext('.stopApp() handles exceptions', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'terminate',
+          deviceId,
+          appId,
+        ],
+        exception: ProcessException('xcrun', <String>[]),
+      ));
+
+      expect(
+        () async => simControl.stopApp(deviceId, appId),
+        throwsToolExit(message: 'Unable to terminate'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('simulator stopApp handles null app package', () async {
+      final IOSSimulator iosSimulator = IOSSimulator(
+        'x',
+        name: 'Testo',
+        simulatorCategory: 'NaN',
+        simControl: simControl,
+      );
+
+      expect(await iosSimulator.stopApp(null), isFalse);
     });
   });
 
@@ -965,7 +1006,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       Xcode: () => xcode,
     });
 
-    testUsingContext('startApp respects the enable software rendering flag', () async {
+    testUsingContext('startApp forwards all supported debugging options', () async {
       final IOSSimulator device = IOSSimulator(
         'x',
         name: 'iPhone SE',
@@ -983,10 +1024,51 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       );
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
-      final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
-      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      final DebuggingOptions mockOptions = DebuggingOptions.enabled(
+        mockInfo,
+        enableSoftwareRendering: true,
+        traceSystrace: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        skiaDeterministicRendering: true,
+        useTestFonts: true,
+        traceSkia: true,
+        traceAllowlist: 'foo,bar',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        endlessTraceBuffer: true,
+        dumpSkpOnShaderCompilation: true,
+        verboseSystemLogs: true,
+        cacheSkSL: true,
+        purgePersistentCache: true,
+        dartFlags: '--baz',
+        nullAssertions: true,
+        enableImpeller: true,
+        hostVmServicePort: 0,
+      );
 
-      expect(simControl.requests.single.launchArgs, contains('--enable-software-rendering'));
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      expect(simControl.requests.single.launchArgs, unorderedEquals(<String>[
+        '--enable-dart-profiling',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-software-rendering',
+        '--trace-systrace',
+        '--start-paused',
+        '--disable-service-auth-codes',
+        '--skia-deterministic-rendering',
+        '--use-test-fonts',
+        '--trace-skia',
+        '--trace-allowlist="foo,bar"',
+        '--trace-skia-allowlist="skia.a,skia.b"',
+        '--endless-trace-buffer',
+        '--dump-skp-on-shader-compilation',
+        '--verbose-logging',
+        '--cache-sksl',
+        '--purge-persistent-cache',
+        '--dart-flags=--baz,--null_assertions',
+        '--enable-impeller',
+        '--observatory-port=0',
+      ]));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,

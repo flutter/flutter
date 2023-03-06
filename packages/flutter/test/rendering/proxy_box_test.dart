@@ -230,6 +230,94 @@ void main() {
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
 
+  test('RenderRepaintBoundary can capture images of itself synchronously', () async {
+    RenderRepaintBoundary boundary = RenderRepaintBoundary();
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
+    pumpFrame(phase: EnginePhase.composite);
+    ui.Image image = boundary.toImageSync();
+    expect(image.width, equals(100));
+    expect(image.height, equals(200));
+
+    // Now with pixel ratio set to something other than 1.0.
+    boundary = RenderRepaintBoundary();
+    layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
+    pumpFrame(phase: EnginePhase.composite);
+    image = boundary.toImageSync(pixelRatio: 2.0);
+    expect(image.width, equals(200));
+    expect(image.height, equals(400));
+
+    // Try building one with two child layers and make sure it renders them both.
+    boundary = RenderRepaintBoundary();
+    final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
+    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xff000000)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
+      ),
+    );
+    stack.add(
+      RenderOpacity()
+        ..opacity = 0.5
+        ..child = blackBox,
+    );
+    final RenderDecoratedBox whiteBox = RenderDecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xffffffff)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
+      ),
+    );
+    final RenderPositionedBox positioned = RenderPositionedBox(
+      widthFactor: 2.0,
+      heightFactor: 2.0,
+      alignment: Alignment.topRight,
+      child: whiteBox,
+    );
+    stack.add(positioned);
+    boundary.child = stack;
+    layout(boundary, constraints: BoxConstraints.tight(const Size(20.0, 20.0)));
+    pumpFrame(phase: EnginePhase.composite);
+    image = boundary.toImageSync();
+    expect(image.width, equals(20));
+    expect(image.height, equals(20));
+    ByteData data = (await image.toByteData())!;
+
+    int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
+
+    expect(data.lengthInBytes, equals(20 * 20 * 4));
+    expect(data.elementSizeInBytes, equals(1));
+    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+
+    final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
+
+    image = layer.toImageSync(Offset.zero & const Size(20.0, 20.0));
+    expect(image.width, equals(20));
+    expect(image.height, equals(20));
+    data = (await image.toByteData())!;
+    expect(getPixel(0, 0), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+
+    // non-zero offsets.
+    image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
+    expect(image.width, equals(30));
+    expect(image.height, equals(30));
+    data = (await image.toByteData())!;
+    expect(getPixel(0, 0), equals(0x00000000));
+    expect(getPixel(10, 10), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0), equals(0x00000000));
+    expect(getPixel(image.width - 1, 10), equals(0xffffffff));
+
+    // offset combined with a custom pixel ratio.
+    image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
+    expect(image.width, equals(60));
+    expect(image.height, equals(60));
+    data = (await image.toByteData())!;
+    expect(getPixel(0, 0), equals(0x00000000));
+    expect(getPixel(20, 20), equals(0x00000080));
+    expect(getPixel(image.width - 1, 0), equals(0x00000000));
+    expect(getPixel(image.width - 1, 20), equals(0xffffffff));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       opacity: 0.0,
@@ -448,19 +536,24 @@ void main() {
 
   test('RenderFittedBox respects clipBehavior', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    final TestClipPaintingContext context = TestClipPaintingContext();
-
-    // By default, clipBehavior should be Clip.none
-    final RenderFittedBox defaultBox = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.none));
-
-    for (final Clip clip in Clip.values) {
-      final RenderFittedBox box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip);
-      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      final RenderFittedBox box;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
+          break;
+        case null:
+          box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
+          break;
+      }
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
+      // By default, clipBehavior should be Clip.none
+      expect(context.clipBehavior, equals(clip ?? Clip.none));
     }
   });
 

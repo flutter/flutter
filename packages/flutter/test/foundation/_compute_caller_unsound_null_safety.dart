@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
 // Running in unsound null-safety mode is intended to test for potential miscasts
 // or invalid assertions.
 
 import 'package:flutter/src/foundation/_isolates_io.dart';
 import 'package:flutter/src/foundation/isolates.dart' as isolates;
 
-
-int returnInt(int arg) {
+int? returnInt(int? arg) {
   return arg;
 }
 
-Future<int> returnIntAsync(int arg) {
+Future<int?> returnIntAsync(int? arg) {
   return Future<int>.value(arg);
 }
 

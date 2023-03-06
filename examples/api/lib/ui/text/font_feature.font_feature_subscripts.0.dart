@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.subscripts
+/// Flutter code sample for [FontFeature.FontFeature.subscripts].
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Piazzolla font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'Line from x1,y1 to x2,y2',
       style: TextStyle(

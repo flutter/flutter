@@ -411,7 +411,7 @@ abstract class ScrollView extends StatelessWidget {
         ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
     final ScrollController? scrollController = effectivePrimary
-        ? PrimaryScrollController.of(context)
+        ? PrimaryScrollController.maybeOf(context)
         : controller;
 
     final Scrollable scrollable = Scrollable(
@@ -620,6 +620,14 @@ class CustomScrollView extends ScrollView {
 
 /// A [ScrollView] that uses a single child layout model.
 ///
+/// {@template flutter.widgets.BoxScroll.scrollBehaviour}
+/// [ScrollView]s are often decorated with [Scrollbar]s and overscroll indicators,
+/// which are managed by the inherited [ScrollBehavior]. Placing a
+/// [ScrollConfiguration] above a ScrollView can modify these behaviors for that
+/// ScrollView, or can be managed app-wide by providing a ScrollBehavior to
+/// [MaterialApp.scrollBehavior] or [CupertinoApp.scrollBehavior].
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [ListView], which is a [BoxScrollView] that uses a linear layout model.
@@ -789,17 +797,19 @@ abstract class BoxScrollView extends ScrollView {
 /// final List<String> entries = <String>['A', 'B', 'C'];
 /// final List<int> colorCodes = <int>[600, 500, 100];
 ///
-/// ListView.builder(
-///   padding: const EdgeInsets.all(8),
-///   itemCount: entries.length,
-///   itemBuilder: (BuildContext context, int index) {
-///     return Container(
-///       height: 50,
-///       color: Colors.amber[colorCodes[index]],
-///       child: Center(child: Text('Entry ${entries[index]}')),
-///     );
-///   }
-/// );
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     padding: const EdgeInsets.all(8),
+///     itemCount: entries.length,
+///     itemBuilder: (BuildContext context, int index) {
+///       return Container(
+///         height: 50,
+///         color: Colors.amber[colorCodes[index]],
+///         child: Center(child: Text('Entry ${entries[index]}')),
+///       );
+///     }
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -815,18 +825,20 @@ abstract class BoxScrollView extends ScrollView {
 /// final List<String> entries = <String>['A', 'B', 'C'];
 /// final List<int> colorCodes = <int>[600, 500, 100];
 ///
-/// ListView.separated(
-///   padding: const EdgeInsets.all(8),
-///   itemCount: entries.length,
-///   itemBuilder: (BuildContext context, int index) {
-///     return Container(
-///       height: 50,
-///       color: Colors.amber[colorCodes[index]],
-///       child: Center(child: Text('Entry ${entries[index]}')),
-///     );
-///   },
-///   separatorBuilder: (BuildContext context, int index) => const Divider(),
-/// );
+/// Widget build(BuildContext context) {
+///   return ListView.separated(
+///     padding: const EdgeInsets.all(8),
+///     itemCount: entries.length,
+///     itemBuilder: (BuildContext context, int index) {
+///       return Container(
+///         height: 50,
+///         color: Colors.amber[colorCodes[index]],
+///         child: Center(child: Text('Entry ${entries[index]}')),
+///       );
+///     },
+///     separatorBuilder: (BuildContext context, int index) => const Divider(),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -934,7 +946,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// ListView(
-///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: const <Widget>[
 ///     Text("I'm dedicating every day to you"),
@@ -949,7 +960,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// CustomScrollView(
-///   shrinkWrap: true,
 ///   slivers: <Widget>[
 ///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
@@ -1001,7 +1011,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ## Selection of list items
 ///
-/// `ListView` has no built-in notion of a selected item or items. For a small
+/// [ListView] has no built-in notion of a selected item or items. For a small
 /// example of how a caller might wire up basic item selection, see
 /// [ListTile.selected].
 ///
@@ -1011,6 +1021,8 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
+///
+/// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
 /// See also:
 ///
@@ -1100,13 +1112,22 @@ class ListView extends BoxScrollView {
   /// The `itemBuilder` callback will be called only with indices greater than
   /// or equal to zero and less than `itemCount`.
   ///
-  /// The `itemBuilder` should always return a non-null widget, and actually
-  /// create the widget instances when called. Avoid using a builder that
-  /// returns a previously-constructed widget; if the list view's children are
-  /// created in advance, or all at once when the [ListView] itself is created,
-  /// it is more efficient to use the [ListView] constructor. Even more
-  /// efficient, however, is to create the instances on demand using this
-  /// constructor's `itemBuilder` callback.
+  /// {@template flutter.widgets.ListView.builder.itemBuilder}
+  /// It is legal for `itemBuilder` to return `null`. If it does, the scroll view
+  /// will stop calling `itemBuilder`, even if it has yet to reach `itemCount`.
+  /// By returning `null`, the [ScrollPosition.maxScrollExtent] will not be accurate
+  /// unless the user has reached the end of the [ScrollView]. This can also cause the
+  /// [Scrollbar] to grow as the user scrolls.
+  ///
+  /// For more accurate [ScrollMetrics], consider specifying `itemCount`.
+  /// {@endtemplate}
+  ///
+  /// The `itemBuilder` should always create the widget instances when called.
+  /// Avoid using a builder that returns a previously-constructed widget; if the
+  /// list view's children are created in advance, or all at once when the
+  /// [ListView] itself is created, it is more efficient to use the [ListView]
+  /// constructor. Even more efficient, however, is to create the instances on
+  /// demand using this constructor's `itemBuilder` callback.
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
@@ -1128,7 +1149,7 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1174,11 +1195,13 @@ class ListView extends BoxScrollView {
   /// The `separatorBuilder` callback will be called with indices greater than
   /// or equal to zero and less than `itemCount - 1`.
   ///
-  /// The `itemBuilder` and `separatorBuilder` callbacks should always return a
-  /// non-null widget, and actually create widget instances when called. Avoid
-  /// using a builder that returns a previously-constructed widget; if the list
-  /// view's children are created in advance, or all at once when the [ListView]
-  /// itself is created, it is more efficient to use the [ListView] constructor.
+  /// The `itemBuilder` and `separatorBuilder` callbacks should always
+  /// actually create widget instances when called. Avoid using a builder that
+  /// returns a previously-constructed widget; if the list view's children are
+  /// created in advance, or all at once when the [ListView] itself is created,
+  /// it is more efficient to use the [ListView] constructor.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
@@ -1216,7 +1239,7 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
@@ -1236,7 +1259,7 @@ class ListView extends BoxScrollView {
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
-           final Widget widget;
+           final Widget? widget;
            if (index.isEven) {
              widget = itemBuilder(context, itemIndex);
            } else {
@@ -1728,15 +1751,18 @@ class GridView extends BoxScrollView {
   /// `itemBuilder` will be called only with indices greater than or equal to
   /// zero and less than `itemCount`.
   ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
-  /// The [gridDelegate] argument must not be null.
+  /// The [gridDelegate] argument is required.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
-  /// be null.
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   GridView.builder({
     super.key,
     super.scrollDirection,
@@ -1747,7 +1773,7 @@ class GridView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     required this.gridDelegate,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,

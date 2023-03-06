@@ -166,12 +166,12 @@ class Interval extends Curve {
 
   /// The largest value for which this interval is 0.0.
   ///
-  /// From t=0.0 to t=`begin`, the interval's value is 0.0.
+  /// From t=0.0 to t=[begin], the interval's value is 0.0.
   final double begin;
 
   /// The smallest value for which this interval is 1.0.
   ///
-  /// From t=`end` to t=1.0, the interval's value is 1.0.
+  /// From t=[end] to t=1.0, the interval's value is 1.0.
   final double end;
 
   /// The curve to apply between [begin] and [end].
@@ -508,7 +508,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     double end = 1.0,
     double tolerance = 1e-10,
   }) {
-    // The sampling  algorithm is:
+    // The sampling algorithm is:
     // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
     //    curve) formed by two points and a test point.
     // 2. If the area of the triangle is small enough (below tolerance), then
@@ -675,7 +675,7 @@ class CatmullRomSpline extends Curve2D {
   /// interpolate.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the structures,
+  /// [transform] is called. If you would rather pre-compute the structures,
   /// use [CatmullRomSpline.precompute] instead.
   CatmullRomSpline(
       List<Offset> controlPoints, {
@@ -851,7 +851,7 @@ class CatmullRomCurve extends Curve {
   /// is equivalent to a linear interpolation between points.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the curve, use
+  /// [transform] is called. If you would rather pre-compute the curve, use
   /// [CatmullRomCurve.precompute] instead.
   ///
   /// All of the arguments must not be null.
@@ -938,7 +938,7 @@ class CatmullRomCurve extends Curve {
 
   /// The "tension" of the curve.
   ///
-  /// The `tension` attribute controls how tightly the curve approaches the
+  /// The [tension] attribute controls how tightly the curve approaches the
   /// given [controlPoints]. It must be in the range 0.0 to 1.0, inclusive. It
   /// is optional, and defaults to 0.0, which provides the smoothest curve. A
   /// value of 1.0 is equivalent to a linear interpolation between control

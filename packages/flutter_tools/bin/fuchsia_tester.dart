@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert' show json;
 import 'dart:math' as math;
 
@@ -57,7 +55,6 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
     ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(_kOptionCoverage,
-      defaultsTo: false,
       negatable: false,
       help: 'Whether to collect coverage information.',
     )
@@ -84,8 +81,8 @@ Future<void> run(List<String> args) async {
     if (!globals.fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
-    Directory coverageDirectory;
-    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String;
+    Directory? coverageDirectory;
+    final String? coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
     if (coverageDirectoryPath != null) {
       if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
         throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
@@ -95,13 +92,14 @@ Future<void> run(List<String> args) async {
 
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
+    final Artifacts artifacts = globals.artifacts!;
     final Link testerDestLink =
-        globals.fs.link(globals.artifacts.getArtifactPath(Artifact.flutterTester));
+        globals.fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(globals.fs.path.absolute(shellPath));
 
     final Directory sdkRootDest =
-        globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+        globals.fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
     for (final FileSystemEntity artifact in sdkRootSrc.listSync()) {
       globals.fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
@@ -109,16 +107,18 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
-    Directory testDirectory;
-    CoverageCollector collector;
-    if (argResults['coverage'] as bool) {
+    Directory? testDirectory;
+    CoverageCollector? collector;
+    if (argResults['coverage'] as bool? ?? false) {
       // If we have a specified coverage directory then accept all libraries by
       // setting libraryNames to null.
-      final Set<String> libraryNames = coverageDirectory != null ? null :
+      final Set<String>? libraryNames = coverageDirectory != null ? null :
           <String>{FlutterProject.current().manifest.appName};
+      final String packagesPath = globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String));
       collector = CoverageCollector(
-        packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
-        libraryNames: libraryNames);
+        packagesPath: packagesPath,
+        libraryNames: libraryNames,
+        resolver: await CoverageCollector.getResolver(packagesPath));
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }
@@ -160,11 +160,11 @@ Future<void> run(List<String> args) async {
       // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
       // test files may appear to be in the root directory.
       if (coverageDirectory == null) {
-        globals.fs.currentDirectory = testDirectory.parent;
+        globals.fs.currentDirectory = testDirectory!.parent;
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String?, coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
       }
     }

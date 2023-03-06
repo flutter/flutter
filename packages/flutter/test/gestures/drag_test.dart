@@ -1507,7 +1507,7 @@ void main() {
       didEndPan = true;
     };
 
-    final TestPointer pointer = TestPointer(2);
+    final TestPointer pointer = TestPointer(2, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent start = pointer.panZoomStart(const Offset(10.0, 10.0));
     pan.addPointerPanZoom(start);
     competingPan.addPointerPanZoom(start);
@@ -1564,7 +1564,7 @@ void main() {
       didEndPan = true;
     };
 
-    final TestPointer panZoomPointer = TestPointer(2);
+    final TestPointer panZoomPointer = TestPointer(2, PointerDeviceKind.trackpad);
     final TestPointer touchPointer = TestPointer(3);
     final PointerPanZoomStartEvent start = panZoomPointer.panZoomStart(const Offset(10.0, 10.0));
     pan.addPointerPanZoom(start);
@@ -1641,7 +1641,7 @@ testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureT
       didEndPan = true;
     };
 
-    final TestPointer panZoomPointer = TestPointer(2);
+    final TestPointer panZoomPointer = TestPointer(2, PointerDeviceKind.trackpad);
     final TestPointer touchPointer = TestPointer(3);
     final PointerDownEvent touchDown = touchPointer.down(const Offset(20.0, 20.0));
     pan.addPointer(touchDown);

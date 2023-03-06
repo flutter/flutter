@@ -4,7 +4,7 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
+import 'package:flutter/rendering.dart' show debugDumpLayerTree, debugDumpRenderTree, debugDumpSemanticsTree;
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'i18n/stock_strings.dart';
@@ -85,8 +85,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode? value) {
-    if (widget.updater != null)
+    if (widget.updater != null) {
       widget.updater(widget.configuration.copyWith(stockMode: value));
+    }
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -135,7 +136,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+                debugDumpSemanticsTree();
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }
@@ -239,8 +240,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
-    if (_searchQuery.text.isEmpty)
+    if (_searchQuery.text.isEmpty) {
       return stocks;
+    }
     final RegExp regexp = RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }

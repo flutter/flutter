@@ -146,16 +146,19 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       await channel.invokeMethod<void>('stopFlutterViewEvents');
       await viewChannel?.invokeMethod<void>('stopTouchEvents');
 
-      if (flutterViewEvents.length != embeddedViewEvents.length)
+      if (flutterViewEvents.length != embeddedViewEvents.length) {
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
+      }
 
       final StringBuffer diff = StringBuffer();
       for (int i = 0; i < flutterViewEvents.length; ++i) {
         final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
-        if (currentDiff.isEmpty)
+        if (currentDiff.isEmpty) {
           continue;
-        if (diff.isNotEmpty)
+        }
+        if (diff.isNotEmpty) {
           diff.write(', ');
+        }
         diff.write(currentDiff);
       }
       return diff.toString();
@@ -229,8 +232,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         flutterViewEvents.insert(0, map.cast<String, dynamic>());
-        if (flutterViewEvents.length > kEventsBufferSize)
+        if (flutterViewEvents.length > kEventsBufferSize) {
           flutterViewEvents.removeLast();
+        }
         setState(() {});
         break;
     }
@@ -242,8 +246,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         embeddedViewEvents.insert(0, map.cast<String, dynamic>());
-        if (embeddedViewEvents.length > kEventsBufferSize)
+        if (embeddedViewEvents.length > kEventsBufferSize) {
           embeddedViewEvents.removeLast();
+        }
         setState(() {});
         break;
     }
@@ -251,9 +256,10 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   Widget buildEventTile(BuildContext context, int index) {
-    if (embeddedViewEvents.length > index)
+    if (embeddedViewEvents.length > index) {
       return TouchEventDiff(
           flutterViewEvents[index], embeddedViewEvents[index]);
+    }
     return Text(
         'Unmatched event, action: ${flutterViewEvents[index]['action']}');
   }

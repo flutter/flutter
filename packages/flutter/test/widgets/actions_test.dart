@@ -28,6 +28,7 @@ void main() {
       expect(invoked, isTrue);
     });
   });
+
   group(Actions, () {
     Intent? invokedIntent;
     Action<Intent>? invokedAction;
@@ -99,6 +100,7 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
+
     testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -125,6 +127,7 @@ void main() {
       expect(result, isNull);
       expect(invoked, isFalse);
     });
+
     testWidgets('invoke throws when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -151,6 +154,7 @@ void main() {
       expect(result, isNull);
       expect(invoked, isFalse);
     });
+
     testWidgets('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -181,6 +185,7 @@ void main() {
       expect(invoked, isTrue);
       expect(invokedIntent, equals(intent));
     });
+
     testWidgets('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -217,6 +222,7 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
+
     testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -252,6 +258,7 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
+
     testWidgets('Actions widget can be found with of', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
@@ -268,6 +275,7 @@ void main() {
       final ActionDispatcher dispatcher = Actions.of(containerKey.currentContext!);
       expect(dispatcher, equals(testDispatcher));
     });
+
     testWidgets('Action can be found with find', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
@@ -314,6 +322,7 @@ void main() {
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
+
     testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
@@ -383,6 +392,7 @@ void main() {
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
+
     testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
       await tester.pumpWidget(
         MouseRegion(
@@ -415,6 +425,7 @@ void main() {
 
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
+
     testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final Object sentinel = Object();
@@ -445,6 +456,7 @@ void main() {
       expect(identical(result, sentinel), isTrue);
       expect(invoked, isTrue);
     });
+
     testWidgets('ContextAction can return null', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       const TestIntent intent = TestIntent();
@@ -471,6 +483,7 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
       expect(testAction.capturedContexts.single, containerKey.currentContext);
     });
+
     testWidgets('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -775,6 +788,7 @@ void main() {
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
+
     testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
@@ -805,6 +819,7 @@ void main() {
       await tester.pump();
       expect(focusing, isTrue);
     });
+
     testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
@@ -951,6 +966,110 @@ void main() {
         expect(buttonNode2.hasFocus, isFalse);
       },
     );
+
+    testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FocusableActionDetector(
+            child: Column(
+              children: <Widget>[
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('Button 1'),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('Button 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSemantics(find.byType(FocusableActionDetector)),
+        matchesSemantics(
+          scopesRoute: true,
+          children: <Matcher>[
+            // This semantic is from `Focus` widget under `FocusableActionDetector`.
+            matchesSemantics(
+              isFocusable: true,
+              children: <Matcher>[
+                matchesSemantics(
+                  hasTapAction: true,
+                  isButton: true,
+                  hasEnabledState: true,
+                  isEnabled: true,
+                  isFocusable: true,
+                  label: 'Button 1',
+                  textDirection: TextDirection.ltr,
+                ),
+                matchesSemantics(
+                  hasTapAction: true,
+                  isButton: true,
+                  hasEnabledState: true,
+                  isEnabled: true,
+                  isFocusable: true,
+                  label: 'Button 2',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+
+      // Set `includeFocusSemantics` to false to exclude semantics
+      // from `Focus` widget under `FocusableActionDetector`.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FocusableActionDetector(
+            includeFocusSemantics: false,
+            child: Column(
+              children: <Widget>[
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('Button 1'),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('Button 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Semantics from the `Focus` widget will be removed.
+      expect(
+        tester.getSemantics(find.byType(FocusableActionDetector)),
+        matchesSemantics(
+          scopesRoute: true,
+          children: <Matcher>[
+            matchesSemantics(
+              hasTapAction: true,
+              isButton: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              isFocusable: true,
+              label: 'Button 1',
+              textDirection: TextDirection.ltr,
+            ),
+            matchesSemantics(
+              hasTapAction: true,
+              isButton: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              isFocusable: true,
+              label: 'Button 2',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      );
+    });
   });
 
   group('Action subclasses', () {
@@ -1009,8 +1128,13 @@ void main() {
         .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equals('actions: {}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {}',
+        ]),
+      );
     });
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1032,8 +1156,13 @@ void main() {
           .toList();
 
       expect(description.length, equals(2));
-      expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
+      expect(
+        description,
+        equalsIgnoringHashCodes(<String>[
+          'dispatcher: ActionDispatcher#00000',
+          'actions: {TestIntent: TestAction#00000}',
+        ]),
+      );
     });
   });
 

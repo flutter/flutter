@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -16,11 +16,11 @@ import 'layout_helper.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
-  PointerEvent,
+  PointerCancelEvent,
   PointerDownEvent,
+  PointerEvent,
   PointerMoveEvent,
-  PointerUpEvent,
-  PointerCancelEvent;
+  PointerUpEvent;
 
 /// A base class for render boxes that resemble their children.
 ///
@@ -173,7 +173,12 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     RenderBox? child,
   }) : super(child);
 
-  /// How to behave during hit testing.
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this one.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   HitTestBehavior behavior;
 
   @override
@@ -1510,6 +1515,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       return true;
     }());
   }
+
+  @override
+  void dispose() {
+    _debugText?.dispose();
+    _debugText = null;
+    super.dispose();
+  }
 }
 
 /// Clips its child using a rectangle.
@@ -2009,11 +2021,11 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RRect get _defaultClip {
     assert(hasSize);
     assert(_shape != null);
+    final Rect rect = Offset.zero & size;
     switch (_shape) {
       case BoxShape.rectangle:
-        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+        return (borderRadius ?? BorderRadius.zero).toRRect(rect);
       case BoxShape.circle:
-        final Rect rect = Offset.zero & size;
         return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
   }
@@ -3455,6 +3467,72 @@ class RenderRepaintBoundary extends RenderProxyBox {
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
+  /// Capture an image of the current state of this render object and its
+  /// children synchronously.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
+  /// of the render object, multiplied by the [pixelRatio].
+  ///
+  /// To use [toImageSync], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
+  ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread and the image is returned before this is completed.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The following is an example of how to go from a `GlobalKey` on a
+  /// `RepaintBoundary` to an image handle:
+  ///
+  /// ```dart
+  /// class ImageCaptureHome extends StatefulWidget {
+  ///   const ImageCaptureHome({super.key});
+  ///
+  ///   @override
+  ///   State<ImageCaptureHome> createState() => _ImageCaptureHomeState();
+  /// }
+  ///
+  /// class _ImageCaptureHomeState extends State<ImageCaptureHome> {
+  ///   GlobalKey globalKey = GlobalKey();
+  ///
+  ///   void _captureImage() {
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = boundary.toImageSync();
+  ///     print('Image dimensions: ${image.width}x${image.height}');
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RepaintBoundary(
+  ///       key: globalKey,
+  ///       child: Center(
+  ///         child: TextButton(
+  ///           onPressed: _captureImage,
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [OffsetLayer.toImageSync] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImageSync] for more information about the image returned.
+  ui.Image toImageSync({ double pixelRatio = 1.0 }) {
+    assert(!debugNeedsPaint);
+    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    return offsetLayer.toImageSync(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
   /// paint at different times. When both paint at the same time, the repaint
@@ -4282,6 +4360,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }
@@ -4920,7 +5001,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      link.leaderSize != null || link.leader == null || leaderAnchor == Alignment.topLeft,
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',

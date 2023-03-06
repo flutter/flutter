@@ -87,7 +87,7 @@ abstract class AnalyzeBase {
     return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
   }
   bool get isBenchmarking => argResults['benchmark'] as bool;
-  String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
+  String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({

@@ -81,12 +81,10 @@ class BottomNavigationBarItem {
   ///    the icons themselves.
   final Color? backgroundColor;
 
-  /// The text to display in the tooltip for this [BottomNavigationBarItem], when
-  /// the user long presses the item.
+  /// The text to display in the [Tooltip] for this [BottomNavigationBarItem].
   ///
-  /// The [Tooltip] will only appear on an item in a Material design [BottomNavigationBar], and
-  /// when the string is not empty.
+  /// A [Tooltip] will only appear on this item if [tooltip] is set to a non-empty string.
   ///
-  /// Defaults to null, in which case the [label] text will be used.
+  /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;
 }

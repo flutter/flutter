@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -397,6 +398,30 @@ void main() {
     expect(staleFile, isNot(exists));
   });
 
+  testWithoutContext('Try to remove without a parent', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory parent = fileSystem.directory('dir');
+    parent.createSync();
+    final Directory child = parent.childDirectory('child');
+    child.createSync();
+    final Directory tempStorage = parent.childDirectory('temp');
+    tempStorage.createSync();
+    final FakeArtifactUpdaterDownload fakeArtifact = FakeArtifactUpdaterDownload(
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      tempStorage: tempStorage,
+      httpClient: HttpClient(),
+      platform: FakePlatform(),
+      allowedBaseUrls: <String>[]
+    );
+    final File file = child.childFile('file');
+    file.createSync();
+    fakeArtifact.addFiles(<File>[file]);
+    child.deleteSync(recursive: true);
+    fakeArtifact.removeDownloadedFiles();
+  });
+
   testWithoutContext('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -566,9 +591,9 @@ void main() {
       cache.includeAllPlatforms = true;
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
-        <String>['darwin-x64', 'darwin-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+        <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 windows hosts are not supported now
       ]);
   });
 
@@ -839,6 +864,55 @@ void main() {
     ]);
   });
 
+  testWithoutContext('FlutterWebSdk does not download CanvasKit if it is already in flutter_web_sdk', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+      .childDirectory('cache')
+      .childDirectory('bin')
+      .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
+
+    final File engineVersionFile = internalDir.childFile('engine.version');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+
+    final List<String> messages = <String>[];
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childDirectory('canvaskit').createSync();
+      location.childDirectory('canvaskit').childFile('canvaskit.js').createSync();
+      location.childDirectory('canvaskit').childFile('canvaskit.wasm').createSync();
+      location.childDirectory('canvaskit').childDirectory('profiling').createSync();
+      location.childDirectory('canvaskit').childDirectory('profiling').childFile('canvaskit.js').createSync();
+      location.childDirectory('canvaskit').childDirectory('profiling').childFile('canvaskit.wasm').createSync();
+    };
+
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(messages, <String>[
+      'Downloading Web SDK...',
+    ]);
+
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
+    ]);
+
+    expect(locations, <String>[
+      'cache/bin/cache/flutter_web_sdk',
+    ]);
+  });
+
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
     final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
@@ -908,6 +982,7 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => FakePub(),
+      projectFactory: FakeFlutterProjectFactory(),
     );
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
@@ -936,7 +1011,7 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // dependencies are missing.
 
-    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/lib/foo.dart')
+    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/pubspec.yaml')
       .createSync(recursive: true);
 
     expect(await pubDependencies.isUpToDate(fileSystem), true);
@@ -950,6 +1025,7 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => pub,
+      projectFactory: FakeFlutterProjectFactory()
     );
 
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
@@ -1155,7 +1231,7 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
@@ -1212,4 +1288,20 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
 
   @override
   void removeDownloadedFiles() { }
+}
+
+class FakeArtifactUpdaterDownload extends ArtifactUpdater {
+  FakeArtifactUpdaterDownload({
+    required super.operatingSystemUtils,
+    required super.logger,
+    required super.fileSystem,
+    required super.tempStorage,
+    required super.httpClient,
+    required super.platform,
+    required super.allowedBaseUrls
+  });
+
+  void addFiles(List<File> files) {
+    downloadedFiles.addAll(files);
+  }
 }

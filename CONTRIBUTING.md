@@ -75,7 +75,7 @@ that increase our test coverage, writing tests for issues others have filed, all
 are really valuable contributions to open source projects.
 
 If this interests you, you can jump in and submit bug reports without needing anyone's permission!
-The #qa channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
+The #quality-assurance channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
 is a good place to talk about what you're doing. We're especially eager for QA testing when
 we announce a beta release. See https://github.com/flutter/flutter/wiki/Quality-Assurance for
 more details.
@@ -159,7 +159,7 @@ To contribute API documentation, an excellent command of the English language is
 We have a [whole section in our style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc)
 that you should read before you write API documentation. It includes notes on the "Flutter Voice", such as our word and grammar conventions.
 
-In general, a really productive way to improve documentation is to use Flutter and stop any time your have a question: find the answer, then
+In general, a really productive way to improve documentation is to use Flutter and stop any time you have a question: find the answer, then
 document the answer where you first looked for it.
 
 We also keep [a list of areas that need better API documentation](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22d%3A+api+docs%22+sort%3Areactions-%2B1-desc).
