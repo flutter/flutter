@@ -716,6 +716,10 @@ mixin LocalHistoryRoute<T> on Route<T> {
     }
   }
 
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   @override
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally) {
@@ -1478,6 +1482,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation? _secondaryAnimationProxy;
 
+  final List<VoidCallback> _onPopCallbacks = <VoidCallback>[];
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
@@ -1498,6 +1503,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    this method checks.
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
+  // TODO(justinmc): Deprecate the overridden parent class one too.
   @override
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
@@ -1508,6 +1518,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       }
     }
     return super.willPop();
+  }
+
+  @override
+  void onPop() {
+    final _ModalScopeState<T>? scope = _scopeKey.currentState;
+    assert(scope != null);
+    for (final VoidCallback callback in List<VoidCallback>.of(_onPopCallbacks)) {
+      callback();
+    }
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -1589,6 +1608,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [willPop], which runs the callbacks added with this method.
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    that [willPop] checks.
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
     _willPopCallbacks.add(callback);
@@ -1601,9 +1624,25 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
+  }
+
+  // TODO(justinmc): Document. This will be called after the pop has begun. It's
+  // not possible to prevent at pop at that point.
+  void addScopedOnPopCallback(VoidCallback callback) {
+    assert(_scopeKey.currentState != null, 'Tried to add an onPop callback to a route that is not currently in the tree.');
+    _onPopCallbacks.add(callback);
+  }
+
+  void removeScopedOnPopCallback(VoidCallback callback) {
+    assert(_scopeKey.currentState != null, 'Tried to remove an onPop callback from a route that is not currently in the tree.');
+    _onPopCallbacks.remove(callback);
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
@@ -1623,6 +1662,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback.
   ///  * [willHandlePopInternally], which reports on another reason why
   ///    a pop might be vetoed.
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   @protected
   bool get hasScopedWillPopCallback {
     return _willPopCallbacks.isNotEmpty;

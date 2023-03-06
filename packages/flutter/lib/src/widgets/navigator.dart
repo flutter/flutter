@@ -86,6 +86,10 @@ typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 ///
 ///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
 ///    mechanism.
+@Deprecated(
+  'Use addScopedOnPopCallback or CanPopScope instead. '
+  'This feature was deprecated after v3.9.0-0.0.pre.',
+)
 enum RoutePopDisposition {
   /// Pop the route.
   ///
@@ -294,6 +298,10 @@ abstract class Route<T> {
   ///    mechanism.
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
+  @Deprecated(
+    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
