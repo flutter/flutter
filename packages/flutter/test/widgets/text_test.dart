@@ -634,7 +634,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
-              label: 'hello world${rleChar}${rloChar} ',
+              label: 'hello world$rleChar$rloChar ',
               textDirection: TextDirection.ltr,
             ),
             TestSemantics(
