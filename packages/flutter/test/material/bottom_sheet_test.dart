@@ -1100,7 +1100,7 @@ void main() {
       const Rect.fromLTRB(376.0, 532.0, 424.0, 580.0),
     );
     final Offset center = tester.getCenter(dragHandle);
-    final Offset edge =  tester.getTopLeft(dragHandle) - const Offset(1, 1);
+    final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
 
     // Shows default drag handle color
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
