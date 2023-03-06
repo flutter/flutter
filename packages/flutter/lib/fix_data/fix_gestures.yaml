@@ -1,0 +1,478 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are [for CLASS] from the <XXX> library. *
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/28602
+  - title: "Rename to 'fromMouseEvent'"
+    date: 2020-12-15
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: 'fromHoverEvent'
+      inClass: 'PointerEnterEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'fromMouseEvent'
+
+  # Changes made in https://github.com/flutter/flutter/pull/28602
+  - title: "Rename to 'fromMouseEvent'"
+    date: 2020-12-15
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: 'fromHoverEvent'
+      inClass: 'PointerExitEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'fromMouseEvent'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66043
+  - title: "Use withKind"
+    date: 2020-09-17
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VelocityTracker'
+    oneOf:
+      - if: "pointerDeviceKind == ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+          - kind: 'addParameter'
+            index: 0
+            name: 'kind'
+            style: required_positional
+            argumentValue:
+              expression: 'PointerDeviceKind.touch'
+      - if: "pointerDeviceKind != ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+    variables:
+      pointerDeviceKind:
+          kind: 'fragment'
+          value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ScaleGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'MultiTapGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DoubleTapGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DelayedMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VerticalMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'HorizontalMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ImmediateMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'MultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'LongPressGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ForcePressGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 6
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'EagerGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 2
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'PrimaryPointerGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 6
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'OneSequenceGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'GestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'HorizontalDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VerticalDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+# Before adding a new fix: read instructions at the top of this file.

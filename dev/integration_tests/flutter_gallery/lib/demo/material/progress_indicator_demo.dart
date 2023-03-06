@@ -33,10 +33,11 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed)
+      if (status == AnimationStatus.dismissed) {
         _controller.forward();
-      else if (status == AnimationStatus.completed)
+      } else if (status == AnimationStatus.completed) {
         _controller.reverse();
+      }
     });
   }
 
@@ -114,7 +115,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       body: Center(
         child: SingleChildScrollView(
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6!,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: GestureDetector(
               onTap: _handleTap,
               behavior: HitTestBehavior.opaque,

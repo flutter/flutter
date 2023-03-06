@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for NestedScrollView
+/// Flutter code sample for [NestedScrollView].
 
 import 'package:flutter/material.dart';
 
@@ -44,11 +44,10 @@ class MyStatelessWidget extends StatelessWidget {
       ];
     }, body: Builder(builder: (BuildContext context) {
       return CustomScrollView(
-        // The "controller" and "primary" members should be left
-        // unset, so that the NestedScrollView can control this
-        // inner scroll view.
-        // If the "controller" property is set, then this scroll
-        // view will not be associated with the NestedScrollView.
+        // The "controller" and "primary" members should be left unset, so that
+        // the NestedScrollView can control this inner scroll view.
+        // If the "controller" property is set, then this scroll view will not
+        // be associated with the NestedScrollView.
         slivers: <Widget>[
           SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),

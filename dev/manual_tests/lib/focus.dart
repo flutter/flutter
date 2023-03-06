@@ -54,10 +54,12 @@ class _DemoButtonState extends State<DemoButton> {
       autofocus: widget.autofocus,
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
+          if (states.contains(MaterialState.focused)) {
             return Colors.red.withOpacity(0.25);
-          if (states.contains(MaterialState.hovered))
+          }
+          if (states.contains(MaterialState.hovered)) {
             return Colors.blue.withOpacity(0.25);
+          }
           return Colors.transparent;
         }),
       ),
@@ -136,7 +138,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.headline4!,
+          style: textTheme.headlineMedium!,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),

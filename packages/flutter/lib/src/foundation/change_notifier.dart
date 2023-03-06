@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'diagnostics.dart';
+import 'memory_allocations.dart';
 
 export 'dart:ui' show VoidCallback;
 
@@ -95,6 +96,8 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -122,11 +125,18 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
+  /// If true, the event [ObjectCreated] for this instance was dispatched to
+  /// [MemoryAllocations].
+  ///
+  /// As [ChangedNotifier] is used as mixin, it does not have constructor,
+  /// so we use [addListener] to dispatch the event.
+  bool _creationDispatched = false;
+
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
   /// disposed.
   ///
   /// {@tool snippet}
-  /// The `debugAssertNotDisposed` function should only be called inside of an
+  /// The [debugAssertNotDisposed] function should only be called inside of an
   /// assert, as in this example.
   ///
   /// ```dart
@@ -170,11 +180,10 @@ class ChangeNotifier implements Listenable {
   /// [notifyListeners]; and similarly, by overriding [removeListener], checking
   /// if [hasListeners] is false after calling `super.removeListener()`, and if
   /// so, stopping that same work.
+  ///
+  /// This method returns false if [dispose] has been called.
   @protected
-  bool get hasListeners {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
-    return _count > 0;
-  }
+  bool get hasListeners => _count > 0;
 
   /// Register a closure to be called when the object changes.
   ///
@@ -205,6 +214,14 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: this,
+      );
+      _creationDispatched = true;
+    }
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -297,13 +314,26 @@ class ChangeNotifier implements Listenable {
   /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
+  ///
+  /// This method does not notify listeners, and clears the listener list once
+  /// it is called. Consumers of this class must decide on whether to notify
+  /// listeners or not immediately before disposal.
   @mustCallSuper
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(
+      _notificationCallStackDepth == 0,
+      'The "dispose()" method on $this was called during the call to '
+      '"notifyListeners()". This is likely to cause errors since it modifies '
+      'the list of listeners while the list is being used.',
+    );
     assert(() {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _listeners = _emptyListeners;
     _count = 0;
   }
@@ -438,7 +468,16 @@ class _MergingListenable extends Listenable {
 /// listeners.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
-  ValueNotifier(this._value);
+  ValueNotifier(this._value) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ValueNotifier',
+        object: this,
+      );
+    }
+    _creationDispatched = true;
+  }
 
   /// The current value stored in this notifier.
   ///

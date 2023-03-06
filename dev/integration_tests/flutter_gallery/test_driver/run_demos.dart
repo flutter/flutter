@@ -23,8 +23,9 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
   String? currentDemoCategory;
 
   for (final String demo in demos) {
-    if (kSkippedDemos.contains(demo))
+    if (kSkippedDemos.contains(demo)) {
       continue;
+    }
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);

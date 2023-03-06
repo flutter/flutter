@@ -68,14 +68,15 @@ void main() {
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
   testUsingContext('generated plugin registrant passes analysis without null safety', () async {
@@ -115,14 +116,15 @@ void main() {
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
 
@@ -146,14 +148,15 @@ void main() {
     final String contents = registrant.readAsStringSync();
     expect(contents, contains('void registerPlugins() {}'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
   // See: https://github.com/dart-lang/dart-services/pull/874
@@ -176,14 +179,15 @@ void main() {
     final Directory buildDir = projectDir.childDirectory('.dart_tool/flutter_build');
     expect(buildDir, isNot(exists));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
   testUsingContext(
@@ -225,14 +229,15 @@ void main() {
     );
     await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 }
 

@@ -11,8 +11,11 @@ Add a dependency on the `integration_test` and `flutter_test` package in the
 `pubspec.yaml` of the example app:
 
 ```yaml
-integration_test:
-  sdk: flutter
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
 ```
 
 Create a `integration_test/` directory for your package. In this directory,
@@ -126,7 +129,7 @@ void main() {
 ```
 
 You can use a driver script to pull in the screenshot from the device.
-This way, you can store the images locally on your computer.  On iOS, the
+This way, you can store the images locally on your computer. On iOS, the
 screenshot will also be available in Xcode test results.
 
 **test_driver/integration_test.dart**
@@ -277,6 +280,7 @@ end
 ```
 
 To build `integration_test/foo_test.dart` from the command line, run:
+
 ```sh
 flutter build ios --config-only integration_test/foo_test.dart
 ```

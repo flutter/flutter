@@ -41,7 +41,7 @@ class MDnsObservatoryDiscovery {
   /// Executes an mDNS query for a Dart Observatory.
   ///
   /// The [applicationId] parameter may be used to specify which application
-  /// to find.  For Android, it refers to the package name; on iOS, it refers to
+  /// to find. For Android, it refers to the package name; on iOS, it refers to
   /// the bundle ID.
   ///
   /// If it is not null, this method will find the port and authentication code

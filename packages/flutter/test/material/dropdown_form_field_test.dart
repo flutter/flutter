@@ -567,6 +567,45 @@ void main() {
     }
   });
 
+  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
+      (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: Material(
+              child: Center(
+                child: DropdownButtonFormField<String>(
+                  key: buttonKey,
+                  value: value,
+                  onChanged: onChanged,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item,
+                          key: ValueKey<String>('${item}Text'),
+                          style: const TextStyle(fontSize: 20.0)),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box =
+    tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    expect(box.size.height, 72.0);
+  });
+
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/46844
     final Key buttonKey = UniqueKey();

@@ -18,6 +18,7 @@ found in the LICENSE file. -->
          Application and put your custom class here. -->
     <application android:name="${applicationName}" android:label="channels" android:icon="@mipmap/ic_launcher">
         <activity android:name=".MainActivity"
+                  android:exported="true"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

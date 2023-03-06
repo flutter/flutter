@@ -231,7 +231,7 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title!, style: Theme.of(context).textTheme.subtitle1),
+        child: Text(title!, style: Theme.of(context).textTheme.titleMedium),
       ),
     );
   }
@@ -245,8 +245,8 @@ class TravelDestinationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
-    final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
+    final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
+    final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
     final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(

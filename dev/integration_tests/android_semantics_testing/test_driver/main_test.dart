@@ -20,7 +20,7 @@ const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSe
 ];
 
 String adbPath() {
-  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
+  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT']!;
   if (androidHome == null) {
     return 'adb';
   } else {
@@ -30,7 +30,7 @@ String adbPath() {
 
 void main() {
   group('AccessibilityBridge', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
     Future<AndroidSemanticsNode> getSemantics(SerializableFinder finder) async {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
@@ -38,7 +38,7 @@ void main() {
     }
 
     // The version of TalkBack running on the device.
-    Version talkbackVersion;
+    Version? talkbackVersion;
 
     Future<Version> getTalkbackVersion() async {
       final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
@@ -51,7 +51,7 @@ void main() {
         throw Exception('Failed to get TalkBack version: ${result.stdout as String}\n${result.stderr as String}');
       }
       final List<String> lines = (result.stdout as String).split('\n');
-      String version;
+      String? version;
       for (final String line in lines) {
         if (line.contains('versionName')) {
           version = line.replaceAll(RegExp(r'\s*versionName='), '');
@@ -64,14 +64,14 @@ void main() {
 
       // Android doesn't quite use semver, so convert the version string to semver form.
       final RegExp startVersion = RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
-      final RegExpMatch match = startVersion.firstMatch(version);
+      final RegExpMatch? match = startVersion.firstMatch(version);
       if (match == null) {
         return Version(0, 0, 0);
       }
       return Version(
-        int.parse(match.namedGroup('major')),
-        int.parse(match.namedGroup('minor')),
-        int.parse(match.namedGroup('patch')),
+        int.parse(match.namedGroup('major')!),
+        int.parse(match.namedGroup('minor')!),
+        int.parse(match.namedGroup('patch')!),
         build: match.namedGroup('build'),
       );
     }
@@ -104,7 +104,7 @@ void main() {
         'null',
       ]);
       await run.exitCode;
-      driver?.close();
+      driver.close();
     });
 
     group('TextField', () {

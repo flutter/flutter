@@ -192,10 +192,10 @@ void main() {
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
         'Analyzing',
-        'info $analyzerSeparator Avoid empty else statements',
-        'info $analyzerSeparator Avoid empty statements',
-        "info $analyzerSeparator The declaration '_incrementCounter' isn't",
-        "warning $analyzerSeparator The parameter 'onPressed' is required",
+        'avoid_empty_else',
+        'empty_statements',
+        'unused_element',
+        'missing_required_param',
       ],
       exitMessageContains: '4 issues found.',
       exitCode: 1,
@@ -339,7 +339,7 @@ int analyze() {}
     );
   });
 
-  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
+  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
 int analyze() {}
 ''';
@@ -354,6 +354,30 @@ analyzer:
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
     await runCommand(
       arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+      statusTextContains: <String>[
+        'warning',
+        'missing_return',
+      ],
+      exitMessageContains: '1 issue found.',
+    );
+  });
+
+
+  testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+    const String warningSourceCode = '''
+int analyze() {}
+''';
+
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: warning
+  ''');
+
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', '--fatal-warnings'],
       statusTextContains: <String>[
         'warning',
         'missing_return',
@@ -423,7 +447,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

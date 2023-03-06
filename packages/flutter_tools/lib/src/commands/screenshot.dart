@@ -20,7 +20,7 @@ const String _kSkiaType = 'skia';
 const String _kRasterizerType = 'rasterizer';
 
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand() {
+  ScreenshotCommand({required this.fs}) {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -52,6 +52,8 @@ class ScreenshotCommand extends FlutterCommand {
     );
     usesDeviceTimeoutOption();
   }
+
+  final FileSystem fs;
 
   @override
   String get name => 'screenshot';
@@ -101,7 +103,7 @@ class ScreenshotCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
-      outputFile = globals.fs.file(stringArgDeprecated(_kOut));
+      outputFile = fs.file(stringArgDeprecated(_kOut));
     }
 
     bool success = true;
@@ -123,16 +125,27 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runScreenshot(File? outputFile) async {
     outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
+      fs.currentDirectory,
       'flutter',
       'png',
     );
+
     try {
       await device!.takeScreenshot(outputFile);
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
-    _showOutputFileInfo(outputFile);
+
+    checkOutput(outputFile, fs);
+
+    try {
+      _showOutputFileInfo(outputFile);
+    } on Exception catch (error) {
+      throwToolExit(
+        'Error with provided file path: "${outputFile.path}"\n'
+        'Error: $error'
+      );
+    }
   }
 
   Future<bool> runSkia(File? outputFile) async {
@@ -147,7 +160,7 @@ class ScreenshotCommand extends FlutterCommand {
       return false;
     }
     outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
+      fs.currentDirectory,
       'flutter',
       'skp',
     );
@@ -171,7 +184,7 @@ class ScreenshotCommand extends FlutterCommand {
       return false;
     }
     outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
+      fs.currentDirectory,
       'flutter',
       'png',
     );
@@ -181,6 +194,15 @@ class ScreenshotCommand extends FlutterCommand {
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
     return true;
+  }
+
+  static void checkOutput(File outputFile, FileSystem fs) {
+    if (!fs.file(outputFile.path).existsSync()) {
+      throwToolExit(
+          'File was not created, ensure path is valid\n'
+          'Path provided: "${outputFile.path}"'
+      );
+    }
   }
 
   void _ensureOutputIsNotJsonRpcError(File outputFile) {
@@ -197,6 +219,6 @@ class ScreenshotCommand extends FlutterCommand {
 
   void _showOutputFileInfo(File outputFile) {
     final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
-    globals.printStatus('Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+    globals.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

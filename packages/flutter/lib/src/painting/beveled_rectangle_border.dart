@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
-import 'edge_insets.dart';
 
 /// A rectangular border with flattened or "beveled" corners.
 ///
@@ -39,18 +38,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
 
   @override
   ShapeBorder scale(double t) {
@@ -125,21 +112,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-    final RRect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = borderRect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = borderRect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = borderRect;
-        break;
-    }
-
-    return _getPath(adjustedRect);
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
@@ -157,18 +130,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
         break;
       case BorderStyle.solid:
         final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
-        final RRect adjustedRect;
-        switch (side.strokeAlign) {
-          case StrokeAlign.inside:
-            adjustedRect = borderRect;
-            break;
-          case StrokeAlign.center:
-            adjustedRect = borderRect.inflate(side.width / 2);
-            break;
-          case StrokeAlign.outside:
-            adjustedRect = borderRect.inflate(side.width);
-            break;
-        }
+        final RRect adjustedRect = borderRect.inflate(side.strokeOutset);
         final Path path = _getPath(adjustedRect)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());

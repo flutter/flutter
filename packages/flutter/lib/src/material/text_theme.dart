@@ -10,7 +10,7 @@ import 'typography.dart';
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in Material Design
-/// (e.g., button, caption). Rather than creating a [TextTheme] directly,
+/// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
@@ -32,22 +32,22 @@ import 'typography.dart';
 /// bodyText1 and bodyText2.
 ///
 /// The 2018 spec has thirteen text styles:
-/// ```
-/// NAME         SIZE  WEIGHT  SPACING
-/// headline1    96.0  light   -1.5
-/// headline2    60.0  light   -0.5
-/// headline3    48.0  regular  0.0
-/// headline4    34.0  regular  0.25
-/// headline5    24.0  regular  0.0
-/// headline6    20.0  medium   0.15
-/// subtitle1    16.0  regular  0.15
-/// subtitle2    14.0  medium   0.1
-/// body1        16.0  regular  0.5   (bodyText1)
-/// body2        14.0  regular  0.25  (bodyText2)
-/// button       14.0  medium   1.25
-/// caption      12.0  regular  0.4
-/// overline     10.0  regular  1.5
-/// ```
+///
+/// | NAME       | SIZE |  WEIGHT |  SPACING |             |
+/// |------------|------|---------|----------|-------------|
+/// | headline1  | 96.0 | light   | -1.5     |             |
+/// | headline2  | 60.0 | light   | -0.5     |             |
+/// | headline3  | 48.0 | regular |  0.0     |             |
+/// | headline4  | 34.0 | regular |  0.25    |             |
+/// | headline5  | 24.0 | regular |  0.0     |             |
+/// | headline6  | 20.0 | medium  |  0.15    |             |
+/// | subtitle1  | 16.0 | regular |  0.15    |             |
+/// | subtitle2  | 14.0 | medium  |  0.1     |             |
+/// | body1      | 16.0 | regular |  0.5     | (bodyText1) |
+/// | body2      | 14.0 | regular |  0.25    | (bodyText2) |
+/// | button     | 14.0 | medium  |  1.25    |             |
+/// | caption    | 12.0 | regular |  0.4     |             |
+/// | overline   | 10.0 | regular |  1.5     |             |
 ///
 /// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
@@ -101,18 +101,70 @@ class TextTheme with Diagnosticable {
     TextStyle? labelLarge,
     this.labelMedium,
     TextStyle? labelSmall,
+    @Deprecated(
+      'Use displayLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline1,
+    @Deprecated(
+      'Use displayMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline2,
+    @Deprecated(
+      'Use displaySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline3,
+    @Deprecated(
+      'Use headlineMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline4,
+    @Deprecated(
+      'Use headlineSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline5,
+    @Deprecated(
+      'Use titleLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline6,
+    @Deprecated(
+      'Use titleMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle1,
+    @Deprecated(
+      'Use titleSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle2,
+    @Deprecated(
+      'Use bodyLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText1,
+    @Deprecated(
+      'Use bodyMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText2,
+    @Deprecated(
+      'Use bodySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? caption,
+    @Deprecated(
+      'Use labelLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? button,
+    @Deprecated(
+      'Use labelSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? overline,
   }) : assert(
          (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
@@ -232,48 +284,100 @@ class TextTheme with Diagnosticable {
   final TextStyle? labelSmall;
 
   /// Extremely large text.
+  @Deprecated(
+    'Use displayLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline1 => displayLarge;
 
   /// Very, very large text.
   ///
   /// Used for the date in the dialog shown by [showDatePicker].
+  @Deprecated(
+    'Use displayMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline2 => displayMedium;
 
   /// Very large text.
+  @Deprecated(
+    'Use displaySmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline3 => displaySmall;
 
   /// Large text.
+  @Deprecated(
+    'Use headlineMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline4 => headlineMedium;
 
   /// Used for large text in dialogs (e.g., the month and year in the dialog
   /// shown by [showDatePicker]).
+  @Deprecated(
+    'Use headlineSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline5 => headlineSmall;
 
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
   /// and [AlertDialog.title]).
+  @Deprecated(
+    'Use titleLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get headline6 => titleLarge;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).
+  @Deprecated(
+    'Use titleMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get subtitle1 => titleMedium;
 
-  /// For medium emphasis text that's a little smaller than [subtitle1].
+  /// For medium emphasis text that's a little smaller than [titleMedium].
+  @Deprecated(
+    'Use titleSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get subtitle2 => titleSmall;
 
-  /// Used for emphasizing text that would otherwise be [bodyText2].
+  /// Used for emphasizing text that would otherwise be [bodyMedium].
+  @Deprecated(
+    'Use bodyLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get bodyText1 => bodyLarge;
 
   /// The default text style for [Material].
+  @Deprecated(
+    'Use bodyMedium instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get bodyText2 => bodyMedium;
 
   /// Used for auxiliary text associated with images.
+  @Deprecated(
+    'Use bodySmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get caption => bodySmall;
 
   /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
+  @Deprecated(
+    'Use labelLarge instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get button => labelLarge;
 
   /// The smallest style.
   ///
   /// Typically used for captions or to introduce a (larger) headline.
+  @Deprecated(
+    'Use labelSmall instead. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
   TextStyle? get overline => labelSmall;
 
   /// Creates a copy of this text theme but with the given fields replaced with
@@ -332,18 +436,70 @@ class TextTheme with Diagnosticable {
     TextStyle? labelLarge,
     TextStyle? labelMedium,
     TextStyle? labelSmall,
+    @Deprecated(
+      'Use displayLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline1,
+    @Deprecated(
+      'Use displayMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline2,
+    @Deprecated(
+      'Use displaySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline3,
+    @Deprecated(
+      'Use headlineMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline4,
+    @Deprecated(
+      'Use headlineSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline5,
+    @Deprecated(
+      'Use titleLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? headline6,
+    @Deprecated(
+      'Use titleMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle1,
+    @Deprecated(
+      'Use titleSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? subtitle2,
+    @Deprecated(
+      'Use bodyLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText1,
+    @Deprecated(
+      'Use bodyMedium instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? bodyText2,
+    @Deprecated(
+      'Use bodySmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? caption,
+    @Deprecated(
+      'Use labelLarge instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? button,
+    @Deprecated(
+      'Use labelSmall instead. '
+      'This feature was deprecated after v3.1.0-0.0.pre.',
+    )
     TextStyle? overline,
   }) {
     assert(
@@ -460,6 +616,8 @@ class TextTheme with Diagnosticable {
   /// point.
   TextTheme apply({
     String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     Color? displayColor,
@@ -475,8 +633,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       displayMedium: displayMedium?.apply(
         color: displayColor,
@@ -484,8 +644,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       displaySmall: displaySmall?.apply(
         color: displayColor,
@@ -493,8 +655,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineLarge: headlineLarge?.apply(
         color: displayColor,
@@ -502,8 +666,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineMedium: headlineMedium?.apply(
         color: displayColor,
@@ -511,8 +677,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineSmall: headlineSmall?.apply(
         color: bodyColor,
@@ -520,8 +688,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleLarge: titleLarge?.apply(
         color: bodyColor,
@@ -529,8 +699,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleMedium: titleMedium?.apply(
         color: bodyColor,
@@ -538,8 +710,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleSmall: titleSmall?.apply(
         color: bodyColor,
@@ -547,8 +721,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodyLarge: bodyLarge?.apply(
         color: bodyColor,
@@ -556,8 +732,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodyMedium: bodyMedium?.apply(
         color: bodyColor,
@@ -565,8 +743,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodySmall: bodySmall?.apply(
         color: displayColor,
@@ -574,8 +754,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelLarge: labelLarge?.apply(
         color: bodyColor,
@@ -583,8 +765,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelMedium: labelMedium?.apply(
         color: bodyColor,
@@ -592,8 +776,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelSmall: labelSmall?.apply(
         color: bodyColor,
@@ -601,8 +787,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
     );
   }
