@@ -388,7 +388,6 @@ class _DragHandle extends StatelessWidget {
     required this.materialState,
   });
 
-
   final VoidCallback? onSemanticsTap;
   final Function(bool) handleHover;
   final Set<MaterialState> materialState;
