@@ -1126,9 +1126,6 @@ class _EqualsIgnoringHashCodes extends Matcher {
   }
 }
 
-/// Returns true if [c] represents a whitespace code unit.
-bool _isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
-
 /// Returns true if [c] represents a vertical line Unicode line art code unit.
 ///
 /// See [https://en.wikipedia.org/wiki/Box-drawing_character]. This method only
@@ -1147,7 +1144,7 @@ bool _isVerticalLine(int c) {
 bool _isAllTreeConnectorCharacters(String line) {
   for (int i = 0; i < line.length; ++i) {
     final int c = line.codeUnitAt(i);
-    if (!_isWhitespace(c) && !_isVerticalLine(c)) {
+    if (!Unicode.isWhitespace(c) && !_isVerticalLine(c)) {
       return false;
     }
   }
