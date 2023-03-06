@@ -466,11 +466,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
               ],
             ),
@@ -488,21 +488,18 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The size of the parent row is just enough to
       // contain both of them.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double belowBaseline1 = fontSize1 * (1 - ahemBaselineLocation);
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
-      const double belowBaseline2 = fontSize2 * (1 - ahemBaselineLocation) + fontSize2 * 6;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double belowBaseline1 = fontSize1 * (1 - ascentRatio);
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
+      const double belowBaseline2 = fontSize2 * (1 - ascentRatio) + fontSize2 * 6;
       final double aboveBaseline = math.max(aboveBaseline1, aboveBaseline2);
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
+      expect(rowBox.size.height, aboveBaseline + belowBaseline, );
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
-      expect(
-        tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
-      );
+      expect(tester.getTopLeft(find.byKey(key2)).dy, aboveBaseline1 - aboveBaseline2);
     });
 
     testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
@@ -521,11 +518,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
                 const FlutterLogo(size: 250),
               ],
@@ -544,16 +541,16 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The FlutterLogo extends further than both Texts,
       // so the size of the parent row should contain the FlutterLogo as well.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
       expect(rowBox.size.height, 250);
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
+        aboveBaseline1 - aboveBaseline2,
       );
     });
   });

@@ -101,14 +101,14 @@ void main() {
 
   test('Can control fontFamily default', () {
     final ThemeData themeData = ThemeData(
-      fontFamily: 'Ahem',
+      fontFamily: 'FlutterTest',
       textTheme: const TextTheme(
         titleLarge: TextStyle(fontFamily: 'Roboto'),
       ),
     );
 
-    expect(themeData.textTheme.bodyLarge!.fontFamily, equals('Ahem'));
-    expect(themeData.primaryTextTheme.displaySmall!.fontFamily, equals('Ahem'));
+    expect(themeData.textTheme.bodyLarge!.fontFamily, equals('FlutterTest'));
+    expect(themeData.primaryTextTheme.displaySmall!.fontFamily, equals('FlutterTest'));
 
     // Shouldn't override the specified style's family
     expect(themeData.textTheme.titleLarge!.fontFamily, equals('Roboto'));
