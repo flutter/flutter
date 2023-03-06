@@ -55,7 +55,13 @@ void main() {
 
     testWithoutContext('flutterMemoryInfo can be called', () async {
       final Response response =
-          await vmService.callServiceExtension('s0.flutterMemoryInfo');
+      await vmService.callServiceExtension('s0.flutterMemoryInfo');
+      expect(response.type, 'Success');
+    });
+
+    testWithoutContext('flutterGetIOSBuildOptions can be called', () async {
+      final Response response =
+          await vmService.callServiceExtension('s0.flutterGetIOSBuildOptions');
       expect(response.type, 'Success');
     });
 
