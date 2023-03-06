@@ -633,16 +633,24 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPhysicalGeometry] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  Rect get physicalGeometry => _physicalGeometry ?? _view.physicalGeometry;
+  Rect get physicalGeometry {
+    Rect value = _physicalGeometry ?? _view.physicalGeometry;
+    if (_physicalSize != null) {
+      value = value.topLeft & _physicalSize!;
+    }
+    return value;
+  }
   Rect? _physicalGeometry;
   set physicalGeometry(Rect value) {
     _physicalGeometry = value;
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// Resets [physicalGeometry] to the default value for this view.
+  /// Resets [physicalGeometry] to the default value for this view. This will
+  /// also reset [physicalSize] as the values are dependent on one another.
   void resetPhysicalGeometry() {
     _physicalGeometry = null;
+    _physicalSize = null;
     platformDispatcher.onMetricsChanged?.call();
   }
 
@@ -658,21 +666,21 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPhysicalSize] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  Size get physicalSize => physicalGeometry.size;
+  Size get physicalSize {
+    // This has to be able to default to `_view.physicalSize` as web_ui handles
+    // `physicalSize` and `physicalGeometry` differently than dart:ui, where
+    // the values are both based off of `physicalGeometry`.
+    return _physicalSize ?? _physicalGeometry?.size ?? _view.physicalSize;
+  }
+  Size? _physicalSize;
   set physicalSize(Size value) {
-    physicalGeometry = physicalGeometry.topLeft & value;
+    _physicalSize = value;
   }
 
-  /// Resets [physicalSize] to the default value for this view.
+  /// Resets [physicalSize] to the default value for this view. This will
+  /// also reset [physicalGeometry] as the values are dependent on one another.
   void resetPhysicalSize() {
-    // Completely reset physicalGeometry if the end result would be the same as
-    // _view's, but if physicalGeometry would be different than _view's, just
-    // update the current test value.
-    if (physicalGeometry.topLeft == _view.physicalGeometry.topLeft) {
-      resetPhysicalGeometry();
-    } else {
-      physicalGeometry = physicalGeometry.topLeft & _view.physicalSize;
-    }
+    resetPhysicalGeometry();
   }
 
   /// The system gesture insets to use for this test.
