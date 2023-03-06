@@ -576,7 +576,7 @@ void main() {
   );
 
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
-    const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
         child: const Row(
