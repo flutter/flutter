@@ -383,7 +383,7 @@ class _BottomSheetState extends State<BottomSheet> {
 typedef _SizeChangeCallback<Size> = void Function(Size);
 
 class _DragHandle extends StatelessWidget {
-    const _DragHandle({
+  const _DragHandle({
     required this.onSemanticsTap,
     required this.handleHover,
     required this.materialState,
