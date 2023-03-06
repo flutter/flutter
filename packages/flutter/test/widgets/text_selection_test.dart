@@ -1662,7 +1662,7 @@ class FakeEditable extends LeafRenderObjectWidget {
 class FakeRenderEditable extends RenderEditable {
   FakeRenderEditable(EditableTextState delegate) : super(
     text: const TextSpan(
-      style: TextStyle(height: 1.0, fontSize: 10.0),
+      style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
       text: 'placeholder',
     ),
     startHandleLayerLink: LayerLink(),
