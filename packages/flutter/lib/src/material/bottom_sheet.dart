@@ -868,9 +868,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Defaults is true.
   final bool enableDrag;
 
-  /// Specifies whether drag handler is displayed when the drag action is enabled.
+  /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults is true in material 3 and false in material 2.
+  /// When null (the default), behaves as true when [ThemeData.useMaterial3]
+  /// is true, and otherwise behaves as false.
   final bool? hasDragHandle;
 
   /// The animation controller that controls the bottom sheet's entrance and
