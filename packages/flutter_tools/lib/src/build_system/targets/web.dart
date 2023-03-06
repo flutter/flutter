@@ -510,8 +510,13 @@ class WebBuiltInAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final Directory flutterWebSdk = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk) as Directory;
-    final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      ),
+    );
+
     for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
       final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);

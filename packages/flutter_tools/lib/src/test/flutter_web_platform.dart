@@ -226,10 +226,12 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File _canvasKitFile(String relativePath) {
-    final Directory webSdkDirectory =
-        _artifacts!.getHostArtifact(HostArtifact.flutterWebSdk) as Directory;
+    final String canvasKitPath = _artifacts!.getArtifactPath(
+      Artifact.canvasKitPath,
+      platform: TargetPlatform.web_javascript,
+    );
     final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(
-      webSdkDirectory.path,
+      canvasKitPath,
       relativePath,
     ));
     return canvasKitFile;
@@ -381,12 +383,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String path = _fileSystem.path.fromUri(request.url);
-    if (!path.startsWith('canvaskit/')) {
+    final String fullPath = _fileSystem.path.fromUri(request.url);
+    if (!fullPath.startsWith('canvaskit/')) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String extension = _fileSystem.path.extension(path);
+    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
+    final String extension = _fileSystem.path.extension(relativePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -402,7 +405,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     return shelf.Response.ok(
-      _canvasKitFile(path).openRead(),
+      _canvasKitFile(relativePath).openRead(),
       headers: <String, Object>{
         HttpHeaders.contentTypeHeader: contentType,
       },
