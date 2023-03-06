@@ -117,9 +117,10 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
-  /// Specifies whether drag handler is displayed when the drag action is enabled.
+  /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults is true in material 3 and false in material 2.
+  /// When null (the default), the behavior is determined by
+  /// [BottomSheetThemeData.hasDragHandle].
   final bool? hasDragHandle;
 
   /// Called when the user begins dragging the bottom sheet vertically, if
