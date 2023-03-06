@@ -160,7 +160,7 @@ static FlMethodResponse* system_sound_play(FlPlatformPlugin* self,
     g_warning("Ignoring unknown sound type %s in SystemSound.play.\n", type);
   }
 
-  return FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Called when Flutter wants to quit the application.
