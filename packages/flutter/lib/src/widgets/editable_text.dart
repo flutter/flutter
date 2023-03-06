@@ -2368,7 +2368,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
     if (!_spellCheckResultsReceived
         || spellCheckResults!.suggestionSpans.last.range.end < cursorIndex) {
-      // No spell check results have been recieved or the cursor index is out
+      // No spell check results have been received or the cursor index is out
       // of range that suggestionSpans covers.
       return null;
     }
@@ -2533,7 +2533,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// * [EditableText.getEditableButtonItems], which performs a similar role,
   ///   but for any editable field, not just specifically EditableText.
-  /// * [SelectableRegionState.contextMenuButtonItems], which peforms a similar
+  /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
   ///   role but for content that is selectable but not editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.
@@ -2605,7 +2605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_tickersEnabled && _cursorActive) {
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
-        // Cannot use _stopCursorTimer because it would reset _cursorActive.
+        // Cannot use _stopCursorBlink because it would reset _cursorActive.
         _cursorTimer!.cancel();
         _cursorTimer = null;
       }
@@ -2789,7 +2789,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Wherever the value is changed by the user, schedule a showCaretOnScreen
-    // to make sure the user can see the changes they just made. Programmatical
+    // to make sure the user can see the changes they just made. Programmatic
     // changes to `textEditingValue` do not trigger the behavior even if the
     // text field is focused.
     _scheduleShowCaretOnScreen(withAnimation: true);
@@ -3557,6 +3557,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final TextSelection oldTextSelection = textEditingValue.selection;
+
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
@@ -3570,6 +3572,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     final String currentText = _value.text;
     if (oldValue.text != currentText) {
@@ -3585,6 +3588,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     endBatchEdit();
+  }
+
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          if (oldSelection.baseOffset != newSelection.baseOffset) {
+            bringIntoView(newSelection.base);
+          } else if (oldSelection.extentOffset != newSelection.extentOffset) {
+            bringIntoView(newSelection.extent);
+          }
+        }
+        break;
+    }
   }
 
   void _onCursorColorTick() {
@@ -4565,14 +4592,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      // Newer verions of iOS (iOS 15+) no longer reveal the most recently
+      // Newer versions of iOS (iOS 15+) no longer reveal the most recently
       // entered character.
       const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
         TargetPlatform.android, TargetPlatform.fuchsia,
       };
-      final bool breiflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
+      final bool brieflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
-      if (breiflyShowPassword) {
+      if (brieflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
@@ -5285,6 +5312,10 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
   late final _Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
 
+  // This is used to prevent a reentrant call to the history (a call to _undo or _redo
+  // should not call _push to add a new entry in the history).
+  bool _locked = false;
+
   // This duration was chosen as a best fit for the behavior of Mac, Linux,
   // and Windows undo/redo state save durations, but it is not perfect for any
   // of them.
@@ -5305,13 +5336,19 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
     if (nextValue.text == widget.controller.text) {
       return;
     }
+    _locked = true;
     widget.onTriggered(widget.controller.value.copyWith(
       text: nextValue.text,
       selection: nextValue.selection,
     ));
+    _locked = false;
   }
 
   void _push() {
+    // Do not try to push a new state when the change is related to an undo or redo.
+    if (_locked) {
+      return;
+    }
     if (widget.controller.value == TextEditingValue.empty) {
       return;
     }
@@ -5385,8 +5422,8 @@ class _UndoStack<T> {
 
   final List<T> _list = <T>[];
 
-  // The index of the current value, or null if the list is emtpy.
-  late int _index;
+  // The index of the current value, or -1 if the list is empty.
+  int _index = -1;
 
   /// Returns the current value of the stack.
   T? get currentValue => _list.isEmpty ? null : _list[_index];

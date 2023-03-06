@@ -23,6 +23,12 @@ void main() {
     expect(copy, custom);
   });
 
+  test('SegmentedButtonThemeData lerp special cases', () {
+    expect(SegmentedButtonThemeData.lerp(null, null, 0), const SegmentedButtonThemeData());
+    const SegmentedButtonThemeData theme = SegmentedButtonThemeData();
+    expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);

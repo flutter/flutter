@@ -127,7 +127,8 @@ class PubDependencies extends ArtifactSet {
       project: _projectFactory.fromDirectory(
         fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
       ),
-      offline: offline
+      offline: offline,
+      outputMode: PubOutputMode.none,
     );
   }
 }
@@ -314,7 +315,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
     if (_platform.isLinux || ignorePlatformFiltering) {
       final String arch = cache.getHostPlatformArchName();
       return <List<String>>[
-        <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch', 'linux-$arch-debug/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-release', 'linux-$arch-release/linux-$arch-flutter-gtk.zip'],
       ];

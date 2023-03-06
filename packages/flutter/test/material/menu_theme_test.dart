@@ -46,6 +46,12 @@ void main() {
     );
   }
 
+  test('MenuThemeData lerp special cases', () {
+    expect(MenuThemeData.lerp(null, null, 0), null);
+    const MenuThemeData data = MenuThemeData();
+    expect(identical(MenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
