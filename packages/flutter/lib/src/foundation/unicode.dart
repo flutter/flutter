@@ -101,6 +101,9 @@ class Unicode {
   /// `U+FFFD Replacement Character`
   static const int RC = 0xFFFD;
 
+  /// `U+FFFC Object Replacement Character` String literal.
+  static const String stringORC = '\uFFFC';
+
   // TODO(gspencergoog): replace when we expose this ICU information.
   /// Check if the given code unit is a white space or separator
   /// character.

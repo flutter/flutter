@@ -61,12 +61,12 @@ class InlineSpanSemanticsInformation {
     this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
   }) : assert(isPlaceholder == false
-          || (text.length == 1 && text.codeUnitAt(0) == Unicode.ORC && semanticsLabel == null && recognizer == null)),
+          || (text == Unicode.stringORC && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
-  static final InlineSpanSemanticsInformation placeholder =
-      InlineSpanSemanticsInformation(String.fromCharCode(Unicode.ORC), isPlaceholder: true);
+  static const InlineSpanSemanticsInformation placeholder =
+      InlineSpanSemanticsInformation(Unicode.stringORC, isPlaceholder: true);
 
   /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
@@ -259,7 +259,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// instead of the text contents for [TextSpan]s.
   ///
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
-  /// represented as an 'object replacement character' (Unicode.ORC).
+  /// represented as an 'object replacement character' (Unicode.stringORC).
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
@@ -297,7 +297,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// instead of the text contents for [TextSpan]s.
   ///
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
-  /// represented as an 'object replacement character' (Unicode.ORC).
+  /// represented as an 'object replacement character' (Unicode.stringORC).
   ///
   /// The plain-text representation of this [InlineSpan] is written into the `buffer`.
   /// This method will then recursively call [computeToPlainText] on its children
