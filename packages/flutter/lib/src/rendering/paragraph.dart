@@ -18,8 +18,6 @@ import 'layer.dart';
 import 'object.dart';
 import 'selection.dart';
 
-const String _kEllipsis = '\u2026';
-
 /// Parent data for use with [RenderParagraph] and [RenderEditable].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   /// The scaling of the text.
@@ -99,7 +97,7 @@ class RenderParagraph extends RenderBox
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         ellipsis: overflow == TextOverflow.ellipsis ? String.fromCharCode(Unicode.HE) : null,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -325,7 +323,9 @@ class RenderParagraph extends RenderBox
       return;
     }
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    _textPainter.ellipsis = value == TextOverflow.ellipsis
+        ? String.fromCharCode(Unicode.HE)
+        : null;
     markNeedsLayout();
   }
 
@@ -800,7 +800,7 @@ class RenderParagraph extends RenderBox
         case TextOverflow.fade:
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
-            text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
+            text: TextSpan(style: _textPainter.text!.style, text: String.fromCharCode(Unicode.HE)),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             locale: locale,

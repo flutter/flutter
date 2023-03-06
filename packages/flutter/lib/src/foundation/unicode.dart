@@ -95,6 +95,9 @@ class Unicode {
   /// Right-to-left zero-width Arabic character.
   static const int ALM = 0x061C;
 
+  /// `U+2026 HORIZONTAL ELLIPSIS`
+  static const int HE = 0x2026;
+
   /// `U+FFFC Object Replacement Character`
   static const int ORC = 0xFFFC;
 
