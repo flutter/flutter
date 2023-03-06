@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const TextStyle testFont = TextStyle(
   color: Color(0xFF00FF00),
-  fontFamily: 'Ahem',
 );
 
 Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
