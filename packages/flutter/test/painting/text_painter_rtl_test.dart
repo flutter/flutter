@@ -9,9 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 const bool skipTestsWithKnownBugs = true;
 const bool skipExpectsWithKnownBugs = false;
 
-final String charRLO = String.fromCharCode(Unicode.RLO);
-final String charLRO = String.fromCharCode(Unicode.LRO);
-final String charPDF = String.fromCharCode(Unicode.PDF);
+final String rloChar = String.fromCharCode(Unicode.RLO);
+final String lroChar = String.fromCharCode(Unicode.LRO);
+final String pdfChar = String.fromCharCode(Unicode.PDF);
 
 String lro(String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
 String rlo(String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';
@@ -47,7 +47,7 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = TextSpan(
-      text: '${charRLO}HEBREW1 ${charLRO}english2$charPDF HEBREW3$charPDF',
+      text: '${rloChar}HEBREW1 ${lroChar}english2$pdfChar HEBREW3$pdfChar',
            //      0       12345678      9      101234567       18     90123456       27
       style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
@@ -179,10 +179,10 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.rtl;
 
-    painter.text = const TextSpan(
-      text: '${charRLO}HEBREW1 ${charLRO}english2${charPDF} HEBREW3${charPDF}',
+    painter.text = TextSpan(
+      text: '${rloChar}HEBREW1 ${lroChar}english2$pdfChar HEBREW3$pdfChar',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
