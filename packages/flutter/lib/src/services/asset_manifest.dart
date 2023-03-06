@@ -30,12 +30,11 @@ abstract class AssetManifest {
   /// information.
   List<String> listAssets();
 
-  /// Retrieves metadata about an asset and its variants.
+  /// Retrieves metadata about an asset and its variants. Returns null if the
+  /// key was not found in the asset manifest.
   ///
   /// This method considers a main asset to be a variant of itself and
   /// includes it in the returned list.
-  ///
-  /// Returns null if the key was not found in the asset manifest.
   List<AssetMetadata>? getAssetVariants(String key);
 }
 
