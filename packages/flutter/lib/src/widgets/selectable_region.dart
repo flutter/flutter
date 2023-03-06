@@ -994,7 +994,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onCopy: () {
         _copy();
 
-        // in Android copy should clear the selection
+        // In Android copy should clear the selection.
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
             _clearSelection();

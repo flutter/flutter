@@ -1737,12 +1737,12 @@ void main() {
     expect(buttonItems.length, 2);
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
 
-    // press `Copy` item
+    // Press `Copy` item
     buttonItems[0].onPressed.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
-    // In Android copy should clear the selection
+    // In Android copy should clear the selection.
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
         expect(regionState.selectionOverlay, isNull);
@@ -1794,7 +1794,7 @@ void main() {
     expect(buttonItems.length, 2);
     expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
 
-    // press `Select All` item
+    // Press `Select All` item
     buttonItems[1].onPressed.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
