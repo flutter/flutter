@@ -243,6 +243,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
+
+  // The initial pointer that the recognizer is tracking. If another pointer event
+  // comes with PointerDeviceKind.mouse and different pointer the recognizer will
+  // disallow it. This is required for magic mouse click to work during
+  // active pan.
   int? _initialPointer;
   Matrix4? _lastTransform;
 
