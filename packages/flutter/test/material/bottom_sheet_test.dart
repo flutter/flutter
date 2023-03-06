@@ -1108,7 +1108,7 @@ void main() {
     await tester.pump();
     BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
       of: dragHandle,
-      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration !=null),
+      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
     )).decoration! as BoxDecoration;
     expect(boxDecoration.color, defaultColor);
 
