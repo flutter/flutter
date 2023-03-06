@@ -142,7 +142,6 @@ class BottomAppBar extends StatefulWidget {
   /// If this property is null, then [BottomAppBarTheme.shadowColor] of
   /// [ThemeData.bottomAppBarTheme] is used. If that is also null, the default value
   /// is fully opaque black for Material 2, and transparent for Material 3.
-  /// {@endtemplate}
   ///
   /// See also:
   ///
