@@ -963,8 +963,9 @@ class FlutterPlugin implements Plugin<Project> {
             }
             // Task compressAssets uses the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency.
-            project.tasks.named("compress${variant.name.capitalize()}Assets").configure {
-                dependsOn(copyFlutterAssetsTask);
+            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
+            if (compressAssetsTask) {
+                compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
