@@ -10,9 +10,6 @@ import 'package:flutter/scheduler.dart';
 
 int seed = 0;
 
-final String charRLO = String.fromCharCode(Unicode.RLO);
-final String charLRO = String.fromCharCode(Unicode.LRO);
-
 void main() {
   runApp(MaterialApp(
     title: 'Text tester',
@@ -400,9 +397,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 21:
         return String.fromCharCode(Unicode.LRE);
       case 22:
-        return charLRO;
+        return String.fromCharCode(Unicode.LRO);
       case 23:
-        return charRLO;
+        return String.fromCharCode(Unicode.RLO);
       case 24:
       case 25:
       case 26:
@@ -755,6 +752,9 @@ class Bidi extends StatefulWidget {
 }
 
 class _BidiState extends State<Bidi> {
+  final String charRLO = String.fromCharCode(Unicode.RLO);
+  final String charLRO = String.fromCharCode(Unicode.LRO);
+
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
