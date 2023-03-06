@@ -752,8 +752,8 @@ class Bidi extends StatefulWidget {
 }
 
 class _BidiState extends State<Bidi> {
-  final String charRLO = String.fromCharCode(Unicode.RLO);
-  final String charLRO = String.fromCharCode(Unicode.LRO);
+  final String rlo = String.fromCharCode(Unicode.RLO);
+  final String lro = String.fromCharCode(Unicode.LRO);
 
   @override
   Widget build(BuildContext context) {
@@ -778,11 +778,11 @@ class _BidiState extends State<Bidi> {
           RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(text: '${charLRO}abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
-                TextSpan(text: '${charRLO}DEF', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
-                TextSpan(text: '${charLRO}ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
-                TextSpan(text: '${charRLO}JKL', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
-                TextSpan(text: '${charLRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
+                TextSpan(text: '${lro}abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                TextSpan(text: '${rlo}DEF', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+                TextSpan(text: '${lro}ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                TextSpan(text: '${rlo}JKL', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                TextSpan(text: '${lro}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
               ],
             ),
             textAlign: TextAlign.center,
@@ -792,9 +792,9 @@ class _BidiState extends State<Bidi> {
           RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(text: '${charLRO}abc${charRLO}D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
-                TextSpan(text: 'EF${charLRO}gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
-                TextSpan(text: 'i${charRLO}JKL${charLRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                TextSpan(text: '${lro}abc${rlo}D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                TextSpan(text: 'EF${lro}gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                TextSpan(text: 'i${rlo}JKL${lro}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
               ],
             ),
             textAlign: TextAlign.center,
