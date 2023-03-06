@@ -8,10 +8,10 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/retry.dart' as http_retry;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:pool/pool.dart';
@@ -439,27 +439,83 @@ class ArchiveCreator {
   /// pub.dev.
   Future<void> _downloadPubPackageArchives() async {
     final Pool pool = Pool(10); // Number of simultaneous downloads.
-    final http.Client client = http_retry.RetryClient(http.Client());
-    /// Fetch a single pacla
+    final http.Client client = http.Client();
+    final Directory preloadCache = Directory(path.join(flutterRoot.path, '.pub-preload-cache'));
+    preloadCache.createSync(recursive: true);
+    /// Fetch a single package.
     Future<void> fetchPackageArchive(String name, String version) async {
-      pool.withResource(() async {
-        final Uri url = Uri.parse('https://pub.dev/packages/$name/versions/$version.tar.gz');
-        final http.Request request = http.Request('get', url);
-        final http.StreamedResponse response = await client.send(request);
-        if (response.statusCode != 200) {
-          stderr.write('Error: Failed downloading $name-$version from "$url". Http status ${response.statusCode}\n');
-          exit(-1);
+      await pool.withResource(() async {
+        stderr.write('Fetching package archive for $name-$version.\n');
+        int retries = 7;
+        while (true) {
+          retries-=1;
+          try {
+            final Uri packageListingUrl =
+              Uri.parse('https://pub.dev/api/packages/$name');
+            // Fetch the package listing to obtain the package download url.
+            final http.Response packageListingResponse =
+                await client.get(packageListingUrl);
+            if (packageListingResponse.statusCode != 200) {
+              throw Exception('Downloading $packageListingUrl failed. Status code ${packageListingResponse.statusCode}.');
+            }
+            final dynamic decodedPackageListing = json.decode(packageListingResponse.body);
+            if (decodedPackageListing is! Map) {
+              throw const FormatException('Package listing should be a map');
+            }
+            final dynamic versions =  decodedPackageListing['versions'];
+            if (versions is! List) {
+              throw const FormatException('.versions should be a list');
+            }
+            final Map<String, dynamic> versionDescription = versions.firstWhere(
+              (dynamic description) {
+                if (description is! Map) {
+                  throw const FormatException('.versions elements should be maps');
+                }
+                return description['version'] == version;
+              },
+              orElse: () => throw FormatException('Could not find $name-$version in package listing')
+            ) as Map<String, dynamic>;
+            final dynamic downloadUrl = versionDescription['archive_url'];
+            if (downloadUrl is! String) {
+              throw const FormatException('archive_url should be a string');
+            }
+            final dynamic archiveSha256 = versionDescription['archive_sha256'];
+            if (archiveSha256 is! String) {
+              throw const FormatException('archive_sha256 should be a string');
+            }
+            final http.Request request = http.Request('get', Uri.parse(downloadUrl));
+            final http.StreamedResponse response = await client.send(request);
+            if (response.statusCode != 200) {
+              throw Exception('Downloading ${request.url} failed. Status code ${response.statusCode}.');
+            }
+            final File archiveFile = File(
+              path.join(preloadCache.path, '$name-$version.tar.gz'),
+            );
+            await response.stream.pipe(archiveFile.openWrite());
+            final Stream<List<int>> archiveStream = archiveFile.openRead();
+            final Digest r = await sha256.bind(archiveStream).first;
+            if (hex.encode(r.bytes) != archiveSha256) {
+              throw Exception('Hash mismatch of downloaded archive');
+            }
+          } on Exception catch (e) {
+            stderr.write('Failed downloading $name-$version. $e\n');
+            if (retries > 0) {
+              stderr.write('Retrying download of $name-$version...');
+              // Retry.
+              continue;
+            } else {
+              rethrow;
+            }
+          }
+          break;
         }
-        final File archiveFile = File(
-          path.join(flutterRoot.path, '.pub-preload-cache', '$name-$version.tar.gz'),
-        );
-        response.stream.pipe(archiveFile.openWrite());
       });
     }
     final Map<String, dynamic> cacheDescription =
         json.decode(await _runFlutter(<String>['pub', 'cache', 'list'])) as Map<String, dynamic>;
+    final Map<String, dynamic> packages = cacheDescription['packages'] as Map<String, dynamic>;
     final List<Future<void>> downloads = <Future<void>>[];
-    for (final MapEntry<String, dynamic> package in cacheDescription.entries) {
+    for (final MapEntry<String, dynamic> package in packages.entries) {
       final String name = package.key;
       final Map<String, dynamic> versions = package.value as Map<String, dynamic>;
       for (final String version in versions.keys) {
@@ -467,6 +523,7 @@ class ArchiveCreator {
       }
     }
     await Future.wait(downloads);
+    client.close();
   }
 
   /// Prepare the archive repo so that it has all of the caches warmed up and
