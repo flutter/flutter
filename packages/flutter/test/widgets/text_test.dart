@@ -13,11 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
-final String charRLO = String.fromCharCode(Unicode.RLO);
-final String charLRO = String.fromCharCode(Unicode.LRO);
-final String charRLE = String.fromCharCode(Unicode.RLE);
-final String charLRE = String.fromCharCode(Unicode.LRE);
-final String charPDF = String.fromCharCode(Unicode.PDF);
+final String rloChar = String.fromCharCode(Unicode.RLO);
+final String rleChar = String.fromCharCode(Unicode.RLE);
+final String pdfChar = String.fromCharCode(Unicode.PDF);
 
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
@@ -604,17 +602,17 @@ void main() {
         text: TextSpan(
           style: textStyle,
           children: <TextSpan>[
-            const TextSpan(text: 'hello world${charRLE}${charRLO} '),
+            const TextSpan(text: 'hello world${rleChar}${rloChar} '),
             TextSpan(
               text: 'BOY',
               recognizer: LongPressGestureRecognizer()..onLongPress = () { },
             ),
-            const TextSpan(text: ' HOW DO${charPDF} you ${charRLO} DO '),
+            const TextSpan(text: ' HOW DO${pdfChar} you ${rloChar} DO '),
             TextSpan(
               text: 'SIR',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
-            const TextSpan(text: '${charPDF}${charPDF} good bye'),
+            const TextSpan(text: '${pdfChar}${pdfChar} good bye'),
           ],
         ),
         textDirection: TextDirection.ltr,
@@ -636,7 +634,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
-              label: 'hello world${charRLE}${charRLO} ',
+              label: 'hello world${rleChar}${rloChar} ',
               textDirection: TextDirection.ltr,
             ),
             TestSemantics(
@@ -647,7 +645,7 @@ void main() {
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
-              label: ' HOW DO$charPDF you $charRLO DO ',
+              label: ' HOW DO$pdfChar you $rloChar DO ',
               textDirection: TextDirection.rtl,
             ),
             TestSemantics(
@@ -659,7 +657,7 @@ void main() {
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
-              label: '$charPDF$charPDF good bye',
+              label: '$pdfChar$pdfChar good bye',
               textDirection: TextDirection.rtl,
             ),
           ],
