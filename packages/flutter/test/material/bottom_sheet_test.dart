@@ -1115,7 +1115,7 @@ void main() {
     // Shows hovering drag handle color
     await gesture.moveTo(center);
     await tester.pump();
-    boxDecoration=tester.widget<Container>(find.descendant(
+    boxDecoration = tester.widget<Container>(find.descendant(
      of: dragHandle,
      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration !=null),
    )).decoration! as BoxDecoration;
