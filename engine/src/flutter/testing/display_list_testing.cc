@@ -448,7 +448,7 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
       break;
     }
     default:
-      os_ << "DlUnknownColorSource(" << source->skia_object().get() << ")";
+      os_ << "?DlUnknownColorSource?()";
       break;
   }
   os_ << ");" << std::endl;
@@ -490,7 +490,7 @@ void DisplayListStreamDispatcher::out(const DlColorFilter& filter) {
       break;
     }
     default:
-      os_ << "DlUnknownColorFilter(" << filter.skia_object().get() << ")";
+      os_ << "?DlUnknownColorFilter?()";
       break;
   }
 }
@@ -530,7 +530,7 @@ void DisplayListStreamDispatcher::setMaskFilter(const DlMaskFilter* filter) {
       break;
     }
     default:
-      os_ << "DlUnknownMaskFilter(" << filter->skia_object().get() << ")";
+      os_ << "?DlUnknownMaskFilter?()";
       break;
   }
   os_ << ");" << std::endl;
@@ -563,7 +563,7 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << "DlMatrixImageFilter(" << matrix->matrix() << ", " << matrix->sampling() << ")";
       break;
     }
-    case DlImageFilterType::kComposeFilter: {
+    case DlImageFilterType::kCompose: {
       const DlComposeImageFilter* compose = filter.asCompose();
       FML_DCHECK(compose);
       os_ << "DlComposeImageFilter(" << std::endl;
@@ -590,7 +590,7 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << ")";
       break;
     }
-    case DlImageFilterType::kLocalMatrixFilter: {
+    case DlImageFilterType::kLocalMatrix: {
       const DlLocalMatrixImageFilter* local_matrix = filter.asLocalMatrix();
       FML_DCHECK(local_matrix);
       os_ << "DlLocalMatrixImageFilter(" << local_matrix->matrix();
@@ -810,13 +810,13 @@ void DisplayListStreamDispatcher::drawImageRect(const sk_sp<DlImage> image,
                                                 const SkRect& dst,
                                                 DlImageSampling sampling,
                                                 bool render_with_attributes,
-                                                SkCanvas::SrcRectConstraint constraint) {
+                                                bool enforce_src_edges) {
   startl() << "drawImageRect(" << image.get() << "," << std::endl;
   startl() << "              src: " << src << "," << std::endl;
   startl() << "              dst: " << dst << "," << std::endl;
   startl() << "              " << sampling << ", "
                                << "with attributes: " << render_with_attributes << ", "
-                               << constraint
+                               << "enforce src edges: " << enforce_src_edges
            << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage> image,
@@ -849,8 +849,12 @@ void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
            << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawDisplayList(
-    const sk_sp<DisplayList> display_list) {
-  startl() << "drawDisplayList(ID: " << display_list->unique_id() << ", bounds: " << display_list->bounds() << ");" << std::endl;
+    const sk_sp<DisplayList> display_list, SkScalar opacity) {
+  startl() << "drawDisplayList("
+           << "ID: " << display_list->unique_id() << ", "
+           << "bounds: " << display_list->bounds() << ", "
+           << "opacity: " << opacity
+           << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                                SkScalar x,

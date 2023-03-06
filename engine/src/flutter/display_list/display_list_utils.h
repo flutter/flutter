@@ -7,33 +7,24 @@
 
 #include <optional>
 
-#include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_blend_mode.h"
-#include "flutter/display_list/display_list_dispatcher.h"
-#include "flutter/display_list/display_list_flags.h"
 #include "flutter/display_list/display_list_rtree.h"
+#include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
 
 // This file contains various utility classes to ease implementing
-// a Flutter DisplayList Dispatcher, including:
+// a Flutter DisplayList DlOpReceiver, including:
 //
 // IgnoreAttributeDispatchHelper:
 // IgnoreClipDispatchHelper:
 // IgnoreTransformDispatchHelper
-//     Empty overrides of all of the associated methods of Dispatcher
-//     for dispatchers that only track some of the rendering operations
-//
-// SkPaintAttributeDispatchHelper:
-//     Tracks the attribute methods and maintains their state in an
-//     SkPaint object.
+//     Empty overrides of all of the associated methods of DlOpReceiver
+//     for receivers that only track some of the rendering operations
 
 namespace flutter {
 
-// A utility class that will ignore all Dispatcher methods relating
+// A utility class that will ignore all DlOpReceiver methods relating
 // to the setting of attributes.
-class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
+class IgnoreAttributeDispatchHelper : public virtual DlOpReceiver {
  public:
   void setAntiAlias(bool aa) override {}
   void setDither(bool dither) override {}
@@ -52,9 +43,9 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setMaskFilter(const DlMaskFilter* filter) override {}
 };
 
-// A utility class that will ignore all Dispatcher methods relating
+// A utility class that will ignore all DlOpReceiver methods relating
 // to setting a clip.
-class IgnoreClipDispatchHelper : public virtual Dispatcher {
+class IgnoreClipDispatchHelper : public virtual DlOpReceiver {
   void clipRect(const SkRect& rect,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {}
@@ -66,9 +57,9 @@ class IgnoreClipDispatchHelper : public virtual Dispatcher {
                 bool is_aa) override {}
 };
 
-// A utility class that will ignore all Dispatcher methods relating
+// A utility class that will ignore all DlOpReceiver methods relating
 // to modifying the transform.
-class IgnoreTransformDispatchHelper : public virtual Dispatcher {
+class IgnoreTransformDispatchHelper : public virtual DlOpReceiver {
  public:
   void translate(SkScalar tx, SkScalar ty) override {}
   void scale(SkScalar sx, SkScalar sy) override {}
@@ -88,7 +79,7 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
   void transformReset() override {}
 };
 
-class IgnoreDrawDispatchHelper : public virtual Dispatcher {
+class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
  public:
   void save() override {}
   void saveLayer(const SkRect* bounds,
@@ -121,7 +112,7 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                      const SkRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
-                     SkCanvas::SrcRectConstraint constraint) override {}
+                     bool enforce_src_edges) override {}
   void drawImageNine(const sk_sp<DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
@@ -136,7 +127,8 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                  DlImageSampling sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override {}
-  void drawDisplayList(const sk_sp<DisplayList> display_list) override {}
+  void drawDisplayList(const sk_sp<DisplayList> display_list,
+                       SkScalar opacity) override {}
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override {}
@@ -145,77 +137,6 @@ class IgnoreDrawDispatchHelper : public virtual Dispatcher {
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override {}
-};
-
-// A utility class that will monitor the Dispatcher methods relating
-// to the rendering attributes and accumulate them into an SkPaint
-// which can be accessed at any time via paint().
-class SkPaintDispatchHelper : public virtual Dispatcher {
- public:
-  SkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
-      : current_color_(SK_ColorBLACK), opacity_(opacity) {
-    if (opacity < SK_Scalar1) {
-      paint_.setAlphaf(opacity);
-    }
-  }
-
-  void setAntiAlias(bool aa) override;
-  void setDither(bool dither) override;
-  void setStyle(DlDrawStyle style) override;
-  void setColor(DlColor color) override;
-  void setStrokeWidth(SkScalar width) override;
-  void setStrokeMiter(SkScalar limit) override;
-  void setStrokeCap(DlStrokeCap cap) override;
-  void setStrokeJoin(DlStrokeJoin join) override;
-  void setColorSource(const DlColorSource* source) override;
-  void setColorFilter(const DlColorFilter* filter) override;
-  void setInvertColors(bool invert) override;
-  void setBlendMode(DlBlendMode mode) override;
-  void setPathEffect(const DlPathEffect* effect) override;
-  void setMaskFilter(const DlMaskFilter* filter) override;
-  void setImageFilter(const DlImageFilter* filter) override;
-
-  const SkPaint& paint() { return paint_; }
-
-  /// Returns the current opacity attribute which is used to reduce
-  /// the alpha of all setColor calls encountered in the streeam
-  SkScalar opacity() { return opacity_; }
-  /// Returns the combined opacity that includes both the current
-  /// opacity attribute and the alpha of the most recent color.
-  /// The most recently set color will have combined the two and
-  /// stored the combined value in the alpha of the paint.
-  SkScalar combined_opacity() { return paint_.getAlphaf(); }
-  /// Returns true iff the current opacity attribute is not opaque,
-  /// irrespective of the alpha of the current color
-  bool has_opacity() { return opacity_ < SK_Scalar1; }
-
- protected:
-  void save_opacity(SkScalar opacity_for_children);
-  void restore_opacity();
-
- private:
-  SkPaint paint_;
-  bool invert_colors_ = false;
-  std::shared_ptr<const DlColorFilter> color_filter_;
-
-  sk_sp<SkColorFilter> makeColorFilter() const;
-
-  struct SaveInfo {
-    SaveInfo(SkScalar opacity) : opacity(opacity) {}
-
-    SkScalar opacity;
-  };
-  std::vector<SaveInfo> save_stack_;
-
-  void set_opacity(SkScalar opacity) {
-    if (opacity_ != opacity) {
-      opacity_ = opacity;
-      setColor(current_color_);
-    }
-  }
-
-  SkColor current_color_;
-  SkScalar opacity_;
 };
 
 enum class BoundsAccumulatorType {
