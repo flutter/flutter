@@ -4057,7 +4057,11 @@ targets:
       - bin/**
       - .ci.yaml
 
+<<<<<<< HEAD
   - name: Windows tool_integration_tests_2_6
+=======
+  - name: Windows tool_integration_tests_1_6
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4071,7 +4075,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
+<<<<<<< HEAD
       subshard: "2_6"
+=======
+      subshard: "1_6"
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
@@ -4082,7 +4090,11 @@ targets:
       - bin/**
       - .ci.yaml
 
+<<<<<<< HEAD
   - name: Windows tool_integration_tests_3_6
+=======
+  - name: Windows tool_integration_tests_2_6
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4096,7 +4108,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
+<<<<<<< HEAD
       subshard: "3_6"
+=======
+      subshard: "2_6"
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
@@ -4107,7 +4123,11 @@ targets:
       - bin/**
       - .ci.yaml
 
+<<<<<<< HEAD
   - name: Windows tool_integration_tests_4_6
+=======
+  - name: Windows tool_integration_tests_3_6
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4121,7 +4141,11 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
+<<<<<<< HEAD
       subshard: "4_6"
+=======
+      subshard: "3_6"
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
       tags: >
         ["framework", "hostonly", "shard"]
       test_timeout_secs: "2700"
@@ -4132,7 +4156,11 @@ targets:
       - bin/**
       - .ci.yaml
 
+<<<<<<< HEAD
   - name: Windows tool_integration_tests_5_6
+=======
+  - name: Windows tool_integration_tests_4_6
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4146,10 +4174,44 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
+<<<<<<< HEAD
+      subshard: "5_6"
+=======
+      subshard: "4_6"
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
+      tags: >
+        ["framework", "hostonly", "shard"]
+      test_timeout_secs: "2700"
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+<<<<<<< HEAD
+  - name: Windows tool_integration_tests_6_6
+=======
+  - name: Windows tool_integration_tests_5_6
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:32v1"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "11"},
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+<<<<<<< HEAD
+=======
       subshard: "5_6"
       tags: >
-        ["framework", "hostonly", "shard"]
-      test_timeout_secs: "2700"
+        ["framework","hostonly","shard"]
     scheduler: luci
     runIf:
       - dev/**
@@ -4164,13 +4226,14 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:32v1"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "open_jdk"},
+          {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
       subshard: "6_6"
       tags: >
         ["framework", "hostonly", "shard"]

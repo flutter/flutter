@@ -452,6 +452,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
 
+<<<<<<< HEAD
     testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
       // Collect some key events to use for testing.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
@@ -476,6 +477,8 @@ void main() {
       expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isFalse);
     });
 
+=======
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
     group('diagnostics.', () {
       test('single key', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -491,6 +494,7 @@ void main() {
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Key A'));
       });
+<<<<<<< HEAD
 
       test('no repeats', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -509,6 +513,26 @@ void main() {
         expect(description[1], equals('excluding repeats'));
       });
 
+=======
+
+      test('no repeats', () {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+          includeRepeats: false,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(2));
+        expect(description[0], equals('keys: Key A'));
+        expect(description[1], equals('excluding repeats'));
+      });
+
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
       test('combination', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 

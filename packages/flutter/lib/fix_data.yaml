@@ -17,6 +17,7 @@
 
 version: 1
 transforms:
+<<<<<<< HEAD
   # Changes made in https://github.com/flutter/flutter/pull/105291
   - title: "Migrate 'ElevatedButton.styleFrom(primary)' to 'ElevatedButton.styleFrom(backgroundColor)'"
     date: 2022-05-27
@@ -404,6 +405,8 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
+=======
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
   # Changes made in https://github.com/flutter/flutter/pull/96115
   - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
     date: 2022-01-04

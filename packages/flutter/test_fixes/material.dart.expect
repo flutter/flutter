@@ -494,6 +494,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outline;
+<<<<<<< HEAD
 
   // Changes made in https://github.com/flutter/flutter/pull/96957
   Scrollbar scrollbar = Scrollbar(thumbVisibility: true);
@@ -538,4 +539,6 @@ void main() {
   ButtonStyle textButtonStyle = TextButton.styleFrom(
     foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
   );
+=======
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
 }

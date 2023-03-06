@@ -636,6 +636,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
 
+<<<<<<< HEAD
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 9.9.9+9');
@@ -670,6 +671,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
+=======
+    expect(createTestCommandRunner(command).run(
+      const <String>['winuwp', '--no-pub']
+    ), throwsToolExit(message: 'No Windows UWP desktop project configured. See '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.'));
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

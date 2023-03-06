@@ -521,6 +521,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outlined;
+<<<<<<< HEAD
 
   // Changes made in https://github.com/flutter/flutter/pull/96957
   Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
@@ -569,4 +570,6 @@ void main() {
     primary: Colors.blue,
     onSurface: Colors.grey,
   );
+=======
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
 }

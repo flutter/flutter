@@ -17,7 +17,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
-import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -1651,6 +1650,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
+<<<<<<< HEAD
   const List<String> kCorePackages = <String>[
     'flutter',
     'flutter_test',
@@ -1722,6 +1722,11 @@ Future<void> _checkConsumerDependencies() async {
       'Thanks!',
     ]);
   }
+=======
+  // Skipping this test for releases as it was never intended to work on release
+  // branches, and would fail for the 2.10 releases. See
+  // https://github.com/flutter/flutter/issues/91757.
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
 }
 
 const String _kDebugOnlyAnnotation = '@_debugOnly';

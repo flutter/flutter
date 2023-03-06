@@ -112,6 +112,135 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 }
 
+<<<<<<< HEAD
+=======
+/// Build the Windows UWP project.
+///
+/// Note that this feature is currently unfinished.
+Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildInfo, {
+  String? target,
+  VisualStudio? visualStudioOverride,
+}) async {
+  final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
+  if (!windowsProject.existsSync()) {
+    throwToolExit(
+      'No Windows UWP desktop project configured. See '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.',
+    );
+  }
+  if (windowsProject.projectVersion != kCurrentUwpTemplateVersion) {
+    throwToolExit(
+      'The Windows UWP project template and build process has changed. In order to build '
+      'you must delete the winuwp directory and re-create the project.',
+    );
+  }
+   // Ensure that necessary ephemeral files are generated and up to date.
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.parent);
+  await createManifest(
+    buildDirectory: buildDirectory,
+    logger: globals.logger,
+    platform: globals.platform,
+    project: windowsProject,
+    buildInfo: buildInfo,
+    fileSystem: globals.fs,
+  );
+
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
+  );
+  final String? cmakePath = visualStudio.cmakePath;
+  final String? cmakeGenerator = visualStudio.cmakeGenerator;
+  if (cmakePath == null || cmakeGenerator == null) {
+    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.');
+  }
+
+  final String buildModeName = getNameForBuildMode(buildInfo.mode);
+  final Status status = globals.logger.startProgress(
+    'Building Windows UWP application...',
+  );
+  try {
+    // The Cmake re-entrant build does not work for UWP, so the flutter build is
+    // run in advance.
+    await _runFlutterBuild(buildDirectory, buildInfo, target);
+    await _runCmakeGeneration(
+      cmakePath: cmakePath,
+      generator: cmakeGenerator,
+      buildDir: buildDirectory,
+      sourceDir: windowsProject.cmakeFile.parent,
+    );
+    await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
+  } finally {
+    status.cancel();
+  }
+}
+
+const Map<BuildMode, String> _targets = <BuildMode, String>{
+  BuildMode.debug: 'debug_bundle_windows_assets_uwp',
+  BuildMode.profile: 'profile_bundle_windows_assets_uwp',
+  BuildMode.release: 'release_bundle_windows_assets_uwp',
+};
+
+Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, String? targetFile) async {
+  await buildDirectory.create(recursive: true);
+  int result;
+  String? flutterEngine;
+  String? localEngine;
+  final Artifacts artifacts = globals.artifacts!;
+  if (artifacts is LocalEngineArtifacts) {
+    final String engineOutPath = artifacts.engineOutPath;
+    flutterEngine = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    localEngine = globals.fs.path.basename(engineOutPath);
+  }
+  try {
+    final String? buildMode = _targets[buildInfo.mode];
+    result = await globals.processUtils.stream(
+      <String>[
+        globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
+        if (globals.logger.isVerbose)
+          '--verbose',
+        if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
+        if (localEngine != null) '--local-engine=$localEngine',
+        'assemble',
+        '--no-version-check',
+        '--output=build',
+        '-dTargetPlatform=windows-uwp-x64',
+        '-dTrackWidgetCreation=${buildInfo.trackWidgetCreation}',
+        '-dBuildMode=${getNameForBuildMode(buildInfo.mode)}',
+        '-dTargetFile=$targetFile',
+        '-dTreeShakeIcons="${buildInfo.treeShakeIcons}"',
+        '-dDartObfuscation=${buildInfo.dartObfuscation}',
+        if (buildInfo.bundleSkSLPath != null)
+          '-dBundleSkSLPath=${buildInfo.bundleSkSLPath}',
+        if (buildInfo.codeSizeDirectory != null)
+          '-dCodeSizeDirectory=${buildInfo.codeSizeDirectory}',
+        if (buildInfo.splitDebugInfoPath != null)
+          '-dSplitDebugInfo=${buildInfo.splitDebugInfoPath}',
+        if (buildInfo.dartDefines != null && buildInfo.dartDefines.isNotEmpty)
+          '--DartDefines=${encodeDartDefines(buildInfo.dartDefines)}',
+        if (buildInfo.extraGenSnapshotOptions != null && buildInfo.extraGenSnapshotOptions.isNotEmpty)
+          '--ExtraGenSnapshotOptions=${buildInfo.extraGenSnapshotOptions}',
+        if (buildInfo.extraFrontEndOptions != null && buildInfo.extraFrontEndOptions.isNotEmpty)
+          '--ExtraFrontEndOptions=${buildInfo.extraFrontEndOptions}',
+        if (buildMode != null)
+          buildMode,
+      ],
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
+}
+
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
 Future<void> _runCmakeGeneration({
   required String cmakePath,
   required String generator,
@@ -207,6 +336,58 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
+}
+
+// Works around the Visual Studio 17.1.0 CMake bug described in
+// https://github.com/flutter/flutter/issues/97086
+//
+// Rather than attempt to remove all the duplicate entries within the
+// <CustomBuild> element, which would require a more complicated parser, this
+// just fixes the incorrect duplicates to have the correct `$<CONFIG>` value,
+// making the duplication harmless.
+//
+// TODO(stuartmorgan): Remove this workaround either once 17.1.0 is
+// sufficiently old that we no longer need to support it, or when
+// dropping VS 2022 support.
+void _fixBrokenCmakeGeneration(Directory buildDirectory) {
+  final File assembleProject = buildDirectory
+    .childDirectory('flutter')
+    .childFile('flutter_assemble.vcxproj');
+  if (assembleProject.existsSync()) {
+    // E.g.: <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    final RegExp commandRegex = RegExp(
+      r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|');
+    // E.g.: [...]/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+    final RegExp assembleCallRegex = RegExp(
+      r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)');
+    String? lastCommandConditionConfig;
+    final StringBuffer newProjectContents = StringBuffer();
+    // vcxproj files contain a BOM, which readAsLinesSync drops; re-add it.
+    newProjectContents.writeCharCode(unicodeBomCharacterRune);
+    for (final String line in assembleProject.readAsLinesSync()) {
+      final RegExpMatch? commandMatch = commandRegex.firstMatch(line);
+      if (commandMatch != null) {
+        lastCommandConditionConfig = commandMatch.group(1);
+      } else if (lastCommandConditionConfig != null) {
+        final RegExpMatch? assembleCallMatch = assembleCallRegex.firstMatch(line);
+        if (assembleCallMatch != null) {
+          final String callConfig = assembleCallMatch.group(1)!;
+          if (callConfig != lastCommandConditionConfig) {
+            // The config is the end of the line; make sure to replace that one,
+            // in case config-matching strings appear anywhere else in the line
+            // (e.g., the project path).
+            final int badConfigIndex = line.lastIndexOf(assembleCallMatch.group(1)!);
+            final String correctedLine = line.replaceFirst(
+              callConfig, lastCommandConditionConfig, badConfigIndex);
+            newProjectContents.writeln('$correctedLine\r');
+            continue;
+          }
+        }
+      }
+      newProjectContents.writeln('$line\r');
+    }
+    assembleProject.writeAsStringSync(newProjectContents.toString());
+  }
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

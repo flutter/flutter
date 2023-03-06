@@ -102,6 +102,7 @@ void main() {
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+<<<<<<< HEAD
 
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
@@ -122,6 +123,8 @@ void main() {
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+=======
+>>>>>>> 6de97371f1fdece7c87e08d1cefe1cfb860ed765
 }
 
 // Loads the cached material icon font.
