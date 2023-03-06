@@ -418,4 +418,9 @@ class PluginInterfaceResolution {
       'dartClass': plugin.pluginDartClassPlatforms[platform] ?? '',
     };
   }
+
+  @override
+  String toString() {
+    return '<PluginInterfaceResolution ${plugin.name} for $platform>';
+  }
 }
