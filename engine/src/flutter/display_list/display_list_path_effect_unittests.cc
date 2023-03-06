@@ -13,19 +13,6 @@
 namespace flutter {
 namespace testing {
 
-TEST(DisplayListPathEffect, BuilderSetGet) {
-  const SkScalar test_dashes[] = {4.0, 2.0};
-  auto dash_path_effect = DlDashPathEffect::Make(test_dashes, 2, 0.0);
-  DisplayListBuilder builder;
-  ASSERT_EQ(builder.getPathEffect(), nullptr);
-  builder.setPathEffect(dash_path_effect.get());
-  ASSERT_NE(builder.getPathEffect(), nullptr);
-  ASSERT_TRUE(Equals(builder.getPathEffect(),
-                     static_cast<DlPathEffect*>(dash_path_effect.get())));
-  builder.setPathEffect(nullptr);
-  ASSERT_EQ(builder.getPathEffect(), nullptr);
-}
-
 TEST(DisplayListPathEffect, EffectShared) {
   const SkScalar TestDashes2[] = {1.0, 1.5};
   auto effect = DlDashPathEffect::Make(TestDashes2, 2, 0.0);

@@ -35,8 +35,7 @@ Damage DiffContextTest::DiffLayerTree(MockLayerTree& layer_tree,
 sk_sp<DisplayList> DiffContextTest::CreateDisplayList(const SkRect& bounds,
                                                       SkColor color) {
   DisplayListBuilder builder;
-  builder.setColor(color);
-  builder.drawRect(bounds);
+  builder.DrawRect(bounds, DlPaint().setColor(color));
   return builder.Build();
 }
 

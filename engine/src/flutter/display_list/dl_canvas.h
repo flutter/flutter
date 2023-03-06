@@ -196,6 +196,14 @@ class DlCanvas {
                           SkScalar dpr) = 0;
 
   virtual void Flush() = 0;
+
+  static constexpr SkScalar kShadowLightHeight = 600;
+  static constexpr SkScalar kShadowLightRadius = 800;
+
+  static SkRect ComputeShadowBounds(const SkPath& path,
+                                    float elevation,
+                                    SkScalar dpr,
+                                    const SkMatrix& ctm);
 };
 
 class DlAutoCanvasRestore {
