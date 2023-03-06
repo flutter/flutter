@@ -938,6 +938,55 @@ void main() {
     });
   });
 
+  group('Trackpad with mouse events', () {
+    late PanGestureRecognizer pan;
+    late TapGestureRecognizer tap;
+    final List<String> recognized = <String>[];
+    setUp(() {
+      pan = PanGestureRecognizer()
+        ..onStart = (DragStartDetails details) {
+          recognized.add('pan');
+        };
+      tap = TapGestureRecognizer()
+        ..onTapUp = (TapUpDetails details) {
+          recognized.add('tapUp');
+        }
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('tapDown');
+        };
+    });
+
+    tearDown(() {
+      recognized.clear();
+      pan.dispose();
+      tap.dispose();
+    });
+
+    testGesture('Trackpad pan does not allow mouse pointer', (GestureTester tester) {
+      // This is to ensure that once pan starts on magic mouse, it will still
+      // allow mouse clicks to be recognized without having to end the pan.
+      // https://github.com/flutter/flutter/issues/120788
+
+      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.trackpad, kPrimaryButton);
+      final PointerPanZoomStartEvent start = pointer1.panZoomStart(const Offset(100, 100));
+      pan.addPointerPanZoom(start);
+      tester.route(start);
+      tester.closeArena(pointer1.pointer);
+      tester.route(pointer1.panZoomUpdate(const Offset(100, 100)));
+
+      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.mouse, kPrimaryButton);
+      final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
+      pan.addPointer(down2);
+      tap.addPointer(down2);
+      tester.route(down2);
+      tester.route(pointer2.up());
+      tester.closeArena(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+
+      expect(recognized, <String>['pan', 'tapDown', 'tapUp']);
+    });
+  });
+
   group('Recognizers listening on different buttons do not form competition:', () {
     // This test is assisted by tap recognizers. If a tap gesture has
     // no competing recognizers, a pointer down event triggers its onTapDown
