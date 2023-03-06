@@ -311,7 +311,8 @@ Future<vm_service.VmService> setUpVmService({
       };
     });
     registrationRequests.add(
-        vmService.registerService('flutterGetIOSBuildOptions', 'Flutter Tools'));
+      vmService.registerService('flutterGetIOSBuildOptions', 'Flutter Tools'),
+    );
   }
 
   if (printStructuredErrorLogMethod != null) {
