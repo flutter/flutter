@@ -88,7 +88,6 @@ void main() {
       nativeNullAssertions: true,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(true);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(true);'''));
   });
 
@@ -98,7 +97,6 @@ void main() {
       nativeNullAssertions: false,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(false);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(false);'''));
   });
 
