@@ -750,16 +750,33 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   UIView* flutter_view = flutter_view_.get();
   // Clear the `active_composition_order_`, which will be populated down below.
   active_composition_order_.clear();
+  NSMutableArray* desired_platform_subviews = [NSMutableArray array];
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t platform_view_id = composition_order_[i];
     std::vector<std::shared_ptr<FlutterPlatformViewLayer>> layers = layer_map[platform_view_id];
     UIView* platform_view_root = root_views_[platform_view_id].get();
-    // `addSubview` will automatically reorder subview if it is already added.
-    [flutter_view addSubview:platform_view_root];
+    [desired_platform_subviews addObject:platform_view_root];
     for (const std::shared_ptr<FlutterPlatformViewLayer>& layer : layers) {
-      [flutter_view addSubview:layer->overlay_view_wrapper];
+      [desired_platform_subviews addObject:layer->overlay_view_wrapper];
     }
     active_composition_order_.push_back(platform_view_id);
+  }
+
+  NSSet* desired_platform_subviews_set = [NSSet setWithArray:desired_platform_subviews];
+  NSArray* existing_platform_subviews = [flutter_view.subviews
+      filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object,
+                                                                        NSDictionary* bindings) {
+        return [desired_platform_subviews_set containsObject:object];
+      }]];
+  // Manipulate view hierarchy only if needed, to address a performance issue where
+  // `BringLayersIntoView` is called even when view hierarchy stays the same.
+  // See: https://github.com/flutter/flutter/issues/121833
+  // TODO(hellohuanlin): investigate if it is possible to skip unnecessary BringLayersIntoView.
+  if (![desired_platform_subviews isEqualToArray:existing_platform_subviews]) {
+    for (UIView* subview in desired_platform_subviews) {
+      // `addSubview` will automatically reorder subview if it is already added.
+      [flutter_view addSubview:subview];
+    }
   }
 }
 
