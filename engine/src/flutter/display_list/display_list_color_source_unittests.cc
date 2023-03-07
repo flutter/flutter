@@ -86,6 +86,19 @@ static constexpr SkPoint kTestPoints2[2] = {
     SkPoint::Make(107, 118),
 };
 
+TEST(DisplayListColorSource, BuilderSetGet) {
+  DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
+                            DlImageSampling::kLinear, &kTestMatrix1);
+  DisplayListBuilder builder;
+  ASSERT_EQ(builder.getColorSource(), nullptr);
+  builder.setColorSource(&source);
+  ASSERT_NE(builder.getColorSource(), nullptr);
+  ASSERT_TRUE(
+      Equals(builder.getColorSource(), static_cast<DlColorSource*>(&source)));
+  builder.setColorSource(nullptr);
+  ASSERT_EQ(builder.getColorSource(), nullptr);
+}
+
 TEST(DisplayListColorSource, ColorConstructor) {
   DlColorColorSource source(SK_ColorRED);
 }
@@ -750,10 +763,22 @@ TEST(DisplayListColorSource, RuntimeEffect) {
   ASSERT_EQ(source1->asConicalGradient(), nullptr);
   ASSERT_EQ(source1->asSweepGradient(), nullptr);
 
+  ASSERT_NE(source1->skia_object(), nullptr);
+  ASSERT_EQ(source3->skia_object(), nullptr);
+
   TestEquals(source1, source1);
   TestEquals(source3, source3);
   TestNotEquals(source1, source2, "SkRuntimeEffect differs");
   TestNotEquals(source2, source3, "SkRuntimeEffect differs");
+}
+
+TEST(DisplayListColorSource, RuntimeEffectWithNullSampler) {
+  std::shared_ptr<DlRuntimeEffectColorSource> source1 =
+      DlColorSource::MakeRuntimeEffect(
+          kTestRuntimeEffect1, {nullptr},
+          std::make_shared<std::vector<uint8_t>>());
+
+  ASSERT_EQ(source1->skia_object(), nullptr);
 }
 
 }  // namespace testing
