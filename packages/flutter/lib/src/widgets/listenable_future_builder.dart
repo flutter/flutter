@@ -168,6 +168,7 @@ class _ListenableFutureBuilderState<T extends Listenable>
   late AsyncSnapshot<T> _snapshot;
 
   ///Use this to access the last snapshot that was passed to the builder
+  @visibleForTesting
   AsyncSnapshot<T> get lastSnapshot => _snapshot;
 
   @override
