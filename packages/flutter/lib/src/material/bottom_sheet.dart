@@ -119,8 +119,8 @@ class BottomSheet extends StatefulWidget {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null, 
-  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise 
+  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null,
+  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise
   /// behaves as false.
   final bool? hasDragHandle;
 
@@ -872,8 +872,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null, 
-  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise 
+  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null,
+  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise
   /// behaves as false.
   final bool? hasDragHandle;
 
