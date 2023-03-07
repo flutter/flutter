@@ -1259,22 +1259,22 @@ void main() {
       WidgetSpan(child: Text('widget')),
       TextSpan(text: 'after'),
     ]);
-    expect(painter.plainText, 'before\n${String.fromCharCode(Unicode.ORC)}after');
+    expect(painter.plainText, 'before\n${String.fromCharCode(Unicode.objReplacementChar)}after');
 
     painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
       PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
     ]);
     painter.layout();
-    expect(painter.plainText, 'before\n${String.fromCharCode(Unicode.ORC)}after');
+    expect(painter.plainText, 'before\n${String.fromCharCode(Unicode.objReplacementChar)}after');
 
     painter.text = const TextSpan(children: <InlineSpan>[
       TextSpan(text: 'be\nfo\nre\n'),
       WidgetSpan(child: Text('widget')),
       TextSpan(text: 'af\nter'),
     ]);
-    expect(painter.plainText, 'be\nfo\nre\n${String.fromCharCode(Unicode.ORC)}af\nter');
+    expect(painter.plainText, 'be\nfo\nre\n${String.fromCharCode(Unicode.objReplacementChar)}af\nter');
     painter.layout();
-    expect(painter.plainText, 'be\nfo\nre\n${String.fromCharCode(Unicode.ORC)}af\nter');
+    expect(painter.plainText, 'be\nfo\nre\n${String.fromCharCode(Unicode.objReplacementChar)}af\nter');
 
     painter.dispose();
   });

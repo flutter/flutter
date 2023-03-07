@@ -286,7 +286,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
           context: ErrorDescription('while building a TextSpan'),
         ));
         // Use a Unicode replacement character as a substitute for invalid text.
-        builder.addText(String.fromCharCode(Unicode.RC));
+        builder.addText(String.fromCharCode(Unicode.replacementChar));
       }
     }
     if (children != null) {
@@ -421,7 +421,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///
   /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
   /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (Unicode.ORC) that is inserted to represent it.
+  /// replacement character (Unicode.objReplacementChar) that is inserted to represent it.
   ///
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.

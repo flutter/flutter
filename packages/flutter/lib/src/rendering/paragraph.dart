@@ -115,7 +115,7 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  static final String _ellipsis = String.fromCharCode(Unicode.HE);
+  static final String _ellipsis = String.fromCharCode(Unicode.horizontalEllipsis);
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
 
@@ -182,7 +182,7 @@ class RenderParagraph extends RenderBox
   }
 
   // Should be null if selection is not enabled, i.e. _registrar = null. The
-  // paragraph splits on [Unicode.ORC], and stores each
+  // paragraph splits on [Unicode.objReplacementChar], and stores each
   // fragment in this list.
   List<_SelectableFragment>? _lastSelectableFragments;
 

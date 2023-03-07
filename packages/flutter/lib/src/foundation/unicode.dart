@@ -96,19 +96,19 @@ class Unicode {
   static const int ALM = 0x061C;
 
   /// `U+2026 HORIZONTAL ELLIPSIS`
-  static const int HE = 0x2026;
+  static const int horizontalEllipsis = 0x2026;
 
   /// `U+FFFC Object Replacement Character`
-  static const int ORC = 0xFFFC;
-
-  /// `U+FFFD Replacement Character`
-  static const int RC = 0xFFFD;
+  static const int objReplacementChar = 0xFFFC;
 
   /// `U+FFFC Object Replacement Character` String literal.
   ///
   /// This is needed in a few places as const String.fromCharCode() isn't
   /// possible (see https://github.com/dart-lang/sdk/issues/49407).
-  static const String stringORC = '\uFFFC';
+  static const String objReplacementCharString = '\uFFFC';
+
+  /// `U+FFFD Replacement Character`
+  static const int replacementChar = 0xFFFD;
 
   // TODO(gspencergoog): replace when we expose this ICU information.
   /// Check if the given code unit is a white space or separator
