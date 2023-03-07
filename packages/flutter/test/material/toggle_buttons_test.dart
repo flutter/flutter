@@ -1326,6 +1326,8 @@ void main() {
   });
 
   testWidgets('ToggleButtons text baseline alignment', (WidgetTester tester) async {
+    // The point size of the fonts must be a multiple of 4 until
+    // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       Material(
         child: boilerplate(
@@ -1337,15 +1339,15 @@ void main() {
                 borderWidth: 5.0,
                 isSelected: const <bool>[false, true],
                 children: const <Widget>[
-                  Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0)),
-                  Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0)),
+                  Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                  Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
                 ],
               ),
               const MaterialButton(
                 onPressed: null,
                 child: Text('Material Button', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
               ),
-              const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 30.0)),
+              const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
             ],
           ),
         ),
@@ -1357,7 +1359,7 @@ void main() {
     //
     //  ToggleButton  MaterialButton  Text
     //  ------------------------------------   baseline
-    //  2.5           5               7.5        space below the baseline = 0.25 * fontSize
+    //  2.0           5.0             7.0      space below the baseline = 0.25 * fontSize
     //  ------------------------------------   widget text dy values
 
     final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
@@ -1366,7 +1368,7 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, materialButtonDy - 2.5);
+    expect(firstToggleButtonDy, materialButtonDy - 3.0);
     expect(firstToggleButtonDy, textDy - 5.0);
   });
 

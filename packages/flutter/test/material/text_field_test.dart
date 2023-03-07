@@ -6913,20 +6913,26 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
@@ -6938,14 +6944,14 @@ void main() {
     // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
-    //  A    abc  B
-    //  -------------  baseline
-    //  2.5  5    7.5  space below the baseline = 0.25 * fontSize
-    //  -------------  rowBottomY
+    //  A  abc  B
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 5.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.5);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -6966,19 +6972,25 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
               ),
             ),
           ],
@@ -6989,15 +7001,15 @@ void main() {
     // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
-    //  A    abc  B
-    //  -------------  baseline
-    //  2.5  5    7.5  space below the baseline = 0.25 * fontSize
-    //  -------------  rowBottomY
+    //  A  abc  B
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
     // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 5.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.5);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 

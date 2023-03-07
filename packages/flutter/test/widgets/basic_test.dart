@@ -454,8 +454,10 @@ void main() {
     testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -506,8 +508,10 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/58898
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
