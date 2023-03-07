@@ -31,6 +31,15 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 ///
 /// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+/// * [ServicesBinding.exitApplication] for a function to call that will request
+///   that the application exits.
+/// * [WidgetsBindingObserver.didRequestAppExit] for the handler which this
+///   class uses to receive exit requests.
+/// * [WidgetsBindingObserver.didChangeAppLifecycleState] for the handler which
+///   this class uses to receive lifecycle state changes.
 class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   /// Creates an [AppLifecycleListener].
   AppLifecycleListener({
@@ -70,7 +79,9 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   /// is not canceled, the application will immediately exit.
   ///
   /// If there are multiple instances of [AppLifecycleListener] in the app, then
-  /// the first one to respond [AppExitResponse.cancel] will cancel the exit.
+  /// if any of them respond [AppExitResponse.cancel], it will cancel the exit.
+  /// All listeners will be asked before the application exits, even if one
+  /// responds [AppExitResponse.cancel].
   final AppExitRequestCallback? onExitRequested;
 
   bool _debugDisposed = false;

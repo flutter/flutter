@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
@@ -326,6 +327,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// The optional [exitCode] argument will be used as the application exit code
   /// on platforms where an exit code is supported. On other platforms it may be
   /// ignored. It defaults to zero.
+  ///
+  /// See also:
+  /// * [AppLifecycleListener] for a class that can listen to exit requests and
+  ///   respond to them without needing to create a [WidgetsBindingObserver].
+  /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
+  ///   override on a [WidgetsBindingObserver] to receive exit requests.
   @mustCallSuper
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
     final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod<Map<String, dynamic>>(
