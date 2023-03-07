@@ -923,6 +923,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.serveObservatory = true,
     this.enableDartProfiling = true,
+    this.enableEmbedderApi = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -942,6 +943,7 @@ class DebuggingOptions {
       this.enableImpeller = false,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
+      this.enableEmbedderApi = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -1015,6 +1017,7 @@ class DebuggingOptions {
     required this.uninstallFirst,
     required this.serveObservatory,
     required this.enableDartProfiling,
+    required this.enableEmbedderApi,
   });
 
   final bool debuggingEnabled;
@@ -1052,6 +1055,7 @@ class DebuggingOptions {
   final bool enableImpeller;
   final bool serveObservatory;
   final bool enableDartProfiling;
+  final bool enableEmbedderApi;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1135,6 +1139,7 @@ class DebuggingOptions {
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
       if (interfaceType == IOSDeviceConnectionInterface.network)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
+      if (enableEmbedderApi) '--enable-embedder-api',
     ];
   }
 
@@ -1181,6 +1186,7 @@ class DebuggingOptions {
     'enableImpeller': enableImpeller,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
+    'enableEmbedderApi': enableEmbedderApi,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1229,6 +1235,7 @@ class DebuggingOptions {
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+      enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
     );
 }
 

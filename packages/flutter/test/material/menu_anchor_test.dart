@@ -147,6 +147,99 @@ void main() {
     );
   }
 
+  testWidgets('Menu responds to density changes', (WidgetTester tester) async {
+    Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) => MaterialApp(
+      theme: ThemeData(visualDensity: visualDensity),
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            MenuBar(
+              children: createTestMenus(onPressed: onPressed),
+            ),
+            const Expanded(child: Placeholder()),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildMenu());
+    await tester.pump();
+
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)));
+
+    // Open and make sure things are the right size.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)));
+    expect(
+      tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
+      equals(const Rect.fromLTRB(257.0, 56.0, 471.0, 104.0)),
+    );
+    expect(
+      tester.getRect(
+        find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
+      ),
+      equals(const Rect.fromLTRB(257.0, 48.0, 471.0, 208.0)),
+    );
+
+    // Test compact visual density (-2, -2)
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenu(visualDensity: VisualDensity.compact));
+    await tester.pump();
+
+    // The original horizontal padding with standard visual density for menu buttons are 12 px, and the total length
+    // for the menu bar is (655 - 145) = 510.
+    // There are 4 buttons in the test menu bar, and with compact visual density,
+    // the padding will reduce by abs(2 * (-2)) = 4. So the total length
+    // now should reduce by abs(4 * 2 * (-4)) = 32, which would be 510 - 32 = 478, and
+    // 478 = 639 - 161
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(161.0, 0.0, 639.0, 40.0)));
+
+    // Open and make sure things are the right size.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(161.0, 0.0, 639.0, 40.0)));
+    expect(
+      tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
+      equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 80.0)),
+    );
+    expect(
+      tester.getRect(
+        find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
+      ),
+      equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 160.0)),
+    );
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenu(visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0)));
+    await tester.pump();
+
+    // Similarly, there are 4 buttons in the test menu bar, and with (2, 2) visual density,
+    // the padding will increase by abs(2 * 4) = 8. So the total length for buttons
+    // should increase by abs(4 * 2 * 8) = 64. The horizontal padding for the menu bar
+    // increases by 2 * 8, so the total width increases to 510 + 64 + 16 = 590, and
+    // 590 = 695 - 105
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)));
+
+    // Open and make sure things are the right size.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)));
+    expect(
+      tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
+      equals(const Rect.fromLTRB(249.0, 80.0, 483.0, 136.0)),
+    );
+    expect(
+      tester.getRect(
+        find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
+      ),
+      equals(const Rect.fromLTRB(241.0, 64.0, 491.0, 264.0)),
+    );
+  });
+
   testWidgets('menu defaults colors', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
@@ -2182,9 +2275,9 @@ void main() {
       expect(
         collectSubmenuRects(),
         equals(const <Rect>[
-          Rect.fromLTRB(145.0, 0.0, 655.0, 40.0),
-          Rect.fromLTRB(257.0, 40.0, 467.0, 176.0),
-          Rect.fromLTRB(467.0, 80.0, 715.0, 256.0),
+          Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
+          Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
+          Rect.fromLTRB(467.0, 72.0, 707.0, 232.0),
         ]),
       );
     });
@@ -2198,9 +2291,9 @@ void main() {
       expect(
         collectSubmenuRects(),
         equals(const <Rect>[
-          Rect.fromLTRB(145.0, 0.0, 655.0, 40.0),
-          Rect.fromLTRB(333.0, 40.0, 543.0, 176.0),
-          Rect.fromLTRB(85.0, 80.0, 333.0, 256.0),
+          Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
+          Rect.fromLTRB(333.0, 40.0, 535.0, 160.0),
+          Rect.fromLTRB(93.0, 72.0, 333.0, 232.0),
         ]),
       );
     });
