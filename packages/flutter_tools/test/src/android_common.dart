@@ -24,6 +24,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   }) async {}
 
   @override
@@ -33,6 +34,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   }) async {}
 }
 
