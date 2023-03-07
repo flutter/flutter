@@ -711,6 +711,25 @@ void main() {
     });
   });
 
+  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (WidgetTester tester) async {
+    expect(tester.platformDispatcher, tester.binding.platformDispatcher);
+  });
+
+  testWidgets('view exposes the implicitView from platformDispatcher', (WidgetTester tester) async {
+    expect(tester.view, tester.platformDispatcher.implicitView);
+  });
+
+  testWidgets('viewOf finds a view when the view is implicit', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(
+        child: Text('Test'),
+      )
+    ));
+
+    expect(() => tester.viewOf(find.text('Test')), isNot(throwsA(anything)));
+    expect(tester.viewOf(find.text('Test')), isA<TestFlutterView>());
+  });
+
   group('SemanticsController', () {
     group('find', () {
       testWidgets('throws when there are no semantics', (WidgetTester tester) async {

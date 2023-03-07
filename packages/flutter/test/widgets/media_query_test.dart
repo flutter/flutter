@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, PlatformDispatcher, ViewPadding;
+import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -146,10 +146,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio));
+    expect(data.size, equals(tester.view.physicalSize / tester.view.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -173,26 +173,17 @@ void main() {
       navigationMode: NavigationMode.directional,
     );
 
-    final TestView view = TestView(
-      physicalSize: const Size(300, 600),
-      devicePixelRatio: 3.0,
-      padding: const TestViewPadding(15),
-      viewPadding: const TestViewPadding(75),
-      viewInsets: const TestViewPadding(45),
-      systemGestureInsets: const TestViewPadding(9),
-    );
-
-    final MediaQueryData data = MediaQueryData.fromView(view, platformData: platformData);
+    final MediaQueryData data = MediaQueryData.fromView(tester.view, platformData: platformData);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, data.copyWith().hashCode);
-    expect(data.size, view.physicalSize / view.devicePixelRatio);
-    expect(data.devicePixelRatio, view.devicePixelRatio);
+    expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
+    expect(data.devicePixelRatio, tester.view.devicePixelRatio);
     expect(data.textScaleFactor, platformData.textScaleFactor);
     expect(data.platformBrightness, platformData.platformBrightness);
-    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(tester.view.viewInsets, tester.view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio));
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
@@ -200,48 +191,37 @@ void main() {
     expect(data.highContrast, platformData.highContrast);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
-    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
-    expect(data.displayFeatures, view.displayFeatures);
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
+    expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
   testWidgets('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
-    final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(platformDispatcher: tester.binding.platformDispatcher);
-    platformDispatcher
+    tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
       ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-    addTearDown(() => platformDispatcher.clearAllTestValues());
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
 
-    final TestView view = TestView(
-      platformDispatcher: platformDispatcher,
-      physicalSize: const Size(300, 600),
-      devicePixelRatio: 3.0,
-      padding: const TestViewPadding(15),
-      viewPadding: const TestViewPadding(75),
-      viewInsets: const TestViewPadding(45),
-      systemGestureInsets: const TestViewPadding(9),
-    );
-
-    final MediaQueryData data = MediaQueryData.fromView(view);
+    final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, data.copyWith().hashCode);
-    expect(data.size, view.physicalSize / view.devicePixelRatio);
-    expect(data.devicePixelRatio, view.devicePixelRatio);
-    expect(data.textScaleFactor, platformDispatcher.textScaleFactor);
-    expect(data.platformBrightness, platformDispatcher.platformBrightness);
-    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
-    expect(data.accessibleNavigation, platformDispatcher.accessibilityFeatures.accessibleNavigation);
-    expect(data.invertColors, platformDispatcher.accessibilityFeatures.invertColors);
-    expect(data.disableAnimations, platformDispatcher.accessibilityFeatures.disableAnimations);
-    expect(data.boldText, platformDispatcher.accessibilityFeatures.boldText);
-    expect(data.highContrast, platformDispatcher.accessibilityFeatures.highContrast);
-    expect(data.alwaysUse24HourFormat, platformDispatcher.alwaysUse24HourFormat);
+    expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
+    expect(data.devicePixelRatio, tester.view.devicePixelRatio);
+    expect(data.textScaleFactor, tester.platformDispatcher.textScaleFactor);
+    expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
+    expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(tester.view.viewInsets, tester.view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio));
+    expect(data.accessibleNavigation, tester.platformDispatcher.accessibilityFeatures.accessibleNavigation);
+    expect(data.invertColors, tester.platformDispatcher.accessibilityFeatures.invertColors);
+    expect(data.disableAnimations, tester.platformDispatcher.accessibilityFeatures.disableAnimations);
+    expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
+    expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
+    expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
-    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
-    expect(data.displayFeatures, view.displayFeatures);
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
+    expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
   testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
@@ -257,20 +237,11 @@ void main() {
       navigationMode: NavigationMode.directional,
     );
 
-    final TestView view = TestView(
-      physicalSize: const Size(300, 600),
-      devicePixelRatio: 3.0,
-      padding: const TestViewPadding(15),
-      viewPadding: const TestViewPadding(75),
-      viewInsets: const TestViewPadding(45),
-      systemGestureInsets: const TestViewPadding(9),
-    );
-
     late MediaQueryData data;
     await tester.pumpWidget(MediaQuery(
       data: platformData,
       child: MediaQuery.fromView(
-        view: view,
+        view: tester.view,
         child: Builder(
           builder: (BuildContext context) {
             data = MediaQuery.of(context);
@@ -281,14 +252,14 @@ void main() {
     ));
 
     expect(data, isNot(platformData));
-    expect(data.size, view.physicalSize / view.devicePixelRatio);
-    expect(data.devicePixelRatio, view.devicePixelRatio);
+    expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
+    expect(data.devicePixelRatio, tester.view.devicePixelRatio);
     expect(data.textScaleFactor, platformData.textScaleFactor);
     expect(data.platformBrightness, platformData.platformBrightness);
-    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
+    expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(tester.view.viewInsets, tester.view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio));
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
@@ -296,27 +267,16 @@ void main() {
     expect(data.highContrast, platformData.highContrast);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
-    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
-    expect(data.displayFeatures, view.displayFeatures);
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
+    expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
   testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
-    final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(platformDispatcher: tester.binding.platformDispatcher);
-    platformDispatcher
+    tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
       ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-    addTearDown(() => platformDispatcher.clearAllTestValues());
-
-    final TestView view = TestView(
-      platformDispatcher: platformDispatcher,
-      physicalSize: const Size(300, 600),
-      devicePixelRatio: 3.0,
-      padding: const TestViewPadding(15),
-      viewPadding: const TestViewPadding(75),
-      viewInsets: const TestViewPadding(45),
-      systemGestureInsets: const TestViewPadding(9),
-    );
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
 
     late MediaQueryData data;
     MediaQueryData? outerData;
@@ -326,7 +286,7 @@ void main() {
         builder: (BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
-              view: view,
+              view: tester.view,
               child: Builder(
                 builder: (BuildContext context) {
                   data = MediaQuery.of(context);
@@ -339,33 +299,34 @@ void main() {
     );
 
     expect(outerData, isNull);
-    expect(data.size, view.physicalSize / view.devicePixelRatio);
-    expect(data.devicePixelRatio, view.devicePixelRatio);
-    expect(data.textScaleFactor, platformDispatcher.textScaleFactor);
-    expect(data.platformBrightness, platformDispatcher.platformBrightness);
-    expect(data.padding, EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio));
-    expect(data.viewPadding, EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio));
-    expect(data.viewInsets, EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio));
-    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio));
-    expect(data.accessibleNavigation, platformDispatcher.accessibilityFeatures.accessibleNavigation);
-    expect(data.invertColors, platformDispatcher.accessibilityFeatures.invertColors);
-    expect(data.disableAnimations, platformDispatcher.accessibilityFeatures.disableAnimations);
-    expect(data.boldText, platformDispatcher.accessibilityFeatures.boldText);
-    expect(data.highContrast, platformDispatcher.accessibilityFeatures.highContrast);
-    expect(data.alwaysUse24HourFormat, platformDispatcher.alwaysUse24HourFormat);
+    expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
+    expect(data.devicePixelRatio, tester.view.devicePixelRatio);
+    expect(data.textScaleFactor, tester.platformDispatcher.textScaleFactor);
+    expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
+    expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
+    expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
+    expect(data.viewInsets, EdgeInsets.fromViewPadding(tester.view.viewInsets, tester.view.devicePixelRatio));
+    expect(data.systemGestureInsets, EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio));
+    expect(data.accessibleNavigation, tester.platformDispatcher.accessibilityFeatures.accessibleNavigation);
+    expect(data.invertColors, tester.platformDispatcher.accessibilityFeatures.invertColors);
+    expect(data.disableAnimations, tester.platformDispatcher.accessibilityFeatures.disableAnimations);
+    expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
+    expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
+    expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
-    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
-    expect(data.displayFeatures, view.displayFeatures);
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
+    expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
   testWidgets('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
-    tester.binding.platformDispatcher
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+    addTearDown(() => tester.view.reset());
+
+    tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
       ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-    addTearDown(() => tester.binding.platformDispatcher.clearAllTestValues());
-    tester.binding.window.devicePixelRatioTestValue = 44;
-    addTearDown(() => tester.binding.window.clearAllTestValues());
+    tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
     MediaQueryData? outerData;
@@ -376,7 +337,7 @@ void main() {
         builder: (BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
-              view: tester.binding.window,
+              view: tester.view,
               child: Builder(
                 builder: (BuildContext context) {
                   rebuildCount++;
@@ -393,38 +354,39 @@ void main() {
     expect(rebuildCount, 1);
 
     expect(data.textScaleFactor, 123);
-    tester.binding.platformDispatcher.textScaleFactorTestValue = 456;
+    tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
     expect(data.textScaleFactor, 456);
     expect(rebuildCount, 2);
 
     expect(data.platformBrightness, Brightness.dark);
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
     await tester.pump();
     expect(data.platformBrightness, Brightness.light);
     expect(rebuildCount, 3);
 
     expect(data.accessibleNavigation, true);
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     await tester.pump();
     expect(data.accessibleNavigation, false);
     expect(rebuildCount, 4);
 
     expect(data.devicePixelRatio, 44);
-    tester.binding.window.devicePixelRatioTestValue = 55;
+    tester.view.devicePixelRatio = 55;
     await tester.pump();
     expect(data.devicePixelRatio, 55);
     expect(rebuildCount, 5);
   });
 
   testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
-    tester.binding.platformDispatcher
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+    addTearDown(() => tester.view.reset());
+
+    tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
       ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-    addTearDown(() => tester.binding.platformDispatcher.clearAllTestValues());
-    tester.binding.window.devicePixelRatioTestValue = 44;
-    addTearDown(() => tester.binding.window.clearAllTestValues());
+    tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
     int rebuildCount = 0;
@@ -436,7 +398,7 @@ void main() {
           accessibleNavigation: true,
         ),
         child: MediaQuery.fromView(
-          view: tester.binding.window,
+          view: tester.view,
           child: Builder(
             builder: (BuildContext context) {
               rebuildCount++;
@@ -451,25 +413,25 @@ void main() {
     expect(rebuildCount, 1);
 
     expect(data.textScaleFactor, 44);
-    tester.binding.platformDispatcher.textScaleFactorTestValue = 456;
+    tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
     expect(data.textScaleFactor, 44);
     expect(rebuildCount, 1);
 
     expect(data.platformBrightness, Brightness.dark);
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
     await tester.pump();
     expect(data.platformBrightness, Brightness.dark);
     expect(rebuildCount, 1);
 
     expect(data.accessibleNavigation, true);
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     await tester.pump();
     expect(data.accessibleNavigation, true);
     expect(rebuildCount, 1);
 
     expect(data.devicePixelRatio, 44);
-    tester.binding.window.devicePixelRatioTestValue = 55;
+    tester.view.devicePixelRatio = 55;
     await tester.pump();
     expect(data.devicePixelRatio, 55);
     expect(rebuildCount, 2);
@@ -487,7 +449,7 @@ void main() {
           return MediaQuery(
             data: MediaQueryData(textScaleFactor: textScaleFactor),
             child: MediaQuery.fromView(
-              view: tester.binding.window,
+              view: tester.view,
               child: Builder(
                 builder: (BuildContext context) {
                   rebuildCount++;
@@ -513,7 +475,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.view);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -552,7 +514,7 @@ void main() {
       ),
     ];
 
-    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.view);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -1325,11 +1287,11 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQueryData.gestureSettings is set from window.viewConfiguration', (WidgetTester tester) async {
-    tester.binding.window.gestureSettingsTestValue = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
+  testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
+    tester.view.gestureSettings = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
+    addTearDown(() => tester.view.resetGestureSettings());
 
-    expect(MediaQueryData.fromView(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
-    tester.binding.window.clearGestureSettingsTestValue();
+    expect(MediaQueryData.fromView(tester.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
   });
 
   testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
@@ -1510,53 +1472,4 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class TestView implements FlutterView {
-  TestView({
-    PlatformDispatcher? platformDispatcher,
-    required this.physicalSize,
-    required this.devicePixelRatio,
-    required this.padding,
-    required this.viewPadding,
-    required this.viewInsets,
-    required this.systemGestureInsets,
-  }) : _platformDispatcher = platformDispatcher;
-
-  @override
-  PlatformDispatcher get platformDispatcher => _platformDispatcher!;
-  final PlatformDispatcher? _platformDispatcher;
-  @override
-  final Size physicalSize;
-  @override
-  final double devicePixelRatio;
-  @override
-  final ViewPadding padding;
-  @override
-  final ViewPadding viewPadding;
-  @override
-  final ViewPadding viewInsets;
-  @override
-  final ViewPadding systemGestureInsets;
-  @override
-  final List<DisplayFeature> displayFeatures = <DisplayFeature>[];
-  @override
-  final GestureSettings gestureSettings = const GestureSettings();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class TestViewPadding implements ViewPadding {
-  const TestViewPadding(this.value);
-  final double value;
-
-  @override
-  double get bottom => value;
-  @override
-  double get left => value;
-  @override
-  double get right => value;
-  @override
-  double get top => value;
 }
