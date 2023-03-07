@@ -59,6 +59,7 @@ void main() {
 
       expect(gradleFile, exists);
       expect(result.stdout, contains(RegExp(r'Config complete')));
+      expect(result.stdout, isNot(contains(RegExp(r'Running Gradle task'))));
     },
   );
 }
