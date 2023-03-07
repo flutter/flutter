@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -112,5 +113,20 @@ void main() {
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
       expect(data, isNotNull);
      });
+  });
+
+  test('Calling exitApplication sends a method call to the engine', () async {
+    bool sentMessage = false;
+    MethodCall? methodCall;
+    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+      methodCall = const JSONMethodCodec().decodeMethodCall(message);
+      sentMessage = true;
+      return const JSONMethodCodec().encodeSuccessEnvelope(<String, String>{'response': 'cancel'});
+    });
+    final AppExitResponse response = await binding.exitApplication(AppExitType.required);
+    expect(sentMessage, isTrue);
+    expect(methodCall, isNotNull);
+    expect((methodCall!.arguments as Map<String, dynamic>)['type'], equals('required'));
+    expect(response, equals(AppExitResponse.cancel));
   });
 }
