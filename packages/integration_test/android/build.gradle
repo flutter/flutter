@@ -43,10 +43,10 @@ android {
         // https://github.com/flutter/flutter/issues/56591
         api 'junit:junit:4.12'
 
-        // https://developer.android.com/jetpack/androidx/releases/test/#1.4.0
-        api 'androidx.test:runner:1.4.0'
-        api 'androidx.test:rules:1.4.0'
-        api 'androidx.test.espresso:espresso-core:3.4.0'
+        // https://developer.android.com/jetpack/androidx/releases/test/#1.2.0
+        api 'androidx.test:runner:1.2.0'
+        api 'androidx.test:rules:1.2.0'
+        api 'androidx.test.espresso:espresso-core:3.2.0'
 
         implementation 'com.google.guava:guava:28.1-android'
     }
