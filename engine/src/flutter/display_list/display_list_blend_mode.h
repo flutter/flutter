@@ -66,14 +66,6 @@ enum class DlBlendMode {
   kDefaultMode = kSrcOver,
 };
 
-inline DlBlendMode ToDl(SkBlendMode mode) {
-  return static_cast<DlBlendMode>(mode);
-}
-
-inline SkBlendMode ToSk(DlBlendMode mode) {
-  return static_cast<SkBlendMode>(mode);
-}
-
 }  // namespace flutter
 
 #endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_BLEND_MODE_H_
