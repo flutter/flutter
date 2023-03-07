@@ -32,10 +32,9 @@ void main() {
     });
 
     test('does not replace the root layer unnecessarily', () {
-      final ui.FlutterView window = TestWindow(window: RendererBinding.instance.window);
       final RenderView view = RenderView(
         configuration: createViewConfiguration(),
-        window: window,
+        window: FakeFlutterView(),
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
@@ -49,10 +48,9 @@ void main() {
     });
 
     test('does not replace the root layer unnecessarily when window resize', () {
-      final ui.FlutterView window = TestWindow(window: RendererBinding.instance.window);
       final RenderView view = RenderView(
         configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
-        window: window,
+        window: FakeFlutterView(),
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
@@ -73,4 +71,11 @@ void main() {
     expect(viewConfigurationA.hashCode, viewConfigurationB.hashCode);
     expect(viewConfigurationA.hashCode != viewConfigurationC.hashCode, true);
   });
+}
+
+class FakeFlutterView implements ui.FlutterView {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
 }

@@ -169,7 +169,7 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: FakeFlutterView());
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +182,7 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: FakeFlutterView());
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -1094,3 +1094,10 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
 class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}
 
 class FakeOffsetEngineLayer extends FakeEngineLayer implements OffsetEngineLayer {}
+
+class FakeFlutterView implements FlutterView {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+}

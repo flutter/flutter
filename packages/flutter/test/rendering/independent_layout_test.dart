@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show FlutterView;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,7 +46,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.window);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: FakeFlutterView());
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -74,7 +76,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.window);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: FakeFlutterView());
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -96,4 +98,11 @@ void main() {
     expect(onscreen.painted, isTrue);
     expect(onscreen.child.size, equals(const Size(800.0, 10.0)));
   });
+}
+
+class FakeFlutterView implements FlutterView {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
 }
