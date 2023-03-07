@@ -124,7 +124,7 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<WidgetsBinding>('binding', binding));
-    properties.add(FlagProperty('onStateChange', value: onStateChange != null, ifTrue: 'onStateChange'));
-    properties.add(FlagProperty('onExitRequested', value: onExitRequested != null, ifTrue: 'onExitRequested'));
+    properties.add(FlagProperty('onStateChange', value: onStateChange != null, ifTrue: 'onStateChange', defaultValue: false));
+    properties.add(FlagProperty('onExitRequested', value: onExitRequested != null, ifTrue: 'onExitRequested', defaultValue: false));
   }
 }

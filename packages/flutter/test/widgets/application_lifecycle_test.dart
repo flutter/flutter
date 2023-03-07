@@ -62,4 +62,21 @@ void main() {
     expect(exitRequested, isTrue);
     listener.dispose();
   });
+
+  testWidgets('Diagnostics', (WidgetTester tester) async {
+    Future<AppExitResponse> handleExitRequested() async {
+      return AppExitResponse.cancel;
+    }
+    void stateChange(AppLifecycleState state) {}
+    AppLifecycleListener listener = AppLifecycleListener(
+      binding: WidgetsBinding.instance,
+    );
+    expect(listener.toString(), equalsIgnoringHashCodes('AppLifecycleListener#00000(binding: <AutomatedTestWidgetsFlutterBinding>)'));
+    listener = AppLifecycleListener(
+      binding: WidgetsBinding.instance,
+      onExitRequested: handleExitRequested,
+      onStateChange: stateChange,
+    );
+    expect(listener.toString(), equalsIgnoringHashCodes('AppLifecycleListener#00000(binding: <AutomatedTestWidgetsFlutterBinding>, onStateChange, onExitRequested)'));
+  });
 }
