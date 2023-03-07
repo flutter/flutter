@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'can_pop_scope.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
@@ -43,16 +44,16 @@ class Form extends StatefulWidget {
   const Form({
     super.key,
     required this.child,
-    this.canPop,
+    this.popEnabled,
     @Deprecated(
-      'Use canPop instead. '
+      'Use popEnabled instead. '
       'This feature was deprecated after v3.9.0-0.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert(canPop == null || onWillPop == null, 'onWillPop is deprecated; just use canPop.');
+       assert(popEnabled == null || onWillPop == null, 'onWillPop is deprecated; use popEnabled only.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -132,12 +133,12 @@ class Form extends StatefulWidget {
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
   @Deprecated(
-    'Use canPop instead. '
+    'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   final WillPopCallback? onWillPop;
 
-  final bool? canPop;
+  final bool? popEnabled;
 
   /// Called when one of the form fields changes.
   ///
@@ -205,10 +206,9 @@ class FormState extends State<Form> {
         break;
     }
 
-    /*
-    if (canPop != null) {
+    if (widget.popEnabled != null) {
       return CanPopScope(
-        canPop: widget.canPop,
+        popEnabled: widget.popEnabled!,
         child: _FormScope(
           formState: this,
           generation: _generation,
@@ -216,7 +216,6 @@ class FormState extends State<Form> {
         ),
       );
     }
-    */
 
     return WillPopScope(
       onWillPop: widget.onWillPop,
