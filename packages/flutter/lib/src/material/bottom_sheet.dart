@@ -119,8 +119,9 @@ class BottomSheet extends StatefulWidget {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// When null (the default), the behavior is determined by
-  /// [BottomSheetThemeData.hasDragHandle].
+  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null, 
+  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise 
+  /// behaves as false.
   final bool? hasDragHandle;
 
   /// Called when the user begins dragging the bottom sheet vertically, if
@@ -323,7 +324,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
-    final bool hasDragHandle = widget.hasDragHandle ?? useMaterial3;
+    final bool hasDragHandle = widget.hasDragHandle ?? bottomSheetTheme.hasDragHandle ?? useMaterial3;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -871,8 +872,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// When null (the default), behaves as true when [ThemeData.useMaterial3]
-  /// is true, and otherwise behaves as false.
+  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null, 
+  /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise 
+  /// behaves as false.
   final bool? hasDragHandle;
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -968,7 +970,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
-            hasDragHandle: hasDragHandle ?? Theme.of(context).useMaterial3,
+            hasDragHandle: hasDragHandle ?? sheetTheme.hasDragHandle ?? Theme.of(context).useMaterial3,
           );
         },
       ),
