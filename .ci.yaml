@@ -1597,7 +1597,7 @@ targets:
 
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
