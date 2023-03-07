@@ -295,9 +295,9 @@ void main() {
   });
 }
 
-// TODO(goderbauer): enabeling semantics
+// TODO(goderbauer): enabling semantics
 // TODO(goderbauer): tree management
-// TODO(goderbauer): Can change children during own layout
+// TODO(goderbauer): Can change children during own layout, not during other phases
 
 class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
   int requestVisualUpdateCount = 0;
