@@ -60,6 +60,19 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(settings.leak_vm, NO);
 }
 
+- (void)testFLTFrameworkBundleInternalWhenBundleIsNotPresent {
+  NSBundle* found =
+      FLTFrameworkBundleInternal(@"doesNotExist", NSBundle.mainBundle.privateFrameworksURL);
+  XCTAssertNil(found);
+}
+
+- (void)testFLTFrameworkBundleInternalWhenBundleIsPresent {
+  NSString* presentBundleID = @"io.flutter.flutter";
+  NSBundle* found =
+      FLTFrameworkBundleInternal(presentBundleID, NSBundle.mainBundle.privateFrameworksURL);
+  XCTAssertNotNil(found);
+}
+
 - (void)testEnableImpellerSettingIsCorrectlyParsed {
   // The FLTEnableImpeller's value is defined in Info.plist
   NSBundle* mainBundle = [NSBundle mainBundle];
