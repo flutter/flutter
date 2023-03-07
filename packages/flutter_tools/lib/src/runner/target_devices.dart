@@ -161,7 +161,7 @@ class TargetDevices {
       await _deviceManager.refreshAllDevices(timeout: timeout);
     }
 
-    List<Device> devices = await _deviceManager.getDevices(
+    final List<Device> devices = await _deviceManager.getDevices(
       filter: DeviceDiscoveryFilter(
         supportFilter: _deviceManager.deviceSupportFilter(
           includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
@@ -169,27 +169,9 @@ class TargetDevices {
       ),
     );
 
-    if (!_deviceManager.hasSpecifiedDeviceId) {
-      // User did not specify the device.
-
-      if (devices.length > 1) {
-        // If there are still multiple devices and the user did not specify to run
-        // all, then attempt to prioritize ephemeral devices. For example, if the
-        // user only typed 'flutter run' and both an Android device and desktop
-        // device are available, choose the Android device.
-
-        // Ephemeral is nullable for device types where this is not well
-        // defined.
-        final List<Device> ephemeralDevices = <Device>[
-          for (final Device device in devices)
-            if (device.ephemeral == true)
-              device,
-        ];
-
-        if (ephemeralDevices.length == 1) {
-          devices = ephemeralDevices;
-        }
-      }
+    // If there is more than one device, attempt to prioritize ephemeral devices.
+    if (devices.length > 1) {
+      return _deviceManager.prioritizeEphemeralDevices(devices);
     }
 
     return devices;

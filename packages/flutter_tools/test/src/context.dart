@@ -254,6 +254,11 @@ class FakeDeviceManager implements DeviceManager {
   }) {
     return TestDeviceDiscoverySupportFilter();
   }
+
+  @override
+  List<Device> prioritizeEphemeralDevices(List<Device> devices) {
+    return devices;
+  }
 }
 
 class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {

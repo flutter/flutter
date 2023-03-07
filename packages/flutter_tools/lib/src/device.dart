@@ -278,6 +278,28 @@ abstract class DeviceManager {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter();
     }
   }
+
+  /// If the user did not specify to run all or a specific device, then attempt
+  /// to prioritize ephemeral devices.
+  ///
+  /// If there is not exactly one ephermeral device return all devices.
+  ///
+  /// For example, if the user only typed 'flutter run' and both an Android
+  /// device and desktop device are available, choose the Android device.
+  ///
+  /// Note: ephemeral is nullable for device types where this is not well
+  /// defined.
+  List<Device> prioritizeEphemeralDevices(List<Device> devices){
+    if (!hasSpecifiedDeviceId) {
+      final List<Device> ephemeralDevices = devices
+          .where((Device element) => element.ephemeral == true)
+          .toList();
+      if (ephemeralDevices.length == 1) {
+        return ephemeralDevices;
+      }
+    }
+    return devices;
+  }
 }
 
 /// A class for determining how to filter devices based on if they are supported.

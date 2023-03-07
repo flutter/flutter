@@ -188,6 +188,7 @@ void main() {
 
   group('Filter devices', () {
     final FakeDevice ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
+    final FakeDevice ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
     final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
     final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
     final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
@@ -198,6 +199,74 @@ void main() {
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     final FakeDevice unconnectedDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', isConnected: false);
     final FakeDevice wirelessDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', connectionInterface: DeviceConnectionInterface.wireless);
+
+    testUsingContext('chooses ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+      );
+
+      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+
+      expect(filtered.single, ephemeralOne);
+    }, overrides: <Type, Generator>{
+      FlutterProject: () => FakeFlutterProject(),
+    });
+
+    testUsingContext('returns all devices when multiple non ephemeral devices are found', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+      );
+
+      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+
+      expect(filtered, <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    }, overrides: <Type, Generator>{
+      FlutterProject: () => FakeFlutterProject(),
+    });
+
+    testUsingContext('return all devices when hasSpecifiedDeviceId is true', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+      );
+      deviceManager.specifiedDeviceId = 'device';
+
+      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+
+      expect(filtered, <Device>[
+        ephemeralOne,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    }, overrides: <Type, Generator>{
+      FlutterProject: () => FakeFlutterProject(),
+    });
 
     testWithoutContext('Unsupported devices listed in all devices', () async {
       final List<Device> devices = <Device>[
