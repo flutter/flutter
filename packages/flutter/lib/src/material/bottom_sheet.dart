@@ -119,7 +119,7 @@ class BottomSheet extends StatefulWidget {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null,
+  /// Defaults to [BottomSheetThemeData.hasDragHandle]. If that is also null,
   /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise
   /// behaves as false.
   final bool? hasDragHandle;
@@ -872,7 +872,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults to [BottomSheetThemeData.hasDragHandle], if it is also null,
+  /// Defaults to [BottomSheetThemeData.hasDragHandle]. If that is also null,
   /// behaves as true when [ThemeData.useMaterial3] is true, and otherwise
   /// behaves as false.
   final bool? hasDragHandle;
@@ -1122,7 +1122,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    and then becomes scrollable once it reaches its maximum size.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
+///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1210,7 +1211,8 @@ Future<T?> showModalBottomSheet<T>({
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
-///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
+///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
 PersistentBottomSheetController<T> showBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
