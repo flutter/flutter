@@ -24,11 +24,10 @@ class SystemNavigator {
   ///  * The
   ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
   ///    for predictive back in native Android apps.
-  static Future<void> updateNavigationStackStatus(bool navigationStackHasMultiple) async {
-    // TODO(justinmc): Maybe instead of hasMultiple it's more like frameworkCanHandleBack?
+  static Future<void> updateNavigationStackStatus(bool frameworkHandlesPop) async {
     // Yes, because this should include the presence of CanPopScopes too, not
     // just the presence of routes.
-    if (navigationStackHasMultiple == _navigationStackHasMultiple) {
+    if (frameworkHandlesPop == _navigationStackHasMultiple) {
       return;
     }
     // Currently, this method call is only relevant on Android.
@@ -45,14 +44,14 @@ class SystemNavigator {
       case TargetPlatform.android:
         // Set the local boolean before the call is made, so that duplicate
         // calls to this method don't cause duplicate calls to the platform.
-        _navigationStackHasMultiple = navigationStackHasMultiple;
+        _navigationStackHasMultiple = frameworkHandlesPop;
         try {
           await SystemChannels.platform.invokeMethod<void>(
             'SystemNavigator.updateNavigationStackStatus',
-            navigationStackHasMultiple,
+            frameworkHandlesPop,
           );
         } catch (error) {
-          _navigationStackHasMultiple = !navigationStackHasMultiple;
+          _navigationStackHasMultiple = !frameworkHandlesPop;
           rethrow;
         }
         break;
