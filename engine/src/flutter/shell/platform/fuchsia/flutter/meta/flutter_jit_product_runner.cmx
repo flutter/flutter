@@ -1,0 +1,34 @@
+{
+    "program": {
+        "data": "data"
+    },
+    "sandbox": {
+        "features": [
+            "config-data",
+            "deprecated-ambient-replace-as-executable",
+            "isolated-cache-storage",
+            "root-ssl-certificates",
+            "vulkan"
+        ],
+        "services": [
+            "fuchsia.accessibility.semantics.SemanticsManager",
+            "fuchsia.device.NameProvider",
+            "fuchsia.feedback.CrashReporter",
+            "fuchsia.fonts.Provider",
+            "fuchsia.intl.PropertyProvider",
+            "fuchsia.logger.LogSink",
+            "fuchsia.memorypressure.Provider",
+            "fuchsia.net.name.Lookup",
+            "fuchsia.posix.socket.Provider",
+            "fuchsia.sysmem.Allocator",
+            "fuchsia.tracing.provider.Registry",
+            "fuchsia.ui.composition.Allocator",
+            "fuchsia.ui.composition.Flatland",
+            "fuchsia.ui.input.ImeService",
+            "fuchsia.ui.input3.Keyboard",
+            "fuchsia.ui.scenic.Scenic",
+            "fuchsia.ui.pointerinjector.Registry",
+            "fuchsia.vulkan.loader.Loader"
+        ]
+    }
+}
