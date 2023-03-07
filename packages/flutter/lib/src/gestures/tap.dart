@@ -32,8 +32,7 @@ class TapDownDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -71,8 +70,7 @@ class TapUpDetails {
     required this.kind,
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -149,7 +147,11 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// Creates a tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  BaseTapGestureRecognizer({ super.debugOwner, super.supportedDevices })
+  BaseTapGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  })
     : super(deadline: kPressTimeout);
 
   bool _sentTapDown = false;
@@ -202,7 +204,6 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    assert(event != null);
     if (state == GestureRecognizerState.ready) {
       // If there is no result in the previous gesture arena,
       // we ignore them and prepare to accept a new pointer.
@@ -354,6 +355,16 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 /// one non-null `onTertiaryTap*` callback. If it has no callbacks, it is a
 /// no-op.
 ///
+/// {@template flutter.gestures.tap.TapGestureRecognizer.allowedButtonsFilter}
+/// The [allowedButtonsFilter] argument only gives this recognizer the
+/// ability to limit the buttons it accepts. It does not provide the
+/// ability to recognize any buttons beyond the ones it already accepts:
+/// kPrimaryButton, kSecondaryButton or kTertiaryButton. Therefore, a
+/// combined value of `kPrimaryButton & kSecondaryButton` would be ignored,
+/// but `kPrimaryButton | kSecondaryButton` would be allowed, as long as
+/// only one of them is selected at a time.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [GestureDetector.onTap], which uses this recognizer.
@@ -362,7 +373,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapGestureRecognizer({ super.debugOwner, super.supportedDevices });
+  TapGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
 
   /// {@template flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   /// A pointer has contacted the screen at a particular location with a primary

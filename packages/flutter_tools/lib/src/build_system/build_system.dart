@@ -303,7 +303,7 @@ class CompositeTarget extends Target {
 ///
 /// Example (Good):
 ///
-/// Using the build mode to produce different output. Note that the action
+/// Using the build mode to produce different output. The action
 /// is still responsible for outputting a different file, as defined by the
 /// corresponding output [Source].
 ///
@@ -985,7 +985,7 @@ class Node {
     }
     final String content = stamp.readAsStringSync();
     // Something went wrong writing the stamp file.
-    if (content == null || content.isEmpty) {
+    if (content.isEmpty) {
       stamp.deleteSync();
       // Malformed stamp file, not safe to skip.
       _dirty = true;

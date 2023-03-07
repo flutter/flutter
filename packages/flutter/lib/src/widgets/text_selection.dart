@@ -320,10 +320,7 @@ class TextSelectionOverlay {
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
-  }) : assert(value != null),
-       assert(context != null),
-       assert(handlesVisible != null),
-       _handlesVisible = handlesVisible,
+  }) : _handlesVisible = handlesVisible,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -419,7 +416,6 @@ class TextSelectionOverlay {
   bool get handlesVisible => _handlesVisible;
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
-    assert(visible != null);
     if (_handlesVisible == visible) {
       return;
     }
@@ -597,7 +593,7 @@ class TextSelectionOverlay {
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.start, end: _selection.start + firstSelectedGraphemeExtent));
@@ -610,7 +606,7 @@ class TextSelectionOverlay {
     final int lastSelectedGraphemeExtent;
     Rect? endHandleRect;
     // See the explanation in _getStartGlyphHeight.
-    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.end - lastSelectedGraphemeExtent, end: _selection.end));
@@ -722,7 +718,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: true);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -753,7 +749,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _handleSelectionHandleChanged(newSelection, isEnd: true);
+    _handleSelectionHandleChanged(newSelection);
 
      _selectionOverlay.updateMagnifier(_buildMagnifier(
       currentTextPosition: newSelection.extent,
@@ -818,7 +814,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: false);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -855,7 +851,7 @@ class TextSelectionOverlay {
       renderEditable: renderObject,
     ));
 
-    _handleSelectionHandleChanged(newSelection, isEnd: false);
+    _handleSelectionHandleChanged(newSelection);
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
@@ -878,13 +874,11 @@ class TextSelectionOverlay {
     }
   }
 
-  void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
-    final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
+  void _handleSelectionHandleChanged(TextSelection newSelection) {
     selectionDelegate.userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-    selectionDelegate.bringIntoView(textPosition);
   }
 
   TextSelectionHandleType _chooseType(
@@ -896,7 +890,6 @@ class TextSelectionOverlay {
       return TextSelectionHandleType.collapsed;
     }
 
-    assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.ltr:
         return ltrType;
@@ -988,13 +981,13 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   /// {@endtemplate}
-  void showMagnifier(MagnifierInfo initalMagnifierInfo) {
+  void showMagnifier(MagnifierInfo initialMagnifierInfo) {
     if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any rememnant values.
-    _magnifierInfo.value = initalMagnifierInfo;
+    // Start from empty, so we don't utilize any remnant values.
+    _magnifierInfo.value = initialMagnifierInfo;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -1579,9 +1572,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
     required this.layerLink,
     required this.offset,
     required this.child,
-  }) : assert(layerLink != null),
-       assert(offset != null),
-       assert(child != null);
+  });
 
   final Widget child;
   final Offset offset;
@@ -1850,7 +1841,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The [delegate] must not be null.
   TextSelectionGestureDetectorBuilder({
     required this.delegate,
-  }) : assert(delegate != null);
+  });
 
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
@@ -1925,8 +1916,6 @@ class TextSelectionGestureDetectorBuilder {
   //   * [_extendSelection], which is similar but pivots the selection around
   //     the base.
   void _expandSelection(Offset offset, SelectionChangedCause cause, [TextSelection? fromSelection]) {
-    assert(cause != null);
-    assert(offset != null);
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
@@ -1956,8 +1945,6 @@ class TextSelectionGestureDetectorBuilder {
   //   * [_expandSelection], which is similar but always increases the size of
   //     the selection.
   void _extendSelection(Offset offset, SelectionChangedCause cause) {
-    assert(cause != null);
-    assert(offset != null);
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
@@ -2441,7 +2428,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.tap);
+      renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
       }
@@ -2771,7 +2758,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionEnd,
     this.behavior,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
@@ -3087,7 +3074,7 @@ enum ClipboardStatus {
   /// waiting to receive the clipboard contents for the first time.
   unknown,
 
-  /// The content on the clipboard is not pastable, such as when it is empty.
+  /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
 }
 

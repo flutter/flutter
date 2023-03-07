@@ -124,11 +124,9 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationDrawerThemeData? lerp(
-      NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+  static NavigationDrawerThemeData? lerp(NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
+    if (identical(a, b)) {
+      return a;
     }
     return NavigationDrawerThemeData(
       tileHeight: lerpDouble(a?.tileHeight, b?.tileHeight, t),
@@ -227,7 +225,7 @@ class NavigationDrawerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationDrawer] widgets.

@@ -1802,6 +1802,78 @@ void main() {
       await tester.pump();
       expect(transformationController.value.getMaxScaleOnAxis(), 2.5); // capped at maxScale (2.5)
     });
+
+    testWidgets('trackpadScrollCausesScale', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                trackpadScrollCausesScale: true,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a vertical scroll.
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      await tester.sendEventToBinding(pointer.panZoomStart(center));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+      await tester.sendEventToBinding(pointer.panZoomUpdate(center, pan: const Offset(0, -81)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
+
+      // Send a horizontal scroll (should have no effect).
+      await tester.sendEventToBinding(pointer.panZoomUpdate(center, pan: const Offset(81, -81)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
+    });
+
+    testWidgets('Scaling inertia', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                trackpadScrollCausesScale: true,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a vertical scroll fling, which will cause inertia.
+      await tester.trackpadFling(
+        find.byType(InteractiveViewer),
+        const Offset(0, -100),
+        3000
+      );
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.6487212707001282));
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.7966838346780103));
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
+      await tester.pump(const Duration(seconds: 10));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
+    });
   });
 
   group('getNearestPointOnLine', () {

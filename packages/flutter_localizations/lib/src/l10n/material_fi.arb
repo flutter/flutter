@@ -1,6 +1,6 @@
 {
   "scriptCategory": "English-like",
-  "timeOfDayFormat": "HH:mm",
+  "timeOfDayFormat": "HH.mm",
   "openAppDrawerTooltip": "Avaa navigointivalikko",
   "backButtonTooltip": "Takaisin",
   "closeButtonTooltip": "Sulje",

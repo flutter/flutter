@@ -355,8 +355,8 @@ class _UndoStack<T> {
 
   final List<T> _list = <T>[];
 
-  // The index of the current value, or null if the list is emtpy.
-  late int _index;
+  // The index of the current value, or -1 if the list is empty.
+  int _index = -1;
 
   /// Returns the current value of the stack.
   T? get currentValue => _list.isEmpty ? null : _list[_index];
@@ -383,7 +383,7 @@ class _UndoStack<T> {
 
     // If anything has been undone in this stack, remove those irrelevant states
     // before adding the new one.
-    if (_index != null && _index != _list.length - 1) {
+    if (_index != _list.length - 1) {
       _list.removeRange(_index + 1, _list.length);
     }
     _list.add(value);

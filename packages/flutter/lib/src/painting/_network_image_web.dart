@@ -39,9 +39,7 @@ class NetworkImage
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
-      : assert(url != null),
-        assert(scale != null);
+  const NetworkImage(this.url, {this.scale = 1.0, this.headers});
 
   @override
   final String url;
@@ -67,7 +65,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, null, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, null, decode, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -84,7 +82,23 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, null, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, decode, null, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, decode, null, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -108,8 +122,9 @@ class NetworkImage
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    image_provider.DecoderBufferCallback? decode,
-    image_provider.DecoderCallback? decodeDepreacted,
+    image_provider.ImageDecoderCallback? decode,
+    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    image_provider.DecoderCallback? decodeDeprecated,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
@@ -167,9 +182,12 @@ class NetworkImage
       if (decode != null) {
         final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         return decode(buffer);
+      } else if (decodeBufferDeprecated != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decodeBufferDeprecated(buffer);
       } else {
-        assert(decodeDepreacted != null);
-        return decodeDepreacted!(bytes);
+        assert(decodeDeprecated != null);
+        return decodeDeprecated!(bytes);
       }
     } else {
       // This API only exists in the web engine implementation and is not

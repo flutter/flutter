@@ -226,6 +226,22 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
+  testWithoutContext('lexer identifier names can contain underscores', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ test_placeholder } { test_select, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('test_placeholder'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('test_select'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
+   testWithoutContext('lexer identifier names can contain the strings select or plural', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ selectTest } { pluralTest, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('selectTest'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('pluralTest'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
@@ -502,5 +518,16 @@ void main() {
         'message',
         contains(expectedError3),
     )));
+  });
+
+  testWithoutContext('parser allows select cases with numbers', () {
+    final Node node = Parser('numberSelect', 'app_en.arb', '{ count, select, 0{none} 100{perfect} other{required!} }').parse();
+    final Node selectExpr = node.children[0];
+    final Node selectParts = selectExpr.children[5];
+    final Node selectPart = selectParts.children[0];
+    expect(selectPart.children[0].value, equals('0'));
+    expect(selectPart.children[1].value, equals('{'));
+    expect(selectPart.children[2].type, equals(ST.message));
+    expect(selectPart.children[3].value, equals('}'));
   });
 }

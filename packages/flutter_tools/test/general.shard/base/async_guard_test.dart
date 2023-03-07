@@ -164,9 +164,12 @@ void main() {
     await FakeAsync().run((FakeAsync time) {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
-          .catchError((Object e, StackTrace s) {
-            caughtByCatchError = true;
-          });
+          .then(
+            (Object? obj) => obj,
+            onError: (Object e, StackTrace s) {
+              caughtByCatchError = true;
+            },
+          );
         try {
           await f;
         } on _CustomException {

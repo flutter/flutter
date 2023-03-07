@@ -104,10 +104,6 @@ Future<bool> installApp(
   String? userIdentifier,
   bool uninstall = true
 }) async {
-  if (package == null) {
-    return false;
-  }
-
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');

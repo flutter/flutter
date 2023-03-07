@@ -69,8 +69,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     required ViewConfiguration configuration,
     required ui.FlutterView window,
-  }) : assert(configuration != null),
-       _configuration = configuration,
+  }) : _configuration = configuration,
        _window = window {
     this.child = child;
   }
@@ -88,7 +87,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
-    assert(value != null);
     if (configuration == value) {
       return;
     }
@@ -201,7 +199,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///  * [Layer.findAllAnnotations], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   HitTestResult hitTestMouseTrackers(Offset position) {
-    assert(position != null);
     final BoxHitTestResult result = BoxHitTestResult();
     hitTest(result, position: position);
     return result;

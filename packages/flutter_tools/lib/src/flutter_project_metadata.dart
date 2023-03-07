@@ -146,11 +146,6 @@ class FlutterProjectMetadata {
   /// needs to be able to write the .migrate_config file into legacy apps.
   void writeFile({File? outputFile}) {
     outputFile = outputFile ?? file;
-    if (outputFile == null) {
-      // In-memory FlutterProjectMetadata instances requires an output file to
-      // be passed or specified in the constructor.
-      throw const FileSystemException('No outputFile specified to write .metadata to. Initialize with a file or provide one when writing.');
-    }
     outputFile
       ..createSync(recursive: true)
       ..writeAsStringSync(toString(), flush: true);
@@ -215,7 +210,7 @@ class MigrateConfig {
     this.unmanagedFiles = kDefaultUnmanagedFiles
   }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
-  /// A mapping of the files that are unmanaged by defult for each platform.
+  /// A mapping of the files that are unmanaged by default for each platform.
   static const List<String> kDefaultUnmanagedFiles = <String>[
     'lib/main.dart',
     'ios/Runner.xcodeproj/project.pbxproj',

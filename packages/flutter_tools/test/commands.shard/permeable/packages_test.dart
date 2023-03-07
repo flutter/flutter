@@ -72,6 +72,7 @@ void main() {
         'packages',
         verb,
         ...?args,
+        '--directory',
         projectPath,
       ]);
       return command;
@@ -487,7 +488,7 @@ void main() {
       globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -513,7 +514,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -542,7 +543,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'run', '--foo', 'bar',
           ],
           stdin: stdin,
         ),
@@ -573,7 +574,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'token', 'list',
           ],
           stdin: stdin,
         ),
@@ -602,7 +603,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'upgrade', '-h',
           ],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),

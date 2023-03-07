@@ -139,7 +139,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();
 
-  /// The option name for a custom observatory port.
+  /// The option name for a custom VM Service port.
+  static const String vmServicePortOption = 'vm-service-port';
+
+  /// The option name for a custom VM Service port.
   static const String observatoryPortOption = 'observatory-port';
 
   /// The option name for a custom DevTools server address.
@@ -379,14 +382,22 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
-  /// Adds options for connecting to the Dart VM observatory port.
+  /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({ required bool verboseHelp }) {
-    argParser.addOption(observatoryPortOption,
+    argParser.addOption(vmServicePortOption,
         help: '(deprecated; use host-vmservice-port instead) '
-              'Listen to the given port for an observatory debugger connection.\n'
+              'Listen to the given port for a Dart VM Service connection.\n'
               'Specifying port 0 (the default) will find a random free port.\n '
               'if the Dart Development Service (DDS) is enabled, this will not be the port '
-              'of the Observatory instance advertised on the command line.',
+              'of the VmService instance advertised on the command line.',
+        hide: !verboseHelp,
+    );
+    argParser.addOption(observatoryPortOption,
+        help: '(deprecated; use host-vmservice-port instead) '
+              'Listen to the given port for a Dart VM Service connection.\n'
+              'Specifying port 0 (the default) will find a random free port.\n '
+              'if the Dart Development Service (DDS) is enabled, this will not be the port '
+              'of the VmService instance advertised on the command line.',
         hide: !verboseHelp,
     );
     argParser.addOption('device-vmservice-port',
@@ -458,6 +469,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addServeObservatoryOptions({required bool verboseHelp}) {
+    argParser.addFlag('serve-observatory',
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Serve the legacy Observatory developer tooling through the VM service.',
+    );
+  }
+
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -482,19 +501,21 @@ abstract class FlutterCommand extends Command<void> {
     return ddsEnabled;
   }();
 
-  bool get _hostVmServicePortProvided => (argResults?.wasParsed('observatory-port') ?? false)
+  bool get _hostVmServicePortProvided => (argResults?.wasParsed(vmServicePortOption) ?? false)
+      || (argResults?.wasParsed(observatoryPortOption) ?? false)
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? observatoryPort = stringArgDeprecated('observatory-port');
+    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
+                                  stringArgDeprecated(observatoryPortOption);
     final String? hostPort = stringArgDeprecated('host-vmservice-port');
-    if (observatoryPort == null && hostPort == null) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`');
+    if (vmServicePort == null && hostPort == null) {
+      throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
     }
     try {
-      return int.parse((observatoryPort ?? hostPort)!);
+      return int.parse((vmServicePort ?? hostPort)!);
     } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+      throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`: $error');
     }
   }
 
@@ -520,10 +541,10 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }
 
-  /// Gets the vmservice port provided to in the 'observatory-port' or
+  /// Gets the vmservice port provided to in the 'vm-service-port' or
   /// 'host-vmservice-port option.
   ///
-  /// Only one of "host-vmservice-port" and "observatory-port" may be
+  /// Only one of "host-vmservice-port" and "vm-service-port" may be
   /// specified.
   ///
   /// If no port is set, returns null.
@@ -531,9 +552,10 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if ((argResults?.wasParsed('observatory-port') ?? false)
+    if ((argResults?.wasParsed(vmServicePortOption) ?? false)
+        && (argResults?.wasParsed(observatoryPortOption) ?? false)
         && (argResults?.wasParsed('host-vmservice-port') ?? false)) {
-      throwToolExit('Only one of "--observatory-port" and '
+      throwToolExit('Only one of "--vm-service-port" and '
         '"--host-vmservice-port" may be specified.');
     }
     // If DDS is enabled and no explicit DDS port is provided, use the
@@ -569,7 +591,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -620,12 +642,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void useDartDefineConfigJsonFileOption() {
-    argParser.addOption(
+    argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
-      valueHelp: 'use-define-config.json'
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
+      valueHelp: 'use-define-config.json',
+      splitCommas: false,
     );
   }
 
@@ -1021,6 +1045,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-embedder-api',
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1093,7 +1124,11 @@ abstract class FlutterCommand extends Command<void> {
             (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
-          nullSafetyMode = NullSafetyMode.unsound;
+          throwToolExit(
+            'This application does not support sound null-safety (its language version is $languageVersion).\n'
+            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
+            'support sound null safety, see https://dart.dev/null-safety.',
+          );
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like
@@ -1152,9 +1187,8 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArgDeprecated(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-        ? stringsArg(FlutterOptions.kDartDefinesOption)
-        : <String>[];
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.autoDetect;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
@@ -1163,27 +1197,6 @@ abstract class FlutterCommand extends Command<void> {
         webRenderer = mappedMode;
       }
       dartDefines = updateDartDefines(dartDefines, webRenderer);
-    }
-
-    Map<String, Object>? defineConfigJsonMap;
-    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          defineConfigJsonMap = <String, Object>{};
-          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            defineConfigJsonMap?[key]=value as Object;
-          });
-          defineConfigJsonMap.forEach((String key, Object value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
-        }
-      }
     }
 
     return BuildInfo(buildMode,
@@ -1301,6 +1314,56 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+    final List<String> dartDefines = <String>[];
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
+      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+    }
+
+    if (defineConfigJsonMap == null) {
+      return dartDefines;
+    }
+    defineConfigJsonMap.forEach((String key, Object value) {
+      dartDefines.add('$key=$value');
+    });
+
+    return dartDefines;
+  }
+
+  Map<String, Object>? extractDartDefineConfigJsonMap() {
+    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
+      final List<String> configJsonPaths = stringsArg(
+          FlutterOptions.kDartDefineFromFileOption,
+      );
+
+      for (final String path in configJsonPaths) {
+        if (!globals.fs.isFileSync(path)) {
+          throwToolExit('Json config define file "--${FlutterOptions
+              .kDartDefineFromFileOption}=$path" is not a file, '
+              'please fix first!');
+        }
+
+        final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+        try {
+          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          (json.decode(configJsonRaw) as Map<String, dynamic>)
+              .forEach((String key, dynamic value) {
+            dartDefineConfigJsonMap[key] = value as Object;
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions
+              .kDartDefineFromFileOption}=$path" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+
+    return dartDefineConfigJsonMap;
+  }
+
   /// Updates dart-defines based on [webRenderer].
   @visibleForTesting
   static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
@@ -1340,17 +1403,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1470,7 +1528,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
@@ -1478,14 +1536,14 @@ abstract class FlutterCommand extends Command<void> {
     }
     final DeviceManager deviceManager = globals.deviceManager!;
     List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       timeout: deviceDiscoveryTimeout,
     );
 
     if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
         globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        final List<Device> allDevices = await deviceManager.getAllDevices();
         if (allDevices.isNotEmpty) {
           globals.logger.printStatus('');
           globals.logger.printStatus('The following devices were found:');
@@ -1522,7 +1580,7 @@ abstract class FlutterCommand extends Command<void> {
         } else {
           // Show an error message asking the user to specify `-d all` if they
           // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          final List<Device> allDevices = await deviceManager.getAllDevices();
           globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
           globals.logger.printStatus('');
           await Device.printDevices(allDevices, globals.logger);
@@ -1586,18 +1644,20 @@ abstract class FlutterCommand extends Command<void> {
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
   ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
-    List<Device>? deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+    List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
     if (deviceList == null) {
       return null;
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;
@@ -1748,4 +1808,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

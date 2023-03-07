@@ -236,6 +236,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
         doUpgrade: true,
@@ -255,6 +256,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
       );
@@ -275,7 +277,6 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -283,7 +284,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     pubGetDirectories.add(project.directory.path);
     project.directory.childFile('pubspec.lock')

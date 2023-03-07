@@ -109,7 +109,7 @@ void main() {
         'url_launcher_android',
         'archive',
         'path_provider_android',
-        'intl',
+        'flutter_plugin_android_lifecycle',
       ]),
     );
   });
