@@ -828,6 +828,64 @@ void testMain() {
       await matchGoldenFile('canvaskit_empty_scene.png',
           region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/121758
+    test('resources used in temporary surfaces for Image.toByteData can cross to rendering overlays', () async {
+      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
+      SurfaceFactory.instance.debugClear();
+
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => createDomHTMLDivElement()..id = 'view-0',
+      );
+      await createPlatformView(0, 'test-platform-view');
+
+      CkPicture makeTextPicture(String text, ui.Offset offset) {
+        final CkPictureRecorder recorder = CkPictureRecorder();
+        final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+        final CkParagraphBuilder builder = CkParagraphBuilder(CkParagraphStyle());
+        builder.addText(text);
+        final CkParagraph paragraph = builder.build();
+        paragraph.layout(const ui.ParagraphConstraints(width: 100));
+        canvas.drawRect(
+          ui.Rect.fromLTWH(offset.dx, offset.dy, paragraph.width, paragraph.height).inflate(10),
+          CkPaint()..color = const ui.Color(0xFF00FF00)
+        );
+        canvas.drawParagraph(paragraph, offset);
+        return recorder.endRecording();
+      }
+
+      CkPicture imageToPicture(CkImage image, ui.Offset offset) {
+        final CkPictureRecorder recorder = CkPictureRecorder();
+        final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+        canvas.drawImage(image, offset, CkPaint());
+        return recorder.endRecording();
+      }
+
+      final CkPicture helloPicture = makeTextPicture('Hello', ui.Offset.zero);
+
+      final CkImage helloImage = helloPicture.toImageSync(100, 100);
+
+      // Calling toByteData is essential to hit the bug.
+      await helloImage.toByteData(format: ui.ImageByteFormat.png);
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPicture(ui.Offset.zero, helloPicture);
+      sb.addPlatformView(0, width: 10, height: 10);
+
+      // The image is rendered after the platform view so that it's rendered into
+      // a separate surface, which is what triggers the bug. If the bug is present
+      // the image will not appear on the UI.
+      sb.addPicture(const ui.Offset(0, 50), imageToPicture(helloImage, ui.Offset.zero));
+      sb.pop();
+
+      // The below line should not throw an error.
+      rasterizer.draw(sb.build().layerTree);
+
+      await matchGoldenFile('cross_overlay_resources.png', region: const ui.Rect.fromLTRB(0, 0, 100, 100));
+    });
+
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }
