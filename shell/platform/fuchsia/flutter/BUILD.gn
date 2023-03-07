@@ -57,6 +57,8 @@ template("runner_sources") {
     sources = [
       "accessibility_bridge.cc",
       "accessibility_bridge.h",
+      "component_v1.cc",
+      "component_v1.h",
       "component_v2.cc",
       "component_v2.h",
       "engine.cc",
@@ -320,6 +322,7 @@ template("jit_runner") {
 
     binary = "flutter_jit${product_suffix}_runner"
 
+    cmx_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")
     cml_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cml")
 
     resources = [
@@ -399,6 +402,7 @@ template("aot_runner") {
       ]
     }
 
+    cmx_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cmx")
     cml_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cml")
 
     binary = "flutter_aot${product_suffix}_runner"
@@ -496,6 +500,7 @@ if (enable_unittests) {
 
     sources = [
       "accessibility_bridge_unittest.cc",
+      "component_v1_unittest.cc",
       "component_v2_unittest.cc",
       "flutter_runner_fakes.h",
       "focus_delegate_unittests.cc",
