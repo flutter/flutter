@@ -51,14 +51,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Logger logger,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required Cache cache,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
       _logger = logger,
-      _artifacts = artifacts,
-      _cache = cache {
+      _artifacts = artifacts {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(createStaticHandler(
@@ -98,7 +96,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
-  final Cache _cache;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -121,7 +118,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ChromiumLauncher chromiumLauncher,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required Cache cache,
     TestTimeRecorder? testTimeRecorder,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -151,7 +147,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       logger: logger,
       nullAssertions: nullAssertions,
       processManager: processManager,
-      cache: cache,
       testTimeRecorder: testTimeRecorder,
     );
   }
