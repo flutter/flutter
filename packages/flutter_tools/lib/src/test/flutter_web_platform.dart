@@ -226,15 +226,8 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File _canvasKitFile(String relativePath) {
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
-    //
-    // Update this when we start building CanvasKit from sources. In the
-    // meantime, get the Web SDK directory from cache rather than through
-    // Artifacts. The latter is sensitive to `--local-engine`, which changes
-    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
-    // built as part of the engine, but fetched from CIPD, and so it won't be
-    // found in ENGINE/src/out.
-    final Directory webSdkDirectory = _cache.getWebSdkDirectory();
+    final Directory webSdkDirectory =
+        _artifacts!.getHostArtifact(HostArtifact.flutterWebSdk) as Directory;
     final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(
       webSdkDirectory.path,
       relativePath,
