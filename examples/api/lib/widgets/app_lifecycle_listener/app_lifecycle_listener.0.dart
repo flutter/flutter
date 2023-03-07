@@ -10,17 +10,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const AppLifecycleListenerExample());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class AppLifecycleListenerExample extends StatefulWidget {
+  const AppLifecycleListenerExample({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<AppLifecycleListenerExample> createState() => _AppLifecycleListenerExampleState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AppLifecycleListenerExampleState extends State<AppLifecycleListenerExample> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -39,6 +39,7 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   late final AppLifecycleListener listener;
   bool _shouldExit = false;
+  String lastResponse = 'No exit requested yet';
 
   @override
   void initState() {
@@ -50,12 +51,18 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> _quit() async {
-    await ServicesBinding.instance.exitApplication(_shouldExit ? AppExitType.cancelable : AppExitType.required);
+    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    setState(() {
+      lastResponse = 'App requesting ${exitType.name} exit';
+    });
+    await ServicesBinding.instance.exitApplication(exitType);
   }
 
   Future<AppExitResponse> _handleExitRequest() async {
     final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
-    debugPrint('Sample App responding $response to exit request');
+    setState(() {
+      lastResponse = 'App responded ${response.name} to exit request';
+    });
     return response;
   }
 
@@ -73,7 +80,7 @@ class _BodyState extends State<Body> {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: 160,
+        width: 300,
         child: IntrinsicHeight(
           child: Column(
             children: <Widget>[
@@ -94,6 +101,8 @@ class _BodyState extends State<Body> {
                 onPressed: _quit,
                 child: const Text('Quit'),
               ),
+              const SizedBox(height: 30),
+              Text(lastResponse),
             ],
           ),
         ),
@@ -102,6 +111,7 @@ class _BodyState extends State<Body> {
   }
 }
 
+// Just a simple labeled radio button.
 class LabeledRadio extends StatelessWidget {
   const LabeledRadio({
     super.key,

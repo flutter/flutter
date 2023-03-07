@@ -29,7 +29,7 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// This examples shows how an application can optionally decide
 /// to abort a request for exiting instead of obeying the request.
 ///
-/// ** See code in examples/api/lib/widgets/application_lifecycle/application_lifecycle.0.dart **
+/// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.0.dart **
 /// {@end-tool}
 class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   /// Creates an [AppLifecycleListener].
