@@ -52,45 +52,32 @@ ImageFilter::~ImageFilter() {}
 
 void ImageFilter::initBlur(double sigma_x,
                            double sigma_y,
-                           SkTileMode tile_mode) {
-  filter_ =
-      std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, ToDl(tile_mode));
+                           DlTileMode tile_mode) {
+  filter_ = DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode);
 }
 
 void ImageFilter::initDilate(double radius_x, double radius_y) {
-  filter_ = std::make_shared<DlDilateImageFilter>(radius_x, radius_y);
+  filter_ = DlDilateImageFilter::Make(radius_x, radius_y);
 }
 
 void ImageFilter::initErode(double radius_x, double radius_y) {
-  filter_ = std::make_shared<DlErodeImageFilter>(radius_x, radius_y);
+  filter_ = DlErodeImageFilter::Make(radius_x, radius_y);
 }
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
                              int filterQualityIndex) {
   auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
-  filter_ =
-      std::make_shared<DlMatrixImageFilter>(ToSkMatrix(matrix4), sampling);
+  filter_ = DlMatrixImageFilter::Make(ToSkMatrix(matrix4), sampling);
 }
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
   FML_DCHECK(colorFilter);
-  auto dl_filter = colorFilter->dl_filter();
-  // Skia may return nullptr if the colorfilter is a no-op.
-  if (dl_filter) {
-    filter_ = std::make_shared<DlColorFilterImageFilter>(dl_filter);
-  }
+  filter_ = DlColorFilterImageFilter::Make(colorFilter->filter());
 }
 
 void ImageFilter::initComposeFilter(ImageFilter* outer, ImageFilter* inner) {
   FML_DCHECK(outer && inner);
-  if (!outer->dl_filter()) {
-    filter_ = inner->filter();
-  } else if (!inner->dl_filter()) {
-    filter_ = outer->filter();
-  } else {
-    filter_ = std::make_shared<DlComposeImageFilter>(outer->dl_filter(),
-                                                     inner->dl_filter());
-  }
+  filter_ = DlComposeImageFilter::Make(outer->filter(), inner->filter());
 }
 
 }  // namespace flutter

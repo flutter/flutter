@@ -285,7 +285,7 @@ void MockCanvas::DrawImageRect(const sk_sp<DlImage>&,
                                const SkRect&,
                                const DlImageSampling,
                                const DlPaint*,
-                               bool enforce_src_edges) {
+                               SrcRectConstraint constraint) {
   FML_DCHECK(false);
 }
 

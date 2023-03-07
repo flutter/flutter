@@ -248,7 +248,7 @@ TEST_F(ImageFilterLayerTest, MultipleChildren) {
       }
     }
   }
-  expected_builder.restore();
+  expected_builder.Restore();
   auto expected_display_list = expected_builder.Build();
 
   layer->Paint(display_list_paint_context());
