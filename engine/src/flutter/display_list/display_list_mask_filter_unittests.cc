@@ -12,18 +12,6 @@
 namespace flutter {
 namespace testing {
 
-TEST(DisplayListMaskFilter, BuilderSetGet) {
-  DlBlurMaskFilter filter(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
-  DisplayListBuilder builder;
-  ASSERT_EQ(builder.getMaskFilter(), nullptr);
-  builder.setMaskFilter(&filter);
-  ASSERT_NE(builder.getMaskFilter(), nullptr);
-  ASSERT_TRUE(
-      Equals(builder.getMaskFilter(), static_cast<DlMaskFilter*>(&filter)));
-  builder.setMaskFilter(nullptr);
-  ASSERT_EQ(builder.getMaskFilter(), nullptr);
-}
-
 TEST(DisplayListMaskFilter, BlurConstructor) {
   DlBlurMaskFilter filter(SkBlurStyle::kNormal_SkBlurStyle, 5.0);
 }
