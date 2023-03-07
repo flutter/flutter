@@ -12923,14 +12923,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       // Undo first insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep2.copyWith(composing: TextRange.empty));
+      expect(controller.value, composingStep2);
 
       // Waiting for the throttling beetween undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep1.copyWith(composing: TextRange.empty));
+      expect(controller.value, composingStep1);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
