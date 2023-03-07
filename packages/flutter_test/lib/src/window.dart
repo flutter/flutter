@@ -675,6 +675,7 @@ class TestFlutterView implements FlutterView {
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
+    platformDispatcher.onMetricsChanged?.call();
   }
 
   /// Resets [physicalSize] to the default value for this view. This will
