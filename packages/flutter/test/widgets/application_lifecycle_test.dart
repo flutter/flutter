@@ -26,7 +26,7 @@ void main() {
 
   Future<void> sendAppExitRequest() async {
     final ByteData message =
-        const StandardMethodCodec().encodeMethodCall(const MethodCall('System.requestAppExit'));
+        const JSONMethodCodec().encodeMethodCall(const MethodCall('System.requestAppExit'));
     await ServicesBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage('flutter/platform', message, (_) {});
   }
@@ -45,6 +45,7 @@ void main() {
     expect(lastState, equals(AppLifecycleState.inactive));
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(lastState, equals(AppLifecycleState.resumed));
+    listener.dispose();
   });
 
   testWidgets('Receives exit requests', (WidgetTester tester) async {
@@ -59,5 +60,6 @@ void main() {
     );
     await sendAppExitRequest();
     expect(exitRequested, isTrue);
+    listener.dispose();
   });
 }
