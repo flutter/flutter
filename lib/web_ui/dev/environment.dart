@@ -30,6 +30,8 @@ class Environment {
         io.Directory(pathlib.join(engineSrcDir.path, 'out'));
     final io.Directory wasmReleaseOutDir =
         io.Directory(pathlib.join(outDir.path, 'wasm_release'));
+    final io.Directory wasmProfileOutDir =
+        io.Directory(pathlib.join(outDir.path, 'wasm_profile'));
     final io.Directory hostDebugUnoptDir =
         io.Directory(pathlib.join(outDir.path, 'host_debug_unopt'));
     final io.Directory dartSdkDir = dartExecutable.parent.parent;
@@ -54,6 +56,7 @@ class Environment {
       engineToolsDir: engineToolsDir,
       outDir: outDir,
       wasmReleaseOutDir: wasmReleaseOutDir,
+      wasmProfileOutDir: wasmProfileOutDir,
       hostDebugUnoptDir: hostDebugUnoptDir,
       dartSdkDir: dartSdkDir,
     );
@@ -67,6 +70,7 @@ class Environment {
     required this.engineToolsDir,
     required this.outDir,
     required this.wasmReleaseOutDir,
+    required this.wasmProfileOutDir,
     required this.hostDebugUnoptDir,
     required this.dartSdkDir,
   });
@@ -95,6 +99,9 @@ class Environment {
   ///
   /// We build CanvasKit in release mode to reduce code size.
   final io.Directory wasmReleaseOutDir;
+
+  /// The output directory for the wasm_profile build.
+  final io.Directory wasmProfileOutDir;
 
   /// The output directory for the host_debug_unopt build.
   final io.Directory hostDebugUnoptDir;
