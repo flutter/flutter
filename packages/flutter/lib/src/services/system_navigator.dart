@@ -12,7 +12,7 @@ class SystemNavigator {
   // prevents instantiation and extension.
   SystemNavigator._();
 
-  static bool _navigationStackHasMultiple = true;
+  static bool _navigationStackHasMultiple = false;
 
   /// Inform the platform of whether or not the navigation stack is empty.
   ///
@@ -26,7 +26,8 @@ class SystemNavigator {
   ///    for predictive back in native Android apps.
   static Future<void> updateNavigationStackStatus(bool navigationStackHasMultiple) async {
     // TODO(justinmc): Maybe instead of hasMultiple it's more like frameworkCanHandleBack?
-    print('justin called updateNavigationStackStatus with $navigationStackHasMultiple');
+    // Yes, because this should include the presence of CanPopScopes too, not
+    // just the presence of routes.
     if (navigationStackHasMultiple == _navigationStackHasMultiple) {
       return;
     }
@@ -46,10 +47,10 @@ class SystemNavigator {
         // calls to this method don't cause duplicate calls to the platform.
         _navigationStackHasMultiple = navigationStackHasMultiple;
         try {
-        await SystemChannels.platform.invokeMethod<void>(
-          'SystemNavigator.updateNavigationStackStatus',
-          navigationStackHasMultiple,
-        );
+          await SystemChannels.platform.invokeMethod<void>(
+            'SystemNavigator.updateNavigationStackStatus',
+            navigationStackHasMultiple,
+          );
         } catch (error) {
           _navigationStackHasMultiple = !navigationStackHasMultiple;
           rethrow;

@@ -8,6 +8,7 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
+// TODO(justinmc): Change name to match popEnabled  more?
 // TODO(justinmc): Document that this can't be set at the time of onPopCallback. Too late.
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
@@ -35,7 +36,7 @@ class CanPopScope extends StatefulWidget {
   const CanPopScope({
     super.key,
     required this.child,
-    required this.canPop,
+    required this.popEnabled,
     // TODO(justinmc): Add onPop (or didPop) to this?
   });
 
@@ -49,14 +50,15 @@ class CanPopScope extends StatefulWidget {
   /// This includes the root route, where upon popping, the Flutter app would
   /// exit.
   ///
-  /// If multiple CanPopScope widgets appear in the widget tree, then each and
-  /// every `canPop` must be `true` in order for the route to be able to pop.
+  /// If multiple CanPopScope widgets appear in a route's widget subtree, then
+  /// each and every `popEnabled` must be `true` in order for the route to be
+  /// able to pop.
   ///
   /// This may have implications for route transitions that allow some
   /// interaction before committing to popping the route. For example,
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
   /// feature will not animate at all when this boolean is true.
-  final bool canPop;
+  final bool popEnabled;
 
   @override
   State<CanPopScope> createState() => _CanPopScopeState();
@@ -64,16 +66,6 @@ class CanPopScope extends StatefulWidget {
 
 class _CanPopScopeState extends State<CanPopScope> {
   ModalRoute<dynamic>? _route;
-
-  /*
-  @override
-  void initState() {
-    super.initState();
-    // TODO(justinmc): Need to make sure this doesn't conflict with the
-    // navigator changing this. Maybe needs to look up in the widget tree.
-    //SystemNavigator.updateNavigationStackStatus(!widget.canPop);
-  }
-  */
 
   @override
   void didChangeDependencies() {
@@ -95,6 +87,7 @@ class _CanPopScopeState extends State<CanPopScope> {
   void didUpdateWidget(CanPopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     _route = ModalRoute.of(context);
+    _route?.unregisterCanPopScope(oldWidget);
     _route?.registerCanPopScope(widget);
     /*
     if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
@@ -110,7 +103,6 @@ class _CanPopScopeState extends State<CanPopScope> {
 
   @override
   void dispose() {
-    _route = ModalRoute.of(context);
     _route?.unregisterCanPopScope(widget);
     /*
     if (widget.onWillPop != null) {

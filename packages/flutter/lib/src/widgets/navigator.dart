@@ -306,9 +306,9 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
-  bool canPopForReal() {
+  bool popEnabled() {
     // TODO(justinmc): Or I probably care about bubbling too!
-    return isFirst;
+    return !isFirst;
   }
 
   /// Whether calling [didPop] would return false.
@@ -4976,7 +4976,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(lastEntry.route._navigator == this);
-    final bool canPop = lastEntry.route.canPopForReal();
+    return lastEntry.route.popEnabled();
     /*
     final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
     if (!mounted) {
@@ -5001,7 +5001,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         return true;
     }
     */
-    return true;
   }
 
   /// Pop the top-most route off the navigator.

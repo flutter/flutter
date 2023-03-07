@@ -1649,16 +1649,26 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   // TODO(justinmc): Really though what should I be registering here...
-  void registerCanPopScope(CanPopScope state) {
-    _canPopScopes.add(state);
+  void registerCanPopScope(CanPopScope widget) {
+    _canPopScopes.add(widget);
+    updateSystemNavigator();
   }
 
-  void unregisterCanPopScope(CanPopScope state) {
-    _canPopScopes.remove(state);
+  void unregisterCanPopScope(CanPopScope widget) {
+    _canPopScopes.remove(widget);
+    updateSystemNavigator();
   }
 
-  bool canPopForReal() {
-    return _canPopScopes.every((CanPopScope widget) => widget.canPop);
+  void updateSystemNavigator() {
+    SystemNavigator.updateNavigationStackStatus(!popEnabled());
+  }
+
+  // True means that this route can handle a pop, false that a route above or
+  // the platform must handle it.
+  bool popEnabled() {
+    // TODO(justinmc): You should consider things other than _canPopScopes as
+    // well.  Is canPop what you need?
+    return _canPopScopes.every((CanPopScope widget) => widget.popEnabled);
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
