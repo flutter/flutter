@@ -30,6 +30,14 @@ enum class DlTileMode {
   kDecal,
 };
 
+inline DlTileMode ToDl(SkTileMode sk_mode) {
+  return static_cast<DlTileMode>(sk_mode);
+}
+
+inline SkTileMode ToSk(DlTileMode dl_mode) {
+  return static_cast<SkTileMode>(dl_mode);
+}
+
 }  // namespace flutter
 
 #endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_TILE_MODE_H_
