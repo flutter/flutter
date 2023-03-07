@@ -718,7 +718,7 @@ void main() {
     });
   });
 
-  testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
+  testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags', () {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
   });
@@ -792,7 +792,7 @@ void main() {
           '--disable-service-auth-codes',
           '--disable-vm-service-publication',
           '--start-paused',
-          '--dart-flags="--foo,--null_assertions"',
+          '--dart-flags="--foo"',
           '--use-test-fonts',
           '--enable-checked-mode',
           '--verify-entry-points',
@@ -951,7 +951,7 @@ void main() {
           '--disable-service-auth-codes',
           '--disable-vm-service-publication',
           '--start-paused',
-          '--dart-flags=--foo,--null_assertions',
+          '--dart-flags=--foo',
           '--use-test-fonts',
           '--enable-checked-mode',
           '--verify-entry-points',
