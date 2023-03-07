@@ -299,16 +299,16 @@ abstract class Route<T> {
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
   @Deprecated(
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
-  bool popEnabled() {
-    // TODO(justinmc): Or I probably care about bubbling too!
-    return !isFirst;
+  // TODO(justinmc): Document. Probably copy a lot from willPop.
+  RoutePopDisposition popEnabled() {
+    return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
   /// Whether calling [didPop] would return false.
@@ -4921,6 +4921,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true; // there's at least two routes, so we can pop
   }
 
+  // TODO(justinmc): This actually wouldn't ever pop the final route! It won't exit the app.
   /// Consults the current route's [Route.willPop] method, and acts accordingly,
   /// potentially popping the route as a result; returns whether the pop request
   /// should be considered handled.
@@ -4943,19 +4944,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(lastEntry.route._navigator == this);
-    final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
-    if (!mounted) {
-      // Forget about this pop, we were disposed in the meantime.
-      return true;
-    }
-    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
-    if (lastEntry != newLastEntry) {
-      // Forget about this pop, something happened to our history in the meantime.
-      return true;
-    }
+    final RoutePopDisposition disposition = lastEntry.route.popEnabled();
     switch (disposition) {
       case RoutePopDisposition.bubble:
         return false;
@@ -4965,18 +4954,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.doNotPop:
         return true;
     }
-  }
-
-  bool maybePopp<T extends Object?>([ T? result ]) {
-    final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
-    if (lastEntry == null) {
-      return false;
-    }
-    assert(lastEntry.route._navigator == this);
-    return lastEntry.route.popEnabled();
     /*
     final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
     if (!mounted) {

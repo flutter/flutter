@@ -718,7 +718,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 
   @Deprecated(
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   @override
@@ -727,6 +727,14 @@ mixin LocalHistoryRoute<T> on Route<T> {
       return RoutePopDisposition.pop;
     }
     return super.willPop();
+  }
+
+  @override
+  RoutePopDisposition popEnabled() {
+    if (willHandlePopInternally) {
+      return RoutePopDisposition.pop;
+    }
+    return super.popEnabled();
   }
 
   @override
@@ -1507,10 +1515,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    this method checks.
   @Deprecated(
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
-  // TODO(justinmc): Deprecate the overridden parent class one too.
   @override
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
@@ -1521,6 +1528,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       }
     }
     return super.willPop();
+  }
+
+  @override
+  RoutePopDisposition popEnabled() {
+    final _ModalScopeState<T>? scope = _scopeKey.currentState;
+    assert(scope != null);
+    final bool popEnabled = _canPopScopes.every((CanPopScope widget) {
+      return widget.popEnabled;
+    });
+
+    if (!popEnabled) {
+      return RoutePopDisposition.doNotPop;
+    }
+    return super.popEnabled();
   }
 
   @override
@@ -1660,15 +1681,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   void updateSystemNavigator() {
-    SystemNavigator.updateNavigationStackStatus(!popEnabled());
-  }
-
-  // True means that this route can handle a pop, false that a route above or
-  // the platform must handle it.
-  bool popEnabled() {
-    // TODO(justinmc): You should consider things other than _canPopScopes as
-    // well.  Is canPop what you need?
-    return _canPopScopes.every((CanPopScope widget) => widget.popEnabled);
+    final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
+    SystemNavigator.updateNavigationStackStatus(popDisabled);
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
