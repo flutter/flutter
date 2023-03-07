@@ -337,7 +337,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags="--foo,--null_assertions"',
+            '--dart-flags="--foo"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
