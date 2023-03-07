@@ -44,7 +44,7 @@ void main() {
       final File gradleFile = fileSystem
           .directory(exampleAppDir)
           .childDirectory('android')
-          .childFile('gradlew');
+          .childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew');
       // Ensure file is gone prior to configOnly running.
       await gradleFile.delete();
 
