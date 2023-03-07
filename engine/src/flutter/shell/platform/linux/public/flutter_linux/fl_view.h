@@ -16,7 +16,7 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkContainer)
+G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkBox)
 
 /**
  * FlView:

@@ -11,7 +11,7 @@ struct _FlGLArea {
 
   GdkGLContext* context;
 
-  FlBackingStoreProvider* texture;
+  GPtrArray* textures;
 };
 
 G_DEFINE_TYPE(FlGLArea, fl_gl_area, GTK_TYPE_WIDGET)
@@ -20,7 +20,7 @@ static void fl_gl_area_dispose(GObject* gobject) {
   FlGLArea* self = FL_GL_AREA(gobject);
 
   g_clear_object(&self->context);
-  g_clear_object(&self->texture);
+  g_clear_pointer(&self->textures, g_ptr_array_unref);
 
   G_OBJECT_CLASS(fl_gl_area_parent_class)->dispose(gobject);
 }
@@ -52,7 +52,7 @@ static void fl_gl_area_realize(GtkWidget* widget) {
 static void fl_gl_area_unrealize(GtkWidget* widget) {
   FlGLArea* self = FL_GL_AREA(widget);
   gdk_gl_context_make_current(self->context);
-  g_clear_object(&self->texture);
+  g_clear_pointer(&self->textures, g_ptr_array_unref);
 
   /* Make sure to unset the context if current */
   if (self->context == gdk_gl_context_get_current()) {
@@ -84,15 +84,18 @@ static gboolean fl_gl_area_draw(GtkWidget* widget, cairo_t* cr) {
 
   gint scale = gtk_widget_get_scale_factor(widget);
 
-  if (self->texture) {
-    uint32_t texture =
-        fl_backing_store_provider_get_gl_texture_id(self->texture);
-    GdkRectangle geometry =
-        fl_backing_store_provider_get_geometry(self->texture);
-    gdk_cairo_draw_from_gl(cr, gtk_widget_get_window(widget), texture,
+  if (self->textures == nullptr) {
+    return TRUE;
+  }
+
+  for (guint i = 0; i < self->textures->len; i++) {
+    FlBackingStoreProvider* texture =
+        FL_BACKING_STORE_PROVIDER(g_ptr_array_index(self->textures, i));
+    uint32_t texture_id = fl_backing_store_provider_get_gl_texture_id(texture);
+    GdkRectangle geometry = fl_backing_store_provider_get_geometry(texture);
+    gdk_cairo_draw_from_gl(cr, gtk_widget_get_window(widget), texture_id,
                            GL_TEXTURE, scale, geometry.x, geometry.y,
                            geometry.width, geometry.height);
-    gdk_gl_context_make_current(self->context);
   }
 
   return TRUE;
@@ -112,7 +115,6 @@ static void fl_gl_area_class_init(FlGLAreaClass* klass) {
 }
 
 static void fl_gl_area_init(FlGLArea* self) {
-  gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
   gtk_widget_set_app_paintable(GTK_WIDGET(self), TRUE);
 }
 
@@ -124,11 +126,11 @@ GtkWidget* fl_gl_area_new(GdkGLContext* context) {
   return GTK_WIDGET(area);
 }
 
-void fl_gl_area_queue_render(FlGLArea* self, FlBackingStoreProvider* texture) {
+void fl_gl_area_queue_render(FlGLArea* self, GPtrArray* textures) {
   g_return_if_fail(FL_IS_GL_AREA(self));
 
-  g_clear_object(&self->texture);
-  g_set_object(&self->texture, texture);
+  g_clear_pointer(&self->textures, g_ptr_array_unref);
+  self->textures = g_ptr_array_ref(textures);
 
   gtk_widget_queue_draw(GTK_WIDGET(self));
 }
