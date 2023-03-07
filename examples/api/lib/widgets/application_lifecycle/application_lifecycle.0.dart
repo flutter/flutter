@@ -50,7 +50,7 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> _quit() async {
-    await ServicesBinding.instance.exitApplication(AppExitType.cancelable);
+    await ServicesBinding.instance.exitApplication(_shouldExit ? AppExitType.cancelable : AppExitType.required);
   }
 
   Future<AppExitResponse> _handleExitRequest() async {
