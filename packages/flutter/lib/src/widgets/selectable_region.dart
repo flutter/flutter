@@ -738,10 +738,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
@@ -973,7 +974,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// * [SelectableRegion.getSelectableButtonItems], which performs a similar role,
   ///   but for any selectable text, not just specifically SelectableRegion.
-  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  /// * [EditableTextState.contextMenuButtonItems], which performs a similar role
   ///   but for content that is not just selectable but also editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.

@@ -17,10 +17,15 @@ class EventPrinter extends TestWatcher {
   final TestWatcher? _parent;
 
   @override
-  void handleStartedDevice(Uri? observatoryUri) {
+  void handleStartedDevice(Uri? vmServiceUri) {
     _sendEvent('test.startedProcess',
-        <String, dynamic>{'observatoryUri': observatoryUri?.toString()});
-    _parent?.handleStartedDevice(observatoryUri);
+        <String, dynamic>{
+          'vmServiceUri': vmServiceUri?.toString(),
+          // TODO(bkonyi): remove references to Observatory
+          // See https://github.com/flutter/flutter/issues/121271
+          'observatoryUri': vmServiceUri?.toString()
+        });
+    _parent?.handleStartedDevice(vmServiceUri);
   }
 
   @override

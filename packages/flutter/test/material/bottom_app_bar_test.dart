@@ -251,7 +251,7 @@ void main() {
 
     final Material material = tester.widget(find.byType(Material).at(1));
 
-    expect(material.shadowColor, Colors.transparent); /* no value in Material 2. */
+    expect(material.shadowColor, Colors.transparent);
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {

@@ -241,12 +241,12 @@ void main() {
 
   testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window insets', (WidgetTester tester) async {
     late Size oldSize;
-    late ui.WindowPadding oldInsets;
+    late ui.ViewPadding oldInsets;
     try {
       oldSize = tester.binding.window.physicalSize;
       oldInsets = tester.binding.window.viewInsets;
       tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
-      tester.binding.window.viewInsetsTestValue = ui.WindowPadding.zero;
+      tester.binding.window.viewInsetsTestValue = ui.ViewPadding.zero;
 
       // Intentionally use nested scaffolds to simulate the view insets being
       // consumed.
@@ -274,8 +274,8 @@ void main() {
 
       await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
 
-       // Change the view insets
-      tester.binding.window.viewInsetsTestValue = const TestWindowPadding(left: 0, top: 0, right: 0, bottom: 500);
+       // Change the view insets.
+      tester.binding.window.viewInsetsTestValue = const TestViewPadding(left: 0, top: 0, right: 0, bottom: 500);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -286,7 +286,6 @@ void main() {
       tester.binding.window.viewInsetsTestValue = oldInsets;
     }
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
-
 
   testWidgets(
       'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
@@ -456,7 +455,7 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
 
-    // Page 2 didn't move
+    // Page 2 didn't move.
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -618,7 +617,7 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
 
-    // Page 2 didn't move
+    // Page 2 didn't move.
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -798,7 +797,7 @@ void main() {
     );
 
     // Check the basic iOS back-swipe dismiss transition. Dragging the pushed
-    // route halfway across the screen will trigger the iOS dismiss animation
+    // route halfway across the screen will trigger the iOS dismiss animation.
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
@@ -809,7 +808,7 @@ void main() {
     await gesture.moveBy(const Offset(400, 0));
     await gesture.up();
     await tester.pump();
-    expect( // The 'route' route has been dragged to the right, halfway across the screen
+    expect( // The 'route' route has been dragged to the right, halfway across the screen.
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
       const Offset(400, 0),
     );
@@ -1330,8 +1329,8 @@ class TestDependencies extends StatelessWidget {
   }
 }
 
-class TestWindowPadding implements ui.WindowPadding {
-  const TestWindowPadding({
+class TestViewPadding implements ui.ViewPadding {
+  const TestViewPadding({
     required this.left,
     required this.top,
     required this.right,

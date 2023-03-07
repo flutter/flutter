@@ -19,16 +19,16 @@ class _${blockName}DefaultsM3 extends ExpansionTileThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
-  Color? get textColor => ${textStyle("md.comp.list.list-item.label-text")}!.color;
+  Color? get textColor => ${componentColor('md.comp.list.list-item.label-text')};
 
   @override
   Color? get iconColor => ${componentColor('md.comp.list.list-item.selected.trailing-icon')};
 
   @override
-  Color? get collapsedTextColor => ${textStyle("md.comp.list.list-item.label-text")}!.color;
+  Color? get collapsedTextColor => ${componentColor('md.comp.list.list-item.label-text')};
 
   @override
-  Color? get collapsedIconColor => ${componentColor('md.comp.list.list-item.unselected.trailing-icon')};
+  Color? get collapsedIconColor => ${componentColor('md.comp.list.list-item.trailing-icon')};
 }
 ''';
 }

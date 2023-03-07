@@ -152,7 +152,7 @@ class DatePickerThemeData with Diagnosticable {
   /// day labels in the grid of the date picker.
   final MaterialStateProperty<Color?>? dayBackgroundColor;
 
-  /// Overriddes the default highlight color that's typically used to
+  /// Overrides the default highlight color that's typically used to
   /// indicate that a day in the grid is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? dayOverlayColor;
 
@@ -356,6 +356,9 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Linearly interpolates between two [DatePickerThemeData].
   static DatePickerThemeData lerp(DatePickerThemeData? a, DatePickerThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DatePickerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -393,8 +396,8 @@ class DatePickerThemeData with Diagnosticable {
   }
 
   static BorderSide? _lerpBorderSide(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
