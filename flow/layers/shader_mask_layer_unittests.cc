@@ -383,7 +383,7 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
           /* child layer paint */ {
             expected_builder.DrawPath(child_path, DlPaint());
           }
-          expected_builder.Translate(mask_rect.fLeft, mask_rect.fTop);
+          expected_builder.translate(mask_rect.fLeft, mask_rect.fTop);
           expected_builder.DrawRect(
               SkRect::MakeWH(mask_rect.width(), mask_rect.height()),
               DlPaint().setBlendMode(DlBlendMode::kSrc));

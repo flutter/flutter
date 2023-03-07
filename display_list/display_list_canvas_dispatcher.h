@@ -6,8 +6,9 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_CANVAS_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/dl_op_receiver.h"
-#include "flutter/display_list/skia/dl_sk_utils.h"
+#include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/display_list_dispatcher.h"
+#include "flutter/display_list/display_list_utils.h"
 #include "flutter/fml/macros.h"
 
 namespace flutter {
@@ -18,10 +19,11 @@ namespace flutter {
 ///
 /// Receives all methods on Dispatcher and sends them to an SkCanvas
 ///
-class DlSkCanvasDispatcher : public virtual DlOpReceiver,
-                             public SkPaintDispatchHelper {
+class DisplayListCanvasDispatcher : public virtual Dispatcher,
+                                    public SkPaintDispatchHelper {
  public:
-  explicit DlSkCanvasDispatcher(SkCanvas* canvas, SkScalar opacity = SK_Scalar1)
+  explicit DisplayListCanvasDispatcher(SkCanvas* canvas,
+                                       SkScalar opacity = SK_Scalar1)
       : SkPaintDispatchHelper(opacity),
         canvas_(canvas),
         original_transform_(canvas->getLocalToDevice()) {}
@@ -79,7 +81,7 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
                      const SkRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
-                     bool enforce_src_edges) override;
+                     SkCanvas::SrcRectConstraint constraint) override;
   void drawImageNine(const sk_sp<DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
@@ -94,8 +96,7 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
                  DlImageSampling sampling,
                  const SkRect* cullRect,
                  bool render_with_attributes) override;
-  void drawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity) override;
+  void drawDisplayList(const sk_sp<DisplayList> display_list) override;
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override;
@@ -104,6 +105,11 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;
+
+  static SkRect ComputeShadowBounds(const SkPath& path,
+                                    float elevation,
+                                    SkScalar dpr,
+                                    const SkMatrix& ctm);
 
   static void DrawShadow(SkCanvas* canvas,
                          const SkPath& path,
