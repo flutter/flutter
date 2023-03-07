@@ -97,7 +97,7 @@ class RenderParagraph extends RenderBox
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? String.fromCharCode(Unicode.HE) : null,
+         ellipsis: overflow == TextOverflow.ellipsis ? _ellipsis : null,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -115,7 +115,8 @@ class RenderParagraph extends RenderBox
     }
   }
 
-  static final String _placeholderCharacter = String.fromCharCode(Unicode.ORC);
+  static final String _ellipsis = String.fromCharCode(Unicode.HE);
+  static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -325,9 +326,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis
-        ? String.fromCharCode(Unicode.HE)
-        : null;
+    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _ellipsis : null;
     markNeedsLayout();
   }
 
@@ -802,7 +801,7 @@ class RenderParagraph extends RenderBox
         case TextOverflow.fade:
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
-            text: TextSpan(style: _textPainter.text!.style, text: String.fromCharCode(Unicode.HE)),
+            text: TextSpan(style: _textPainter.text!.style, text: _ellipsis),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             locale: locale,

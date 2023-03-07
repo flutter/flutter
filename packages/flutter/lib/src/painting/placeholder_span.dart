@@ -40,6 +40,9 @@ abstract class PlaceholderSpan extends InlineSpan {
     super.style,
   });
 
+  /// The unicode character to represent a placeholder.
+  static const int placeholderCodeUnit = Unicode.ORC;
+
   /// How the placeholder aligns vertically with the text.
   ///
   /// See [ui.PlaceholderAlignment] for details on each mode.
