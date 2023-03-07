@@ -5,10 +5,10 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterApplication.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterApplication_Internal.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#import "shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
-#import "shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
-#import "shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
 // An NSApplication subclass that implements overrides necessary for some
 // Flutter features, like application lifecycle handling.
