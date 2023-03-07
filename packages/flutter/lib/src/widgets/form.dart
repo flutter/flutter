@@ -43,10 +43,16 @@ class Form extends StatefulWidget {
   const Form({
     super.key,
     required this.child,
+    this.canPop,
+    @Deprecated(
+      'Use canPop instead. '
+      'This feature was deprecated after v3.9.0-0.0.pre.',
+    )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
+       assert(canPop == null || onWillPop == null, 'onWillPop is deprecated; just use canPop.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -125,7 +131,13 @@ class Form extends StatefulWidget {
   ///
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
+  @Deprecated(
+    'Use canPop instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   final WillPopCallback? onWillPop;
+
+  final bool? canPop;
 
   /// Called when one of the form fields changes.
   ///
@@ -192,6 +204,19 @@ class FormState extends State<Form> {
       case AutovalidateMode.disabled:
         break;
     }
+
+    /*
+    if (canPop != null) {
+      return CanPopScope(
+        canPop: widget.canPop,
+        child: _FormScope(
+          formState: this,
+          generation: _generation,
+          child: widget.child,
+        ),
+      );
+    }
+    */
 
     return WillPopScope(
       onWillPop: widget.onWillPop,

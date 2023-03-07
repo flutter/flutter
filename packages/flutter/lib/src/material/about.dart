@@ -1184,9 +1184,13 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
+    // TODO(justinmc): I feel like this can be done without either of these
+    // WillPopScope widgets...
     return WillPopScope(
       // Push pop check into nested navigator.
-      onWillPop: () async => !(await _navigatorKey.currentState!.maybePop()),
+      onWillPop: () async {
+        return !(await _navigatorKey.currentState!.maybePop());
+      },
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',

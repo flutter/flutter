@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'can_pop_scope.dart';
 import 'display_feature_sub_screen.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -1485,6 +1486,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final List<VoidCallback> _onPopCallbacks = <VoidCallback>[];
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
+  final Set<CanPopScope> _canPopScopes = <CanPopScope>{};
+
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
   /// return true, the base [Route.willPop]'s result will be returned. The
@@ -1643,6 +1646,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void removeScopedOnPopCallback(VoidCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove an onPop callback from a route that is not currently in the tree.');
     _onPopCallbacks.remove(callback);
+  }
+
+  // TODO(justinmc): Really though what should I be registering here...
+  void registerCanPopScope(CanPopScope state) {
+    _canPopScopes.add(state);
+  }
+
+  void unregisterCanPopScope(CanPopScope state) {
+    _canPopScopes.remove(state);
+  }
+
+  bool canPopForReal() {
+    return _canPopScopes.every((CanPopScope widget) => widget.canPop);
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.

@@ -306,6 +306,11 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
+  bool canPopForReal() {
+    // TODO(justinmc): Or I probably care about bubbling too!
+    return isFirst;
+  }
+
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
 
@@ -4960,6 +4965,43 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.doNotPop:
         return true;
     }
+  }
+
+  bool maybePopp<T extends Object?>([ T? result ]) {
+    final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
+      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
+      orElse: () => null,
+    );
+    if (lastEntry == null) {
+      return false;
+    }
+    assert(lastEntry.route._navigator == this);
+    final bool canPop = lastEntry.route.canPopForReal();
+    /*
+    final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
+    if (!mounted) {
+      // Forget about this pop, we were disposed in the meantime.
+      return true;
+    }
+    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
+      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
+      orElse: () => null,
+    );
+    if (lastEntry != newLastEntry) {
+      // Forget about this pop, something happened to our history in the meantime.
+      return true;
+    }
+    switch (disposition) {
+      case RoutePopDisposition.bubble:
+        return false;
+      case RoutePopDisposition.pop:
+        pop(result);
+        return true;
+      case RoutePopDisposition.doNotPop:
+        return true;
+    }
+    */
+    return true;
   }
 
   /// Pop the top-most route off the navigator.

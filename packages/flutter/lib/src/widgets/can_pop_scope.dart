@@ -27,15 +27,16 @@ import 'routes.dart';
 ///  * [Form], which provides an `onWillPop` callback that enables the form
 ///    to veto a `pop` initiated by the app's back button.
 ///
-class WillPopScope extends StatefulWidget {
+class CanPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   ///
   /// The [child] argument must not be null.
-  const WillPopScope({
+  const CanPopScope({
     super.key,
     required this.child,
     required this.canPop,
+    // TODO(justinmc): Add onPop (or didPop) to this?
   });
 
   /// The widget below this widget in the tree.
@@ -58,23 +59,28 @@ class WillPopScope extends StatefulWidget {
   final bool canPop;
 
   @override
-  State<WillPopScope> createState() => _WillPopScopeState();
+  State<CanPopScope> createState() => _CanPopScopeState();
 }
 
-class _WillPopScopeState extends State<WillPopScope> {
+class _CanPopScopeState extends State<CanPopScope> {
   ModalRoute<dynamic>? _route;
 
+  /*
   @override
   void initState() {
     super.initState();
     // TODO(justinmc): Need to make sure this doesn't conflict with the
     // navigator changing this. Maybe needs to look up in the widget tree.
-    SystemNavigator.updateNavigationStackStatus(!widget.canPop);
+    //SystemNavigator.updateNavigationStackStatus(!widget.canPop);
   }
+  */
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _route = ModalRoute.of(context);
+    _route?.registerCanPopScope(widget);
+    /*
     if (widget.onWillPop != null) {
       _route?.removeScopedWillPopCallback(widget.onWillPop!);
     }
@@ -82,11 +88,15 @@ class _WillPopScopeState extends State<WillPopScope> {
     if (widget.onWillPop != null) {
       _route?.addScopedWillPopCallback(widget.onWillPop!);
     }
+    */
   }
 
   @override
-  void didUpdateWidget(WillPopScope oldWidget) {
+  void didUpdateWidget(CanPopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _route = ModalRoute.of(context);
+    _route?.registerCanPopScope(widget);
+    /*
     if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
       if (oldWidget.onWillPop != null) {
         _route!.removeScopedWillPopCallback(oldWidget.onWillPop!);
@@ -95,17 +105,21 @@ class _WillPopScopeState extends State<WillPopScope> {
         _route!.addScopedWillPopCallback(widget.onWillPop!);
       }
     }
+    */
   }
 
   @override
   void dispose() {
+    _route = ModalRoute.of(context);
+    _route?.unregisterCanPopScope(widget);
+    /*
     if (widget.onWillPop != null) {
       _route?.removeScopedWillPopCallback(widget.onWillPop!);
     }
+    */
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => widget.child;
 }
-
