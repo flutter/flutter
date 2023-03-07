@@ -250,7 +250,7 @@ void main() {
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
         '--ez', 'disable-service-auth-codes', 'true',
-        '--es', 'dart-flags', 'foo,--null_assertions',
+        '--es', 'dart-flags', 'foo',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
         '--user', '10',
