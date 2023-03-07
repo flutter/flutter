@@ -627,6 +627,16 @@ class TestFlutterView implements FlutterView {
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
   ///
+  /// This property and [physicalSize] are dependent on one another. If both
+  /// properties are set through their test setters, the final result will be
+  /// that [physicalGeometry] determines the location and [physicalSize]
+  /// determines the size of the [physicalGeometry] [Rect]. If only
+  /// [physicalSize] is set, the final result is that the default value of
+  /// [physicalGeometry] determines the location and [physicalSize] determines
+  /// the size of the [physicalGeometry] [Rect]. If only [physicalGeometry]
+  /// is set, it will determine both the location and size of the
+  /// [physicalGeometry] [Rect].
+  ///
   /// See also:
   ///
   ///   * [FlutterView.physicalGeometry] for the standard implementation
@@ -646,8 +656,10 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// Resets [physicalGeometry] to the default value for this view. This will
-  /// also reset [physicalSize] as the values are dependent on one another.
+  /// Resets [physicalGeometry] to the default value for this view.
+  ///
+  /// This will also reset [physicalSize] as the values are dependent
+  /// on one another.
   void resetPhysicalGeometry() {
     _physicalGeometry = null;
     _physicalSize = null;
@@ -659,6 +671,16 @@ class TestFlutterView implements FlutterView {
   /// Defaults to the value provided by [FlutterView.physicalSize]. This
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// This property and [physicalGeometry] are dependent on one another. If both
+  /// properties are set through their test setters, the final result will be
+  /// that [physicalGeometry] determines the location and [physicalSize]
+  /// determines the size of the [physicalGeometry] [Rect]. If only
+  /// [physicalSize] is set, the final result is that the default value of
+  /// [physicalGeometry] determines the location and [physicalSize] determines
+  /// the size of the [physicalGeometry] [Rect]. If only [physicalGeometry]
+  /// is set, it will determine both the location and size of the
+  /// [physicalGeometry] [Rect].
   ///
   /// See also:
   ///
@@ -678,8 +700,10 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// Resets [physicalSize] to the default value for this view. This will
-  /// also reset [physicalGeometry] as the values are dependent on one another.
+  /// Resets [physicalSize] to the default value for this view.
+  ///
+  /// This will also reset [physicalGeometry] as the values are dependent
+  /// on one another.
   void resetPhysicalSize() {
     resetPhysicalGeometry();
   }
