@@ -256,9 +256,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  List<Device> prioritizeEphemeralDevices(List<Device> devices) {
-    return devices;
-  }
+  Device? getSingleEphemeralDevice(List<Device> devices) => null;
 }
 
 class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {

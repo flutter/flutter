@@ -212,14 +212,14 @@ void main() {
         logger: BufferLogger.test(),
       );
 
-      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(filtered.single, ephemeralOne);
+      expect(ephemeralDevice, ephemeralOne);
     }, overrides: <Type, Generator>{
       FlutterProject: () => FakeFlutterProject(),
     });
 
-    testUsingContext('returns all devices when multiple non ephemeral devices are found', () async {
+    testUsingContext('returns null when multiple non ephemeral devices are found', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -232,19 +232,14 @@ void main() {
         logger: BufferLogger.test(),
       );
 
-      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(filtered, <Device>[
-        ephemeralOne,
-        ephemeralTwo,
-        nonEphemeralOne,
-        nonEphemeralTwo,
-      ]);
+      expect(ephemeralDevice, isNull);
     }, overrides: <Type, Generator>{
       FlutterProject: () => FakeFlutterProject(),
     });
 
-    testUsingContext('return all devices when hasSpecifiedDeviceId is true', () async {
+    testUsingContext('return null when hasSpecifiedDeviceId is true', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         nonEphemeralOne,
@@ -257,13 +252,27 @@ void main() {
       );
       deviceManager.specifiedDeviceId = 'device';
 
-      final List<Device> filtered = deviceManager.prioritizeEphemeralDevices(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(filtered, <Device>[
-        ephemeralOne,
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{
+      FlutterProject: () => FakeFlutterProject(),
+    });
+
+    testUsingContext('returns null when no ephemeral devices are found', () async {
+      final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
-      ]);
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+      );
+
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+
+      expect(ephemeralDevice, isNull);
     }, overrides: <Type, Generator>{
       FlutterProject: () => FakeFlutterProject(),
     });

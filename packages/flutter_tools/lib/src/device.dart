@@ -282,23 +282,22 @@ abstract class DeviceManager {
   /// If the user did not specify to run all or a specific device, then attempt
   /// to prioritize ephemeral devices.
   ///
-  /// If there is not exactly one ephermeral device return all devices.
+  /// If there is not exactly one ephermeral device return null.
   ///
   /// For example, if the user only typed 'flutter run' and both an Android
   /// device and desktop device are available, choose the Android device.
   ///
   /// Note: ephemeral is nullable for device types where this is not well
   /// defined.
-  List<Device> prioritizeEphemeralDevices(List<Device> devices){
+  Device? getSingleEphemeralDevice(List<Device> devices){
     if (!hasSpecifiedDeviceId) {
-      final List<Device> ephemeralDevices = devices
-          .where((Device element) => element.ephemeral == true)
-          .toList();
-      if (ephemeralDevices.length == 1) {
-        return ephemeralDevices;
+      try {
+        return devices.singleWhere((Device device) => device.ephemeral == true);
+      } on StateError {
+        return null;
       }
     }
-    return devices;
+    return null;
   }
 }
 

@@ -171,7 +171,10 @@ class TargetDevices {
 
     // If there is more than one device, attempt to prioritize ephemeral devices.
     if (devices.length > 1) {
-      return _deviceManager.prioritizeEphemeralDevices(devices);
+      final Device? ephemeralDevice = _deviceManager.getSingleEphemeralDevice(devices);
+      if (ephemeralDevice != null) {
+        return <Device>[ephemeralDevice];
+      }
     }
 
     return devices;
