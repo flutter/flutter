@@ -435,8 +435,8 @@ class ArchiveCreator {
   /// These archives will be installed in the user-level cache on first
   /// following flutter command that accesses the cache.
   ///
-  /// This assumes that all packages currently in the cache are installed from
-  /// pub.dev.
+  /// Precondition: all packages currently in the PUB_CACHE of [_processRunner]
+  /// are installed from pub.dev.
   Future<void> _downloadPubPackageArchives() async {
     final Pool pool = Pool(10); // Number of simultaneous downloads.
     final http.Client client = http.Client();
