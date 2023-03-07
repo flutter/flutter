@@ -39,7 +39,7 @@ void main() {
   });
 
   test(
-    'flutter build apk --configOnly should create gradlew and not assemble',
+    'flutter build apk --config-only should create gradlew and not assemble',
     () async {
       final File gradleFile = fileSystem
           .directory(exampleAppDir)
