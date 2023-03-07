@@ -1655,7 +1655,6 @@
 ../../../third_party/dart/runtime/vm/libfuzzer/README.md
 ../../../third_party/dart/runtime/vm/log_test.cc
 ../../../third_party/dart/runtime/vm/longjump_test.cc
-../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
 ../../../third_party/dart/runtime/vm/memory_region_test.cc
 ../../../third_party/dart/runtime/vm/message_handler_test.cc
 ../../../third_party/dart/runtime/vm/message_test.cc
@@ -1736,9 +1735,6 @@
 ../../../third_party/dart/third_party/mdn/browser-compat-data/README.google
 ../../../third_party/dart/third_party/pkg
 ../../../third_party/dart/third_party/requirejs
-../../../third_party/dart/third_party/tcmalloc/.gitignore
-../../../third_party/dart/third_party/tcmalloc/OWNERS
-../../../third_party/dart/third_party/tcmalloc/README.dart
 ../../../third_party/dart/tools
 ../../../third_party/dart/utils/OWNERS
 ../../../third_party/dart/utils/compiler/.gitignore
