@@ -284,7 +284,6 @@ targets:
       config_name: linux_android_debug_engine
 
   - name: Linux linux_web_engine
-    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
