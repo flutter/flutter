@@ -100,28 +100,7 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   }
 
   @override
-  ui.Image toImageSync(int width, int height) {
-    SurfaceFactory.instance.baseSurface.ensureSurface();
-    if (SurfaceFactory.instance.baseSurface.usingSoftwareBackend) {
-      return toImageSyncSoftware(width, height);
-    }
-    return toImageSyncGPU(width, height);
-  }
-
-  ui.Image toImageSyncGPU(int width, int height) {
-    assert(debugCheckNotDisposed('Cannot convert picture to image.'));
-
-    final CkSurface ckSurface = SurfaceFactory.instance.baseSurface
-      .createRenderTargetSurface(ui.Size(width.toDouble(), height.toDouble()));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
-    ckCanvas.clear(const ui.Color(0x00000000));
-    ckCanvas.drawPicture(this);
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
-    ckSurface.dispose();
-    return CkImage(skImage);
-  }
-
-  ui.Image toImageSyncSoftware(int width, int height) {
+  CkImage toImageSync(int width, int height) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
     final Surface surface = SurfaceFactory.instance.pictureToImageSurface;
