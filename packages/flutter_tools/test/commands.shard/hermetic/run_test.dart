@@ -932,7 +932,6 @@ void main() {
       '--trace-skia',
       '--trace-systrace',
       '--verbose-system-logs',
-      '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
       '--trace-systrace',
