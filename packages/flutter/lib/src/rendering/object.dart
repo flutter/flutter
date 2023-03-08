@@ -1399,7 +1399,7 @@ class PipelineOwner {
 /// Signature for the callback to [PipelineOwner.visitChildren].
 ///
 /// The argument is the child being visited.
-typedef PipelineOwnerVisitor = void Function(PipelineOwner owner);
+typedef PipelineOwnerVisitor = void Function(PipelineOwner child);
 
 /// Manages a tree of [PipelineOwner]s.
 ///

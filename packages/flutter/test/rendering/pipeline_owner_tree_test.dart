@@ -20,9 +20,9 @@ void main() {
     int rootOnNeedVisualUpdateCallCount = 0;
     final TestRenderObject rootRenderObject = TestRenderObject();
     final PipelineOwner root = PipelineOwner(
-        onNeedVisualUpdate: () {
-          rootOnNeedVisualUpdateCallCount += 1;
-        },
+      onNeedVisualUpdate: () {
+        rootOnNeedVisualUpdateCallCount += 1;
+      },
     );
     root.rootNode = rootRenderObject;
     rootRenderObject.scheduleInitialLayout();
@@ -670,6 +670,7 @@ void main() {
     expect(manifold.requestVisualUpdateCount, 0);
     owner.attach(manifold);
     expect(manifold.requestVisualUpdateCount, 1);
+    handle.dispose();
   });
 
   test('cannot detach when not attached', () {
