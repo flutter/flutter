@@ -9,6 +9,5 @@ import 'package:flutter_devicelab/tasks/microbenchmarks.dart';
 /// Runs microbenchmarks on iOS.
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  // ignore: avoid_redundant_argument_values
   await task(createMicrobenchmarkTask(enableImpeller: true));
 }
