@@ -6057,68 +6057,6 @@ void main() {
       'to come to the aid\n'                      // 36 + 19 => 55
       'of their country.';                        // 55 + 17 => 72
 
-  Future<void> sendKeys(
-      WidgetTester tester,
-      List<LogicalKeyboardKey> keys, {
-        bool shift = false,
-        bool wordModifier = false,
-        bool lineModifier = false,
-        bool shortcutModifier = false,
-        required TargetPlatform targetPlatform,
-      }) async {
-    final String targetPlatformString = targetPlatform.toString();
-    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
-    if (shift) {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-    }
-    if (shortcutModifier) {
-      await tester.sendKeyDownEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
-        platform: platform,
-      );
-    }
-    if (wordModifier) {
-      await tester.sendKeyDownEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
-        platform: platform,
-      );
-    }
-    if (lineModifier) {
-      await tester.sendKeyDownEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
-        platform: platform,
-      );
-    }
-    for (final LogicalKeyboardKey key in keys) {
-      await tester.sendKeyEvent(key, platform: platform);
-      await tester.pump();
-    }
-    if (lineModifier) {
-      await tester.sendKeyUpEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
-        platform: platform,
-      );
-    }
-    if (wordModifier) {
-      await tester.sendKeyUpEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
-        platform: platform,
-      );
-    }
-    if (shortcutModifier) {
-      await tester.sendKeyUpEvent(
-        platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
-        platform: platform,
-      );
-    }
-    if (shift) {
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-    }
-    if (shift || wordModifier || lineModifier) {
-      await tester.pump();
-    }
-  }
-
   Future<void> testTextEditing(WidgetTester tester, {required TargetPlatform targetPlatform}) async {
     final String targetPlatformString = targetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
@@ -13066,14 +13004,14 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       // Undo first insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep2.copyWith(composing: TextRange.empty));
+      expect(controller.value, composingStep2);
 
       // Waiting for the throttling beetween undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep1.copyWith(composing: TextRange.empty));
+      expect(controller.value, composingStep1);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
@@ -13594,6 +13532,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13603,6 +13542,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13620,6 +13560,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13628,6 +13569,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13653,6 +13595,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13661,6 +13604,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13700,6 +13644,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13708,6 +13653,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13829,6 +13775,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller.value,
             const TextEditingValue(
               text: '1 2 ni',
+              composing: TextRange(start: 4, end: 6),
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
@@ -13887,6 +13834,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller.value,
             const TextEditingValue(
               text: '1 2 ni',
+              composing: TextRange(start: 4, end: 6),
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
