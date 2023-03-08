@@ -15,6 +15,8 @@ import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 
+const bool kEnableImpellerDefault = true;
+
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -448,6 +450,9 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   return <String>[
     command,
+    if (!command.contains('--enable-impeller')
+        && deviceOperatingSystem == DeviceOperatingSystem.ios)
+      '--enable-impeller',
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
       ...<String>[
         '--device-timeout',
