@@ -10,12 +10,14 @@ IDeviceCapabilities::IDeviceCapabilities(bool has_threading_restrictions,
                                          bool supports_offscreen_msaa,
                                          bool supports_ssbo,
                                          bool supports_texture_to_texture_blits,
+                                         bool supports_framebuffer_fetch,
                                          PixelFormat default_color_format,
                                          PixelFormat default_stencil_format)
     : has_threading_restrictions_(has_threading_restrictions),
       supports_offscreen_msaa_(supports_offscreen_msaa),
       supports_ssbo_(supports_ssbo),
       supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
+      supports_framebuffer_fetch_(supports_framebuffer_fetch),
       default_color_format_(default_color_format),
       default_stencil_format_(default_stencil_format) {}
 
@@ -35,6 +37,10 @@ bool IDeviceCapabilities::SupportsSSBO() const {
 
 bool IDeviceCapabilities::SupportsTextureToTextureBlits() const {
   return supports_texture_to_texture_blits_;
+}
+
+bool IDeviceCapabilities::SupportsFramebufferFetch() const {
+  return supports_framebuffer_fetch_;
 }
 
 PixelFormat IDeviceCapabilities::GetDefaultColorFormat() const {
@@ -73,6 +79,12 @@ DeviceCapabilitiesBuilder::SetSupportsTextureToTextureBlits(bool value) {
   return *this;
 }
 
+DeviceCapabilitiesBuilder&
+DeviceCapabilitiesBuilder::SetSupportsFramebufferFetch(bool value) {
+  supports_framebuffer_fetch_ = value;
+  return *this;
+}
+
 DeviceCapabilitiesBuilder& DeviceCapabilitiesBuilder::SetDefaultColorFormat(
     PixelFormat value) {
   default_color_format_ = value;
@@ -96,6 +108,7 @@ std::unique_ptr<IDeviceCapabilities> DeviceCapabilitiesBuilder::Build() {
       supports_offscreen_msaa_,                                 //
       supports_ssbo_,                                           //
       supports_texture_to_texture_blits_,                       //
+      supports_framebuffer_fetch_,                              //
       *default_color_format_,                                   //
       *default_stencil_format_                                  //
   );

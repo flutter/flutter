@@ -96,12 +96,32 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
             .SetSupportsOffscreenMSAA(true)
             .SetSupportsSSBO(true)
             .SetSupportsTextureToTextureBlits(true)
+            .SetSupportsFramebufferFetch(SupportsFramebufferFetch())
             .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
             .Build();
   }
 
   is_valid_ = true;
+}
+
+bool ContextMTL::SupportsFramebufferFetch() const {
+  // The iOS simulator lies about supporting framebuffer fetch.
+#if FML_OS_IOS_SIMULATOR
+  return false;
+#endif  // FML_OS_IOS_SIMULATOR
+
+  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
+    return [device_ supportsFamily:MTLGPUFamilyApple2];
+  }
+  // According to
+  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf , Apple2
+  // corresponds to iOS GPU family 2, which supports A8 devices.
+#if FML_OS_IOS
+  return [device_ supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v1];
+#else
+  return false;
+#endif  // FML_OS_IOS
 }
 
 static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFilePaths(

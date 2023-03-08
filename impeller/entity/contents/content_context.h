@@ -78,7 +78,7 @@
 #include "impeller/entity/advanced_blend_saturation.frag.h"
 #include "impeller/entity/advanced_blend_screen.frag.h"
 #include "impeller/entity/advanced_blend_softlight.frag.h"
-#if FML_OS_PHYSICAL_IOS
+
 #include "impeller/entity/framebuffer_blend.vert.h"
 #include "impeller/entity/framebuffer_blend_color.frag.h"
 #include "impeller/entity/framebuffer_blend_colorburn.frag.h"
@@ -95,7 +95,6 @@
 #include "impeller/entity/framebuffer_blend_saturation.frag.h"
 #include "impeller/entity/framebuffer_blend_screen.frag.h"
 #include "impeller/entity/framebuffer_blend_softlight.frag.h"
-#endif  // FML_OS_PHYSICAL_IOS
 
 namespace impeller {
 
@@ -202,8 +201,7 @@ using BlendScreenPipeline = RenderPipelineT<AdvancedBlendVertexShader,
 using BlendSoftLightPipeline =
     RenderPipelineT<AdvancedBlendVertexShader,
                     AdvancedBlendSoftlightFragmentShader>;
-#if FML_OS_PHYSICAL_IOS
-// iOS only advanced blends.
+// Framebuffer Advanced Blends
 using FramebufferBlendColorPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
                     FramebufferBlendColorFragmentShader>;
@@ -249,7 +247,6 @@ using FramebufferBlendScreenPipeline =
 using FramebufferBlendSoftLightPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
                     FramebufferBlendSoftlightFragmentShader>;
-#endif  // FML_OS_PHYSICAL_IOS
 
 /// Pipeline state configuration.
 ///
@@ -516,83 +513,97 @@ class ContentContext {
       ContentContextOptions opts) const {
     return GetPipeline(blend_softlight_pipelines_, opts);
   }
-#if FML_OS_PHYSICAL_IOS
-  // iOS advanced blends.
+
+  // Framebuffer Advanced Blends
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendColorPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_color_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendColorBurnPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_colorburn_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendColorDodgePipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_colordodge_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendDarkenPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_darken_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendDifferencePipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_difference_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendExclusionPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_exclusion_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendHardLightPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_hardlight_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetFramebufferBlendHuePipeline(
       ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_hue_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendLightenPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_lighten_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendLuminosityPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_luminosity_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendMultiplyPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_multiply_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendOverlayPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_overlay_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendSaturationPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_saturation_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendScreenPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_screen_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>>
   GetFramebufferBlendSoftLightPipeline(ContentContextOptions opts) const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
     return GetPipeline(framebuffer_blend_softlight_pipelines_, opts);
   }
-#endif  // FML_OS_PHYSICAL_IOS
 
   std::shared_ptr<Context> GetContext() const;
 
@@ -669,7 +680,7 @@ class ContentContext {
   mutable Variants<BlendSaturationPipeline> blend_saturation_pipelines_;
   mutable Variants<BlendScreenPipeline> blend_screen_pipelines_;
   mutable Variants<BlendSoftLightPipeline> blend_softlight_pipelines_;
-#if FML_OS_PHYSICAL_IOS
+  // Framebuffer Advanced blends.
   mutable Variants<FramebufferBlendColorPipeline>
       framebuffer_blend_color_pipelines_;
   mutable Variants<FramebufferBlendColorBurnPipeline>
@@ -700,7 +711,6 @@ class ContentContext {
       framebuffer_blend_screen_pipelines_;
   mutable Variants<FramebufferBlendSoftLightPipeline>
       framebuffer_blend_softlight_pipelines_;
-#endif  // FML_OS_PHYSICAL_IOS
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
