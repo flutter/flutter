@@ -146,7 +146,7 @@ class AnalyzeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final bool suggestionFlag = boolArg('suggestions');
     final bool machineFlag = boolArg('machine');
-    if (suggestionFlag == true) {
+    if (suggestionFlag) {
       final String directoryPath;
       final bool watchFlag = boolArg('watch');
       if (watchFlag) {
