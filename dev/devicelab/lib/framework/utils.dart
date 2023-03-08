@@ -15,6 +15,8 @@ import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 
+const bool kEnableImpellerDefault = false;
+
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
