@@ -624,8 +624,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The [useSafeArea] parameter specifies whether a [SafeArea] is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using [MediaQuery.removePadding].
+/// The [useSafeArea] parameter specifies whether the sheet will avoid system
+/// intrusions on the top, left, and right. If false, no SafeArea is added
+/// and the top padding is consumed using [MediaQuery.removePadding].
+/// Defaults to false.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
@@ -783,12 +785,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
-  /// If useSafeArea is true, a [SafeArea] is inserted.
+  /// Whether to avoid system intrusions on the top, left, and right.
   ///
-  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-  /// and isn't exposed to the top padding of the MediaQuery.
+  /// If true, a [SafeArea] is inserted to keep the bottom sheet away from
+  /// system intrusions at the top, left, and right sides of the screen.
   ///
-  /// Default is false.
+  /// If false, the bottom sheet isn't exposed to the top padding of the
+  /// MediaQuery.
+  ///
+  /// In either case, the bottom sheet extends all the way to the bottom of
+  /// the screen, including any system intrusions.
+  ///
+  /// The default is false.
   final bool useSafeArea;
 
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
@@ -871,11 +879,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    // If useSafeArea is true, a SafeArea is inserted.
-    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
+      ? SafeArea(bottom: false, child: content)
       : MediaQuery.removePadding(
           context: context,
           removeTop: true,
