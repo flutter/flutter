@@ -985,14 +985,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   /// Builds the CkParagraph with the builder and deletes the builder.
   SkParagraph _buildSkParagraph() {
     if (canvasKitVariant == CanvasKitVariant.chromium) {
-      final String text = _paragraphBuilder.getText();
-      _paragraphBuilder.setWordsUtf16(
-        fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word),
-      );
-      _paragraphBuilder.setGraphemeBreaksUtf16(
-        fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
-      );
-      _paragraphBuilder.setLineBreaksUtf16(fragmentUsingV8LineBreaker(text));
+      injectClientICU(_paragraphBuilder);
     }
     final SkParagraph result = _paragraphBuilder.build();
     _paragraphBuilder.delete();

@@ -7,6 +7,27 @@ import 'dart:typed_data';
 import '../dom.dart';
 import '../text/line_breaker.dart';
 import 'canvaskit_api.dart';
+import 'renderer.dart';
+
+/// Injects required ICU data into the [builder].
+///
+/// This should only be used with the CanvasKit Chromium variant that's compiled
+/// without ICU data.
+void injectClientICU(SkParagraphBuilder builder) {
+  assert(
+    canvasKitVariant == CanvasKitVariant.chromium,
+    'This method should only be used with the CanvasKit Chromium variant.',
+  );
+
+  final String text = builder.getText();
+  builder.setWordsUtf16(
+    fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word),
+  );
+  builder.setGraphemeBreaksUtf16(
+    fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
+  );
+  builder.setLineBreaksUtf16(fragmentUsingV8LineBreaker(text));
+}
 
 /// The granularity at which to segment text.
 ///
