@@ -1,7 +1,7 @@
-name: I have a problem with my Flutter application.
+name: Report a bug
 description: |
-  You are writing an application with Flutter but the application is crashing
-  or throws an exception, a widget is buggy, or something looks wrong.
+  You found a bug in the application but it is crashing or 
+  throws an exception, a widget is buggy or something looks wrong.
 body:
   - type: markdown
     attributes:
