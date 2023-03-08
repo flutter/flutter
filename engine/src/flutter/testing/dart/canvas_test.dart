@@ -440,7 +440,10 @@ void main() {
         canvas.drawImage(image, Offset.zero, Paint());
       } on PictureRasterizationException catch (e) {
         caughtException = true;
-        expect(e.message, contains('unable to create render target at specified size'));
+        expect(
+          e.message,
+          contains('unable to create bitmap render target at specified size ${image.width}x${image.height}'),
+        );
         break;
       }
       // Let the event loop turn.
