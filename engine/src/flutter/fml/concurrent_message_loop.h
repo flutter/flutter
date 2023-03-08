@@ -34,8 +34,6 @@ class ConcurrentMessageLoop
 
   void PostTaskToAllWorkers(const fml::closure& task);
 
-  bool RunsTasksOnCurrentThread();
-
  private:
   friend ConcurrentTaskRunner;
 
