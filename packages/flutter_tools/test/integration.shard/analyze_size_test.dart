@@ -15,7 +15,7 @@ import 'test_utils.dart';
 const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
 const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
 const String macOSDebugMessage = 'A summary of your macOS bundle analysis can be found at: ';
-const String runDevToolsMessage = 'flutter pub global activate devtools; flutter pub global run devtools ';
+const String runDevToolsMessage = 'dart devtools ';
 
 void main() {
   testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
