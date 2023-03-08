@@ -337,7 +337,7 @@ class DomCSSStyleSheet extends DomStyleSheet {}
 extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
   /// Inserts a rule into this style sheet.
   int insertRule(String rule, [int? index]) =>
-    js_util.callMethod(this, 'insertRule', <Object>[
+    js_util.callMethod<double>(this, 'insertRule', <Object>[
       rule,
       if (index != null) index.toDouble()
     ]).toInt();
