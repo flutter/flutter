@@ -6,77 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
-
-/// A mixin for [StatefulWidget]s that implement material-themed toggleable
-/// controls with toggle animations (e.g. [Switch]es, [Checkbox]es, and
-/// [Radio]s).
+/// A mixin for [StatefulWidget]s that implement ios-themed toggleable
+/// controls (e.g.[Checkbox]es).
 ///
-/// The mixin implements the logic for toggling the control (e.g. when tapped)
-/// and provides a series of animation controllers to transition the control
-/// from one state to another. It does not have any opinion about the visual
-/// representation of the toggleable widget. The visuals are defined by a
-/// [CustomPainter] passed to the [buildToggleable]. [State] objects using this
-/// mixin should call that method from their [build] method.
+/// The mixin implements the logic for toggling the control (e.g. when tapped).
+/// It does not have any opinion about the visual representation of the
+/// toggleable widget. The visuals are defined by a [CustomPainter] passed to
+/// the [buildToggleable]. [State] objects using this mixin should call that
+/// method from their [build] method.
 ///
-/// This mixin is used to implement the material components for [Switch],
-/// [Checkbox], and [Radio] controls.
+/// This mixin is used to implement the cupertino components for [Checkbox]
+/// controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
-
-  /// The visual value of the control.
-  ///
-  /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value is either true or
-  /// tristate is true and the value is null. When the control is active the
-  /// animation has a value of 1.0. When the control is changing from inactive
-  /// to active (or vice versa), [value] is the target value and this animation
-  /// gradually updates from 0.0 to 1.0 (or vice versa).
-  CurvedAnimation get position => _position;
-  late CurvedAnimation _position;
-
-  /// Used by subclasses to control the radial reaction animation.
-  ///
-  /// Some controls have a radial ink reaction to user input. This animation
-  /// controller can be used to start or stop these ink reactions.
-  ///
-  /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
-  /// may be used.
-  AnimationController get reactionController => _reactionController;
-  late AnimationController _reactionController;
-
-  /// The visual value of the radial reaction animation.
-  ///
-  /// Some controls have a radial ink reaction to user input. This animation
-  /// controls the progress of these ink reactions.
-  ///
-  /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
-  /// may be used.
-  Animation<double> get reaction => _reaction;
-  late Animation<double> _reaction;
-
-  /// Controls the radial reaction's opacity animation for hover changes.
-  ///
-  /// Some controls have a radial ink reaction to pointer hover. This animation
-  /// controls these ink reaction fade-ins and
-  /// fade-outs.
-  ///
-  /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
-  /// may be used.
-  Animation<double> get reactionHoverFade => _reactionHoverFade;
-  late Animation<double> _reactionHoverFade;
-  late AnimationController _reactionHoverFadeController;
-
-  /// Controls the radial reaction's opacity animation for focus changes.
-  ///
-  /// Some controls have a radial ink reaction to focus. This animation
-  /// controls these ink reaction fade-ins and fade-outs.
-  ///
-  /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
-  /// may be used.
-  Animation<double> get reactionFocusFade => _reactionFocusFade;
-  late Animation<double> _reactionFocusFade;
-  late AnimationController _reactionFocusFadeController;
 
   /// Whether [value] of this control can be changed by user interaction.
   ///
@@ -84,11 +26,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// non-null. If the callback is null, then the control is disabled, and
   /// non-interactive. A disabled checkbox, for example, is displayed using a
   /// grey color and its value cannot be changed.
-  bool get isInteractive => onChanged != null; // Useful for iOS
-
-  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
-  };
+  bool get isInteractive => onChanged != null;
 
   /// Called when the control changes value.
   ///
@@ -99,98 +37,25 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// callback is non-null. If the callback is null, then the control is
   /// disabled, and non-interactive. A disabled checkbox, for example, is
   /// displayed using a grey color and its value cannot be changed.
-  ValueChanged<bool?>? get onChanged; // Useful for iOS
+  ValueChanged<bool?>? get onChanged;
 
   /// False if this control is "inactive" (not checked, off, or unselected).
   ///
   /// If value is true then the control "active" (checked, on, or selected). If
   /// tristate is true and value is null, then the control is considered to be
-  /// in its third or "indeterminate" state.
-  ///
-  /// When the value changes, this object starts the [positionController] and
-  /// [position] animations to animate the visual appearance of the control to
-  /// the new value.
-  bool? get value; // Useful
+  /// in its third or "indeterminate" state..
+  bool? get value;
 
   /// If true, [value] can be true, false, or null, otherwise [value] must
   /// be true or false.
   ///
   /// When [tristate] is true and [value] is null, then the control is
   /// considered to be in its third or "indeterminate" state.
-  bool get tristate;  // Useful
+  bool get tristate;
 
   @override
   void initState() {
     super.initState();
-    _positionController = AnimationController(
-      duration: _kToggleDuration,
-      value: value == false ? 0.0 : 1.0,
-      vsync: this,
-    );
-    _position = CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.easeIn,
-      reverseCurve: Curves.easeOut,
-    );
-    _reactionController = AnimationController(
-      duration: kRadialReactionDuration,
-      vsync: this,
-    );
-    _reaction = CurvedAnimation(
-      parent: _reactionController,
-      curve: Curves.fastOutSlowIn,
-    );
-    _reactionHoverFadeController = AnimationController(
-      duration: _kReactionFadeDuration,
-      value: _hovering || _focused ? 1.0 : 0.0,
-      vsync: this,
-    );
-    _reactionHoverFade = CurvedAnimation(
-      parent: _reactionHoverFadeController,
-      curve: Curves.fastOutSlowIn,
-    );
-    _reactionFocusFadeController = AnimationController(
-      duration: _kReactionFadeDuration,
-      value: _hovering || _focused ? 1.0 : 0.0,
-      vsync: this,
-    );
-    _reactionFocusFade = CurvedAnimation(
-      parent: _reactionFocusFadeController,
-      curve: Curves.fastOutSlowIn,
-    );
-  }
-
-  /// Runs the [position] animation to transition the Toggleable's appearance
-  /// to match [value].
-  ///
-  /// This method must be called whenever [value] changes to ensure that the
-  /// visual representation of the Toggleable matches the current [value].
-  void animateToValue() {
-    if (tristate) {
-      if (value == null) {
-        _positionController.value = 0.0;
-      }
-      if (value ?? true) {
-        _positionController.forward();
-      } else {
-        _positionController.reverse();
-      }
-    } else {
-      if (value ?? false) {
-        _positionController.forward();
-      } else {
-        _positionController.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _positionController.dispose();
-    _reactionController.dispose();
-    _reactionHoverFadeController.dispose();
-    _reactionFocusFadeController.dispose();
-    super.dispose();
   }
 
   /// The most recent [Offset] at which a pointer touched the Toggleable.
@@ -205,7 +70,6 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       setState(() {
         _downPosition = details.localPosition;
       });
-      _reactionController.forward();
     }
   }
 
@@ -231,58 +95,23 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (_downPosition != null) {
       setState(() { _downPosition = null; });
     }
-    _reactionController.reverse();
   }
 
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
       setState(() { _focused = focused; });
-      if (focused) {
-        _reactionFocusFadeController.forward();
-      } else {
-        _reactionFocusFadeController.reverse();
-      }
     }
   }
 
-  bool _hovering = false;
-  void _handleHoverChanged(bool hovering) {
-    if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
-      if (hovering) {
-        _reactionHoverFadeController.forward();
-      } else {
-        _reactionHoverFadeController.reverse();
-      }
-    }
-  }
-
-  /// Describes the current [MaterialState] of the Toggleable.
-  ///
-  /// The returned set will include:
-  ///
-  ///  * [MaterialState.disabled], if [isInteractive] is false
-  ///  * [MaterialState.hovered], if a pointer is hovering over the Toggleable
-  ///  * [MaterialState.focused], if the Toggleable has input focus
-  ///  * [MaterialState.selected], if [value] is true or null
-  Set<MaterialState> get states => <MaterialState>{
-    if (!isInteractive) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (value ?? true) MaterialState.selected,
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
   };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
   ///
-  /// Consider providing a subclass of [ToggleablePainter] as a `painter`, which
-  /// implements logic to draw a radial ink reaction for this control. The
-  /// painter is usually configured with the [reaction], [position],
-  /// [reactionHoverFade], and [reactionFocusFade] animation provided by this
-  /// mixin. It is expected to draw the visuals of the Toggleable based on the
-  /// current value of these animations. The animations are triggered by
-  /// this mixin to transition the Toggleable from one state to another.
+  /// Consider providing a subclass of [ToggleablePainter] as a `painter`.
   ///
   /// This method must be called from the [build] method of the [State] class
   /// that uses this mixin. The returned [Widget] must be returned from the
@@ -291,19 +120,16 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     FocusNode? focusNode,
     Function(bool)? onFocusChange,
     bool autofocus = false,
-    required MaterialStateProperty<MouseCursor> mouseCursor,
     required Size size,
     required CustomPainter painter,
   }) {
     return FocusableActionDetector(
-      actions: _actionMap,
       focusNode: focusNode,
       autofocus: autofocus,
       onFocusChange: onFocusChange,
       enabled: isInteractive,
+      actions: _actionMap,
       onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
         onTapDown: isInteractive ? _handleTapDown : null,
@@ -330,66 +156,6 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// the Toggleable. In their [paint] method subclasses may call
 /// [paintRadialReaction] to draw a radial ink reaction for this control.
 abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
-  /// The visual value of the control.
-  ///
-  /// Usually set to [ToggleableStateMixin.position].
-  Animation<double> get position => _position!;
-  Animation<double>? _position;
-  set position(Animation<double> value) {
-    if (value == _position) {
-      return;
-    }
-    _position?.removeListener(notifyListeners);
-    value.addListener(notifyListeners);
-    _position = value;
-    notifyListeners();
-  }
-
-  /// The visual value of the radial reaction animation.
-  ///
-  /// Usually set to [ToggleableStateMixin.reaction].
-  Animation<double> get reaction => _reaction!;
-  Animation<double>? _reaction;
-  set reaction(Animation<double> value) {
-    if (value == _reaction) {
-      return;
-    }
-    _reaction?.removeListener(notifyListeners);
-    value.addListener(notifyListeners);
-    _reaction = value;
-    notifyListeners();
-  }
-
-  /// Controls the radial reaction's opacity animation for focus changes.
-  ///
-  /// Usually set to [ToggleableStateMixin.reactionFocusFade].
-  Animation<double> get reactionFocusFade => _reactionFocusFade!;
-  Animation<double>? _reactionFocusFade;
-  set reactionFocusFade(Animation<double> value) {
-    if (value == _reactionFocusFade) {
-      return;
-    }
-    _reactionFocusFade?.removeListener(notifyListeners);
-    value.addListener(notifyListeners);
-    _reactionFocusFade = value;
-    notifyListeners();
-  }
-
-  /// Controls the radial reaction's opacity animation for hover changes.
-  ///
-  /// Usually set to [ToggleableStateMixin.reactionHoverFade].
-  Animation<double> get reactionHoverFade => _reactionHoverFade!;
-  Animation<double>? _reactionHoverFade;
-  set reactionHoverFade(Animation<double> value) {
-    if (value == _reactionHoverFade) {
-      return;
-    }
-    _reactionHoverFade?.removeListener(notifyListeners);
-    value.addListener(notifyListeners);
-    _reactionHoverFade = value;
-    notifyListeners();
-  }
-
   /// The color that should be used in the active state (i.e., when
   /// [ToggleableStateMixin.value] is true).
   ///
@@ -418,50 +184,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     notifyListeners();
   }
 
-  /// The color that should be used for the reaction when the toggleable is
-  /// inactive.
-  ///
-  /// Used when the toggleable needs to change the reaction color/transparency
-  /// that is displayed when the toggleable is inactive and tapped.
-  Color get inactiveReactionColor => _inactiveReactionColor!;
-  Color? _inactiveReactionColor;
-  set inactiveReactionColor(Color value) {
-    if (value == _inactiveReactionColor) {
-      return;
-    }
-    _inactiveReactionColor = value;
-    notifyListeners();
-  }
-
-  /// The color that should be used for the reaction when the toggleable is
-  /// active.
-  ///
-  /// Used when the toggleable needs to change the reaction color/transparency
-  /// that is displayed when the toggleable is active and tapped.
-  Color get reactionColor => _reactionColor!;
-  Color? _reactionColor;
-  set reactionColor(Color value) {
-    if (value == _reactionColor) {
-      return;
-    }
-    _reactionColor = value;
-    notifyListeners();
-  }
-
-  /// The color that should be used for the reaction when [isHovered] is true.
-  ///
-  /// Used when the toggleable needs to change the reaction color/transparency,
-  /// when it is being hovered over.
-  Color get hoverColor => _hoverColor!;
-  Color? _hoverColor;
-  set hoverColor(Color value) {
-    if (value == _hoverColor) {
-      return;
-    }
-    _hoverColor = value;
-    notifyListeners();
-  }
-
   /// The color that should be used for the reaction when [isFocused] is true.
   ///
   /// Used when the toggleable needs to change the reaction color/transparency,
@@ -473,17 +195,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
       return;
     }
     _focusColor = value;
-    notifyListeners();
-  }
-
-  /// The splash radius for the radial reaction.
-  double get splashRadius => _splashRadius!;
-  double? _splashRadius;
-  set splashRadius(double value) {
-    if (value == _splashRadius) {
-      return;
-    }
-    _splashRadius = value;
     notifyListeners();
   }
 
@@ -513,59 +224,15 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     notifyListeners();
   }
 
-  /// True if this toggleable is being hovered over by a pointer.
-  bool get isHovered => _isHovered!;
-  bool? _isHovered;
-  set isHovered(bool? value) {
-    if (value == _isHovered) {
+  /// Determines whether the toggleable shows as active.
+  bool get isActive => _isActive!;
+  bool? _isActive;
+  set isActive(bool? value) {
+    if (value == _isActive) {
       return;
     }
-    _isHovered = value;
+    _isActive = value;
     notifyListeners();
-  }
-
-  /// Used by subclasses to paint the radial ink reaction for this control.
-  ///
-  /// The reaction is painted on the given canvas at the given offset. The
-  /// origin is the center point of the reaction (usually distinct from the
-  /// [downPosition] at which the user interacted with the control).
-  void paintRadialReaction({
-    required Canvas canvas,
-    Offset offset = Offset.zero,
-    required Offset origin,
-  }) {
-    if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
-      final Paint reactionPaint = Paint()
-        ..color = Color.lerp(
-          Color.lerp(
-            Color.lerp(inactiveReactionColor, reactionColor, position.value),
-            hoverColor,
-            reactionHoverFade.value,
-          ),
-          focusColor,
-          reactionFocusFade.value,
-        )!;
-      final Animatable<double> radialReactionRadiusTween = Tween<double>(
-        begin: 0.0,
-        end: splashRadius,
-      );
-      final double reactionRadius = isFocused || isHovered
-          ? splashRadius
-          : radialReactionRadiusTween.evaluate(reaction);
-      if (reactionRadius > 0.0) {
-        canvas.drawCircle(origin + offset, reactionRadius, reactionPaint);
-      }
-    }
-  }
-
-
-  @override
-  void dispose() {
-    _position?.removeListener(notifyListeners);
-    _reaction?.removeListener(notifyListeners);
-    _reactionFocusFade?.removeListener(notifyListeners);
-    _reactionHoverFade?.removeListener(notifyListeners);
-    super.dispose();
   }
 
   @override
