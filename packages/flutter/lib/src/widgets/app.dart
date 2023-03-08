@@ -1480,7 +1480,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    return navigator.maybePop();
+    print('justin WidgetsApp didPopRoute calling maybePop');
+    final bool popped = await navigator.maybePop();
+    print('justin WidgetsApp didPopRoute called maybePop, got $popped');
+    return popped;
+    //return navigator.maybePop();
   }
 
   @override

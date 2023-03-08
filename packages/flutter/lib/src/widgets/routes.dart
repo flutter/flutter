@@ -1491,7 +1491,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation? _secondaryAnimationProxy;
 
-  final List<VoidCallback> _onPopCallbacks = <VoidCallback>[];
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
   final Set<CanPopScope> _canPopScopes = <CanPopScope>{};
@@ -1548,8 +1547,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void onPop() {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    for (final VoidCallback callback in List<VoidCallback>.of(_onPopCallbacks)) {
-      callback();
+    for (final CanPopScope widget in _canPopScopes) {
+      widget.onPop?.call();
     }
   }
 
@@ -1657,18 +1656,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _willPopCallbacks.remove(callback);
   }
 
-  // TODO(justinmc): Document. This will be called after the pop has begun. It's
-  // not possible to prevent at pop at that point.
-  void addScopedOnPopCallback(VoidCallback callback) {
-    assert(_scopeKey.currentState != null, 'Tried to add an onPop callback to a route that is not currently in the tree.');
-    _onPopCallbacks.add(callback);
-  }
-
-  void removeScopedOnPopCallback(VoidCallback callback) {
-    assert(_scopeKey.currentState != null, 'Tried to remove an onPop callback from a route that is not currently in the tree.');
-    _onPopCallbacks.remove(callback);
-  }
-
   // TODO(justinmc): Really though what should I be registering here...
   void registerCanPopScope(CanPopScope widget) {
     _canPopScopes.add(widget);
@@ -1682,6 +1669,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   void updateSystemNavigator() {
     final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
+    // TODO(justinmc): This is probably wrong in the case of nested navigators.
     SystemNavigator.updateNavigationStackStatus(popDisabled);
   }
 

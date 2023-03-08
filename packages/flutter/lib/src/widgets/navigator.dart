@@ -1413,6 +1413,7 @@ class Navigator extends StatefulWidget {
   const Navigator({
     super.key,
     this.pages = const <Page<dynamic>>[],
+    // TODO(justinmc): Is this something else I need to worry about? It returns a bool.
     this.onPopPage,
     this.initialRoute,
     this.onGenerateInitialRoutes = Navigator.defaultGenerateInitialRoutes,
@@ -4953,9 +4954,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:
+        // TODO(justinmc): This will eventually call onPop. Is it better to do
+        // it here? I guess I probably want a direct call to `pop` to also call
+        // onPop though.
         pop(result);
         return true;
       case RoutePopDisposition.doNotPop:
+        // TODO(justinmc): Should I pass a boolean indicating whether or not the
+        // pop was successful?
+        lastEntry.route.onPop();
         return true;
     }
     /*
@@ -5261,7 +5268,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
 
-    // TODO(justinmc): Probably not the best place for this.
+    // TODO(justinmc): Probably not the best place for this. Doesn't consider
+    // nested Navigators.
     final int numberOfRoutes = _history.where(_RouteEntry.isPresentPredicate).length;
     print('justin calling updateNavigationStackStatus, _history length is ${_history.length}, numberOfRoutes is $numberOfRoutes');
     SystemNavigator.updateNavigationStackStatus(numberOfRoutes > 1);
