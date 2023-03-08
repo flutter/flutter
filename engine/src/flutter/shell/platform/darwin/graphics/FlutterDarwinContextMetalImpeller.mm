@@ -10,6 +10,7 @@
 #include "flutter/shell/common/context_options.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "impeller/entity/mtl/entity_shaders.h"
+#include "impeller/entity/mtl/framebuffer_blend_shaders.h"
 #include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/scene/shaders/mtl/scene_shaders.h"
 
@@ -23,6 +24,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext() {
                                              impeller_scene_shaders_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
                                              impeller_modern_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,
+                                             impeller_framebuffer_blend_shaders_length),
   };
   auto context = impeller::ContextMTL::Create(shader_mappings, "Impeller Library");
   if (!context) {

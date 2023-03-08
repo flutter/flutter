@@ -32,6 +32,10 @@ std::optional<Rect> FramebufferBlendContents::GetCoverage(
 bool FramebufferBlendContents::Render(const ContentContext& renderer,
                                       const Entity& entity,
                                       RenderPass& pass) const {
+  if (!renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    return false;
+  }
+
   using VS = FramebufferBlendScreenPipeline::VertexShader;
   using FS = FramebufferBlendScreenPipeline::FragmentShader;
 
