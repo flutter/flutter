@@ -3187,8 +3187,6 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         } else {
           y = allowedRect.bottom - childSize.height;
         }
-      } else {
-        y = anchorRect.bottom + alignmentOffset.dy;
       }
     } else {
       if (offBottom(y)) {
@@ -3198,8 +3196,6 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         } else {
           y = allowedRect.bottom - childSize.height;
         }
-      } else {
-        y = anchorRect.top;
       }
     }
     return Offset(x, y);
