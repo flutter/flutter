@@ -1,0 +1,137 @@
+name: I have a problem with my Flutter application.
+description: |
+  You are writing an application with Flutter but the application is crashing
+  or throws an exception, a widget is buggy, or something looks wrong.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for using Flutter!
+
+        If you are looking for support, please check out our documentation
+        or consider asking a question on Stack Overflow:
+
+          - https://flutter.dev/
+          - https://api.flutter.dev/
+          - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
+
+        If you have found a bug or if our documentation doesn't have an answer
+        to what you're looking for, then fill out the template below.
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
+        required: true
+      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Please tell us exactly how to reproduce the problem you are running into.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected results
+      description: Please tell us what is expected to happen
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual results
+      description: Please tell us what is actually happening
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Code sample
+      description: |
+        Please create a minimal reproducible sample that shows the problem
+        and attach it below between the lines with the backticks.
+
+        To create it you can use `flutter create bug` command and update the `main.dart` file.
+
+        Alternatively, you can use https://dartpad.dev/
+        which is capable of creating and running small Flutter apps.
+
+        If your sample includes changes to native code, ideally you can create
+        a public Github repository and paste the link to it here
+
+        Without this we will unlikely be able to progress on the issue, and because of that
+        we regretfully will have to close it.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks
+        or the above mentioned ways to upload your code sample.
+      value: |
+        <details>
+        <summary>Code sample</summary>
+
+        ```dart
+
+        <!-- Paste your code here -->
+
+        ```
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Screenshots or Video
+      description: |
+        Upload any screenshots or video of the bug if applicable.
+      value: |
+        <details>
+        <summary>Screenshots / Video demonstration</summary>
+
+        <!-- Upload media here -->
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Logs
+      description: |
+        Include the full logs of the commands you are running between the lines
+        with the backticks below. If you are running any `flutter` commands,
+        please include the output of running them with `--verbose`; for example,
+        the output of running `flutter --verbose create foo`.
+
+        If the logs are too large to be uploaded to Github, you may upload
+        them as a `txt` file or use online tools like https://pastebin.com to
+        share it.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks
+        or the above mentioned ways to upload logs.
+      value: |
+        <details>
+        <summary>Logs</summary>
+
+        ```console
+
+        <!-- Paste your logs here -->
+
+        ```
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Flutter Doctor output
+      description: |
+        Please provide the full output of running `flutter doctor -v`
+      value: |
+        <details>
+        <summary>Doctor output</summary>
+
+        ```console
+
+        <!-- Paste your output here -->
+
+        ```
+
+        </details>
+    validations:
+      required: true
