@@ -188,12 +188,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Uri? get debugUri {
-    if (argResults!['debug-url'] == null) {
+    final String? debugUrl = stringArg('debug-url');
+    if (debugUrl == null) {
       return null;
     }
-    final Uri? uri = Uri.tryParse(stringArg('debug-url')!);
+    final Uri? uri = Uri.tryParse(debugUrl);
     if (uri == null) {
-      throwToolExit('Invalid `--debug-url`: ${stringArg('debug-url')}');
+      throwToolExit('Invalid `--debug-url`: $debugUrl');
     }
     if (!uri.hasPort) {
       throwToolExit('Port not specified for `--debug-url`: $uri');
