@@ -329,6 +329,7 @@ class FlutterDevice {
               restart: restart,
               compileExpression: compileExpression,
               getSkSLMethod: getSkSLMethod,
+              flutterProject: FlutterProject.current(),
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
               logger: globals.logger,

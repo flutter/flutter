@@ -3557,6 +3557,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final TextSelection oldTextSelection = textEditingValue.selection;
+
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
@@ -3570,6 +3572,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     final String currentText = _value.text;
     if (oldValue.text != currentText) {
@@ -3585,6 +3588,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     endBatchEdit();
+  }
+
+  void _bringIntoViewBySelectionState(TextSelection oldSelection, TextSelection newSelection, SelectionChangedCause? cause) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          if (oldSelection.baseOffset != newSelection.baseOffset) {
+            bringIntoView(newSelection.base);
+          } else if (oldSelection.extentOffset != newSelection.extentOffset) {
+            bringIntoView(newSelection.extent);
+          }
+        }
+        break;
+    }
   }
 
   void _onCursorColorTick() {
@@ -5285,6 +5312,10 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
   late final _Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
 
+  // This is used to prevent a reentrant call to the history (a call to _undo or _redo
+  // should not call _push to add a new entry in the history).
+  bool _locked = false;
+
   // This duration was chosen as a best fit for the behavior of Mac, Linux,
   // and Windows undo/redo state save durations, but it is not perfect for any
   // of them.
@@ -5305,13 +5336,19 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
     if (nextValue.text == widget.controller.text) {
       return;
     }
+    _locked = true;
     widget.onTriggered(widget.controller.value.copyWith(
       text: nextValue.text,
       selection: nextValue.selection,
     ));
+    _locked = false;
   }
 
   void _push() {
+    // Do not try to push a new state when the change is related to an undo or redo.
+    if (_locked) {
+      return;
+    }
     if (widget.controller.value == TextEditingValue.empty) {
       return;
     }

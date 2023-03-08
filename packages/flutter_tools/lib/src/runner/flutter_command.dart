@@ -642,12 +642,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void useDartDefineConfigJsonFileOption() {
-    argParser.addOption(
+    argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.',
-      valueHelp: 'use-define-config.json'
+          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
+      valueHelp: 'use-define-config.json',
+      splitCommas: false,
     );
   }
 
@@ -1043,6 +1045,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-embedder-api',
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental embedder API on iOS.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1178,9 +1187,8 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArgDeprecated(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    List<String> dartDefines = argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-        ? stringsArg(FlutterOptions.kDartDefinesOption)
-        : <String>[];
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.autoDetect;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
@@ -1189,27 +1197,6 @@ abstract class FlutterCommand extends Command<void> {
         webRenderer = mappedMode;
       }
       dartDefines = updateDartDefines(dartDefines, webRenderer);
-    }
-
-    Map<String, Object>? defineConfigJsonMap;
-    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          defineConfigJsonMap = <String, Object>{};
-          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            defineConfigJsonMap?[key]=value as Object;
-          });
-          defineConfigJsonMap.forEach((String key, Object value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
-        }
-      }
     }
 
     return BuildInfo(buildMode,
@@ -1325,6 +1312,56 @@ abstract class FlutterCommand extends Command<void> {
     if (deprecated) {
       globals.printWarning(deprecationWarning);
     }
+  }
+
+  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+    final List<String> dartDefines = <String>[];
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
+      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+    }
+
+    if (defineConfigJsonMap == null) {
+      return dartDefines;
+    }
+    defineConfigJsonMap.forEach((String key, Object value) {
+      dartDefines.add('$key=$value');
+    });
+
+    return dartDefines;
+  }
+
+  Map<String, Object>? extractDartDefineConfigJsonMap() {
+    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
+      final List<String> configJsonPaths = stringsArg(
+          FlutterOptions.kDartDefineFromFileOption,
+      );
+
+      for (final String path in configJsonPaths) {
+        if (!globals.fs.isFileSync(path)) {
+          throwToolExit('Json config define file "--${FlutterOptions
+              .kDartDefineFromFileOption}=$path" is not a file, '
+              'please fix first!');
+        }
+
+        final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+        try {
+          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+          (json.decode(configJsonRaw) as Map<String, dynamic>)
+              .forEach((String key, dynamic value) {
+            dartDefineConfigJsonMap[key] = value as Object;
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions
+              .kDartDefineFromFileOption}=$path" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+
+    return dartDefineConfigJsonMap;
   }
 
   /// Updates dart-defines based on [webRenderer].
@@ -1491,7 +1528,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
@@ -1499,14 +1536,14 @@ abstract class FlutterCommand extends Command<void> {
     }
     final DeviceManager deviceManager = globals.deviceManager!;
     List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       timeout: deviceDiscoveryTimeout,
     );
 
     if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedDeviceId) {
         globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+        final List<Device> allDevices = await deviceManager.getAllDevices();
         if (allDevices.isNotEmpty) {
           globals.logger.printStatus('');
           globals.logger.printStatus('The following devices were found:');
@@ -1543,7 +1580,7 @@ abstract class FlutterCommand extends Command<void> {
         } else {
           // Show an error message asking the user to specify `-d all` if they
           // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+          final List<Device> allDevices = await deviceManager.getAllDevices();
           globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
           globals.logger.printStatus('');
           await Device.printDevices(allDevices, globals.logger);
@@ -1607,18 +1644,20 @@ abstract class FlutterCommand extends Command<void> {
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
   ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
+  /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeUnsupportedDevices = false,
+    bool includeDevicesUnsupportedByProject = false,
   }) async {
-    List<Device>? deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+    List<Device>? deviceList = await findAllTargetDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
     if (deviceList == null) {
       return null;
     }
     if (deviceList.length > 1) {
       globals.printStatus(userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllConnectedDevices();
+      deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
       return null;
@@ -1694,9 +1733,6 @@ abstract class FlutterCommand extends Command<void> {
     }
     return argResults![name] as String?;
   }
-
-  /// Gets the parsed command-line option named [name] as an `int`.
-  int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {
