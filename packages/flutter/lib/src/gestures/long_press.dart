@@ -250,9 +250,10 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     super.postAcceptSlopTolerance = null,
     super.supportedDevices,
     super.debugOwner,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+    AllowedButtonsFilter? allowedButtonsFilter,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
+         allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior,
        );
 
   bool _longPressAccepted = false;
