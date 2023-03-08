@@ -450,7 +450,8 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   return <String>[
     command,
-    if (!command.contains('--enable-impeller'))
+    if (!command.contains('--enable-impeller')
+        && deviceOperatingSystem == DeviceOperatingSystem.ios)
       '--enable-impeller',
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
       ...<String>[
