@@ -678,7 +678,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final TextStyle? titleTextStyle;
 
   /// {@template flutter.material.appbar.systemOverlayStyle}
-  /// Specifies the style to use for the system overlays that overlap the AppBar.
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android).
   ///
   /// If this property is null, then [AppBarTheme.systemOverlayStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, an appropriate
@@ -692,7 +693,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@endtemplate}
   //
   /// See also:
-  ///  * [SystemChrome.setSystemUIOverlayStyle]
+  ///
+  ///  * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
+  ///  * [SystemChrome.setSystemUIOverlayStyle], the imperative API for setting
+  ///    system overlays style.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   /// {@template flutter.material.appbar.forceMaterialTransparency}
