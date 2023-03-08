@@ -51,6 +51,8 @@ class ContextMTL final : public Context,
 
   ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
 
+  bool SupportsFramebufferFetch() const;
+
   // |Context|
   bool IsValid() const override;
 

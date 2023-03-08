@@ -40,6 +40,7 @@ impeller_component("playground") {
 
   public_deps = [
     "../entity:entity_shaders",
+    "../entity:framebuffer_blend_entity_shaders",
     "../entity:modern_entity_shaders",
     "../fixtures:shader_fixtures",
     "../renderer",

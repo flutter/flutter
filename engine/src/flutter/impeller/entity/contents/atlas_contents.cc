@@ -12,6 +12,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry.h"
@@ -21,10 +22,6 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
-
-#ifdef FML_OS_PHYSICAL_IOS
-#include "impeller/entity/contents/framebuffer_blend_contents.h"
-#endif
 
 namespace impeller {
 
@@ -224,38 +221,39 @@ bool AtlasContents::Render(const ContentContext& renderer,
   dst_contents->SetSubAtlas(sub_atlas);
   dst_contents->SetCoverage(sub_coverage);
 
-#ifdef FML_OS_PHYSICAL_IOS
-  auto new_texture = renderer.MakeSubpass(
-      "Atlas Blend", sub_atlas->size,
-      [&](const ContentContext& context, RenderPass& pass) {
-        Entity entity;
-        entity.SetContents(dst_contents);
-        entity.SetBlendMode(BlendMode::kSource);
-        if (!entity.Render(context, pass)) {
-          return false;
-        }
-        if (blend_mode_ >= Entity::kLastPipelineBlendMode) {
-          auto contents = std::make_shared<FramebufferBlendContents>();
-          contents->SetBlendMode(blend_mode_);
-          contents->SetChildContents(src_contents);
-          entity.SetContents(std::move(contents));
+  std::shared_ptr<Texture> new_texture;
+  if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    new_texture = renderer.MakeSubpass(
+        "Atlas Blend", sub_atlas->size,
+        [&](const ContentContext& context, RenderPass& pass) {
+          Entity entity;
+          entity.SetContents(dst_contents);
           entity.SetBlendMode(BlendMode::kSource);
+          if (!entity.Render(context, pass)) {
+            return false;
+          }
+          if (blend_mode_ >= Entity::kLastPipelineBlendMode) {
+            auto contents = std::make_shared<FramebufferBlendContents>();
+            contents->SetBlendMode(blend_mode_);
+            contents->SetChildContents(src_contents);
+            entity.SetContents(std::move(contents));
+            entity.SetBlendMode(BlendMode::kSource);
+            return entity.Render(context, pass);
+          }
+          entity.SetContents(src_contents);
+          entity.SetBlendMode(blend_mode_);
           return entity.Render(context, pass);
-        }
-        entity.SetContents(src_contents);
-        entity.SetBlendMode(blend_mode_);
-        return entity.Render(context, pass);
-      });
-#else
-  auto contents = ColorFilterContents::MakeBlend(
-      blend_mode_,
-      {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
-  auto snapshot = contents->RenderToSnapshot(renderer, entity);
-  if (!snapshot.has_value()) {
-    return false;
+        });
+  } else {
+    auto contents = ColorFilterContents::MakeBlend(
+        blend_mode_,
+        {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
+    auto snapshot = contents->RenderToSnapshot(renderer, entity);
+    if (!snapshot.has_value()) {
+      return false;
+    }
+    new_texture = snapshot.value().texture;
   }
-  auto new_texture = snapshot.value().texture;
-#endif
 
   auto child_contents = AtlasTextureContents(*this);
   child_contents.SetAlpha(alpha_);

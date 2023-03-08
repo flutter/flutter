@@ -42,7 +42,7 @@ static uint32_t ParseMSLVersion(const std::string& msl_version) {
       }
     }
   }
-  if (major < 1 || minor < 2) {
+  if (major < 1 || (major == 1 && minor < 2)) {
     std::cerr << "--metal-version version must be at least 1.2. Have "
               << msl_version << std::endl;
   }

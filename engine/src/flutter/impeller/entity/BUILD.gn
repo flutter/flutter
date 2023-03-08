@@ -77,26 +77,40 @@ impeller_shaders("modern_entity_shaders") {
     "shaders/radial_gradient_ssbo_fill.frag",
     "shaders/sweep_gradient_ssbo_fill.frag",
   ]
-  if (is_ios && !use_ios_simulator) {
-    shaders += [
-      "shaders/blending/ios/framebuffer_blend.vert",
-      "shaders/blending/ios/framebuffer_blend_color.frag",
-      "shaders/blending/ios/framebuffer_blend_colorburn.frag",
-      "shaders/blending/ios/framebuffer_blend_colordodge.frag",
-      "shaders/blending/ios/framebuffer_blend_darken.frag",
-      "shaders/blending/ios/framebuffer_blend_difference.frag",
-      "shaders/blending/ios/framebuffer_blend_exclusion.frag",
-      "shaders/blending/ios/framebuffer_blend_hardlight.frag",
-      "shaders/blending/ios/framebuffer_blend_hue.frag",
-      "shaders/blending/ios/framebuffer_blend_lighten.frag",
-      "shaders/blending/ios/framebuffer_blend_luminosity.frag",
-      "shaders/blending/ios/framebuffer_blend_multiply.frag",
-      "shaders/blending/ios/framebuffer_blend_overlay.frag",
-      "shaders/blending/ios/framebuffer_blend_saturation.frag",
-      "shaders/blending/ios/framebuffer_blend_screen.frag",
-      "shaders/blending/ios/framebuffer_blend_softlight.frag",
-    ]
+}
+
+impeller_shaders("framebuffer_blend_entity_shaders") {
+  name = "framebuffer_blend"
+
+  if (is_mac && !is_ios) {
+    # Note: this needs to correspond to the Apple7 Support family
+    # for M1 and M2.
+    metal_version = "2.3"
   }
+
+  # This version is to disable malioc checks.
+  if (impeller_enable_opengles) {
+    gles_language_version = "460"
+  }
+
+  shaders = [
+    "shaders/blending/ios/framebuffer_blend.vert",
+    "shaders/blending/ios/framebuffer_blend_color.frag",
+    "shaders/blending/ios/framebuffer_blend_colorburn.frag",
+    "shaders/blending/ios/framebuffer_blend_colordodge.frag",
+    "shaders/blending/ios/framebuffer_blend_darken.frag",
+    "shaders/blending/ios/framebuffer_blend_difference.frag",
+    "shaders/blending/ios/framebuffer_blend_exclusion.frag",
+    "shaders/blending/ios/framebuffer_blend_hardlight.frag",
+    "shaders/blending/ios/framebuffer_blend_hue.frag",
+    "shaders/blending/ios/framebuffer_blend_lighten.frag",
+    "shaders/blending/ios/framebuffer_blend_luminosity.frag",
+    "shaders/blending/ios/framebuffer_blend_multiply.frag",
+    "shaders/blending/ios/framebuffer_blend_overlay.frag",
+    "shaders/blending/ios/framebuffer_blend_saturation.frag",
+    "shaders/blending/ios/framebuffer_blend_screen.frag",
+    "shaders/blending/ios/framebuffer_blend_softlight.frag",
+  ]
 }
 
 impeller_component("entity") {
@@ -143,6 +157,8 @@ impeller_component("entity") {
     "contents/filters/srgb_to_linear_filter_contents.h",
     "contents/filters/yuv_to_rgb_filter_contents.cc",
     "contents/filters/yuv_to_rgb_filter_contents.h",
+    "contents/framebuffer_blend_contents.cc",
+    "contents/framebuffer_blend_contents.h",
     "contents/gradient_generator.cc",
     "contents/gradient_generator.h",
     "contents/linear_gradient_contents.cc",
@@ -179,15 +195,9 @@ impeller_component("entity") {
     "inline_pass_context.h",
   ]
 
-  if (is_ios && !use_ios_simulator) {
-    sources += [
-      "contents/framebuffer_blend_contents.cc",
-      "contents/framebuffer_blend_contents.h",
-    ]
-  }
-
   public_deps = [
     ":entity_shaders",
+    ":framebuffer_blend_entity_shaders",
     ":modern_entity_shaders",
     "../archivist",
     "../image",
