@@ -163,6 +163,12 @@ enum TraversalEdgeBehavior {
 abstract class FocusTraversalPolicy with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
+  ///
+  /// {@template flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  /// The `requestFocusCallback` can be used to overwrite the default behaviour
+  /// of the focus requests. If `requestFocusCallback`
+  /// is null, defaults to [defaultTraversalRequestFocusCallback].
+  /// {@endtemplate}
   const FocusTraversalPolicy({
     TraversalRequestFocusCallback? requestFocusCallback
   }) : requestFocusCallback = requestFocusCallback ?? defaultTraversalRequestFocusCallback;
@@ -997,6 +1003,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Constructs a traversal policy that orders widgets for keyboard traversal
   /// based on the widget hierarchy order.
+  ///
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
   WidgetOrderTraversalPolicy({super.requestFocusCallback});
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) => descendants;
@@ -1166,6 +1174,8 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
 ///    explicitly using [FocusTraversalOrder] widgets.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Constructs a traversal policy that orders the widgets in "reading order".
+  ///
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
   ReadingOrderTraversalPolicy({super.requestFocusCallback});
 
   // Collects the given candidates into groups by directionality. The candidates
