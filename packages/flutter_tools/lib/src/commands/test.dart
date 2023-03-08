@@ -313,7 +313,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'directory (or one of its subdirectories).');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final bool buildTestAssets = boolArgDeprecated('test-assets');
+    final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
     final String? tags = stringArgDeprecated('tags');
@@ -343,7 +343,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
-    final bool startPaused = boolArgDeprecated('start-paused');
+    final bool startPaused = boolArg('start-paused');
     if (startPaused && _testFileUris.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -390,10 +390,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
-    final bool machine = boolArgDeprecated('machine');
+    final bool machine = boolArg('machine');
     CoverageCollector? collector;
-    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage') ||
-        boolArgDeprecated('branch-coverage')) {
+    if (boolArg('coverage') || boolArg('merge-coverage') ||
+        boolArg('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
@@ -401,7 +401,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
-        branchCoverage: boolArgDeprecated('branch-coverage'),
+        branchCoverage: boolArg('branch-coverage'),
       );
     }
 
@@ -415,12 +415,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
-      disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
-      serveObservatory: boolArgDeprecated('serve-observatory'),
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      serveObservatory: boolArg('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
-      nullAssertions: boolArgDeprecated(FlutterOptions.kNullAssertions),
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
     Device? integrationTestDevice;
@@ -464,10 +464,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
-      enableVmService: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
-      ipv6: boolArgDeprecated('ipv6'),
+      enableVmService: collector != null || startPaused || boolArg('enable-vmservice'),
+      ipv6: boolArg('ipv6'),
       machine: machine,
-      updateGoldens: boolArgDeprecated('update-goldens'),
+      updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
@@ -476,7 +476,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       reporter: stringArgDeprecated('reporter'),
       fileReporter: stringArg('file-reporter'),
       timeout: stringArgDeprecated('timeout'),
-      runSkipped: boolArgDeprecated('run-skipped'),
+      runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
@@ -489,7 +489,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       final Stopwatch? collectTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageDataCollect);
       final bool collectionResult = await collector.collectCoverageData(
         stringArgDeprecated('coverage-path'),
-        mergeCoverageData: boolArgDeprecated('merge-coverage'),
+        mergeCoverageData: boolArg('merge-coverage'),
       );
       testTimeRecorder?.stop(TestTimePhases.CoverageDataCollect, collectTimeRecorderStopwatch!);
       if (!collectionResult) {

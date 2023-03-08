@@ -171,16 +171,16 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      boolArgDeprecated('csp'),
+      boolArg('csp'),
       stringArgDeprecated('pwa-strategy')!,
-      boolArgDeprecated('source-maps'),
-      boolArgDeprecated('native-null-assertions'),
+      boolArg('source-maps'),
+      boolArg('native-null-assertions'),
       wasmRequested,
       baseHref: baseHref,
       dart2jsOptimization: stringArgDeprecated('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
-      dumpInfo: boolArgDeprecated('dump-info'),
-      noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
+      dumpInfo: boolArg('dump-info'),
+      noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }

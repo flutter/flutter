@@ -111,12 +111,12 @@ class ConfigCommand extends FlutterCommand {
           '    flutter config --android-studio-dir "/opt/Android Studio"');
     }
 
-    if (boolArgDeprecated('machine')) {
+    if (boolArg('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();
     }
 
-    if (boolArgDeprecated('clear-features')) {
+    if (boolArg('clear-features')) {
       for (final Feature feature in allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
@@ -127,7 +127,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('analytics') ?? false) {
-      final bool value = boolArgDeprecated('analytics');
+      final bool value = boolArg('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
@@ -167,7 +167,7 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults?.wasParsed(configSetting) ?? false) {
-        final bool keyValue = boolArgDeprecated(configSetting);
+        final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
       }

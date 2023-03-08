@@ -171,7 +171,7 @@ class DriveCommand extends RunCommandBase {
   // specified not to.
   @override
   bool get shouldRunPub {
-    if (argResults!.wasParsed('pub') && !boolArgDeprecated('pub')) {
+    if (argResults!.wasParsed('pub') && !boolArg('pub')) {
       return false;
     }
     return true;
@@ -226,7 +226,7 @@ class DriveCommand extends RunCommandBase {
       _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
-    return !boolArgDeprecated('publish-port');
+    return !boolArg('publish-port');
   }
 
   @override
@@ -294,7 +294,7 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArgDeprecated('multidex'))
+            if (boolArg('multidex'))
               'multidex': true,
           }
         );
@@ -317,14 +317,14 @@ class DriveCommand extends RunCommandBase {
         <String, String>{},
         packageConfig,
         chromeBinary: stringArgDeprecated('chrome-binary'),
-        headless: boolArgDeprecated('headless'),
+        headless: boolArg('headless'),
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
         browserName: stringArgDeprecated('browser-name'),
         driverPort: stringArgDeprecated('driver-port') != null
           ? int.tryParse(stringArgDeprecated('driver-port')!)
           : null,
-        androidEmulator: boolArgDeprecated('android-emulator'),
+        androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
       );
 
@@ -344,7 +344,7 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArgDeprecated('keep-app-running')) {
+      if (boolArg('keep-app-running')) {
         _logger.printStatus('Leaving the application running.');
       } else {
         final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null

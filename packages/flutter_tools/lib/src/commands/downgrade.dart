@@ -127,7 +127,7 @@ class DowngradeCommand extends FlutterCommand {
     // If there is a terminal attached, prompt the user to confirm the downgrade.
     final Stdio stdio = _stdio!;
     final Terminal terminal = _terminal!;
-    if (stdio.hasTerminal && boolArgDeprecated('prompt')) {
+    if (stdio.hasTerminal && boolArg('prompt')) {
       terminal.usesTerminalUi = true;
       final String result = await terminal.promptForCharInput(
         const <String>['y', 'n'],

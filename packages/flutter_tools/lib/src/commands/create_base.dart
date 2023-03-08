@@ -327,7 +327,7 @@ abstract class CreateBase extends FlutterCommand {
   String get projectName {
     final String projectName =
         stringArgDeprecated('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArgDeprecated('skip-name-checks')) {
+    if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
@@ -527,7 +527,7 @@ abstract class CreateBase extends FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    if (boolArgDeprecated('pub')) {
+    if (boolArg('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,

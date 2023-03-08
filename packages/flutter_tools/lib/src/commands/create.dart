@@ -256,10 +256,10 @@ class CreateCommand extends CreateBase {
 
     final String organization = await getOrganization();
 
-    final bool overwrite = boolArgDeprecated('overwrite');
+    final bool overwrite = boolArg('overwrite');
     validateProjectDir(overwrite: overwrite);
 
-    if (boolArgDeprecated('with-driver-test')) {
+    if (boolArg('with-driver-test')) {
       globals.printWarning(
         'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
@@ -324,7 +324,7 @@ class CreateCommand extends CreateBase {
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
-      implementationTests: boolArgDeprecated('implementation-tests'),
+      implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
@@ -408,12 +408,12 @@ class CreateCommand extends CreateBase {
         break;
     }
 
-    if (boolArgDeprecated('pub')) {
+    if (boolArg('pub')) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
       await pub.get(
         context: pubContext,
         project: project,
-        offline: boolArgDeprecated('offline'),
+        offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
       await project.ensureReadyForPlatformSpecificTooling(

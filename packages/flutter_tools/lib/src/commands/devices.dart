@@ -67,7 +67,7 @@ class DevicesCommand extends FlutterCommand {
     );
 
     await output.findAndOutputAllTargetDevices(
-      machine: boolArgDeprecated('machine'),
+      machine: boolArg('machine'),
     );
 
     return FlutterCommandResult.success();

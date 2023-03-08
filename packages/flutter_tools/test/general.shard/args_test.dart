@@ -49,11 +49,11 @@ void main() {
     expect(command.boolArg('key'), true);
     expect(command.boolArg('empty'), null);
 
-    expect(command.boolArgDeprecated('key'), true);
-    expect(() => command.boolArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.boolArg('key'), true);
+    expect(() => command.boolArg('empty'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.boolArg('key-false'), false);
-    expect(command.boolArgDeprecated('key-false'), false);
+    expect(command.boolArg('key-false'), false);
   });
 
   testUsingContext('String? safe argResults', () async {
