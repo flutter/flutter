@@ -1619,13 +1619,13 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no flag named [name] was parsed (either from the command-line or from
   /// defaults), an [ArgumentError] is thrown.
-  bool boolArg(String name) => argResults?[name] as bool? ?? false;
+  bool boolArg(String name) => argResults![name] as bool? ?? false;
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was parsed (either from the command-line or from
   /// defaults), an [ArgumentError] is thrown.
-  String? stringArg(String name) => argResults?[name] as String?;
+  String? stringArg(String name) => argResults![name] as String?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {
