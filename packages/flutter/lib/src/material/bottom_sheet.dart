@@ -78,6 +78,7 @@ class BottomSheet extends StatefulWidget {
     this.onDragStart,
     this.onDragEnd,
     this.backgroundColor,
+    this.shadowColor,
     this.elevation,
     this.shape,
     this.clipBehavior,
@@ -133,6 +134,18 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to null and falls back to [Material]'s default.
   final Color? backgroundColor;
+
+  /// The color of the shadow below the sheet.
+  ///
+  /// If this property is null, then [BottomSheetThemeData.shadowColor] of
+  /// [ThemeData.bottomSheetTheme] is used. If that is also null, the default value
+  /// is transparent.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], which defines the size of the shadow below the sheet.
+  ///  * [shape], which defines the shape of the sheet and its shadow.
+  final Color? shadowColor;
 
   /// The z-coordinate at which to place this material relative to its parent.
   ///
@@ -275,6 +288,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final BoxConstraints? constraints = widget.constraints ?? bottomSheetTheme.constraints;
     final Color? color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
+    final Color? shadowColor = widget.shadowColor ?? bottomSheetTheme.shadowColor ?? defaults.shadowColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
@@ -284,6 +298,7 @@ class _BottomSheetState extends State<BottomSheet> {
       color: color,
       elevation: elevation,
       surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
       shape: shape,
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
@@ -609,8 +624,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The [useSafeArea] parameter specifies whether a [SafeArea] is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using [MediaQuery.removePadding].
+/// The [useSafeArea] parameter specifies whether the sheet will avoid system
+/// intrusions on the top, left, and right. If false, no SafeArea is added
+/// and the top padding is consumed using [MediaQuery.removePadding].
+/// Defaults to false.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
@@ -768,12 +785,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
-  /// If useSafeArea is true, a [SafeArea] is inserted.
+  /// Whether to avoid system intrusions on the top, left, and right.
   ///
-  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-  /// and isn't exposed to the top padding of the MediaQuery.
+  /// If true, a [SafeArea] is inserted to keep the bottom sheet away from
+  /// system intrusions at the top, left, and right sides of the screen.
   ///
-  /// Default is false.
+  /// If false, the bottom sheet isn't exposed to the top padding of the
+  /// MediaQuery.
+  ///
+  /// In either case, the bottom sheet extends all the way to the bottom of
+  /// the screen, including any system intrusions.
+  ///
+  /// The default is false.
   final bool useSafeArea;
 
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
@@ -856,11 +879,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    // If useSafeArea is true, a SafeArea is inserted.
-    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
+      ? SafeArea(bottom: false, child: content)
       : MediaQuery.removePadding(
           context: context,
           removeTop: true,
@@ -1142,6 +1162,9 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

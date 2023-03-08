@@ -560,18 +560,13 @@ class ResidentWebRunner extends ResidentRunner {
         // thrown if we're not already subscribed.
       }
       await setUpVmService(
-        (String isolateId, {
-          bool? force,
-          bool? pause,
-        }) async {
+        reloadSources: (String isolateId, {bool? force, bool? pause}) async {
           await restart(pause: pause);
         },
-        null,
-        null,
-        device!.device,
-        null,
-        printStructuredErrorLog,
-        _vmService.service,
+        device: device!.device,
+        flutterProject: flutterProject,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
+        vmService: _vmService.service,
       );
 
 
