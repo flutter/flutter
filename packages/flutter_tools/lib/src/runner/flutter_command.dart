@@ -1615,8 +1615,10 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageFactory? applicationPackages;
 
-  /// Gets the parsed command-line option named [name] as a `bool`.
-  /// This has been deprecated, use [boolArg] instead.
+  /// Gets the parsed command-line flag named [name] as a `bool`.
+  ///
+  /// If no flag named [name] was parsed (either from the command-line or from
+  /// defaults), an [ArgumentError] is thrown.
   bool boolArgDeprecated(String name) => argResults?[name] as bool? ?? false;
 
   /// Gets the parsed command-line option named [name] as a `bool?`.
