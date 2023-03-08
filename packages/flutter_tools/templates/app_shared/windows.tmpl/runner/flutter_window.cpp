@@ -1,13 +1,73 @@
 #include "flutter_window.h"
-
+#include <Windows.h>
 #include <optional>
-
+#include <WinHttp.h>
+#include <flutter/binary_messenger.h>
+#include <flutter/standard_method_codec.h>
+#include <flutter/method_channel.h>
+#include <flutter/method_result_functions.h>
 #include "flutter/generated_plugin_registrant.h"
+#include <string>
+#pragma comment(lib, "winhttp")
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
 FlutterWindow::~FlutterWindow() {}
+
+
+std::string convertLPWSTRToStdString(LPWSTR lpwszStr) {
+    // Determine the length of the LPWSTR string
+    int strLength = WideCharToMultiByte(CP_UTF8, 0, lpwszStr, -1, NULL, 0, NULL, NULL);
+
+    // Allocate a buffer for the converted string
+    char* pszStr = new char[strLength];
+
+    // Convert the LPWSTR string to a UTF-8 encoded std::string
+    WideCharToMultiByte(CP_UTF8, 0, lpwszStr, -1, pszStr, strLength, NULL, NULL);
+    std::string str(pszStr);
+
+    // Free the buffer
+    delete[] pszStr;
+
+    return str;
+}
+
+std::string ConvertProxyConfigToString(const WINHTTP_CURRENT_USER_IE_PROXY_CONFIG& proxyConfig) {
+    std::string result = convertLPWSTRToStdString(proxyConfig.lpszProxy);
+    return result;
+}
+
+void initMethodChannel(flutter::FlutterEngine* flutter_instance) {
+    // name your channel
+    const static std::string channel_name("system_proxy");
+
+    auto channel =
+        std::make_unique<flutter::MethodChannel<>>(
+            flutter_instance->messenger(), channel_name,
+            &flutter::StandardMethodCodec::GetInstance());
+
+    channel->SetMethodCallHandler(
+        [](const flutter::MethodCall<>& call,
+    std::unique_ptr<flutter::MethodResult<>> result) {
+            if (call.method_name().compare("getProxySettings") == 0) {
+                WINHTTP_CURRENT_USER_IE_PROXY_CONFIG proxyConfig;
+                if (WinHttpGetIEProxyConfigForCurrentUser(&proxyConfig)) {
+                    std::string proxyConfigString = ConvertProxyConfigToString(proxyConfig);
+                    // free memory
+                    GlobalFree(proxyConfig.lpszAutoConfigUrl);
+                    GlobalFree(proxyConfig.lpszProxy);
+                    GlobalFree(proxyConfig.lpszProxyBypass);
+                    result->Success(proxyConfigString);
+                } else {
+                    result->Success(NULL);
+                }
+            }
+            else {
+                result->NotImplemented();
+            }
+        });
+}
 
 bool FlutterWindow::OnCreate() {
   if (!Win32Window::OnCreate()) {
@@ -25,6 +85,8 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  // initialize method channel here
+  initMethodChannel(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
