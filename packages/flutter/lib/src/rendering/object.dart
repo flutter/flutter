@@ -1357,9 +1357,9 @@ class PipelineOwner {
   ///
   /// To remove a child, call [dropChild].
   void adoptChild(PipelineOwner child) {
-    assert(_debugParent == null);
+    assert(child._debugParent == null);
     assert(!_children.contains(child));
-    assert(_debugAllowChildListModifications);
+    assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
     assert(_debugSetParent(child, this));
     if (_manifold != null) {
@@ -1377,7 +1377,7 @@ class PipelineOwner {
   void dropChild(PipelineOwner child) {
     assert(child._debugParent == this);
     assert(_children.contains(child));
-    assert(_debugAllowChildListModifications);
+    assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
     assert(_debugSetParent(child, null));
     if (_manifold != null) {

@@ -8,14 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// import 'rendering_tester.dart';
-
 void main() {
   FlutterError.presentError = (FlutterErrorDetails details) {
-    // Make tests fail on exceptions.
+    // Make tests fail on FlutterErrors.
     throw details.exception;
   };
-  // TestRenderingFlutterBinding.ensureInitialized();
 
   test('onNeedVisualUpdate takes precedence over manifold', () {
     final TestPipelineManifold manifold = TestPipelineManifold();
@@ -306,7 +303,7 @@ void main() {
       onSemanticsUpdate: (SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         rootOnSemanticsOwnerDisposed++;
-      }
+      },
     );
 
     int childOnSemanticsOwnerCreatedCount = 0;
@@ -316,9 +313,9 @@ void main() {
         childOnSemanticsOwnerCreatedCount++;
       },
       onSemanticsUpdate: (SemanticsUpdate update) { },
-        onSemanticsOwnerDisposed: () {
-          childOnSemanticsOwnerDisposed++;
-        }
+      onSemanticsOwnerDisposed: () {
+        childOnSemanticsOwnerDisposed++;
+      },
     );
 
     root.adoptChild(child);
@@ -348,12 +345,540 @@ void main() {
     expect(root.semanticsOwner, isNull);
     expect(child.semanticsOwner, isNull);
   });
-}
 
-// TODO(goderbauer): one had semantics enabled previously
-// TODO(goderbauer): one enables semantics while manifold has it on
-// TODO(goderbauer): tree management
-// TODO(goderbauer): Can change children during own layout, not during other phases
+  test('when manifold enables semantics all PipelineOwners in tree that did not have a SemanticsOwner create one', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    int rootOnSemanticsOwnerCreatedCount = 0;
+    int rootOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        rootOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        rootOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    int childOnSemanticsOwnerCreatedCount = 0;
+    int childOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        childOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        childOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    root.adoptChild(child);
+    root.attach(manifold);
+
+    final SemanticsHandle childSemantics = child.ensureSemantics();
+    expect(rootOnSemanticsOwnerCreatedCount, 0);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = true;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    childSemantics.dispose();
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 1);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+  });
+
+  test('PipelineOwner can dispose local handle even when manifold forces semantics to on', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    int rootOnSemanticsOwnerCreatedCount = 0;
+    int rootOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        rootOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        rootOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    int childOnSemanticsOwnerCreatedCount = 0;
+    int childOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        childOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        childOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    root.adoptChild(child);
+    root.attach(manifold);
+
+    final SemanticsHandle childSemantics = child.ensureSemantics();
+    expect(rootOnSemanticsOwnerCreatedCount, 0);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = true;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    childSemantics.dispose();
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 1);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+  });
+
+  test('can hold on to local handle when manifold turns off semantics', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    int rootOnSemanticsOwnerCreatedCount = 0;
+    int rootOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        rootOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        rootOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    int childOnSemanticsOwnerCreatedCount = 0;
+    int childOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        childOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        childOnSemanticsOwnerDisposed++;
+      },
+    );
+
+    root.adoptChild(child);
+    root.attach(manifold);
+
+    expect(rootOnSemanticsOwnerCreatedCount, 0);
+    expect(childOnSemanticsOwnerCreatedCount, 0);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+
+    manifold.semanticsEnabled = true;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    final SemanticsHandle childSemantics = child.ensureSemantics();
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    childSemantics.dispose();
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 1);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+  });
+
+  test('cannot attach when already attached', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final PipelineOwner owner = PipelineOwner();
+
+    owner.attach(manifold);
+    expect(() => owner.attach(manifold), throwsAssertionError);
+  });
+
+  test('attach update semanticsOwner', () {
+    final TestPipelineManifold manifold = TestPipelineManifold()
+      ..semanticsEnabled = true;
+    final PipelineOwner owner = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+
+    expect(owner.semanticsOwner, isNull);
+    owner.attach(manifold);
+    expect(owner.semanticsOwner, isNotNull);
+  });
+
+  test('attach does not request visual update if nothing is dirty', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner();
+    owner.rootNode = renderObject;
+
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 0);
+  });
+
+  test('attach does not request visual update if onNeedVisualUpdate is specified', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    int onNeedVisualUpdateCount = 0;
+    final PipelineOwner owner = PipelineOwner(
+      onNeedVisualUpdate: () {
+        onNeedVisualUpdateCount++;
+      },
+      onSemanticsUpdate: (_) { },
+    );
+    owner.ensureSemantics();
+    owner.rootNode = renderObject;
+    final OffsetLayer rootLayer = OffsetLayer();
+    rootLayer.attach(renderObject);
+    renderObject.scheduleInitialLayout();
+    renderObject.scheduleInitialPaint(rootLayer);
+    renderObject.scheduleInitialSemantics();
+    renderObject.markNeedsSemanticsUpdate();
+
+    onNeedVisualUpdateCount = 0;
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 0);
+    expect(onNeedVisualUpdateCount, 0);
+  });
+
+  test('attach requests visual update if onNeedVisualUpdate was not specified and nodes are dirty for layout', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner();
+    owner.rootNode = renderObject;
+    renderObject.scheduleInitialLayout();
+
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 1);
+  });
+
+  test('attach requests visual update if onNeedVisualUpdate was not specified and nodes are dirty for compositing bits', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner();
+    owner.rootNode = renderObject;
+    renderObject.markNeedsCompositingBitsUpdate();
+
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 1);
+  });
+
+  test('attach requests visual update if onNeedVisualUpdate was not specified and nodes are dirty for paint', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner();
+    owner.rootNode = renderObject;
+    final OffsetLayer rootLayer = OffsetLayer();
+    rootLayer.attach(renderObject);
+    renderObject.scheduleInitialLayout();
+    renderObject.scheduleInitialPaint(rootLayer);
+    owner.flushLayout();
+    owner.flushPaint();
+
+    renderObject.markNeedsPaint();
+
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 1);
+  });
+
+  test('attach requests visual update if onNeedVisualUpdate was not specified and nodes are dirty for semantics', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final TestRenderObject renderObject = TestRenderObject();
+    final PipelineOwner owner = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    final SemanticsHandle handle = owner.ensureSemantics();
+    owner.rootNode = renderObject;
+    renderObject.scheduleInitialLayout();
+    renderObject.scheduleInitialSemantics();
+    owner.flushLayout();
+    owner.flushSemantics();
+
+    renderObject.markNeedsSemanticsUpdate();
+
+    expect(manifold.requestVisualUpdateCount, 0);
+    owner.attach(manifold);
+    expect(manifold.requestVisualUpdateCount, 1);
+  });
+
+  test('cannot detach when not attached', () {
+    final PipelineOwner owner = PipelineOwner();
+
+    expect(() => owner.detach(), throwsAssertionError);
+  });
+
+  test('cannot adopt twice', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child = PipelineOwner();
+    root.adoptChild(child);
+    expect(() => root.adoptChild(child), throwsAssertionError);
+  });
+
+  test('cannot adopt child of other parent', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child = PipelineOwner();
+    final PipelineOwner otherRoot = PipelineOwner();
+    root.adoptChild(child);
+    expect(() => otherRoot.adoptChild(child), throwsAssertionError);
+  });
+
+  test('adopting creates semantics owner if necessary', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    final PipelineOwner childOfChild = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    root.attach(manifold);
+
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNull);
+
+    root.adoptChild(child);
+
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNull);
+
+    manifold.semanticsEnabled = true;
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNull);
+
+    child.adoptChild(childOfChild);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+  });
+
+  test('cannot drop unattached child', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child = PipelineOwner();
+    expect(() => root.dropChild(child), throwsAssertionError);
+  });
+
+  test('cannot drop child attached to other parent', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child = PipelineOwner();
+    final PipelineOwner otherRoot = PipelineOwner();
+    otherRoot.adoptChild(child);
+    expect(() => root.dropChild(child), throwsAssertionError);
+  });
+
+  test('dropping destroys semantics owner if necessary', () {
+    final TestPipelineManifold manifold = TestPipelineManifold()
+      ..semanticsEnabled = true;
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    final PipelineOwner childOfChild = PipelineOwner(
+      onSemanticsUpdate: (_) { },
+    );
+    root.attach(manifold);
+    root.adoptChild(child);
+    child.adoptChild(childOfChild);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    child.dropChild(childOfChild);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNull);
+
+    final SemanticsHandle childSemantics = child.ensureSemantics();
+    root.dropChild(child);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNull);
+
+    childSemantics.dispose();
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNull);
+  });
+
+  test('can adopt/drop children during own layout', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child1 = PipelineOwner();
+    final PipelineOwner child2 = PipelineOwner();
+
+    final TestRenderObject rootRenderObject = TestRenderObject(
+      onLayout: () {
+        child1.dropChild(child2);
+        root.dropChild(child1);
+        root.adoptChild(child2);
+        child2.adoptChild(child1);
+      },
+    );
+
+    root.rootNode = rootRenderObject;
+    rootRenderObject.scheduleInitialLayout();
+
+    root.adoptChild(child1);
+    child1.adoptChild(child2);
+    root.attach(manifold);
+    expect(_treeWalk(root), <PipelineOwner>[root, child1, child2]);
+
+    root.flushLayout();
+
+    expect(_treeWalk(root), <PipelineOwner>[root, child2, child1]);
+  });
+
+  test('cannot adopt/drop children during child layout', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child1 = PipelineOwner();
+    final PipelineOwner child2 = PipelineOwner();
+    final PipelineOwner child3 = PipelineOwner();
+
+    Object? droppingError;
+    Object? adoptingError;
+
+    final TestRenderObject childRenderObject = TestRenderObject(
+      onLayout: () {
+        child1.dropChild(child2);
+        child1.adoptChild(child3);
+        try {
+          root.dropChild(child1);
+        } catch (e) {
+          droppingError = e;
+        }
+        try {
+          root.adoptChild(child2);
+        } catch (e) {
+          adoptingError = e;
+        }
+      },
+    );
+
+    child1.rootNode = childRenderObject;
+    childRenderObject.scheduleInitialLayout();
+
+    root.adoptChild(child1);
+    child1.adoptChild(child2);
+    root.attach(manifold);
+    expect(_treeWalk(root), <PipelineOwner>[root, child1, child2]);
+
+    root.flushLayout();
+
+    expect(adoptingError, isAssertionError.having((AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
+    expect(droppingError, isAssertionError.having((AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
+  });
+
+  test('visitChildren visits all children', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child1 = PipelineOwner();
+    final PipelineOwner child2 = PipelineOwner();
+    final PipelineOwner child3 = PipelineOwner();
+    final PipelineOwner childOfChild3 = PipelineOwner();
+
+    root.adoptChild(child1);
+    root.adoptChild(child2);
+    root.adoptChild(child3);
+    child3.adoptChild(childOfChild3);
+
+    final List<PipelineOwner> children = <PipelineOwner>[];
+    root.visitChildren((PipelineOwner child) {
+      children.add(child);
+    });
+    expect(children, <PipelineOwner>[child1, child2, child3]);
+
+    children.clear();
+    child3.visitChildren((PipelineOwner child) {
+      children.add(child);
+    });
+    expect(children.single, childOfChild3);
+  });
+}
 
 class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
   int requestVisualUpdateCount = 0;
@@ -411,4 +936,16 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get semanticBounds => Rect.zero;
+}
+
+List<PipelineOwner> _treeWalk(PipelineOwner root) {
+  final List<PipelineOwner> results = <PipelineOwner>[root];
+
+  void visitor(PipelineOwner child) {
+    results.add(child);
+    child.visitChildren(visitor);
+  }
+
+  root.visitChildren(visitor);
+  return results;
 }
