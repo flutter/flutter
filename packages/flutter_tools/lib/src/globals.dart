@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
@@ -70,6 +71,15 @@ XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+
+// Analytics instance for package:unified_analytics for telemetry
+// reporting for all Flutter and Dart related tooling
+final Analytics analytics = Analytics(
+  tool: DashTool.flutterTools,
+  flutterChannel: flutterVersion.channel,
+  flutterVersion: flutterVersion.frameworkVersion,
+  dartVersion: flutterVersion.dartSdkVersion,
+);
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
