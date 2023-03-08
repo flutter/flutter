@@ -6294,12 +6294,7 @@ class ImmutableBuffer extends NativeFieldWrapperClass1 {
     final ImmutableBuffer instance = ImmutableBuffer._(0);
     return _futurize((_Callback<int> callback) {
       return instance._initFromAsset(encodedKey, callback);
-    }).then((int length) {
-      if (length == -1) {
-        throw Exception('Asset not found');
-      }
-      return instance.._length = length;
-    });
+    }).then((int length) => instance.._length = length);
   }
 
   /// Create a buffer from the file with [path].
