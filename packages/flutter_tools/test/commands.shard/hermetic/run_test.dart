@@ -1174,6 +1174,9 @@ class TestRunCommandForUsageValues extends RunCommand {
   List<Device>? devices;
 
   @override
+  bool get enableImpeller => false;
+
+  @override
   Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
     return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   }
