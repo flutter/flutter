@@ -762,9 +762,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Top padding is consumed and there is a SafeArea
-    expect(MediaQuery.of(innerContext).padding.top, 0);
-    expect(find.byType(SafeArea), findsOneWidget);
+    // A SafeArea is inserted, with left / top / right true but bottom false.
+    final Finder safeAreaWidgetFinder = find.byType(SafeArea);
+    expect(safeAreaWidgetFinder, findsOneWidget);
+    final SafeArea safeAreaWidget = safeAreaWidgetFinder.evaluate().single.widget as SafeArea;
+    expect(safeAreaWidget.left, true);
+    expect(safeAreaWidget.top, true);
+    expect(safeAreaWidget.right, true);
+    expect(safeAreaWidget.bottom, false);
+
+    // Because that SafeArea is inserted, no left / top / right padding remains
+    // for `builder` to consume. Bottom padding does remain.
+    expect(MediaQuery.of(innerContext).padding, const EdgeInsets.fromLTRB(0, 0, 0, 50.0));
   });
 
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
