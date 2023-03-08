@@ -1623,8 +1623,8 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
-  /// If no option named [name] was parsed (either from the command-line or from
-  /// defaults), an [ArgumentError] is thrown.
+  /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
+  /// will be thrown.
   String? stringArg(String name) => argResults![name] as String?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
