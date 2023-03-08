@@ -19,7 +19,6 @@
 #include "flutter/flow/layers/layer_raster_cache_item.h"
 #include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
-#include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/dart/dart_converter.h"
 #include "flutter/fml/make_copyable.h"
@@ -193,42 +192,6 @@ class TestAssetResolver : public AssetResolver {
  private:
   bool valid_;
   AssetResolver::AssetResolverType type_;
-};
-
-class ThreadCheckingAssetResolver : public AssetResolver {
- public:
-  explicit ThreadCheckingAssetResolver(
-      std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop)
-      : concurrent_loop_(std::move(concurrent_loop)) {}
-
-  // |AssetResolver|
-  bool IsValid() const override { return true; }
-
-  // |AssetResolver|
-  bool IsValidAfterAssetManagerChange() const override { return true; }
-
-  // |AssetResolver|
-  AssetResolverType GetType() const {
-    return AssetResolverType::kApkAssetProvider;
-  }
-
-  // |AssetResolver|
-  std::unique_ptr<fml::Mapping> GetAsMapping(
-      const std::string& asset_name) const override {
-    if (asset_name == "FontManifest.json") {
-      // This file is loaded directly by the engine.
-      return nullptr;
-    }
-    mapping_requests.push_back(asset_name);
-    EXPECT_TRUE(concurrent_loop_->RunsTasksOnCurrentThread())
-        << fml::BacktraceHere();
-    return nullptr;
-  }
-
-  mutable std::vector<std::string> mapping_requests;
-
- private:
-  std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
 };
 
 static bool ValidateShell(Shell* shell) {
@@ -3840,39 +3803,6 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
 
   DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-}
-
-TEST_F(ShellTest, ImmutableBufferLoadsAssetOnBackgroundThread) {
-  Settings settings = CreateSettingsForFixture();
-  auto task_runner = CreateNewThread();
-  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
-                           task_runner);
-  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-
-  fml::CountDownLatch latch(1);
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("testThatAssetLoadingHappensOnWorkerThread");
-  auto asset_manager = configuration.GetAssetManager();
-  auto test_resolver = std::make_unique<ThreadCheckingAssetResolver>(
-      shell->GetDartVM()->GetConcurrentMessageLoop());
-  auto leaked_resolver = test_resolver.get();
-  asset_manager->PushBack(std::move(test_resolver));
-
-  RunEngine(shell.get(), std::move(configuration));
-  PumpOneFrame(shell.get());
-
-  latch.Wait();
-
-  EXPECT_EQ(leaked_resolver->mapping_requests[0], "DoesNotExist");
-
-  PlatformViewNotifyDestroyed(shell.get());
-  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, PictureToImageSync) {

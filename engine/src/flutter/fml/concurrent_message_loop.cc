@@ -170,14 +170,4 @@ void ConcurrentTaskRunner::PostTask(const fml::closure& task) {
   task();
 }
 
-bool ConcurrentMessageLoop::RunsTasksOnCurrentThread() {
-  std::scoped_lock lock(tasks_mutex_);
-  for (const auto& worker_thread_id : worker_thread_ids_) {
-    if (worker_thread_id == std::this_thread::get_id()) {
-      return true;
-    }
-  }
-  return false;
-}
-
 }  // namespace fml
