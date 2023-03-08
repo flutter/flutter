@@ -2454,7 +2454,7 @@ void main() {
       '     MediaQuery\n'
       '     _MediaQueryFromView\n'
       '     _ViewScope\n'
-      '     View-[GlobalObjectKey TestFlutterView#e6136]\n'
+      '     View-[GlobalObjectKey TestWindow#e6136]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n',
