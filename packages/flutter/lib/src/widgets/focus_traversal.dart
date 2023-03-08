@@ -48,7 +48,7 @@ void _focusAndEnsureVisible(
 
 /// Signature for the callback that's called when a traversal policy is
 /// requesting focus.
-typedef RequestFocusCallback = void Function(
+typedef TraversalRequestFocusCallback = void Function(
     FocusNode node, {
     ScrollPositionAlignmentPolicy alignmentPolicy,
     double alignment,
@@ -164,12 +164,26 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FocusTraversalPolicy({
-    RequestFocusCallback? requestFocusCallback
-  }) : requestFocusCallback = requestFocusCallback ?? _focusAndEnsureVisible;
+    TraversalRequestFocusCallback? requestFocusCallback
+  }) : requestFocusCallback = requestFocusCallback ?? defaultTraversalRequestFocusCallback;
 
   /// The callback used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
-  final RequestFocusCallback requestFocusCallback;
+  final TraversalRequestFocusCallback requestFocusCallback;
+
+  /// The default value for [requestFocusCallback].
+  /// Requests focus from `node` and ensures the node is visible
+  /// by calling [Scrollable.ensureVisible].
+  static void defaultTraversalRequestFocusCallback(
+      FocusNode node, {
+        ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+        double alignment = 1.0,
+        Duration duration = Duration.zero,
+        Curve curve = Curves.ease,
+      }) {
+    node.requestFocus();
+    Scrollable.ensureVisible(node.context!, alignment: alignment, alignmentPolicy: alignmentPolicy, duration: duration, curve: curve);
+  }
 
   /// Returns the node that should receive focus if focus is traversing
   /// forwards, and there is no current focus.
