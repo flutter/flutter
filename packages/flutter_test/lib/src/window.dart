@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:isolate';
 import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
@@ -546,11 +545,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   void requestDartPerformanceMode(DartPerformanceMode mode) {
     _platformDispatcher.requestDartPerformanceMode(mode);
-  }
-
-  @override
-  void sendPortPlatformMessage(String name, ByteData? data, int identifier, SendPort port) {
-    _platformDispatcher.sendPortPlatformMessage(name, data, identifier, port);
   }
 
   /// The system font family to use for this test.
