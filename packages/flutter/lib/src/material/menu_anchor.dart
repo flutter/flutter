@@ -3158,7 +3158,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = anchorRect.right;
+          final double newX = anchorRect.right + alignmentOffset.dx;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -3169,7 +3169,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
-          final double newX = anchorRect.left - childSize.width;
+          final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
@@ -3178,24 +3178,28 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         }
       }
     }
-    if (childSize.height >= allowedRect.height) {
-      // Too tall to fit, fit as much on as possible.
-      y = allowedRect.top;
-    } else {
-      if (offTop(y)) {
-        final double newY = anchorRect.bottom;
-        if (!offBottom(newY)) {
+
+    if (parentOrientation == Axis.horizontal) {
+      if (offBottom(y)) {
+        final double newY = allowedRect.bottom - anchorRect.height - childSize.height - alignmentOffset.dy;
+        if(!offTop(newY)) {
           y = newY;
         } else {
-          y = allowedRect.top;
+          y = allowedRect.bottom - childSize.height;
         }
-      } else if (offBottom(y)) {
-        final double newY = anchorRect.top - childSize.height;
+      } else {
+        y = anchorRect.bottom + alignmentOffset.dy;
+      }
+    } else {
+      if (offBottom(y)) {
+        final double newY = allowedRect.bottom - childSize.height;
         if (!offTop(newY)) {
           y = newY;
         } else {
           y = allowedRect.bottom - childSize.height;
         }
+      } else {
+        y = anchorRect.top;
       }
     }
     return Offset(x, y);
