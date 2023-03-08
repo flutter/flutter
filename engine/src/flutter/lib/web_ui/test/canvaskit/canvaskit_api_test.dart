@@ -1624,6 +1624,9 @@ void _paragraphTests() {
     builder.pushStyle(
         canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
+    if (canvasKitVariant == CanvasKitVariant.chromium) {
+      injectClientICU(builder);
+    }
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
@@ -1738,6 +1741,10 @@ void _paragraphTests() {
       CanvasKitRenderer.instance.fontCollection.fontProvider,
     );
     builder.addText('hello');
+
+    if (canvasKitVariant == CanvasKitVariant.chromium) {
+      injectClientICU(builder);
+    }
 
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
