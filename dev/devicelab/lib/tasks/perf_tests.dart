@@ -867,17 +867,19 @@ class DevtoolsStartupTest {
           break;
       }
 
-      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+      final Process process = await startFlutter(
         'run',
-        '--no-android-gradle-daemon',
-        '--no-publish-port',
-        '--verbose',
-        '--profile',
-        '-d',
-        device.deviceId,
-        if (applicationBinaryPath != null)
-          '--use-application-binary=$applicationBinaryPath',
-       ]);
+        options: <String>[
+          '--no-android-gradle-daemon',
+          '--no-publish-port',
+          '--verbose',
+          '--profile',
+          '-d',
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
+       ],
+      );
       final Completer<void> completer = Completer<void>();
       bool sawLine = false;
       process.stdout
@@ -1184,11 +1186,11 @@ class PerfTestWithSkSL extends PerfTest {
       await _generateSkSL();
 
       // Build the app with SkSL artifacts and run that app
-      final String observatoryUri = await _runApp(skslPath: _skslJsonFileName);
+      final String vmServiceUri = await _runApp(skslPath: _skslJsonFileName);
 
       // Attach to the running app and run the final driver test to get metrics.
       final TaskResult result = await internalRun(
-        existingApp: observatoryUri,
+        existingApp: vmServiceUri,
       );
 
       _runProcess.kill();
@@ -1207,8 +1209,8 @@ class PerfTestWithSkSL extends PerfTest {
     // `--write-sksl-on-exit` option doesn't seem to be compatible with
     // `flutter drive --existing-app` as it will complain web socket connection
     // issues.
-    final String observatoryUri = await _runApp(cacheSkSL: true);
-    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
+    final String vmServiceUri = await _runApp(cacheSkSL: true);
+    await super.internalRun(cacheSkSL: true, existingApp: vmServiceUri);
     _runProcess.kill();
     await _runProcess.exitCode;
 

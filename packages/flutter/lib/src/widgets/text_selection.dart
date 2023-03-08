@@ -718,7 +718,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: true);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -749,7 +749,7 @@ class TextSelectionOverlay {
         break;
     }
 
-    _handleSelectionHandleChanged(newSelection, isEnd: true);
+    _handleSelectionHandleChanged(newSelection);
 
      _selectionOverlay.updateMagnifier(_buildMagnifier(
       currentTextPosition: newSelection.extent,
@@ -814,7 +814,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: false);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -851,7 +851,7 @@ class TextSelectionOverlay {
       renderEditable: renderObject,
     ));
 
-    _handleSelectionHandleChanged(newSelection, isEnd: false);
+    _handleSelectionHandleChanged(newSelection);
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
@@ -874,13 +874,11 @@ class TextSelectionOverlay {
     }
   }
 
-  void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
-    final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
+  void _handleSelectionHandleChanged(TextSelection newSelection) {
     selectionDelegate.userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-    selectionDelegate.bringIntoView(textPosition);
   }
 
   TextSelectionHandleType _chooseType(
