@@ -266,7 +266,9 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
   if (image_info.width() > 16384 || image_info.height() > 16384) {
     return std::make_unique<SnapshotDelegate::GpuImageResult>(
         GrBackendTexture(), nullptr, nullptr,
-        "unable to create render target at specified size");
+        "unable to create bitmap render target at specified size " +
+            std::to_string(image_info.width()) + "x" +
+            std::to_string(image_info.height()));
   };
 
   sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
@@ -321,7 +323,9 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
             if (!texture.isValid()) {
               result = std::make_unique<SnapshotDelegate::GpuImageResult>(
                   GrBackendTexture(), nullptr, nullptr,
-                  "unable to create render target at specified size");
+                  "unable to create texture render target at specified size " +
+                      std::to_string(image_info.width()) + "x" +
+                      std::to_string(image_info.height()));
               return;
             }
 
