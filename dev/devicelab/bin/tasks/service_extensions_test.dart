@@ -25,9 +25,9 @@ void main() {
       final Completer<void> ready = Completer<void>();
       late bool ok;
       print('run: starting...');
-      final Process run = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--no-fast-start', '--no-publish-port', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
+      final Process run = await startFlutter(
+        'run',
+        options: <String>['--verbose', '--no-fast-start', '--no-publish-port', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
           .transform<String>(utf8.decoder)
