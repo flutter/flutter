@@ -416,6 +416,18 @@ class WebAssetServer implements AssetReader {
 
     File file = _resolveDartFile(requestPath);
 
+    if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
+      final String canvasKitPath = globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      );
+      final Uri potential = globals.fs
+          .directory(canvasKitPath)
+          .uri
+          .resolve(requestPath.replaceFirst('canvaskit/', ''));
+      file = globals.fs.file(potential);
+    }
+
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
@@ -437,7 +449,8 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync()) {
       // Paths starting with these prefixes should've been resolved above.
       if (requestPath.startsWith('assets/') ||
-          requestPath.startsWith('packages/')) {
+          requestPath.startsWith('packages/') ||
+          requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
       return _serveIndex();
