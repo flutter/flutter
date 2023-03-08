@@ -36,7 +36,7 @@ class DevicesCommand extends FlutterCommand {
   @override
   Duration? get deviceDiscoveryTimeout {
     if (argResults?['timeout'] != null) {
-      final int? timeoutSeconds = int.tryParse(stringArgDeprecated('timeout')!);
+      final int? timeoutSeconds = int.tryParse(stringArg('timeout')!);
       if (timeoutSeconds == null) {
         throwToolExit('Could not parse -t/--timeout argument. It must be an integer.');
       }

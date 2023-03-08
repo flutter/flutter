@@ -320,7 +320,7 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (argResults?.wasParsed('target') ?? false) {
-      return stringArgDeprecated('target')!;
+      return stringArg('target')!;
     }
     final List<String>? rest = argResults?.rest;
     if (rest != null && rest.isNotEmpty) {
@@ -339,7 +339,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This can be overridden by some of its subclasses.
   String? get fileSystemScheme =>
     argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArgDeprecated(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
           : null;
 
   /// The values of the `--filesystem-root` argument.
@@ -507,9 +507,9 @@ abstract class FlutterCommand extends Command<void> {
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
-                                  stringArgDeprecated(observatoryPortOption);
-    final String? hostPort = stringArgDeprecated('host-vmservice-port');
+    final String? vmServicePort = stringArg(vmServicePortOption) ??
+                                  stringArg(observatoryPortOption);
+    final String? hostPort = stringArg('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
     }
@@ -526,7 +526,7 @@ abstract class FlutterCommand extends Command<void> {
       return _tryParseHostVmservicePort();
     } else if (argResults?.wasParsed('dds-port') ?? false) {
       // If an explicit DDS port is provided, use dds-port for DDS.
-      return int.tryParse(stringArgDeprecated('dds-port')!) ?? 0;
+      return int.tryParse(stringArg('dds-port')!) ?? 0;
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
@@ -534,7 +534,7 @@ abstract class FlutterCommand extends Command<void> {
 
   Uri? get devToolsServerAddress {
     if (argResults?.wasParsed(kDevToolsServerAddress) ?? false) {
-      final Uri? uri = Uri.tryParse(stringArgDeprecated(kDevToolsServerAddress)!);
+      final Uri? uri = Uri.tryParse(stringArg(kDevToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }
@@ -572,7 +572,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get deviceVmservicePort {
-    final String? devicePort = stringArgDeprecated('device-vmservice-port');
+    final String? devicePort = stringArg('device-vmservice-port');
     if (!_usesPortOption || devicePort == null) {
       return null;
     }
@@ -701,7 +701,7 @@ abstract class FlutterCommand extends Command<void> {
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
-      final int? timeoutSeconds = int.tryParse(stringArgDeprecated(FlutterOptions.kDeviceTimeout)!);
+      final int? timeoutSeconds = int.tryParse(stringArg(FlutterOptions.kDeviceTimeout)!);
       if (timeoutSeconds == null) {
         throwToolExit( 'Could not parse "--${FlutterOptions.kDeviceTimeout}" argument. It must be an integer.');
       }
@@ -1069,7 +1069,7 @@ abstract class FlutterCommand extends Command<void> {
       boolArg('track-widget-creation');
 
     final String? buildNumber = argParser.options.containsKey('build-number')
-      ? stringArgDeprecated('build-number')
+      ? stringArg('build-number')
       : null;
 
     final File packagesFile = globals.fs.file(
@@ -1104,8 +1104,8 @@ abstract class FlutterCommand extends Command<void> {
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
-      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArgDeprecated(FlutterOptions.kCodeSizeDirectory) != null) {
-        directory = globals.fs.directory(stringArgDeprecated(FlutterOptions.kCodeSizeDirectory));
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
@@ -1153,7 +1153,7 @@ abstract class FlutterCommand extends Command<void> {
       && boolArg(FlutterOptions.kDartObfuscationOption);
 
     final String? splitDebugInfoPath = argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
-      ? stringArgDeprecated(FlutterOptions.kSplitDebugInfoOption)
+      ? stringArg(FlutterOptions.kSplitDebugInfoOption)
       : null;
 
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
@@ -1182,7 +1182,7 @@ abstract class FlutterCommand extends Command<void> {
       && boolArg('tree-shake-icons');
 
     final String? bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-      ? stringArgDeprecated(FlutterOptions.kBundleSkSLPathOption)
+      ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
 
     if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
@@ -1190,7 +1190,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final String? performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
-      ? stringArgDeprecated(FlutterOptions.kPerformanceMeasurementFile)
+      ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
     final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
@@ -1198,7 +1198,7 @@ abstract class FlutterCommand extends Command<void> {
 
     WebRendererMode webRenderer = WebRendererMode.autoDetect;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      final WebRendererMode? mappedMode = _webRendererModeMap[stringArgDeprecated(FlutterOptions.kWebRendererFlag)!];
+      final WebRendererMode? mappedMode = _webRendererModeMap[stringArg(FlutterOptions.kWebRendererFlag)!];
       if (mappedMode != null) {
         webRenderer = mappedMode;
       }
@@ -1207,7 +1207,7 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
-        ? stringArgDeprecated('flavor')
+        ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
@@ -1220,7 +1220,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? stringArgDeprecated('build-name')
+          ? stringArg('build-name')
           : null,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
@@ -1238,7 +1238,7 @@ abstract class FlutterCommand extends Command<void> {
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
-          ? stringArgDeprecated(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
@@ -1622,14 +1622,10 @@ abstract class FlutterCommand extends Command<void> {
   bool boolArg(String name) => argResults?[name] as bool? ?? false;
 
   /// Gets the parsed command-line option named [name] as a `String`.
-  String? stringArgDeprecated(String name) => argResults?[name] as String?;
-
-  String? stringArg(String name) {
-    if (!argParser.options.containsKey(name)) {
-      return null;
-    }
-    return argResults![name] as String?;
-  }
+  ///
+  /// If no option named [name] was parsed (either from the command-line or from
+  /// defaults), an [ArgumentError] is thrown.
+  String? stringArg(String name) => argResults?[name] as String?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {

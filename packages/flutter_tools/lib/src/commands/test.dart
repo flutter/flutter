@@ -244,7 +244,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         // Use [DeviceBasedDevelopmentArtifacts].
         ? await super.requiredArtifacts
         : <DevelopmentArtifact>{};
-    if (stringArgDeprecated('platform') == 'chrome') {
+    if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }
     return results;
@@ -316,8 +316,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String? tags = stringArgDeprecated('tags');
-    final String? excludeTags = stringArgDeprecated('exclude-tags');
+    final String? tags = stringArg('tags');
+    final String? excludeTags = stringArg('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     TestTimeRecorder? testTimeRecorder;
@@ -351,7 +351,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    int? jobs = int.tryParse(stringArgDeprecated('concurrency')!);
+    int? jobs = int.tryParse(stringArg('concurrency')!);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -369,13 +369,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     }
 
-    final int? shardIndex = int.tryParse(stringArgDeprecated('shard-index') ?? '');
+    final int? shardIndex = int.tryParse(stringArg('shard-index') ?? '');
     if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
           'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int? totalShards = int.tryParse(stringArgDeprecated('total-shards') ?? '');
+    final int? totalShards = int.tryParse(stringArg('total-shards') ?? '');
     if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
@@ -471,16 +471,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       concurrency: jobs,
       testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
-      web: stringArgDeprecated('platform') == 'chrome',
-      randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
-      reporter: stringArgDeprecated('reporter'),
+      web: stringArg('platform') == 'chrome',
+      randomSeed: stringArg('test-randomize-ordering-seed'),
+      reporter: stringArg('reporter'),
       fileReporter: stringArg('file-reporter'),
-      timeout: stringArgDeprecated('timeout'),
+      timeout: stringArg('timeout'),
       runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
+      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
@@ -488,7 +488,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (collector != null) {
       final Stopwatch? collectTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageDataCollect);
       final bool collectionResult = await collector.collectCoverageData(
-        stringArgDeprecated('coverage-path'),
+        stringArg('coverage-path'),
         mergeCoverageData: boolArg('merge-coverage'),
       );
       testTimeRecorder?.stop(TestTimePhases.CoverageDataCollect, collectTimeRecorderStopwatch!);

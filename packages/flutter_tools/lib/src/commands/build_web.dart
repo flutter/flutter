@@ -138,12 +138,12 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArgDeprecated('target')!;
+    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    final String? baseHref = stringArgDeprecated('base-href');
+    final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
@@ -172,12 +172,12 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       boolArg('csp'),
-      stringArgDeprecated('pwa-strategy')!,
+      stringArg('pwa-strategy')!,
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
       wasmRequested,
       baseHref: baseHref,
-      dart2jsOptimization: stringArgDeprecated('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
+      dart2jsOptimization: stringArg('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
       dumpInfo: boolArg('dump-info'),
       noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),

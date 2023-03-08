@@ -74,8 +74,8 @@ void main() {
     expect(command.stringArg('key'), 'value');
     expect(command.stringArg('empty'), null);
 
-    expect(command.stringArgDeprecated('key'), 'value');
-    expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.stringArg('key'), 'value');
+    expect(() => command.stringArg('empty'), throwsA(const TypeMatcher<ArgumentError>()));
   });
 
   testUsingContext('List<String> safe argResults', () async {

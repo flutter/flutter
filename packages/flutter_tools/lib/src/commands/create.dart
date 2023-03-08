@@ -95,9 +95,9 @@ class CreateCommand extends CreateBase {
   @override
   Future<CustomDimensions> get usageValues async {
     return CustomDimensions(
-      commandCreateProjectType: stringArgDeprecated('template'),
-      commandCreateAndroidLanguage: stringArgDeprecated('android-language'),
-      commandCreateIosLanguage: stringArgDeprecated('ios-language'),
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
     );
   }
 
@@ -309,13 +309,13 @@ class CreateCommand extends CreateBase {
       organization: organization,
       projectName: projectName,
       titleCaseProjectName: titleCaseProjectName,
-      projectDescription: stringArgDeprecated('description'),
+      projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
       withFfiPluginHook: generateFfiPlugin,
       withEmptyMain: emptyArgument,
-      androidLanguage: stringArgDeprecated('android-language'),
-      iosLanguage: stringArgDeprecated('ios-language'),
+      androidLanguage: stringArg('android-language'),
+      iosLanguage: stringArg('ios-language'),
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: includeAndroid,
@@ -505,7 +505,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -526,7 +526,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -564,7 +564,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
@@ -634,7 +634,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
