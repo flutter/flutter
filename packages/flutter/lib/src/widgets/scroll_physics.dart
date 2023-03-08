@@ -70,7 +70,8 @@ enum ScrollDecelerationRate {
 ///
 /// When implementing a subclass, you must override [applyTo] so that it returns
 /// an appropriate instance of your subclass.  Otherwise, classes like
-/// [Scrollable] that inform a [ScrollPosition] will combine them with the default [ScrollPhysics] object instead of your custom subclass.
+/// [Scrollable] that inform a [ScrollPosition] will combine them with
+/// the default [ScrollPhysics] object instead of your custom subclass.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
