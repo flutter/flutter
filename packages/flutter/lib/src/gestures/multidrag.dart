@@ -216,8 +216,8 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   MultiDragGestureRecognizer({
     required super.debugOwner,
     super.supportedDevices,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
-  });
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
 
   // Accept the input if, and only if, [kPrimaryButton] is pressed.
   static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
