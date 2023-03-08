@@ -3165,6 +3165,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.close();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
+      _scribbleCacheKey = null;
       removeTextPlaceholder();
     }
   }
