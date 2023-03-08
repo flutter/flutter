@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -14,6 +18,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -23,6 +29,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('gradle build', () {
@@ -717,39 +724,14 @@ void main() {
     });
 
     testUsingContext('Uses namespace attribute if manifest lacks a package attribute', () async {
-      final AndroidGradleBuilder builder = AndroidGradleBuilder(
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: Artifacts.test(),
-        usage: testUsage,
-        gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
-      );
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final AndroidSdk sdk = FakeAndroidSdk();
 
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          'assembleRelease',
-        ],
-      ));
-
-      fileSystem.directory('android')
+      fileSystem.directory(project.android.hostAppGradleRoot)
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
-
-      fileSystem.directory('android')
+      fileSystem.directory(project.android.hostAppGradleRoot)
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -762,7 +744,7 @@ android {
 }
 ''');
 
-      fileSystem.directory('android')
+      fileSystem.directory(project.android.hostAppGradleRoot)
         .childDirectory('app')
         .childDirectory('src')
         .childDirectory('main')
@@ -778,30 +760,18 @@ android {
 </manifest>
 ''');
 
-      fileSystem.directory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile('app-release.apk')
-        .createSync(recursive: true);
-
-      await builder.buildGradleApp(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        androidBuildInfo: const AndroidBuildInfo(
-          BuildInfo(
-            BuildMode.release,
-            null,
-            treeShakeIcons: false,
-          ),
-        ),
-        target: 'lib/main.dart',
-        isBuildingBundle: false,
-        localGradleErrors: const <GradleHandledError>[],
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        userMessages: UserMessages(),
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
       );
 
-      expect(processManager, hasNoRemainingExpectations);
-
-      // TODO: verify the packageId of the built APK equals the namespace value
+      expect(androidApk?.id, 'com.example.foo');
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
