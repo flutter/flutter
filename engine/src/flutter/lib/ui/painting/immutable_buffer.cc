@@ -43,7 +43,7 @@ Dart_Handle ImmutableBuffer::init(Dart_Handle buffer_handle,
   return Dart_Null();
 }
 
-Dart_Handle ImmutableBuffer::initFromAsset(Dart_Handle buffer_handle,
+Dart_Handle ImmutableBuffer::initFromAsset(Dart_Handle raw_buffer_handle,
                                            Dart_Handle asset_name_handle,
                                            Dart_Handle callback_handle) {
   UIDartState::ThrowIfUIOperationsProhibited();
@@ -62,21 +62,55 @@ Dart_Handle ImmutableBuffer::initFromAsset(Dart_Handle buffer_handle,
   std::string asset_name = std::string{reinterpret_cast<const char*>(chars),
                                        static_cast<size_t>(asset_length)};
 
-  std::shared_ptr<AssetManager> asset_manager = UIDartState::Current()
-                                                    ->platform_configuration()
-                                                    ->client()
-                                                    ->GetAssetManager();
-  std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(asset_name);
-  if (data == nullptr) {
-    return tonic::ToDart("Asset not found");
-  }
+  auto* dart_state = UIDartState::Current();
+  auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
+  auto buffer_callback =
+      std::make_unique<tonic::DartPersistentValue>(dart_state, callback_handle);
+  auto buffer_handle = std::make_unique<tonic::DartPersistentValue>(
+      dart_state, raw_buffer_handle);
+  auto asset_manager = UIDartState::Current()
+                           ->platform_configuration()
+                           ->client()
+                           ->GetAssetManager();
 
-  auto size = data->GetSize();
-  const void* bytes = static_cast<const void*>(data->GetMapping());
-  auto sk_data = MakeSkDataWithCopy(bytes, size);
-  auto buffer = fml::MakeRefCounted<ImmutableBuffer>(sk_data);
-  buffer->AssociateWithDartWrapper(buffer_handle);
-  tonic::DartInvoke(callback_handle, {tonic::ToDart(size)});
+  auto ui_task = fml::MakeCopyable(
+      [buffer_callback = std::move(buffer_callback),
+       buffer_handle = std::move(buffer_handle)](const sk_sp<SkData>& sk_data,
+                                                 size_t buffer_size) mutable {
+        auto dart_state = buffer_callback->dart_state().lock();
+        if (!dart_state) {
+          return;
+        }
+        tonic::DartState::Scope scope(dart_state);
+        if (!sk_data) {
+          // -1 is used as a sentinel that the file could not be opened.
+          tonic::DartInvoke(buffer_callback->Get(), {tonic::ToDart(-1)});
+          return;
+        }
+        auto buffer = fml::MakeRefCounted<ImmutableBuffer>(sk_data);
+        buffer->AssociateWithDartWrapper(buffer_handle->Get());
+        tonic::DartInvoke(buffer_callback->Get(), {tonic::ToDart(buffer_size)});
+      });
+
+  dart_state->GetConcurrentTaskRunner()->PostTask(
+      [asset_name = std::move(asset_name),
+       asset_manager = std::move(asset_manager),
+       ui_task_runner = std::move(ui_task_runner), ui_task] {
+        std::unique_ptr<fml::Mapping> mapping =
+            asset_manager->GetAsMapping(asset_name);
+
+        sk_sp<SkData> sk_data;
+        size_t buffer_size = 0;
+        if (mapping != nullptr) {
+          buffer_size = mapping->GetSize();
+          const void* bytes = static_cast<const void*>(mapping->GetMapping());
+          sk_data = MakeSkDataWithCopy(bytes, buffer_size);
+        }
+        ui_task_runner->PostTask(
+            [sk_data = std::move(sk_data), ui_task = ui_task, buffer_size]() {
+              ui_task(sk_data, buffer_size);
+            });
+      });
   return Dart_Null();
 }
 
