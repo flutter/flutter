@@ -393,7 +393,10 @@ config("compiler") {
 
     ldflags += [
       "-Wl,--no-undefined",
-      "-Wl,--exclude-libs,ALL",
+
+      # TODO: Terrible hack, but otherwise libupdater.a symbols can't
+      # be exported from libflutter.so, even when added to android_exports.lst.
+      # "-Wl,--exclude-libs,ALL",
       "-fuse-ld=lld",
 
       # Enable identical code folding to reduce size.
