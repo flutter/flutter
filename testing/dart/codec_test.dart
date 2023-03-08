@@ -126,6 +126,57 @@ void main() {
       expect(e.toString(), contains('Decoded image has been disposed'));
     }
   });
+
+  test('Animated gif can reuse across multiple frames', () async {
+    // Regression test for b/271947267 and https://github.com/flutter/flutter/issues/122134
+
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'four_frame_with_reuse.gif'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // Capture the final frame of animation. If we have not composited
+    // correctly, it will be clipped strangely.
+    late ui.FrameInfo frameInfo;
+    for (int i = 0; i < 4; i++) {
+      frameInfo = await codec.getNextFrame();
+    }
+
+    final ui.Image image = frameInfo.image;
+    final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+
+    final Uint8List goldenData = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'four_frame_with_reuse_end.png'),
+    ).readAsBytesSync();
+
+    expect(imageData.buffer.asUint8List(), goldenData);
+  });
+
+  test('Animated webp can reuse across multiple frames', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/61150#issuecomment-679055858
+
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // Capture the final frame of animation. If we have not composited
+    // correctly, the hearts will be incorrectly repeated in the image.
+    late ui.FrameInfo frameInfo;
+    for (int i = 0; i < 69; i++) {
+      frameInfo  = await codec.getNextFrame();
+    }
+
+    final ui.Image image = frameInfo.image;
+    final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+
+    final Uint8List goldenData = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'heart_end.png'),
+    ).readAsBytesSync();
+
+    expect(imageData.buffer.asUint8List(), goldenData);
+
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
