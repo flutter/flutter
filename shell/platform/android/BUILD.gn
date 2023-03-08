@@ -53,6 +53,7 @@ executable("flutter_shell_native_unittests") {
 }
 
 shared_library("flutter_shell_native") {
+  inputs = [ "android_exports.lst" ]
   output_name = "flutter"
   deps = [ ":flutter_shell_native_src" ]
   ldflags = [ "-Wl,--version-script=" + rebase_path("android_exports.lst") ]
