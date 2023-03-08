@@ -74,9 +74,9 @@ void main() {
   Finder findMnemonic(String label) {
     return find
         .descendant(
-          of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()),
-          matching: find.byType(Text),
-        )
+      of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()),
+      matching: find.byType(Text),
+    )
         .last;
   }
 
@@ -697,11 +697,11 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 324.0, 602.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 276.0, 602.0, 388.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.center));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 324.0, 674.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 300.0, 674.0, 412.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
@@ -741,7 +741,7 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 324.0, 472.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 276.0, 472.0, 388.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.center));
       await tester.pump();
@@ -783,7 +783,7 @@ void main() {
 
       // Now move the menu by calling open() again with a local position on the
       // anchor.
-      controller.open(position: const Offset(200, 0));
+      controller.open(position: const Offset(200, 200));
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 476.0, 800.0, 588.0)));
     });
@@ -1070,7 +1070,7 @@ void main() {
         description.join('\n'),
         equalsIgnoringHashCodes(
             'style: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xfff44336))), elevation: MaterialStatePropertyAll(10.0))\n'
-            'clipBehavior: Clip.none'),
+                'clipBehavior: Clip.none'),
       );
     });
 
@@ -1463,13 +1463,13 @@ void main() {
       int count = 0;
       for (final String key in expected.keys) {
         expect(MenuAcceleratorLabel.stripAcceleratorMarkers(key, setIndex: (int index) {
-            acceleratorIndex = index;
-          }), equals(expected[key]),
-          reason: "'$key' label doesn't match ${expected[key]}");
+          acceleratorIndex = index;
+        }), equals(expected[key]),
+            reason: "'$key' label doesn't match ${expected[key]}");
         expect(acceleratorIndex, equals(expectedIndices[count]),
-          reason: "'$key' index doesn't match ${expectedIndices[count]}");
+            reason: "'$key' index doesn't match ${expectedIndices[count]}");
         expect(MenuAcceleratorLabel(key).hasAccelerator, equals(expectedHasAccelerator[count]),
-          reason: "'$key' hasAccelerator isn't ${expectedHasAccelerator[count]}");
+            reason: "'$key' hasAccelerator isn't ${expectedHasAccelerator[count]}");
         count += 1;
       }
     });
@@ -2218,8 +2218,8 @@ void main() {
                 children: <Widget>[
                   MenuBar(
                     style: menuPadding != null
-                      ? MenuStyle(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding))
-                      : null,
+                        ? MenuStyle(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding))
+                        : null,
                     children: createTestMenus(onPressed: onPressed),
                   ),
                   const Expanded(child: Placeholder()),
@@ -2534,9 +2534,9 @@ List<Widget> createTestMenus({
   bool accelerators = false,
 }) {
   Widget submenuButton(
-    TestMenu menu, {
-    required List<Widget> menuChildren,
-  }) {
+      TestMenu menu, {
+        required List<Widget> menuChildren,
+      }) {
     return SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(menu) : null,
       onClose: onClose != null ? () => onClose(menu) : null,
@@ -2546,12 +2546,12 @@ List<Widget> createTestMenus({
   }
 
   Widget menuItemButton(
-    TestMenu menu, {
-    bool enabled = true,
-    Widget? leadingIcon,
-    Widget? trailingIcon,
-    Key? key,
-  }) {
+      TestMenu menu, {
+        bool enabled = true,
+        Widget? leadingIcon,
+        Widget? trailingIcon,
+        Key? key,
+      }) {
     return MenuItemButton(
       key: key,
       onPressed: enabled && onPressed != null ? () => onPressed(menu) : null,
