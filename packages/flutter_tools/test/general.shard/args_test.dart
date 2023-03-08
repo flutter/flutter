@@ -47,10 +47,10 @@ void main() {
     await runner.run(<String>['dummy', '--key']);
 
     expect(command.boolArg('key'), true);
-    expect(command.boolArg('empty'), null);
+    expect(() => command.boolArg('non-existent'), throwsArgumentError);
 
     expect(command.boolArg('key'), true);
-    expect(() => command.boolArg('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(() => command.boolArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.boolArg('key-false'), false);
     expect(command.boolArg('key-false'), false);
@@ -72,10 +72,10 @@ void main() {
     await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
-    expect(command.stringArg('empty'), null);
+    expect(() => command.stringArg('non-existent'), throwsArgumentError);
 
     expect(command.stringArg('key'), 'value');
-    expect(() => command.stringArg('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(() => command.stringArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
   });
 
   testUsingContext('List<String> safe argResults', () async {
@@ -97,7 +97,7 @@ void main() {
     await runner.run(<String>['dummy', '--key', 'a']);
 
     // throws error when trying to parse non-existent key.
-    expect(() => command.stringsArg('empty'),throwsA(const TypeMatcher<ArgumentError>()));
+    expect(() => command.stringsArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.stringsArg('key'), <String>['a']);
 
