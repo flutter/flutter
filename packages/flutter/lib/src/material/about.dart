@@ -1194,44 +1194,36 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
-    // TODO(justinmc): I feel like this can be done without either of these
-    // WillPopScope widgets...
-    return WillPopScope(
-      // Push pop check into nested navigator.
-      onWillPop: () async {
-        return !(await _navigatorKey.currentState!.maybePop());
+    return Navigator(
+      key: _navigatorKey,
+      initialRoute: 'initial',
+      onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+        switch (focus) {
+          case _Focus.master:
+            return <Route<void>>[masterPageRoute];
+          case _Focus.detail:
+            return <Route<void>>[
+              masterPageRoute,
+              _detailPageRoute(_cachedDetailArguments),
+            ];
+        }
       },
-      child: Navigator(
-        key: _navigatorKey,
-        initialRoute: 'initial',
-        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
-          switch (focus) {
-            case _Focus.master:
-              return <Route<void>>[masterPageRoute];
-            case _Focus.detail:
-              return <Route<void>>[
-                masterPageRoute,
-                _detailPageRoute(_cachedDetailArguments),
-              ];
-          }
-        },
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case _navMaster:
-              // Matching state to navigation event.
-              focus = _Focus.master;
-              return masterPageRoute;
-            case _navDetail:
-              // Matching state to navigation event.
-              focus = _Focus.detail;
-              // Cache detail page settings.
-              _cachedDetailArguments = settings.arguments;
-              return _detailPageRoute(_cachedDetailArguments);
-            default:
-              throw Exception('Unknown route ${settings.name}');
-          }
-        },
-      ),
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case _navMaster:
+            // Matching state to navigation event.
+            focus = _Focus.master;
+            return masterPageRoute;
+          case _navDetail:
+            // Matching state to navigation event.
+            focus = _Focus.detail;
+            // Cache detail page settings.
+            _cachedDetailArguments = settings.arguments;
+            return _detailPageRoute(_cachedDetailArguments);
+          default:
+            throw Exception('Unknown route ${settings.name}');
+        }
+      },
     );
   }
 
@@ -1254,12 +1246,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
     return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-      return WillPopScope(
-        onWillPop: () async {
+      return CanPopScope(
+        onPop: () {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
-          Navigator.of(context).pop();
-          return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),
       );

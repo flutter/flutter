@@ -311,6 +311,9 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
+  /// Called after a route is popped.
+  void onPop() {}
+
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
 
@@ -3018,6 +3021,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(isPresent);
     pendingResult = result;
     currentState = _RouteLifecycle.pop;
+    route.onPop();
   }
 
   bool _reportRemovalToObserver = true;

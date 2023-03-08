@@ -36,14 +36,18 @@ class CanPopScope extends StatefulWidget {
   const CanPopScope({
     super.key,
     required this.child,
-    required this.popEnabled,
-    // TODO(justinmc): Add onPop (or didPop) to this?
+    this.popEnabled = true,
+    this.onPop,
   });
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  // TODO(justinmc): Should this be didPop?
+  // TODO(justinmc): Document exactly when this is called. Currently after pop.
+  final VoidCallback? onPop;
 
   /// When false, blocks the current route from being popped.
   ///
