@@ -3045,6 +3045,7 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test_macos
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/122196
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
