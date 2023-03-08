@@ -1734,9 +1734,6 @@ abstract class FlutterCommand extends Command<void> {
     return argResults![name] as String?;
   }
 
-  /// Gets the parsed command-line option named [name] as an `int`.
-  int? intArg(String name) => argResults?[name] as int?;
-
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {
     return argResults![name]! as List<String>? ?? <String>[];
