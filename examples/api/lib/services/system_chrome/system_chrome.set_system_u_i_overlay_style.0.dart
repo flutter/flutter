@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for setting the [SystemUiOverlayStyle] with an [AnnotatedRegion].
+// Flutter code sample for [AppBar.systemOverlayStyle].
 
 import 'dart:math' as math;
 
@@ -54,28 +54,15 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _currentStyle,
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'SystemUiOverlayStyle Sample',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _changeColor,
-                  child: const Text('Change Color'),
-                ),
-              ),
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SystemUiOverlayStyle Sample'),
+        systemOverlayStyle: _currentStyle,
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: _changeColor,
+          child: const Text('Change Color'),
         ),
       ),
     );
