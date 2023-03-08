@@ -73,7 +73,6 @@ class DriveCommand extends RunCommandBase {
     addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
-        defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
               'By default, "flutter drive" stops the application after tests are finished, '
               'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '

@@ -201,7 +201,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return uri;
   }
 
-  bool get serveObservatory => boolArg('serve-observatory') ?? false;
+  bool get serveObservatory => boolArg('serve-observatory');
 
   String? get appId {
     return stringArgDeprecated('app-id');

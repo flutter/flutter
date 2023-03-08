@@ -135,7 +135,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Don't run pub if asking for machine output.
-    if (boolArg('machine') != null && boolArg('machine')!) {
+    if (boolArg('machine')) {
       return false;
     }
 
@@ -144,12 +144,12 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool? suggestionFlag = boolArg('suggestions');
-    final bool machineFlag = boolArg('machine') ?? false;
-    if (suggestionFlag != null && suggestionFlag == true) {
+    final bool suggestionFlag = boolArg('suggestions');
+    final bool machineFlag = boolArg('machine');
+    if (suggestionFlag == true) {
       final String directoryPath;
-      final bool? watchFlag = boolArg('watch');
-      if (watchFlag != null && watchFlag) {
+      final bool watchFlag = boolArg('watch');
+      if (watchFlag) {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {

@@ -226,7 +226,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final List<String> outputFileList;
     File? untranslatedMessagesFile;
 
-    bool format = boolArg('format') ?? false;
+    bool format = boolArg('format');
 
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       final LocalizationOptions options = parseLocalizationsOptions(

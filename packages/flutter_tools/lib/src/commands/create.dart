@@ -207,7 +207,7 @@ class CreateCommand extends CreateBase {
     validateOutputDirectoryArg();
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
-    final bool emptyArgument = boolArg('empty') ?? false;
+    final bool emptyArgument = boolArg('empty');
     if (sampleArgument != null) {
       final String? templateArgument = stringArg('template');
       if (templateArgument != null && stringToProjectType(templateArgument) != FlutterProjectType.app) {

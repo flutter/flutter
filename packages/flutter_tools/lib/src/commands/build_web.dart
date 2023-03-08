@@ -132,7 +132,7 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final bool wasmRequested = boolArg('wasm')!;
+    final bool wasmRequested = boolArg('wasm');
     if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
       throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
     }
