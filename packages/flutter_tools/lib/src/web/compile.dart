@@ -54,7 +54,7 @@ Future<void> buildWeb(
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(
-      WebServiceWorker(globals.fs, globals.cache, buildInfo.webRenderer, isWasm),
+      WebServiceWorker(globals.fs, buildInfo.webRenderer, isWasm: isWasm),
       Environment(
         projectDir: globals.fs.currentDirectory,
         outputDir: outputDirectory,

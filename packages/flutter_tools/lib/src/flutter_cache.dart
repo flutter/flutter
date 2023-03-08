@@ -181,20 +181,6 @@ class FlutterWebSdk extends CachedArtifact {
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
-    // This is a temporary work-around for not being able to safely download into a shared directory.
-    final FileSystem fileSystem = location.fileSystem;
-    for (final FileSystemEntity entity in location.listSync(recursive: true)) {
-      if (entity is File) {
-        final List<String> segments = fileSystem.path.split(entity.path);
-        segments.remove('flutter_web_sdk');
-        final String newPath = fileSystem.path.joinAll(segments);
-        final File newFile = fileSystem.file(newPath);
-        if (!newFile.existsSync()) {
-          newFile.createSync(recursive: true);
-        }
-        entity.copySync(newPath);
-      }
-    }
   }
 }
 
