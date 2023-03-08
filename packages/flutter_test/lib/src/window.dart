@@ -574,7 +574,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     return _forceSystemFontFamilyToBeNull
       ? null
       : _systemFontFamily ?? _platformDispatcher.systemFontFamily;
-    }
+  }
   String? _systemFontFamily;
   bool _forceSystemFontFamilyToBeNull = false;
   set systemFontFamily(String? value) {
