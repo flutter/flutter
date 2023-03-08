@@ -293,9 +293,65 @@ void main() {
 
     expect(childSemanticsCalled, isTrue);
   });
+
+  test('when manifold enables semantics all PipelineOwners in tree create SemanticsOwner', () {
+    final TestPipelineManifold manifold = TestPipelineManifold();
+
+    int rootOnSemanticsOwnerCreatedCount = 0;
+    int rootOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner root = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        rootOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsOwnerDisposed: () {
+        rootOnSemanticsOwnerDisposed++;
+      }
+    );
+
+    int childOnSemanticsOwnerCreatedCount = 0;
+    int childOnSemanticsOwnerDisposed = 0;
+    final PipelineOwner child = PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        childOnSemanticsOwnerCreatedCount++;
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) { },
+        onSemanticsOwnerDisposed: () {
+          childOnSemanticsOwnerDisposed++;
+        }
+    );
+
+    root.adoptChild(child);
+    root.attach(manifold);
+    expect(rootOnSemanticsOwnerCreatedCount, 0);
+    expect(childOnSemanticsOwnerCreatedCount, 0);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+
+    manifold.semanticsEnabled = true;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 0);
+    expect(childOnSemanticsOwnerDisposed, 0);
+    expect(root.semanticsOwner, isNotNull);
+    expect(child.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(rootOnSemanticsOwnerCreatedCount, 1);
+    expect(childOnSemanticsOwnerCreatedCount, 1);
+    expect(rootOnSemanticsOwnerDisposed, 1);
+    expect(childOnSemanticsOwnerDisposed, 1);
+    expect(root.semanticsOwner, isNull);
+    expect(child.semanticsOwner, isNull);
+  });
 }
 
-// TODO(goderbauer): enabling semantics
+// TODO(goderbauer): one had semantics enabled previously
+// TODO(goderbauer): one enables semantics while manifold has it on
 // TODO(goderbauer): tree management
 // TODO(goderbauer): Can change children during own layout, not during other phases
 
