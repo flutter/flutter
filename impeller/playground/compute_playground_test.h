@@ -11,6 +11,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/playground/playground.h"
+#include "impeller/renderer/device_buffer.h"
 
 namespace impeller {
 
@@ -35,6 +36,18 @@ class ComputePlaygroundTest
 
   // |Playground|
   std::string GetWindowTitle() const override;
+
+  template <typename T>
+  std::shared_ptr<DeviceBuffer> CreateHostVisibleDeviceBuffer(
+      std::shared_ptr<Context> context,
+      const std::string& label) {
+    DeviceBufferDescriptor desc;
+    desc.storage_mode = StorageMode::kHostVisible;
+    desc.size = sizeof(T);
+    auto buffer = context->GetResourceAllocator()->CreateBuffer(desc);
+    buffer->SetLabel(label);
+    return buffer;
+  }
 
  private:
   fml::TimeDelta start_time_;
