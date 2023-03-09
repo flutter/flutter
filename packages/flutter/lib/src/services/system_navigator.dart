@@ -46,6 +46,7 @@ class SystemNavigator {
         // calls to this method don't cause duplicate calls to the platform.
         _navigationStackHasMultiple = frameworkHandlesPop;
         try {
+          print('justin telling platform to do predictive back: ${!frameworkHandlesPop}');
           await SystemChannels.platform.invokeMethod<void>(
             'SystemNavigator.updateNavigationStackStatus',
             frameworkHandlesPop,

@@ -1669,7 +1669,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   void updateSystemNavigator() {
     final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
-    // TODO(justinmc): This is probably wrong in the case of nested navigators.
+    // TODO(justinmc): This is wrong in the case of nested navigators.
     SystemNavigator.updateNavigationStackStatus(popDisabled);
   }
 

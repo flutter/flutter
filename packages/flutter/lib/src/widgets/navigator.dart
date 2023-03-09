@@ -5270,9 +5270,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // TODO(justinmc): Probably not the best place for this. Doesn't consider
     // nested Navigators.
-    final int numberOfRoutes = _history.where(_RouteEntry.isPresentPredicate).length;
-    print('justin calling updateNavigationStackStatus, _history length is ${_history.length}, numberOfRoutes is $numberOfRoutes');
-    SystemNavigator.updateNavigationStackStatus(numberOfRoutes > 1);
+    //final int numberOfRoutes = _history.where(_RouteEntry.isPresentPredicate).length;
+    //print('justin calling updateNavigationStackStatus, _history length is ${_history.length}, numberOfRoutes is $numberOfRoutes');
+    //SystemNavigator.updateNavigationStackStatus(numberOfRoutes > 1);
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above

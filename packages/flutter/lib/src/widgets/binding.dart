@@ -47,6 +47,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
 abstract class WidgetsBindingObserver {
+  // TODO(justinmc): Maybe state that this won't be called on API 33+ of Android?
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
   /// the back button.
@@ -62,6 +63,10 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  @Deprecated(
+    'Use popEnabled instead. '
+    'This feature was deprecated after v3.9.0-0.0.pre.',
+  )
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new route onto the
@@ -597,6 +602,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
+  // TODO(justinmc): This and didPopRoute probably need to be refactored. They
+  // give the impression that they can prevent system pops, but that's not true
+  // anymore. They won't be called at all for a root system pop.
   /// Called when the system pops the current route.
   ///
   /// This first notifies the binding observers (using
@@ -620,6 +628,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         return;
       }
     }
+    // TODO(justinmc): This won't ever happen anymore? At least not in normal
+    // usage.
     SystemNavigator.pop();
   }
 
