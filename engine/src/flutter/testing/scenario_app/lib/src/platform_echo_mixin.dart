@@ -16,6 +16,6 @@ mixin PlatformEchoMixin on Scenario {
     ByteData? data,
     PlatformMessageResponseCallback? callback,
   ) {
-    window.sendPlatformMessage(name, data, null);
+    view.platformDispatcher.sendPlatformMessage(name, data, null);
   }
 }

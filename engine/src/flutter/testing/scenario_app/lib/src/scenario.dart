@@ -8,10 +8,10 @@ import 'dart:ui';
 /// A scenario to run for testing.
 abstract class Scenario {
   /// Creates a new scenario using a specific FlutterView instance.
-  Scenario(this.dispatcher);
+  Scenario(this.view);
 
-  /// The window used by this scenario. May be mocked.
-  final PlatformDispatcher dispatcher;
+  /// The FlutterView used by this scenario. May be mocked.
+  final FlutterView view;
 
   /// [true] if a screenshot is taken in the next frame.
   bool _didScheduleScreenshot = false;
@@ -27,12 +27,12 @@ abstract class Scenario {
   /// See [PlatformDispatcher.onDrawFrame] for more details.
   void onDrawFrame() {
     if (_didScheduleScreenshot) {
-      dispatcher.sendPlatformMessage('take_screenshot', null, null);
+      view.platformDispatcher.sendPlatformMessage('take_screenshot', null, null);
       return;
     }
     Future<void>.delayed(const Duration(seconds: 2), () {
       _didScheduleScreenshot = true;
-      dispatcher.scheduleFrame();
+      view.platformDispatcher.scheduleFrame();
     });
   }
 

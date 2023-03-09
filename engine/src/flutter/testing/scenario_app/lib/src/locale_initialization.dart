@@ -12,8 +12,7 @@ import 'scenario.dart';
 /// Sends the received locale data back as semantics information.
 class LocaleInitialization extends Scenario {
   /// Constructor
-  LocaleInitialization(PlatformDispatcher dispatcher)
-      : super(dispatcher);
+  LocaleInitialization(super.view);
 
   int _tapCount = 0;
 
@@ -26,7 +25,7 @@ class LocaleInitialization extends Scenario {
     final Canvas canvas = Canvas(recorder);
 
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, window.physicalSize.width, window.physicalSize.height),
+      Rect.fromLTWH(0, 0, view.physicalSize.width, view.physicalSize.height),
       Paint()..color = const Color.fromARGB(255, 255, 255, 255),
     );
     final Picture picture = recorder.endRecording();
@@ -36,7 +35,7 @@ class LocaleInitialization extends Scenario {
       picture,
     );
     final Scene scene = builder.build();
-    window.render(scene);
+    view.render(scene);
     scene.dispose();
 
     // On the first frame, pretend that it drew a text field. Send the
@@ -50,7 +49,7 @@ class LocaleInitialization extends Scenario {
         // SemanticsAction.tap.
         actions: 1,
         rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
-        label: window.locales.toString(),
+        label: view.platformDispatcher.locales.toString(),
         labelAttributes: <StringAttribute>[],
         textDirection: TextDirection.ltr,
         textSelectionBase: -1,
@@ -82,7 +81,7 @@ class LocaleInitialization extends Scenario {
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
 
-    dispatcher.views.first.updateSemantics(semanticsUpdate);
+    view.updateSemantics(semanticsUpdate);
   }
 
   /// Handle taps.
@@ -140,7 +139,7 @@ class LocaleInitialization extends Scenario {
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
 
-    dispatcher.views.first.updateSemantics(semanticsUpdate);
+    view.updateSemantics(semanticsUpdate);
 
     _tapCount++;
   }
