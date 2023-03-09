@@ -106,7 +106,7 @@ class TabController extends ChangeNotifier {
     Duration? animationDuration,
     required this.length,
     required TickerProvider vsync,
-  }) : assert(length >= 0),
+  })  : assert(length >= 0),
         assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
         _index = initialIndex,
         _previousIndex = initialIndex,
@@ -125,9 +125,9 @@ class TabController extends ChangeNotifier {
     required Duration animationDuration,
     required this.length,
   }) : _index = index,
-        _previousIndex = previousIndex,
-        _animationController = animationController,
-        _animationDuration = animationDuration;
+       _previousIndex = previousIndex,
+       _animationController = animationController,
+       _animationDuration = animationDuration;
 
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
@@ -195,8 +195,8 @@ class TabController extends ChangeNotifier {
       _indexChangingCurves.add(curve!);
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
-          .animateTo(_index.toDouble(), duration: duration, curve: curve!)
-          .whenCompleteOrCancel(() {
+        .animateTo(_index.toDouble(), duration: duration, curve: curve!)
+        .whenCompleteOrCancel(() {
           if (_animationController != null) { // don't notify if we've been disposed
           _indexIsChangingCount -= 1;
           _indexChangingDurations.removeLast();
@@ -206,7 +206,7 @@ class TabController extends ChangeNotifier {
       });
     } else {
       _indexIsChangingCount += 1;
-      _indexChangingDurations.add(Duration.zero);
+      _indexChangingDurations.add(animationDuration);
       _indexChangingCurves.add(Curves.ease);
       _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
@@ -379,7 +379,7 @@ class DefaultTabController extends StatefulWidget {
     required this.child,
     this.animationDuration,
   }) : assert(length >= 0),
-        assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
 
   /// The total number of tabs.
   ///
