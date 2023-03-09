@@ -290,6 +290,31 @@ float HalfToFloat(uint16_t half) {
 }
 }  // namespace
 
+TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
+  auto info = SkImageInfo::Make(10, 10, SkColorType::kRGBA_8888_SkColorType,
+                                SkAlphaType::kPremul_SkAlphaType);
+  SkBitmap bitmap;
+  bitmap.allocPixels(info, 10 * 4);
+  auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 4);
+  auto image = SkImage::MakeFromBitmap(bitmap);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
+  ASSERT_EQ(nullptr, image->colorSpace());
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      std::move(data), image->imageInfo(), 10 * 4);
+
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<SkBitmap> decompressed =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          /*supports_wide_gamut=*/true);
+  ASSERT_TRUE(decompressed);
+  ASSERT_EQ(decompressed->colorType(), kRGBA_8888_SkColorType);
+  ASSERT_EQ(decompressed->colorSpace(), nullptr);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
 TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
   auto data = OpenFixtureAsSkData("DisplayP3Logo.png");
   auto image = SkImage::MakeFromEncoded(data);

@@ -54,9 +54,12 @@ static constexpr float kSrgbGamutArea = 0.0982f;
 
 // Source:
 // https://source.chromium.org/chromium/_/skia/skia.git/+/393fb1ec80f41d8ad7d104921b6920e69749fda1:src/codec/SkAndroidCodec.cpp;l=67;drc=46572b4d445f41943059d0e377afc6d6748cd5ca;bpv=1;bpt=0
-bool IsWideGamut(const SkColorSpace& color_space) {
+bool IsWideGamut(const SkColorSpace* color_space) {
+  if (!color_space) {
+    return false;
+  }
   skcms_Matrix3x3 xyzd50;
-  color_space.toXYZD50(&xyzd50);
+  color_space->toXYZD50(&xyzd50);
   SkPoint rgb[3];
   LoadGamut(rgb, xyzd50);
   float area = CalculateArea(rgb);
@@ -134,7 +137,7 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
 
   const auto base_image_info = descriptor->image_info();
   const bool is_wide_gamut =
-      supports_wide_gamut ? IsWideGamut(*base_image_info.colorSpace()) : false;
+      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   SkImageInfo image_info;
