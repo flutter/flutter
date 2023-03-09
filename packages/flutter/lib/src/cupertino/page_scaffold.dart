@@ -87,7 +87,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// Optional [ScrollController] that is animated when the Scaffold's status bar is tapped.
   ///
   /// This callback is only called in iOS and macOS applications.
-  final void ScrollController? statusBarTapScrollController;
+  final ScrollController? statusBarTapScrollController;
 
   /// Optional callback that is called when the Scaffold's status bar is tapped.
   ///
