@@ -126,7 +126,7 @@ sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     SkISize size) {
   return DoMakeRasterSnapshot(size, [display_list](SkCanvas* canvas) {
-    DlSkCanvasAdapter(canvas).DrawDisplayList(display_list);
+    display_list->RenderTo(canvas);
   });
 }
 
