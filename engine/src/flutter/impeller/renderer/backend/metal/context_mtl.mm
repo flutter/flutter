@@ -90,6 +90,14 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
 #endif
 
   {
+    bool supports_subgroups = false;
+    // Refer to the "SIMD-scoped reduction operations" feature in the table
+    // below: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+    if (@available(ios 13.0, tvos 13.0, macos 10.15, *)) {
+      supports_subgroups = [device supportsFamily:MTLGPUFamilyApple7] ||
+                           [device supportsFamily:MTLGPUFamilyMac2];
+    }
+
     device_capabilities_ =
         DeviceCapabilitiesBuilder()
             .SetHasThreadingRestrictions(false)
@@ -99,6 +107,7 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
             .SetSupportsFramebufferFetch(SupportsFramebufferFetch())
             .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
+            .SetSupportsCompute(true, supports_subgroups)
             .Build();
   }
 
