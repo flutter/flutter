@@ -139,7 +139,7 @@ void recursiveCopy(Directory source, Directory target) {
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
       final String modes = entity.statSync().modeString();
-      if (modes != null && modes.contains('x')) {
+      if (modes.contains('x')) {
         makeExecutable(dest);
       }
     }
@@ -276,13 +276,13 @@ Future<Process> startProcess(
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
-  assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
+
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
@@ -433,7 +433,7 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(String command, List<String> options) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -470,10 +470,11 @@ Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment);
+    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
 }
 
 /// Starts a Flutter subprocess.
@@ -502,14 +503,15 @@ Future<Process> startFlutter(String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
-}) {
-  assert(isBot != null);
-  final List<String> args = flutterCommandArgs(command, options);
+  String? workingDirectory,
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
   return startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
     isBot: isBot,
+    workingDirectory: workingDirectory,
   );
 }
 
@@ -519,16 +521,17 @@ Future<String> evalFlutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
   StringBuffer? stderr, // if not null, the stderr will be written here.
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, stderr: stderr);
+      canFail: canFail, environment: environment, stderr: stderr, workingDirectory: workingDirectory);
 }
 
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
 }) async {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return _processManager.run(
     <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
     workingDirectory: cwd,
@@ -634,48 +637,6 @@ Future<void> getNewGallery(String revision, Directory galleryDir) async {
   });
 }
 
-void checkNotNull(Object o1,
-    [Object o2 = 1,
-    Object o3 = 1,
-    Object o4 = 1,
-    Object o5 = 1,
-    Object o6 = 1,
-    Object o7 = 1,
-    Object o8 = 1,
-    Object o9 = 1,
-    Object o10 = 1]) {
-  if (o1 == null) {
-    throw 'o1 is null';
-  }
-  if (o2 == null) {
-    throw 'o2 is null';
-  }
-  if (o3 == null) {
-    throw 'o3 is null';
-  }
-  if (o4 == null) {
-    throw 'o4 is null';
-  }
-  if (o5 == null) {
-    throw 'o5 is null';
-  }
-  if (o6 == null) {
-    throw 'o6 is null';
-  }
-  if (o7 == null) {
-    throw 'o7 is null';
-  }
-  if (o8 == null) {
-    throw 'o8 is null';
-  }
-  if (o9 == null) {
-    throw 'o9 is null';
-  }
-  if (o10 == null) {
-    throw 'o10 is null';
-  }
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {required String from}) {
   return from.split('\n').where((String line) {
@@ -707,14 +668,14 @@ Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
 bool canRun(String path) => _processManager.canRun(path);
 
 final RegExp _obsRegExp =
-  RegExp('An Observatory debugger .* is available at: ');
+  RegExp('A Dart VM Service .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 /// Tries to extract a port from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 int? parseServicePort(String line, {
   Pattern? prefix,
 }) {
@@ -732,7 +693,7 @@ int? parseServicePort(String line, {
 /// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 Uri? parseServiceUri(String line, {
   Pattern? prefix,
 }) {

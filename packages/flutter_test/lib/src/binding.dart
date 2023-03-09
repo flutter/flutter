@@ -99,7 +99,7 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 
   /// The current [TestDefaultBinaryMessengerBinding], if one has been created.
-  static TestDefaultBinaryMessengerBinding? get instance => _instance;
+  static TestDefaultBinaryMessengerBinding get instance => BindingBase.checkInstance(_instance);
   static TestDefaultBinaryMessengerBinding? _instance;
 
   @override
@@ -182,17 +182,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
 
   @override
-  TestWindow get window => _window;
-  final TestWindow _window;
+  late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -346,6 +347,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    // This is intialized here because it's needed for the `super.initInstances`
+    // call. It can't be handled as a ctor initializer because it's dependent
+    // on `platformDispatcher`. It can't be handled in the ctor itself because
+    // the base class ctor is called first and calls `initInstances`.
+    window = TestWindow.fromPlatformDispatcher(platformDispatcher: platformDispatcher);
+
     super.initInstances();
     _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
@@ -772,14 +779,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     VoidCallback invariantTester,
     String description,
   ) {
-    assert(description != null);
     assert(inTest);
 
     // Set the handler only if there is currently none.
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
       _announcementHandler = _handleAnnouncementMessage;
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, _announcementHandler);
     }
@@ -1068,10 +1074,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _parentZone = null;
     buildOwner!.focusManager.dispose();
 
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(
             SystemChannels.accessibility.name, _announcementHandler)) {
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
       _announcementHandler = null;
     }
@@ -1194,7 +1200,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
-    assert(additionalTime != null);
     assert(() {
       if (_pendingAsyncTasks == null) {
         return true;
@@ -1335,7 +1340,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       debugBuildingDirtyElements = true;
       buildOwner!.buildScope(renderViewElement!);
       if (_phase != EnginePhase.build) {
-        assert(renderView != null);
         pipelineOwner.flushLayout();
         if (_phase != EnginePhase.layout) {
           pipelineOwner.flushCompositingBits();
@@ -1383,7 +1387,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     )
     Duration? timeout,
   }) {
-    assert(description != null);
     assert(!inTest);
     assert(_currentFakeAsync == null);
     assert(_clock == null);
@@ -1885,7 +1888,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     )
     Duration? timeout,
   }) {
-    assert(description != null);
     assert(!inTest);
     _inTest = true;
     _liveTestRenderView._setDescription(description);
@@ -2038,7 +2040,6 @@ class _LiveTestRenderView extends RenderView {
     fontSize: 10.0,
   );
   void _setDescription(String value) {
-    assert(value != null);
     if (value.isEmpty) {
       _label = null;
       return;
@@ -2081,7 +2082,7 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null) {
+      if (dirty) {
         scheduleMicrotask(onNeedPaint);
       }
     }

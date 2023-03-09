@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
-const String _expText = 'Éxp'; // renders in Ahem as:
+const String _expText = 'Éxp'; // renders in the test font as:
 
 // ########
 // ########
@@ -98,7 +98,7 @@ void main() {
       find.byType(Align),
       <Color>{ const Color(0xFFFFFFFF) },
     );
-    // fake a "select all" event to selecte the text
+    // fake a "select all" event to select the text
     Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
     await tester.pump();
     await _expectColors(

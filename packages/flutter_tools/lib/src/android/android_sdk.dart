@@ -435,11 +435,9 @@ class AndroidSdk {
           throwOnError: true,
           hideStdout: true,
         ).stdout.trim();
-        if (javaHomeOutput != null) {
-          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
-            final String javaHome = javaHomeOutput.split('\n').last.trim();
-            return fileSystem.path.join(javaHome, 'bin', 'java');
-          }
+        if (javaHomeOutput.isNotEmpty) {
+          final String javaHome = javaHomeOutput.split('\n').last.trim();
+          return fileSystem.path.join(javaHome, 'bin', 'java');
         }
       } on Exception { /* ignore */ }
     }
@@ -500,10 +498,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.platformName,
     required this.buildToolsVersion,
     required FileSystem fileSystem,
-  }) : assert(sdkLevel != null),
-       assert(platformName != null),
-       assert(buildToolsVersion != null),
-       _fileSystem = fileSystem;
+  }) : _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
   final int sdkLevel;

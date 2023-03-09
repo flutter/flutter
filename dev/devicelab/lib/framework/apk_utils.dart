@@ -287,6 +287,20 @@ android {
     pubspec.writeAsStringSync(content, flush: true);
   }
 
+  Future<void> setMinSdkVersion(int sdkVersion) async {
+    final File buildScript = File(
+      path.join(androidPath, 'app', 'build.gradle'),
+    );
+
+    buildScript.openWrite(mode: FileMode.append).write('''
+android {
+    defaultConfig {
+        minSdkVersion $sdkVersion
+    }
+}
+    ''');
+  }
+
   Future<void> getPackages() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('pub', options: <String>['get']);

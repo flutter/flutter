@@ -9,7 +9,6 @@ class BottomAppBarTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends BottomAppBarTheme {
   const _${blockName}DefaultsM3(this.context)
     : super(
@@ -25,6 +24,9 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
 
   @override
   Color? get surfaceTintColor => ${componentColor('md.comp.bottom-app-bar.container.surface-tint-layer')};
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 }
 ''';
 }

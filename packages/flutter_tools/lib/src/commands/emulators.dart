@@ -53,7 +53,7 @@ class EmulatorsCommand extends FlutterCommand {
       await _createEmulator(name: stringArgDeprecated('name'));
     } else {
       final String? searchText =
-          argumentResults.rest != null && argumentResults.rest.isNotEmpty
+          argumentResults.rest.isNotEmpty
               ? argumentResults.rest.first
               : null;
       await _listEmulators(searchText);

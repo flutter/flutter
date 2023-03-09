@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=382757700"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:ui' as ui;
 
@@ -147,6 +148,7 @@ void main() {
       pixels: 0.0,
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
+      devicePixelRatio: tester.binding.window.devicePixelRatio,
     );
     scrollPainter!.update(metrics, AxisDirection.down);
 

@@ -207,21 +207,31 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+  }) async {
     return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
-  Future<List<Device>> getDevices() {
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+  }) {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId!)
-        : getAllConnectedDevices();
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
   }
 
   void addDevice(Device device) => devices.add(device);
@@ -236,14 +246,25 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    return device.isSupportedForProject(flutterProject!);
+  Future<List<Device>> findTargetDevices({
+    bool includeDevicesUnsupportedByProject = false,
+    Duration? timeout,
+    bool promptUserToChooseDevice = true,
+  }) async {
+    return devices;
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout, bool promptUserToChooseDevice = true }) async {
-    return devices;
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+    FlutterProject? flutterProject,
+  }) {
+    return TestDeviceDiscoverySupportFilter();
   }
+}
+
+class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+  TestDeviceDiscoverySupportFilter();
 }
 
 class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {

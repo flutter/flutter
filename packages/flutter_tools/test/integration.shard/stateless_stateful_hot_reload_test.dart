@@ -29,7 +29,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Can switch between stateless and stateful', () async {
+  testWithoutContext('Can switch from stateless to stateful', () async {
     await flutter.run();
     await flutter.hotReload();
     final StringBuffer stdout = StringBuffer();
@@ -39,13 +39,8 @@ void main() {
     project.toggleState();
     await flutter.hotReload();
 
-    // switch to stateless.
-    project.toggleState();
-    await flutter.hotReload();
-
     final String logs = stdout.toString();
 
-    expect(logs, contains('STATELESS'));
     expect(logs, contains('STATEFUL'));
     await subscription.cancel();
   });

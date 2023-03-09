@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -404,7 +405,9 @@ void main() {
     final TestDataSource source = TestDataSource();
 
     Widget buildCustomHeightPaginatedTable({
-      double dataRowHeight = 48.0,
+      double? dataRowHeight,
+      double? dataRowMinHeight,
+      double? dataRowMaxHeight,
       double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(
@@ -422,6 +425,8 @@ void main() {
           DataColumn(label: Text('Generation')),
         ],
         dataRowHeight: dataRowHeight,
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
         headingRowHeight: headingRowHeight,
       );
     }
@@ -479,6 +484,13 @@ void main() {
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt (0)').first,
     ).size.height, 56.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomHeightPaginatedTable(dataRowMinHeight: 51.0, dataRowMaxHeight: 51.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt (0)').first,
+    ).size.height, 51.0);
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
@@ -770,7 +782,7 @@ void main() {
   testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
-    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // 800 is wide enough to ensure that all of the columns fit in the
     // Card. The test makes sure that the DataTable is exactly as wide
     // as the Card, minus the Card's margin.
     const double originalWidth = 800;

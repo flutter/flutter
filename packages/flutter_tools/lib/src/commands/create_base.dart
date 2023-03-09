@@ -333,7 +333,6 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
-    assert(projectName != null);
     return projectName;
   }
 
@@ -688,7 +687,7 @@ abstract class CreateBase extends FlutterCommand {
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
-        if (modes != null && modes.contains('x')) {
+        if (modes.contains('x')) {
           globals.os.makeExecutable(destinationFile);
         }
       },

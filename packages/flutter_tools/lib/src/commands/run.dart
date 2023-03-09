@@ -19,6 +19,8 @@ import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -135,6 +137,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'this comma separated list of allowed prefixes.',
         valueHelp: 'skia.gpu,skia.shaders',
       )
+      ..addFlag('enable-dart-profiling',
+        defaultsTo: true,
+        help: 'Whether the Dart VM sampling CPU profiler is enabled. This flag '
+              'is only meaningful in debug and profile builds.',
+      )
       ..addFlag('enable-software-rendering',
         negatable: false,
         help: 'Enable rendering using the Skia software backend. '
@@ -172,12 +179,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArgDeprecated('trace-startup');
+  bool get enableDartProfiling => boolArgDeprecated('enable-dart-profiling');
   bool get cacheSkSL => boolArgDeprecated('cache-sksl');
   bool get dumpSkpOnShaderCompilation => boolArgDeprecated('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArgDeprecated('purge-persistent-cache');
@@ -187,6 +197,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArgDeprecated('track-widget-creation');
   bool get enableImpeller => boolArgDeprecated('enable-impeller');
   bool get uninstallFirst => boolArgDeprecated('uninstall-first');
+  bool get enableEmbedderApi => boolArgDeprecated('enable-embedder-api');
 
   @override
   bool get reportNullSafety => true;
@@ -224,6 +235,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -247,7 +260,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
-        disablePortPublication: disablePortPublication,
+        disablePortPublication: await disablePortPublication,
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArgDeprecated('verbose-system-logs'),
@@ -270,6 +283,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        serveObservatory: boolArgDeprecated('serve-observatory'),
+        enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     }
   }
@@ -399,18 +415,23 @@ class RunCommand extends RunCommandBase {
     bool isEmulator;
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
+    bool anyIOSNetworkDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
       deviceOsVersion = 'none';
       isEmulator = false;
     } else if (devices!.length == 1) {
-      final TargetPlatform platform = await devices![0].targetPlatform;
+      final Device device = devices![0];
+      final TargetPlatform platform = await device.targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
+      if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+        anyIOSNetworkDevices = true;
+      }
       deviceType = getNameForTargetPlatform(platform);
-      deviceOsVersion = await devices![0].sdkNameAndVersion;
-      isEmulator = await devices![0].isLocalEmulator;
+      deviceOsVersion = await device.sdkNameAndVersion;
+      isEmulator = await device.isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
@@ -419,24 +440,32 @@ class RunCommand extends RunCommandBase {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+          anyIOSNetworkDevices = true;
+        }
         if (anyAndroidDevices && anyIOSDevices) {
           break;
         }
       }
     }
 
+    String? iOSInterfaceType;
+    if (anyIOSDevices) {
+      iOSInterfaceType = anyIOSNetworkDevices ? 'wireless' : 'usb';
+    }
+
     String? androidEmbeddingVersion;
     final List<String> hostLanguage = <String>[];
     if (anyAndroidDevices) {
       final AndroidProject androidProject = FlutterProject.current().android;
-      if (androidProject != null && androidProject.existsSync()) {
+      if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
-      if (iosProject != null && iosProject.exists) {
+      if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
@@ -456,6 +485,7 @@ class RunCommand extends RunCommandBase {
       commandRunProjectHostLanguage: hostLanguage.join(','),
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller,
+      commandRunIOSInterfaceType: iOSInterfaceType,
     );
   }
 

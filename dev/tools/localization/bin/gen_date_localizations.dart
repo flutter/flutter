@@ -2,6 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path/path.dart' as path;
+
+import '../localizations_utils.dart';
+
+const String _kCommandName = 'gen_date_localizations.dart';
+
+// Used to let _jsonToMap know what locale it's date symbols converting for.
+// Date symbols for the Kannada locale ('kn') are handled specially because
+// some of the strings contain characters that can crash Emacs on Linux.
+// See packages/flutter_localizations/lib/src/l10n/README for more information.
+String? currentLocale;
+
 /// This program extracts localized date symbols and patterns from the intl
 /// package for the subset of locales supported by the flutter_localizations
 /// package.
@@ -25,23 +41,6 @@
 /// ```
 /// dart dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 /// ```
-
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
-
-import '../localizations_utils.dart';
-
-const String _kCommandName = 'gen_date_localizations.dart';
-
-// Used to let _jsonToMap know what locale it's date symbols converting for.
-// Date symbols for the Kannada locale ('kn') are handled specially because
-// some of the strings contain characters that can crash Emacs on Linux.
-// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String? currentLocale;
-
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
 

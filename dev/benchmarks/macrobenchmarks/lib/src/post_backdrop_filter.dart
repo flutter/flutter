@@ -74,9 +74,9 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
               ),
               getConditionalBackdrop(),
               RepaintBoundary(
-                child: Container(
+                child: ColoredBox(
                   color: Colors.white,
-                  child:Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text('Include BackdropFilter:'),

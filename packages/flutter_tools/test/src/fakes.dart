@@ -185,7 +185,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
-    assert(value != null);
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -196,7 +195,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
   set supportsAnsiEscapes(bool value) {
-    assert(value != null);
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;
@@ -415,6 +413,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -443,6 +442,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {

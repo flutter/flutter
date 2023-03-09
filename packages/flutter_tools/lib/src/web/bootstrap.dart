@@ -157,6 +157,7 @@ String generateMainModule({
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
 // Disable require module timeout

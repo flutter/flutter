@@ -327,7 +327,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -369,8 +369,7 @@ class IOSSimulator extends Device {
     String? userIdentifier,
   }) async {
     try {
-      final IOSApp iosApp = app;
-      await _simControl.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, app.simulatorBundlePath);
       return true;
     } on Exception {
       return false;
@@ -420,7 +419,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant IOSApp package, {
+    IOSApp package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -451,9 +450,9 @@ class IOSSimulator extends Device {
       platformArgs,
     );
 
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(app: package),
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -486,13 +485,13 @@ class IOSSimulator extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on..."
-    globals.printTrace('Waiting for observatory port to be available...');
+    // device has printed "Dart VM Service is listening on..."
+    globals.printTrace('Waiting for VM Service port to be available...');
 
     try {
-      final Uri? deviceUri = await observatoryDiscovery?.uri;
+      final Uri? deviceUri = await vmServiceDiscovery?.uri;
       if (deviceUri != null) {
-        return LaunchResult.succeeded(observatoryUri: deviceUri);
+        return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
       globals.printError(
         'Error waiting for a debug connection: '
@@ -501,12 +500,12 @@ class IOSSimulator extends Device {
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }
 
-  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
+  Future<void> _setupUpdatedApplicationBundle(BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -574,7 +573,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
@@ -866,9 +865,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     }
 
     final String filteredLine = _filterSystemLog(line);
-    if (filteredLine == null) {
-      return;
-    }
 
     _linesController.add(filteredLine);
   }

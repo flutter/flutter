@@ -97,7 +97,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
 /// ```
 ///
-/// Note: SomeFinder and SomeFinderExtension must be placed in different files
+/// `SomeFinder` and `SomeFinderExtension` must be placed in different files
 /// to avoid `dart:ui` import issue. Imports relative to `dart:ui` can't be
 /// accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -140,7 +140,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 ///
-/// Note: SomeCommand, SomeResult and SomeCommandExtension must be placed in
+/// `SomeCommand`, `SomeResult` and `SomeCommandExtension` must be placed in
 /// different files to avoid `dart:ui` import issue. Imports relative to `dart:ui`
 /// can't be accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -255,7 +255,6 @@ abstract class FinderExtension {
 /// See also:
 ///   * [CommandWithTarget], a base class for [Command]s with [Finder]s.
 abstract class CommandExtension {
-
   /// Identifies the type of command to be used by the driver extension.
   String get commandKind;
 
@@ -319,7 +318,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     this._enableTextEntryEmulation, {
     List<FinderExtension> finders = const <FinderExtension>[],
     List<CommandExtension> commands = const <CommandExtension>[],
-  }) : assert(finders != null) {
+  }) {
     if (_enableTextEntryEmulation) {
       registerTextInput();
     }

@@ -18,7 +18,7 @@ void main() {
 
     void setupTestDevice() {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      const FakeWindowPadding padding = FakeWindowPadding(
+      const FakeViewPadding padding = FakeViewPadding(
         top: statusBarHeight * devicePixelRatio,
         bottom: navigationBarHeight * devicePixelRatio,
       );
@@ -232,7 +232,7 @@ void main() {
     testWidgets('Top AnnotatedRegion provides status bar overlay style and bottom AnnotatedRegion provides navigation bar overlay style', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: Colors.blue,
@@ -258,7 +258,7 @@ void main() {
     testWidgets('Top only AnnotatedRegion provides status bar and navigation bar style properties', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
               systemNavigationBarColor: Colors.blue,
@@ -278,7 +278,7 @@ void main() {
     testWidgets('Bottom only AnnotatedRegion provides status bar and navigation bar style properties', (WidgetTester tester) async {
       setupTestDevice();
       await tester.pumpWidget(
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Expanded(child: SizedBox.expand()),
           Expanded(child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
@@ -297,8 +297,8 @@ void main() {
   });
 }
 
-class FakeWindowPadding implements WindowPadding {
-  const FakeWindowPadding({
+class FakeViewPadding implements ViewPadding {
+  const FakeViewPadding({
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,

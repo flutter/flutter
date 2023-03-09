@@ -45,12 +45,6 @@ Offset positionDependentBox({
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {
-  assert(size != null);
-  assert(childSize != null);
-  assert(target != null);
-  assert(verticalOffset != null);
-  assert(preferBelow != null);
-  assert(margin != null);
   // VERTICAL DIRECTION
   final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - margin;
   final bool fitsAbove = target.dy - verticalOffset - childSize.height >= margin;

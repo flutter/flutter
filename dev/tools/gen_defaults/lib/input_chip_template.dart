@@ -13,7 +13,7 @@ class InputChipTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
-  const _${blockName}DefaultsM3(this.context, this.isEnabled)
+  const _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
@@ -22,6 +22,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  final bool isSelected;
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
@@ -36,7 +37,9 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get selectedColor => ${componentColor("$tokenGroup$variant.selected.container")};
+  Color? get selectedColor => isEnabled
+    ? ${componentColor("$tokenGroup$variant.selected.container")}
+    : ${componentColor("$tokenGroup$variant.disabled.selected.container")};
 
   @override
   Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
@@ -48,9 +51,11 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
 
   @override
-  BorderSide? get side => isEnabled
-    ? ${border('$tokenGroup$variant.unselected.outline')}
-    : ${border('$tokenGroup$variant.disabled.unselected.outline')};
+  BorderSide? get side => !isSelected
+    ? isEnabled
+      ? ${border('$tokenGroup$variant.unselected.outline')}
+      : ${border('$tokenGroup$variant.disabled.unselected.outline')}
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
@@ -71,7 +76,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 ''';

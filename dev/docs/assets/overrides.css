@@ -19,6 +19,12 @@ h2 {
   font-size: 24px;
 }
 
+/* Specifically make all the Markdown h2 headings slightly
+   bigger, so the Markdown CSS doesn't override it. */
+.markdown h2 {
+  font-size: 24px;
+}
+
 section.summary h2 {
   color: inherit;
   border-bottom: none;

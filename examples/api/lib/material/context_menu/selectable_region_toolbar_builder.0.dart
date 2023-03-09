@@ -5,15 +5,22 @@
 // This example demonstrates a custom context menu in non-editable text using
 // SelectionArea.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
-const String text = 'I am some text inside of SelectionArea. Right click or long press me to show the customized context menu.';
+const String text = 'I am some text inside of SelectionArea. Right click (desktop) or long press (mobile) me to show the customized context menu.';
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   void _showDialog (BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
@@ -22,6 +29,24 @@ class MyApp extends StatelessWidget {
           const AlertDialog(title: Text('You clicked print!')),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // On web, disable the browser's context menu since this example uses a custom
+    // Flutter-rendered context menu.
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
+    super.dispose();
   }
 
   @override

@@ -5,11 +5,18 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('BottomAppBarTheme lerp special cases', () {
+    expect(BottomAppBarTheme.lerp(null, null, 0), const BottomAppBarTheme());
+    const BottomAppBarTheme data = BottomAppBarTheme();
+    expect(identical(BottomAppBarTheme.lerp(data, data, 0.5), data), true);
+  });
+
   group('Material 2 tests', () {
     testWidgets('BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
@@ -189,6 +196,17 @@ void main() {
       expect(widget.surfaceTintColor, babThemeSurfaceTintColor);
     });
 
+    testWidgets('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
+      const Color babThemeShadowColor = Colors.yellow;
+      const BottomAppBarTheme theme = BottomAppBarTheme(
+        shadowColor: babThemeShadowColor, elevation: 0
+      );
+      await tester.pumpWidget(_withTheme(theme, true));
+
+      final Material widget = getBabRenderObject(tester);
+      expect(widget.shadowColor, babThemeShadowColor);
+    });
+
     testWidgets('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
       const Color themeSurfaceTintColor = Colors.white10;
       const Color babThemeSurfaceTintColor = Colors.black87;
@@ -252,9 +270,9 @@ Widget _withTheme(BottomAppBarTheme theme, [bool useMaterial3 = false]) {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: RepaintBoundary(
         key: _painterKey,
-        child: BottomAppBar(
+        child: const BottomAppBar(
           child: Row(
-            children: const <Widget>[
+            children: <Widget>[
               Icon(Icons.add),
               Expanded(child: SizedBox()),
               Icon(Icons.add),

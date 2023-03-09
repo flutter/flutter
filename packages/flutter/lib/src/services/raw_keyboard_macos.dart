@@ -42,10 +42,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     this.keyCode = 0,
     this.modifiers = 0,
     this.specifiedLogicalKey,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
