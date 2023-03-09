@@ -162,7 +162,7 @@ void main() {
     expect(events[1], isA<PointerCancelEvent>());
   });
 
-  const double devicePixelRation = 2.5;
+  const double devicePixelRatio = 2.5;
 
   test('Can expand add and hover pointers', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -175,7 +175,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -191,7 +191,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.add, device: 24),
       ],
     );
-    List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 1);
     expect(events[0], isA<PointerAddedEvent>());
@@ -207,7 +207,7 @@ void main() {
         ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.negativeInfinity, scrollDeltaX: 10),
       ],
     );
-    events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
     expect(events.length, 0);
 
     // Send packet with a valid scroll event.
@@ -217,7 +217,7 @@ void main() {
       ],
     );
     // Make sure PointerEventConverter can expand when device pixel ratio is valid.
-    events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
     expect(events.length, 1);
     expect(events[0], isA<PointerScrollEvent>());
 
@@ -234,7 +234,7 @@ void main() {
         ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -242,7 +242,7 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for touch when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * devicePixelRation;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
@@ -253,7 +253,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -269,7 +269,7 @@ void main() {
   });
 
   test('Should not synthesize kPrimaryButton for touch when a button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * devicePixelRation;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
@@ -280,7 +280,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -296,7 +296,7 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for stylus when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * devicePixelRation;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.stylus,
       PointerDeviceKind.invertedStylus,
@@ -312,7 +312,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -329,7 +329,7 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for unknown devices when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * devicePixelRation;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     const PointerDeviceKind kind = PointerDeviceKind.unknown;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -341,7 +341,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -357,7 +357,7 @@ void main() {
   });
 
   test('Should not synthesize kPrimaryButton for mouse', () {
-    final Offset location = const Offset(10.0, 10.0) * devicePixelRation;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,
     ]) {
@@ -371,7 +371,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRation).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
