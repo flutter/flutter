@@ -11,10 +11,6 @@
 
 static uint64_t platform_message_counter = 1;
 
-@protocol FlutterTaskQueue
-- (void)dispatch:(dispatch_block_t)block;
-@end
-
 @interface FLTSerialTaskQueue : NSObject <FlutterTaskQueue>
 @property(nonatomic, strong) dispatch_queue_t queue;
 @end
@@ -44,8 +40,9 @@ NSObject<FlutterTaskQueue>* PlatformMessageHandlerIos::MakeBackgroundTaskQueue()
   return [[[FLTSerialTaskQueue alloc] init] autorelease];
 }
 
-PlatformMessageHandlerIos::PlatformMessageHandlerIos(const TaskRunners& task_runners)
-    : task_runners_(task_runners) {}
+PlatformMessageHandlerIos::PlatformMessageHandlerIos(
+    fml::RefPtr<fml::TaskRunner> platform_task_runner)
+    : platform_task_runner_(std::move(platform_task_runner)) {}
 
 void PlatformMessageHandlerIos::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   // This can be called from any isolate's thread.
@@ -97,6 +94,10 @@ void PlatformMessageHandlerIos::HandlePlatformMessage(std::unique_ptr<PlatformMe
   }
 }
 
+bool PlatformMessageHandlerIos::DoesHandlePlatformMessageOnPlatformThread() const {
+  return false;
+}
+
 void PlatformMessageHandlerIos::InvokePlatformMessageResponseCallback(
     int response_id,
     std::unique_ptr<fml::Mapping> mapping) {
@@ -114,7 +115,7 @@ void PlatformMessageHandlerIos::InvokePlatformMessageEmptyResponseCallback(int r
 void PlatformMessageHandlerIos::SetMessageHandler(const std::string& channel,
                                                   FlutterBinaryMessageHandler handler,
                                                   NSObject<FlutterTaskQueue>* task_queue) {
-  FML_CHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FML_CHECK(platform_task_runner_->RunsTasksOnCurrentThread());
   /// TODO(gaaclarke): This should be migrated to a lockfree datastructure.
   std::lock_guard lock(message_handlers_mutex_);
   message_handlers_.erase(channel);
