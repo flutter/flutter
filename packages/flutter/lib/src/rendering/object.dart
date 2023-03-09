@@ -1171,10 +1171,10 @@ class PipelineOwner {
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
   /// An owner is created by [ensureSemantics] or when the [PipelineManifold] to
-  /// which this owner is connected has [PipelineManifold.enableSemantics] set
+  /// which this owner is connected has [PipelineManifold.semanticsEnabled] set
   /// to true. The owner is valid for as long as
-  /// [PipelineManifold.enableSemantics] remains true or while there are
-  /// outstanding [SemanticsHandle]s returned by [ensureSemantics]. The
+  /// [PipelineManifold.semanticsEnabled] remains true or while there are
+  /// outstanding [SemanticsHandle]s from calls to [ensureSemantics]. The
   /// [semanticsOwner] field will revert to null once both conditions are no
   /// longer met.
   ///
@@ -1410,7 +1410,7 @@ typedef PipelineOwnerVisitor = void Function(PipelineOwner child);
 ///
 /// All [PipelineOwner]s within a tree are attached to the same
 /// [PipelineManifold], which gives them access to shared functionality such
-/// as requesting a visual update (by calling [ensureVisualUpdate]). As such,
+/// as requesting a visual update (by calling [requestVisualUpdate]). As such,
 /// the [PipelineManifold] gives the [PipelineOwner]s access to functionality
 /// usually provided by the bindings without tying the [PipelineOwner]s to a
 /// particular binding implementation.
