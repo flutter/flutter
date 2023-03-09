@@ -12,7 +12,7 @@ void main() {
     builder.addPlatformView(1);
     final Scene scene = builder.build();
 
-    window.render(scene);
+    PlatformDispatcher.instance.implicitView!.render(scene);
     scene.dispose();
     // Test harness asserts that this does not emit an error from the shell logs.
   });

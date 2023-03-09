@@ -75,7 +75,7 @@ void main() {
       }
 
       final Completer<PlatformResponse> completer = Completer<PlatformResponse>();
-      ui.window.onPlatformMessage = (String name, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String name, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
         final ByteBuffer buffer = data!.buffer;
         final Uint8List list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         completer.complete(PlatformResponse(name: name, contents: utf8.decode(list)));

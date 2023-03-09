@@ -23,7 +23,7 @@ void main() {
     );
 
     final Completer<void> completer = Completer<void>();
-    window.onBeginFrame = (Duration timeStamp) async {
+    PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
       final PictureRecorder recorder = PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
@@ -45,7 +45,7 @@ void main() {
       scene.dispose();
       completer.complete();
     };
-    window.scheduleFrame();
+    PlatformDispatcher.instance.scheduleFrame();
     await completer.future;
 
     final vms.Timeline timeline = await vmService.getVMTimeline();

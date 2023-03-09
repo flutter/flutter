@@ -12,7 +12,7 @@ void main() {
   test('window.sendPlatformMessage preserves callback zone', () {
     runZoned(() {
       final Zone innerZone = Zone.current;
-      window.sendPlatformMessage('test', ByteData.view(Uint8List(0).buffer), expectAsync1((ByteData? data) {
+      PlatformDispatcher.instance.sendPlatformMessage('test', ByteData.view(Uint8List(0).buffer), expectAsync1((ByteData? data) {
         final Zone runZone = Zone.current;
         expect(runZone, isNotNull);
         expect(runZone, same(innerZone));
@@ -76,7 +76,7 @@ void main() {
       const Locale.fromSubtags(languageCode: 'en'),
     ];
     // The default implementation returns null due to lack of a real platform.
-    final Locale? result = window.computePlatformResolvedLocale(supportedLocales);
+    final Locale? result = PlatformDispatcher.instance.computePlatformResolvedLocale(supportedLocales);
     expect(result, null);
   });
 }
