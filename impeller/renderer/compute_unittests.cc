@@ -28,6 +28,8 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   using CS = SampleComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsCompute());
+
   using SamplePipelineBuilder = ComputePipelineBuilder<CS>;
   auto pipeline_desc =
       SamplePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
@@ -114,6 +116,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 
   auto context = GetContext();
   ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsCompute());
 
   auto pipeline_desc_1 =
       Stage1PipelineBuilder::MakeDefaultPipelineDescriptor(*context);

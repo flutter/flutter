@@ -35,6 +35,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
 
   auto context = GetContext();
   ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsComputeSubgroups());
 
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();
@@ -182,6 +183,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
 
     auto* v = reinterpret_cast<SS::VertexBuffer<kCubicCount * 10 * 10 * 4>*>(
         vertex_buffer->AsBufferView().contents);
+    EXPECT_EQ(v->count, golden_heart_vertices.size());
     for (size_t i = 0; i < golden_heart_vertices.size(); i += 1) {
       EXPECT_LT(std::abs(golden_heart_vertices[i].x - v->position[i].x), 1e-3);
       EXPECT_LT(std::abs(golden_heart_vertices[i].y - v->position[i].y), 1e-3);
@@ -197,6 +199,7 @@ TEST_P(ComputeTest, QuadsToPolyline) {
   using QS = QuadPolylineComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsComputeSubgroups());
 
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();
@@ -259,7 +262,6 @@ TEST_P(ComputeTest, QuadsToPolyline) {
           EXPECT_LT(std::abs(p->data[i].x - golden_heart_points[i].x), 1e-3);
           EXPECT_LT(std::abs(p->data[i].y - golden_heart_points[i].y), 1e-3);
         }
-
         latch.Signal();
       }));
 

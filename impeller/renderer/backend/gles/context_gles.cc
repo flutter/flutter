@@ -81,6 +81,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetSupportsFramebufferFetch(false)
             .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
+            .SetSupportsCompute(false, false)
             .Build();
   }
 
