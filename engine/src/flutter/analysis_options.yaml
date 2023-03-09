@@ -95,6 +95,7 @@ linter:
     - flutter_style_todos
     - hash_and_equals
     - implementation_imports
+    - invalid_case_patterns
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
