@@ -55,7 +55,7 @@ class PlistParser {
       ).stdout.trim();
       return xmlContent;
     } on ProcessException catch (error) {
-      _logger.printTrace('$error');
+      _logger.printError('$error');
       return null;
     }
   }
@@ -85,7 +85,7 @@ class PlistParser {
         throwOnError: true,
       );
     } on ProcessException catch (error) {
-      _logger.printTrace('$error');
+      _logger.printError('$error');
       return false;
     }
     return true;

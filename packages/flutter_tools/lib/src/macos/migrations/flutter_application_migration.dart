@@ -33,11 +33,14 @@ class FlutterApplicationMigration extends ProjectMigrator {
         logger.printTrace('${_infoPlistFile.basename} has an '
           '${PlistParser.kNSPrincipalClassKey} of $principleClass, not '
           'NSApplication, skipping FlutterApplication migration.\nYou may need '
-          'to modify your application class to derive from FlutterApplication');
+          'to modify your application class to derive from FlutterApplication.');
         return;
       }
       logger.printStatus('Updating ${_infoPlistFile.basename} to use FlutterApplication instead of NSApplication.');
-      globals.plistParser.replaceKey(_infoPlistFile.path, key: PlistParser.kNSPrincipalClassKey, value: 'FlutterApplication');
+      final bool success = globals.plistParser.replaceKey(_infoPlistFile.path, key: PlistParser.kNSPrincipalClassKey, value: 'FlutterApplication');
+      if (!success) {
+        logger.printError('Updating ${_infoPlistFile.basename} failed.');
+      }
     } else {
       logger.printTrace('${_infoPlistFile.basename} not found, skipping FlutterApplication migration.');
     }
