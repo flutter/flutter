@@ -12,10 +12,7 @@ import 'scenario.dart';
 /// A blank page with a button that pops the page when tapped.
 class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   /// Creates the PoppableScreenScenario.
-  ///
-  /// The [dispatcher] parameter must not be null.
-  PoppableScreenScenario(PlatformDispatcher dispatcher)
-      : super(dispatcher);
+  PoppableScreenScenario(super.view);
 
   // Rect for the pop button. Only defined once onMetricsChanged is called.
   Rect? _buttonRect;
@@ -39,7 +36,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
     builder.pushOffset(0, 0);
     builder.addPicture(Offset.zero, picture);
     final Scene scene = builder.build();
-    window.render(scene);
+    view.render(scene);
     scene.dispose();
   }
 
@@ -51,12 +48,12 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   @override
   void onMetricsChanged() {
     _buttonRect = Rect.fromLTRB(
-      window.physicalSize.width / 4,
-      window.physicalSize.height * 2 / 5,
-      window.physicalSize.width * 3 / 4,
-      window.physicalSize.height * 3 / 5,
+      view.physicalSize.width / 4,
+      view.physicalSize.height * 2 / 5,
+      view.physicalSize.width * 3 / 4,
+      view.physicalSize.height * 3 / 5,
     );
-    window.scheduleFrame();
+    view.platformDispatcher.scheduleFrame();
   }
 
   @override
@@ -72,7 +69,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
 
   void _pop() {
     sendJsonMethodCall(
-      dispatcher: dispatcher,
+      dispatcher: view.platformDispatcher,
       // 'flutter/platform' is the hardcoded name of the 'platform'
       // `SystemChannel` from the `SystemNavigator` API.
       // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/system_navigator.dart.

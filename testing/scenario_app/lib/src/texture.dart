@@ -11,10 +11,7 @@ import 'scenarios.dart';
 /// Displays a platform texture with the given width and height.
 class DisplayTexture extends Scenario {
   /// Creates the DisplayTexture scenario.
-  ///
-  /// The [dispatcher] parameter must not be null.
-  DisplayTexture(PlatformDispatcher dispatcher)
-      : super(dispatcher);
+  DisplayTexture(super.view);
 
   int get _textureId => scenarioParams['texture_id'] as int;
   double get _textureWidth =>
@@ -28,18 +25,18 @@ class DisplayTexture extends Scenario {
     builder.addTexture(
       _textureId,
       offset: Offset(
-        (window.physicalSize.width / 2.0) - (_textureWidth / 2.0),
+        (view.physicalSize.width / 2.0) - (_textureWidth / 2.0),
         0.0,
       ),
       width: _textureWidth,
       height: _textureHeight,
     );
     final Scene scene = builder.build();
-    window.render(scene);
+    view.render(scene);
     scene.dispose();
 
     sendJsonMessage(
-      dispatcher: dispatcher,
+      dispatcher: view.platformDispatcher,
       channel: 'display_data',
       json: <String, dynamic>{
         'data': 'ready',

@@ -14,21 +14,18 @@ import 'scenario.dart';
 /// that are constantly changing.
 class AnimatedColorSquareScenario extends Scenario {
   /// Creates the AnimatedColorSquare scenario.
-  ///
-  /// The [dispatcher] parameter must not be null.
-  AnimatedColorSquareScenario(PlatformDispatcher dispatcher)
-      : super(dispatcher);
+  AnimatedColorSquareScenario(super.view);
 
   static const double _squareSize = 200;
   /// Used to animate the red value in the color of the square.
   final _NumberSwinger<int> _r = _NumberSwinger<int>(0, 255);
-  _NumberSwinger<double> _top = _NumberSwinger<double>(
+  late _NumberSwinger<double> _top = _NumberSwinger<double>(
     0,
-    window.physicalSize.height - _squareSize,
+    view.physicalSize.height - _squareSize,
   );
-  _NumberSwinger<double> _left = _NumberSwinger<double>(
+  late _NumberSwinger<double> _left = _NumberSwinger<double>(
     0,
-    window.physicalSize.width - _squareSize,
+    view.physicalSize.width - _squareSize,
   );
 
   @override
@@ -50,26 +47,26 @@ class AnimatedColorSquareScenario extends Scenario {
       willChangeHint: true,
     );
     final Scene scene = builder.build();
-    window.render(scene);
+    view.render(scene);
     scene.dispose();
   }
 
   @override
   void onDrawFrame() {
-    window.scheduleFrame();
+    view.platformDispatcher.scheduleFrame();
   }
 
   @override
   void onMetricsChanged() {
     _top = _NumberSwinger<double>(
       0,
-      window.physicalSize.height - _squareSize,
-      math.min(_top.current, window.physicalSize.height - _squareSize),
+      view.physicalSize.height - _squareSize,
+      math.min(_top.current, view.physicalSize.height - _squareSize),
     );
     _left = _NumberSwinger<double>(
       0,
-      window.physicalSize.width - _squareSize,
-      math.min(_left.current, window.physicalSize.width - _squareSize),
+      view.physicalSize.width - _squareSize,
+      math.min(_left.current, view.physicalSize.width - _squareSize),
     );
   }
 }
