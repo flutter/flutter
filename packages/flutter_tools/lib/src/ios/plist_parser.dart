@@ -76,7 +76,7 @@ class PlistParser {
       ];
     } else {
       args = <String>[
-        _plutilExecutable, '-replace', key, '-string', value, '-', plistFilePath,
+        _plutilExecutable, '-replace', key, '-string', value, plistFilePath,
       ];
     }
     try {
