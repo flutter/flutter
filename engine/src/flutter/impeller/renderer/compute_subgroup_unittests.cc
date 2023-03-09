@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <numeric>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "impeller/base/strings.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/fixtures/cubic_to_quads.comp.h"
 #include "impeller/fixtures/golden_heart.h"
 #include "impeller/fixtures/quad_polyline.comp.h"
@@ -22,6 +25,7 @@
 #include "impeller/renderer/compute_pipeline_builder.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "impeller/renderer/render_pass.h"
 
 namespace impeller {
 namespace testing {
@@ -44,27 +48,21 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
   static constexpr size_t kCubicCount = 6;
   static constexpr Scalar kAccuracy = .1;
 
-  DeviceBufferDescriptor quad_buffer_desc;
-  quad_buffer_desc.storage_mode = StorageMode::kHostVisible;
-  quad_buffer_desc.size = sizeof(CS::Quads<kCubicCount * 10>);
-  auto quads = context->GetResourceAllocator()->CreateBuffer(quad_buffer_desc);
-  quads->SetLabel("Quads");
+  auto quads = CreateHostVisibleDeviceBuffer<CS::Quads<kCubicCount * 10>>(
+      context, "Quads");
 
-  DeviceBufferDescriptor point_buffer_desc;
-  point_buffer_desc.storage_mode = StorageMode::kHostVisible;
   // TODO(dnfield): Size this buffer more accurately.
-  point_buffer_desc.size = sizeof(QS::Polyline<kCubicCount * 10 * 10>);
   auto polyline =
-      context->GetResourceAllocator()->CreateBuffer(point_buffer_desc);
-  polyline->SetLabel("polyline");
+      CreateHostVisibleDeviceBuffer<QS::Polyline<kCubicCount * 10 * 10>>(
+          context, "polyline");
 
-  DeviceBufferDescriptor vertex_buffer_desc;
-  vertex_buffer_desc.storage_mode = StorageMode::kHostVisible;
+  auto vertex_buffer_count =
+      CreateHostVisibleDeviceBuffer<SS::VertexBufferCount>(context,
+                                                           "VertexBufferCount");
+
   // TODO(dnfield): Size this buffer more accurately.
-  vertex_buffer_desc.size = sizeof(SS::VertexBuffer<kCubicCount * 10 * 10 * 4>);
-  auto vertex_buffer =
-      context->GetResourceAllocator()->CreateBuffer(vertex_buffer_desc);
-  vertex_buffer->SetLabel("VertexBuffer");
+  auto vertex_buffer = CreateHostVisibleDeviceBuffer<
+      SS::VertexBuffer<kCubicCount * 10 * 10 * 4>>(context, "VertexBuffer");
 
   {
     using CubicPipelineBuilder = ComputePipelineBuilder<CS>;
@@ -138,13 +136,14 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
     pass->SetThreadGroupSize(ISize(1024, 1));
 
     ComputeCommand cmd;
-    cmd.label = "Stroke";
+    cmd.label = "Draw Stroke";
     cmd.pipeline = compute_pipeline;
 
     SS::Config config{.width = 1.0f, .cap = 1, .join = 1, .miter_limit = 4.0f};
     SS::BindConfig(cmd, pass->GetTransientsBuffer().EmplaceUniform(config));
 
     SS::BindPolyline(cmd, polyline->AsBufferView());
+    SS::BindVertexBufferCount(cmd, vertex_buffer_count->AsBufferView());
     SS::BindVertexBuffer(cmd, vertex_buffer->AsBufferView());
 
     ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
@@ -154,7 +153,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
 
   fml::AutoResetWaitableEvent latch;
   ASSERT_TRUE(cmd_buffer->SubmitCommands([&latch, quads, polyline,
-                                          vertex_buffer](
+                                          vertex_buffer_count, vertex_buffer](
                                              CommandBuffer::Status status) {
     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
 
@@ -183,7 +182,9 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
 
     auto* v = reinterpret_cast<SS::VertexBuffer<kCubicCount * 10 * 10 * 4>*>(
         vertex_buffer->AsBufferView().contents);
-    EXPECT_EQ(v->count, golden_heart_vertices.size());
+    auto* v_count = reinterpret_cast<SS::VertexBufferCount*>(
+        vertex_buffer_count->AsBufferView().contents);
+    EXPECT_EQ(v_count->count, golden_heart_vertices.size());
     for (size_t i = 0; i < golden_heart_vertices.size(); i += 1) {
       EXPECT_LT(std::abs(golden_heart_vertices[i].x - v->position[i].x), 1e-3);
       EXPECT_LT(std::abs(golden_heart_vertices[i].y - v->position[i].y), 1e-3);
@@ -193,6 +194,64 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
   }));
 
   latch.Wait();
+
+  auto callback = [&](RenderPass& pass) -> bool {
+    ContentContext renderer(context);
+    if (!renderer.IsValid()) {
+      return false;
+    }
+
+    using VS = SolidFillPipeline::VertexShader;
+    using FS = SolidFillPipeline::FragmentShader;
+
+    Command cmd;
+    cmd.label = "Draw Stroke";
+    cmd.stencil_reference = 0;  // entity.GetStencilDepth();
+
+    ContentContextOptions options;
+    options.sample_count = pass.GetRenderTarget().GetSampleCount();
+    options.color_attachment_pixel_format =
+        pass.GetRenderTarget().GetRenderTargetPixelFormat();
+    options.has_stencil_attachment =
+        pass.GetRenderTarget().GetStencilAttachment().has_value();
+    options.blend_mode = BlendMode::kSourceIn;  // entity.GetBlendMode();
+    options.primitive_type = PrimitiveType::kTriangleStrip;
+    options.stencil_compare = CompareFunction::kEqual;
+    options.stencil_operation = StencilOperation::kIncrementClamp;
+
+    cmd.pipeline = renderer.GetSolidFillPipeline(options);
+
+    auto count = golden_heart_vertices.size();
+    auto& host_buffer = pass.GetTransientsBuffer();
+    std::vector<uint16_t> indices(count);
+    std::iota(std::begin(indices), std::end(indices), 0);
+
+    VertexBuffer render_vertex_buffer{
+        .vertex_buffer = vertex_buffer->AsBufferView(),
+        .index_buffer = host_buffer.Emplace(
+            indices.data(), count * sizeof(uint16_t), alignof(uint16_t)),
+        .index_count = count,
+        .index_type = IndexType::k16bit};
+    cmd.BindVertices(render_vertex_buffer);
+
+    VS::FrameInfo frame_info;
+    auto world_matrix = Matrix::MakeScale(GetContentScale());
+    frame_info.mvp =
+        Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    VS::BindFrameInfo(cmd,
+                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+
+    FS::FragInfo frag_info;
+    frag_info.color = Color::Red().Premultiply();
+    FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
+
+    if (!pass.AddCommand(std::move(cmd))) {
+      return false;
+    }
+
+    return true;
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(ComputeTest, QuadsToPolyline) {
@@ -215,12 +274,8 @@ TEST_P(ComputeTest, QuadsToPolyline) {
                      golden_heart_quads[i].p2};
   }
 
-  DeviceBufferDescriptor point_buffer_desc;
-  point_buffer_desc.storage_mode = StorageMode::kHostVisible;
-  point_buffer_desc.size = sizeof(QS::Polyline<kPolylineCount>);
-  auto polyline =
-      context->GetResourceAllocator()->CreateBuffer(point_buffer_desc);
-  polyline->SetLabel("polyline");
+  auto polyline = CreateHostVisibleDeviceBuffer<QS::Polyline<kPolylineCount>>(
+      context, "polyline");
 
   {
     using QuadPipelineBuilder = ComputePipelineBuilder<QS>;

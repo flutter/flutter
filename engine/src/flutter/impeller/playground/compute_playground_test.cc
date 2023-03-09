@@ -24,6 +24,7 @@ void ComputePlaygroundTest::SetUp() {
   }
 
   SetupContext(GetParam());
+  SetupWindow();
 
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }

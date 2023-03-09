@@ -64,13 +64,8 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   input_0.some_int = 5;
   input_1.some_struct = CS::SomeStruct{.vf = Point(3, 4), .i = 42};
 
-  DeviceBufferDescriptor buffer_desc;
-  buffer_desc.storage_mode = StorageMode::kHostVisible;
-  buffer_desc.size = sizeof(CS::Output<kCount>);
-
-  auto output_buffer =
-      context->GetResourceAllocator()->CreateBuffer(buffer_desc);
-  output_buffer->SetLabel("Output Buffer");
+  auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
+      context, "Output Buffer");
 
   CS::BindInfo(cmd, pass->GetTransientsBuffer().EmplaceUniform(info));
   CS::BindInput0(cmd,
@@ -154,21 +149,10 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
     input_2.elements[i] = i;
   }
 
-  DeviceBufferDescriptor output_desc_1;
-  output_desc_1.storage_mode = StorageMode::kHostVisible;
-  output_desc_1.size = sizeof(CS1::Output<kCount2>);
-
-  auto output_buffer_1 =
-      context->GetResourceAllocator()->CreateBuffer(output_desc_1);
-  output_buffer_1->SetLabel("Output Buffer Stage 1");
-
-  DeviceBufferDescriptor output_desc_2;
-  output_desc_2.storage_mode = StorageMode::kHostVisible;
-  output_desc_2.size = sizeof(CS2::Output<kCount2>);
-
-  auto output_buffer_2 =
-      context->GetResourceAllocator()->CreateBuffer(output_desc_2);
-  output_buffer_2->SetLabel("Output Buffer Stage 2");
+  auto output_buffer_1 = CreateHostVisibleDeviceBuffer<CS1::Output<kCount2>>(
+      context, "Output Buffer Stage 1");
+  auto output_buffer_2 = CreateHostVisibleDeviceBuffer<CS2::Output<kCount2>>(
+      context, "Output Buffer Stage 2");
 
   {
     ComputeCommand cmd;

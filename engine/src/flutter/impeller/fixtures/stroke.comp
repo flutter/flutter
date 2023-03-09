@@ -17,10 +17,14 @@ layout(binding = 0) buffer Polyline {
 polyline;
 
 layout(binding = 1) buffer VertexBuffer {
-  uint count;
   vec2 position[];
 }
 vertex_buffer;
+
+layout(binding = 2) buffer VertexBufferCount {
+  uint count;
+}
+vertex_buffer_count;
 
 uniform Config {
   float width;
@@ -41,7 +45,7 @@ void main() {
     return;
   }
 
-  atomicAdd(vertex_buffer.count, 4);
+  atomicAdd(vertex_buffer_count.count, 4);
 
   vec2 offset = compute_offset(ident);
   uint index = ident - 1;
