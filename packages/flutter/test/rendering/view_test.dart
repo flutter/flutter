@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,7 +32,7 @@ void main() {
     test('does not replace the root layer unnecessarily', () {
       final RenderView view = RenderView(
         configuration: createViewConfiguration(),
-        window: FakeFlutterView(),
+        window: RendererBinding.instance.platformDispatcher.views.single,
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
@@ -50,7 +48,7 @@ void main() {
     test('does not replace the root layer unnecessarily when window resize', () {
       final RenderView view = RenderView(
         configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
-        window: FakeFlutterView(),
+        window: RendererBinding.instance.platformDispatcher.views.single,
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
@@ -71,11 +69,4 @@ void main() {
     expect(viewConfigurationA.hashCode, viewConfigurationB.hashCode);
     expect(viewConfigurationA.hashCode != viewConfigurationC.hashCode, true);
   });
-}
-
-class FakeFlutterView implements ui.FlutterView {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return super.noSuchMethod(invocation);
-  }
 }
