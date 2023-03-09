@@ -38,10 +38,10 @@ void main() {
       final Completer<void> ready = Completer<void>();
       late bool ok;
       print('run: starting...');
-      final Process run = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
+      final Process run = await startFlutter(
+        'run',
         // --fast-start does not support routes.
-        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '--no-publish-port', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        options: <String>['--verbose', '--disable-service-auth-codes', '--no-fast-start', '--no-publish-port', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
         .transform<String>(utf8.decoder)
@@ -70,9 +70,9 @@ void main() {
         throw 'Failed to run test app.';
       }
       print('drive: starting...');
-      final Process drive = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
+      final Process drive = await startFlutter(
+        'drive',
+        options: <String>['--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
       );
       drive.stdout
         .transform<String>(utf8.decoder)

@@ -99,6 +99,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -194,6 +195,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -263,6 +265,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -357,6 +360,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -448,6 +452,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsProcessException());
@@ -527,6 +532,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[
           GradleHandledError(
             test: (String line) {
@@ -643,6 +649,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
 
@@ -711,6 +718,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: const <GradleHandledError>[],
       );
 
@@ -1023,6 +1031,7 @@ android {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1099,6 +1108,7 @@ android {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1175,6 +1185,7 @@ android {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1252,6 +1263,7 @@ android {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1310,6 +1322,7 @@ android {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());

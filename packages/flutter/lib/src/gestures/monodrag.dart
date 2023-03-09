@@ -78,8 +78,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     super.supportedDevices,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
-  });
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
