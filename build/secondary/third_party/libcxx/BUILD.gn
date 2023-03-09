@@ -12,7 +12,6 @@ config("src_include") {
 }
 
 source_set("libcxx") {
-
   sources = [
     "src/algorithm.cpp",
     "src/any.cpp",
@@ -41,6 +40,9 @@ source_set("libcxx") {
     "src/optional.cpp",
     "src/random.cpp",
     "src/regex.cpp",
+    "src/ryu/d2fixed.cpp",
+    "src/ryu/d2s.cpp",
+    "src/ryu/f2s.cpp",
     "src/shared_mutex.cpp",
     "src/stdexcept.cpp",
     "src/string.cpp",
@@ -52,9 +54,6 @@ source_set("libcxx") {
     "src/valarray.cpp",
     "src/variant.cpp",
     "src/vector.cpp",
-    "src/ryu/d2fixed.cpp",
-    "src/ryu/d2s.cpp",
-    "src/ryu/f2s.cpp",
   ]
 
   deps = [ "//third_party/libcxxabi" ]

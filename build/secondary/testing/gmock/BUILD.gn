@@ -45,10 +45,6 @@ static_library("gmock") {
 static_library("gmock_main") {
   # TODO http://crbug.com/412064 enable this flag all the time.
   testonly = !is_component_build
-  sources = [
-    "src/gmock_main.cc",
-  ]
-  deps = [
-    ":gmock",
-  ]
+  sources = [ "src/gmock_main.cc" ]
+  deps = [ ":gmock" ]
 }

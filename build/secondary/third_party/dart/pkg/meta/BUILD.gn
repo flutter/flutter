@@ -16,12 +16,11 @@ dart_library("meta") {
 
   language_version = "2.12"
 
-  deps = [
-  ]
+  deps = []
 
   sources = [
     "dart2js.dart",
-    "meta_meta.dart",
     "meta.dart",
+    "meta_meta.dart",
   ]
 }

@@ -115,11 +115,7 @@ static_library("ocmock") {
   # Force the static lib to include code from dependencies
   complete_static_lib = true
   if (is_ios) {
-    cflags = [
-      "-mios-simulator-version-min=$ios_testing_deployment_target",
-    ]
+    cflags = [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
   }
-  public_deps = [
-    ":ocmock_src",
-  ]
+  public_deps = [ ":ocmock_src" ]
 }

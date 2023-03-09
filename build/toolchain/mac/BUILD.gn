@@ -81,9 +81,8 @@ template("mac_toolchain") {
       command = "$goma_prefix $cc -MD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
-      outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-      ]
+      outputs =
+          [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
     tool("cxx") {
@@ -91,9 +90,8 @@ template("mac_toolchain") {
       command = "$goma_prefix $cxx -MD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_cc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
-      outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-      ]
+      outputs =
+          [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
     tool("asm") {
@@ -102,9 +100,8 @@ template("mac_toolchain") {
       command = "$goma_prefix $cc -MD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
-      outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-      ]
+      outputs =
+          [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
     tool("objc") {
@@ -112,9 +109,8 @@ template("mac_toolchain") {
       command = "$goma_prefix $cxx -MD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_c}} {{cflags_objc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
-      outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-      ]
+      outputs =
+          [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
     tool("objcxx") {
@@ -122,23 +118,22 @@ template("mac_toolchain") {
       command = "$goma_prefix $cxx -MD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
-      outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-      ]
+      outputs =
+          [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
     tool("alink") {
       command = "rm -f {{output}} && $ar rcs {{output}} {{inputs}}"
       description = "CREATE ARCHIVE {{output}}"
-      outputs = [
-        "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
-      ]
+      outputs =
+          [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
       default_output_extension = ".a"
       output_prefix = "lib"
     }
 
     tool("solink") {
-      dylib = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # eg "./libfoo.dylib"
+      dylib = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # eg
+                                                                             # "./libfoo.dylib"
       rspfile = dylib + ".rsp"
 
       # These variables are not build into GN but are helpers that implement
@@ -194,9 +189,7 @@ template("mac_toolchain") {
       command = "$ld $sysroot_flags {{ldflags}} $coverage_flags -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}} {{frameworks}}"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
-      outputs = [
-        outfile,
-      ]
+      outputs = [ outfile ]
     }
 
     tool("stamp") {
@@ -273,7 +266,8 @@ mac_toolchain("clang_x64") {
   cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
-  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
+  sysroot_flags =
+      "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
 }
 
 # Toolchain used for Mac ARM64 host targets.
@@ -286,5 +280,6 @@ mac_toolchain("clang_arm64") {
   cxx = "$prefix/clang++"
   ld = cxx
   is_clang = true
-  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
+  sysroot_flags =
+      "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
 }

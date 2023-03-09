@@ -155,12 +155,8 @@ if (use_system_libsrtp) {
     }
 
     if (use_srtp_boringssl) {
-      deps = [
-        "//third_party/boringssl:boringssl",
-      ]
-      public_deps = [
-        "//third_party/boringssl:boringssl",
-      ]
+      deps = [ "//third_party/boringssl:boringssl" ]
+      public_deps = [ "//third_party/boringssl:boringssl" ]
       sources -= [
         "srtp/crypto/cipher/aes_cbc.c",
         "srtp/crypto/cipher/aes_icm.c",
@@ -185,9 +181,7 @@ if (use_system_libsrtp) {
     executable("rdbx_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/include/getopt_s.h",
         "srtp/test/getopt_s.c",
@@ -198,9 +192,7 @@ if (use_system_libsrtp) {
     executable("srtp_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/include/getopt_s.h",
         "srtp/include/srtp_priv.h",
@@ -212,9 +204,7 @@ if (use_system_libsrtp) {
     executable("roc_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/include/rdbx.h",
         "srtp/include/ut_sim.h",
@@ -225,9 +215,7 @@ if (use_system_libsrtp) {
     executable("replay_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/include/rdbx.h",
         "srtp/include/ut_sim.h",
@@ -238,9 +226,7 @@ if (use_system_libsrtp) {
     executable("rtpw") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/include/datatypes.h",
         "srtp/include/getopt_s.h",
@@ -261,9 +247,7 @@ if (use_system_libsrtp) {
     executable("srtp_test_cipher_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/test/cipher_driver.c",
         "srtp/include/getopt_s.h",
@@ -274,42 +258,28 @@ if (use_system_libsrtp) {
     executable("srtp_test_datatypes_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
-      sources = [
-        "srtp/crypto/test/datatypes_driver.c",
-      ]
+      deps = [ ":libsrtp" ]
+      sources = [ "srtp/crypto/test/datatypes_driver.c" ]
     }
 
     executable("srtp_test_stat_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
-      sources = [
-        "srtp/crypto/test/stat_driver.c",
-      ]
+      deps = [ ":libsrtp" ]
+      sources = [ "srtp/crypto/test/stat_driver.c" ]
     }
 
     executable("srtp_test_sha1_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
-      sources = [
-        "srtp/crypto/test/sha1_driver.c",
-      ]
+      deps = [ ":libsrtp" ]
+      sources = [ "srtp/crypto/test/sha1_driver.c" ]
     }
 
     executable("srtp_test_kernel_driver") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/test/kernel_driver.c",
         "srtp/include/getopt_s.h",
@@ -320,20 +290,14 @@ if (use_system_libsrtp) {
     executable("srtp_test_aes_calc") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
-      sources = [
-        "srtp/crypto/test/aes_calc.c",
-      ]
+      deps = [ ":libsrtp" ]
+      sources = [ "srtp/crypto/test/aes_calc.c" ]
     }
 
     executable("srtp_test_rand_gen") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/test/rand_gen.c",
         "srtp/include/getopt_s.h",
@@ -344,9 +308,7 @@ if (use_system_libsrtp) {
     executable("srtp_test_rand_gen_soak") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
+      deps = [ ":libsrtp" ]
       sources = [
         "srtp/crypto/test/rand_gen_soak.c",
         "srtp/include/getopt_s.h",
@@ -357,12 +319,8 @@ if (use_system_libsrtp) {
     executable("srtp_test_env") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
-      deps = [
-        ":libsrtp",
-      ]
-      sources = [
-        "srtp/crypto/test/env.c",
-      ]
+      deps = [ ":libsrtp" ]
+      sources = [ "srtp/crypto/test/env.c" ]
     }
 
     group("srtp_runtest") {

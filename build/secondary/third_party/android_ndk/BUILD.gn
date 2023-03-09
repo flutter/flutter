@@ -4,7 +4,5 @@
 
 source_set("cpu_features") {
   public_configs = [ "//third_party/android_tools:cpu_features_include" ]
-  deps = [
-    "//third_party/android_tools:cpu_features",
-  ]
+  deps = [ "//third_party/android_tools:cpu_features" ]
 }

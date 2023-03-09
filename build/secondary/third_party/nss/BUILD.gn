@@ -347,9 +347,7 @@ if (is_linux) {
       "nss/lib/nss/nssver.c",
     ]
 
-    public_deps = [
-      ":nss_static",
-    ]
+    public_deps = [ ":nss_static" ]
 
     if (include_nss_root_certs) {
       public_deps += [ ":nssckbi" ]
@@ -439,9 +437,7 @@ if (is_linux) {
     include_dirs = [ "nss/lib/ckfw" ]
     public_configs = [ ":nssckbi_config" ]
 
-    public_deps = [
-      ":nss_static",
-    ]
+    public_deps = [ ":nss_static" ]
   }
 
   config("nss_static_config") {
@@ -1196,9 +1192,7 @@ if (is_linux) {
       ]
     }
 
-    public_deps = [
-      ":nspr",
-    ]
+    public_deps = [ ":nspr" ]
     deps = [
       ":nspr",
       "//third_party/sqlite",

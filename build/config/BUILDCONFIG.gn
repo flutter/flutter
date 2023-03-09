@@ -689,9 +689,7 @@ template("component") {
       if (defined(invoker.deps)) {
         deps = invoker.deps + [ "//build/config/sanitizers:deps" ]
       } else {
-        deps = [
-          "//build/config/sanitizers:deps",
-        ]
+        deps = [ "//build/config/sanitizers:deps" ]
       }
       if (defined(invoker.direct_dependent_configs)) {
         direct_dependent_configs = invoker.direct_dependent_configs

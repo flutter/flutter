@@ -32,9 +32,8 @@ toolchain("custom") {
     command = "$cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("cxx") {
@@ -42,9 +41,8 @@ toolchain("custom") {
     command = "$cxx -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("asm") {
@@ -52,9 +50,8 @@ toolchain("custom") {
     command = "$cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("alink") {
@@ -62,9 +59,8 @@ toolchain("custom") {
     command = "rm -f {{output}} && $ar rcs {{output}} @$rspfile"
     description = "AR {{output}}"
     rspfile_content = "{{inputs}}"
-    outputs = [
-      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
-    ]
+    outputs =
+        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
     default_output_extension = ".a"
     output_prefix = "lib"
   }
@@ -72,7 +68,9 @@ toolchain("custom") {
   tool("solink") {
     soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
     sofile = "{{root_out_dir}}/$soname"  # Possibly including toolchain dir.
-    unstripped_sofile = "{{root_out_dir}}/so.unstripped/$soname"  # Possibly including toolchain dir.
+    unstripped_sofile =
+        "{{root_out_dir}}/so.unstripped/$soname"  # Possibly including toolchain
+                                                  # dir.
     rspfile = sofile + ".rsp"
 
     # These variables are not built into GN but are helpers that implement

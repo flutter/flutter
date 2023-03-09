@@ -5,8 +5,8 @@
 import("//build/config/sysroot.gni")  # Imports android/config.gni.
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
-import("//build/toolchain/goma.gni")
 import("//build/toolchain/gcc_toolchain.gni")
+import("//build/toolchain/goma.gni")
 
 # The Android GCC toolchains share most of the same parameters, so we have this
 # wrapper around gcc_toolchain to avoid duplication of logic.

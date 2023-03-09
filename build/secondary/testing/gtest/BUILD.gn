@@ -127,10 +127,6 @@ static_library("gtest") {
 source_set("gtest_main") {
   # TODO http://crbug.com/412064 enable this flag all the time.
   testonly = !is_component_build
-  sources = [
-    "src/gtest_main.cc",
-  ]
-  deps = [
-    ":gtest",
-  ]
+  sources = [ "src/gtest_main.cc" ]
+  deps = [ ":gtest" ]
 }

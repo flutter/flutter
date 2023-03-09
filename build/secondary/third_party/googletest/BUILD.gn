@@ -77,20 +77,14 @@ static_library("gtest") {
 # Library that defines the FRIEND_TEST macro.
 source_set("gtest_prod") {
   testonly = false
-  public = [
-    "googletest/include/gtest/gtest_prod.h",
-  ]
+  public = [ "googletest/include/gtest/gtest_prod.h" ]
   public_configs = [ ":gtest_config" ]
 }
 
 static_library("gtest_main") {
   testonly = true
-  sources = [
-    "googletest/src/gtest_main.cc",
-  ]
-  public_deps = [
-    ":gtest",
-  ]
+  sources = [ "googletest/src/gtest_main.cc" ]
+  public_deps = [ ":gtest" ]
 }
 
 executable("gtest_all_test") {
@@ -123,33 +117,21 @@ executable("gtest_all_test") {
 
 executable("gtest_environment_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_environment_test.cc",
-  ]
+  sources = [ "googletest/test/gtest_environment_test.cc" ]
   configs += [ ":gtest_private_config" ]
-  deps = [
-    ":gtest",
-  ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_listener_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest-listener_test.cc",
-  ]
-  deps = [
-    ":gtest",
-  ]
+  sources = [ "googletest/test/gtest-listener_test.cc" ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_no_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_no_test_unittest.cc",
-  ]
-  deps = [
-    ":gtest",
-  ]
+  sources = [ "googletest/test/gtest_no_test_unittest.cc" ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_param_test") {
@@ -160,37 +142,25 @@ executable("gtest_param_test") {
     "googletest/test/gtest-param-test_test.h",
   ]
   configs += [ ":gtest_private_config" ]
-  deps = [
-    ":gtest",
-  ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_premature_exit_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_premature_exit_test.cc",
-  ]
-  deps = [
-    ":gtest",
-  ]
+  sources = [ "googletest/test/gtest_premature_exit_test.cc" ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_repeat_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_repeat_test.cc",
-  ]
+  sources = [ "googletest/test/gtest_repeat_test.cc" ]
   configs += [ ":gtest_private_config" ]
-  deps = [
-    ":gtest",
-  ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_sole_header_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_sole_header_test.cc",
-  ]
+  sources = [ "googletest/test/gtest_sole_header_test.cc" ]
   deps = [
     ":gtest",
     ":gtest_main",
@@ -199,23 +169,15 @@ executable("gtest_sole_header_test") {
 
 executable("gtest_stress_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest_stress_test.cc",
-  ]
+  sources = [ "googletest/test/gtest_stress_test.cc" ]
   configs += [ ":gtest_private_config" ]
-  deps = [
-    ":gtest",
-  ]
+  deps = [ ":gtest" ]
 }
 
 executable("gtest_unittest_api_test") {
   testonly = true
-  sources = [
-    "googletest/test/gtest-unittest-api_test.cc",
-  ]
-  deps = [
-    ":gtest",
-  ]
+  sources = [ "googletest/test/gtest-unittest-api_test.cc" ]
+  deps = [ ":gtest" ]
 }
 
 group("gtest_all_tests") {
@@ -254,9 +216,7 @@ config("gmock_config") {
 
 static_library("gmock") {
   testonly = true
-  public = [
-    "googlemock/include/gmock/gmock.h",
-  ]
+  public = [ "googlemock/include/gmock/gmock.h" ]
   sources = [
     "googlemock/include/gmock/gmock-actions.h",
     "googlemock/include/gmock/gmock-cardinalities.h",
@@ -284,16 +244,12 @@ static_library("gmock") {
   sources -= [ "googlemock/src/gmock-all.cc" ]
   public_configs = [ ":gmock_config" ]
   configs += [ ":gmock_private_config" ]
-  deps = [
-    ":gtest",
-  ]
+  deps = [ ":gtest" ]
 }
 
 static_library("gmock_main") {
   testonly = true
-  sources = [
-    "googlemock/src/gmock_main.cc",
-  ]
+  sources = [ "googlemock/src/gmock_main.cc" ]
   public_deps = [
     ":gmock",
     ":gtest",
@@ -345,9 +301,7 @@ executable("gmock_link_test") {
 
 executable("gmock_stress_test") {
   testonly = true
-  sources = [
-    "googlemock/test/gmock_stress_test.cc",
-  ]
+  sources = [ "googlemock/test/gmock_stress_test.cc" ]
   configs += [ ":gmock_private_config" ]
   deps = [
     ":gmock",

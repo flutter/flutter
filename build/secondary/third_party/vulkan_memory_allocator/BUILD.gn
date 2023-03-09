@@ -34,9 +34,7 @@ config("vulkan_memory_allocator_config") {
 }
 
 source_set("vulkan_memory_allocator") {
-  sources = [
-    "include/vk_mem_alloc.h",
-  ]
+  sources = [ "include/vk_mem_alloc.h" ]
   deps = [ "${vma_vulkan_headers_dir}:vulkan_headers" ]
   public_configs = [ ":vulkan_memory_allocator_config" ]
 }

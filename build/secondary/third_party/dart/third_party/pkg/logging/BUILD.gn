@@ -16,13 +16,12 @@ dart_library("logging") {
 
   language_version = "2.12"
 
-  deps = [
-  ]
+  deps = []
 
   sources = [
-    "src/logger.dart",
-    "src/log_record.dart",
-    "src/level.dart",
     "logging.dart",
+    "src/level.dart",
+    "src/log_record.dart",
+    "src/logger.dart",
   ]
 }

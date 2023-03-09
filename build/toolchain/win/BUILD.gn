@@ -175,13 +175,14 @@ template("msvc_toolchain") {
     }
 
     tool("solink") {
-      dllname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # e.g. foo.dll
-      libname =
-          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.lib"  # e.g. foo.dll.lib
-      expname =
-          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.exp"  # e.g. foo.dll.exp
-      pdbname =
-          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.pdb"  # e.g. foo.dll.pdb
+      dllname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # e.g.
+                                                                               # foo.dll
+      libname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.lib"  # e.g.
+                                                                                   # foo.dll.lib
+      expname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.exp"  # e.g.
+                                                                                   # foo.dll.exp
+      pdbname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.pdb"  # e.g.
+                                                                                   # foo.dll.pdb
       rspfile = "${dllname}.rsp"
 
       link_command = "$python_path $tool_wrapper_path link-wrapper $env False link.exe /nologo /IMPLIB:$libname /DLL /OUT:$dllname /PDB:${dllname}.pdb @$rspfile"
@@ -242,8 +243,7 @@ template("msvc_toolchain") {
     }
 
     tool("copy") {
-      command =
-          "$python_path $tool_wrapper_path recursive-mirror {{source}} {{output}}"
+      command = "$python_path $tool_wrapper_path recursive-mirror {{source}} {{output}}"
       description = "COPY {{source}} {{output}}"
     }
   }
@@ -301,10 +301,11 @@ if (target_cpu == "arm64") {
   win_toolchains("arm64") {
     toolchain_arch = "arm64"
   }
+
   # Cross-compilation support for x64 hosts.
   if (host_cpu != "arm64") {
     win_toolchains(host_cpu) {
-        toolchain_arch = host_cpu
+      toolchain_arch = host_cpu
     }
   }
 }

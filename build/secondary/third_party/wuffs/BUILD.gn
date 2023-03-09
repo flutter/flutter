@@ -55,7 +55,5 @@ source_set("wuffs") {
     "WUFFS_CONFIG__MODULE__LZW",
   ]
 
-  sources = [
-    "release/c/wuffs-v0.3.c",
-  ]
+  sources = [ "release/c/wuffs-v0.3.c" ]
 }

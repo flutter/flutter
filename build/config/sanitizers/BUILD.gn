@@ -39,9 +39,7 @@ source_set("options_sources") {
     ":deps",
     "//:gn_visibility",
   ]
-  sources = [
-    "//build/sanitizers/sanitizer_options.cc",
-  ]
+  sources = [ "//build/sanitizers/sanitizer_options.cc" ]
 
   if (is_asan) {
     sources += [ "//build/sanitizers/asan_suppressions.cc" ]

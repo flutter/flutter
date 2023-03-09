@@ -16,8 +16,7 @@ dart_library("path") {
 
   language_version = "2.12"
 
-  deps = [
-  ]
+  deps = []
 
   sources = [
     "path.dart",

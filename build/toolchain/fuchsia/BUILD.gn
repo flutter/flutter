@@ -14,7 +14,8 @@ if (use_goma) {
 toolchain("fuchsia") {
   assert(target_cpu == "x64" || target_cpu == "arm64",
          "We currently only support 'x64' and 'arm64' targets for fuchsia.")
-  toolchain_bin = rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin", root_out_dir)
+  toolchain_bin =
+      rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin", root_out_dir)
   fuchsia_sdk = rebase_path("//fuchsia/sdk/$host_os", root_out_dir)
 
   # We can't do string interpolation ($ in strings) on things with dots in
@@ -40,7 +41,6 @@ toolchain("fuchsia") {
   lib_switch = "-l"
   lib_dir_switch = "-L"
 
-
   lto_flags = ""
   if (enable_lto) {
     lto_flags = "-flto"
@@ -51,9 +51,8 @@ toolchain("fuchsia") {
     command = "$goma_prefix $cc -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("cxx") {
@@ -61,9 +60,8 @@ toolchain("fuchsia") {
     command = "$goma_prefix $cxx -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("asm") {
@@ -71,9 +69,8 @@ toolchain("fuchsia") {
     command = "$goma_prefix $cc -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("alink") {
@@ -81,9 +78,8 @@ toolchain("fuchsia") {
     command = "rm -f {{output}} && $ar rcs {{output}} @$rspfile"
     description = "AR {{output}}"
     rspfile_content = "{{inputs}}"
-    outputs = [
-      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
-    ]
+    outputs =
+        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
     default_output_extension = ".a"
     output_prefix = "lib"
   }
@@ -91,7 +87,9 @@ toolchain("fuchsia") {
   tool("solink") {
     soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
     sofile = "{{root_out_dir}}/$soname"  # Possibly including toolchain dir.
-    unstripped_sofile = "{{root_out_dir}}/so.unstripped/$soname"  # Possibly including toolchain dir.
+    unstripped_sofile =
+        "{{root_out_dir}}/so.unstripped/$soname"  # Possibly including toolchain
+                                                  # dir.
     rspfile = sofile + ".rsp"
 
     # These variables are not built into GN but are helpers that implement
