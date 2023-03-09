@@ -116,8 +116,8 @@ class CustomDimensions {
   final String? commandPackagesAndroidEmbeddingVersion;  // cd46
   final bool? nullSafety;  // cd47
   final bool? fastReassemble;  // cd48
-  // final int? nullSafeMigratedLibraries;  // cd49
-  // final int? nullSafeTotalLibraries;  // cd50
+  // final int? nullSafeMigratedLibraries;  // cd49 - deprecated
+  // final int? nullSafeTotalLibraries;  // cd50 - deprecated
   final int? hotEventCompileTimeInMs;  // cd 51
   final int? hotEventFindInvalidatedTimeInMs;  // cd 52
   final int? hotEventScannedSourcesCount;  // cd 53
