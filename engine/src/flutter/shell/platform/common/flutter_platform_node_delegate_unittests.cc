@@ -28,8 +28,8 @@ TEST(FlutterPlatformNodeDelegateTest, NodeDelegateHasUniqueId) {
   node1.label = "prefecture";
   node1.value = "Kyoto";
 
-  bridge->AddFlutterSemanticsNodeUpdate(&node0);
-  bridge->AddFlutterSemanticsNodeUpdate(&node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
   bridge->CommitUpdates();
 
   auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -54,7 +54,7 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -99,7 +99,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -124,7 +124,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   root.custom_accessibility_actions_count = 0;
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode child1;
   child1.id = 1;
@@ -138,7 +138,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   child1.custom_accessibility_actions_count = 0;
   child1.rect = {0, 0, 50, 50};  // LTRB
   child1.transform = {0.5, 0, 0, 0, 0.5, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
   auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
@@ -170,7 +170,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   root.custom_accessibility_actions_count = 0;
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode child1;
   child1.id = 1;
@@ -184,7 +184,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   child1.custom_accessibility_actions_count = 0;
   child1.rect = {90, 90, 100, 100};  // LTRB
   child1.transform = {2, 0, 0, 0, 2, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
   auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
@@ -216,7 +216,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   root.custom_accessibility_actions_count = 0;
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode child1;
   child1.id = 1;
@@ -230,7 +230,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   child1.custom_accessibility_actions_count = 0;
   child1.rect = {0, 0, 50, 50};  // LTRB
   child1.transform = {0.5, 0, 0, 0, 0.5, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
   auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
@@ -260,7 +260,7 @@ TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
   root.child_count = 0;
   root.children_in_traversal_order = nullptr;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
   auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -283,7 +283,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode child1;
   child1.id = 1;
@@ -295,7 +295,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
   auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
