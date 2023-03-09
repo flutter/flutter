@@ -39,7 +39,7 @@ const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 const Color _kCupertinoPageTransitionBarrierColor = Color(0x18000000);
 
 /// Third-order Bézier curve used by [CupertinoPageTransition].
-/// 
+///
 /// It has been derived from plots of native iOS animation frames.
 /// Specifically, transition animation positions were measured
 /// every frame and plotted against time. Then, a cubic curve was
