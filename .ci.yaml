@@ -4414,6 +4414,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
