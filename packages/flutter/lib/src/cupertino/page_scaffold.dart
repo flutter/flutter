@@ -38,6 +38,7 @@ class CupertinoPageScaffold extends StatefulWidget {
     this.navigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
+    this.statusBarTapScrollController,
     this.onStatusBarTap,
     required this.child,
   });
@@ -83,6 +84,11 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
+  /// Optional [ScrollController] that is animated when the Scaffold's status bar is tapped.
+  ///
+  /// This callback is only called in iOS and macOS applications.
+  final void ScrollController? statusBarTapScrollController;
+
   /// Optional callback that is called when the Scaffold's status bar is tapped.
   ///
   /// This callback is only called in iOS and macOS applications.
@@ -105,6 +111,14 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
         curve: Curves.linearToEaseOut,
       );
     }
+
+    if (widget.statusBarTapScrollController != null && widget.statusBarTapScrollController!.hasClients) {
+       widget.statusBarTapScrollController!.animateTo(
+         0.0,
+         duration: const Duration(milliseconds: 1000),
+         curve: Curves.easeOutCirc,
+       );
+     }
 
     widget.onStatusBarTap?.call();
   }

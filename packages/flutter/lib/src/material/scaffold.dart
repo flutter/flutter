@@ -1567,6 +1567,7 @@ class Scaffold extends StatefulWidget {
     this.onDrawerChanged,
     this.endDrawer,
     this.onEndDrawerChanged,
+    this.statusBarTapScrollController,
     this.onStatusBarTap,
     this.bottomNavigationBar,
     this.bottomSheet,
@@ -1719,6 +1720,11 @@ class Scaffold extends StatefulWidget {
 
   /// Optional callback that is called when the [Scaffold.endDrawer] is opened or closed.
   final DrawerCallback? onEndDrawerChanged;
+
+  /// Optional [ScrollController] that is animated when the Scaffold's status bar is tapped.
+  ///
+  /// This callback is only called in iOS and macOS applications.
+  final void ScrollController? statusBarTapScrollController;
 
   /// Optional callback that is called when the Scaffold's status bar is tapped.
   ///
@@ -2534,6 +2540,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         curve: Curves.easeOutCirc,
       );
     }
+
+    if (widget.statusBarTapScrollController != null && widget.statusBarTapScrollController!.hasClients) {
+       widget.statusBarTapScrollController!.animateTo(
+         0.0,
+         duration: const Duration(milliseconds: 1000),
+         curve: Curves.easeOutCirc,
+       );
+     }
 
     widget.onStatusBarTap?.call();
   }
