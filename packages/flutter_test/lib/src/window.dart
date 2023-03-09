@@ -25,6 +25,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.boldText = false,
     this.reduceMotion = false,
     this.highContrast = false,
+    this.onOffSwitchLabels = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -35,6 +36,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     boldText: true,
     reduceMotion: true,
     highContrast: true,
+    onOffSwitchLabels: true,
   );
 
   @override
@@ -56,6 +58,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool highContrast;
 
   @override
+  final bool onOffSwitchLabels;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -66,11 +71,22 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         && other.disableAnimations == disableAnimations
         && other.boldText == boldText
         && other.reduceMotion == reduceMotion
-        && other.highContrast == highContrast;
+        && other.highContrast == highContrast
+        && other.onOffSwitchLabels == onOffSwitchLabels;
   }
 
   @override
-  int get hashCode => Object.hash(accessibleNavigation, invertColors, disableAnimations, boldText, reduceMotion, highContrast);
+  int get hashCode {
+    return Object.hash(
+      accessibleNavigation,
+      invertColors,
+      disableAnimations,
+      boldText,
+      reduceMotion,
+      highContrast,
+      onOffSwitchLabels,
+    );
+  }
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [AccessibilityFeatures], and makes things easier when we do rolls to
@@ -457,6 +473,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearNativeSpellCheckServiceDefined();
     resetBrieflyShowPassword();
     resetInitialLifecycleState();
+    resetSystemFontFamily();
   }
 
   @override
@@ -501,6 +518,80 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
 
     extraKeys.forEach(_testViews.remove);
+  }
+
+  @override
+  ErrorCallback? get onError => _platformDispatcher.onError;
+  @override
+  set onError(ErrorCallback? value) {
+    _platformDispatcher.onError;
+  }
+
+  @override
+  VoidCallback? get onSystemFontFamilyChanged => _platformDispatcher.onSystemFontFamilyChanged;
+  @override
+  set onSystemFontFamilyChanged(VoidCallback? value) {
+    _platformDispatcher.onSystemFontFamilyChanged = value;
+  }
+
+  @override
+  FrameData get frameData => _platformDispatcher.frameData;
+
+  @override
+  void registerBackgroundIsolate(RootIsolateToken token) {
+    _platformDispatcher.registerBackgroundIsolate(token);
+  }
+
+  @override
+  void requestDartPerformanceMode(DartPerformanceMode mode) {
+    _platformDispatcher.requestDartPerformanceMode(mode);
+  }
+
+  /// The system font family to use for this test.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.systemFontFamily].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [systemFontFamily] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [systemFontFamily], use [resetSystemFontFamily].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.systemFontFamily] for the standard implementation
+  ///   * [resetSystemFontFamily] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
+  @override
+  String? get systemFontFamily {
+    return _forceSystemFontFamilyToBeNull
+      ? null
+      : _systemFontFamily ?? _platformDispatcher.systemFontFamily;
+  }
+  String? _systemFontFamily;
+  bool _forceSystemFontFamilyToBeNull = false;
+  set systemFontFamily(String? value) {
+    _systemFontFamily = value;
+    if (value == null) {
+      _forceSystemFontFamilyToBeNull = true;
+    }
+    onSystemFontFamilyChanged?.call();
+  }
+
+  /// Resets [systemFontFamily] to the default for the platform.
+  void resetSystemFontFamily() {
+    _systemFontFamily = null;
+    _forceSystemFontFamilyToBeNull = false;
+    onSystemFontFamilyChanged?.call();
+  }
+
+  @override
+  void updateSemantics(SemanticsUpdate update) {
+    // Using the deprecated method to maintain backwards compatibility during
+    // the multi-view transition window.
+    // ignore: deprecated_member_use
+    _platformDispatcher.updateSemantics(update);
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
@@ -1382,6 +1473,44 @@ class TestWindow implements SingletonFlutterWindow {
     clearViewInsetsTestValue();
     platformDispatcher.clearAllTestValues();
   }
+
+  @override
+  VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
+  @override
+  set onFrameDataChanged(VoidCallback? value) {
+    platformDispatcher.onFrameDataChanged = value;
+  }
+
+  @override
+  KeyDataCallback? get onKeyData => platformDispatcher.onKeyData;
+  @override
+  set onKeyData(KeyDataCallback? value) {
+    platformDispatcher.onKeyData = value;
+  }
+
+  @override
+  VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
+  @override
+  set onSystemFontFamilyChanged(VoidCallback? value) {
+    platformDispatcher.onSystemFontFamilyChanged = value;
+  }
+
+  @override
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+  }
+
+  @override
+  FrameData get frameData => platformDispatcher.frameData;
+
+  @override
+  Rect get physicalGeometry => _view.physicalGeometry;
+
+  @override
+  String? get systemFontFamily => platformDispatcher.systemFontFamily;
+
+  @override
+  Object get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
