@@ -32,7 +32,7 @@ void main() {
     });
 
     for (final String template in templates) {
-      testUsingContext(template, () async {
+      testUsingContext('analysis for $template', () async {
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template', template]);
         final ProcessResult result = await globals.processManager
