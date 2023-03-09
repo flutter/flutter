@@ -25,7 +25,8 @@ enum class DlPathEffectType {
   kDash,
 };
 
-class DlPathEffect : public DlAttribute<DlPathEffect, DlPathEffectType> {
+class DlPathEffect
+    : public DlAttribute<DlPathEffect, SkPathEffect, DlPathEffectType> {
  public:
   virtual const DlDashPathEffect* asDash() const { return nullptr; }
 
@@ -76,11 +77,13 @@ class DlDashPathEffect final : public DlPathEffect {
 
   const DlDashPathEffect* asDash() const override { return this; }
 
+  sk_sp<SkPathEffect> skia_object() const override {
+    return SkDashPathEffect::Make(intervals(), count_, phase_);
+  }
+
   const SkScalar* intervals() const {
     return reinterpret_cast<const SkScalar*>(this + 1);
   }
-  int count() const { return count_; }
-  SkScalar phase() const { return phase_; }
 
   std::optional<SkRect> effect_bounds(SkRect& rect) const override;
 
