@@ -4827,7 +4827,7 @@ class Flex extends MultiChildRenderObjectWidget with FlexMixin {
 ///    that may by sized smaller (leaving some remaining room unused).
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Row extends Flex {
+class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMixin {
   /// Creates a horizontal array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -4843,17 +4843,69 @@ class Row extends Flex {
   /// must not be null.
   const Row({
     super.key,
-    super.selectionSeparator,
-    super.mainAxisAlignment,
-    super.mainAxisSize,
-    super.crossAxisAlignment,
-    super.textDirection,
-    super.verticalDirection,
-    super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
-    super.children,
-  }) : super(
-    direction: Axis.horizontal,
-  );
+    this.mainAxisAlignment = MainAxisAlignment.start,
+    this.mainAxisSize = MainAxisSize.max,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    this.textBaseline,
+    this.clipBehavior = Clip.none,
+    this.children = const <Widget>[],
+  });
+  
+  @override
+  Axis get direction => Axis.horizontal;
+
+  @override
+  final MainAxisAlignment mainAxisAlignment;
+
+  @override
+  final MainAxisSize mainAxisSize;
+
+  @override
+  final CrossAxisAlignment crossAxisAlignment;
+
+  @override
+  final TextDirection? textDirection;
+
+  @override
+  final VerticalDirection verticalDirection;
+
+  @override
+  final TextBaseline? textBaseline;
+
+  @override
+  final Clip clipBehavior;
+  
+  @override
+  final List<Widget> children;
+  
+  @override
+  Widget build(BuildContext context) {
+    Widget result = Flex(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection,
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+      clipBehavior: clipBehavior,
+      children: children,
+    );
+
+    // Selection is only enabled when there is a parent registrar.
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    if (registrar != null) {
+      result = SelectionContainer(
+        registrar: registrar,
+        delegate: SelectableRegionContainerDelegate(selectionSeparator: ' '),
+        child: result,
+      );
+    }
+
+    return result;
+  }
 }
 
 /// A widget that displays its children in a vertical array.
