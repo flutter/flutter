@@ -1372,7 +1372,7 @@ class PipelineOwner {
     }
   }
 
-  /// Removes a child [PipelineOwner] previously added via [addChild].
+  /// Removes a child [PipelineOwner] previously added via [adoptChild].
   ///
   /// This node will cease to call the flush methods on the `child` during frame
   /// production.
