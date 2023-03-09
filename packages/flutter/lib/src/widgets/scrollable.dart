@@ -827,6 +827,19 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return false;
   }
 
+  Widget _buildChrome(Widget child) {
+    final ScrollableDetails details = ScrollableDetails(
+      direction: widget.axisDirection,
+      controller: _effectiveScrollController,
+      clipBehavior: widget.clipBehavior,
+    );
+    return _configuration.buildScrollbar(
+      context,
+      _configuration.buildOverscrollIndicator(context, child, details),
+      details,
+    );
+  }
+
   // DESCRIPTION
 
   @override
@@ -883,11 +896,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       clipBehavior: widget.clipBehavior,
     );
 
-    result = _configuration.buildScrollbar(
-      context,
-      _configuration.buildOverscrollIndicator(context, result, details),
-      details,
-    );
+    // Apply chrome like scrollbars and overscroll indicators.
+    result = _buildChrome(result);
 
     // Selection is only enabled when there is a parent registrar.
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);

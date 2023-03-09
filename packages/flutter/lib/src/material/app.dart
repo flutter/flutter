@@ -838,6 +838,31 @@ class MaterialScrollBehavior extends ScrollBehavior {
   }
 
   @override
+  Widget buildDualScrollbars(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails verticalDetails,
+    ScrollableDetails horizontalDetails,
+  ) {
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return Scrollbar.dual(
+          verticalController: verticalDetails.controller,
+          horizontalController: horizontalDetails.controller,
+          child: child,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        return child;
+    }
+  }
+
+  @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.

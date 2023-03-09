@@ -102,6 +102,24 @@ class CupertinoScrollbar extends RawScrollbar {
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
+  /// Creates a set of scrollbars for vertical and horizontal axes.
+  factory CupertinoScrollbar.dual({
+    required ScrollController verticalController,
+    required ScrollController horizontalController,
+    required Widget child,
+  }) {
+    // TODO(Piinks): Instead, `.dual` should be a constructor that internally
+    //  creates two ScrollbarPainters so that they can respond to each other
+    //  appropriately: <ISSUE LINK>
+    return CupertinoScrollbar(
+      controller: verticalController,
+      child: CupertinoScrollbar(
+        controller: horizontalController,
+        child: child,
+      ),
+    );
+  }
+
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
   static const double defaultThickness = 3;
 

@@ -1006,6 +1006,24 @@ class RawScrollbar extends StatefulWidget {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(radius == null || shape == null);
 
+  /// Creates a set of scrollbars for vertical and horizontal axes.
+  factory RawScrollbar.dual({
+    required ScrollController verticalController,
+    required ScrollController horizontalController,
+    required Widget child,
+  }) {
+    // TODO(Piinks): Instead, `.dual` should be a constructor that internally
+    //  creates two ScrollbarPainters so that they can respond to each other
+    //  appropriately: <ISSUE LINK>
+    return RawScrollbar(
+      controller: verticalController,
+      child: RawScrollbar(
+        controller: horizontalController,
+        child: child,
+      ),
+    );
+  }
+
   /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
   ///

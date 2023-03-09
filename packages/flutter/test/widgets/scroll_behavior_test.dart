@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -316,4 +317,73 @@ void main() {
       // For default glowing indicator
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
+
+  testWidgets('ScrollBehavior.buildDualScrollbars', (WidgetTester tester) async {
+    final ScrollableDetails verticalDetails = ScrollableDetails(
+      controller: ScrollController(),
+      direction: AxisDirection.down,
+    );
+    final ScrollableDetails horizontalDetails = ScrollableDetails(
+      controller: ScrollController(),
+      direction: AxisDirection.right,
+    );
+    final Widget child = SingleChildScrollView(
+        controller: verticalDetails.controller,
+        child: SingleChildScrollView(
+          controller: horizontalDetails.controller,
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            height: 1200,
+            width: 1200,
+            color: const Color(0xFF000000),
+          ),
+        )
+    );
+
+    Widget buildWidget() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const MockScrollBehavior(),
+            child: Builder(
+              builder: (BuildContext context) {
+                return ScrollConfiguration.of(context).buildDualScrollbars(
+                  context,
+                  child,
+                  verticalDetails,
+                  horizontalDetails,
+                );
+              }
+            ),
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      // Only applicable on desktop platforms.
+        expect(find.byType(RawScrollbar), findsNothing);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(find.byType(RawScrollbar), findsNWidgets(2));
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+}
+
+class MockScrollBehavior extends ScrollBehavior {
+  const MockScrollBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }

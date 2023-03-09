@@ -424,13 +424,72 @@ void main() {
 
     debugBrightnessOverride = null;
   });
+
+  testWidgets('CupertinoScrollBehavior.buildDualScrollbars', (WidgetTester tester) async {
+    final ScrollableDetails verticalDetails = ScrollableDetails(
+      controller: ScrollController(),
+      direction: AxisDirection.down,
+    );
+    final ScrollableDetails horizontalDetails = ScrollableDetails(
+      controller: ScrollController(),
+      direction: AxisDirection.right,
+    );
+    final Widget child = SingleChildScrollView(
+      controller: verticalDetails.controller,
+      child: SingleChildScrollView(
+        controller: horizontalDetails.controller,
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          height: 1200,
+          width: 1200,
+          color: const Color(0xFF000000),
+        ),
+      )
+    );
+    
+    Widget buildWidget() {
+      return CupertinoApp(
+        scrollBehavior: const MockScrollBehavior(),
+        home: Builder(
+          builder: (BuildContext context) {
+            return ScrollConfiguration.of(context).buildDualScrollbars(
+              context,
+              child,
+              verticalDetails,
+              horizontalDetails,
+            );
+          }
+        )
+      );
+    }
+    
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Only applicable on desktop platforms.
+        expect(find.byType(CupertinoScrollbar), findsNothing);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
-class MockScrollBehavior extends ScrollBehavior {
+class MockScrollBehavior extends CupertinoScrollBehavior {
   const MockScrollBehavior();
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

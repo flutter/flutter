@@ -173,6 +173,32 @@ class ScrollBehavior {
     }
   }
 
+  /// Applies two [RawScrollbar]s to the child widget on desktop platforms, one
+  /// for both [Axis] directions.
+  Widget buildDualScrollbars(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails verticalDetails,
+    ScrollableDetails horizontalDetails,
+  ) {
+    // When modifying this function, consider modifying the implementation in
+    // the Material and Cupertino subclasses as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return RawScrollbar.dual(
+          verticalController: verticalDetails.controller,
+          horizontalController: horizontalDetails.controller,
+          child: child,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        return child;
+    }
+  }
+
   /// Applies a [GlowingOverscrollIndicator] to the child widget on
   /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -323,6 +349,24 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     if (scrollbars) {
       return delegate.buildScrollbar(context, child, details);
+    }
+    return child;
+  }
+
+  @override
+  Widget buildDualScrollbars(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails verticalDetails,
+    ScrollableDetails horizontalDetails,
+  ) {
+    if (scrollbars) {
+      return delegate.buildDualScrollbars(
+        context,
+        child,
+        verticalDetails,
+        horizontalDetails,
+      );
     }
     return child;
   }

@@ -2904,4 +2904,31 @@ void main() {
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Dual scrollbar constructor', (WidgetTester tester) async {
+    final ScrollController horizontalController = ScrollController();
+    final ScrollController verticalController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar.dual(
+            horizontalController: horizontalController,
+            verticalController: verticalController,
+            child: SingleChildScrollView(
+              controller: verticalController,
+              child: SingleChildScrollView(
+                controller: horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(RawScrollbar), findsNWidgets(2));
+  });
 }

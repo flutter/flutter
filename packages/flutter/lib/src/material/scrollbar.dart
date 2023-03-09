@@ -116,6 +116,24 @@ class Scrollbar extends StatelessWidget {
          'isAlwaysShown is deprecated.'
        );
 
+  /// Creates a set of scrollbars for vertical and horizontal axes.
+  factory Scrollbar.dual({
+    required ScrollController verticalController,
+    required ScrollController horizontalController,
+    required Widget child,
+  }) {
+    // TODO(Piinks): Instead, `.dual` should be a constructor that internally
+    //  creates two ScrollbarPainters so that they can respond to each other
+    //  appropriately: <ISSUE LINK>
+    return Scrollbar(
+      controller: verticalController,
+      child: Scrollbar(
+        controller: horizontalController,
+        child: child,
+      ),
+    );
+  }
+
   /// {@macro flutter.widgets.Scrollbar.child}
   final Widget child;
 
