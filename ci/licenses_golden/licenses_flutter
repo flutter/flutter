@@ -2744,8 +2744,6 @@ ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.h + 
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/empty.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc + ../../../flutter/LICENSE
@@ -5295,8 +5293,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/empty.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
@@ -5329,19 +5325,11 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/logging.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/main.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/common.shard.cml
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_product_runner.cml
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_runner.cml
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_runner.cml
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cml
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cmx
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_product_runtime
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.cc
