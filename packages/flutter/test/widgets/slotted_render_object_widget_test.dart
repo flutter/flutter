@@ -219,27 +219,33 @@ void main() {
 
     expect(
       tester.renderObject(find.byType(_Diagonal)).toStringDeep(),
-      equalsIgnoringHashCodes(r'''
-_RenderDiagonal#00000 relayoutBoundary=up1
- │ creator: _Diagonal ← Align ← Directionality ← [root]
- │ parentData: offset=Offset(0.0, 0.0) (can use size)
- │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)
- │ size: Size(190.0, 220.0)
- │
- ├─topLeft: RenderConstrainedBox#00000 relayoutBoundary=up2
- │   creator: SizedBox ← _Diagonal ← Align ← Directionality ← [root]
- │   parentData: offset=Offset(0.0, 0.0) (can use size)
- │   constraints: BoxConstraints(unconstrained)
- │   size: Size(80.0, 100.0)
- │   additionalConstraints: BoxConstraints(w=80.0, h=100.0)
- │
- └─bottomRight: RenderConstrainedBox#00000 relayoutBoundary=up2
-     creator: SizedBox ← _Diagonal ← Align ← Directionality ← [root]
-     parentData: offset=Offset(80.0, 100.0) (can use size)
-     constraints: BoxConstraints(unconstrained)
-     size: Size(110.0, 120.0)
-     additionalConstraints: BoxConstraints(w=110.0, h=120.0)
-''')
+      equalsIgnoringHashCodes(
+        '_RenderDiagonal#00000 relayoutBoundary=up1\n'
+        ' │ creator: _Diagonal ← Align ← Directionality ← MediaQuery ←\n'
+        ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
+        ' │   TestFlutterView#00000] ← [root]\n'
+        ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
+        ' │ size: Size(190.0, 220.0)\n'
+        ' │\n'
+        ' ├─topLeft: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+        ' │   creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
+        ' │     MediaQuery ← _MediaQueryFromView ← _ViewScope ←\n'
+        ' │     View-[GlobalObjectKey TestFlutterView#00000] ← [root]\n'
+        ' │   parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+        ' │   constraints: BoxConstraints(unconstrained)\n'
+        ' │   size: Size(80.0, 100.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=80.0, h=100.0)\n'
+        ' │\n'
+        ' └─bottomRight: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+        '     creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
+        '       MediaQuery ← _MediaQueryFromView ← _ViewScope ←\n'
+        '       View-[GlobalObjectKey TestFlutterView#00000] ← [root]\n'
+        '     parentData: offset=Offset(80.0, 100.0) (can use size)\n'
+        '     constraints: BoxConstraints(unconstrained)\n'
+        '     size: Size(110.0, 120.0)\n'
+        '     additionalConstraints: BoxConstraints(w=110.0, h=120.0)\n',
+      )
     );
   });
 }

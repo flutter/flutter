@@ -70,7 +70,7 @@ class FuchsiaKernelCompiler {
       '$multiRootScheme:///$target',
     ];
 
-    final String? engineDartBinaryPath = globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String? engineDartBinaryPath = globals.artifacts?.getArtifactPath(Artifact.engineDartBinary);
     if (engineDartBinaryPath == null) {
       throwToolExit('Engine dart binary not found at "$engineDartBinaryPath"');
     }

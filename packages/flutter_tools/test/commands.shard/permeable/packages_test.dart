@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -71,6 +72,7 @@ void main() {
         'packages',
         verb,
         ...?args,
+        '--directory',
         projectPath,
       ]);
       return command;
@@ -211,7 +213,7 @@ void main() {
       expect(mockStdio.stdout.writes.map(utf8.decode),
         allOf(
           contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
-          contains('+ flutter 0.0.0 from sdk flutter\n'),
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
           contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
         ),
       );
@@ -220,7 +222,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -242,7 +244,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -264,7 +266,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -285,10 +287,11 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
+      // A plugin example depends on the plugin itself, and integration_test.
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -310,7 +313,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -332,7 +335,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -363,7 +366,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -385,7 +388,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -407,7 +410,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -429,7 +432,7 @@ void main() {
       expectModulePluginInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -459,7 +462,7 @@ void main() {
       expectPluginInjected(exampleProjectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -485,7 +488,7 @@ void main() {
       globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -496,7 +499,7 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -511,7 +514,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -522,7 +525,7 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -540,7 +543,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'run', '--foo', 'bar',
           ],
           stdin: stdin,
         ),
@@ -553,7 +556,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -571,7 +574,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'token', 'list',
           ],
           stdin: stdin,
         ),
@@ -584,7 +587,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -600,7 +603,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h',
+            '/bin/cache/dart-sdk/bin/dart', '--no-analytics', 'pub', 'upgrade', '-h',
           ],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
@@ -613,7 +616,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,

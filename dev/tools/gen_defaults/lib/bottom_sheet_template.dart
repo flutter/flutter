@@ -9,7 +9,6 @@ class BottomSheetTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends BottomSheetThemeData {
    const _${blockName}DefaultsM3(this.context)
     : super(
@@ -25,6 +24,9 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
 
   @override
   Color? get surfaceTintColor => ${componentColor("md.comp.sheet.bottom.docked.container.surface-tint-layer")};
+
+  @override
+  Color? get shadowColor => Colors.transparent;
 }
 ''';
 }

@@ -87,7 +87,7 @@ void main() {
     final WindowsStdoutLogger logger = WindowsStdoutLogger(
       outputPreferences: OutputPreferences.test(),
       stdio: stdio,
-      terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+      terminal: Terminal.test(),
     );
 
     logger.printStatus('🔥🖼️✗✓🔨💪✏️');
@@ -497,10 +497,7 @@ void main() {
             time.elapse(timeLapse);
 
             List<String> lines = outputStdout();
-            expect(
-              lines.join(),
-              contains(warningMessage),
-            );
+            expect(lines.join(), '⣽\ba warning message.⣻');
 
             spinner.stop();
             lines = outputStdout();

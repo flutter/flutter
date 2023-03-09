@@ -42,9 +42,7 @@ abstract class InteractiveInkFeature extends InkFeature {
     required super.referenceBox,
     required Color color,
     super.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _color = color;
+  }) : _color = color;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -111,12 +109,6 @@ abstract class InteractiveInkFeature extends InkFeature {
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback? clipCallback,
   }) {
-    assert(canvas != null);
-    assert(transform != null);
-    assert(paint != null);
-    assert(center != null);
-    assert(radius != null);
-    assert(borderRadius != null);
 
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     canvas.save();
@@ -323,12 +315,7 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -438,13 +425,15 @@ class InkResponse extends StatelessWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double? radius;
 
-  /// The clipping radius of the containing rect. This is effective only if
-  /// [customBorder] is null.
+  /// The border radius of the containing rectangle. This is effective only if
+  /// [highlightShape] is [BoxShape.rectangle].
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? borderRadius;
 
-  /// The custom clip border which overrides [borderRadius].
+  /// The custom clip border.
+  ///
+  /// If this is null, the ink response will not clip its content.
   final ShapeBorder? customBorder;
 
   /// The color of the ink response when the parent widget is focused. If this
@@ -557,10 +546,12 @@ class InkResponse extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  /// {@template flutter.material.inkwell.onFocusChange}
   /// Handler called when the focus changes.
   ///
   /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
+  /// {@endtemplate}
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.widgets.Focus.autofocus}
@@ -684,12 +675,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  });
 
   final Widget? child;
   final GestureTapCallback? onTap;
@@ -777,7 +763,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
-    assert(childState != null);
     final bool lastAnyPressed = _anyChildInkResponsePressed;
     if (value) {
       _activeChildren.add(childState);
@@ -834,10 +819,32 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
+    if (widget.customBorder != oldWidget.customBorder ||
+        widget.radius != oldWidget.radius ||
+        widget.borderRadius != oldWidget.borderRadius ||
+        widget.highlightShape != oldWidget.highlightShape) {
+      final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+      if (hoverHighlight != null) {
+        hoverHighlight.dispose();
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      }
+      final InkHighlight? focusHighlight = _highlights[_HighlightType.focus];
+      if (focusHighlight != null) {
+        focusHighlight.dispose();
+        // Do not call updateFocusHighlights() here because it is called below
+      }
+    }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
         statesController.update(MaterialState.pressed, false);
+        // Remove the existing hover highlight immediately when enabled is false.
+        // Do not rely on updateHighlight or InkHighlight.deactivate to not break
+        // the expected lifecycle which is updating _hovering when the mouse exit.
+        // Manually updating _hovering here or calling InkHighlight.deactivate
+        // will lead to onHover not being called or call when it is not allowed.
+        final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+        hoverHighlight?.dispose();
       }
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
@@ -918,7 +925,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: resolvedOverlayColor,
+          color: enabled ? resolvedOverlayColor : resolvedOverlayColor.withAlpha(0),
           shape: widget.highlightShape,
           radius: widget.radius,
           borderRadius: widget.borderRadius,
@@ -999,7 +1006,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _shouldShowFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && _hasFocus;
@@ -1147,7 +1154,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && widget.canRequestFocus;

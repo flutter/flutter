@@ -18,6 +18,11 @@ const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
 
 /// Command to proceed from one [pb.ReleasePhase] to the next.
+///
+/// After `conductor start`, the rest of the release steps are initiated by the
+/// user via `conductor next`. Thus this command's behavior is conditional upon
+/// which phase of the release the user is currently in. This is implemented
+/// with a switch case statement.
 class NextCommand extends Command<void> {
   NextCommand({
     required this.checkouts,
@@ -155,20 +160,6 @@ class NextContext extends Context {
         }
         break;
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
-          stdio.printStatus(
-              'This release has no engine cherrypicks, and thus the engine.version file\n'
-              'in the framework does not need to be updated.',
-          );
-
-          if (state.framework.cherrypicks.isEmpty) {
-            stdio.printStatus(
-                'This release also has no framework cherrypicks. Therefore, a framework\n'
-                'pull request is not required.',
-            );
-            break;
-          }
-        }
         final Remote engineUpstreamRemote = Remote(
             name: RemoteName.upstream,
             url: state.engine.upstream.url,
@@ -264,21 +255,33 @@ class NextContext extends Context {
       case pb.ReleasePhase.PUBLISH_VERSION:
         stdio.printStatus('Please ensure that you have merged your framework PR and that');
         stdio.printStatus('post-submit CI has finished successfully.\n');
-        final Remote upstream = Remote(
+        final Remote frameworkUpstream = Remote(
             name: RemoteName.upstream,
             url: state.framework.upstream.url,
         );
         final FrameworkRepository framework = FrameworkRepository(
             checkouts,
             // We explicitly want to check out the merged version from upstream
-            initialRef: '${upstream.name}/${state.framework.candidateBranch}',
-            upstreamRemote: upstream,
+            initialRef: '${frameworkUpstream.name}/${state.framework.candidateBranch}',
+            upstreamRemote: frameworkUpstream,
             previousCheckoutLocation: state.framework.checkoutPath,
         );
-        final String headRevision = await framework.reverseParse('HEAD');
+        final String frameworkHead = await framework.reverseParse('HEAD');
+        final Remote engineUpstream = Remote(
+            name: RemoteName.upstream,
+            url: state.engine.upstream.url,
+        );
+        final EngineRepository engine = EngineRepository(
+            checkouts,
+            // We explicitly want to check out the merged version from upstream
+            initialRef: '${engineUpstream.name}/${state.engine.candidateBranch}',
+            upstreamRemote: engineUpstream,
+            previousCheckoutLocation: state.engine.checkoutPath,
+        );
+        final String engineHead = await engine.reverseParse('HEAD');
         if (autoAccept == false) {
           final bool response = await prompt(
-            'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
+            'Are you ready to tag commit $frameworkHead as ${state.releaseVersion}\n'
             'and push to remote ${state.framework.upstream.url}?',
           );
           if (!response) {
@@ -287,7 +290,8 @@ class NextContext extends Context {
             return;
           }
         }
-        await framework.tag(headRevision, state.releaseVersion, upstream.name);
+        await framework.tag(frameworkHead, state.releaseVersion, frameworkUpstream.name);
+        await engine.tag(engineHead, state.releaseVersion, engineUpstream.name);
         break;
       case pb.ReleasePhase.PUBLISH_CHANNEL:
         final Remote upstream = Remote(

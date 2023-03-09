@@ -63,23 +63,14 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     required intl.DateFormat doubleDigitMinuteFormat,
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
+  }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
-       assert(dayFormat != null),
        _dayFormat = dayFormat,
-       assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
-       assert(singleDigitHourFormat != null),
        _singleDigitHourFormat = singleDigitHourFormat,
-       assert(singleDigitMinuteFormat != null),
        _singleDigitMinuteFormat = singleDigitMinuteFormat,
-       assert(doubleDigitMinuteFormat != null),
        _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
-       assert(singleDigitSecondFormat != null),
        _singleDigitSecondFormat = singleDigitSecondFormat,
-       assert(decimalFormat != null),
        _decimalFormat =decimalFormat;
 
   final String _localeName;
@@ -106,7 +97,10 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerDayOfMonth(int dayIndex) {
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+     if (weekDay != null) {
+      return ' ${DefaultCupertinoLocalizations.shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+    }
     // Year and month doesn't matter since we just want to day formatted.
     return _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }

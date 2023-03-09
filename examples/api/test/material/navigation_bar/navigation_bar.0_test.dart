@@ -11,10 +11,9 @@ void main() {
   testWidgets('Navigation bar updates destination on tap',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.ExampleApp(),
+      const example.NavigationBarApp(),
     );
-    final NavigationBar navigationBarWidget =
-        tester.firstWidget(find.byType(NavigationBar));
+    final NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
 
     /// NavigationDestinations must be rendered
     expect(find.text('Explore'), findsOneWidget);

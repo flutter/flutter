@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:ui';
 
@@ -1662,6 +1663,30 @@ void main() {
       date,
       DateTime(2022, 6, 14, 3, 45),
     );
+  });
+
+  testWidgets('date picker has expected day of week', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) { },
+              initialDateTime: DateTime(2018, 9, 15),
+              showDayOfWeek: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('September'), findsOneWidget);
+    expect(find.textContaining('Sat').last, findsOneWidget);
+    expect(find.textContaining('15').last, findsOneWidget);
+    expect(find.text('2018'), findsOneWidget);
   });
 }
 

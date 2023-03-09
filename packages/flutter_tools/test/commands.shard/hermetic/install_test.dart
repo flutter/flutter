@@ -148,7 +148,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   Future<bool> isAppInstalled(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 
@@ -157,6 +157,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'iOS';
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -168,7 +171,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 
@@ -177,4 +180,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     AndroidApk app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'Android';
 }

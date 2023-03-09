@@ -14,6 +14,7 @@ import 'event_simulation.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
+import 'window.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
 /// smaller moves.
@@ -23,7 +24,7 @@ const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
-/// Class that programatically interacts with the [Semantics] tree.
+/// Class that programmatically interacts with the [Semantics] tree.
 ///
 /// Allows for testing of the [Semantics] tree, which is used by assistive
 /// technology, search engines, and other analysis software to determine the
@@ -72,7 +73,7 @@ class SemanticsController {
   /// if no semantics are found or are not enabled.
   SemanticsNode find(Finder finder) {
     TestAsyncUtils.guardSync();
-    if (_binding.pipelineOwner.semanticsOwner == null) {
+    if (!_binding.semanticsEnabled) {
       throw StateError('Semantics are not enabled.');
     }
     final Iterable<Element> candidates = finder.evaluate();
@@ -187,7 +188,7 @@ class SemanticsController {
   }
 
   /// Whether or not the node is important for semantics. Should match most cases
-  /// on the platforms, but certain edge cases will be inconsisent.
+  /// on the platforms, but certain edge cases will be inconsistent.
   ///
   /// Based on:
   ///
@@ -234,6 +235,37 @@ abstract class WidgetController {
   /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
 
+  /// The [TestPlatformDispatcher] that is being used in this test.
+  ///
+  /// This will be injected into the framework such that calls to
+  /// [WidgetsBinding.platformDispatcher] will use this. This allows
+  /// users to change platform specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [TestFlutterView] which allows changing view specific properties
+  ///     for testing
+  ///   * [view] and [viewOf] which are used to find
+  ///     [TestFlutterView]s from the widget tree
+  TestPlatformDispatcher get platformDispatcher => binding.platformDispatcher as TestPlatformDispatcher;
+
+  /// The [TestFlutterView] provided by default when testing with
+  /// [WidgetTester.pumpWidget].
+  ///
+  /// If the test requires multiple views, it will need to use [viewOf] instead
+  /// to ensure that the view related to the widget being evaluated is the one
+  /// that gets updated.
+  ///
+  /// See also:
+  ///
+  ///   * [viewOf], which can find a [TestFlutterView] related to a given finder.
+  ///     This is how to modify view properties for testing when dealing with
+  ///     multiple views.
+  TestFlutterView get view {
+    assert(platformDispatcher.views.length == 1, 'When testing with multiple views, use `viewOf` instead.');
+    return platformDispatcher.views.single;
+  }
+
   /// Provides access to a [SemanticsController] for testing anything related to
   /// the [Semantics] tree.
   ///
@@ -241,7 +273,7 @@ abstract class WidgetController {
   /// use of the [Semantics] tree to determine the meaning of an application.
   /// If semantics has been disabled for the test, this will throw a [StateError].
   SemanticsController get semantics {
-    if (binding.pipelineOwner.semanticsOwner == null) {
+    if (!binding.semanticsEnabled) {
       throw StateError(
         'Semantics are not enabled. Enable them by passing '
         '`semanticsEnabled: true` to `testWidgets`, or by manually creating a '
@@ -256,6 +288,26 @@ abstract class WidgetController {
 
   // TODO(ianh): verify that the return values are of type T and throw
   // a good message otherwise, in all the generic methods below
+
+  /// Finds the [TestFlutterView] that is the closest ancestor of the widget
+  /// found by [finder].
+  ///
+  /// [TestFlutterView] can be used to modify view specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [view] which returns the [TestFlutterView] used when only a single
+  ///     view is being used.
+  TestFlutterView viewOf(Finder finder) {
+    final View view = firstWidget<View>(
+      find.ancestor(
+        of: finder,
+        matching: find.byType(View),
+      )
+    );
+
+    return view.view as TestFlutterView;
+  }
 
   /// Checks if `finder` exists in the tree.
   bool any(Finder finder) {
@@ -562,6 +614,16 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
+  /// {@template flutter.flutter_test.WidgetController.fling.offset}
+  /// The `offset` represents a distance the pointer moves in the global
+  /// coordinate system of the screen.
+  ///
+  /// Positive [Offset.dy] values mean the pointer moves downward. Negative
+  /// [Offset.dy] values mean the pointer moves upwards. Accordingly, positive
+  /// [Offset.dx] values mean the pointer moves towards the right. Negative
+  /// [Offset.dx] values mean the pointer moves towards left.
+  /// {@endtemplate}
+  ///
   /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
@@ -817,6 +879,8 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
+  ///
   /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
@@ -878,7 +942,6 @@ abstract class WidgetController {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
-      assert(gesture != null);
 
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
@@ -952,6 +1015,8 @@ abstract class WidgetController {
   /// time, starting in the middle of the widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
   ///
   /// This is the timed version of [drag]. This may or may not result in a
   /// [fling] or ballistic animation, depending on the speed from
@@ -1106,7 +1171,6 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    assert(downLocation != null);
     final TestGesture result = await createGesture(
       pointer: pointer,
       kind: kind,
@@ -1254,9 +1318,7 @@ abstract class WidgetController {
       }
       if (!found) {
         bool outOfBounds = false;
-        if (binding.renderView != null && binding.renderView.size != null) {
-          outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
-        }
+        outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
@@ -1335,7 +1397,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
@@ -1379,7 +1440,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1413,7 +1473,6 @@ abstract class WidgetController {
         String platform = _defaultPlatform,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -1455,7 +1514,6 @@ abstract class WidgetController {
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1485,7 +1543,7 @@ abstract class WidgetController {
   ///
   /// The handle must be disposed at the end of the test.
   SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
+    return binding.ensureSemantics();
   }
 
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
@@ -1613,7 +1671,6 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
   ]) {
-    assert(duration != null);
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
       int count = 0;
@@ -1627,7 +1684,6 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
-    assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];

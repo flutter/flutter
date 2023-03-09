@@ -116,6 +116,12 @@ void batch2() {
     );
     await flutter.waitForPause();
     await evaluateTrivialExpressions(flutter);
+
+    // Ensure we did not leave a dill file alongside the test.
+    // https://github.com/Dart-Code/Dart-Code/issues/4243.
+    final String dillFilename = '${project.testFilePath}.dill';
+    expect(fileSystem.file(dillFilename).existsSync(), isFalse);
+
     await cleanProject();
   });
 
@@ -168,6 +174,12 @@ void batch3() {
     );
     await flutter.waitForPause();
     await evaluateTrivialExpressions(flutter);
+
+    // Ensure we did not leave a dill file alongside the test.
+    // https://github.com/Dart-Code/Dart-Code/issues/4243.
+    final String dillFilename = '${project.testFilePath}.dill';
+    expect(fileSystem.file(dillFilename).existsSync(), isFalse);
+
     await cleanProject();
   });
 

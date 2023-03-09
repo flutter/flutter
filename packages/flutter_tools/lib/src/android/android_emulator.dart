@@ -62,9 +62,7 @@ class AndroidEmulators extends EmulatorDiscovery {
       <String>[emulatorPath, '-list-avds'])).stdout.trim();
 
     final List<AndroidEmulator> emulators = <AndroidEmulator>[];
-    if (listAvdsOutput != null) {
-      _extractEmulatorAvdInfo(listAvdsOutput, emulators);
-    }
+    _extractEmulatorAvdInfo(listAvdsOutput, emulators);
     return emulators;
   }
 

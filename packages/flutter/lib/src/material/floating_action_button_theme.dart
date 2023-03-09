@@ -193,9 +193,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static FloatingActionButtonThemeData? lerp(FloatingActionButtonThemeData? a, FloatingActionButtonThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return FloatingActionButtonThemeData(
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),

@@ -247,6 +247,11 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
+  void insertContent(KeyboardInsertedContent content) {
+    latestMethodCall = 'commitContent';
+  }
+
+  @override
   void updateEditingValue(TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
   }
@@ -269,6 +274,21 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
   }
 
   @override

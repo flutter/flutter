@@ -40,8 +40,7 @@ class CupertinoPageScaffold extends StatefulWidget {
     this.resizeToAvoidBottomInset = true,
     this.onStatusBarTap,
     required this.child,
-  }) : assert(child != null),
-       assert(resizeToAvoidBottomInset != null);
+  });
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.

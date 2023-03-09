@@ -40,8 +40,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required Platform platform,
   }) :
-      assert(delegate != null),
-      assert(platform != null),
       _platform = platform,
       super(delegate);
 
@@ -164,9 +162,6 @@ class ErrorHandlingFile
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -379,9 +374,6 @@ class ErrorHandlingDirectory
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -518,9 +510,6 @@ class ErrorHandlingLink
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -563,7 +552,6 @@ Future<T> _run<T>(Future<T> Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) async {
-  assert(platform != null);
   try {
     return await op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -581,8 +569,10 @@ Future<T> _run<T>(Future<T> Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -593,7 +583,6 @@ T _runSync<T>(T Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) {
-  assert(platform != null);
   try {
     return op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -611,8 +600,10 @@ T _runSync<T>(T Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -676,7 +667,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -695,8 +689,12 @@ class ErrorHandlingProcessManager extends ProcessManager {
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
         runInShell: runInShell,
+        mode: mode,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -719,7 +717,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 }
 
@@ -760,6 +761,22 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
       break;
   }
   _throwFileSystemException(errorMessage);
+}
+
+void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  const int ebadarch = 86;
+  if (errorCode == ebadarch) {
+    final StringBuffer errorBuffer = StringBuffer();
+    if (message != null) {
+      errorBuffer.writeln('$message.');
+    }
+    errorBuffer.writeln('The binary was built with the incorrect architecture to run on this machine.');
+    errorBuffer.writeln('If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:');
+    errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
+    _throwFileSystemException(errorBuffer.toString());
+  }
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {

@@ -112,9 +112,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// to test [SchedulerPhase.postFrameCallbacks].
   void pumpCompleteFrame() {
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
       TestRenderingFlutterBinding.instance.handleBeginFrame(null);
       TestRenderingFlutterBinding.instance.handleDrawFrame();
@@ -139,9 +137,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
       pipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) {
@@ -197,13 +193,12 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void layout(
-  RenderBox box, {
+  RenderBox box, { // If you want to just repump the last box, call pumpFrame().
   BoxConstraints? constraints,
   Alignment alignment = Alignment.center,
   EnginePhase phase = EnginePhase.layout,
   VoidCallback? onErrors,
 }) {
-  assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   TestRenderingFlutterBinding.instance.renderView.child = null;
@@ -225,8 +220,6 @@ void layout(
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors }) {
-  assert(TestRenderingFlutterBinding.instance != null);
-  assert(TestRenderingFlutterBinding.instance.renderView != null);
   assert(TestRenderingFlutterBinding.instance.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {

@@ -179,12 +179,8 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
-  }) : assert(child != null),
-       assert(feedback != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
-       assert(dragAnchorStrategy != null);
+    this.allowedButtonsFilter,
+  }) : assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -359,6 +355,9 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior hitTestBehavior;
 
+  /// {@macro flutter.gestures.multidrag._allowedButtonsFilter}
+  final AllowedButtonsFilter? allowedButtonsFilter;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -367,11 +366,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     switch (affinity) {
       case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer()..onStart = onStart;
+        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer()..onStart = onStart;
+        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case null:
-        return ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
     }
   }
 
@@ -409,6 +408,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackSemantics,
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
+    super.allowedButtonsFilter,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -421,7 +421,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer(delay: delay)
+    return DelayedMultiDragGestureRecognizer(delay: delay, allowedButtonsFilter: allowedButtonsFilter)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart) {
@@ -447,7 +447,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   void didChangeDependencies() {
-    _recognizer!.gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     super.didChangeDependencies();
   }
 
@@ -561,8 +561,7 @@ class DraggableDetails {
     this.wasAccepted = false,
     required this.velocity,
     required this.offset,
-  }) : assert(velocity != null),
-       assert(offset != null);
+  });
 
   /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
@@ -581,7 +580,7 @@ class DragTargetDetails<T> {
   /// Creates details for a [DragTarget] callback.
   ///
   /// The [offset] must not be null.
-  DragTargetDetails({required this.data, required this.offset}) : assert(offset != null);
+  DragTargetDetails({required this.data, required this.offset});
 
   /// The data that was dropped onto this [DragTarget].
   final T data;
@@ -649,7 +648,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
-  /// Note that this includes entering and leaving the target.
+  /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
@@ -729,7 +728,6 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.builder != null);
     return MetaData(
       metaData: this,
       behavior: widget.hitTestBehavior,
@@ -758,12 +756,7 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
     required this.ignoringFeedbackPointer,
-  }) : assert(overlayState != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(dragStartPoint != null),
-       assert(feedbackOffset != null),
-       _position = initialPosition {
+  }) : _position = initialPosition {
     _entry = OverlayEntry(builder: _build);
     overlayState.insert(_entry!);
     updateDrag(initialPosition);
