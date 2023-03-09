@@ -448,17 +448,22 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   };
   final String? localEngine = localEngineFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+  bool addEnableImpeller() {
+    return !options.contains('--enable-impeller')
+           && deviceOperatingSystem == DeviceOperatingSystem.ios
+           && (command == 'drive' || command == 'run');
+  }
+
   return <String>[
     command,
-    if (!command.contains('--enable-impeller')
-        && deviceOperatingSystem == DeviceOperatingSystem.ios)
-      '--enable-impeller',
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
       ...<String>[
         '--device-timeout',
         '5',
       ],
-
+    if (addEnableImpeller())
+      '--enable-impeller',
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
       hostAgent.dumpDirectory!.path,
