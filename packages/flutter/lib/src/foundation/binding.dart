@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window; // ignore: deprecated_member_use
 
 // Before adding any more dart:ui imports, please read the README.
 
@@ -21,7 +21,7 @@ import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
 
-export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
 
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
