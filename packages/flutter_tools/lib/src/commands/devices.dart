@@ -62,7 +62,7 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
-    final List<Device> devices = await globals.deviceManager?.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
+    final List<Device> devices = await globals.deviceManager?.refreshAllDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
 
     if (boolArgDeprecated('machine')) {
       await printDevicesAsJson(devices);

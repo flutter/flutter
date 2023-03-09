@@ -24,7 +24,10 @@ void main() {
     while (getStatus(tester) == 'ok') {
       step++;
       print('>> Tapping for step $step...');
-      await tester.tap(stepButton);
+      // TODO(goderbauer): Setting the pointer ID to something large to avoid
+      //   that the test events clash with ghost events from the device to
+      //   further investigate https://github.com/flutter/flutter/issues/116663.
+      await tester.tap(stepButton, pointer: 500 + step);
       await tester.pump();
       expect(statusField, findsNothing);
 

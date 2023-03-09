@@ -333,10 +333,10 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * hovered - 3
   ///   * focused or pressed - 1
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - horizontal(16)
-  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///   * `textScaleFactor <= 1` - horizontal(24)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(24), horizontal(12))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(12), horizontal(6))
+  ///   * `3 < textScaleFactor` - horizontal(6)
   /// * `minimumSize` - Size(64, 40)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
@@ -351,6 +351,10 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [ElevatedButton.icon] factory, the start (generally the left) value of
+  /// [padding] is reduced from 24 to 16.
+
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -390,10 +394,12 @@ class ElevatedButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  final bool useMaterial3 = Theme.of(context).useMaterial3;
+  final double padding1x = useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
-    const EdgeInsets.symmetric(horizontal: 16),
-    const EdgeInsets.symmetric(horizontal: 8),
-    const EdgeInsets.symmetric(horizontal: 4),
+     EdgeInsets.symmetric(horizontal: padding1x),
+     EdgeInsets.symmetric(horizontal: padding1x / 2),
+     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
     MediaQuery.textScaleFactorOf(context),
   );
 }
@@ -494,7 +500,13 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final EdgeInsetsGeometry scaledPadding = useMaterial3 ?  ButtonStyleButton.scaledPadding(
+      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+      MediaQuery.textScaleFactorOf(context),
+    ) : ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),

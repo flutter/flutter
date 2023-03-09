@@ -1397,7 +1397,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, unorderedEquals(directories));
         });
 
-        test('can add multiple directories seperately', () async {
+        test('can add multiple directories separately', () async {
           service.addPubRootDirectories(<String>[directoryA]);
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
@@ -1439,7 +1439,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('removes multiple directories seperately', () async {
+        test('removes multiple directories separately', () async {
           service.removePubRootDirectories(<String>[directoryA]);
           service.removePubRootDirectories(<String>[directoryB]);
           service.removePubRootDirectories(<String>[]);
@@ -1595,7 +1595,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
 
           testWidgets(
-            'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
+            'does not have createdByLocalProject when thePubRootDirectory has a different suffix',
             (WidgetTester tester) async {
               const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,

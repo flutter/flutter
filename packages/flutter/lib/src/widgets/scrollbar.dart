@@ -396,7 +396,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _thumbRect;
   // The current scroll position + _leadingThumbMainAxisOffset
   late double _thumbOffset;
-  // The fraction visible in relation to the trversable length of the track.
+  // The fraction visible in relation to the traversable length of the track.
   late double _thumbExtent;
   // Thumb Offsets
   // The thumb is offset by padding and margins.
@@ -1676,29 +1676,41 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _updateScrollPosition(Offset updatedOffset) {
     assert(_cachedController != null);
     assert(_startDragScrollbarAxisOffset != null);
+    assert(_lastDragUpdateOffset != null);
     assert(_startDragThumbOffset != null);
 
     final ScrollPosition position = _cachedController!.position;
-    late double primaryDelta;
+    late double primaryDeltaFromDragStart;
+    late double primaryDeltaFromLastDragUpdate;
     switch (position.axisDirection) {
       case AxisDirection.up:
-        primaryDelta = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - updatedOffset.dy;
         break;
       case AxisDirection.right:
-        primaryDelta = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
+        primaryDeltaFromDragStart = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
+        primaryDeltaFromLastDragUpdate = updatedOffset.dx -_lastDragUpdateOffset!.dx;
         break;
       case AxisDirection.down:
-        primaryDelta = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
+        primaryDeltaFromDragStart = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
+        primaryDeltaFromLastDragUpdate = updatedOffset.dy -_lastDragUpdateOffset!.dy;
         break;
       case AxisDirection.left:
-        primaryDelta = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - updatedOffset.dx;
         break;
     }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time when drag started, into the coordinate space of the scroll
+    // time when drag started or last updated, into the coordinate space of the scroll
     // position, and jump to that position.
-    final double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDelta + _startDragThumbOffset!);
+    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!);
+    if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
+        || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
+      // Adjust the position value if the scrolling direction conflicts with
+      // the dragging direction due to scroll metrics shrink.
+      scrollOffsetGlobal = position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate);
+    }
     if (scrollOffsetGlobal != position.pixels) {
       // Ensure we don't drag into overscroll if the physics do not allow it.
       final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
@@ -1772,6 +1784,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
     _startDragScrollbarAxisOffset = localPosition;
+    _lastDragUpdateOffset = localPosition;
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
     _thumbDragging = true;
   }
@@ -1786,7 +1799,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (_lastDragUpdateOffset == localPosition) {
       return;
     }
-    _lastDragUpdateOffset = localPosition;
     final ScrollPosition position = _cachedController!.position;
     if (!position.physics.shouldAcceptUserOffset(position)) {
       return;
@@ -1796,6 +1808,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
     _updateScrollPosition(localPosition);
+    _lastDragUpdateOffset = localPosition;
   }
 
   /// Handler called when a long press has ended.
@@ -1825,46 +1838,31 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    double scrollIncrement;
-    // Is an increment calculator available?
-    final ScrollIncrementCalculator? calculator = Scrollable.maybeOf(
-      _cachedController!.position.context.notificationContext!,
-    )?.widget.incrementCalculator;
-    if (calculator != null) {
-      scrollIncrement = calculator(
-        ScrollIncrementDetails(
-          type: ScrollIncrementType.page,
-          metrics: _cachedController!.position,
-        ),
-      );
-    } else {
-      // Default page increment
-      scrollIncrement = 0.8 * _cachedController!.position.viewportDimension;
-    }
+    // Determines the scroll direction.
+    final AxisDirection scrollDirection;
 
-    // Adjust scrollIncrement for direction
-    switch (_cachedController!.position.axisDirection) {
+    switch (position.axisDirection) {
       case AxisDirection.up:
-        if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
-        }
-        break;
       case AxisDirection.down:
-        if (details.localPosition.dy < scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
-        }
-        break;
-      case AxisDirection.right:
-        if (details.localPosition.dx < scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
+        if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
+          scrollDirection = AxisDirection.down;
+        } else {
+          scrollDirection = AxisDirection.up;
         }
         break;
       case AxisDirection.left:
+      case AxisDirection.right:
         if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
-          scrollIncrement = -scrollIncrement;
+          scrollDirection = AxisDirection.right;
+        } else {
+          scrollDirection = AxisDirection.left;
         }
-        break;
     }
+
+    final ScrollableState? state = Scrollable.maybeOf(position.context.notificationContext!);
+    final ScrollIntent intent = ScrollIntent(direction: scrollDirection, type: ScrollIncrementType.page);
+    assert(state != null);
+    final double scrollIncrement = ScrollAction.getDirectionalIncrement(state!, intent);
 
     _cachedController!.position.moveTo(
       _cachedController!.position.pixels + scrollIncrement,

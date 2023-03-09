@@ -194,8 +194,8 @@ class HSVColor {
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -377,8 +377,8 @@ class HSLColor {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -479,13 +479,12 @@ class ColorSwatch<T> extends Color {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static ColorSwatch<T>? lerp<T>(ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     final Map<T, Color> swatch;
     if (b == null) {
-      if (a == null) {
-        return null;
-      } else {
-        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
-      }
+      swatch = a!._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
     } else {
       if (a == null) {
         swatch = b._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));

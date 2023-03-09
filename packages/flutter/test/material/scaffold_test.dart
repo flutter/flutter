@@ -601,7 +601,7 @@ void main() {
   });
 
   testWidgets('Persistent bottom buttons alignment', (WidgetTester tester) async {
-    Widget buildApp(AlignmentDirectional persistentAligment) {
+    Widget buildApp(AlignmentDirectional persistentAlignment) {
       return MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(
@@ -611,7 +611,7 @@ void main() {
                 child: const Text('body'),
               ),
             ),
-            persistentFooterAlignment: persistentAligment,
+            persistentFooterAlignment: persistentAlignment,
             persistentFooterButtons: <Widget>[
               TextButton(
                 onPressed: () { },
@@ -769,7 +769,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
     testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
-      await expectBackIcon(tester, Icons.arrow_back_ios);
+      await expectBackIcon(tester, kIsWeb ? Icons.arrow_back : Icons.arrow_back_ios);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
@@ -1908,7 +1908,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, false);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets('Drawer does not open with a drag gesture on dekstop', (WidgetTester tester) async {
+  testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2454,7 +2454,7 @@ void main() {
       '     MediaQuery\n'
       '     _MediaQueryFromView\n'
       '     _ViewScope\n'
-      '     View-[GlobalObjectKey TestWindow#e6136]\n'
+      '     View-[GlobalObjectKey TestFlutterView#e6136]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n',

@@ -157,7 +157,7 @@ void main() {
           expect(_containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
         });
 
-        testWithoutContext('Info.plist dart observatory Bonjour service', () {
+        testWithoutContext('Info.plist dart VM Service Bonjour service', () {
           final String infoPlistPath = fileSystem.path.join(
             outputApp.path,
             'Info.plist',
@@ -173,7 +173,7 @@ void main() {
               infoPlistPath,
             ],
           );
-          final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartobservatory._tcp');
+          final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartVmService._tcp');
           expect(bonjourServicesFound, buildMode == BuildMode.debug);
 
           final ProcessResult localNetworkUsage = processManager.runSync(

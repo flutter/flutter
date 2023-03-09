@@ -189,7 +189,7 @@ void main() {
           ),
         );
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
+        // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierinfo);
 
         // Move the gesture to one that should hide it.
@@ -228,7 +228,7 @@ void main() {
           ),
         );
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
+        // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.

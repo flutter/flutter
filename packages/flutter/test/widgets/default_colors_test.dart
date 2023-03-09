@@ -98,7 +98,7 @@ void main() {
       find.byType(Align),
       <Color>{ const Color(0xFFFFFFFF) },
     );
-    // fake a "select all" event to selecte the text
+    // fake a "select all" event to select the text
     Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
     await tester.pump();
     await _expectColors(

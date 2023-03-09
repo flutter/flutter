@@ -27,6 +27,7 @@ void main() {
   test('BottomSheetThemeData null fields by default', () {
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData();
     expect(bottomSheetTheme.backgroundColor, null);
+    expect(bottomSheetTheme.shadowColor, null);
     expect(bottomSheetTheme.elevation, null);
     expect(bottomSheetTheme.shape, null);
     expect(bottomSheetTheme.clipBehavior, null);
@@ -50,6 +51,7 @@ void main() {
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       elevation: 2.0,
+      shadowColor: Color(0xFF00FFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       clipBehavior: Clip.antiAlias,
       constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
@@ -63,6 +65,7 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
       'elevation: 2.0',
+      'shadowColor: Color(0xff00ffff)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
@@ -122,6 +125,7 @@ void main() {
 
   testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
+    const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
@@ -133,6 +137,7 @@ void main() {
       home: Scaffold(
         body: BottomSheet(
           backgroundColor: backgroundColor,
+          shadowColor: shadowColor,
           elevation: elevation,
           shape: shape,
           clipBehavior: Clip.hardEdge,
@@ -151,6 +156,7 @@ void main() {
       ),
     );
     expect(material.color, backgroundColor);
+    expect(material.shadowColor, shadowColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(material.clipBehavior, clipBehavior);
@@ -240,18 +246,22 @@ void main() {
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;
     const Color darkBackgroundColor = Colors.grey;
+    const Color lightShadowColor = Colors.blue;
+    const Color darkShadowColor = Colors.purple;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.light().copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: lightElevation,
           backgroundColor: lightBackgroundColor,
+          shadowColor: lightShadowColor,
         ),
       ),
       darkTheme: ThemeData.dark().copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: darkElevation,
           backgroundColor: darkBackgroundColor,
+          shadowColor: darkShadowColor,
         ),
       ),
       home: Scaffold(
@@ -287,6 +297,7 @@ void main() {
     );
     expect(lightMaterial.elevation, lightElevation);
     expect(lightMaterial.color, lightBackgroundColor);
+    expect(lightMaterial.shadowColor, lightShadowColor);
 
     // Simulate the user changing to dark theme
     tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
@@ -300,6 +311,7 @@ void main() {
     );
     expect(darkMaterial.elevation, darkElevation);
     expect(darkMaterial.color, darkBackgroundColor);
+    expect(darkMaterial.shadowColor, darkShadowColor);
   });
 }
 

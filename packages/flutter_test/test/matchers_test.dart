@@ -737,7 +737,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -789,13 +788,13 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 
   group('containsSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -889,6 +888,7 @@ void main() {
         )),
         reason: 'onTapHint "scans" should not have matched "scan".',
       );
+      handle.dispose();
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
@@ -1233,7 +1233,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -1283,6 +1282,7 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 

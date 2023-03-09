@@ -155,10 +155,10 @@ void testWidgets(
       () {
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
+        tester._recordNumberOfSemanticsHandles();
         if (semanticsEnabled == true) {
           semanticsHandle = tester.ensureSemantics();
         }
-        tester._recordNumberOfSemanticsHandles();
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
@@ -1044,17 +1044,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
-    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles!) {
+    // TODO(goderbauer): Fix known leak in web engine when running integration tests and remove this "correction", https://github.com/flutter/flutter/issues/121640.
+    final int knownWebEngineLeakForLiveTestsCorrection = kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 2 : 0;
+
+    if (_currentSemanticsHandles - knownWebEngineLeakForLiveTestsCorrection > _lastRecordedSemanticsHandles!) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A SemanticsHandle was active at the end of the test.'),
         ErrorDescription(
           'All SemanticsHandle instances must be disposed by calling dispose() on '
           'the SemanticsHandle.'
-        ),
-        ErrorHint(
-          'If your test uses SemanticsTester, it is '
-          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-          'existing handle will leak into another test and alter its behavior.'
         ),
       ]);
     }
@@ -1063,8 +1061,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   int? _lastRecordedSemanticsHandles;
 
+  int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
+
   void _recordNumberOfSemanticsHandles() {
-    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
+    _lastRecordedSemanticsHandles = _currentSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.

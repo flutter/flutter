@@ -288,8 +288,8 @@ class BoxDecoration extends Decoration {
   ///    and which use [BoxDecoration.lerp] when interpolating two
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration? lerp(BoxDecoration? a, BoxDecoration? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);

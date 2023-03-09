@@ -596,9 +596,8 @@ void main() {
           case MaterialType.material3:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(144, 129)));
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(298.0, 143.0)));
-            expect(tester.getBottomRight(find.text(okString)).dx, 638);
             expect(tester.getBottomLeft(find.text(okString)).dx, 610);
-            expect(tester.getBottomRight(find.text(cancelString)).dx, 576);
+            expect(tester.getBottomRight(find.text(cancelString)).dx, 572);
             break;
         }
 
@@ -622,7 +621,7 @@ void main() {
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(656, 143)));
             expect(tester.getBottomLeft(find.text(okString)).dx, 162);
             expect(tester.getBottomRight(find.text(okString)).dx, 190);
-            expect(tester.getBottomLeft(find.text(cancelString)).dx, 224);
+            expect(tester.getBottomLeft(find.text(cancelString)).dx, 228);
             break;
         }
 

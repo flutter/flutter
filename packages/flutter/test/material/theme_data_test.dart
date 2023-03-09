@@ -757,6 +757,7 @@ void main() {
       textTheme: ThemeData.dark().textTheme,
       typography: Typography.material2018(),
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
@@ -874,6 +875,7 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
 
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
@@ -977,6 +979,7 @@ void main() {
       typography: otherTheme.typography,
 
       // COMPONENT THEMES
+      actionIconTheme: otherTheme.actionIconTheme,
       appBarTheme: otherTheme.appBarTheme,
       badgeTheme: otherTheme.badgeTheme,
       bannerTheme: otherTheme.bannerTheme,
@@ -1077,6 +1080,7 @@ void main() {
     expect(themeDataCopy.typography, equals(otherTheme.typography));
 
     // COMPONENT THEMES
+    expect(themeDataCopy.actionIconTheme, equals(otherTheme.actionIconTheme));
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
     expect(themeDataCopy.badgeTheme, equals(otherTheme.badgeTheme));
     expect(themeDataCopy.bannerTheme, equals(otherTheme.bannerTheme));
@@ -1211,6 +1215,7 @@ void main() {
       'iconTheme',
       'primaryIconTheme',
       // COMPONENT THEMES
+      'actionIconTheme',
       'appBarTheme',
       'badgeTheme',
       'bannerTheme',

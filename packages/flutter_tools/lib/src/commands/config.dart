@@ -101,6 +101,16 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.isNotEmpty) {
+      throwToolExit(exitCode: 2,
+          'error: flutter config: Too many arguments.\n'
+          '\n'
+          'If a value has a space in it, enclose in quotes on the command line\n'
+          'to make a single argument.  For example:\n'
+          '    flutter config --android-studio-dir "/opt/Android Studio"');
+    }
+
     if (boolArgDeprecated('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();

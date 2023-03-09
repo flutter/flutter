@@ -346,7 +346,7 @@ class AttributedString {
   }
 
   @override
-  int get hashCode => Object.hash(string, attributes,);
+  int get hashCode => Object.hash(string, attributes);
 
   @override
   String toString() {
@@ -3129,9 +3129,9 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
-/// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
-/// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
-/// necessary.
+/// To listen for semantic updates, call [SemanticsBinding.ensureSemantics] or
+/// [PipelineOwner.ensureSemantics] to obtain a [SemanticsHandle]. This will
+/// create a [SemanticsOwner] if necessary.
 class SemanticsOwner extends ChangeNotifier {
   /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({
@@ -3248,7 +3248,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
 
     // Default actions if no [handler] was provided.
-    if (action == SemanticsAction.showOnScreen && _nodes[id]!._showOnScreen != null) {
+    if (action == SemanticsAction.showOnScreen && _nodes[id]?._showOnScreen != null) {
       _nodes[id]!._showOnScreen!();
     }
   }
@@ -3805,7 +3805,8 @@ class SemanticsConfiguration {
   /// which of them should be merged upwards into the parent SemanticsNode.
   ///
   /// The input list of [SemanticsConfiguration]s can be empty if the rendering
-  /// object of this semantics configuration is a leaf node.
+  /// object of this semantics configuration is a leaf node or child rendering
+  /// objects do not contribute to the semantics.
   ChildSemanticsConfigurationsDelegate? get childConfigurationsDelegate => _childConfigurationsDelegate;
   ChildSemanticsConfigurationsDelegate? _childConfigurationsDelegate;
   set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {

@@ -1531,7 +1531,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,
@@ -2523,6 +2523,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {

@@ -2297,6 +2297,7 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {

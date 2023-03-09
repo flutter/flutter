@@ -50,7 +50,7 @@ void main() {
 
     testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await globals.deviceManager!.getAllConnectedDevices(),
+        await globals.deviceManager!.getAllDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
@@ -134,12 +134,14 @@ class _FakeDeviceManager extends DeviceManager {
   _FakeDeviceManager() : super(logger: testLogger);
 
   @override
-  Future<List<Device>> getAllConnectedDevices() =>
+  Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) =>
     Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
-    getAllConnectedDevices();
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) => getAllDevices(filter: filter);
 
   @override
   Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
@@ -154,11 +156,16 @@ class NoDevicesManager extends DeviceManager {
   NoDevicesManager() : super(logger: testLogger);
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => <Device>[];
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => <Device>[];
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
-    getAllConnectedDevices();
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) =>
+    getAllDevices();
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
