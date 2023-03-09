@@ -4,7 +4,7 @@
   "datePickerMinuteSemanticsLabelOne": "1분",
   "datePickerMinuteSemanticsLabelOther": "$minute분",
   "datePickerDateOrder": "ymd",
-  "datePickerDateTimeOrder": "date_dayPeriod_time",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "오전",
   "postMeridiemAbbreviation": "오후",
   "todayLabel": "오늘",
