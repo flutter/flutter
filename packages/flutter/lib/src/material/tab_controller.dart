@@ -107,14 +107,14 @@ class TabController extends ChangeNotifier {
     required this.length,
     required TickerProvider vsync,
   }) : assert(length >= 0),
-       assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
-       _index = initialIndex,
-       _previousIndex = initialIndex,
-       _animationDuration = animationDuration ?? kTabScrollDuration,
-       _animationController = AnimationController.unbounded(
-         value: initialIndex.toDouble(),
-         vsync: vsync,
-       );
+        assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
+        _index = initialIndex,
+        _previousIndex = initialIndex,
+        _animationDuration = animationDuration ?? kTabScrollDuration,
+        _animationController = AnimationController.unbounded(
+          value: initialIndex.toDouble(),
+          vsync: vsync,
+        );
 
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
@@ -125,9 +125,9 @@ class TabController extends ChangeNotifier {
     required Duration animationDuration,
     required this.length,
   }) : _index = index,
-       _previousIndex = previousIndex,
-       _animationController = animationController,
-       _animationDuration = animationDuration;
+        _previousIndex = previousIndex,
+        _animationController = animationController,
+        _animationDuration = animationDuration;
 
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
@@ -191,19 +191,23 @@ class TabController extends ChangeNotifier {
     _index = value;
     if (duration != null && duration > Duration.zero) {
       _indexIsChangingCount += 1;
+      _indexChangingDurations.add(duration);
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
-        .animateTo(_index.toDouble(), duration: duration, curve: curve!)
-        .whenCompleteOrCancel(() {
+          .animateTo(_index.toDouble(), duration: duration, curve: curve!)
+          .whenCompleteOrCancel(() {
           if (_animationController != null) { // don't notify if we've been disposed
-            _indexIsChangingCount -= 1;
-            notifyListeners();
-          }
-        });
+          _indexIsChangingCount -= 1;
+          _indexChangingDurations.removeLast();
+          notifyListeners();
+        }
+      });
     } else {
       _indexIsChangingCount += 1;
+      _indexChangingDurations.add(Duration.zero);
       _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
+      _indexChangingDurations.removeLast();
       notifyListeners();
     }
   }
@@ -237,6 +241,16 @@ class TabController extends ChangeNotifier {
   /// consequence of the user dragging (and "flinging") the [TabBarView].
   bool get indexIsChanging => _indexIsChangingCount != 0;
   int _indexIsChangingCount = 0;
+
+  /// The Duration used to animate [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is set during the [animateTo] animation that's triggered when
+  /// the user taps a [TabBar] tab. It is null when [offset] is changing as a
+  /// consequence of the user dragging (and "flinging") the [TabBarView].
+  Duration? get indexChangingDuration =>
+      _indexChangingDurations.isNotEmpty ? _indexChangingDurations.last : null;
+  final List<Duration> _indexChangingDurations = <Duration>[];
 
   /// Immediately sets [index] and [previousIndex] and then plays the
   /// [animation] from its current value to [index].
@@ -351,7 +365,7 @@ class DefaultTabController extends StatefulWidget {
     required this.child,
     this.animationDuration,
   }) : assert(length >= 0),
-       assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
+        assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
 
   /// The total number of tabs.
   ///

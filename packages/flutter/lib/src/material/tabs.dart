@@ -1635,7 +1635,7 @@ class _TabBarViewState extends State<TabBarView> {
       return Future<void>.value();
     }
 
-    final Duration duration = _controller!.animationDuration;
+    final Duration duration = _controller!.indexChangingDuration ?? _controller!.animationDuration;
     final int previousIndex = _controller!.previousIndex;
 
     if ((_currentIndex! - previousIndex).abs() == 1) {
