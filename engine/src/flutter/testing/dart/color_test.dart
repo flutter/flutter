@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:litetest/litetest.dart';
 
 class NotAColor extends Color {
-  const NotAColor(int value) : super(value);
+  const NotAColor(super.value);
 }
 
 void main() {

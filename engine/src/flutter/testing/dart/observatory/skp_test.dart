@@ -25,7 +25,7 @@ void main() {
     );
 
     final Completer<void> completer = Completer<void>();
-    window.onBeginFrame = (Duration timeStamp) {
+    PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) {
       final PictureRecorder recorder = PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
@@ -35,14 +35,11 @@ void main() {
       builder.addPicture(Offset.zero, picture);
       final Scene scene = builder.build();
 
-      window.render(scene);
+      PlatformDispatcher.instance.implicitView!.render(scene);
       scene.dispose();
-      // window.onBeginFrame = (Duration timeStamp) {
-        completer.complete();
-      // };
-      // window.scheduleFrame();
+      completer.complete();
     };
-    window.scheduleFrame();
+    PlatformDispatcher.instance.scheduleFrame();
     await completer.future;
 
     final vms.Response response = await vmService.callServiceExtension('_flutter.screenshotSkp');
