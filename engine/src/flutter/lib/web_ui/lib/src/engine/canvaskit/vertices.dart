@@ -62,11 +62,16 @@ class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
           '"indices" values must be valid indices in the positions list.');
     }
 
+    Uint32List? unsignedColors;
+    if (colors != null) {
+      unsignedColors = colors.buffer.asUint32List(colors.offsetInBytes, colors.length);
+    }
+
     return CkVertices._(
       toSkVertexMode(mode),
       positions,
       textureCoordinates,
-      colors?.buffer.asUint32List(),
+      unsignedColors,
       indices,
     );
   }

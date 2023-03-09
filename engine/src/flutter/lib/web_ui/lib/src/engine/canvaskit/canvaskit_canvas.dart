@@ -389,8 +389,13 @@ class CanvasKitCanvas implements ui.Canvas {
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
     }
 
+    Uint32List? unsignedColors;
+    if (colors != null) {
+      unsignedColors = colors.buffer.asUint32List(colors.offsetInBytes, colors.length);
+    }
+
     _drawAtlas(paint, atlas, rstTransforms, rects,
-        colors?.buffer.asUint32List(), blendMode ?? ui.BlendMode.src);
+        unsignedColors, blendMode ?? ui.BlendMode.src);
   }
 
   // TODO(hterkelsen): Pass a cull_rect once CanvasKit supports that.
