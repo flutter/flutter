@@ -82,6 +82,16 @@ struct TSize {
     };
   }
 
+  constexpr TSize Floor() const {
+    return {std::floor(width), std::floor(height)};
+  }
+
+  constexpr TSize Ceil() const { return {std::ceil(width), std::ceil(height)}; }
+
+  constexpr TSize Round() const {
+    return {std::round(width), std::round(height)};
+  }
+
   constexpr Type Area() const { return width * height; }
 
   constexpr bool IsPositive() const { return width > 0 && height > 0; }

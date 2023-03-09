@@ -351,15 +351,13 @@ std::optional<std::pair<Point, Point>> Path::GetMinMaxCoveragePoints() const {
 
   auto clamp = [&min, &max](const Point& point) {
     if (min.has_value()) {
-      min->x = std::min(min->x, point.x);
-      min->y = std::min(min->y, point.y);
+      min = min->Min(point);
     } else {
       min = point;
     }
 
     if (max.has_value()) {
-      max->x = std::max(max->x, point.x);
-      max->y = std::max(max->y, point.y);
+      max = max->Max(point);
     } else {
       max = point;
     }

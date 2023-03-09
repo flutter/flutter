@@ -214,8 +214,7 @@ bool Playground::OpenPlaygroundHere(
         if (!playground) {
           return;
         }
-        playground->SetWindowSize(
-            ISize{std::max(width, 0), std::max(height, 0)});
+        playground->SetWindowSize(ISize{width, height}.Max({}));
       });
   ::glfwSetKeyCallback(window, &PlaygroundKeyCallback);
   ::glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x,
