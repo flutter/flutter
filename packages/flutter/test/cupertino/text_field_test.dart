@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
@@ -5003,9 +4998,11 @@ void main() {
 
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       TextEditingController controller;
       EditableTextState state;
       Offset bottomLeftSelectionPosition;
@@ -5183,15 +5180,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -5253,15 +5249,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -5327,9 +5322,6 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for
