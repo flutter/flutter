@@ -1485,7 +1485,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           break;
         case TextDirection.ltr:
           if (helperError != null) {
-            baselineLayout(helperError!, left + _boxSize(icon).width);
+            baselineLayout(helperError!, left + _boxSize(icon).width - 12);
           }
           if (counter != null) {
             baselineLayout(counter!, right - counter!.size.width);
