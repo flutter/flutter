@@ -60,7 +60,7 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
-  bool get configOnly => boolArg('config-only') ?? false;
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
