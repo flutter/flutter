@@ -707,6 +707,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
         : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
+    if (easing && decelerationRate == ScrollDecelerationRate.fast) {
+      return direction * offset.abs();
+    }
     return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
