@@ -4553,7 +4553,7 @@ class Flex extends MultiChildRenderObjectWidget with FlexMixin {
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.textBaseline,
+    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     super.children,
   }): assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
@@ -5023,7 +5023,7 @@ class Row extends Flex {
 ///    use a [Column] inside a scrolling container.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Column extends Flex {
+class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMixin {
   /// Creates a vertical array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -5037,17 +5037,69 @@ class Column extends Flex {
   /// [crossAxisAlignment], the [textDirection] must not be null.
   const Column({
     super.key,
-    super.selectionSeparator,
-    super.mainAxisAlignment,
-    super.mainAxisSize,
-    super.crossAxisAlignment,
-    super.textDirection,
-    super.verticalDirection,
-    super.textBaseline,
-    super.children,
-  }) : super(
-    direction: Axis.vertical,
-  );
+    this.mainAxisAlignment = MainAxisAlignment.start,
+    this.mainAxisSize = MainAxisSize.max,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    this.textBaseline,
+    this.clipBehavior = Clip.none,
+    this.children = const <Widget>[],
+  });
+  
+  @override
+  Axis get direction => Axis.vertical;
+
+  @override
+  final MainAxisAlignment mainAxisAlignment;
+
+  @override
+  final MainAxisSize mainAxisSize;
+
+  @override
+  final CrossAxisAlignment crossAxisAlignment;
+
+  @override
+  final TextDirection? textDirection;
+
+  @override
+  final VerticalDirection verticalDirection;
+
+  @override
+  final TextBaseline? textBaseline;
+
+  @override
+  final Clip clipBehavior;
+  
+  @override
+  final List<Widget> children;
+  
+  @override
+  Widget build(BuildContext context) {
+    Widget result = Flex(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection,
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+      clipBehavior: clipBehavior,
+      children: children,
+    );
+
+    // Selection is only enabled when there is a parent registrar.
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    if (registrar != null) {
+      result = SelectionContainer(
+        registrar: registrar,
+        delegate: SelectableRegionContainerDelegate(selectionSeparator: '\n'),
+        child: result,
+      );
+    }
+
+    return result;
+  }
 }
 
 /// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
