@@ -699,7 +699,6 @@ targets:
 
   - name: Linux plugin_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true # New task
     timeout: 60
     properties:
       dependencies: >-
