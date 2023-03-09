@@ -37,13 +37,13 @@ AccessibilityBridge::~AccessibilityBridge() {
 }
 
 void AccessibilityBridge::AddFlutterSemanticsNodeUpdate(
-    const FlutterSemanticsNode* node) {
-  pending_semantics_node_updates_[node->id] = FromFlutterSemanticsNode(node);
+    const FlutterSemanticsNode& node) {
+  pending_semantics_node_updates_[node.id] = FromFlutterSemanticsNode(node);
 }
 
 void AccessibilityBridge::AddFlutterSemanticsCustomActionUpdate(
-    const FlutterSemanticsCustomAction* action) {
-  pending_semantics_custom_action_updates_[action->id] =
+    const FlutterSemanticsCustomAction& action) {
+  pending_semantics_custom_action_updates_[action.id] =
       FromFlutterSemanticsCustomAction(action);
 }
 
@@ -578,66 +578,66 @@ void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
 
 AccessibilityBridge::SemanticsNode
 AccessibilityBridge::FromFlutterSemanticsNode(
-    const FlutterSemanticsNode* flutter_node) {
+    const FlutterSemanticsNode& flutter_node) {
   SemanticsNode result;
-  result.id = flutter_node->id;
-  result.flags = flutter_node->flags;
-  result.actions = flutter_node->actions;
-  result.text_selection_base = flutter_node->text_selection_base;
-  result.text_selection_extent = flutter_node->text_selection_extent;
-  result.scroll_child_count = flutter_node->scroll_child_count;
-  result.scroll_index = flutter_node->scroll_index;
-  result.scroll_position = flutter_node->scroll_position;
-  result.scroll_extent_max = flutter_node->scroll_extent_max;
-  result.scroll_extent_min = flutter_node->scroll_extent_min;
-  result.elevation = flutter_node->elevation;
-  result.thickness = flutter_node->thickness;
-  if (flutter_node->label) {
-    result.label = std::string(flutter_node->label);
+  result.id = flutter_node.id;
+  result.flags = flutter_node.flags;
+  result.actions = flutter_node.actions;
+  result.text_selection_base = flutter_node.text_selection_base;
+  result.text_selection_extent = flutter_node.text_selection_extent;
+  result.scroll_child_count = flutter_node.scroll_child_count;
+  result.scroll_index = flutter_node.scroll_index;
+  result.scroll_position = flutter_node.scroll_position;
+  result.scroll_extent_max = flutter_node.scroll_extent_max;
+  result.scroll_extent_min = flutter_node.scroll_extent_min;
+  result.elevation = flutter_node.elevation;
+  result.thickness = flutter_node.thickness;
+  if (flutter_node.label) {
+    result.label = std::string(flutter_node.label);
   }
-  if (flutter_node->hint) {
-    result.hint = std::string(flutter_node->hint);
+  if (flutter_node.hint) {
+    result.hint = std::string(flutter_node.hint);
   }
-  if (flutter_node->value) {
-    result.value = std::string(flutter_node->value);
+  if (flutter_node.value) {
+    result.value = std::string(flutter_node.value);
   }
-  if (flutter_node->increased_value) {
-    result.increased_value = std::string(flutter_node->increased_value);
+  if (flutter_node.increased_value) {
+    result.increased_value = std::string(flutter_node.increased_value);
   }
-  if (flutter_node->decreased_value) {
-    result.decreased_value = std::string(flutter_node->decreased_value);
+  if (flutter_node.decreased_value) {
+    result.decreased_value = std::string(flutter_node.decreased_value);
   }
-  if (flutter_node->tooltip) {
-    result.tooltip = std::string(flutter_node->tooltip);
+  if (flutter_node.tooltip) {
+    result.tooltip = std::string(flutter_node.tooltip);
   }
-  result.text_direction = flutter_node->text_direction;
-  result.rect = flutter_node->rect;
-  result.transform = flutter_node->transform;
-  if (flutter_node->child_count > 0) {
+  result.text_direction = flutter_node.text_direction;
+  result.rect = flutter_node.rect;
+  result.transform = flutter_node.transform;
+  if (flutter_node.child_count > 0) {
     result.children_in_traversal_order = std::vector<int32_t>(
-        flutter_node->children_in_traversal_order,
-        flutter_node->children_in_traversal_order + flutter_node->child_count);
+        flutter_node.children_in_traversal_order,
+        flutter_node.children_in_traversal_order + flutter_node.child_count);
   }
-  if (flutter_node->custom_accessibility_actions_count > 0) {
+  if (flutter_node.custom_accessibility_actions_count > 0) {
     result.custom_accessibility_actions = std::vector<int32_t>(
-        flutter_node->custom_accessibility_actions,
-        flutter_node->custom_accessibility_actions +
-            flutter_node->custom_accessibility_actions_count);
+        flutter_node.custom_accessibility_actions,
+        flutter_node.custom_accessibility_actions +
+            flutter_node.custom_accessibility_actions_count);
   }
   return result;
 }
 
 AccessibilityBridge::SemanticsCustomAction
 AccessibilityBridge::FromFlutterSemanticsCustomAction(
-    const FlutterSemanticsCustomAction* flutter_custom_action) {
+    const FlutterSemanticsCustomAction& flutter_custom_action) {
   SemanticsCustomAction result;
-  result.id = flutter_custom_action->id;
-  result.override_action = flutter_custom_action->override_action;
-  if (flutter_custom_action->label) {
-    result.label = std::string(flutter_custom_action->label);
+  result.id = flutter_custom_action.id;
+  result.override_action = flutter_custom_action.override_action;
+  if (flutter_custom_action.label) {
+    result.label = std::string(flutter_custom_action.label);
   }
-  if (flutter_custom_action->hint) {
-    result.hint = std::string(flutter_custom_action->hint);
+  if (flutter_custom_action.hint) {
+    result.hint = std::string(flutter_custom_action.hint);
   }
   return result;
 }

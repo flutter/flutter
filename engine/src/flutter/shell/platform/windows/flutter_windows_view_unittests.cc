@@ -162,7 +162,7 @@ TEST(FlutterWindowsView, AddSemanticsNodeUpdate) {
   node.label = "name";
   node.value = "value";
   node.platform_view_id = -1;
-  bridge->AddFlutterSemanticsNodeUpdate(&node);
+  bridge->AddFlutterSemanticsNodeUpdate(node);
   bridge->CommitUpdates();
 
   // Look up the root windows node delegate.
@@ -275,10 +275,10 @@ TEST(FlutterWindowsView, AddSemanticsNodeUpdateWithChildren) {
   node3.label = "city";
   node3.value = "Uji";
 
-  bridge->AddFlutterSemanticsNodeUpdate(&node0);
-  bridge->AddFlutterSemanticsNodeUpdate(&node1);
-  bridge->AddFlutterSemanticsNodeUpdate(&node2);
-  bridge->AddFlutterSemanticsNodeUpdate(&node3);
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->AddFlutterSemanticsNodeUpdate(node3);
   bridge->CommitUpdates();
 
   // Look up the root windows node delegate.
@@ -465,8 +465,8 @@ TEST(FlutterWindowsView, NonZeroSemanticsRoot) {
   node2.label = "prefecture";
   node2.value = "Kyoto";
 
-  bridge->AddFlutterSemanticsNodeUpdate(&node1);
-  bridge->AddFlutterSemanticsNodeUpdate(&node2);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
   bridge->CommitUpdates();
 
   // Look up the root windows node delegate.
@@ -618,10 +618,10 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   node3.label = "city";
   node3.value = "Uji";
 
-  bridge->AddFlutterSemanticsNodeUpdate(&node0);
-  bridge->AddFlutterSemanticsNodeUpdate(&node1);
-  bridge->AddFlutterSemanticsNodeUpdate(&node2);
-  bridge->AddFlutterSemanticsNodeUpdate(&node3);
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->AddFlutterSemanticsNodeUpdate(node3);
   bridge->CommitUpdates();
 
   // Look up the root windows node delegate.
@@ -743,7 +743,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -782,7 +782,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   // Test unchecked too.
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
   {
@@ -821,7 +821,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsCheckStateMixed);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
   {
@@ -889,7 +889,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsToggled);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -938,7 +938,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   // Test unpressed too.
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
   {
@@ -1006,7 +1006,7 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
   root.custom_accessibility_actions_count = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField);
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
   auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();

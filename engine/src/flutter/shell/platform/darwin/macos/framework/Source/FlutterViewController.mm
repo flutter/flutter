@@ -479,13 +479,11 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     return;
   }
   for (size_t i = 0; i < update->nodes_count; i++) {
-    const FlutterSemanticsNode* node = &update->nodes[i];
-    _bridge->AddFlutterSemanticsNodeUpdate(node);
+    _bridge->AddFlutterSemanticsNodeUpdate(update->nodes[i]);
   }
 
   for (size_t i = 0; i < update->custom_actions_count; i++) {
-    const FlutterSemanticsCustomAction* action = &update->custom_actions[i];
-    _bridge->AddFlutterSemanticsCustomActionUpdate(action);
+    _bridge->AddFlutterSemanticsCustomActionUpdate(update->custom_actions[i]);
   }
 
   _bridge->CommitUpdates();
