@@ -25,12 +25,16 @@
 // - Function signatures (names, argument counts, argument order, and argument
 //   type) cannot change.
 // - The core behavior of existing functions cannot change.
+// - Instead of nesting structures by value within another structure, prefer
+//   nesting by pointer. This ensures that adding members to the nested struct
+//   does not break the ABI of the parent struct.
 // - Instead of array of structures, prefer array of pointers to structures.
 //   This ensures that array indexing does not break if members are added
 //   to the structure.
 //
 // These changes are allowed:
-// - Adding new struct members at the end of a structure.
+// - Adding new struct members at the end of a structure as long as the struct
+//   is not nested within another struct by value.
 // - Adding new enum members with a new value.
 // - Renaming a struct member as long as its type, size, and intent remain the
 //   same.

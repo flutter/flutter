@@ -14,6 +14,47 @@ namespace testing {
 #define ASSERT_EQ_OFFSET(type1, type2, member) \
   ASSERT_EQ(offsetof(type1, member), offsetof(type2, member))
 
+// New members must not be added to `FlutterTransformation`
+// as it would break the ABI of `FlutterSemanticsNode`.
+// See: https://github.com/flutter/flutter/issues/121176
+TEST(EmbedderFrozen, FlutterTransformationIsFrozen) {
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, scaleX);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, skewX);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, transX);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, skewY);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, scaleY);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, transY);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, pers0);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, pers1);
+  ASSERT_EQ_OFFSET(FlutterTransformation, FrozenFlutterTransformation, pers2);
+}
+
+// New members must not be added to `FlutterRect` as it would
+// break the ABI of `FlutterSemanticsNode` and `FlutterDamage`.
+// See: https://github.com/flutter/flutter/issues/121176
+// See: https://github.com/flutter/flutter/issues/121347
+TEST(EmbedderFrozen, FlutterRectIsFrozen) {
+  ASSERT_EQ_OFFSET(FlutterRect, FrozenFlutterRect, left);
+  ASSERT_EQ_OFFSET(FlutterRect, FrozenFlutterRect, top);
+  ASSERT_EQ_OFFSET(FlutterRect, FrozenFlutterRect, right);
+  ASSERT_EQ_OFFSET(FlutterRect, FrozenFlutterRect, bottom);
+}
+
+// New members must not be added to `FlutterPoint` as it would
+// break the ABI of `FlutterLayer`.
+TEST(EmbedderFrozen, FlutterPointIsFrozen) {
+  ASSERT_EQ_OFFSET(FlutterPoint, FrozenFlutterPoint, x);
+  ASSERT_EQ_OFFSET(FlutterPoint, FrozenFlutterPoint, y);
+}
+
+// New members must not be added to `FlutterDamage` as it would
+// break the ABI of `FlutterPresentInfo`.
+TEST(EmbedderFrozen, FlutterDamageIsFrozen) {
+  ASSERT_EQ_OFFSET(FlutterDamage, FrozenFlutterDamage, struct_size);
+  ASSERT_EQ_OFFSET(FlutterDamage, FrozenFlutterDamage, num_rects);
+  ASSERT_EQ_OFFSET(FlutterDamage, FrozenFlutterDamage, damage);
+}
+
 // New members must not be added to `FlutterSemanticsNode`
 // as it would break the ABI of `FlutterSemanticsUpdate`.
 // See: https://github.com/flutter/flutter/issues/121176
