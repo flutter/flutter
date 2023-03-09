@@ -785,8 +785,6 @@ android {
       );
 
       expect(androidApk?.id, 'com.example.foo');
-    }, overrides: <Type, Generator>{
-      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
