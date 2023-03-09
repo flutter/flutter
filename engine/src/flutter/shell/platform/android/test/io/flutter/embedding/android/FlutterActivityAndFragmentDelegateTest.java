@@ -237,6 +237,47 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Expect IllegalStateException.
   }
 
+  // Bug: b/271100292
+  @Test
+  public void flutterEngineGroupGetsInitialRouteFromIntent() {
+    // ---- Test setup ----
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    Activity mockActivity = mock(Activity.class);
+    Intent mockIntent = mock(Intent.class);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+    FlutterEngineGroup flutterEngineGroup = mock(FlutterEngineGroup.class);
+    FlutterEngineGroupCache.getInstance().put("my_flutter_engine_group", flutterEngineGroup);
+
+    List<String> entryPointArgs = new ArrayList<>();
+    entryPointArgs.add("entrypoint-arg");
+
+    // Adjust fake host to request cached engine group.
+    when(mockHost.getInitialRoute()).thenReturn(null);
+    when(mockHost.getCachedEngineGroupId()).thenReturn("my_flutter_engine_group");
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
+    when(mockHost.getDartEntrypointArgs()).thenReturn(entryPointArgs);
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    when(mockHost.getActivity()).thenReturn(mockActivity);
+    when(mockActivity.getIntent()).thenReturn(mockIntent);
+    when(mockIntent.getData()).thenReturn(Uri.parse("foo://example.com/initial_route"));
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is obtained in onAttach().
+    delegate.onAttach(ctx);
+
+    DartExecutor.DartEntrypoint entrypoint = new DartExecutor.DartEntrypoint("/fake/path", "main");
+    ArgumentCaptor<FlutterEngineGroup.Options> optionsCaptor =
+        ArgumentCaptor.forClass(FlutterEngineGroup.Options.class);
+    verify(flutterEngineGroup, times(1)).createAndRunEngine(optionsCaptor.capture());
+    assertEquals("/initial_route", optionsCaptor.getValue().getInitialRoute());
+  }
+
   @Test
   public void itUsesNewEngineInGroupWhenProvided() {
     // ---- Test setup ----
