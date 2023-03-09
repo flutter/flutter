@@ -75,9 +75,8 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
                                  ? Glyph::Type::kBitmap
                                  : Glyph::Type::kPath;
 
-          text_run.AddGlyph(
-              Glyph{glyphs[i], type, ToRect(glyph_bounds[i])},
-              Point{std::round(point->x()), std::round(point->y())});
+          text_run.AddGlyph(Glyph{glyphs[i], type, ToRect(glyph_bounds[i])},
+                            Point{point->x(), point->y()}.Round());
         }
         break;
       }
