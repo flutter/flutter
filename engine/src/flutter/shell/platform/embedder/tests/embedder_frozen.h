@@ -22,6 +22,47 @@
 namespace flutter {
 namespace testing {
 
+// New members must not be added to `FlutterTransformation`
+// as it would break the ABI of `FlutterSemanticsNode`.
+// See: https://github.com/flutter/flutter/issues/121176
+typedef struct {
+  double scaleX;
+  double skewX;
+  double transX;
+  double skewY;
+  double scaleY;
+  double transY;
+  double pers0;
+  double pers1;
+  double pers2;
+} FrozenFlutterTransformation;
+
+// New members must not be added to `FlutterRect` as it would
+// break the ABI of `FlutterSemanticsNode` and `FlutterDamage`.
+// See: https://github.com/flutter/flutter/issues/121176
+// See: https://github.com/flutter/flutter/issues/121347
+typedef struct {
+  double left;
+  double top;
+  double right;
+  double bottom;
+} FrozenFlutterRect;
+
+// New members must not be added to `FlutterPoint` as it would
+// break the ABI of `FlutterLayer`.
+typedef struct {
+  double x;
+  double y;
+} FrozenFlutterPoint;
+
+// New members must not be added to `FlutterDamage` as it would
+// break the ABI of `FlutterPresentInfo`.
+typedef struct {
+  size_t struct_size;
+  size_t num_rects;
+  FrozenFlutterRect* damage;
+} FrozenFlutterDamage;
+
 // New members must not be added to `FlutterSemanticsNode`
 // as it would break the ABI of `FlutterSemanticsUpdate`.
 // See: https://github.com/flutter/flutter/issues/121176
@@ -45,8 +86,8 @@ typedef struct {
   const char* increased_value;
   const char* decreased_value;
   FlutterTextDirection text_direction;
-  FlutterRect rect;
-  FlutterTransformation transform;
+  FrozenFlutterRect rect;
+  FrozenFlutterTransformation transform;
   size_t child_count;
   const int32_t* children_in_traversal_order;
   const int32_t* children_in_hit_test_order;
