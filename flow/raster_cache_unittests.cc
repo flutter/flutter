@@ -449,7 +449,8 @@ TEST(RasterCache, DeviceRectRoundOutForDisplayList) {
 
   SkRect logical_rect = SkRect::MakeLTRB(28, 0, 354.56731, 310.288);
   DisplayListBuilder builder(logical_rect);
-  builder.DrawRect(logical_rect, DlPaint(DlColor::kRed()));
+  builder.setColor(SK_ColorRED);
+  builder.drawRect(logical_rect);
   sk_sp<DisplayList> display_list = builder.Build();
 
   SkMatrix ctm = SkMatrix::MakeAll(1.3312, 0, 233, 0, 1.3312, 206, 0, 0, 1);

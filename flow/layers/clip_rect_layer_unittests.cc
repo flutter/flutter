@@ -454,24 +454,25 @@ TEST_F(ClipRectLayerTest, OpacityInheritanceSaveLayerPainting) {
 
   DisplayListBuilder expected_builder;
   /* OpacityLayer::Paint() */ {
-    expected_builder.Save();
+    expected_builder.save();
     {
-      expected_builder.Translate(offset.fX, offset.fY);
+      expected_builder.translate(offset.fX, offset.fY);
       /* ClipRectLayer::Paint() */ {
-        expected_builder.Save();
-        expected_builder.ClipRect(clip_rect, ClipOp::kIntersect, true);
-        expected_builder.SaveLayer(&children_bounds,
-                                   &DlPaint().setAlpha(opacity_alpha));
+        expected_builder.save();
+        expected_builder.clipRect(clip_rect, ClipOp::kIntersect, true);
+        expected_builder.setColor(opacity_alpha << 24);
+        expected_builder.saveLayer(&children_bounds, true);
         /* child layer1 paint */ {
-          expected_builder.DrawPath(path1, DlPaint());
+          expected_builder.setColor(0xFF000000);
+          expected_builder.drawPath(path1);
         }
         /* child layer2 paint */ {  //
-          expected_builder.DrawPath(path2, DlPaint());
+          expected_builder.drawPath(path2);
         }
-        expected_builder.Restore();
+        expected_builder.restore();
       }
     }
-    expected_builder.Restore();
+    expected_builder.restore();
   }
 
   opacity_layer->Paint(display_list_paint_context());

@@ -20,7 +20,8 @@ class DlBlurMaskFilter;
 // An enumerated type for the supported MaskFilter operations.
 enum class DlMaskFilterType { kBlur };
 
-class DlMaskFilter : public DlAttribute<DlMaskFilter, DlMaskFilterType> {
+class DlMaskFilter
+    : public DlAttribute<DlMaskFilter, SkMaskFilter, DlMaskFilterType> {
  public:
   // Return a DlBlurMaskFilter pointer to this object iff it is a Blur
   // type of MaskFilter, otherwise return nullptr.
@@ -42,20 +43,15 @@ class DlBlurMaskFilter final : public DlMaskFilter {
       : DlBlurMaskFilter(filter->style_, filter->sigma_, filter->respect_ctm_) {
   }
 
-  static std::shared_ptr<DlMaskFilter> Make(SkBlurStyle style,
-                                            SkScalar sigma,
-                                            bool respect_ctm = true) {
-    if (SkScalarIsFinite(sigma) && sigma > 0) {
-      return std::make_shared<DlBlurMaskFilter>(style, sigma, respect_ctm);
-    }
-    return nullptr;
-  }
-
   DlMaskFilterType type() const override { return DlMaskFilterType::kBlur; }
   size_t size() const override { return sizeof(*this); }
 
   std::shared_ptr<DlMaskFilter> shared() const override {
     return std::make_shared<DlBlurMaskFilter>(this);
+  }
+
+  sk_sp<SkMaskFilter> skia_object() const override {
+    return SkMaskFilter::MakeBlur(style_, sigma_, respect_ctm_);
   }
 
   const DlBlurMaskFilter* asBlur() const override { return this; }

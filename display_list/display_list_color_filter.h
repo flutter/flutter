@@ -28,7 +28,8 @@ enum class DlColorFilterType {
   kLinearToSrgbGamma,
 };
 
-class DlColorFilter : public DlAttribute<DlColorFilter, DlColorFilterType> {
+class DlColorFilter
+    : public DlAttribute<DlColorFilter, SkColorFilter, DlColorFilterType> {
  public:
   // Return a boolean indicating whether the color filtering operation will
   // modify transparent black. This is typically used to determine if applying
@@ -67,16 +68,21 @@ class DlBlendColorFilter final : public DlColorFilter {
   DlBlendColorFilter(const DlBlendColorFilter* filter)
       : DlBlendColorFilter(filter->color_, filter->mode_) {}
 
-  static std::shared_ptr<DlColorFilter> Make(DlColor color, DlBlendMode mode);
-
   DlColorFilterType type() const override { return DlColorFilterType::kBlend; }
   size_t size() const override { return sizeof(*this); }
-
-  bool modifies_transparent_black() const override;
-  bool can_commute_with_opacity() const override;
+  bool modifies_transparent_black() const override {
+    // Look at blend and color to make a faster determination?
+    sk_sp<SkColorFilter> sk_filter = skia_object();
+    return sk_filter &&
+           sk_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
+  }
 
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlBlendColorFilter>(this);
+  }
+
+  sk_sp<SkColorFilter> skia_object() const override {
+    return SkColorFilters::Blend(color_, ToSk(mode_));
   }
 
   const DlBlendColorFilter* asBlend() const override { return this; }
@@ -108,10 +114,6 @@ class DlBlendColorFilter final : public DlColorFilter {
 //
 // The resulting color [oR,oG,oB,oA] is then clamped to the range of
 // valid pixel components before storing in the output.
-//
-// The incoming and outgoing [iR,iG,iB,iA] and [oR,oG,oB,oA] are
-// considered to be non-premultiplied. When working on premultiplied
-// pixel data, the necessary pre<->non-pre conversions must be performed.
 class DlMatrixColorFilter final : public DlColorFilter {
  public:
   DlMatrixColorFilter(const float matrix[20]) {
@@ -122,16 +124,28 @@ class DlMatrixColorFilter final : public DlColorFilter {
   DlMatrixColorFilter(const DlMatrixColorFilter* filter)
       : DlMatrixColorFilter(filter->matrix_) {}
 
-  static std::shared_ptr<DlColorFilter> Make(const float matrix[20]);
-
   DlColorFilterType type() const override { return DlColorFilterType::kMatrix; }
   size_t size() const override { return sizeof(*this); }
+  bool modifies_transparent_black() const override {
+    // Look at the matrix to make a faster determination?
+    // Basically, are the translation components all 0?
+    sk_sp<SkColorFilter> sk_filter = skia_object();
+    return sk_filter &&
+           sk_filter->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT;
+  }
 
-  bool modifies_transparent_black() const override;
-  bool can_commute_with_opacity() const override;
+  bool can_commute_with_opacity() const override {
+    return matrix_[3] == 0 && matrix_[8] == 0 && matrix_[13] == 0 &&
+           matrix_[15] == 0 && matrix_[16] == 0 && matrix_[17] == 0 &&
+           (matrix_[18] >= 0.0 && matrix_[18] <= 1.0) && matrix_[19] == 0;
+  }
 
   std::shared_ptr<DlColorFilter> shared() const override {
     return std::make_shared<DlMatrixColorFilter>(this);
+  }
+
+  sk_sp<SkColorFilter> skia_object() const override {
+    return SkColorFilters::Matrix(matrix_);
   }
 
   const DlMatrixColorFilter* asMatrix() const override { return this; }
@@ -172,6 +186,7 @@ class DlSrgbToLinearGammaColorFilter final : public DlColorFilter {
   bool can_commute_with_opacity() const override { return true; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
+  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
@@ -180,6 +195,7 @@ class DlSrgbToLinearGammaColorFilter final : public DlColorFilter {
   }
 
  private:
+  static const sk_sp<SkColorFilter> sk_filter_;
   friend class DlColorFilter;
 };
 
@@ -203,6 +219,7 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
   bool can_commute_with_opacity() const override { return true; }
 
   std::shared_ptr<DlColorFilter> shared() const override { return instance; }
+  sk_sp<SkColorFilter> skia_object() const override { return sk_filter_; }
 
  protected:
   bool equals_(const DlColorFilter& other) const override {
@@ -211,6 +228,7 @@ class DlLinearToSrgbGammaColorFilter final : public DlColorFilter {
   }
 
  private:
+  static const sk_sp<SkColorFilter> sk_filter_;
   friend class DlColorFilter;
 };
 
