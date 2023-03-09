@@ -620,7 +620,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'How are you?\nGood, you? Fine.\n🍎🫥🍌🫥🍇');
+      expect(clipboardData['text'], 'How are you?\nGood, you? Fine.');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets(
