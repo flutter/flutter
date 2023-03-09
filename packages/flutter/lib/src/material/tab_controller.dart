@@ -192,6 +192,7 @@ class TabController extends ChangeNotifier {
     if (duration != null && duration > Duration.zero) {
       _indexIsChangingCount += 1;
       _indexChangingDurations.add(duration);
+      _indexChangingCurves.add(curve!);
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
           .animateTo(_index.toDouble(), duration: duration, curve: curve!)
@@ -199,15 +200,18 @@ class TabController extends ChangeNotifier {
           if (_animationController != null) { // don't notify if we've been disposed
           _indexIsChangingCount -= 1;
           _indexChangingDurations.removeLast();
+          _indexChangingCurves.removeLast();
           notifyListeners();
         }
       });
     } else {
       _indexIsChangingCount += 1;
       _indexChangingDurations.add(Duration.zero);
+      _indexChangingCurves.add(Curves.ease);
       _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       _indexChangingDurations.removeLast();
+      _indexChangingCurves.removeLast();
       notifyListeners();
     }
   }
@@ -251,6 +255,16 @@ class TabController extends ChangeNotifier {
   Duration? get indexChangingDuration =>
       _indexChangingDurations.isNotEmpty ? _indexChangingDurations.last : null;
   final List<Duration> _indexChangingDurations = <Duration>[];
+
+  /// The Curve used to animate [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is set during the [animateTo] animation that's triggered when
+  /// the user taps a [TabBar] tab. It is null when [offset] is changing as a
+  /// consequence of the user dragging (and "flinging") the [TabBarView].
+  Curve? get indexChangingCurve =>
+      _indexChangingCurves.isNotEmpty ? _indexChangingCurves.last : null;
+  final List<Curve> _indexChangingCurves = <Curve>[];
 
   /// Immediately sets [index] and [previousIndex] and then plays the
   /// [animation] from its current value to [index].

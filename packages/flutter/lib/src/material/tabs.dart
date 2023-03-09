@@ -1636,6 +1636,7 @@ class _TabBarViewState extends State<TabBarView> {
     }
 
     final Duration duration = _controller!.indexChangingDuration ?? _controller!.animationDuration;
+    final Curve curve = _controller!.indexChangingCurve ?? Curves.ease;
     final int previousIndex = _controller!.previousIndex;
 
     if ((_currentIndex! - previousIndex).abs() == 1) {
@@ -1644,7 +1645,7 @@ class _TabBarViewState extends State<TabBarView> {
         return Future<void>.value();
       }
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: curve);
       _warpUnderwayCount -= 1;
 
       if (mounted && widget.children != _children) {
