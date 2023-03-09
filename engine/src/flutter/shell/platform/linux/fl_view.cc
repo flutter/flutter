@@ -667,7 +667,9 @@ static void fl_view_class_init(FlViewClass* klass) {
                                        fl_view_accessible_get_type());
 }
 
-static void fl_view_init(FlView* self) {}
+static void fl_view_init(FlView* self) {
+  gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
+}
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   return static_cast<FlView*>(
