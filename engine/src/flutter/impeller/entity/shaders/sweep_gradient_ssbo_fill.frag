@@ -23,7 +23,7 @@ uniform FragInfo {
   float scale;
   float tile_mode;
   float alpha;
-  float colors_length;
+  int colors_length;
 }
 frag_info;
 
