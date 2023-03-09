@@ -17,6 +17,7 @@ layout(binding = 0) buffer Polyline {
 polyline;
 
 layout(binding = 1) buffer VertexBuffer {
+  uint count;
   vec2 position[];
 }
 vertex_buffer;
@@ -39,6 +40,8 @@ void main() {
   if (ident >= polyline.count || ident == 0) {
     return;
   }
+
+  atomicAdd(vertex_buffer.count, 4);
 
   vec2 offset = compute_offset(ident);
   uint index = ident - 1;
