@@ -275,7 +275,6 @@
 ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unittest.cc
 ../../../flutter/shell/platform/fuchsia/flutter/build/asset_package.py
 ../../../flutter/shell/platform/fuchsia/flutter/build/gen_debug_wrapper_main.py
-../../../flutter/shell/platform/fuchsia/flutter/component_v1_unittest.cc
 ../../../flutter/shell/platform/fuchsia/flutter/component_v2_unittest.cc
 ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate_unittests.cc
 ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc

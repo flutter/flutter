@@ -1,3 +1,0 @@
-{
-    "runner": "fuchsia-pkg://fuchsia.com/flutter_aot_runner#meta/flutter_aot_runner.cmx"
-}
