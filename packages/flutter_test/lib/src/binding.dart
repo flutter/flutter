@@ -182,17 +182,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
 
   @override
-  TestWindow get window => _window;
-  final TestWindow _window;
+  late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -346,6 +347,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    // This is intialized here because it's needed for the `super.initInstances`
+    // call. It can't be handled as a ctor initializer because it's dependent
+    // on `platformDispatcher`. It can't be handled in the ctor itself because
+    // the base class ctor is called first and calls `initInstances`.
+    window = TestWindow.fromPlatformDispatcher(platformDispatcher: platformDispatcher);
+
     super.initInstances();
     _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
