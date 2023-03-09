@@ -195,10 +195,10 @@ void testTextRange() {
 
 void testLoadFontFromList() {
   test('loadFontFromList will send platform message after font is loaded', () async {
-    final PlatformMessageCallback? oldHandler = window.onPlatformMessage;
+    final PlatformMessageCallback? oldHandler = PlatformDispatcher.instance.onPlatformMessage;
     late String actualName;
     late String message;
-    window.onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+    PlatformDispatcher.instance.onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
       assert(data != null);
       actualName = name;
       final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
@@ -206,7 +206,7 @@ void testLoadFontFromList() {
     };
     final Uint8List fontData = Uint8List(0);
     await loadFontFromList(fontData, fontFamily: 'fake');
-    window.onPlatformMessage = oldHandler;
+    PlatformDispatcher.instance.onPlatformMessage = oldHandler;
     expect(actualName, 'flutter/system');
     expect(message, '{"type":"fontsChange"}');
   });
