@@ -21,7 +21,7 @@ uniform FragInfo {
   vec2 end_point;
   float alpha;
   float tile_mode;
-  float colors_length;
+  int colors_length;
 }
 frag_info;
 
