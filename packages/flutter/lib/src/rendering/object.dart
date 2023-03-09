@@ -967,7 +967,7 @@ class PipelineOwner {
   /// always returns false.
   bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingLayout = false;
-  bool _debugDoingChildrenLayout = false;
+  bool _debugDoingChildLayout = false;
 
   /// Update the layout information for all dirty render objects.
   ///
@@ -1022,7 +1022,7 @@ class PipelineOwner {
       }
 
       assert(() {
-        _debugDoingChildrenLayout = true;
+        _debugDoingChildLayout = true;
         return true;
       }());
       for (final PipelineOwner child in _children) {
@@ -1033,7 +1033,7 @@ class PipelineOwner {
       _shouldMergeDirtyNodes = false;
       assert(() {
         _debugDoingLayout = false;
-        _debugDoingChildrenLayout = false;
+        _debugDoingChildLayout = false;
         return true;
       }());
       if (!kReleaseMode) {
@@ -1171,8 +1171,8 @@ class PipelineOwner {
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
   /// An owner is created by [ensureSemantics] or when the [PipelineManifold] to
-  /// which this owner is connected to has [PipelineManifold.enableSemantics]
-  /// set to true. The owner is valid for as long as
+  /// which this owner is connected has [PipelineManifold.enableSemantics] set
+  /// to true. The owner is valid for as long as
   /// [PipelineManifold.enableSemantics] remains true or while there are
   /// outstanding [SemanticsHandle]s returned by [ensureSemantics]. The
   /// [semanticsOwner] field will revert to null once both conditions are no
@@ -1307,7 +1307,12 @@ class PipelineOwner {
     _updateSemanticsOwner();
 
     // If onNeedVisualUpdate is specified, it has already been called when the node was dirtied in the first place.
-    if (onNeedVisualUpdate == null && (_nodesNeedingLayout.isNotEmpty || _nodesNeedingCompositingBitsUpdate.isNotEmpty || _nodesNeedingPaint.isNotEmpty || _nodesNeedingSemantics.isNotEmpty)) {
+    if (onNeedVisualUpdate == null && (
+        _nodesNeedingLayout.isNotEmpty ||
+        _nodesNeedingCompositingBitsUpdate.isNotEmpty ||
+        _nodesNeedingPaint.isNotEmpty ||
+        _nodesNeedingSemantics.isNotEmpty
+    )) {
       requestVisualUpdate();
     }
 
@@ -1336,15 +1341,15 @@ class PipelineOwner {
   // _debugDoingChildrenLayout and _debugDoingPaint as well as between
   // _debugDoingPaint and _debugDoingSemantics. However, since the associated
   // flush methods are usually called back to back, this gets us close enough.
-  bool get _debugAllowChildListModifications => !_debugDoingChildrenLayout && !_debugDoingPaint && !_debugDoingSemantics;
+  bool get _debugAllowChildListModifications => !_debugDoingChildLayout && !_debugDoingPaint && !_debugDoingSemantics;
 
   /// Adds `child` to this [PipelineOwner].
   ///
   /// During the phases of frame production (see [RendererBinding.drawFrame]),
-  /// the parent [PipelineOwner] will complete a phase first for the nodes it
-  /// owns directly before invoking the flush method corresponding to the
-  /// current phase on its child [PipelineOwner]s. For example, during layout,
-  /// the parent [PipelineOwner] will first lay out its own nodes before calling
+  /// the parent [PipelineOwner] will complete a phase for the nodes it owns
+  /// directly before invoking the flush method corresponding to the current
+  /// phase on its child [PipelineOwner]s. For example, during layout, the
+  /// parent [PipelineOwner] will first lay out its own nodes before calling
   /// [flushLayout] on its children. During paint, it will first paint its own
   /// nodes before calling [flushPaint] on its children. This order also applies
   /// for all the other phases.
@@ -1410,9 +1415,9 @@ typedef PipelineOwnerVisitor = void Function(PipelineOwner child);
 /// usually provided by the bindings without tying the [PipelineOwner]s to a
 /// particular binding implementation.
 ///
-/// The root of the [PipelineOwner] tree is attached to a [PipelineManifold]
-/// by passing it to [PipelineOwner.attach]. Children are attached to the same
-/// [PipelineManifold] as their parent when they are adopted via
+/// The root of the [PipelineOwner] tree is attached to a [PipelineManifold] by
+/// passing the manifold to [PipelineOwner.attach]. Children are attached to the
+/// same [PipelineManifold] as their parent when they are adopted via
 /// [PipelineOwner.adoptChild].
 ///
 /// [PipelineOwner]s can register listeners with the [PipelineManifold] to be
@@ -1430,8 +1435,8 @@ abstract class PipelineManifold implements Listenable {
   ///    implementations typically use to back this property.
   bool get semanticsEnabled;
 
-  /// Called be a [PipelineOwner] connected to this [PipelineManifold] when a
-  /// render object associated with that pipeline owner wishes to update its
+  /// Called by a [PipelineOwner] connected to this [PipelineManifold] when a
+  /// [RenderObject] associated with that pipeline owner wishes to update its
   /// visual appearance.
   ///
   /// Typical implementations of this function will schedule a task to flush the
