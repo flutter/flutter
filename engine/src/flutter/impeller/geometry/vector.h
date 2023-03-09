@@ -60,6 +60,26 @@ struct Vector3 {
     };
   }
 
+  constexpr Vector3 Min(const Vector3& p) const {
+    return {std::min(x, p.x), std::min(y, p.y), std::min(z, p.z)};
+  }
+
+  constexpr Vector3 Max(const Vector3& p) const {
+    return {std::max(x, p.x), std::max(y, p.y), std::max(z, p.z)};
+  }
+
+  constexpr Vector3 Floor() const {
+    return {std::floor(x), std::floor(y), std::floor(z)};
+  }
+
+  constexpr Vector3 Ceil() const {
+    return {std::ceil(x), std::ceil(y), std::ceil(z)};
+  }
+
+  constexpr Vector3 Round() const {
+    return {std::round(x), std::round(y), std::round(z)};
+  }
+
   constexpr bool operator==(const Vector3& v) const {
     return v.x == x && v.y == y && v.z == z;
   }
@@ -234,6 +254,28 @@ struct Vector4 {
 
   constexpr Vector4 operator*(const Vector4& v) const {
     return Vector4(x * v.x, y * v.y, z * v.z, w * v.w);
+  }
+
+  constexpr Vector4 Min(const Vector4& p) const {
+    return {std::min(x, p.x), std::min(y, p.y), std::min(z, p.z),
+            std::min(w, p.w)};
+  }
+
+  constexpr Vector4 Max(const Vector4& p) const {
+    return {std::max(x, p.x), std::max(y, p.y), std::max(z, p.z),
+            std::max(w, p.w)};
+  }
+
+  constexpr Vector4 Floor() const {
+    return {std::floor(x), std::floor(y), std::floor(z), std::floor(w)};
+  }
+
+  constexpr Vector4 Ceil() const {
+    return {std::ceil(x), std::ceil(y), std::ceil(z), std::ceil(w)};
+  }
+
+  constexpr Vector4 Round() const {
+    return {std::round(x), std::round(y), std::round(z), std::round(w)};
   }
 
   constexpr Vector4 Lerp(const Vector4& v, Scalar t) const {

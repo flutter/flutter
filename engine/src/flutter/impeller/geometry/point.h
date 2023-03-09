@@ -184,6 +184,12 @@ struct TPoint {
     return {std::max<Type>(x, p.x), std::max<Type>(y, p.y)};
   }
 
+  constexpr TPoint Floor() const { return {std::floor(x), std::floor(y)}; }
+
+  constexpr TPoint Ceil() const { return {std::ceil(x), std::ceil(y)}; }
+
+  constexpr TPoint Round() const { return {std::round(x), std::round(y)}; }
+
   constexpr Type GetDistance(const TPoint& p) const {
     return sqrt(GetDistanceSquared(p));
   }

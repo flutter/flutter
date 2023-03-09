@@ -1059,6 +1059,111 @@ TEST(GeometryTest, PointAngleTo) {
   }
 }
 
+TEST(GeometryTest, PointMin) {
+  Point p(1, 2);
+  Point result = p.Min({0, 10});
+  Point expected(0, 2);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Min) {
+  Vector3 p(1, 2, 3);
+  Vector3 result = p.Min({0, 10, 2});
+  Vector3 expected(0, 2, 2);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Min) {
+  Vector4 p(1, 2, 3, 4);
+  Vector4 result = p.Min({0, 10, 2, 1});
+  Vector4 expected(0, 2, 2, 1);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
+TEST(GeometryTest, PointMax) {
+  Point p(1, 2);
+  Point result = p.Max({0, 10});
+  Point expected(1, 10);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Max) {
+  Vector3 p(1, 2, 3);
+  Vector3 result = p.Max({0, 10, 2});
+  Vector3 expected(1, 10, 3);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Max) {
+  Vector4 p(1, 2, 3, 4);
+  Vector4 result = p.Max({0, 10, 2, 1});
+  Vector4 expected(1, 10, 3, 4);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
+TEST(GeometryTest, PointFloor) {
+  Point p(1.5, 2.3);
+  Point result = p.Floor();
+  Point expected(1, 2);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Floor) {
+  Vector3 p(1.5, 2.3, 3.9);
+  Vector3 result = p.Floor();
+  Vector3 expected(1, 2, 3);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Floor) {
+  Vector4 p(1.5, 2.3, 3.9, 4.0);
+  Vector4 result = p.Floor();
+  Vector4 expected(1, 2, 3, 4);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
+TEST(GeometryTest, PointCeil) {
+  Point p(1.5, 2.3);
+  Point result = p.Ceil();
+  Point expected(2, 3);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Ceil) {
+  Vector3 p(1.5, 2.3, 3.9);
+  Vector3 result = p.Ceil();
+  Vector3 expected(2, 3, 4);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Ceil) {
+  Vector4 p(1.5, 2.3, 3.9, 4.0);
+  Vector4 result = p.Ceil();
+  Vector4 expected(2, 3, 4, 4);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
+TEST(GeometryTest, PointRound) {
+  Point p(1.5, 2.3);
+  Point result = p.Round();
+  Point expected(2, 2);
+  ASSERT_POINT_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector3Round) {
+  Vector3 p(1.5, 2.3, 3.9);
+  Vector3 result = p.Round();
+  Vector3 expected(2, 2, 4);
+  ASSERT_VECTOR3_NEAR(result, expected);
+}
+
+TEST(GeometryTest, Vector4Round) {
+  Vector4 p(1.5, 2.3, 3.9, 4.0);
+  Vector4 result = p.Round();
+  Vector4 expected(2, 2, 4, 4);
+  ASSERT_VECTOR4_NEAR(result, expected);
+}
+
 TEST(GeometryTest, PointLerp) {
   Point p(1, 2);
   Point result = p.Lerp({5, 10}, 0.75);
