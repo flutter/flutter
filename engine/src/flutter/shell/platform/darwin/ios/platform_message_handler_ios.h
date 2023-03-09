@@ -13,7 +13,9 @@
 #include "flutter/shell/common/platform_message_handler.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 
-@protocol FlutterTaskQueue;
+@protocol FlutterTaskQueue
+- (void)dispatch:(dispatch_block_t)block;
+@end
 
 namespace flutter {
 
@@ -21,11 +23,11 @@ class PlatformMessageHandlerIos : public PlatformMessageHandler {
  public:
   static NSObject<FlutterTaskQueue>* MakeBackgroundTaskQueue();
 
-  PlatformMessageHandlerIos(const TaskRunners& task_runners);
+  PlatformMessageHandlerIos(fml::RefPtr<fml::TaskRunner> platform_task_runner);
 
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
-  bool DoesHandlePlatformMessageOnPlatformThread() const override { return false; }
+  bool DoesHandlePlatformMessageOnPlatformThread() const override;
 
   void InvokePlatformMessageResponseCallback(int response_id,
                                              std::unique_ptr<fml::Mapping> mapping) override;
@@ -43,7 +45,7 @@ class PlatformMessageHandlerIos : public PlatformMessageHandler {
 
  private:
   std::unordered_map<std::string, HandlerInfo> message_handlers_;
-  TaskRunners task_runners_;
+  const fml::RefPtr<fml::TaskRunner> platform_task_runner_;
   std::mutex message_handlers_mutex_;
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformMessageHandlerIos);
 };

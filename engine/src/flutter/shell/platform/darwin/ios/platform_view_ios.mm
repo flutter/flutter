@@ -48,7 +48,8 @@ PlatformViewIOS::PlatformViewIOS(
       ios_context_(context),
       platform_views_controller_(platform_views_controller),
       accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }),
-      platform_message_handler_(new PlatformMessageHandlerIos(task_runners)) {}
+      platform_message_handler_(
+          new PlatformMessageHandlerIos(task_runners.GetPlatformTaskRunner())) {}
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
