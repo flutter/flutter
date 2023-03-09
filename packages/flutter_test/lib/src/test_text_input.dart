@@ -370,4 +370,16 @@ class TestTextInput {
   Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
     await _keyHandler?.handleKeyUpEvent(key);
   }
+
+  /// Simulates iOS responding to an undo or redo gesture or button.
+  Future<void> handleKeyboardUndo(String direction) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall('TextInputClient.handleUndo', <dynamic>[direction]),
+      ),
+      (ByteData? data) {/* response from framework is discarded */},
+    );
+  }
 }

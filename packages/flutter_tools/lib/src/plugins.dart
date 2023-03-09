@@ -193,7 +193,7 @@ class Plugin {
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
-          package: pluginYaml['androidPackage'] as String,
+          package: androidPackage,
           pluginClass: pluginClass,
           pluginPath: path,
           fileSystem: fileSystem,
