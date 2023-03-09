@@ -151,11 +151,11 @@ void PopulateAXTree(std::shared_ptr<AccessibilityBridge> bridge) {
   // Add node 4: text child (with no text) of node 2.
   FlutterSemanticsNode node4{sizeof(FlutterSemanticsNode), 4};
 
-  bridge->AddFlutterSemanticsNodeUpdate(&node0);
-  bridge->AddFlutterSemanticsNodeUpdate(&node1);
-  bridge->AddFlutterSemanticsNodeUpdate(&node2);
-  bridge->AddFlutterSemanticsNodeUpdate(&node3);
-  bridge->AddFlutterSemanticsNodeUpdate(&node4);
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->AddFlutterSemanticsNodeUpdate(node3);
+  bridge->AddFlutterSemanticsNodeUpdate(node4);
   bridge->CommitUpdates();
 }
 

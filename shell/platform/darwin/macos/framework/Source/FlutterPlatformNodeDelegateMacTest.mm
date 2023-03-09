@@ -50,7 +50,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -88,7 +88,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -130,7 +130,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
 
@@ -172,7 +172,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode child1;
   child1.id = 1;
@@ -184,7 +184,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
 
@@ -251,7 +251,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   root.custom_accessibility_actions_count = 0;
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   double rectSize = 50;
   double transformFactor = 0.5;
@@ -272,7 +272,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   child1.custom_accessibility_actions_count = 0;
   child1.rect = {0, 0, rectSize, rectSize};  // LTRB
   child1.transform = {transformFactor, 0, 0, 0, transformFactor, 0, 0, 0, 1};
-  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
 

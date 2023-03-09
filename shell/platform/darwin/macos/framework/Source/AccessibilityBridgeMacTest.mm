@@ -87,7 +87,7 @@ TEST(AccessibilityBridgeMacTest, sendsAccessibilityCreateNotificationToWindowOfF
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -135,7 +135,7 @@ TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenH
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -182,7 +182,7 @@ TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenN
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
   auto platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
