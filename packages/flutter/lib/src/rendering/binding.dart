@@ -33,7 +33,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsUpdate: _handleSemanticsUpdate,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
-    )..attach(_manifold);
+    );
     platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
@@ -44,6 +44,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame);
     }
+    _pipelineOwner.attach(_manifold);
   }
 
   /// The current [RendererBinding], if one has been created.
