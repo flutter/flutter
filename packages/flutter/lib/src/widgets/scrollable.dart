@@ -83,13 +83,12 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 ///    child.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
-class Scrollable extends StatefulWidget with MultiSelectableSeparator {
+class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.
   ///
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     super.key,
-    String? selectionSeparator,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -101,13 +100,7 @@ class Scrollable extends StatefulWidget with MultiSelectableSeparator {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
-        _selectionSeparator = selectionSeparator;
-
-  final String? _selectionSeparator;
-
-  @override
-  String get selectionSeparator => _selectionSeparator ?? selectionSeparatorForAxis(axis);
+  })  : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -280,6 +273,15 @@ class Scrollable extends StatefulWidget with MultiSelectableSeparator {
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
+
+  String get _selectionSeparator {
+    switch (axis) {
+      case Axis.horizontal:
+        return ' ';
+      case Axis.vertical:
+        return '\n';
+    }
+  }
 
   @override
   ScrollableState createState() => ScrollableState();
@@ -900,7 +902,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     if (registrar != null) {
       result = _ScrollableSelectionHandler(
-        selectionSeparator: widget.selectionSeparator,
+        selectionSeparator: widget._selectionSeparator,
         state: this,
         position: position,
         registrar: registrar,
@@ -926,8 +928,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 ///
 /// This widget registers itself to the [registrar] and uses
 /// [SelectionContainer] to collect selectables from its subtree.
-class _ScrollableSelectionHandler extends StatefulWidget with MultiSelectableSeparator {
-   const _ScrollableSelectionHandler({
+class _ScrollableSelectionHandler extends StatefulWidget {
+  const _ScrollableSelectionHandler({
     required this.selectionSeparator,
     required this.state,
     required this.position,
@@ -935,7 +937,6 @@ class _ScrollableSelectionHandler extends StatefulWidget with MultiSelectableSep
     required this.child,
   });
 
-  @override
   final String selectionSeparator;
   final ScrollableState state;
   final ScrollPosition position;

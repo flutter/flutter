@@ -306,7 +306,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final SelectableRegionContainerDelegate _selectionDelegate = SelectableRegionContainerDelegate();
+  final StaticMultiSelectableSelectionContainerDelegate _selectionDelegate = StaticMultiSelectableSelectionContainerDelegate();
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1260,14 +1260,13 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
   }
 }
 
-/// A delegate for the [SelectionContainer]s of [SelectableRegion]s and their
-/// children.
-class SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  /// Create a [SelectableRegionContainerDelegate]
+/// A delegate for selectables within non-scrolling widgets
+class StaticMultiSelectableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  /// Create a [StaticMultiSelectableSelectionContainerDelegate]
   ///
   /// The [selectionSeparator] is the string that will be used to separate
   /// the selected text of the children of this delegate.
-  SelectableRegionContainerDelegate({super.selectionSeparator = ''});
+  StaticMultiSelectableSelectionContainerDelegate({super.selectionSeparator = ''});
 
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
@@ -1424,22 +1423,6 @@ class SelectableRegionContainerDelegate extends MultiSelectableSelectionContaine
   }
 }
 
-/// A mixin to standardize the usage of [selectionSeparator].
-mixin MultiSelectableSeparator {
-  /// The separator to use when concatenating the selected text.
-  String get selectionSeparator;
-
-  /// Return the default selection separator for the given [axis].
-  String selectionSeparatorForAxis(Axis axis) {
-    switch (axis) {
-      case Axis.horizontal:
-        return ' ';
-      case Axis.vertical:
-        return '\n';
-    }
-  }
-}
-
 /// An abstract base class for updating multiple selectable children.
 ///
 /// This class provide basic [SelectionEvent] handling and child [Selectable]
@@ -1448,7 +1431,7 @@ mixin MultiSelectableSeparator {
 ///
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
-abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier, MultiSelectableSeparator {
+abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates a [MultiSelectableSelectionContainerDelegate].
   ///
   /// The [selectionSeparator] is used to separate the text of each selectable in
@@ -1459,7 +1442,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   /// The separator used to separate the text of each selectable in
   /// [selectables].
-  @override
   final String selectionSeparator;
 
   /// Gets the list of selectables this delegate is managing.

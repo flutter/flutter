@@ -4899,7 +4899,7 @@ class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMi
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: SelectableRegionContainerDelegate(selectionSeparator: ' '),
+        delegate: StaticMultiSelectableSelectionContainerDelegate(selectionSeparator: ' '),
         child: result,
       );
     }
@@ -5145,7 +5145,7 @@ class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, Fle
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: SelectableRegionContainerDelegate(selectionSeparator: '\n'),
+        delegate: StaticMultiSelectableSelectionContainerDelegate(selectionSeparator: '\n'),
         child: result,
       );
     }
