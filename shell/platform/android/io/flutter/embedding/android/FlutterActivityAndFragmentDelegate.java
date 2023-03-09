@@ -235,9 +235,16 @@ import java.util.List;
     DartExecutor.DartEntrypoint dartEntrypoint =
         new DartExecutor.DartEntrypoint(
             appBundlePathOverride, host.getDartEntrypointFunctionName());
+    String initialRoute = host.getInitialRoute();
+    if (initialRoute == null) {
+      initialRoute = maybeGetInitialRouteFromIntent(host.getActivity().getIntent());
+      if (initialRoute == null) {
+        initialRoute = DEFAULT_INITIAL_ROUTE;
+      }
+    }
     return options
         .setDartEntrypoint(dartEntrypoint)
-        .setInitialRoute(host.getInitialRoute())
+        .setInitialRoute(initialRoute)
         .setDartEntrypointArgs(host.getDartEntrypointArgs());
   }
 
