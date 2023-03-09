@@ -1567,6 +1567,7 @@ class Scaffold extends StatefulWidget {
     this.onDrawerChanged,
     this.endDrawer,
     this.onEndDrawerChanged,
+    this.onStatusBarTap,
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
@@ -1718,6 +1719,11 @@ class Scaffold extends StatefulWidget {
 
   /// Optional callback that is called when the [Scaffold.endDrawer] is opened or closed.
   final DrawerCallback? onEndDrawerChanged;
+
+  /// Optional callback that is called when the Scaffold's status bar is tapped.
+  ///
+  /// This callback is only called in iOS and macOS applications.
+  final void Function()? onStatusBarTap;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
@@ -2528,6 +2534,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         curve: Curves.easeOutCirc,
       );
     }
+
+    widget.onStatusBarTap?.call();
   }
 
   // INTERNALS
