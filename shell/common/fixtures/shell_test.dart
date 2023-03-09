@@ -470,3 +470,11 @@ Future<void> testPluginUtilitiesCallbackHandle() async {
   }
   notifyNativeBool(true);
 }
+
+@pragma('vm:entry-point')
+Future<void> testThatAssetLoadingHappensOnWorkerThread() async {
+  try {
+    await ImmutableBuffer.fromAsset('DoesNotExist');
+  } catch (err) { /* Do nothing */ }
+  notifyNative();
+}
