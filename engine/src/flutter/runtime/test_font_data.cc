@@ -1622,18 +1622,18 @@ std::vector<sk_sp<SkTypeface>> GetTestFontData() {
   std::vector<sk_sp<SkTypeface>> typefaces;
 #if EMBED_TEST_FONT_DATA
   typefaces.push_back(SkTypeface::MakeFromStream(
+      SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
+  typefaces.push_back(SkTypeface::MakeFromStream(
       SkMemoryStream::MakeDirect(kAhemFont, kAhemFontLength)));
   typefaces.push_back(SkTypeface::MakeFromStream(
       SkMemoryStream::MakeDirect(kCoughFont, kCoughFontLength)));
-  typefaces.push_back(SkTypeface::MakeFromStream(
-      SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
 #endif  // EMBED_TEST_FONT_DATA
   return typefaces;
 }
 
 std::vector<std::string> GetTestFontFamilyNames() {
 #if EMBED_TEST_FONT_DATA
-  std::vector<std::string> names = {"Ahem", "Cough", "FlutterTest"};
+  std::vector<std::string> names = {"FlutterTest", "Ahem", "Cough"};
 #else   // EMBED_TEST_FONT_DATA
   std::vector<std::string> names;
 #endif  // EMBED_TEST_FONT_DATA
