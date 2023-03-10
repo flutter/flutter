@@ -36,9 +36,6 @@ dartdevc:
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
 
-    _web_sdk_version:
-      uri: "lib/_web_sdk_version/web_sdk_version.dart"
-
 dart2js:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: dart2js}
@@ -62,9 +59,6 @@ dart2js:
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
 
-    _web_sdk_version:
-      uri: "lib/_web_sdk_version/web_sdk_version.dart"
-
 wasm:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: wasm}
@@ -87,6 +81,3 @@ wasm:
 
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
-
-    _web_sdk_version:
-      uri: "lib/_web_sdk_version/web_sdk_version.dart"
