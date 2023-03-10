@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -42,26 +41,6 @@ class _MatchesMethodCall extends Matcher {
     }
     return newDescription;
   }
-}
-
-// Used to set window.viewInsets since the real ui.WindowPadding has only a
-// private constructor.
-class _TestViewPadding implements ui.ViewPadding {
-  const _TestViewPadding({
-    required this.bottom,
-  });
-
-  @override
-  final double bottom;
-
-  @override
-  double get top => 0.0;
-
-  @override
-  double get left => 0.0;
-
-  @override
-  double get right => 0.0;
 }
 
 late TextEditingController controller;
@@ -134,6 +113,8 @@ void main() {
 
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     final TextEditingController textController = TextEditingController.fromValue(
       const TextEditingValue(text: 'I love flutter'),
@@ -164,8 +145,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
-    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
     textController.selection = TextSelection(
       baseOffset: 0,
       extentOffset: textController.text.length,
@@ -173,13 +153,15 @@ void main() {
 
     await tester.pump();
 
-    // The offset of the scrollController should change immediately after window changes its metrics.
+    // The offset of the scrollController should change immediately after view changes its metrics.
     final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
-  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the view changes metrics', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     final Widget widget = MaterialApp(
       home: Scaffold(
@@ -215,11 +197,10 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
-    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
     await tester.pump();
 
-    // The offset of the scrollController should change immediately after window changes its metrics.
+    // The offset of the scrollController should change immediately after view changes its metrics.
     final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
@@ -1841,7 +1822,7 @@ void main() {
   });
 
   testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1871,7 +1852,7 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
 
     // Hide the menu by changing orientation.
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), findsNothing);
 
@@ -5176,9 +5157,9 @@ void main() {
   });
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.view.reset);
     // Ensure selection rects are sent on iPhone (using SE 3rd gen size)
-    tester.binding.window.physicalSizeTestValue = const Size(750.0, 1334.0);
+    tester.view.physicalSize = const Size(750.0, 1334.0);
 
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
