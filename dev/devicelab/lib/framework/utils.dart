@@ -15,6 +15,8 @@ import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 
+const bool kEnableImpellerDefault = true;
+
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -433,7 +435,7 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(String command, List<String> options) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -446,6 +448,13 @@ List<String> flutterCommandArgs(String command, List<String> options) {
   };
   final String? localEngine = localEngineFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+  bool addEnableImpeller() {
+    return !options.contains('--enable-impeller')
+           && deviceOperatingSystem == DeviceOperatingSystem.ios
+           && (command == 'drive' || command == 'run');
+  }
+
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -453,7 +462,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
-
+    if (addEnableImpeller())
+      '--enable-impeller',
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
       hostAgent.dumpDirectory!.path,
@@ -470,10 +480,11 @@ Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment);
+    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
 }
 
 /// Starts a Flutter subprocess.
@@ -502,13 +513,15 @@ Future<Process> startFlutter(String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
-}) {
-  final List<String> args = flutterCommandArgs(command, options);
+  String? workingDirectory,
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
   return startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
     isBot: isBot,
+    workingDirectory: workingDirectory,
   );
 }
 
@@ -518,16 +531,17 @@ Future<String> evalFlutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
   StringBuffer? stderr, // if not null, the stderr will be written here.
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, stderr: stderr);
+      canFail: canFail, environment: environment, stderr: stderr, workingDirectory: workingDirectory);
 }
 
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
 }) async {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return _processManager.run(
     <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
     workingDirectory: cwd,

@@ -199,11 +199,7 @@ void main() {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
-          inherit: false,
-          fontFamily: 'Ahem',
-          fontSize: 123.0,
-        ),
+        style: TextStyle(inherit: false, fontSize: 123.0),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -216,11 +212,7 @@ void main() {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
-          inherit: false,
-          fontFamily: 'Ahem',
-          fontSize: 10.0,
-        ),
+        style: TextStyle(inherit: false, fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       textScaleFactor: 2.0,
@@ -268,7 +260,6 @@ void main() {
   test('TextPainter intrinsic dimensions', () {
     const TextStyle style = TextStyle(
       inherit: false,
-      fontFamily: 'Ahem',
       fontSize: 10.0,
     );
     TextPainter painter;

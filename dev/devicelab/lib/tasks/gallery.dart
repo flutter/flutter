@@ -28,7 +28,7 @@ TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
 TaskFunction createGalleryTransitionE2EBuildTest(
   List<String> args, {
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool enableImpeller = kEnableImpellerDefault,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -44,7 +44,7 @@ TaskFunction createGalleryTransitionE2EBuildTest(
 
 TaskFunction createGalleryTransitionE2ETest({
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool enableImpeller = kEnableImpellerDefault,
 }) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
@@ -91,7 +91,7 @@ class GalleryTransitionTest {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller = kEnableImpellerDefault,
   });
 
   final bool semanticsEnabled;
@@ -233,7 +233,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller = kEnableImpellerDefault,
   }) : super(workingDirectory: galleryDirectory);
 
   final bool semanticsEnabled;
