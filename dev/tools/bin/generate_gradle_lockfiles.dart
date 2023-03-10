@@ -149,7 +149,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 
@@ -196,8 +196,6 @@ const String settingGradleFile = r'''
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 include ':app'
-
-enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
