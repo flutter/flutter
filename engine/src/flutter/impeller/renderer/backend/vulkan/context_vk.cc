@@ -51,7 +51,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
   }
 
   const auto prefix = impeller::vk::to_string(
-      impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT{severity});
+      impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT(severity));
   // Just so that the log doesn't say FML_DCHECK(false).
   constexpr bool kVulkanValidationFailure = false;
   FML_DCHECK(kVulkanValidationFailure)

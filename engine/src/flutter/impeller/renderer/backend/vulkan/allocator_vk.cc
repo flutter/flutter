@@ -252,7 +252,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                                               &allocation_info      //
                                               )};
       if (result != vk::Result::eSuccess) {
-        VALIDATION_LOG << "Unable to allocation Vulkan Image: "
+        VALIDATION_LOG << "Unable to allocate Vulkan Image: "
                        << vk::to_string(result);
         return;
       }
