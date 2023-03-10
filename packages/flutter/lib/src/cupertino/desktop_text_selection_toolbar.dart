@@ -97,31 +97,30 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return Container(
       width: _kToolbarWidth,
+      clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         boxShadow: _kToolbarShadow,
+        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
       ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.compose(
-            outer: ColorFilter.matrix(_matrixWithSat(_kToolbarSaturationBoost)),
-            inner: ImageFilter.blur(
-              sigmaX: _kToolbarBlurSigma,
-              sigmaY: _kToolbarBlurSigma,
-            ),
+      child: BackdropFilter(
+        filter: ImageFilter.compose(
+          outer: ColorFilter.matrix(_matrixWithSat(_kToolbarSaturationBoost)),
+          inner: ImageFilter.blur(
+            sigmaX: _kToolbarBlurSigma,
+            sigmaY: _kToolbarBlurSigma,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: _kToolbarBackgroundColor.resolveFrom(context),
-              border: Border.all(
-                color: _kToolbarBorderColor.resolveFrom(context),
-              ),
-              borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _kToolbarBackgroundColor.resolveFrom(context),
+            border: Border.all(
+              color: _kToolbarBorderColor.resolveFrom(context),
             ),
-            child: Padding(
-              padding: _kToolbarPadding,
-              child: child,
-            ),
+            borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+          ),
+          child: Padding(
+            padding: _kToolbarPadding,
+            child: child,
           ),
         ),
       ),
