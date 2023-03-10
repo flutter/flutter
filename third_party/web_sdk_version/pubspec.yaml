@@ -1,0 +1,6 @@
+name: web_sdk_version
+
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0-0 <3.0.0"
