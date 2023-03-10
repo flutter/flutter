@@ -76,13 +76,13 @@ class HtmlFontCollection implements FontCollection {
   @override
   Future<void> debugDownloadTestFonts() async {
     final FontManager fontManager = _testFontManager = FontManager();
+    for (final MapEntry<String, String> fontEntry in testFontUrls.entries) {
+      fontManager.downloadAsset(fontEntry.key, 'url(${fontEntry.value})', const <String, String>{});
+    }
     fontManager._downloadedFonts.add(createDomFontFace(
       EmbeddedTestFont.flutterTest.fontFamily,
       EmbeddedTestFont.flutterTest.data,
     ));
-    for (final MapEntry<String, String> fontEntry in testFontUrls.entries) {
-      fontManager.downloadAsset(fontEntry.key, 'url(${fontEntry.value})', const <String, String>{});
-    }
     await fontManager.downloadAllFonts();
   }
 
