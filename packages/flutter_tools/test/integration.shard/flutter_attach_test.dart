@@ -197,9 +197,7 @@ void main() {
     testWithoutContext('enables Observatory on run', () async {
         await flutterRun.run(
           withDebugger: true,
-          // TODO(bkonyi): uncomment once Observatory is disabled by default
-          // See https://github.com/dart-lang/sdk/issues/50233
-          // serveObservatory: true,
+          serveObservatory: true,
         );
         expect(await isObservatoryAvailable(), true);
     });
@@ -212,9 +210,7 @@ void main() {
       }
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
-        // TODO(bkonyi): uncomment once Observatory is disabled by default
-        // See https://github.com/dart-lang/sdk/issues/50233
-        // serveObservatory: true,
+        serveObservatory: true,
       );
       expect(await isObservatoryAvailable(), true);
     });

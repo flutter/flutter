@@ -965,7 +965,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
-    this.serveObservatory = true,
+    this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
    }) : debuggingEnabled = true;
