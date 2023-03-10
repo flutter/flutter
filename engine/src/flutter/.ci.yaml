@@ -305,6 +305,7 @@ targets:
           {"dependency": "firefox", "version": "version:106.0"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
+      no_goma: "true"
     timeout: 60
     runIf:
       - DEPS
@@ -331,6 +332,7 @@ targets:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       framework: "true"
+      no_goma: "true"
       shard: web_tests
       subshards: >-
               ["0", "1", "2", "3", "4", "5", "6", "7_last"]
@@ -450,6 +452,7 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
+      no_goma: "true"
     timeout: 60
     runIf:
       - DEPS
@@ -527,6 +530,7 @@ targets:
         [
           {"dependency": "chrome_and_driver", "version": "version:111.0"}
         ]
+      no_goma: "true"
     timeout: 60
     runIf:
       - DEPS
