@@ -8,7 +8,8 @@
                     "type": "gcs",
                     "include_paths": [
                         "out/wasm_release/zip_archives/flutter-web-sdk.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
