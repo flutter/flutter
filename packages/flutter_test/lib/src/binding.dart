@@ -1912,9 +1912,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return TestViewConfiguration.fromView(
+    return TestViewConfiguration(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      view: window,
+      window: window,
     );
   }
 
@@ -1938,31 +1938,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
-  /// Deprecated. Will be removed in a future version of Flutter.
+  /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   ///
-  /// This property has been deprecated to prepare for Flutter's upcoming
-  /// support for multiple views and multiple windows.
-  ///
-  /// Use [TestViewConfiguration.fromView] instead.
-  @Deprecated(
-    'Use TestViewConfiguration.fromView instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.7.0-32.0.pre.'
-  )
+  /// If a [window] instance is not provided it defaults to [ui.window].
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.FlutterView? window,
   }) {
-    return TestViewConfiguration.fromView(size: size, view: window ?? ui.window);
+    return TestViewConfiguration._(size, window ?? ui.window);
   }
 
-  /// Creates a [TestViewConfiguration] with the given size and view.
-  ///
-  /// The [size] defaults to 800x600.
-  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
-      : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        _hitTestMatrix = _getMatrix(size, 1.0, view),
-        super(devicePixelRatio: view.devicePixelRatio);
+  TestViewConfiguration._(Size size, ui.FlutterView window)
+    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
+      _hitTestMatrix = _getMatrix(size, 1.0, window),
+      super(size: size, devicePixelRatio: window.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

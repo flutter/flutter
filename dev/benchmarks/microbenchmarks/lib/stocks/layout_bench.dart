@@ -31,11 +31,11 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration.fromView(
+    final TestViewConfiguration big = TestViewConfiguration(
       size: const Size(360.0, 640.0),
       window: RendererBinding.instance.window,
     );
-    final TestViewConfiguration small = TestViewConfiguration.fromView(
+    final TestViewConfiguration small = TestViewConfiguration(
       size: const Size(355.0, 635.0),
       window: RendererBinding.instance.window,
     );
