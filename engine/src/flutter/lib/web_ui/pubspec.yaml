@@ -17,9 +17,6 @@ dependencies:
   web_test_fonts:
     path: ../../third_party/web_test_fonts
 
-  web_sdk_version:
-    path: ../../third_party/web_sdk_version
-
 dev_dependencies:
   analyzer: 5.2.0
   archive: 3.1.2

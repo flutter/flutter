@@ -680,7 +680,6 @@ LIBRARY: engine
 LIBRARY: spring_animation
 LIBRARY: tonic
 LIBRARY: txt
-LIBRARY: web_sdk_version
 LIBRARY: web_test_fonts
 LIBRARY: web_unicode
 ORIGIN: ../../../flutter/LICENSE
@@ -3168,8 +3167,6 @@ ORIGIN: ../../../flutter/third_party/txt/src/txt/platform_fuchsia.cc + ../../../
 ORIGIN: ../../../flutter/third_party/txt/src/txt/platform_linux.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/third_party/txt/src/txt/platform_mac.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/third_party/txt/src/txt/platform_windows.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/third_party/web_sdk_version/lib/web_sdk_version.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/third_party/web_sdk_version/lib/web_sdk_version/web_sdk_version.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/third_party/web_test_fonts/lib/web_test_fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/third_party/web_test_fonts/lib/web_test_fonts/web_test_fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/third_party/web_unicode/lib/web_unicode.dart + ../../../flutter/LICENSE
@@ -5718,8 +5715,6 @@ FILE: ../../../flutter/third_party/txt/src/txt/platform_fuchsia.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform_linux.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform_mac.mm
 FILE: ../../../flutter/third_party/txt/src/txt/platform_windows.cc
-FILE: ../../../flutter/third_party/web_sdk_version/lib/web_sdk_version.dart
-FILE: ../../../flutter/third_party/web_sdk_version/lib/web_sdk_version/web_sdk_version.dart
 FILE: ../../../flutter/third_party/web_test_fonts/lib/web_test_fonts.dart
 FILE: ../../../flutter/third_party/web_test_fonts/lib/web_test_fonts/web_test_fonts.dart
 FILE: ../../../flutter/third_party/web_unicode/lib/web_unicode.dart
