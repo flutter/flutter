@@ -132,18 +132,21 @@ void printSomething() {
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
+      "import 'dart:_web_sdk_version';",
     ]);
     expect(getExtraImportsForLibrary('skwasm_stub'), <String>[
       "import 'dart:_engine';",
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
+      "import 'dart:_web_sdk_version';",
     ]);
     expect(getExtraImportsForLibrary('skwasm_impl'), <String>[
       "import 'dart:_engine';",
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
+      "import 'dart:_web_sdk_version';",
       "import 'dart:ffi';",
     ]);
 
@@ -151,5 +154,6 @@ void printSomething() {
     expect(getExtraImportsForLibrary('web_unicode'), isEmpty);
     expect(getExtraImportsForLibrary('web_test_fonts'), isEmpty);
     expect(getExtraImportsForLibrary('web_locale_keymap'), isEmpty);
+    expect(getExtraImportsForLibrary('web_sdk_version'), isEmpty);
   });
 }
