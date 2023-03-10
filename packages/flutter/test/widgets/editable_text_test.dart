@@ -2751,6 +2751,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectionCause, SelectionChangedCause.scribble);
+
+    await tester.testTextInput.finishScribbleInteraction();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
@@ -12411,6 +12413,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     EditableText.debugDeterministicCursor = true;
     final FocusNode focusNode = FocusNode();
     final GlobalKey key = GlobalKey();
+    SelectionChangedCause? lastSelectionChangedCause;
 
     final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890');
     controller.selection = const TextSelection.collapsed(offset: 0);
@@ -12425,6 +12428,9 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
           cursorOpacityAnimates: true,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            lastSelectionChangedCause = cause;
+          },
           maxLines: 2,
         ),
       ),
@@ -12461,6 +12467,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // Selection should be updated based on the floating cursor location.
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
@@ -12486,7 +12494,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     ));
 
     // Simulate UIKit setting the selection using keyboard selection.
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection(baseOffset: 0, extentOffset: 4)));
     await tester.pump();
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
@@ -12496,9 +12504,11 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     // Now test using keyboard selection in a forwards direction.
-    controller.selection = const TextSelection.collapsed(offset: 0);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 0)));
     await tester.pump();
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
@@ -12523,7 +12533,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     ));
 
     // Simulate UIKit setting the selection using keyboard selection.
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection(baseOffset: 0, extentOffset: 4)));
     await tester.pump();
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
@@ -12533,11 +12543,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     // Test that the affinity is updated in case the floating cursor ends at the same offset.
 
     // Put the selection at the beginning of the second line.
-    controller.selection = const TextSelection.collapsed(offset: 27);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 27)));
     await tester.pump();
 
     // Now test using keyboard selection in a forwards direction.
@@ -12572,6 +12584,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 27);
     expect(controller.selection.extentOffset, 27);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     EditableText.debugDeterministicCursor = false;
   });
