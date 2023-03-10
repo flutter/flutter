@@ -14,14 +14,24 @@ static constexpr char kChannelName[] = "flutter/platform";
 static constexpr char kBadArgumentsError[] = "Bad Arguments";
 static constexpr char kUnknownClipboardFormatError[] =
     "Unknown Clipboard Format";
-static constexpr char kFailedError[] = "Failed";
+static constexpr char kInProgressError[] = "In Progress";
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
 static constexpr char kClipboardHasStringsMethod[] = "Clipboard.hasStrings";
+static constexpr char kExitApplicationMethod[] = "System.exitApplication";
+static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
 static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
 static constexpr char kTextKey[] = "text";
 static constexpr char kValueKey[] = "value";
+
+static constexpr char kExitTypeKey[] = "type";
+static constexpr char kExitTypeCancelable[] = "cancelable";
+static constexpr char kExitTypeRequired[] = "required";
+
+static constexpr char kExitResponseKey[] = "response";
+static constexpr char kExitResponseCancel[] = "cancel";
+static constexpr char kExitResponseExit[] = "exit";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 
@@ -32,6 +42,8 @@ struct _FlPlatformPlugin {
   GObject parent_instance;
 
   FlMethodChannel* channel;
+  FlMethodCall* exit_application_method_call;
+  GCancellable* cancellable;
 };
 
 G_DEFINE_TYPE(FlPlatformPlugin, fl_platform_plugin, G_TYPE_OBJECT)
@@ -140,6 +152,138 @@ static FlMethodResponse* clipboard_has_strings_async(
   return nullptr;
 }
 
+// Get the exit response from a System.requestAppExit method call.
+static gchar* get_exit_response(FlMethodResponse* response) {
+  if (response == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(GError) error = nullptr;
+  FlValue* result = fl_method_response_get_result(response, &error);
+  if (result == nullptr) {
+    g_warning("Error returned from System.requestAppExit: %s", error->message);
+    return nullptr;
+  }
+  if (fl_value_get_type(result) != FL_VALUE_TYPE_MAP) {
+    g_warning("System.requestAppExit result argument map missing or malformed");
+    return nullptr;
+  }
+
+  FlValue* response_value = fl_value_lookup_string(result, kExitResponseKey);
+  if (fl_value_get_type(response_value) != FL_VALUE_TYPE_STRING) {
+    g_warning("Invalid response from System.requestAppExit");
+    return nullptr;
+  }
+  return g_strdup(fl_value_get_string(response_value));
+}
+
+// Quit this application
+static void quit_application() {
+  GApplication* app = g_application_get_default();
+  if (app == nullptr) {
+    // Unable to gracefully quit, so just exit the process.
+    exit(0);
+  } else {
+    g_application_quit(app);
+  }
+}
+
+// Handle response of System.requestAppExit.
+static void request_app_exit_response_cb(GObject* object,
+                                         GAsyncResult* result,
+                                         gpointer user_data) {
+  FlPlatformPlugin* self = FL_PLATFORM_PLUGIN(user_data);
+
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlMethodResponse) method_response =
+      fl_method_channel_invoke_method_finish(FL_METHOD_CHANNEL(object), result,
+                                             &error);
+  g_autofree gchar* exit_response = nullptr;
+  if (method_response == nullptr) {
+    if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      return;
+    }
+    g_warning("Failed to complete System.requestAppExit: %s", error->message);
+  } else {
+    exit_response = get_exit_response(method_response);
+  }
+  // If something went wrong, then just exit.
+  if (exit_response == nullptr) {
+    exit_response = g_strdup(kExitResponseExit);
+  }
+
+  if (g_str_equal(exit_response, kExitResponseExit)) {
+    quit_application();
+  } else if (g_str_equal(exit_response, kExitResponseCancel)) {
+    // Canceled - no action to take.
+  }
+
+  // If request was due to a request from Flutter, pass result back.
+  if (self->exit_application_method_call != nullptr) {
+    g_autoptr(FlValue) exit_result = fl_value_new_map();
+    fl_value_set_string_take(exit_result, kExitResponseKey,
+                             fl_value_new_string(exit_response));
+    g_autoptr(FlMethodResponse) exit_response =
+        FL_METHOD_RESPONSE(fl_method_success_response_new(exit_result));
+    if (!fl_method_call_respond(self->exit_application_method_call,
+                                exit_response, &error)) {
+      g_warning("Failed to send response to System.exitApplication: %s",
+                error->message);
+    }
+    g_clear_object(&self->exit_application_method_call);
+  }
+}
+
+// Send a request to Flutter to exit the application.
+static void request_app_exit(FlPlatformPlugin* self, const char* type) {
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_value_set_string_take(args, kExitTypeKey, fl_value_new_string(type));
+  fl_method_channel_invoke_method(self->channel, kRequestAppExitMethod, args,
+                                  self->cancellable,
+                                  request_app_exit_response_cb, self);
+}
+
+// Called when Flutter wants to exit the application.
+static FlMethodResponse* system_exit_application(FlPlatformPlugin* self,
+                                                 FlMethodCall* method_call) {
+  FlValue* args = fl_method_call_get_args(method_call);
+  if (fl_value_get_type(args) != FL_VALUE_TYPE_MAP) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kBadArgumentsError, "Argument map missing or malformed", nullptr));
+  }
+
+  FlValue* type_value = fl_value_lookup_string(args, kExitTypeKey);
+  if (type_value == nullptr ||
+      fl_value_get_type(type_value) != FL_VALUE_TYPE_STRING) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kBadArgumentsError, "Missing type argument", nullptr));
+  }
+  const char* type = fl_value_get_string(type_value);
+
+  // Save method call to respond to when our request to Flutter completes.
+  if (self->exit_application_method_call != nullptr) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kInProgressError, "Request already in progress", nullptr));
+  }
+  self->exit_application_method_call =
+      FL_METHOD_CALL(g_object_ref(method_call));
+
+  // Requested to immediately quit.
+  if (g_str_equal(type, kExitTypeRequired)) {
+    quit_application();
+    g_autoptr(FlValue) exit_result = fl_value_new_map();
+    fl_value_set_string_take(exit_result, kExitResponseKey,
+                             fl_value_new_string(kExitResponseExit));
+    return FL_METHOD_RESPONSE(fl_method_success_response_new(exit_result));
+  }
+
+  // Send the request back to Flutter to follow the standard process.
+  request_app_exit(self, type);
+
+  // Will respond later.
+  return nullptr;
+}
+
 // Called when Flutter wants to play a sound.
 static FlMethodResponse* system_sound_play(FlPlatformPlugin* self,
                                            FlValue* args) {
@@ -165,14 +309,7 @@ static FlMethodResponse* system_sound_play(FlPlatformPlugin* self,
 
 // Called when Flutter wants to quit the application.
 static FlMethodResponse* system_navigator_pop(FlPlatformPlugin* self) {
-  GApplication* app = g_application_get_default();
-  if (app == nullptr) {
-    return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        kFailedError, "Unable to get GApplication", nullptr));
-  }
-
-  g_application_quit(app);
-
+  quit_application();
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
@@ -192,6 +329,8 @@ static void method_call_cb(FlMethodChannel* channel,
     response = clipboard_get_data_async(self, method_call);
   } else if (strcmp(method, kClipboardHasStringsMethod) == 0) {
     response = clipboard_has_strings_async(self, method_call);
+  } else if (strcmp(method, kExitApplicationMethod) == 0) {
+    response = system_exit_application(self, method_call);
   } else if (strcmp(method, kPlaySoundMethod) == 0) {
     response = system_sound_play(self, args);
   } else if (strcmp(method, kSystemNavigatorPopMethod) == 0) {
@@ -208,7 +347,11 @@ static void method_call_cb(FlMethodChannel* channel,
 static void fl_platform_plugin_dispose(GObject* object) {
   FlPlatformPlugin* self = FL_PLATFORM_PLUGIN(object);
 
+  g_cancellable_cancel(self->cancellable);
+
   g_clear_object(&self->channel);
+  g_clear_object(&self->exit_application_method_call);
+  g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_platform_plugin_parent_class)->dispose(object);
 }
@@ -217,7 +360,9 @@ static void fl_platform_plugin_class_init(FlPlatformPluginClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_platform_plugin_dispose;
 }
 
-static void fl_platform_plugin_init(FlPlatformPlugin* self) {}
+static void fl_platform_plugin_init(FlPlatformPlugin* self) {
+  self->cancellable = g_cancellable_new();
+}
 
 FlPlatformPlugin* fl_platform_plugin_new(FlBinaryMessenger* messenger) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
@@ -232,4 +377,10 @@ FlPlatformPlugin* fl_platform_plugin_new(FlBinaryMessenger* messenger) {
                                             nullptr);
 
   return self;
+}
+
+void fl_platform_plugin_request_app_exit(FlPlatformPlugin* self) {
+  g_return_if_fail(FL_IS_PLATFORM_PLUGIN(self));
+  // Request a cancellable exit.
+  request_app_exit(self, kExitTypeCancelable);
 }
