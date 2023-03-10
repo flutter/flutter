@@ -1014,7 +1014,7 @@ class RawScrollbar extends StatefulWidget {
   }) {
     // TODO(Piinks): Instead, `.dual` should be a constructor that internally
     //  creates two ScrollbarPainters so that they can respond to each other
-    //  appropriately: <ISSUE LINK>
+    //  appropriately: https://github.com/flutter/flutter/issues/122345
     return RawScrollbar(
       controller: verticalController,
       child: RawScrollbar(

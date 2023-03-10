@@ -890,12 +890,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    final ScrollableDetails details = ScrollableDetails(
-      direction: widget.axisDirection,
-      controller: _effectiveScrollController,
-      clipBehavior: widget.clipBehavior,
-    );
-
     // Apply chrome like scrollbars and overscroll indicators.
     result = _buildChrome(result);
 
