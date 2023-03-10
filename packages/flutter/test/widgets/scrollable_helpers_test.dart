@@ -16,9 +16,7 @@ void main() {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           physics: const NeverScrollableScrollPhysics(),
@@ -28,7 +26,10 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                  child: SizedBox(
+                    key: ValueKey<String>('Box $index'),
+                    height: 50.0,
+                  ),
                 ),
               );
             },
@@ -39,36 +40,49 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           slivers: List<Widget>.generate(
@@ -77,7 +91,10 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                  child: SizedBox(
+                    key: ValueKey<String>('Box $index'),
+                    height: 50.0,
+                  ),
                 ),
               );
             },
@@ -88,7 +105,10 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
     if (!kIsWeb) {
@@ -99,7 +119,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)),
+    );
     if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
     }
@@ -108,22 +131,29 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           scrollDirection: Axis.horizontal,
@@ -133,7 +163,10 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                  child: SizedBox(
+                    key: ValueKey<String>('Box $index'),
+                    width: 50.0,
+                  ),
                 ),
               );
             },
@@ -144,7 +177,10 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)),
+    );
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
     if (!kIsWeb) {
@@ -155,7 +191,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)),
+    );
     if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
     }
@@ -164,16 +203,17 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: CustomScrollView(
@@ -185,7 +225,10 @@ void main() {
                 return SliverToBoxAdapter(
                   child: Focus(
                     autofocus: index == 0,
-                    child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                    child: SizedBox(
+                      key: ValueKey<String>('Box $index'),
+                      width: 50.0,
+                    ),
                   ),
                 );
               },
@@ -197,7 +240,10 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)),
+    );
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
     if (!kIsWeb) {
@@ -208,7 +254,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)),
+    );
     if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
     }
@@ -217,7 +266,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -225,9 +277,7 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           reverse: true,
@@ -237,7 +287,10 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   focusNode: focusNode,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                  child: SizedBox(
+                    key: ValueKey<String>('Box $index'),
+                    height: 50.0,
+                  ),
                 ),
               );
             },
@@ -249,7 +302,10 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
+    );
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
     if (!kIsWeb) {
@@ -260,7 +316,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)),
+    );
     if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
     }
@@ -269,13 +328,22 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 950.0, 800.0, 1000.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 950.0, 800.0, 1000.0)),
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -283,9 +351,7 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           scrollDirection: Axis.horizontal,
@@ -296,7 +362,10 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   focusNode: focusNode,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                  child: SizedBox(
+                    key: ValueKey<String>('Box $index'),
+                    width: 50.0,
+                  ),
                 ),
               );
             },
@@ -308,7 +377,10 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)),
+    );
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
     if (!kIsWeb) {
@@ -319,7 +391,10 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)),
+    );
     if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
     }
@@ -335,9 +410,7 @@ void main() {
     final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.fuchsia,
-        ),
+        theme: ThemeData(platform: TargetPlatform.fuchsia),
         home: CustomScrollView(
           controller: controller,
           center: const ValueKey<String>('Center'),
@@ -363,7 +436,10 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
+    );
     for (int i = 0; i < 10; ++i) {
       // We exclude the modifier keys here for web testing since default web shortcuts
       // do not use a modifier key with arrow keys for ScrollActions.
@@ -378,7 +454,10 @@ void main() {
     }
     // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
     expect(controller.position.pixels, equals(400.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)),
+    );
     for (int i = 0; i < 10; ++i) {
       if (!kIsWeb) {
         await tester.sendKeyDownEvent(modifierKey);
@@ -391,6 +470,9 @@ void main() {
     }
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
-    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)),
+    );
   }, variant: KeySimulatorTransitModeVariant.all());
 }
