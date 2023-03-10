@@ -2403,5 +2403,17 @@ TEST(DisplayList, RTreeRenderCulling) {
   }
 }
 
+TEST(DisplayListTest, DrawSaveDrawCannotInheritOpacity) {
+  DisplayListBuilder builder;
+  builder.DrawCircle({10, 10}, 5, DlPaint());
+  builder.Save();
+  builder.ClipRect({0, 0, 20, 20}, DlCanvas::ClipOp::kIntersect, false);
+  builder.DrawRect({5, 5, 15, 15}, DlPaint());
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  ASSERT_FALSE(display_list->can_apply_group_opacity());
+}
+
 }  // namespace testing
 }  // namespace flutter
