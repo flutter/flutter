@@ -276,8 +276,6 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<GlyphAtlasSdfPipeline>(*context_);
   geometry_color_pipelines_[{}] =
       CreateDefaultPipeline<GeometryColorPipeline>(*context_);
-  geometry_position_pipelines_[{}] =
-      CreateDefaultPipeline<GeometryPositionPipeline>(*context_);
   yuv_to_rgb_filter_pipelines_[{}] =
       CreateDefaultPipeline<YUVToRGBFilterPipeline>(*context_);
 
