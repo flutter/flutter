@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -155,5 +158,49 @@ Future<void> main() async {
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));
+  });
+
+  testWidgets('OutlinedBorder (such as CircleBorder) avoids clipping edges when possible', (WidgetTester tester) async {
+    // Fix https://github.com/flutter/flutter/issues/13675
+    Widget buildWidget(Color color) {
+      return SizedBox(
+        width: 145,
+        height: 145,
+        child: Stack(
+          children: <Widget>[
+            for (int i = 0; i < 10; i++)
+              for (int j = 0; j < 10; j++)
+                Transform.translate(
+                  offset: Offset(i * 5, j * 5),
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const ShapeDecoration(
+                      color: Colors.black,
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: Colors.white,
+                          width: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.circle_border.filledBorder.png'),
+    );
+
+    await tester.pumpWidget(buildWidget(const Color(0xfaffffff)));
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.circle_border.leakingBorder.png'),
+    );
   });
 }

@@ -378,11 +378,23 @@ class _ShapeDecorationPainter extends BoxPainter {
   void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_interiorPaint != null) {
       if (_decoration.shape.preferPaintInterior) {
-        _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
+        // When border is filled, we can reduce the rect to avoid
+        // visual glitches leaking the color due to clipping.
+        // https://github.com/flutter/flutter/issues/13675
+        final Rect adjustedRect = _adjustRectOnOutlinedBorder(rect);
+        _decoration.shape.paintInterior(canvas, adjustedRect, _interiorPaint!, textDirection: textDirection);
       } else {
         canvas.drawPath(_outerPath, _interiorPaint!);
       }
     }
+  }
+
+  Rect _adjustRectOnOutlinedBorder(Rect rect) {
+    if (_decoration.shape is OutlinedBorder) {
+      final BorderSide side = (_decoration.shape as OutlinedBorder).side;
+      return (side.color.alpha == 255 && _decoration.color != null) ? rect.deflate(side.strokeInset / 2) : rect;
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;
