@@ -14,7 +14,7 @@ import 'theme.dart';
 // macOS 13.2 on a Macbook Pro.
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
-  fontSize: 13.0,
+  fontSize: 14.0,
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
 );

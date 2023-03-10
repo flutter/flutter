@@ -15,6 +15,14 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;
 const Radius _kToolbarBorderRadius = Radius.circular(8.0);
 const EdgeInsets _kToolbarPadding = EdgeInsets.all(6.0);
+const List<BoxShadow> _kToolbarShadow = <BoxShadow>[
+  BoxShadow(
+    color: Color.fromARGB(60, 0, 0, 0),
+    blurRadius: 10.0,
+    spreadRadius: 0.5,
+    offset: Offset(0.0, 4.0),
+  ),
+];
 
 // These values were measured from a screenshot of the native context menu on
 // macOS 13.2 on a Macbook Pro.
@@ -74,14 +82,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
           color: _kToolbarBorderColor.resolveFrom(context),
         ),
         borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color.fromARGB(50, 0, 0, 0),
-            blurRadius: 10.0,
-            spreadRadius: 0.5,
-            offset: Offset(0.0, 4.0),
-          ),
-        ],
+        boxShadow: _kToolbarShadow,
       ),
       child: Padding(
         padding: _kToolbarPadding,
