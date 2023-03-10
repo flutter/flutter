@@ -41,7 +41,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#744c9\n'
+        '_RenderTheater#744c9\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -114,7 +114,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#385b3\n'
+        '_RenderTheater#385b3\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'

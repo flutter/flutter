@@ -1663,7 +1663,7 @@ void main() {
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
-  testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
+  testUsingContext('can re-gen default template over existing app project with no metadata and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1950,14 +1950,14 @@ void main() {
       await runner.run(<String>['create', '--pub', projectDir.path]);
       final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && !c.contains('--offline')
       )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && c.contains('--offline')
       )));
     },
     overrides: <Type, Generator>{

@@ -6811,7 +6811,7 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// A widget that annotates the widget tree with a description of the meaning of
 /// the widgets.
 ///
-/// Used by assitive technologies, search engines, and other semantic analysis
+/// Used by assistive technologies, search engines, and other semantic analysis
 /// software to determine the meaning of the application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}

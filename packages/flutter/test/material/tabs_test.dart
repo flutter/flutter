@@ -288,24 +288,24 @@ void main() {
 
   testWidgets('Tab sizing - text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(text: 'x')))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(text: 'x')))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
   });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(fontFamily: 'Ahem'),
+        theme: ThemeData(fontFamily: 'FlutterTest'),
         home: const Center(
           child: Material(
             child: Tab(
@@ -322,15 +322,15 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
   });
 
@@ -3568,7 +3568,7 @@ void main() {
     expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
   });
 
-  testWidgets('Do not throw when switching beetween a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
+  testWidgets('Do not throw when switching between a scrollable TabBar and a non-scrollable TabBar', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/120649
     final TabController controller1 = TabController(
       vsync: const TestVSync(),
@@ -5613,6 +5613,36 @@ void main() {
         find.text(unSelectedValue)).text.style!.color,
         labelColor.withAlpha(0xB2) // 70% alpha,
       );
+    });
+
+    testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (WidgetTester tester) async {
+      const Color dividerColor = Colors.yellow;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: true,
+            tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                controller: TabController(length: 3, vsync: const TestVSync()),
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Test painter's divider color.
+      final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
+      // ignore: avoid_dynamic_calls
+      expect((paint.painter as dynamic).dividerColor, dividerColor);
     });
   });
 }

@@ -114,10 +114,10 @@ void main() {
     ];
 
     for (final Typography fromTypography in all) {
-      for (final Typography toTypegraphy in all) {
+      for (final Typography toTypography in all) {
         Object? error;
         try {
-          Typography.lerp(fromTypography, toTypegraphy, 0.5);
+          Typography.lerp(fromTypography, toTypography, 0.5);
         } catch (e) {
           error = e;
         }

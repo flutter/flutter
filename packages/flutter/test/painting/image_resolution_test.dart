@@ -40,8 +40,8 @@ class TestAssetBundle extends CachingAssetBundle {
 void main() {
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
-      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
-        <String, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
+        <String, List<Map<Object?, Object?>>>{};
 
       assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
@@ -89,13 +89,13 @@ void main() {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
       const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
-        <String, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
+        <String, List<Map<Object?, Object?>>>{};
 
-      final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
+      final Map<Object?, Object?> mainAssetVariantManifestEntry = <Object?, Object?>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;
       mainAssetVariantManifestEntry['dpr'] = 3.0;
-      assetBundleMap[mainAssetPath] = <Map<dynamic, dynamic>>[mainAssetVariantManifestEntry];
+      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[mainAssetVariantManifestEntry];
       final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
       final AssetImage assetImage = AssetImage(
@@ -121,8 +121,8 @@ void main() {
     test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
-        <String, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
+        <String, List<Map<Object?, Object?>>>{};
 
       assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
@@ -160,13 +160,13 @@ void main() {
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
-        <String, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
+        <String, List<Map<Object?, Object?>>>{};
 
-      final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
+      final Map<Object?, Object?> mainAssetVariantManifestEntry = <Object?, Object?>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;
       mainAssetVariantManifestEntry['dpr'] = 3.0;
-      assetBundleMap[mainAssetPath] = <Map<dynamic, dynamic>>[mainAssetVariantManifestEntry];
+      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[mainAssetVariantManifestEntry];
 
       final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 

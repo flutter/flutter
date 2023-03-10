@@ -19,7 +19,7 @@ import '../image_data.dart';
 ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
 double scaleOf(ByteData data) => data.getFloat64(0);
 
-final Map<dynamic, dynamic> testManifest = json.decode('''
+final Map<Object?, Object?> testManifest = json.decode('''
 {
   "assets/image.png" : [
     {"asset": "assets/1.5x/image.png", "dpr": 1.5},
@@ -31,7 +31,7 @@ final Map<dynamic, dynamic> testManifest = json.decode('''
 ''') as Map<Object?, Object?>;
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ required Map<dynamic, dynamic> manifest }) {
+  TestAssetBundle({ required Map<Object?, Object?> manifest }) {
     this.manifest = const StandardMessageCodec().encodeMessage(manifest)!;
   }
 

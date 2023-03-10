@@ -38,16 +38,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
-      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
-      ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction;
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     initRenderView();
-    _handleSemanticsEnabledChanged();
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame);
     }
+    addSemanticsEnabledListener(_handleSemanticsEnabledChanged);
+    _handleSemanticsEnabledChanged();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -308,8 +307,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     );
   }
 
-  SemanticsHandle? _semanticsHandle;
-
   /// Creates a [MouseTracker] which manages state about currently connected
   /// mice, for hover notification.
   ///
@@ -333,14 +330,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     super.dispatchEvent(event, hitTestResult);
   }
 
-  void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(platformDispatcher.semanticsEnabled);
-  }
+  SemanticsHandle? _semanticsHandle;
 
-  /// Whether the render tree associated with this binding should produce a tree
-  /// of [SemanticsNode] objects.
-  void setSemanticsEnabled(bool enabled) {
-    if (enabled) {
+  void _handleSemanticsEnabledChanged() {
+    if (semanticsEnabled) {
       _semanticsHandle ??= _pipelineOwner.ensureSemantics();
     } else {
       _semanticsHandle?.dispose();
@@ -348,18 +341,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     }
   }
 
-  void _handleWebFirstFrame(Duration _) {
-    assert(kIsWeb);
-    const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
-    methodChannel.invokeMethod<void>('first-frame');
-  }
-
-  void _handleSemanticsAction(int id, SemanticsAction action, ByteData? args) {
-    _pipelineOwner.semanticsOwner?.performAction(
-      id,
-      action,
-      args != null ? const StandardMessageCodec().decodeMessage(args) : null,
-    );
+  @override
+  void performSemanticsAction(SemanticsActionEvent action) {
+    _pipelineOwner.semanticsOwner?.performAction(action.nodeId, action.type, action.arguments);
   }
 
   void _handleSemanticsOwnerCreated() {
@@ -372,6 +356,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handleSemanticsOwnerDisposed() {
     renderView.clearSemantics();
+  }
+
+  void _handleWebFirstFrame(Duration _) {
+    assert(kIsWeb);
+    const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
+    methodChannel.invokeMethod<void>('first-frame');
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {

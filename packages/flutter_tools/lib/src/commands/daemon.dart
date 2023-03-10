@@ -883,7 +883,7 @@ class DeviceDomain extends Domain {
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices())
           await _deviceToMap(device),
     ];
   }
@@ -1016,7 +1016,9 @@ class DeviceDomain extends Domain {
     );
     return <String, Object?>{
       'started': result.started,
-      'observatoryUri': result.observatoryUri?.toString(),
+      'vmServiceUri': result.vmServiceUri?.toString(),
+      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 
@@ -1067,7 +1069,7 @@ class DeviceDomain extends Domain {
   /// Return the device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {

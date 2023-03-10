@@ -260,6 +260,9 @@ class BorderSide with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     if (t == 0.0) {
       return a;
     }
@@ -519,6 +522,9 @@ abstract class ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     ShapeBorder? result;
     if (b != null) {
       result = b.lerpFrom(a, t);
@@ -708,6 +714,9 @@ abstract class OutlinedBorder extends ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     ShapeBorder? result;
     if (b != null) {
       result = b.lerpFrom(a, t);

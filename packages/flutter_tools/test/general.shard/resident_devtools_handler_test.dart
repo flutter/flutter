@@ -421,7 +421,7 @@ void main() {
     expect(handler.launchedInBrowser, isTrue);
   });
 
-  testWithoutContext('Converts a VmService URI with a query parameter to a pretty display string', () {
+  testWithoutContext('Converts a VM Service URI with a query parameter to a pretty display string', () {
     const String value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
     final Uri uri = Uri.parse(value);
 

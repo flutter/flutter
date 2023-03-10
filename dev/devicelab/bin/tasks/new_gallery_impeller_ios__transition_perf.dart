@@ -17,6 +17,7 @@ Future<void> main() async {
   final Directory galleryDir = Directory(path.join(galleryParentDir.path, 'gallery'));
 
   try {
+    // ignore: avoid_redundant_argument_values
     await task(NewGalleryPerfTest(galleryDir, enableImpeller: true).run);
   } finally {
     rmTree(galleryParentDir);

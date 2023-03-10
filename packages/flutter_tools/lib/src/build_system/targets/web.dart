@@ -39,6 +39,11 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// The default optimization level for dart2js.
+///
+/// Maps to [kDart2jsOptimization].
+const String kDart2jsDefaultOptimizationLevel = 'O4';
+
 /// If `--dump-info` should be passed to dart2js.
 const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
 
@@ -235,7 +240,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw Exception(_collectOutput(kernelResult));
     }
 
-    final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final String dart2jsOptimization = environment.defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel;
     final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
     final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
@@ -243,7 +248,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
-      if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
+      '-$dart2jsOptimization',
       if (buildMode == BuildMode.profile) '--no-minify',
       if (dumpInfo) '--dump-info',
       if (noFrequencyBasedMinification) '--no-frequency-based-minification',
@@ -342,7 +347,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle(this.webRenderer, this.isWasm);
+  const WebReleaseBundle(this.webRenderer, {required this.isWasm});
 
   final WebRendererMode webRenderer;
   final bool isWasm;
@@ -483,10 +488,9 @@ class WebReleaseBundle extends Target {
 /// These assets can be cached forever and are only invalidated when the
 /// Flutter SDK is upgraded to a new version.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, this.cache, this.isWasm);
+  const WebBuiltInAssets(this.fileSystem, {required this.isWasm});
 
   final FileSystem fileSystem;
-  final Cache cache;
   final bool isWasm;
 
   @override
@@ -506,16 +510,13 @@ class WebBuiltInAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
-    //
-    // Update this when we start building CanvasKit from sources. In the
-    // meantime, get the Web SDK directory from cache rather than through
-    // Artifacts. The latter is sensitive to `--local-engine`, which changes
-    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
-    // built as part of the engine, but fetched from CIPD, and so it won't be
-    // found in ENGINE/src/out.
-    final Directory flutterWebSdk = cache.getWebSdkDirectory();
-    final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      ),
+    );
+
     for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
       final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
@@ -538,10 +539,9 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer, this.isWasm);
+  const WebServiceWorker(this.fileSystem, this.webRenderer, {required this.isWasm});
 
   final FileSystem fileSystem;
-  final Cache cache;
   final WebRendererMode webRenderer;
   final bool isWasm;
 
@@ -551,8 +551,8 @@ class WebServiceWorker extends Target {
   @override
   List<Target> get dependencies => <Target>[
     if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
-    WebReleaseBundle(webRenderer, isWasm),
-    WebBuiltInAssets(fileSystem, cache, isWasm),
+    WebReleaseBundle(webRenderer, isWasm: isWasm),
+    WebBuiltInAssets(fileSystem, isWasm: isWasm),
   ];
 
   @override
