@@ -1,12 +1,11 @@
 {
-  "version": "v0_158",
+  "version": "v0_168",
 
-  "md.comp.elevated-button.container.color": "surface",
+  "md.comp.elevated-button.container.color": "surfaceContainerLow",
   "md.comp.elevated-button.container.elevation": "md.sys.elevation.level1",
   "md.comp.elevated-button.container.height": 40.0,
   "md.comp.elevated-button.container.shadow-color": "shadow",
   "md.comp.elevated-button.container.shape": "md.sys.shape.corner.full",
-  "md.comp.elevated-button.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.elevated-button.disabled.container.color": "onSurface",
   "md.comp.elevated-button.disabled.container.elevation": "md.sys.elevation.level0",
   "md.comp.elevated-button.disabled.container.opacity": 0.12,

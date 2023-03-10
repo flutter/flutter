@@ -1,7 +1,7 @@
 {
-  "version": "v0_158",
+  "version": "v0_168",
 
-  "md.comp.filled-card.container.color": "surfaceVariant",
+  "md.comp.filled-card.container.color": "surfaceContainerHighest",
   "md.comp.filled-card.container.elevation": "md.sys.elevation.level0",
   "md.comp.filled-card.container.shadow-color": "shadow",
   "md.comp.filled-card.container.shape": "md.sys.shape.corner.medium",
