@@ -1,10 +1,10 @@
 {
-  "version": "v0_168",
+  "version": "v0_162",
 
   "md.comp.filled-text-field.active-indicator.color": "onSurfaceVariant",
   "md.comp.filled-text-field.active-indicator.height": 1.0,
   "md.comp.filled-text-field.caret.color": "primary",
-  "md.comp.filled-text-field.container.color": "surfaceContainerHighest",
+  "md.comp.filled-text-field.container.color": "surfaceVariant",
   "md.comp.filled-text-field.container.shape": "md.sys.shape.corner.extra-small.top",
   "md.comp.filled-text-field.disabled.active-indicator.color": "onSurface",
   "md.comp.filled-text-field.disabled.active-indicator.height": 1.0,

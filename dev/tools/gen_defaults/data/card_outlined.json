@@ -1,10 +1,11 @@
 {
-  "version": "v0_168",
+  "version": "v0_162",
 
   "md.comp.outlined-card.container.color": "surface",
   "md.comp.outlined-card.container.elevation": "md.sys.elevation.level0",
   "md.comp.outlined-card.container.shadow-color": "shadow",
   "md.comp.outlined-card.container.shape": "md.sys.shape.corner.medium",
+  "md.comp.outlined-card.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.outlined-card.disabled.container.elevation": "md.sys.elevation.level0",
   "md.comp.outlined-card.disabled.outline.color": "outline",
   "md.comp.outlined-card.disabled.outline.opacity": 0.12,
