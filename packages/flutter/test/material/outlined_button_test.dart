@@ -1010,7 +1010,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
-    expect(tester.getSize(find.byType(Text)), const Size(55.0, 19.0));
+    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
