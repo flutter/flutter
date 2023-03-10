@@ -3496,10 +3496,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4045,10 +4042,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4180,10 +4174,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -7858,7 +7849,6 @@ void main() {
   testWidgets('placeholder style overflow works', (WidgetTester tester) async {
     final String placeholder = 'hint text' * 20;
     const TextStyle placeholderStyle = TextStyle(
-      fontFamily: 'Ahem',
       fontSize: 14.0,
       overflow: TextOverflow.fade,
     );
