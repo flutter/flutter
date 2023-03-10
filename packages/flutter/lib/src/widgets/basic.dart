@@ -4852,7 +4852,7 @@ class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMi
     this.clipBehavior = Clip.none,
     this.children = const <Widget>[],
   });
-  
+
   @override
   Axis get direction => Axis.horizontal;
 
@@ -4876,10 +4876,10 @@ class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMi
 
   @override
   final Clip clipBehavior;
-  
+
   @override
   final List<Widget> children;
-  
+
   @override
   Widget build(BuildContext context) {
     Widget result = Flex(
@@ -5098,7 +5098,7 @@ class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, Fle
     this.clipBehavior = Clip.none,
     this.children = const <Widget>[],
   });
-  
+
   @override
   Axis get direction => Axis.vertical;
 
@@ -5122,10 +5122,10 @@ class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, Fle
 
   @override
   final Clip clipBehavior;
-  
+
   @override
   final List<Widget> children;
-  
+
   @override
   Widget build(BuildContext context) {
     Widget result = Flex(
