@@ -1104,7 +1104,7 @@ void main() {
     });
   });
 
-  for (TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
+  for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
     testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
       late BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
