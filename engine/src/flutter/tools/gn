@@ -380,6 +380,10 @@ def to_gn_args(args):
   else:
     gn_args['dart_runtime_mode'] = runtime_mode
 
+  # If we are building the dart sdk in-tree, exclude the wasm-opt target, as
+  # it doesn't build properly with our gn configuration.
+  gn_args['dart_include_wasm_opt'] = False
+
   # Desktop embeddings can have more dependencies than the engine library,
   # which can be problematic in some build environments (e.g., building on
   # Linux will bring in pkg-config dependencies at generation time). These
