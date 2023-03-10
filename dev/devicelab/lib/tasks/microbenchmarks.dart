@@ -15,7 +15,7 @@ import '../microbenchmarks.dart';
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
-TaskFunction createMicrobenchmarkTask({bool enableImpeller = kEnableImpellerDefault}) {
+TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
