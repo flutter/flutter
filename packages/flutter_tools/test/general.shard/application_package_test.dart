@@ -83,7 +83,7 @@ void main() {
             aaptPath,
             'dump',
             'xmltree',
-             fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'debug', 'app-debug.apk'),
+             fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'app-debug.apk'),
             'AndroidManifest.xml',
           ],
           stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
@@ -106,7 +106,6 @@ void main() {
         .childDirectory('host')
         .childDirectory('outputs')
         .childDirectory('apk')
-        .childDirectory('debug')
         .childFile('app-debug.apk');
       apkDebugFile.createSync(recursive: true);
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
