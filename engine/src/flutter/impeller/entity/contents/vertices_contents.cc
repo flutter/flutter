@@ -8,7 +8,6 @@
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
-#include "impeller/entity/position.vert.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/geometry/color.h"

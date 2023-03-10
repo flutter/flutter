@@ -52,7 +52,6 @@
 #include "impeller/renderer/pipeline.h"
 #include "impeller/scene/scene_context.h"
 
-#include "impeller/entity/position.vert.h"
 #include "impeller/entity/position_color.vert.h"
 
 #include "impeller/scene/scene_context.h"
@@ -152,8 +151,6 @@ using GlyphAtlasSdfPipeline =
 using ClipPipeline =
     RenderPipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
-using GeometryPositionPipeline =
-    RenderPipelineT<PositionVertexShader, VerticesFragmentShader>;
 using GeometryColorPipeline =
     RenderPipelineT<PositionColorVertexShader, VerticesFragmentShader>;
 using YUVToRGBFilterPipeline =
@@ -427,11 +424,6 @@ class ContentContext {
     return GetPipeline(geometry_color_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGeometryPositionPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(geometry_position_pipelines_, opts);
-  }
-
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetYUVToRGBFilterPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(yuv_to_rgb_filter_pipelines_, opts);
@@ -661,7 +653,6 @@ class ContentContext {
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
   mutable Variants<GlyphAtlasSdfPipeline> glyph_atlas_sdf_pipelines_;
-  mutable Variants<GeometryPositionPipeline> geometry_position_pipelines_;
   mutable Variants<GeometryColorPipeline> geometry_color_pipelines_;
   mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
   // Advanced blends.
