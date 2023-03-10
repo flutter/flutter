@@ -746,18 +746,16 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
     expect(
       tester.getSize(find.text('Chip A')),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
+      const Size(84.0, 14.0),
     );
     expect(
       tester.getSize(find.text('Chip B')),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
+      const Size(84.0, 14.0),
     );
-    expect(tester.getSize(find.byType(Chip).first), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find.byType(Chip).first), const Size(132.0, 48.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(132.0, 48.0));
 
     await tester.pumpWidget(
       wrapForChip(
@@ -777,14 +775,10 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(310.0, 311.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last).width, anyOf(310.0, 311.0));
-    expect(tester.getSize(find.byType(Chip).last).height, equals(50.0));
+    expect(tester.getSize(find.text('Chip A')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.text('Chip B')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.byType(Chip).first), const Size(310.0, 50.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(310.0, 50.0));
 
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
@@ -804,13 +798,10 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find.text('Chip A')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.text('Chip B')), const Size(84.0, 14.0));
+    expect(tester.getSize(find.byType(Chip).first), const Size(318.0, 50.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(132.0, 48.0));
   });
 
   testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
@@ -833,17 +824,9 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(
-      tester.getSize(find.byKey(keyA)),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
-    );
+    expect(tester.getSize(find.byKey(keyA)), const Size(84.0, 14.0));
     expect(tester.getSize(find.byKey(keyB)), const Size(10.0, 10.0));
-    expect(
-      tester.getSize(find.byType(Chip).first),
-      anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)),
-    );
+    expect(tester.getSize(find.byType(Chip).first), const Size(132.0, 48.0));
     expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 48.0));
   });
 
