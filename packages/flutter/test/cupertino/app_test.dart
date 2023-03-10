@@ -446,7 +446,7 @@ void main() {
         ),
       )
     );
-    
+
     Widget buildWidget() {
       return CupertinoApp(
         scrollBehavior: const MockScrollBehavior(),
@@ -462,10 +462,10 @@ void main() {
         )
       );
     }
-    
+
     await tester.pumpWidget(buildWidget());
     await tester.pumpAndSettle();
-    
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
