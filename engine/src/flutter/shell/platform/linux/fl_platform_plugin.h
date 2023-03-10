@@ -33,6 +33,15 @@ G_DECLARE_FINAL_TYPE(FlPlatformPlugin,
  */
 FlPlatformPlugin* fl_platform_plugin_new(FlBinaryMessenger* messenger);
 
+/**
+ * fl_platform_plugin_request_app_exit:
+ * @plugin: an #FlPlatformPlugin
+ *
+ * Request the application exits (i.e. due to the window being requested to be
+ * closed).
+ */
+void fl_platform_plugin_request_app_exit(FlPlatformPlugin* plugin);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_PLATFORM_PLUGIN_H_
