@@ -26,6 +26,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_web_sdk_version": {
+        "uri": "lib/_web_sdk_version/web_sdk_version.dart"
       }
     }
   },
@@ -54,6 +57,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_web_sdk_version": {
+        "uri": "lib/_web_sdk_version/web_sdk_version.dart"
       }
     }
   },
@@ -82,6 +88,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_web_sdk_version": {
+        "uri": "lib/_web_sdk_version/web_sdk_version.dart"
       }
     }
   }

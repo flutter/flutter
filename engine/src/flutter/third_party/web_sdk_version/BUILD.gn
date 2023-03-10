@@ -1,0 +1,43 @@
+import("//flutter/shell/version.gni")
+import("//third_party/dart/build/dart/dart_action.gni")
+
+dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
+
+prebuilt_dart_action("web_sdk_version") {
+  packages = dart_sdk_package_config
+  pool = "//flutter/build/dart:dart_pool"
+
+  script = "version_writer.dart"
+  inputs = [ "version_writer.dart" ]
+
+  stamp_location = "$target_gen_dir/$target_name.stamp"
+  outputs = [
+    stamp_location,
+    invoker.output_dir,
+  ]
+
+  input_dir = rebase_path(invoker.input_dir)
+  output_dir = rebase_path(invoker.output_dir)
+
+  args = [
+    "--output-dir=$output_dir",
+    "--input-dir=$input_dir",
+    "--stamp",
+    rebase_path(stamp_location, root_build_dir),
+  ]
+  if (ui) {
+    args += [ "--ui" ]
+  } else {
+    library_name = invoker.library_name
+    api_file = rebase_path(invoker.api_file)
+    args += [
+      "--library-name=$library_name",
+      "--api-file=$api_file",
+    ]
+  }
+
+  foreach(source_file, source_dart_files) {
+    path = rebase_path(source_file)
+    args += [ "--source-file=$path" ]
+  }
+}
