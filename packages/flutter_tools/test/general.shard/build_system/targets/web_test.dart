@@ -374,8 +374,8 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
-        '--invoker=flutter_tool',
         '--enable-experiment=non-nullable',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -389,8 +389,8 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
-        '--invoker=flutter_tool',
         '--enable-experiment=non-nullable',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
