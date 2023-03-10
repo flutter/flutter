@@ -20,6 +20,7 @@ void main() {
         bottom: navigationBarHeight * devicePixelRatio,
       );
 
+      addTearDown(tester.view.reset);
       tester.view
         ..viewPadding = padding
         ..padding = padding
