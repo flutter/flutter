@@ -14,7 +14,7 @@ class NewGalleryPerfTest extends PerfTest {
     this.galleryDir, {
     String timelineFileName = 'transitions',
     String dartDefine = '',
-    bool enableImpeller = false,
+    bool enableImpeller = kEnableImpellerDefault,
     super.timeoutSeconds,
   }) : super(
     galleryDir.path,
