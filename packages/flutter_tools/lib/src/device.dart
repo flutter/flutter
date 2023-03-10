@@ -282,7 +282,7 @@ abstract class DeviceManager {
   /// If the user did not specify to run all or a specific device, then attempt
   /// to prioritize ephemeral devices.
   ///
-  /// If there is not exactly one ephermeral device return null.
+  /// If there is not exactly one ephemeral device return null.
   ///
   /// For example, if the user only typed 'flutter run' and both an Android
   /// device and desktop device are available, choose the Android device.
