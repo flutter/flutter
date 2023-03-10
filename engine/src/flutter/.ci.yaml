@@ -183,6 +183,7 @@ targets:
         {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
+      cores: "32"
     timeout: 60
 
   - name: Linux Unopt
@@ -321,6 +322,7 @@ targets:
       - master
     properties:
       add_recipes_cq: "true"
+      cores: "32"
       gclient_variables: >-
         {"download_emsdk": true}
       dependencies: >-
