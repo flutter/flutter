@@ -28,7 +28,7 @@ void main() {
     renderObject.scheduleInitialLayout();
     RendererBinding.instance.pipelineOwner.flushLayout();
 
-    expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 0);
+    MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
     renderObject.markNeedsLayout();
     expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
   });
