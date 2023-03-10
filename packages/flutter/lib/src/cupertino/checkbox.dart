@@ -5,11 +5,18 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'toggleable.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
 // late StateSetter setState;
+
+// The relative values needed to transform a color to it's equivilant focus
+// outline color.
+const double _kCupertinoFocusColorOpacity = 0.80;
+const double _kCupertinoFocusColorBrightness = 0.69;
+const double _kCupertinoFocusColorSaturation = 0.835;
 
 /// A macOS style checkbox.
 ///
@@ -23,10 +30,11 @@ import 'toggleable.dart';
 /// if [tristate] is true. When [value] is null a dash is displayed. By default
 /// [tristate] is false and the checkbox's [value] must be true or false.
 ///
-/// Note: in the Apple ecosystem, checkboxes are encouraged to only be used in
-/// macOS, not iOS. If a multi-selection component is needed, iOS encourages the
-/// developer to use Switches, or [CupertinoSwitch] instead, or find a creative
-/// custom solution.
+/// In the Apple Human Interface Guidelines (HIG), checkboxes are encouraged for
+/// use on macOS, but is silent about their use on iOS. If a multi-selection
+/// component is needed on iOS, the HIG encourages the developer to use switches
+/// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
+/// solution.
 ///
 /// See also:
 ///
@@ -69,7 +77,8 @@ class CupertinoCheckbox extends StatefulWidget {
   /// Whether this checkbox is checked.
   ///
   /// When [tristate] is true, a value of null corresponds to the mixed state.
-  /// When [tristate] is false, this value must not be null.
+  /// When [tristate] is false, this value must not be null. This is asserted in
+  /// debug mode.
   final bool? value;
 
   /// Called when the value of the checkbox should change.
@@ -83,7 +92,8 @@ class CupertinoCheckbox extends StatefulWidget {
   ///
   /// When the checkbox is tapped, if [tristate] is false (the default) then
   /// the [onChanged] callback will be applied to `!value`. If [tristate] is
-  /// true this callback cycle from false to true to null.
+  /// true this callback cycle from false to true to null and back to false
+  /// again.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -124,7 +134,7 @@ class CupertinoCheckbox extends StatefulWidget {
   /// value is true, and to false if value is null (i.e. it cycles through false
   /// => true => null => false when tapped).
   ///
-  /// If tristate is false (the default), [value] must not be null.
+  /// If tristate is false (the default), [value] is asseted to not be null.
   final bool tristate;
 
   /// The color for the checkbox's border shadow when it has the input focus.
@@ -140,13 +150,13 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color and width of the checkbox's border.
   ///
-  /// If this property is null, then the side will be width 1.
+  /// If this property is null, then the side defaults to a width of 1.
   final BorderSide? side;
 
   /// The shape of the checkbox.
   ///
-  /// If this property is null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 4.0.
+  /// If this property is null then the shape defaults to a
+  /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
   /// The width of a checkbox widget.
@@ -199,7 +209,6 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-
     final Color effectiveActiveColor = widget.activeColor
       ?? CupertinoColors.activeBlue;
     final Color? inactiveColor = widget.inactiveColor;
@@ -208,8 +217,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(0.80))
-          .withLightness(0.69).withSaturation(0.835)
+          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
+          .withLightness(_kCupertinoFocusColorBrightness)
+          .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
 
     final Color effectiveCheckColor = widget.checkColor
@@ -222,7 +232,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,
-        size: const Size(48.0, 48.0),
+        size: const Size.square(kMinInteractiveDimensionCupertino),
         painter: _painter
           ..focusColor = effectiveFocusOverlayColor
           ..isFocused = focused
@@ -241,8 +251,6 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     );
   }
 }
-
-const double _kEdgeSize = CupertinoCheckbox.width;
 
 class _CheckboxPainter extends ToggleablePainter {
   Color get checkColor => _checkColor!;
@@ -296,7 +304,7 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   Rect _outerRectAt(Offset origin) {
-    const double size = _kEdgeSize;
+    const double size = CupertinoCheckbox.width;
     final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
     return rect;
   }
@@ -327,9 +335,12 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawCheck(Canvas canvas, Offset origin, Paint paint) {
     final Path path = Path();
-    const Offset start = Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
-    const Offset mid = Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
-    const Offset end = Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
+    // The ratios for the offsets below where found from looking at the checkbox
+    // examples on in the HIG docs. The distance from the needed point to the
+    // edge was measured, then devided by the total width.
+    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);
+    const Offset mid = Offset(CupertinoCheckbox.width * 0.46, CupertinoCheckbox.width * 0.75);
+    const Offset end = Offset(CupertinoCheckbox.width * 0.72, CupertinoCheckbox.width * 0.29);
     path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
     path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
     canvas.drawPath(path, paint);
@@ -339,15 +350,17 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawDash(Canvas canvas, Offset origin, Paint paint) {
-    const Offset start = Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.5);
-    const Offset end = Offset(_kEdgeSize * 0.75, _kEdgeSize * 0.5);
+    // From measuring the checkbox example in the HIG docs, the dash was found
+    // to be half the total width, centered in the middle.
+    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
+    const Offset end = Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
     canvas.drawLine(origin + start, origin + end, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
+    final Offset origin = size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
 
     final Rect outer = _outerRectAt(origin);
     final Paint paint = Paint()..color = _colorAt(value ?? true);

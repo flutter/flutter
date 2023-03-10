@@ -6,16 +6,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A mixin for [StatefulWidget]s that implement ios-themed toggleable
+/// A mixin for [StatefulWidget]s that implement iOS-themed toggleable
 /// controls (e.g.[Checkbox]es).
 ///
-/// The mixin implements the logic for toggling the control (e.g. when tapped).
+/// The mixin implements the logic for toggling the control when tapped.
 /// It does not have any opinion about the visual representation of the
 /// toggleable widget. The visuals are defined by a [CustomPainter] passed to
 /// the [buildToggleable]. [State] objects using this mixin should call that
 /// method from their [build] method.
 ///
-/// This mixin is used to implement the cupertino components for [Checkbox]
+/// This mixin is used to implement the Cupertino components for [Checkbox]
 /// controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
