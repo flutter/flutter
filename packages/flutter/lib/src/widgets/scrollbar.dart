@@ -22,6 +22,7 @@ import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'ticker_provider.dart';
 
 const double _kMinThumbExtent = 18.0;
