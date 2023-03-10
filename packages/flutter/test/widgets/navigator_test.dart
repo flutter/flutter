@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show FlutterView;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -2679,7 +2677,6 @@ void main() {
 
   group('Page api', () {
     Widget buildNavigator({
-      required FlutterView view,
       required List<Page<dynamic>> pages,
       required PopPageCallback onPopPage,
       GlobalKey<NavigatorState>? key,
@@ -2687,7 +2684,7 @@ void main() {
       List<NavigatorObserver> observers = const <NavigatorObserver>[],
     }) {
       return MediaQuery(
-        data: MediaQueryData.fromView(view),
+        data: MediaQueryData.fromView(WidgetsBinding.instance.window),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2721,12 +2718,7 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(find.text('third'), findsOneWidget);
       expect(find.text('second'), findsNothing);
@@ -2758,42 +2750,22 @@ void main() {
       bool onPopPage(Route<dynamic> route, dynamic result) => false;
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages1,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
       );
       await tester.pump();
       expect(find.text('initial'), findsOneWidget);
       // Update multiple times without waiting for pop to finish to leave
       // multiple popping route entries in route stack with the same page key.
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages2,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
       );
       await tester.pump();
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages1,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
       );
       await tester.pump();
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages2,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
       );
 
       await tester.pumpAndSettle();
@@ -2897,12 +2869,7 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(find.text('initial'), findsOneWidget);
 
@@ -2937,12 +2904,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // The third page is transitioning, and the secondary animation of first
       // page should chain with the third page. The animation of second page
@@ -2997,12 +2959,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
@@ -3062,12 +3019,7 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(find.text('third'), findsOneWidget);
       expect(find.text('second'), findsNothing);
@@ -3081,12 +3033,7 @@ void main() {
 
       myPages = myPages.reversed.toList();
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Reversed routes are still chained up correctly.
       expect(secondaryAnimationOfRouteThree.value, primaryAnimationOfRouteTwo.value);
@@ -3169,12 +3116,7 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(find.text('second'), findsOneWidget);
       expect(find.text('initial'), findsNothing);
@@ -3203,12 +3145,7 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name:'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsNothing);
@@ -3239,12 +3176,7 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name:'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Swaps the order without any adding or removing should not trigger any
       // transition. The routes should update without a pumpAndSettle
@@ -3316,12 +3248,7 @@ void main() {
 
       // Add initial page route with one pageless route.
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       bool initialPageless1Completed = false;
       navigator.currentState!.push(
@@ -3337,12 +3264,7 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pumpAndSettle();
       bool secondPageless1Completed = false;
@@ -3367,12 +3289,7 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name: 'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pumpAndSettle();
       bool thirdPageless1Completed = false;
@@ -3395,12 +3312,7 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // The pageless route of initial page route should be completed.
       expect(initialPageless1Completed, true);
@@ -3412,12 +3324,7 @@ void main() {
         const TestPage(key: ValueKey<String>('3'), name: 'third'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pumpAndSettle();
       expect(secondPageless1Completed, true);
@@ -3428,12 +3335,7 @@ void main() {
         const TestPage(key: ValueKey<String>('4'), name: 'forth'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(thirdPageless1Completed, true);
       await tester.pumpAndSettle();
@@ -3454,12 +3356,7 @@ void main() {
       }
 
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       expect(find.text('second'), findsOneWidget);
       expect(find.text('initial'), findsNothing);
@@ -3481,12 +3378,7 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name:'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       await tester.pumpAndSettle();
 
@@ -3519,7 +3411,6 @@ void main() {
       // Add initial page route with one pageless route.
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3541,7 +3432,6 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3571,7 +3461,6 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3599,7 +3488,6 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3617,7 +3505,6 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3635,7 +3522,6 @@ void main() {
       ];
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3661,12 +3547,7 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Pops the second page route.
@@ -3674,12 +3555,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Re-push the second page again before it finishes popping.
@@ -3688,12 +3564,7 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name: 'second'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // It should not crash the app.
@@ -3713,12 +3584,7 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Pops the second page route.
@@ -3726,12 +3592,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Updates the pages again before second page finishes popping.
@@ -3739,12 +3600,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // It should not crash the app.
@@ -3765,12 +3621,7 @@ void main() {
         return route.didPop(result);
       }
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Pushes a pageless route.
       showDialog<void>(
@@ -3787,12 +3638,7 @@ void main() {
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
       ];
       await tester.pumpWidget(
-        buildNavigator(
-          view: tester.view,
-          pages: myPages,
-          onPopPage: onPopPage,
-          key: navigator,
-        ),
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // It should not crash the app.
       expect(tester.takeException(), isNull);
@@ -3831,7 +3677,6 @@ void main() {
 
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
@@ -3845,7 +3690,6 @@ void main() {
 
       await tester.pumpWidget(
         buildNavigator(
-          view: tester.view,
           pages: myPages,
           onPopPage: onPopPage,
           key: navigator,
