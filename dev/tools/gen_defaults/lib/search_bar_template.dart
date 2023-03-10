@@ -52,7 +52,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
         return ${componentColor("md.comp.search-bar.hover.state-layer")};
       }
       if (states.contains(MaterialState.focused)) {
-        return Colors.transparent;
+        return ${colorOrTransparent("md.comp.search-bar.focused.state-layer")};
       }
       return Colors.transparent;
     });

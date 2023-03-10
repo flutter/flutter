@@ -67,7 +67,10 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// {@macro flutter.material.inputDecoration.hintText}
+  /// Text that suggests what sort of input the field accepts.
+  ///
+  /// Displayed at the same location on the screen where text may be entered
+  /// when the input is empty.
   ///
   /// Defaults to null.
   final String? hintText;
