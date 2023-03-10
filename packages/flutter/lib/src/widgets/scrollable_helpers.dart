@@ -62,7 +62,11 @@ class ScrollableDetails {
 /// velocity = <distance of overscroll> * [velocityScalar].
 class EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
-  EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
+  EdgeDraggingAutoScroller(
+    this.scrollable, {
+    this.onScrollViewScrolled,
+    this.velocityScalar = _kDefaultAutoScrollVelocityScalar,
+  });
 
   // An eyeballed value for a smooth scrolling experience.
   static const double _kDefaultAutoScrollVelocityScalar = 7;
@@ -124,9 +128,8 @@ class EdgeDraggingAutoScroller {
       // The change will be picked up in the next scroll.
       return;
     }
-    if (!_scrolling) {
-      _scroll();
-    }
+    assert(!_scrolling);
+    _scroll();
   }
 
   /// Stop any ongoing auto scrolling.
@@ -137,13 +140,13 @@ class EdgeDraggingAutoScroller {
   Future<void> _scroll() async {
     final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
     final Rect globalRect = MatrixUtils.transformRect(
-        scrollRenderBox.getTransformTo(null),
-        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
+      scrollRenderBox.getTransformTo(null),
+      Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
     assert(
-    globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
+      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
         globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
-    'Drag target size is larger than scrollable size, which may cause bouncing',
+      'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
     double? newOffset;
@@ -396,18 +399,18 @@ class ScrollAction extends Action<ScrollIntent> {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'A ScrollAction was invoked with the PrimaryScrollController, but '
-                  'more than one ScrollPosition is attached.',
+              'more than one ScrollPosition is attached.',
             ),
             ErrorDescription(
               'Only one ScrollPosition can be manipulated by a ScrollAction at '
-                  'a time.',
+              'a time.',
             ),
             ErrorHint(
               'The PrimaryScrollController can be inherited automatically by '
-                  'descendant ScrollViews based on the TargetPlatform and scroll '
-                  'direction. By default, the PrimaryScrollController is '
-                  'automatically inherited on mobile platforms for vertical '
-                  'ScrollViews. ScrollView.primary can also override this behavior.',
+              'descendant ScrollViews based on the TargetPlatform and scroll '
+              'direction. By default, the PrimaryScrollController is '
+              'automatically inherited on mobile platforms for vertical '
+              'ScrollViews. ScrollView.primary can also override this behavior.',
             ),
           ]);
         }
