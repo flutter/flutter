@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -12,6 +14,8 @@ const double _kToolbarScreenPadding = 8.0;
 
 // These values were measured from a screenshot of the native context menu on
 // macOS 13.2 on a Macbook Pro.
+const double _kToolbarSaturationBoost = 3;
+const double _kToolbarBlurSigma = 20;
 const double _kToolbarWidth = 222.0;
 const Radius _kToolbarBorderRadius = Radius.circular(8.0);
 const EdgeInsets _kToolbarPadding = EdgeInsets.all(6.0);
@@ -33,8 +37,8 @@ const CupertinoDynamicColor _kToolbarBorderColor =
 );
 const CupertinoDynamicColor _kToolbarBackgroundColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFECECEC),
-  darkColor: Color(0xFF333333),
+  color: Color(0xB2FFFFFF),
+  darkColor: Color(0xB2303030),
 );
 
 /// A macOS-style text selection toolbar.
@@ -61,6 +65,23 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     required this.children,
   }) : assert(children.length > 0);
 
+  /// Creates a 5x5 matrix that increases saturation when used with [ColorFilter.matrix].
+  ///
+  /// The numbers were taken from this comment:
+  /// [Cupertino blurs should boost saturation](https://github.com/flutter/flutter/issues/29483#issuecomment-477334981).
+  static List<double> _matrixWithSat(double sat) {
+    final double r = 0.213 * (1 - sat);
+    final double g = 0.715 * (1 - sat);
+    final double b = 0.072 * (1 - sat);
+
+    return <double>[
+      r + sat, g, b, 0, 0, //
+      r, g + sat, b, 0, 0, //
+      r, g, b + sat, 0, 0, //
+      0, 0, 0, 1, 0, //
+    ];
+  }
+
   /// {@macro flutter.material.DesktopTextSelectionToolbar.anchor}
   final Offset anchor;
 
@@ -76,17 +97,33 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return Container(
       width: _kToolbarWidth,
-      decoration: BoxDecoration(
-        color: _kToolbarBackgroundColor.resolveFrom(context),
-        border: Border.all(
-          color: _kToolbarBorderColor.resolveFrom(context),
-        ),
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+      decoration: const BoxDecoration(
         boxShadow: _kToolbarShadow,
       ),
-      child: Padding(
-        padding: _kToolbarPadding,
-        child: child,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.compose(
+            outer: ColorFilter.matrix(_matrixWithSat(_kToolbarSaturationBoost)),
+            inner: ImageFilter.blur(
+              sigmaX: _kToolbarBlurSigma,
+              sigmaY: _kToolbarBlurSigma,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: _kToolbarBackgroundColor.resolveFrom(context),
+              border: Border.all(
+                color: _kToolbarBorderColor.resolveFrom(context),
+              ),
+              borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+            ),
+            child: Padding(
+              padding: _kToolbarPadding,
+              child: child,
+            ),
+          ),
+        ),
       ),
     );
   }
