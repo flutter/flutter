@@ -79,7 +79,9 @@ class BottomSheet extends StatefulWidget {
     super.key,
     this.animationController,
     this.enableDrag = true,
-    this.hasDragHandle,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
     this.onDragStart,
     this.onDragEnd,
     this.backgroundColor,
@@ -125,7 +127,18 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
   /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
   /// defaults to false.
-  final bool? hasDragHandle;
+  final bool? showDragHandle;
+
+  /// The bottom sheet drag handle's color.
+  ///
+  /// Defaults to [BottomSheetThemeData.dragHandleColor].
+  /// If that is also null, defaults to [ColorScheme.onSurfaceVariant]
+  /// with an opacity of 0.4.
+  final Color? dragHandleColor;
+
+  /// Defaults to [BottomSheetThemeData.dragHandleSize].
+  /// If that is also null, defaults to Size(32, 4).
+  final Size? dragHandleSize;
 
   /// Called when the user begins dragging the bottom sheet vertically, if
   /// [enableDrag] is true.
@@ -327,7 +340,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
-    final bool hasDragHandle = widget.hasDragHandle ?? bottomSheetTheme.hasDragHandle ?? useMaterial3;
+    final bool showDragHandle = widget.showDragHandle ?? bottomSheetTheme.showDragHandle ?? useMaterial3;
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -339,7 +352,7 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: (!widget.enableDrag || !hasDragHandle)
+        child: (!widget.enableDrag || !showDragHandle)
           ? widget.builder(context)
           : Stack(
               alignment: Alignment.topCenter,
@@ -594,7 +607,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
-    this.hasDragHandle = false,
+    this.showDragHandle = false,
   });
 
   final ModalBottomSheetRoute<T> route;
@@ -605,7 +618,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final Clip? clipBehavior;
   final BoxConstraints? constraints;
   final bool enableDrag;
-  final bool hasDragHandle;
+  final bool showDragHandle;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -667,7 +680,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         clipBehavior: widget.clipBehavior,
         constraints: widget.constraints,
         enableDrag: widget.enableDrag,
-        hasDragHandle: widget.hasDragHandle,
+        showDragHandle: widget.showDragHandle,
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
       ),
@@ -770,7 +783,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.modalBarrierColor,
     this.isDismissible = true,
     this.enableDrag = true,
-    this.hasDragHandle,
+    this.showDragHandle,
     required this.isScrollControlled,
     super.settings,
     this.transitionAnimationController,
@@ -878,7 +891,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Defaults to [BottomSheetThemeData.hasDragHandle]. If that is also null,
   /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
   /// defaults to false.
-  final bool? hasDragHandle;
+  final bool? showDragHandle;
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -973,7 +986,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
-            hasDragHandle: hasDragHandle ?? sheetTheme.hasDragHandle ?? Theme.of(context).useMaterial3,
+            showDragHandle: showDragHandle ?? sheetTheme.showDragHandle ?? Theme.of(context).useMaterial3,
           );
         },
       ),
