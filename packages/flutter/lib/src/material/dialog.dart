@@ -234,7 +234,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: Theme.of(context).useMaterial3 ? _dialogConstraints : const BoxConstraints(minWidth: 280.0),
+          constraints: _constraintsScaleFactor(MediaQuery.of(context).textScaleFactor, theme.useMaterial3),
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -1120,7 +1120,7 @@ class SimpleDialog extends StatelessWidget {
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
-        constraints: Theme.of(context).useMaterial3 ? _dialogConstraints : const BoxConstraints(minWidth: 280.0),
+        constraints: _constraintsScaleFactor(MediaQuery.of(context).textScaleFactor, theme.useMaterial3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1392,6 +1392,17 @@ double _paddingScaleFactor(double textScaleFactor) {
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0)!;
+}
+
+BoxConstraints _constraintsScaleFactor(double textScaleFactor, bool useMaterial3) {
+  if (!useMaterial3) {
+    return const BoxConstraints(minWidth: 280.0);
+  } else {
+    return textScaleFactor == 1.0
+      ? _dialogConstraints
+      // Scale the max height of the dialog by the text scale factor to aid in readability.
+      : _dialogConstraints.copyWith(maxHeight: _dialogConstraints.maxHeight * textScaleFactor);
+  }
 }
 
 // Hand coded defaults based on Material Design 2.
