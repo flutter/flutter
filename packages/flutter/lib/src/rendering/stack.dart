@@ -781,7 +781,11 @@ class RenderIndexedStack extends RenderStack {
     while (child != null) {
       children.add(child.toDiagnosticsNode(
         name: 'child ${i + 1}',
-        style: i != index ? DiagnosticsTreeStyle.offstage : null,
+        // Though those children are indeed offstage, the current 
+        // `debugVisitOnstageChildren` wrongly treat them as onstage.
+        // Thus, the style is deberliately made onstage in order to make
+        // users less surprising.
+        // style: i != index ? DiagnosticsTreeStyle.offstage : null,
       ));
       child = (child.parentData! as StackParentData).nextSibling;
       i += 1;
