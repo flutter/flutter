@@ -67,7 +67,8 @@ typedef BottomSheetDragEndHandler = void Function(
 ///    sheet.
 ///  * [BottomSheetThemeData], which can be used to customize the default
 ///    bottom sheet property values.
-///  * <https://material.io/design/components/sheets-bottom.html>
+///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
   ///
