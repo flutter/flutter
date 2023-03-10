@@ -43,6 +43,9 @@ class BuildApkCommand extends BuildSubCommand {
         help: 'Whether to split the APKs per ABIs. '
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
+      ..addFlag('config-only',
+          help: 'Generate build files used by flutter but '
+                'do not build any artifacts.')
       ..addMultiOption('target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
@@ -56,6 +59,8 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   DeprecationBehavior get deprecationBehavior => boolArgDeprecated('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+
+  bool get configOnly => boolArg('config-only') ?? false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -112,6 +117,7 @@ class BuildApkCommand extends BuildSubCommand {
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
+      configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }
