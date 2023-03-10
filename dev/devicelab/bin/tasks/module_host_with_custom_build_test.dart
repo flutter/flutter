@@ -116,7 +116,6 @@ Future<void> main() async {
         'outputs',
         'apk',
         'demo',
-        'debug',
         'app-demo-debug.apk',
       );
 
@@ -159,7 +158,6 @@ Future<void> main() async {
         'outputs',
         'apk',
         'demo',
-        'debug',
         'app-demo-debug.apk',
       );
 
@@ -194,7 +192,6 @@ Future<void> main() async {
         'outputs',
         'apk',
         'demo',
-        'staging',
         'app-demo-staging.apk',
       );
 
@@ -231,7 +228,6 @@ Future<void> main() async {
         'outputs',
         'apk',
         'demo',
-        'release',
         'app-demo-release-unsigned.apk',
       );
 
@@ -269,7 +265,6 @@ Future<void> main() async {
         'outputs',
         'apk',
         'demo',
-        'prod',
         'app-demo-prod-unsigned.apk',
       );
 

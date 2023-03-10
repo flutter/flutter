@@ -125,7 +125,6 @@ Future<void> main() async {
         'host',
         'outputs',
         'apk',
-        'release',
         'app-release.apk',
       )));
 
@@ -163,7 +162,6 @@ Future<void> main() async {
         'host',
         'outputs',
         'apk',
-        'release',
         'app-release.apk',
       )));
 
@@ -220,7 +218,6 @@ Future<void> main() async {
         'build',
         'outputs',
         'apk',
-        'debug',
         'app-debug.apk',
       );
       if (!exists(File(debugHostApk))) {
@@ -300,7 +297,6 @@ Future<void> main() async {
         'build',
         'outputs',
         'apk',
-        'release',
         'app-release-unsigned.apk',
       );
       if (!exists(File(releaseHostApk))) {
