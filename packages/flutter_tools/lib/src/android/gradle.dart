@@ -803,9 +803,7 @@ Iterable<String> findApkFilesModule(
       return <File>[apkFile];
     }
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final String modeName = camelCase(buildInfo.modeName);
     apkFile = apkDirectory
-      .childDirectory(modeName)
       .childFile(apkFileName);
     if (apkFile.existsSync()) {
       return <File>[apkFile];
@@ -815,7 +813,6 @@ Iterable<String> findApkFilesModule(
       // Android Studio Gradle plugin v3 adds flavor to path.
       apkFile = apkDirectory
         .childDirectory(flavor)
-        .childDirectory(modeName)
         .childFile(apkFileName);
       if (apkFile.existsSync()) {
         return <File>[apkFile];
