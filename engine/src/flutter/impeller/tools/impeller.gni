@@ -18,7 +18,7 @@ declare_args() {
   impeller_enable_opengles = is_mac || is_linux || is_win || is_android
 
   # Whether the Vulkan backend is enabled.
-  impeller_enable_vulkan = is_mac || is_linux || is_android
+  impeller_enable_vulkan = is_mac || is_linux || is_win || is_android
 
   # Whether to use a prebuilt impellerc.
   # If this is the empty string, impellerc will be built.

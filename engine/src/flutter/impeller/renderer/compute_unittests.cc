@@ -54,7 +54,7 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   CS::Info info{.count = kCount};
   CS::Input0<kCount> input_0;
   CS::Input1<kCount> input_1;
-  for (uint i = 0; i < kCount; i++) {
+  for (size_t i = 0; i < kCount; i++) {
     input_0.elements[i] = Vector4(2.0 + i, 3.0 + i, 4.0 + i, 5.0 * i);
     input_1.elements[i] = Vector4(6.0, 7.0, 8.0, 9.0);
   }
@@ -139,13 +139,13 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 
   CS1::Input<kCount1> input_1;
   input_1.count = kCount1;
-  for (uint i = 0; i < kCount1; i++) {
+  for (size_t i = 0; i < kCount1; i++) {
     input_1.elements[i] = i;
   }
 
   CS2::Input<kCount2> input_2;
   input_2.count = kCount2;
-  for (uint i = 0; i < kCount2; i++) {
+  for (size_t i = 0; i < kCount2; i++) {
     input_2.elements[i] = i;
   }
 
