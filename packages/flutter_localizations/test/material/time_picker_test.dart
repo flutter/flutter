@@ -9,9 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('can localize the header in all known formats - portrait', (WidgetTester tester) async {
     // Ensure picker is displayed in portrait mode.
-    tester.view.physicalSize = const Size(400, 800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+    tester.binding.window.physicalSizeTestValue = const Size(400, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1;
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
@@ -75,13 +74,15 @@ void main() {
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
     }
+
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize the header in all known formats - landscape', (WidgetTester tester) async {
     // Ensure picker is displayed in landscape mode.
-    tester.view.physicalSize = const Size(800, 400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+    tester.binding.window.physicalSizeTestValue = const Size(800, 400);
+    tester.binding.window.devicePixelRatioTestValue = 1;
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
@@ -150,6 +151,9 @@ void main() {
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
     }
+
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize input mode in all known formats', (WidgetTester tester) async {
