@@ -81,7 +81,8 @@ class SearchBar extends StatefulWidget {
   ///
   /// Typically these actions can represent additional modes of searching
   /// (like voice search), an avatar, a separate high-level action (such as
-  /// current location) or an overflow menu.
+  /// current location) or an overflow menu. There should not be more than
+  /// two trailing actions.
   final Iterable<Widget>? trailing;
 
   /// Called when the user taps this search bar.
