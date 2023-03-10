@@ -23,7 +23,7 @@ import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
