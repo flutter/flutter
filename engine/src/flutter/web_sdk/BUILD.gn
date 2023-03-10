@@ -4,7 +4,6 @@
 
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
-import("//flutter/shell/version/version.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
 dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
@@ -25,7 +24,6 @@ web_engine_libraries = [
   ":web_unicode_library",
   ":web_test_fonts_library",
   ":web_locale_keymap_library",
-  ":web_sdk_version_library",
 ]
 
 group("web_sdk") {
@@ -151,14 +149,6 @@ sdk_rewriter("web_locale_keymap_library") {
       "//flutter/third_party/web_locale_keymap/lib/web_locale_keymap.dart"
   input_dir = "//flutter/third_party/web_locale_keymap/lib/web_locale_keymap/"
   output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_locale_keymap/"
-}
-
-generated_file("web_sdk_version_library") {
-  outputs = [
-    "$root_out_dir/flutter_web_sdk/lib/_web_sdk_version/web_sdk_version.dart",
-  ]
-
-  contents = "// Copyright 2013 The Flutter Authors. All rights reserved.$0x0A// Use of this source code is governed by a BSD-style license that can be$0x0A// found in the LICENSE file.$0x0A$0x0A@JS()$0x0Alibrary dart._web_sdk_version;$0x0A$0x0Aimport 'dart:_js_annotations';$0x0A$0x0Aconst String flutterWebSdkVersion = '$engine_version';$0x0A"
 }
 
 copy("web_ui_library") {
@@ -324,8 +314,6 @@ template("_compile_platform") {
       "dart:_web_unicode",
       "--source",
       "dart:_web_locale_keymap",
-      "--source",
-      "dart:_web_sdk_version",
     ]
     if (flutter_prebuilt_dart_sdk) {
       args += [
