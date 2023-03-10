@@ -1,6 +1,6 @@
 name: Report a bug
 description: |
-  You found a bug in the application but it is crashing or 
+  You found a bug in the application but it is crashing or
   throws an exception, a widget is buggy or something looks wrong.
 body:
   - type: markdown
