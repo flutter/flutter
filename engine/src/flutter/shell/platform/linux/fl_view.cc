@@ -89,6 +89,15 @@ G_DEFINE_TYPE_WITH_CODE(
                 G_IMPLEMENT_INTERFACE(fl_text_input_view_delegate_get_type(),
                                       fl_view_text_input_delegate_iface_init))
 
+// Signal handler for GtkWidget::delete-event
+static gboolean window_delete_event_cb(GtkWidget* widget,
+                                       GdkEvent* event,
+                                       FlView* self) {
+  fl_platform_plugin_request_app_exit(self->platform_plugin);
+  // Stop the event from propagating.
+  return TRUE;
+}
+
 // Initialize keyboard manager.
 static void init_keyboard(FlView* self) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
@@ -474,6 +483,11 @@ static void gesture_zoom_end_cb(GtkGestureZoom* gesture,
 static void realize_cb(GtkWidget* widget) {
   FlView* self = FL_VIEW(widget);
   g_autoptr(GError) error = nullptr;
+
+  // Handle requests by the user to close the application.
+  GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
+  g_signal_connect(toplevel_window, "delete-event",
+                   G_CALLBACK(window_delete_event_cb), self);
 
   init_keyboard(self);
 
