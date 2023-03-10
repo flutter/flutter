@@ -446,7 +446,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
     bool has_layer() const { return has_layer_; }
     bool cannot_inherit_opacity() const { return cannot_inherit_opacity_; }
-    bool has_compatible_op() const { return cannot_inherit_opacity_; }
+    bool has_compatible_op() const { return has_compatible_op_; }
 
     bool is_group_opacity_compatible() const {
       return !cannot_inherit_opacity_;
