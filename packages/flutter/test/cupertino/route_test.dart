@@ -1060,7 +1060,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
       expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
 
-      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
