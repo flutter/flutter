@@ -18,6 +18,8 @@
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #import "flutter/testing/testing.h"
 
+#pragma mark - Test Helper Classes
+
 // A wrap to convert FlutterKeyEvent to a ObjC class.
 @interface KeyEventWrapper : NSObject
 @property(nonatomic) FlutterKeyEvent* data;
@@ -36,6 +38,23 @@
 }
 @end
 
+// A FlutterViewController subclass for testing that mouseDown/mouseUp get called when
+// mouse events are sent to the associated view.
+@interface MouseEventFlutterViewController : FlutterViewController
+@property(nonatomic, assign) BOOL mouseDownCalled;
+@property(nonatomic, assign) BOOL mouseUpCalled;
+@end
+
+@implementation MouseEventFlutterViewController
+- (void)mouseDown:(NSEvent*)event {
+  self.mouseDownCalled = YES;
+}
+
+- (void)mouseUp:(NSEvent*)event {
+  self.mouseUpCalled = YES;
+}
+@end
+
 @interface FlutterViewControllerTestObjC : NSObject
 - (bool)testKeyEventsAreSentToFramework;
 - (bool)testKeyEventsArePropagatedIfNotHandled;
@@ -43,6 +62,7 @@
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
 - (bool)testKeyboardIsRestartedOnEngineRestart;
 - (bool)testTrackpadGesturesAreSentToFramework;
+- (bool)testMouseDownUpEventsSentToNextResponder;
 - (bool)testModifierKeysAreSynthesizedOnMouseMove;
 - (bool)testViewWillAppearCalledMultipleTimes;
 - (bool)testFlutterViewIsConfigured;
@@ -51,6 +71,8 @@
                         callback:(nullable FlutterKeyEventCallback)callback
                         userData:(nullable void*)userData;
 @end
+
+#pragma mark - Static helper functions
 
 using namespace ::flutter::testing::keycodes;
 
@@ -107,6 +129,8 @@ NSEvent* CreateMouseEvent(NSEventModifierFlags modifierFlags) {
 }
 
 }  // namespace
+
+#pragma mark - gtest tests
 
 TEST(FlutterViewController, HasViewThatHidesOtherViewsInAccessibility) {
   FlutterViewController* viewControllerMock = CreateMockViewController();
@@ -196,6 +220,10 @@ TEST(FlutterViewControllerTest, TestTrackpadGesturesAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testTrackpadGesturesAreSentToFramework]);
 }
 
+TEST(FlutterViewControllerTest, TestMouseDownUpEventsSentToNextResponder) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testMouseDownUpEventsSentToNextResponder]);
+}
+
 TEST(FlutterViewControllerTest, TestModifierKeysAreSynthesizedOnMouseMove) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testModifierKeysAreSynthesizedOnMouseMove]);
 }
@@ -209,6 +237,8 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 }  // namespace flutter::testing
+
+#pragma mark - FlutterViewControllerTestObjC
 
 @implementation FlutterViewControllerTestObjC
 
@@ -799,6 +829,51 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
                                                                                  bundle:nil];
   [viewController viewWillAppear];
   [viewController viewWillAppear];
+  return true;
+}
+
+static void SwizzledNoop(id self, SEL _cmd) {}
+
+// Verify workaround an AppKit bug where mouseDown/mouseUp are not called on the view controller if
+// the view is the content view of an NSPopover AND macOS's Reduced Transparency accessibility
+// setting is enabled.
+//
+// See: https://github.com/flutter/flutter/issues/115015
+// See: http://www.openradar.me/FB12050037
+// See: https://developer.apple.com/documentation/appkit/nsresponder/1524634-mousedown
+- (bool)testMouseDownUpEventsSentToNextResponder {
+  // The root cause of the above bug is NSResponder mouseDown/mouseUp methods that don't correctly
+  // walk the responder chain calling the appropriate method on the next responder under certain
+  // conditions. Simulate this by swizzling out the default implementations and replacing them with
+  // no-ops.
+  Method mouseDown = class_getInstanceMethod([NSResponder class], @selector(mouseDown:));
+  Method mouseUp = class_getInstanceMethod([NSResponder class], @selector(mouseUp:));
+  IMP noopImp = (IMP)SwizzledNoop;
+  IMP origMouseDown = method_setImplementation(mouseDown, noopImp);
+  IMP origMouseUp = method_setImplementation(mouseUp, noopImp);
+
+  // Verify that mouseDown/mouseUp trigger mouseDown/mouseUp calls on FlutterViewController.
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  MouseEventFlutterViewController* viewController =
+      [[MouseEventFlutterViewController alloc] initWithEngine:engineMock nibName:@"" bundle:nil];
+  FlutterView* view = (FlutterView*)[viewController view];
+
+  EXPECT_FALSE(viewController.mouseDownCalled);
+  EXPECT_FALSE(viewController.mouseUpCalled);
+
+  NSEvent* mouseEvent = flutter::testing::CreateMouseEvent(0x00);
+  [view mouseDown:mouseEvent];
+  EXPECT_TRUE(viewController.mouseDownCalled);
+  EXPECT_FALSE(viewController.mouseUpCalled);
+
+  viewController.mouseDownCalled = NO;
+  [view mouseUp:mouseEvent];
+  EXPECT_FALSE(viewController.mouseDownCalled);
+  EXPECT_TRUE(viewController.mouseUpCalled);
+
+  // Restore the original NSResponder mouseDown/mouseUp implementations.
+  method_setImplementation(mouseDown, origMouseDown);
+  method_setImplementation(mouseUp, origMouseUp);
   return true;
 }
 
