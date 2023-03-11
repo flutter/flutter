@@ -278,6 +278,34 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   return @[ _flutterView ];
 }
 
+- (void)mouseDown:(NSEvent*)event {
+  // Work around an AppKit bug where mouseDown/mouseUp are not called on the view controller if the
+  // view is the content view of an NSPopover AND macOS's Reduced Transparency accessibility setting
+  // is enabled.
+  //
+  // This simply calls mouseDown on the next responder in the responder chain as the default
+  // implementation on NSResponder is documented to do.
+  //
+  // See: https://github.com/flutter/flutter/issues/115015
+  // See: http://www.openradar.me/FB12050037
+  // See: https://developer.apple.com/documentation/appkit/nsresponder/1524634-mousedown
+  [self.nextResponder mouseDown:event];
+}
+
+- (void)mouseUp:(NSEvent*)event {
+  // Work around an AppKit bug where mouseDown/mouseUp are not called on the view controller if the
+  // view is the content view of an NSPopover AND macOS's Reduced Transparency accessibility setting
+  // is enabled.
+  //
+  // This simply calls mouseUp on the next responder in the responder chain as the default
+  // implementation on NSResponder is documented to do.
+  //
+  // See: https://github.com/flutter/flutter/issues/115015
+  // See: http://www.openradar.me/FB12050037
+  // See: https://developer.apple.com/documentation/appkit/nsresponder/1535349-mouseup
+  [self.nextResponder mouseUp:event];
+}
+
 @end
 
 #pragma mark - FlutterViewController implementation.
