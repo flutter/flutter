@@ -11,6 +11,10 @@
 #include <utility>
 #include <vector>
 
+#if SHELL_ENABLE_GL
+#include <EGL/egl.h>
+#endif  // SHELL_ENABLE_GL
+
 #include "assets/directory_asset_bundle.h"
 #include "common/graphics/persistent_cache.h"
 #include "flutter/flow/layers/backdrop_filter_layer.h"
@@ -3890,6 +3894,11 @@ TEST_F(ShellTest, PictureToImageSync) {
                   ShellTestPlatformView::BackendType::kGLBackend  //
       );
 
+  AddNativeCallback("NativeOnBeforeToImageSync",
+                    CREATE_NATIVE_ENTRY([&](auto args) {
+                      // nop
+                    }));
+
   fml::CountDownLatch latch(2);
   AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
                       // Teardown and set up rasterizer again.
@@ -3911,6 +3920,58 @@ TEST_F(ShellTest, PictureToImageSync) {
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
 }
+
+#if SHELL_ENABLE_GL
+// This test uses the GL backend and refers to symbols in egl.h
+TEST_F(ShellTest, PictureToImageSyncWithTrampledContext) {
+  // make it easier to trample the GL context by running on a single task
+  // runner.
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell =
+      CreateShell(settings,                                       //
+                  task_runners,                                   //
+                  false,                                          //
+                  nullptr,                                        //
+                  false,                                          //
+                  ShellTestPlatformView::BackendType::kGLBackend  //
+      );
+
+  AddNativeCallback(
+      "NativeOnBeforeToImageSync", CREATE_NATIVE_ENTRY([&](auto args) {
+        // Trample the GL context. If the rasterizer fails
+        // to make the right one current again, test will
+        // fail.
+        ::eglMakeCurrent(::eglGetCurrentDisplay(), NULL, NULL, NULL);
+      }));
+
+  fml::CountDownLatch latch(2);
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+                      // Teardown and set up rasterizer again.
+                      PlatformViewNotifyDestroyed(shell.get());
+                      PlatformViewNotifyCreated(shell.get());
+                      latch.CountDown();
+                    }));
+
+  ASSERT_NE(shell, nullptr);
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
+  configuration.SetEntrypoint("toImageSync");
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+
+  latch.Wait();
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell), task_runners);
+}
+#endif  // SHELL_ENABLE_GL
 
 TEST_F(ShellTest, PluginUtilitiesCallbackHandleErrorHandling) {
   auto settings = CreateSettingsForFixture();
