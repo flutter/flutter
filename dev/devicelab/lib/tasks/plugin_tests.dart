@@ -278,7 +278,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
         break;
       case 'linux':
         if (await exec(
-          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_plugin_test'),
+          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
           <String>[],
           canFail: true,
         ) != 0) {

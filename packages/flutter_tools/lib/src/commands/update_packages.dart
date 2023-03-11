@@ -41,6 +41,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'archive': '3.3.2',
   // https://github.com/flutter/flutter/issues/116376
   'path_provider_android': '2.0.21',
+  // https://github.com/flutter/flutter/issues/122039
+  'flutter_plugin_android_lifecycle': '2.0.8',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1438,7 +1440,7 @@ String generateFakePubspec(
   final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <4.0.0'");
+  result.writeln("  sdk: '>=2.12.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {
