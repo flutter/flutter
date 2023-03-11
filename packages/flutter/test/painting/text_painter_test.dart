@@ -12,11 +12,105 @@ const bool isCanvasKit =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 void main() {
+  void checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
+    expect(boundaries.first, 0);
+    expect(boundaries.last, text.length);
+
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    // Lay out the string up to each boundary, and record the width.
+    final List<double> prefixWidths = <double>[];
+    for (final int boundary in boundaries) {
+      painter.text = TextSpan(text: text.substring(0, boundary));
+      painter.layout(maxWidth: 10000);
+      prefixWidths.add(painter.width);
+    }
+
+    // The painter has the full text laid out.  Check the caret offsets.
+    double caretOffset(int offset) {
+      final TextPosition position = ui.TextPosition(offset: offset);
+      return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+    }
+    expect(boundaries.map(caretOffset).toList(), prefixWidths);
+    double lastOffset = caretOffset(0);
+    for (int i = 1; i <= text.length; i++) {
+      final double offset = caretOffset(i);
+      expect(offset, greaterThanOrEqualTo(lastOffset));
+      lastOffset = offset;
+    }
+    painter.dispose();
+  }
+
+  /// Check the caret offsets are accurate for the given single line of LTR text.
+  ///
+  /// This lays out the given text as a single line with [TextDirection.ltr]
+  /// and checks the following invariants, which should always hold if the text
+  /// is made up of LTR characters:
+  ///  * The caret offsets go monotonically from 0.0 to the width of the text.
+  ///  * At each character (that is, grapheme cluster) boundary, the caret
+  ///    offset equals the width that the text up to that point would have
+  ///    if laid out on its own.
+  void checkCaretOffsetsLtr(String text) {
+    final List<int> characterBoundaries = <int>[];
+    final CharacterRange range = CharacterRange.at(text, 0);
+    while (true) {
+      characterBoundaries.add(range.current.length);
+      if (range.stringAfterLength <= 0) {
+        break;
+      }
+      range.expandNext();
+    }
+    checkCaretOffsetsLtrAt(text, characterBoundaries);
+  }
+
+  /// Check the caret offsets are accurate for the given single line of LTR text,
+  /// ignoring character boundaries within each given cluster.
+  ///
+  /// This concatenates [clusters] into a string and then performs the same
+  /// checks as [checkCaretOffsetsLtr], except that instead of checking the
+  /// offset-equals-prefix-width invariant at every character boundary,
+  /// it does so only at the boundaries between the elements of [clusters].
+  ///
+  /// The elements of [clusters] should be composed of whole characters: each
+  /// element should be a valid character range in the concatenated string.
+  ///
+  /// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
+  /// doesn't pass, you may have an instance of https://github.com/flutter/flutter/issues/122478 .
+  void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
+    final StringBuffer buffer = StringBuffer();
+    final List<int> boundaries = <int>[];
+    boundaries.add(buffer.length);
+    for (final String cluster in clusters) {
+      buffer.write(cluster);
+      boundaries.add(buffer.length);
+    }
+    checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
+  }
+
+  List<double> caretOffsetsForTextSpan(TextSpan text) {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = text
+      ..layout(maxWidth: 10000);
+    final int length = text.toPlainText().length;
+    final List<double> result =
+    List<double>.generate(length + 1, (int offset) {
+      final TextPosition position = ui.TextPosition(offset: offset);
+      return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+    });
+    expect(result[length], painter.width);
+    painter.dispose();
+    return result;
+  }
+
   test('TextPainter caret test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     String text = 'A';
+    checkCaretOffsetsLtr(text);
+
     painter.text = TextSpan(text: text);
     painter.layout();
 
@@ -31,6 +125,7 @@ void main() {
     // Check that getOffsetForCaret handles a character that is encoded as a
     // surrogate pair.
     text = 'A\u{1F600}';
+    checkCaretOffsetsLtr(text);
     painter.text = TextSpan(text: text);
     painter.layout();
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
@@ -90,6 +185,8 @@ void main() {
     // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
     // One three-person family, one four-person family, one clapping hands (medium skin tone).
     const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
+    checkCaretOffsetsLtr(text);
+
     painter.text = const TextSpan(text: text);
     painter.layout(maxWidth: 10000);
 
@@ -148,6 +245,70 @@ void main() {
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
     expect(caretOffset.dx, 126); // end of string
     painter.dispose();
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret emoji tests: single, long emoji', () {
+    // Regression test for https://github.com/flutter/flutter/issues/50563
+    checkCaretOffsetsLtr('👩‍🚀');
+    checkCaretOffsetsLtr('👩‍❤️‍💋‍👩');
+    checkCaretOffsetsLtr('👨‍👩‍👦‍👦');
+    checkCaretOffsetsLtr('👨🏾‍🤝‍👨🏻');
+    checkCaretOffsetsLtr('👨‍👦');
+    checkCaretOffsetsLtr('👩‍👦');
+    checkCaretOffsetsLtr('🏌🏿‍♀️');
+    checkCaretOffsetsLtr('🏊‍♀️');
+    checkCaretOffsetsLtr('🏄🏻‍♂️');
+
+    // These actually worked even before #50563 was fixed (because
+    // their lengths in code units are powers of 2, namely 4 and 8).
+    checkCaretOffsetsLtr('🇺🇳');
+    checkCaretOffsetsLtr('👩‍❤️‍👨');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret emoji test: letters, then 1 emoji of 5 code units', () {
+    // Regression test for https://github.com/flutter/flutter/issues/50563
+    checkCaretOffsetsLtr('a👩‍🚀');
+    checkCaretOffsetsLtr('ab👩‍🚀');
+    checkCaretOffsetsLtr('abc👩‍🚀');
+    checkCaretOffsetsLtr('abcd👩‍🚀');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret zalgo test', () {
+    // Regression test for https://github.com/flutter/flutter/issues/98516
+    checkCaretOffsetsLtr('Z͉̳̺ͥͬ̾a̴͕̲̒̒͌̋ͪl̨͎̰̘͉̟ͤ̀̈̚͜g͕͔̤͖̟̒͝ͅo̵̡̡̼͚̐ͯ̅ͪ̆ͣ̚');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret Devanagari test', () {
+    // Regression test for https://github.com/flutter/flutter/issues/118403
+    checkCaretOffsetsLtrFromPieces(
+        <String>['प्रा', 'प्त', ' ', 'व', 'र्ण', 'न', ' ', 'प्र', 'व्रु', 'ति']);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret Devanagari test, full strength', () {
+    // Regression test for https://github.com/flutter/flutter/issues/118403
+    checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
+  }, skip: true); // https://github.com/flutter/flutter/issues/122478
+
+  test('TextPainter caret emoji test: letters next to emoji, as separate TextBoxes', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122477
+    // The trigger for this bug was to have SkParagraph report separate
+    // TextBoxes for the emoji and for the characters next to it.
+    // In normal usage on a real device, this can happen by simply typing
+    // letters and then an emoji, presumably because they get different fonts.
+    // In these tests, our single test font covers both letters and emoji,
+    // so we provoke the same effect by adding styles.
+    expect(caretOffsetsForTextSpan(
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+          TextSpan(text: ' word', style: TextStyle(fontWeight: FontWeight.bold)),
+        ])),
+        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98]);
+    expect(caretOffsetsForTextSpan(
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: 'word ', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+        ])),
+        <double>[0, 14, 28, 42, 56, 70, 70, 70, 70, 70, 98]);
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {

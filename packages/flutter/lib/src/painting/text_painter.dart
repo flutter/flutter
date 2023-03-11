@@ -1031,7 +1031,7 @@ class TextPainter {
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0 || offset > plainTextLength) {
+    if (plainTextLength == 0 || offset > plainTextLength || offset < 0) {
       return null;
     }
     final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
@@ -1047,7 +1047,7 @@ class TextPainter {
       final int prevRuneOffset = offset - graphemeClusterLength;
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
+      boxes = _paragraph!.getBoxesForRange(max(0, prevRuneOffset), offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -1065,7 +1065,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.first;
+      final TextBox box = boxes.last;
 
       if (prevCodeUnit == NEWLINE_CODE_UNIT) {
         return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
@@ -1115,7 +1115,7 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.last;
+      final TextBox box = boxes.first;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
       return Rect.fromLTRB(clampDouble(dx, 0, _paragraph!.width), box.top, clampDouble(dx, 0, _paragraph!.width), box.bottom);
