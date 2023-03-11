@@ -50,10 +50,10 @@ void _focusAndEnsureVisible(
 /// requesting focus.
 typedef TraversalRequestFocusCallback = void Function(
     FocusNode node, {
-    ScrollPositionAlignmentPolicy alignmentPolicy,
-    double alignment,
-    Duration duration,
-    Curve curve,
+    ScrollPositionAlignmentPolicy? alignmentPolicy,
+    double? alignment,
+    Duration? duration,
+    Curve? curve,
 });
 
 // A class to temporarily hold information about FocusTraversalGroups when
@@ -182,13 +182,16 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// by calling [Scrollable.ensureVisible].
   static void defaultTraversalRequestFocusCallback(
       FocusNode node, {
-        ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-        double alignment = 1.0,
-        Duration duration = Duration.zero,
-        Curve curve = Curves.ease,
+        ScrollPositionAlignmentPolicy? alignmentPolicy,
+        double? alignment,
+        Duration? duration,
+        Curve? curve,
       }) {
     node.requestFocus();
-    Scrollable.ensureVisible(node.context!, alignment: alignment, alignmentPolicy: alignmentPolicy, duration: duration, curve: curve);
+    Scrollable.ensureVisible(node.context!, alignment: alignment ?? 1.0,
+        alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
+        duration: duration ?? Duration.zero,
+        curve: curve ?? Curves.ease);
   }
 
   /// Returns the node that should receive focus if focus is traversing
