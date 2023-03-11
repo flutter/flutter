@@ -1306,16 +1306,6 @@ class PipelineOwner {
     _manifold!.addListener(_updateSemanticsOwner);
     _updateSemanticsOwner();
 
-    // If onNeedVisualUpdate is specified, it has already been called when the node was dirtied in the first place.
-    if (onNeedVisualUpdate == null && (
-        _nodesNeedingLayout.isNotEmpty ||
-        _nodesNeedingCompositingBitsUpdate.isNotEmpty ||
-        _nodesNeedingPaint.isNotEmpty ||
-        _nodesNeedingSemantics.isNotEmpty
-    )) {
-      requestVisualUpdate();
-    }
-
     for (final PipelineOwner child in _children) {
       child.attach(manifold);
     }
