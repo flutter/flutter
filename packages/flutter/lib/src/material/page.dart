@@ -120,7 +120,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final ThemeData themeData = Theme.of(context);
     return ValueListenableBuilder<bool>(
-        valueListenable: navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+        valueListenable: navigator!.userGestureInProgressNotifier,
         builder: (BuildContext context, bool useGestureInProgress, Widget? _) {
           final bool usePrevTargetPlatform;
           if (useGestureInProgress) {
