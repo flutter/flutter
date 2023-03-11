@@ -891,7 +891,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Specifies whether a drag handle is shown when [enableDrag] is true.
   ///
-  /// Defaults to [BottomSheetThemeData.hasDragHandle]. If that is also null,
+  /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
   /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
   /// defaults to false.
   final bool? showDragHandle;
