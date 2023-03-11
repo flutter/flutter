@@ -241,7 +241,7 @@ void main() {
     expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.2601277381181717);
   });
 
   testWidgets('Font transitions respect themes', (WidgetTester tester) async {
@@ -289,7 +289,7 @@ void main() {
     expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.2601277381181717);
   });
 
   testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
@@ -1080,15 +1080,15 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(732.8125, 13.5),
+      const Offset(739.7103369235992, 13.5),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.5555618554353714);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.29867843724787235);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(439.7678077220917, 13.5),
+      const Offset(504.65044379234314, 13.5),
     );
   });
 
@@ -1130,15 +1130,15 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(67.1875, 13.5),
+      const Offset(60.28966307640076, 13.5),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.5555618554353714);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.29867843724787235);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(360.2321922779083, 13.5),
+      const Offset(295.34955620765686, 13.5),
     );
   });
 
@@ -1156,15 +1156,15 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(781.625, 54.0),
+      const Offset(795.4206738471985, 54.0),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.5292819738388062);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.2601277381181717);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(195.53561544418335, 54.0),
+      const Offset(325.3008875846863, 54.0),
     );
   });
 
@@ -1183,15 +1183,15 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(18.375, 54.0),
+      const Offset(4.579326152801514, 54.0),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.5292819738388062);
+    checkOpacity(tester, flying(tester, find.text('Page 2')), 0.2601277381181717);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(604.4643845558167, 54.0),
+      const Offset(474.6991124153137, 54.0),
     );
   });
 
@@ -1248,10 +1248,10 @@ void main() {
     );
 
     // Go to the next page.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Start the gesture at the edge of the screen.
-    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
     // Trigger the swipe.
     await gesture.moveBy(const Offset(100.0, 0.0));
 
@@ -1310,7 +1310,7 @@ void main() {
     );
 
     // Go to the next page.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Start the gesture at the edge of the screen.
     final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
