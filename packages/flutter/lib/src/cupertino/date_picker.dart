@@ -81,6 +81,7 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
   _DatePickerLayoutDelegate({
     required this.columnWidths,
     required this.textDirectionFactor,
+    required this.maxWidth,
   });
 
   // The list containing widths of all columns.
@@ -89,15 +90,18 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
   // textDirectionFactor is 1 if text is written left to right, and -1 if right to left.
   final int textDirectionFactor;
 
+  // The max width the children should reach to avoid bending outwards.
+  final double maxWidth;
+
   @override
   void performLayout(Size size) {
-    double remainingWidth = size.width;
+    double remainingWidth = maxWidth < size.width ? maxWidth : size.width;
+
+    double currentHorizontalOffset = (size.width - remainingWidth) / 2;
 
     for (int i = 0; i < columnWidths.length; i++) {
       remainingWidth -= columnWidths[i] + _kDatePickerPadSize * 2;
     }
-
-    double currentHorizontalOffset = 0.0;
 
     for (int i = 0; i < columnWidths.length; i++) {
       final int index = textDirectionFactor == 1 ? i : columnWidths.length - i - 1;
@@ -1024,6 +1028,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
 
     final List<Widget> pickers = <Widget>[];
+    double totalColumnWidths = 4 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
@@ -1043,6 +1048,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       if (textDirectionFactor == -1) {
         padding = padding.flipped;
       }
+
+      totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
 
       pickers.add(LayoutId(
         id: i,
@@ -1068,6 +1075,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       ));
     }
 
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
@@ -1076,6 +1085,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           delegate: _DatePickerLayoutDelegate(
             columnWidths: columnWidths,
             textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
           ),
           children: pickers,
         ),
@@ -1418,6 +1428,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     }
 
     final List<Widget> pickers = <Widget>[];
+    double totalColumnWidths = 4 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
       final double offAxisFraction = (i - 1) * 0.3 * textDirectionFactor;
@@ -1433,6 +1444,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       } else if (i == columnWidths.length - 1) {
         selectionOverlay = _endSelectionOverlay;
       }
+
+      totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
 
       pickers.add(LayoutId(
         id: i,
@@ -1456,6 +1469,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       ));
     }
 
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
@@ -1464,6 +1479,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           delegate: _DatePickerLayoutDelegate(
             columnWidths: columnWidths,
             textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
           ),
           children: pickers,
         ),
