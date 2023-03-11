@@ -289,17 +289,12 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
   TRACE_EVENT0("flutter", "Rasterizer::MakeGpuImage");
   FML_DCHECK(display_list);
 
-// TODO(dnfield): the Linux embedding is in a rough state right now and
-// I can't seem to get the GPU path working on it.
-// https://github.com/flutter/flutter/issues/108835
-#if FML_OS_LINUX
-  return MakeBitmapImage(display_list, image_info);
-#endif
-
   std::unique_ptr<SnapshotDelegate::GpuImageResult> result;
   delegate_.GetIsGpuDisabledSyncSwitch()->Execute(
       fml::SyncSwitch::Handlers()
           .SetIfTrue([&result, &image_info, &display_list] {
+            // TODO(dnfield): This isn't safe if display_list contains any GPU
+            // resources like an SkImage_gpu.
             result = MakeBitmapImage(display_list, image_info);
           })
           .SetIfFalse([&result, &image_info, &display_list,
@@ -307,6 +302,14 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
                        gpu_image_behavior = gpu_image_behavior_] {
             if (!surface ||
                 gpu_image_behavior == MakeGpuImageBehavior::kBitmap) {
+              // TODO(dnfield): This isn't safe if display_list contains any GPU
+              // resources like an SkImage_gpu.
+              result = MakeBitmapImage(display_list, image_info);
+              return;
+            }
+
+            auto context_switch = surface->MakeRenderContextCurrent();
+            if (!context_switch->GetResult()) {
               result = MakeBitmapImage(display_list, image_info);
               return;
             }

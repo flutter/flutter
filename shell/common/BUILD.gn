@@ -328,5 +328,13 @@ if (enable_unittests) {
         deps += [ "//third_party/swiftshader" ]
       }
     }
+
+    if (shell_enable_gl) {
+      deps += [
+        "//third_party/angle:libEGL_static",
+        "//third_party/angle:libGLESv2_static",
+        "//third_party/swiftshader",
+      ]
+    }
   }
 }

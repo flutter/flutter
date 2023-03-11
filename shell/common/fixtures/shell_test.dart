@@ -354,6 +354,9 @@ void scene_with_red_box() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
+@pragma('vm:external-name', 'NativeOnBeforeToImageSync')
+external void onBeforeToImageSync();
+
 
 @pragma('vm:entry-point')
 Future<void> toImageSync() async {
@@ -362,6 +365,7 @@ Future<void> toImageSync() async {
   canvas.drawPaint(Paint()..color = const Color(0xFFAAAAAA));
   final Picture picture = recorder.endRecording();
 
+  onBeforeToImageSync();
   final Image image = picture.toImageSync(20, 25);
   void expect(Object? a, Object? b) {
     if (a != b) {
