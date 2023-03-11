@@ -211,6 +211,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
       '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      '--invoker=flutter_tool',
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)

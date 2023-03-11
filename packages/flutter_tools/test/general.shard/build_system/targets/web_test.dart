@@ -335,6 +335,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -348,6 +349,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -373,6 +375,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--enable-experiment=non-nullable',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -387,6 +390,7 @@ void main() {
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--enable-experiment=non-nullable',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -408,6 +412,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -421,6 +426,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -442,6 +448,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -455,6 +462,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O4',
@@ -476,6 +484,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '--native-null-assertions',
         '-Ddart.vm.product=true',
         '--no-source-maps',
@@ -490,6 +499,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '--native-null-assertions',
         '-Ddart.vm.product=true',
         '--no-source-maps',
@@ -512,6 +522,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -525,6 +536,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O3',
@@ -545,6 +557,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -576,6 +589,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -591,6 +605,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -614,6 +629,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -626,6 +642,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.product=true',
         '-O4',
         '-o',
@@ -647,6 +664,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -662,6 +680,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -686,6 +705,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -699,6 +719,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -722,6 +743,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -735,6 +757,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
+        '--invoker=flutter_tool',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
