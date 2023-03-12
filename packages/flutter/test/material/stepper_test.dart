@@ -1259,6 +1259,77 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
+
+  testWidgets('Stepper Connector Style', (WidgetTester tester) async {
+    const Color selectedColor = Colors.black;
+    const Color disabledColor = Colors.white;
+    int index = 0;
+    
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            // Must break this out into its own widget purely to be able to call `setState()`
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  type: StepperType.horizontal, 
+                  connectorColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) =>
+                  states.contains(MaterialState.selected)
+                    ? selectedColor
+                    : disabledColor),
+                  onStepTapped: (int i) => setState(() => index = i),
+                  currentStep: index,
+                  steps: <Step>[
+                    Step(
+                      isActive: index >= 0,
+                      title: const Text('step1'),
+                      content: const Text('step1 content'),
+                    ),
+                    Step(
+                      isActive: index >= 1,
+                      title: const Text('step2'),
+                      content: const Text('step2 content'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    Color? circleColor(String circleText) => (tester.widget<AnimatedContainer>(
+      find.widgetWithText(AnimatedContainer, circleText),
+    ).decoration as BoxDecoration?)?.color;
+
+    Color? lineColor(String keyStep) => tester.widget<Container>(find.byKey(Key(keyStep))).color;
+
+    // Step 1
+    // check if I'm in step 1
+    expect(find.text('step1 content'), findsOneWidget);
+    expect(find.text('step2 content'), findsNothing);
+
+    expect(circleColor('1'), selectedColor);
+    expect(circleColor('2'), disabledColor);
+    // in two steps case there will be single line
+    expect(lineColor('line0'), disabledColor);
+
+    // now hitting step two
+    await tester.tap(find.text('step2'));
+    await tester.pumpAndSettle();
+
+    // check if I'm in step 1
+    expect(find.text('step1 content'), findsNothing);
+    expect(find.text('step2 content'), findsOneWidget);
+
+    expect(circleColor('1'), selectedColor);
+    expect(circleColor('2'), selectedColor);
+    
+    expect(lineColor('line0'), selectedColor);
+  });
+
 }
 
 class _TappableColorWidget extends StatefulWidget {

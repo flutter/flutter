@@ -796,6 +796,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Container(
+              key: Key('line$i'),
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: widget.connectorThickness,
               color: _connectorColor(widget.steps[i+1].isActive),
