@@ -867,17 +867,19 @@ class DevtoolsStartupTest {
           break;
       }
 
-      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+      final Process process = await startFlutter(
         'run',
-        '--no-android-gradle-daemon',
-        '--no-publish-port',
-        '--verbose',
-        '--profile',
-        '-d',
-        device.deviceId,
-        if (applicationBinaryPath != null)
-          '--use-application-binary=$applicationBinaryPath',
-       ]);
+        options: <String>[
+          '--no-android-gradle-daemon',
+          '--no-publish-port',
+          '--verbose',
+          '--profile',
+          '-d',
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
+       ],
+      );
       final Completer<void> completer = Completer<void>();
       bool sawLine = false;
       process.stdout
