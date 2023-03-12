@@ -378,14 +378,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return false;
   }
 
-  Widget _buildLine(bool visible, bool isActive) {
-    return Container(
-      width: visible ? widget.connectorThickness : 0.0,
-      height: 16.0,
-      color: _connectorColor(isActive),
-    );
-  }
-
   Color _connectorColor(bool isActive) {
     final ColorScheme colorSchema = Theme.of(context).colorScheme;
     if(widget.connectorColor == null) {
@@ -394,6 +386,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return widget.connectorColor!.resolve(<MaterialState>{
       if (isActive) MaterialState.selected else MaterialState.disabled
     });
+  }
+
+  Widget _buildLine(bool visible, bool isActive) {
+    return Container(
+      width: visible ? widget.connectorThickness : 0.0,
+      height: 16.0,
+      color: _connectorColor(isActive),
+    );
   }
 
   Widget _buildCircleChild(int index, bool oldState) {
