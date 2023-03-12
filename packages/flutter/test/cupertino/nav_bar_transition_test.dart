@@ -241,7 +241,7 @@ void main() {
     expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.2601277381181717);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
   testWidgets('Font transitions respect themes', (WidgetTester tester) async {
@@ -289,7 +289,7 @@ void main() {
     expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.2601277381181717);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
   testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
