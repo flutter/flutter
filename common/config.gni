@@ -16,6 +16,9 @@ declare_args() {
 
   # Whether to use a prebuilt Dart SDK instead of building one.
   flutter_prebuilt_dart_sdk = false
+
+  # Whether to build host-side development artifacts.
+  flutter_build_engine_artifacts = true
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -122,5 +125,6 @@ if (flutter_prebuilt_dart_sdk) {
 # TODO: We can't build the engine artifacts for arm (32-bit) right now;
 # see https://github.com/flutter/flutter/issues/74322
 build_engine_artifacts =
-    current_toolchain == host_toolchain ||
-    (is_linux && !is_chromeos && current_cpu != "arm") || is_mac || is_win
+    flutter_build_engine_artifacts &&
+    (current_toolchain == host_toolchain ||
+     (is_linux && !is_chromeos && current_cpu != "arm") || is_mac || is_win)
