@@ -22,10 +22,6 @@ void configureProject(Project project, String outputDir) {
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
-    if (project.hasProperty("buildNumber")) {
-        project.version = project.property("buildNumber")
-    }
-
     project.components.forEach { component ->
         if (component.name != "all") {
             addAarTask(project, component)
@@ -69,6 +65,17 @@ void configurePlugin(Project project, String outputDir) {
         // A plugin doesn't support the Android platform when this property isn't defined in the plugin.
         return
     }
+    // Set plugin aar's version to the version in plugin's pubspec.yaml
+    File file = project.file("../pubspec.yaml")
+    String version = project.version
+    List<String> lines = file.readLines()
+    for (i in 0..<lines.size()) {
+        if (lines[i].startsWith("version: ")) {
+            version = lines[i].split(": ")[1].trim()
+            break
+        }
+    }
+    project.version = version
     configureProject(project, outputDir)
 }
 
@@ -121,6 +128,12 @@ projectsEvaluated {
     Project moduleProject = rootProject.subprojects.find { it.name == "flutter" }
     assert moduleProject != null
     assert moduleProject.hasProperty("output-dir")
+
+    // Move this from configureProject to here.
+    // Only module aar's version use --build-number
+    if (moduleProject.hasProperty("buildNumber")) {
+        moduleProject.version = moduleProject.property("buildNumber")
+    }
     configureProject(moduleProject, moduleProject.property("output-dir"))
 
     // Gets the plugin subprojects.
