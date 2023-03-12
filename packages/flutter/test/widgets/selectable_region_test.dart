@@ -1758,6 +1758,7 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
+        // Test doesn't run these platforms.
         break;
     }
   },
