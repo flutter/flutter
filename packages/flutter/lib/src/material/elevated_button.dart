@@ -542,7 +542,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)
@@ -565,7 +565,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
-      return _colors.surface;
+      return _colors.surfaceContainerLow;
     });
 
   @override
@@ -598,7 +598,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
   MaterialStateProperty<double>? get elevation =>

@@ -1083,7 +1083,7 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _IconButtonDefaultsM3 extends ButtonStyle {
   _IconButtonDefaultsM3(this.context, this.toggleable)
@@ -1206,7 +1206,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_170
 
 class _FilledIconButtonDefaultsM3 extends ButtonStyle {
   _FilledIconButtonDefaultsM3(this.context, this.toggleable)
@@ -1232,7 +1232,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
         return _colors.primary;
       }
       if (toggleable) { // toggleable but unselected case
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       return _colors.primary;
     });
@@ -1354,7 +1354,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_170
 
 class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalIconButtonDefaultsM3(this.context, this.toggleable)
@@ -1380,7 +1380,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
         return _colors.secondaryContainer;
       }
       if (toggleable) { // toggleable but unselected case
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       return _colors.secondaryContainer;
     });
@@ -1502,7 +1502,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_170
 
 class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
   _OutlinedIconButtonDefaultsM3(this.context, this.toggleable)

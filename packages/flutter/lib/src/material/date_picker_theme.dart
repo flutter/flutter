@@ -777,7 +777,7 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _DatePickerDefaultsM3 extends DatePickerThemeData {
   _DatePickerDefaultsM3(this.context)
@@ -794,13 +794,13 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   late final TextTheme _textTheme = _theme.textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get headerBackgroundColor => Colors.transparent;

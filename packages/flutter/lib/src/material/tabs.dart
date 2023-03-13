@@ -1961,7 +1961,7 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_170
 
 class _TabsDefaultsM3 extends TabBarTheme {
   _TabsDefaultsM3(this.context)
@@ -1972,7 +1972,7 @@ class _TabsDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get dividerColor => _colors.surfaceVariant;
+  Color? get dividerColor => null;
 
   @override
   Color? get indicatorColor => _colors.primary;

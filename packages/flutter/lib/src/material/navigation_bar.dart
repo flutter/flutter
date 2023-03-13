@@ -1368,7 +1368,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
@@ -1382,11 +1382,11 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  @override Color? get backgroundColor => _colors.surface;
+  @override Color? get backgroundColor => _colors.surfaceContainer;
 
   @override Color? get shadowColor => Colors.transparent;
 
-  @override Color? get surfaceTintColor => _colors.surfaceTint;
+  @override Color? get surfaceTintColor => Colors.transparent;
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {

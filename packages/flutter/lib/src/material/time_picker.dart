@@ -3385,7 +3385,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
@@ -3397,7 +3397,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get backgroundColor {
-    return _colors.surface;
+    return _colors.surfaceContainerHigh;
   }
 
   @override
@@ -3501,7 +3501,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.surfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return _colors.surfaceContainerHighest.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
   }
 
   @override
@@ -3583,7 +3583,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
-        Color overlayColor = _colors.surfaceVariant;
+        Color overlayColor = _colors.surfaceContainerHighest;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.focused)) {
@@ -3593,7 +3593,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         }
-        return Color.alphaBlend(overlayColor, _colors.surfaceVariant);
+        return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
       }
     });
   }

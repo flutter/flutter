@@ -821,7 +821,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
@@ -831,10 +831,10 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   late final TextDirection direction = Directionality.of(context);
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => null;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get shadowColor => Colors.transparent;

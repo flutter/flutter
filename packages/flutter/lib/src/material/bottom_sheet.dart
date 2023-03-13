@@ -1145,7 +1145,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
    const _BottomSheetDefaultsM3(this.context)
@@ -1158,10 +1158,10 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   final BuildContext context;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => Theme.of(context).colorScheme.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => null;
 
   @override
   Color? get shadowColor => Colors.transparent;

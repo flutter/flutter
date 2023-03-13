@@ -1,9 +1,8 @@
 {
-  "version": "v0_162",
+  "version": "v0_170",
 
-  "md.comp.sheet.bottom.docked.container.color": "surface",
+  "md.comp.sheet.bottom.docked.container.color": "surfaceContainerLow",
   "md.comp.sheet.bottom.docked.container.shape": "md.sys.shape.corner.extra-large.top",
-  "md.comp.sheet.bottom.docked.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.sheet.bottom.docked.drag-handle.color": "onSurfaceVariant",
   "md.comp.sheet.bottom.docked.drag-handle.height": 4.0,
   "md.comp.sheet.bottom.docked.drag-handle.opacity": 0.4,

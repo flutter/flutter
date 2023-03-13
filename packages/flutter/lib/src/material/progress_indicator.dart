@@ -924,7 +924,7 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);
@@ -946,7 +946,7 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   Color get color => _colors.primary;
 
   @override
-  Color get linearTrackColor => _colors.surfaceVariant;
+  Color get linearTrackColor => _colors.surfaceContainerHighest;
 
   @override
   double get linearMinHeight => 4.0;

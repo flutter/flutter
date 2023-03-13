@@ -1695,7 +1695,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(BuildContext context)
@@ -1744,7 +1744,7 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        return _colors.surfaceVariant.withOpacity(0.12);
+        return _colors.surfaceContainerHighest.withOpacity(0.12);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -1759,15 +1759,15 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return _colors.primary;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 
@@ -1835,7 +1835,7 @@ class _SwitchConfigM3 with _SwitchConfig {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        return _colors.surfaceVariant.withOpacity(0.38);
+        return _colors.surfaceContainerHighest.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -1850,15 +1850,15 @@ class _SwitchConfigM3 with _SwitchConfig {
         return _colors.onPrimaryContainer;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 

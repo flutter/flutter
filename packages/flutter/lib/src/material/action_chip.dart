@@ -175,7 +175,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
@@ -198,7 +198,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get selectedColor => null;

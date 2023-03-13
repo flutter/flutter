@@ -1371,7 +1371,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)
@@ -1386,20 +1386,20 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
-        return style.apply(color: _colors.onSurface.withOpacity(0.38));
+        return style.apply(color: _colors.onSurface.withOpacity(0.3));
       }
       return style.apply(color: _colors.onSurface);
     });
   }
 
   @override
-  Color? get color => _colors.surface;
+  Color? get color => _colors.surfaceContainer;
 
   @override
   Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => null;
 
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));

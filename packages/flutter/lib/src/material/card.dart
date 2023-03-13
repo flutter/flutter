@@ -214,7 +214,7 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _CardDefaultsM3 extends CardTheme {
   const _CardDefaultsM3(this.context)
@@ -228,13 +228,13 @@ class _CardDefaultsM3 extends CardTheme {
   final BuildContext context;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.surface;
+  Color? get color => Theme.of(context).colorScheme.surfaceContainerLow;
 
   @override
   Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - Card

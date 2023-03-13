@@ -459,7 +459,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   const _BannerDefaultsM3(this.context)
@@ -468,10 +468,10 @@ class _BannerDefaultsM3 extends MaterialBannerThemeData {
   final BuildContext context;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => Theme.of(context).colorScheme.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => null;
 
   @override
   Color? get dividerColor => Theme.of(context).colorScheme.outlineVariant;

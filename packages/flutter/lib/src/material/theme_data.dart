@@ -2755,7 +2755,7 @@ class VisualDensity with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,
@@ -2775,18 +2775,18 @@ const ColorScheme _colorSchemeLightM3 = ColorScheme(
   onError: Color(0xFFFFFFFF),
   errorContainer: Color(0xFFF9DEDC),
   onErrorContainer: Color(0xFF410E0B),
-  background: Color(0xFFFFFBFE),
-  onBackground: Color(0xFF1C1B1F),
-  surface: Color(0xFFFFFBFE),
-  onSurface: Color(0xFF1C1B1F),
+  background: Color(0xFFFEF7FF),
+  onBackground: Color(0xFF1D1B20),
+  surface: Color(0xFFFEF7FF),
+  onSurface: Color(0xFF1D1B20),
   surfaceVariant: Color(0xFFE7E0EC),
   onSurfaceVariant: Color(0xFF49454F),
   outline: Color(0xFF79747E),
   outlineVariant: Color(0xFFCAC4D0),
   shadow: Color(0xFF000000),
   scrim: Color(0xFF000000),
-  inverseSurface: Color(0xFF313033),
-  onInverseSurface: Color(0xFFF4EFF4),
+  inverseSurface: Color(0xFF322F35),
+  onInverseSurface: Color(0xFFF5EFF7),
   inversePrimary: Color(0xFFD0BCFF),
   // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(0xFF6750A4),
@@ -2810,18 +2810,18 @@ const ColorScheme _colorSchemeDarkM3 = ColorScheme(
   onError: Color(0xFF601410),
   errorContainer: Color(0xFF8C1D18),
   onErrorContainer: Color(0xFFF9DEDC),
-  background: Color(0xFF1C1B1F),
-  onBackground: Color(0xFFE6E1E5),
-  surface: Color(0xFF1C1B1F),
-  onSurface: Color(0xFFE6E1E5),
+  background: Color(0xFF141218),
+  onBackground: Color(0xFFE6E0E9),
+  surface: Color(0xFF141218),
+  onSurface: Color(0xFFE6E0E9),
   surfaceVariant: Color(0xFF49454F),
   onSurfaceVariant: Color(0xFFCAC4D0),
   outline: Color(0xFF938F99),
   outlineVariant: Color(0xFF49454F),
   shadow: Color(0xFF000000),
   scrim: Color(0xFF000000),
-  inverseSurface: Color(0xFFE6E1E5),
-  onInverseSurface: Color(0xFF313033),
+  inverseSurface: Color(0xFFE6E0E9),
+  onInverseSurface: Color(0xFF322F35),
   inversePrimary: Color(0xFF6750A4),
   // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(0xFFD0BCFF),

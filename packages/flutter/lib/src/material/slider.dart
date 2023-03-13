@@ -1878,7 +1878,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
+// Token database version: v0_170
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
@@ -1892,7 +1892,7 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get activeTrackColor => _colors.primary;
 
   @override
-  Color? get inactiveTrackColor => _colors.surfaceVariant;
+  Color? get inactiveTrackColor => _colors.surfaceContainerHighest;
 
   @override
   Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);

@@ -3585,7 +3585,7 @@ bool _platformSupportsAccelerators() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_170
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3604,7 +3604,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
@@ -3614,7 +3614,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return MaterialStatePropertyAll<Color?>(null);
   }
 
   @override
@@ -3660,7 +3660,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get foregroundColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
+        return _colors.onSurface.withOpacity(0.3);
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface;
@@ -3756,7 +3756,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.bodyLarge);
   }
 
   @override
@@ -3805,12 +3805,12 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return MaterialStatePropertyAll<Color?>(null);
   }
 
   @override
