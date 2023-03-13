@@ -7,6 +7,14 @@ import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
+config("display_list_config") {
+  defines = []
+
+  if (impeller_enable_3d) {
+    defines += [ "IMPELLER_ENABLE_3D" ]
+  }
+}
+
 source_set("display_list") {
   sources = [
     "display_list.cc",
@@ -65,6 +73,8 @@ source_set("display_list") {
     "types.h",
   ]
 
+  public_configs = [ ":display_list_config" ]
+
   public_deps = [
     "//flutter/fml",
     "//flutter/impeller/runtime_stage",
@@ -73,10 +83,6 @@ source_set("display_list") {
 
   if (!defined(defines)) {
     defines = []
-  }
-  if (impeller_enable_3d) {
-    defines += [ "IMPELLER_ENABLE_3D" ]
-    public_deps += [ "//flutter/impeller/scene" ]
   }
 }
 
