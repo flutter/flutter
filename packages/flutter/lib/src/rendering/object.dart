@@ -859,6 +859,20 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 /// are visible on screen. You can create other pipeline owners to manage
 /// off-screen objects, which can flush their pipelines independently of the
 /// on-screen render objects.
+///
+/// [PipelineOwner]s can be organized in a tree to manage multiple render trees,
+/// where each [PipelineOwner] is responsible for one of the render trees. To
+/// build or modify the tree, call [adoptChild] or [dropChild]. During each of
+/// the different flush phases described above, a [PipelineOwner] will first
+/// perform the phase on the nodes it manages in its own render tree before
+/// calling the same flush method on its children. No assumption must be made
+/// about the order in which child [PipelineOwner]s are flushed.
+///
+/// A [PipelineOwner] may also be [attach]ed to a [PipelineManifold], which
+/// gives it access to platform functionality usually exposed by the bindings
+/// without tying it to a specific binding implementation. All [PipelineOwner]s
+/// in a given tree must be attached to the same [PipelineManifold]. This
+/// happens automatically during [adoptChild].
 class PipelineOwner {
   /// Creates a pipeline owner.
   ///
@@ -879,6 +893,10 @@ class PipelineOwner {
   /// various stages of the pipeline. This function might be called multiple
   /// times in quick succession. Implementations should take care to discard
   /// duplicate calls quickly.
+  ///
+  /// When the [PipelineOwner] is attached to a [PipelineManifold] and
+  /// [onNeedVisualUpdate] is provided, the [onNeedVisualUpdate] callback is
+  /// invoked instead of calling [PipelineManifold.requestVisualUpdate].
   final VoidCallback? onNeedVisualUpdate;
 
   /// Called whenever this pipeline owner creates a semantics object.
@@ -903,7 +921,11 @@ class PipelineOwner {
   /// Used to notify the pipeline owner that an associated render object wishes
   /// to update its visual appearance.
   void requestVisualUpdate() {
-    onNeedVisualUpdate?.call();
+    if (onNeedVisualUpdate != null) {
+      onNeedVisualUpdate!();
+    } else {
+      _manifold?.requestVisualUpdate();
+    }
   }
 
   /// The unique object managed by this pipeline that has no parent.
@@ -945,6 +967,7 @@ class PipelineOwner {
   /// always returns false.
   bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingLayout = false;
+  bool _debugDoingChildLayout = false;
 
   /// Update the layout information for all dirty render objects.
   ///
@@ -997,10 +1020,20 @@ class PipelineOwner {
         // relayout boundary back.
         _shouldMergeDirtyNodes = false;
       }
+
+      assert(() {
+        _debugDoingChildLayout = true;
+        return true;
+      }());
+      for (final PipelineOwner child in _children) {
+        child.flushLayout();
+      }
+      assert(_nodesNeedingLayout.isEmpty, 'Child PipelineOwners must not dirty nodes in their parent.');
     } finally {
       _shouldMergeDirtyNodes = false;
       assert(() {
         _debugDoingLayout = false;
+        _debugDoingChildLayout = false;
         return true;
       }());
       if (!kReleaseMode) {
@@ -1052,6 +1085,10 @@ class PipelineOwner {
       }
     }
     _nodesNeedingCompositingBitsUpdate.clear();
+    for (final PipelineOwner child in _children) {
+      child.flushCompositingBits();
+    }
+    assert(_nodesNeedingCompositingBitsUpdate.isEmpty, 'Child PipelineOwners must not dirty nodes in their parent.');
     if (!kReleaseMode) {
       Timeline.finishSync();
     }
@@ -1116,7 +1153,10 @@ class PipelineOwner {
           }
         }
       }
-      assert(_nodesNeedingPaint.isEmpty);
+      for (final PipelineOwner child in _children) {
+        child.flushPaint();
+      }
+      assert(_nodesNeedingPaint.isEmpty, 'Child PipelineOwners must not dirty nodes in their parent.');
     } finally {
       assert(() {
         _debugDoingPaint = false;
@@ -1130,11 +1170,13 @@ class PipelineOwner {
 
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
-  /// An owner is created by [ensureSemantics]. The owner is valid for as long
-  /// there are [SemanticsHandle]s returned by [ensureSemantics] that have not
-  /// yet been disposed. Once the last handle has been disposed, the
-  /// [semanticsOwner] field will revert to null, and the previous owner will be
-  /// disposed.
+  /// An owner is created by [ensureSemantics] or when the [PipelineManifold] to
+  /// which this owner is connected has [PipelineManifold.semanticsEnabled] set
+  /// to true. The owner is valid for as long as
+  /// [PipelineManifold.semanticsEnabled] remains true or while there are
+  /// outstanding [SemanticsHandle]s from calls to [ensureSemantics]. The
+  /// [semanticsOwner] field will revert to null once both conditions are no
+  /// longer met.
   ///
   /// When [semanticsOwner] is null, the [PipelineOwner] skips all steps
   /// relating to semantics.
@@ -1167,23 +1209,28 @@ class PipelineOwner {
   /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback? listener }) {
     _outstandingSemanticsHandles += 1;
-    if (_outstandingSemanticsHandles == 1) {
-      assert(_semanticsOwner == null);
-      assert(onSemanticsUpdate != null, 'Attempted to open a semantics handle without an onSemanticsUpdate callback.');
-      _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
-      onSemanticsOwnerCreated?.call();
-    }
+    _updateSemanticsOwner();
     return _LocalSemanticsHandle._(this, listener);
+  }
+
+  void _updateSemanticsOwner() {
+    if ((_manifold?.semanticsEnabled ?? false) || _outstandingSemanticsHandles > 0) {
+      if (_semanticsOwner == null) {
+        assert(onSemanticsUpdate != null, 'Attempted to enable semantics without configuring an onSemanticsUpdate callback.');
+        _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
+        onSemanticsOwnerCreated?.call();
+      }
+    } else if (_semanticsOwner != null) {
+      _semanticsOwner?.dispose();
+      _semanticsOwner = null;
+      onSemanticsOwnerDisposed?.call();
+    }
   }
 
   void _didDisposeSemanticsHandle() {
     assert(_semanticsOwner != null);
     _outstandingSemanticsHandles -= 1;
-    if (_outstandingSemanticsHandles == 0) {
-      _semanticsOwner!.dispose();
-      _semanticsOwner = null;
-      onSemanticsOwnerDisposed?.call();
-    }
+    _updateSemanticsOwner();
   }
 
   bool _debugDoingSemantics = false;
@@ -1222,8 +1269,11 @@ class PipelineOwner {
         }
       }
       _semanticsOwner!.sendSemanticsUpdate();
+      for (final PipelineOwner child in _children) {
+        child.flushSemantics();
+      }
+      assert(_nodesNeedingSemantics.isEmpty, 'Child PipelineOwners must not dirty nodes in their parent.');
     } finally {
-      assert(_nodesNeedingSemantics.isEmpty);
       assert(() {
         _debugDoingSemantics = false;
         return true;
@@ -1233,6 +1283,166 @@ class PipelineOwner {
       }
     }
   }
+
+  // TREE MANAGEMENT
+
+  final Set<PipelineOwner> _children = <PipelineOwner>{};
+  PipelineManifold? _manifold;
+
+  PipelineOwner? _debugParent;
+  bool _debugSetParent(PipelineOwner child, PipelineOwner? parent) {
+    child._debugParent = parent;
+    return true;
+  }
+
+  /// Mark this [PipelineOwner] as attached to the given [PipelineManifold].
+  ///
+  /// Typically, this is only called directly on the root [PipelineOwner].
+  /// Children are automatically attached to their parent's [PipelineManifold]
+  /// when [adoptChild] is called.
+  void attach(PipelineManifold manifold) {
+    assert(_manifold == null);
+    _manifold = manifold;
+    _manifold!.addListener(_updateSemanticsOwner);
+    _updateSemanticsOwner();
+
+    for (final PipelineOwner child in _children) {
+      child.attach(manifold);
+    }
+  }
+
+  /// Mark this [PipelineOwner] as detached.
+  ///
+  /// Typically, this is only called directly on the root [PipelineOwner].
+  /// Children are automatically detached from their parent's [PipelineManifold]
+  /// when [dropChild] is called.
+  void detach() {
+    assert(_manifold != null);
+    _manifold!.removeListener(_updateSemanticsOwner);
+    _manifold = null;
+    _updateSemanticsOwner();
+
+    for (final PipelineOwner child in _children) {
+      child.detach();
+    }
+  }
+
+  // In theory, child list modifications are also disallowed between
+  // _debugDoingChildrenLayout and _debugDoingPaint as well as between
+  // _debugDoingPaint and _debugDoingSemantics. However, since the associated
+  // flush methods are usually called back to back, this gets us close enough.
+  bool get _debugAllowChildListModifications => !_debugDoingChildLayout && !_debugDoingPaint && !_debugDoingSemantics;
+
+  /// Adds `child` to this [PipelineOwner].
+  ///
+  /// During the phases of frame production (see [RendererBinding.drawFrame]),
+  /// the parent [PipelineOwner] will complete a phase for the nodes it owns
+  /// directly before invoking the flush method corresponding to the current
+  /// phase on its child [PipelineOwner]s. For example, during layout, the
+  /// parent [PipelineOwner] will first lay out its own nodes before calling
+  /// [flushLayout] on its children. During paint, it will first paint its own
+  /// nodes before calling [flushPaint] on its children. This order also applies
+  /// for all the other phases.
+  ///
+  /// No assumptions must be made about the order in which child
+  /// [PipelineOwner]s are flushed.
+  ///
+  /// No new children may be added after the [PipelineOwner] has started calling
+  /// [flushLayout] on any of its children until the end of the current frame.
+  ///
+  /// To remove a child, call [dropChild].
+  void adoptChild(PipelineOwner child) {
+    assert(child._debugParent == null);
+    assert(!_children.contains(child));
+    assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
+    _children.add(child);
+    assert(_debugSetParent(child, this));
+    if (_manifold != null) {
+      child.attach(_manifold!);
+    }
+  }
+
+  /// Removes a child [PipelineOwner] previously added via [adoptChild].
+  ///
+  /// This node will cease to call the flush methods on the `child` during frame
+  /// production.
+  ///
+  /// No children may be removed after the [PipelineOwner] has started calling
+  /// [flushLayout] on any of its children until the end of the current frame.
+  void dropChild(PipelineOwner child) {
+    assert(child._debugParent == this);
+    assert(_children.contains(child));
+    assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
+    _children.remove(child);
+    assert(_debugSetParent(child, null));
+    if (_manifold != null) {
+      child.detach();
+    }
+  }
+
+  /// Calls `visitor` for each immediate child of this [PipelineOwner].
+  ///
+  /// See also:
+  ///
+  ///  * [adoptChild] to add a child.
+  ///  * [dropChild] to remove a child.
+  void visitChildren(PipelineOwnerVisitor visitor) {
+    _children.forEach(visitor);
+  }
+}
+
+/// Signature for the callback to [PipelineOwner.visitChildren].
+///
+/// The argument is the child being visited.
+typedef PipelineOwnerVisitor = void Function(PipelineOwner child);
+
+/// Manages a tree of [PipelineOwner]s.
+///
+/// All [PipelineOwner]s within a tree are attached to the same
+/// [PipelineManifold], which gives them access to shared functionality such
+/// as requesting a visual update (by calling [requestVisualUpdate]). As such,
+/// the [PipelineManifold] gives the [PipelineOwner]s access to functionality
+/// usually provided by the bindings without tying the [PipelineOwner]s to a
+/// particular binding implementation.
+///
+/// The root of the [PipelineOwner] tree is attached to a [PipelineManifold] by
+/// passing the manifold to [PipelineOwner.attach]. Children are attached to the
+/// same [PipelineManifold] as their parent when they are adopted via
+/// [PipelineOwner.adoptChild].
+///
+/// [PipelineOwner]s can register listeners with the [PipelineManifold] to be
+/// informed when certain values provided by the [PipelineManifold] change.
+abstract class PipelineManifold implements Listenable {
+  /// Whether [PipelineOwner]s connected to this [PipelineManifold] should
+  /// collect semantics information and produce a semantics tree.
+  ///
+  /// The [PipelineManifold] notifies its listeners (managed with [addListener]
+  /// and [removeListener]) when this property changes its value.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsBinding.semanticsEnabled], which [PipelineManifold]
+  ///    implementations typically use to back this property.
+  bool get semanticsEnabled;
+
+  /// Called by a [PipelineOwner] connected to this [PipelineManifold] when a
+  /// [RenderObject] associated with that pipeline owner wishes to update its
+  /// visual appearance.
+  ///
+  /// Typical implementations of this function will schedule a task to flush the
+  /// various stages of the pipeline. This function might be called multiple
+  /// times in quick succession. Implementations should take care to discard
+  /// duplicate calls quickly.
+  ///
+  /// A [PipelineOwner] connected to this [PipelineManifold] will call
+  /// [PipelineOwner.onNeedVisualUpdate] instead of this method if it has been
+  /// configured with a non-null [PipelineOwner.onNeedVisualUpdate] callback.
+  ///
+  /// See also:
+  ///
+  ///  * [SchedulerBinding.ensureVisualUpdate], which [PipelineManifold]
+  ///    implementations typically call to implement this method.
+  void requestVisualUpdate();
 }
 
 const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
