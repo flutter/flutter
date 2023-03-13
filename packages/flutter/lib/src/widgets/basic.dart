@@ -4362,8 +4362,8 @@ class PositionedDirectional extends StatelessWidget {
   }
 }
 
-/// Mixin to allow sharing the required properties of [FlexRenderObject]
-mixin FlexMixin {
+/// Base class containing the required properties of [Flex]
+abstract class _FlexBase {
   /// The direction to use as the main axis.
   ///
   /// If you know the axis in advance, then consider using a [Row] (if it's
@@ -4458,6 +4458,9 @@ mixin FlexMixin {
   ///
   /// Defaults to [Clip.none].
   Clip get clipBehavior;
+
+  /// {@macro flutter.widgets.MultiChildRenderObjectWidget.children}
+  List<Widget> get children;
 }
 
 /// A widget that displays its children in a one-dimensional array.
@@ -4531,7 +4534,7 @@ mixin FlexMixin {
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Flex extends MultiChildRenderObjectWidget with FlexMixin {
+class Flex extends MultiChildRenderObjectWidget implements _FlexBase {
   /// Creates a flex layout.
   ///
   /// The [direction] is required.
@@ -4827,7 +4830,7 @@ class Flex extends MultiChildRenderObjectWidget with FlexMixin {
 ///    that may by sized smaller (leaving some remaining room unused).
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMixin {
+class Row extends StatelessWidget implements _FlexBase {
   /// Creates a horizontal array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -4899,7 +4902,7 @@ class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMi
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: StaticMultiSelectableSelectionContainerDelegate(selectionSeparator: ' '),
+        delegate: StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: ' '),
         child: result,
       );
     }
@@ -5075,7 +5078,7 @@ class Row extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMi
 ///    use a [Column] inside a scrolling container.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, FlexMixin {
+class Column extends StatelessWidget implements _FlexBase {
   /// Creates a vertical array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -5145,7 +5148,7 @@ class Column extends StatelessWidget with MultiChildRenderObjectWidgetMixin, Fle
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: StaticMultiSelectableSelectionContainerDelegate(selectionSeparator: '\n'),
+        delegate: StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: '\n'),
         child: result,
       );
     }

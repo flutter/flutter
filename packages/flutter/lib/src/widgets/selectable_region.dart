@@ -1264,9 +1264,9 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 class StaticMultiSelectableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   /// Create a [StaticMultiSelectableSelectionContainerDelegate]
   ///
-  /// The [selectionSeparator] is the string that will be used to separate
+  /// The [selectedContentSeparator] is the string that will be used to separate
   /// the selected text of the children of this delegate.
-  StaticMultiSelectableSelectionContainerDelegate({super.selectionSeparator = ''});
+  StaticMultiSelectableSelectionContainerDelegate({super.selectedContentSeparator = ''});
 
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
@@ -1434,15 +1434,15 @@ class StaticMultiSelectableSelectionContainerDelegate extends MultiSelectableSel
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates a [MultiSelectableSelectionContainerDelegate].
   ///
-  /// The [selectionSeparator] is used to separate the text of each selectable in
+  /// The [selectedContentSeparator] is used to separate the text of each selectable in
   /// [selectables].
   MultiSelectableSelectionContainerDelegate({
-     this.selectionSeparator = '',
+     this.selectedContentSeparator = '',
   });
 
   /// The separator used to separate the text of each selectable in
   /// [selectables].
-  final String selectionSeparator;
+  final String selectedContentSeparator;
 
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
@@ -1847,7 +1847,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       return null;
     }
     return SelectedContent(
-      plainText: selections.map((SelectedContent e) => e.plainText).join(selectionSeparator),
+      plainText: selections.map((SelectedContent e) => e.plainText).join(selectedContentSeparator),
     );
   }
 
