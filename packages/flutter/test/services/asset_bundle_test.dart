@@ -46,6 +46,14 @@ class SynchronousTestAssetBundle extends CachingAssetBundle {
     }
     throw FlutterError('key not found');
   }
+
+  @override
+  Future<String> loadString(String key, {bool cache = true}) {
+    if (key == 'one') {
+      return SynchronousFuture<String>('1');
+    }
+    throw FlutterError('key not found');
+  }
 }
 
 void main() {
@@ -135,6 +143,14 @@ void main() {
       final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
       bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
       final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
+      expect(data, isA<SynchronousFuture<int>>());
+      expect(await data, 1);
+    });
+
+    test('loadStructuredData cache is populated synchronously if load is synchronous', () async {
+      final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
+      bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
+      final Future<int> data = bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(2));
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
