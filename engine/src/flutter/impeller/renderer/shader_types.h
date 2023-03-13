@@ -123,17 +123,6 @@ struct SampledImageSlot {
   constexpr bool HasSampler() const { return sampler_index < 32u; }
 };
 
-enum class DescriptorType {
-  kSampledImage,
-  kUniformBuffer,
-};
-
-struct DescriptorSetLayout {
-  uint32_t binding;
-  DescriptorType descriptor_type;
-  ShaderStage shader_stage;
-};
-
 template <size_t Size>
 struct Padding {
  private:

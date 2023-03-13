@@ -188,10 +188,6 @@ enum class TextureUsage : TextureUsageMask {
   kRenderTarget = 1 << 2,
 };
 
-constexpr bool TextureUsageIsRenderTarget(TextureUsageMask mask) {
-  return static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) & mask;
-}
-
 enum class TextureIntent {
   kUploadFromHost,
   kRenderToTexture,

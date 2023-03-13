@@ -62,7 +62,10 @@ class PipelineLibraryVK final
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
-  std::unique_ptr<PipelineVK> CreatePipeline(const PipelineDescriptor& desc);
+  std::unique_ptr<PipelineCreateInfoVK> CreatePipeline(
+      const PipelineDescriptor& desc);
+
+  vk::UniqueRenderPass CreateRenderPass(const PipelineDescriptor& desc);
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryVK);
 };

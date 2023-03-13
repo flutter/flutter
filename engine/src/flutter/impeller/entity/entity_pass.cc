@@ -152,7 +152,7 @@ static RenderTarget CreateRenderTarget(ContentContext& renderer,
   /// What's important is the `StorageMode` of the textures, which cannot be
   /// changed for the lifetime of the textures.
 
-  if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (context->GetDeviceCapabilities().SupportsOffscreenMSAA()) {
     return RenderTarget::CreateOffscreenMSAA(
         *context,      // context
         size,          // size
@@ -210,8 +210,8 @@ bool EntityPass::Render(ContentContext& renderer,
     command_buffer->SetLabel("EntityPass Root Command Buffer");
 
     if (renderer.GetContext()
-            ->GetCapabilities()
-            ->SupportsTextureToTextureBlits()) {
+            ->GetDeviceCapabilities()
+            .SupportsTextureToTextureBlits()) {
       auto blit_pass = command_buffer->CreateBlitPass();
 
       blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),

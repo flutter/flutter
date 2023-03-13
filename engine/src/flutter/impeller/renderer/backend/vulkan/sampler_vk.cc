@@ -14,7 +14,7 @@ SamplerVK::SamplerVK(SamplerDescriptor desc, vk::UniqueSampler sampler)
 
 SamplerVK::~SamplerVK() = default;
 
-vk::Sampler SamplerVK::GetSampler() const {
+vk::Sampler SamplerVK::GetSamplerVK() const {
   return *sampler_;
 }
 

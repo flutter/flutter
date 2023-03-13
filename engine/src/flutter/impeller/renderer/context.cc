@@ -14,8 +14,8 @@ std::shared_ptr<GPUTracer> Context::GetGPUTracer() const {
   return nullptr;
 }
 
-bool Context::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
-  return false;
+PixelFormat Context::GetColorAttachmentPixelFormat() const {
+  return GetDeviceCapabilities().GetDefaultColorFormat();
 }
 
 }  // namespace impeller

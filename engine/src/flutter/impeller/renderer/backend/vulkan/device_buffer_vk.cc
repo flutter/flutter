@@ -67,7 +67,7 @@ bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
   return SetLabel(label);
 }
 
-vk::Buffer DeviceBufferVK::GetBuffer() const {
+vk::Buffer DeviceBufferVK::GetVKBufferHandle() const {
   return buffer_;
 }
 

@@ -4,81 +4,29 @@
 
 #pragma once
 
-#include <map>
 #include <set>
 #include <string>
-#include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/capabilities.h"
 
 namespace impeller {
 
-class ContextVK;
-
-//------------------------------------------------------------------------------
-/// @brief      The Vulkan layers and extensions wrangler.
-///
-class CapabilitiesVK final : public Capabilities {
+class CapabilitiesVK {
  public:
-  CapabilitiesVK(bool enable_validations = false);
+  CapabilitiesVK();
 
   ~CapabilitiesVK();
 
-  bool IsValid() const;
-
-  bool AreValidationsEnabled() const;
-
-  std::optional<std::vector<std::string>> GetRequiredLayers() const;
-
-  std::optional<std::vector<std::string>> GetRequiredInstanceExtensions() const;
-
-  std::optional<std::vector<std::string>> GetRequiredDeviceExtensions(
-      const vk::PhysicalDevice& physical_device) const;
-
-  std::optional<vk::PhysicalDeviceFeatures> GetRequiredDeviceFeatures(
-      const vk::PhysicalDevice& physical_device) const;
-
-  [[nodiscard]] bool SetDevice(const vk::PhysicalDevice& physical_device);
-
-  // |Capabilities|
-  bool HasThreadingRestrictions() const override;
-
-  // |Capabilities|
-  bool SupportsOffscreenMSAA() const override;
-
-  // |Capabilities|
-  bool SupportsSSBO() const override;
-
-  // |Capabilities|
-  bool SupportsTextureToTextureBlits() const override;
-
-  // |Capabilities|
-  bool SupportsFramebufferFetch() const override;
-
-  // |Capabilities|
-  bool SupportsCompute() const override;
-
-  // |Capabilities|
-  bool SupportsComputeSubgroups() const override;
-
-  // |Capabilities|
-  PixelFormat GetDefaultColorFormat() const override;
-
-  // |Capabilities|
-  PixelFormat GetDefaultStencilFormat() const override;
-
- private:
-  const bool enable_validations_;
-  std::map<std::string, std::set<std::string>> exts_;
-  PixelFormat color_format_ = PixelFormat::kUnknown;
-  PixelFormat depth_stencil_format_ = PixelFormat::kUnknown;
-  bool is_valid_ = false;
-
-  bool HasExtension(const std::string& ext) const;
+  bool HasExtension(const std::string& extension) const;
 
   bool HasLayer(const std::string& layer) const;
+
+  bool HasLayerExtension(const std::string& layer,
+                         const std::string& extension);
+
+ private:
+  std::set<std::string> extensions_;
+  std::set<std::string> layers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CapabilitiesVK);
 };
