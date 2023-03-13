@@ -14,6 +14,7 @@ import 'event_simulation.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
+import 'window.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
 /// smaller moves.
@@ -234,6 +235,37 @@ abstract class WidgetController {
   /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
 
+  /// The [TestPlatformDispatcher] that is being used in this test.
+  ///
+  /// This will be injected into the framework such that calls to
+  /// [WidgetsBinding.platformDispatcher] will use this. This allows
+  /// users to change platform specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [TestFlutterView] which allows changing view specific properties
+  ///     for testing
+  ///   * [view] and [viewOf] which are used to find
+  ///     [TestFlutterView]s from the widget tree
+  TestPlatformDispatcher get platformDispatcher => binding.platformDispatcher as TestPlatformDispatcher;
+
+  /// The [TestFlutterView] provided by default when testing with
+  /// [WidgetTester.pumpWidget].
+  ///
+  /// If the test requires multiple views, it will need to use [viewOf] instead
+  /// to ensure that the view related to the widget being evaluated is the one
+  /// that gets updated.
+  ///
+  /// See also:
+  ///
+  ///   * [viewOf], which can find a [TestFlutterView] related to a given finder.
+  ///     This is how to modify view properties for testing when dealing with
+  ///     multiple views.
+  TestFlutterView get view {
+    assert(platformDispatcher.views.length == 1, 'When testing with multiple views, use `viewOf` instead.');
+    return platformDispatcher.views.single;
+  }
+
   /// Provides access to a [SemanticsController] for testing anything related to
   /// the [Semantics] tree.
   ///
@@ -256,6 +288,26 @@ abstract class WidgetController {
 
   // TODO(ianh): verify that the return values are of type T and throw
   // a good message otherwise, in all the generic methods below
+
+  /// Finds the [TestFlutterView] that is the closest ancestor of the widget
+  /// found by [finder].
+  ///
+  /// [TestFlutterView] can be used to modify view specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [view] which returns the [TestFlutterView] used when only a single
+  ///     view is being used.
+  TestFlutterView viewOf(Finder finder) {
+    final View view = firstWidget<View>(
+      find.ancestor(
+        of: finder,
+        matching: find.byType(View),
+      )
+    );
+
+    return view.view as TestFlutterView;
+  }
 
   /// Checks if `finder` exists in the tree.
   bool any(Finder finder) {
