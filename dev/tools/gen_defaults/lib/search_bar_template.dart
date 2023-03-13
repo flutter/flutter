@@ -10,13 +10,6 @@ class SearchBarTemplate extends TokenTemplate {
     super.textThemePrefix = '_textTheme.'
   });
 
-  String _textStyle(String token) {
-    if (tokens.containsKey('$token.text-style')) {
-      return '''MaterialStatePropertyAll<TextStyle?>(${textStyle(token)}?.copyWith(color: ${componentColor(token)}))''';
-    }
-    return '''null''';
-  }
-
   @override
   String generate() => '''
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
@@ -69,11 +62,11 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-    ${_textStyle('md.comp.search-bar.input-text')};
+    MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-bar.input-text')});
 
   @override
   MaterialStateProperty<TextStyle?> get hintStyle =>
-    ${_textStyle('md.comp.search-bar.supporting-text')};
+    MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-bar.supporting-text')});
 
   @override
   BoxConstraints get constraints =>

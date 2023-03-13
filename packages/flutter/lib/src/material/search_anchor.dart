@@ -19,8 +19,8 @@ import 'theme.dart';
 
 /// A Material Design search bar.
 ///
-/// Search bars include a leading Search icon, a text input field and optional
-/// trailing icons. A search bar is typically used to open a search view.
+/// Search bars include a [leading] Search icon, a text input field and optional
+/// [trailing] icons. A search bar is typically used to open a search view.
 /// It is the default trigger for a search view.
 ///
 /// The [leading] widget is on the left side of the bar and should contain either
@@ -34,9 +34,10 @@ import 'theme.dart';
 class SearchBar extends StatefulWidget {
   /// Creates a Material Design search bar.
   ///
-  /// If [trailing] is specified, there should be up to two widgets.
+  /// If [trailing] is specified, there should not be more than two
+  /// widgets in [trailing].
   ///
-  /// Typically used as an anchor of a search view.
+  /// Typically used in combination with a search view.
   const SearchBar({
     super.key,
     this.controller,
@@ -137,12 +138,19 @@ class SearchBar extends StatefulWidget {
   ///
   /// This value is combined with [shape] to create a shape decorated
   /// with an outline.
+  ///
+  /// If null, the value of [SearchBarThemeData.side] will be used. If this is
+  /// also null, the search bar doesn't have a side by default.
   final MaterialStateProperty<BorderSide?>? side;
 
   /// The shape of the search bar's underlying [Material].
   ///
   /// This shape is combined with [side] to create a shape decorated
   /// with an outline.
+  ///
+  /// If null, the value of [SearchBarThemeData.shape] will be used.
+  /// If this is also null, then the default value is 16.0 horizontally.
+  /// Defaults to [StadiumBorder].
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
   /// The padding between the search bar's boundary and its child.
