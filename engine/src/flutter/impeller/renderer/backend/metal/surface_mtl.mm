@@ -64,6 +64,7 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   resolve_tex_desc.format = color_format;
   resolve_tex_desc.size = msaa_tex_desc.size;
   resolve_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  resolve_tex_desc.sample_count = SampleCount::kCount1;
   resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 
   std::shared_ptr<Texture> resolve_tex =
@@ -86,7 +87,7 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   stencil_tex_desc.type = TextureType::kTexture2DMultisample;
   stencil_tex_desc.sample_count = SampleCount::kCount4;
   stencil_tex_desc.format =
-      context->GetDeviceCapabilities().GetDefaultStencilFormat();
+      context->GetCapabilities()->GetDefaultStencilFormat();
   stencil_tex_desc.size = msaa_tex_desc.size;
   stencil_tex_desc.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);

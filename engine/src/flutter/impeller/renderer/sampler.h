@@ -20,7 +20,7 @@ class Sampler {
  protected:
   SamplerDescriptor desc_;
 
-  Sampler(SamplerDescriptor desc);
+  explicit Sampler(SamplerDescriptor desc);
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Sampler);
