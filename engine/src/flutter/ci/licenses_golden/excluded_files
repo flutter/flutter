@@ -2747,6 +2747,7 @@
 ../../../third_party/skia/src/encode/BUILD.bazel
 ../../../third_party/skia/src/fonts/BUILD.bazel
 ../../../third_party/skia/src/gpu/BUILD.bazel
+../../../third_party/skia/src/gpu/dawn/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/d3d/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/dawn/BUILD.bazel
