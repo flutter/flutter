@@ -134,7 +134,7 @@ void main() {
     test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () async {
       final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
       bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
-      final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 0);
+      final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
