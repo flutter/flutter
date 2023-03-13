@@ -12,6 +12,7 @@
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/color_source_text_contents.h"
 #include "impeller/entity/contents/rrect_shadow_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -380,16 +381,40 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
                            const Paint& paint) {
   lazy_glyph_atlas_->AddTextFrame(text_frame);
 
+  Entity entity;
+  entity.SetStencilDepth(GetStencilDepth());
+  entity.SetBlendMode(paint.blend_mode);
+
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
   text_contents->SetGlyphAtlas(lazy_glyph_atlas_);
+
+  if (paint.color_source.has_value()) {
+    auto& source = paint.color_source.value();
+    auto color_text_contents = std::make_shared<ColorSourceTextContents>();
+    entity.SetTransformation(GetCurrentTransformation());
+
+    Entity test;
+    auto cvg = text_contents->GetCoverage(test).value();
+    color_text_contents->SetTextPosition(cvg.origin + position);
+
+    text_contents->SetInverseMatrix(
+        Matrix::MakeTranslation(Vector3(-cvg.origin.x, -cvg.origin.y, 0)));
+    color_text_contents->SetTextContents(std::move(text_contents));
+    color_text_contents->SetColorSourceContents(source());
+
+    entity.SetContents(
+        paint.WithFilters(std::move(color_text_contents), false));
+
+    GetCurrentPass().AddEntity(entity);
+    return;
+  }
+
   text_contents->SetColor(paint.color);
 
-  Entity entity;
   entity.SetTransformation(GetCurrentTransformation() *
                            Matrix::MakeTranslation(position));
-  entity.SetStencilDepth(GetStencilDepth());
-  entity.SetBlendMode(paint.blend_mode);
+
   entity.SetContents(paint.WithFilters(std::move(text_contents), true));
 
   GetCurrentPass().AddEntity(entity);

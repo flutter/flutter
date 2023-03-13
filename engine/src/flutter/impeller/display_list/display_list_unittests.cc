@@ -57,6 +57,25 @@ TEST_P(DisplayListTest, CanDrawTextBlob) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawTextBlobWithGradient) {
+  flutter::DisplayListBuilder builder;
+
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
+                                          flutter::DlColor::kRed()};
+  const float stops[2] = {0.0, 1.0};
+
+  auto linear = flutter::DlColorSource::MakeLinear({0.0, 0.0}, {300.0, 300.0},
+                                                   2, colors.data(), stops,
+                                                   flutter::DlTileMode::kClamp);
+  flutter::DlPaint paint;
+  paint.setColorSource(linear);
+
+  builder.DrawTextBlob(
+      SkTextBlob::MakeFromString("Hello World", CreateTestFont()), 100, 100,
+      paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DisplayListBuilder builder;
   builder.setColor(SK_ColorRED);
