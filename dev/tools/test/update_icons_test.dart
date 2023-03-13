@@ -17,6 +17,9 @@ Map<String, String> codepointsC = <String, String>{
   'airplane': '111',
   'train': '444',
 };
+Map<String, String> codepointsUnderscore = <String, String>{
+  'airplane__123': '111',
+};
 
 void main() {
   group('safety checks', () {
@@ -38,7 +41,7 @@ void main() {
   });
 
   test('no double underscores', () {
-    expect(Icon.generateFlutterId('abc__123'), 'abc_123');
+    expect(Icon(codepointsUnderscore.entries.first), 'abc_123');
   });
 
   test('usage string is correct', () {
