@@ -12,6 +12,126 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
   : LogicalKeyboardKey.controlLeft;
 
 void main() {
+  group('ScrollableDetails', (){
+    final ScrollController controller = ScrollController();
+    test('constructors assert when controller and primary conflict', () {
+      expect(
+        () {
+          ScrollableDetails(
+            direction: AxisDirection.down,
+            controller: controller,
+            primary: true,
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having((AssertionError error) => error.toString(),
+          'description', contains('!(controller != null && (primary ?? false))')),
+        ),
+      );
+
+      expect(
+        () {
+          ScrollableDetails.vertical(
+            controller: controller,
+            primary: true,
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having((AssertionError error) => error.toString(),
+          'description', contains('!(controller != null && (primary ?? false))')),
+        ),
+      );
+
+      expect(
+        () {
+          ScrollableDetails.horizontal(
+            controller: controller,
+            primary: true,
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having((AssertionError error) => error.toString(),
+          'description', contains('!(controller != null && (primary ?? false))')),
+        ),
+      );
+    });
+
+    test('copyWith / == / hashCode', () {
+      final ScrollableDetails details = ScrollableDetails(
+        direction: AxisDirection.down,
+        controller: controller,
+        primary: false,
+        physics: const AlwaysScrollableScrollPhysics(),
+        decorationClipBehavior: Clip.hardEdge,
+      );
+      ScrollableDetails copiedDetails = details.copyWith();
+      expect(details, copiedDetails);
+      expect(details.hashCode, copiedDetails.hashCode);
+
+      copiedDetails = details.copyWith(
+        direction: AxisDirection.left,
+        physics: const ClampingScrollPhysics(),
+        decorationClipBehavior: Clip.none,
+      );
+      expect(
+        copiedDetails,
+        ScrollableDetails(
+          direction: AxisDirection.left,
+          controller: controller,
+          primary: false,
+          physics: const ClampingScrollPhysics(),
+          decorationClipBehavior: Clip.none,
+        ),
+      );
+    });
+
+    test('toString', (){
+      const ScrollableDetails bareDetails = ScrollableDetails(
+        direction: AxisDirection.right,
+      );
+      expect(
+        bareDetails.toString(),
+        equalsIgnoringHashCodes(
+          'ScrollableDetails#00000(axisDirection: AxisDirection.right)'
+        ),
+      );
+      final ScrollableDetails fullDetails = ScrollableDetails(
+        direction: AxisDirection.down,
+        controller: controller,
+        primary: false,
+        physics: const AlwaysScrollableScrollPhysics(),
+        decorationClipBehavior: Clip.hardEdge,
+      );
+      expect(
+        fullDetails.toString(),
+        equalsIgnoringHashCodes(
+          'ScrollableDetails#00000('
+          'axisDirection: AxisDirection.down, '
+          'scroll controller: ScrollController#00000(no clients), '
+          'primary: false, '
+          'scroll physics: AlwaysScrollableScrollPhysics, '
+          'decorationClipBehavior: Clip.hardEdge)'
+        ),
+      );
+    });
+
+    test('deprecated clipBehavior is backwards compatible', (){
+      const ScrollableDetails deprecatedClip = ScrollableDetails(
+        direction: AxisDirection.right,
+        clipBehavior: Clip.hardEdge,
+      );
+      expect(deprecatedClip.clipBehavior, Clip.hardEdge);
+      expect(deprecatedClip.decorationClipBehavior, Clip.hardEdge);
+
+      const ScrollableDetails newClip = ScrollableDetails(
+        direction: AxisDirection.right,
+        decorationClipBehavior: Clip.hardEdge,
+      );
+      expect(newClip.clipBehavior, Clip.hardEdge);
+      expect(newClip.decorationClipBehavior, Clip.hardEdge);
+    });
+  });
+
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
