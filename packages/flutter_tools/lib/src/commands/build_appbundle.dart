@@ -70,7 +70,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   final String name = 'appbundle';
 
   @override
-  DeprecationBehavior get deprecationBehavior => boolArgDeprecated('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -88,11 +88,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
   Future<CustomDimensions> get usageValues async {
     String buildMode;
 
-    if (boolArgDeprecated('release')) {
+    if (boolArg('release')) {
       buildMode = 'release';
-    } else if (boolArgDeprecated('debug')) {
+    } else if (boolArg('debug')) {
       buildMode = 'debug';
-    } else if (boolArgDeprecated('profile')) {
+    } else if (boolArg('profile')) {
       buildMode = 'profile';
     } else {
       // The build defaults to release.
@@ -113,12 +113,12 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArgDeprecated('multidex'),
+      multidexEnabled: boolArg('multidex'),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
     final List<DeferredComponent>? deferredComponents = FlutterProject.current().manifest.deferredComponents;
-    if (deferredComponents != null && boolArgDeprecated('deferred-components') && boolArgDeprecated('validate-deferred-components') && !boolArgDeprecated('debug')) {
+    if (deferredComponents != null && boolArg('deferred-components') && boolArg('validate-deferred-components') && !boolArg('debug')) {
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
         FlutterProject.current().directory,
         globals.logger,
@@ -154,8 +154,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
-      validateDeferredComponents: boolArgDeprecated('validate-deferred-components'),
-      deferredComponentsEnabled: boolArgDeprecated('deferred-components') && !boolArgDeprecated('debug'),
+      validateDeferredComponents: boolArg('validate-deferred-components'),
+      deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );
     return FlutterCommandResult.success();
   }
