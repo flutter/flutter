@@ -1022,6 +1022,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             selectAll();
+            hideToolbar();
             break;
         }
       },
