@@ -136,7 +136,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
     pass->SetThreadGroupSize(ISize(1024, 1));
 
     ComputeCommand cmd;
-    cmd.label = "Draw Stroke";
+    cmd.label = "Compute Stroke";
     cmd.pipeline = compute_pipeline;
 
     SS::Config config{.width = 1.0f, .cap = 1, .join = 1, .miter_limit = 4.0f};
@@ -161,7 +161,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
         quads->AsBufferView().contents);
 
     EXPECT_EQ(q->count, golden_heart_quads.size());
-    for (size_t i = 0; i < golden_heart_quads.size(); i++) {
+    for (size_t i = 0; i < q->count; i++) {
       EXPECT_LT(std::abs(golden_heart_quads[i].p1.x - q->data[i].p1.x), 1e-3);
       EXPECT_LT(std::abs(golden_heart_quads[i].p1.y - q->data[i].p1.y), 1e-3);
 
@@ -185,7 +185,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
     auto* v_count = reinterpret_cast<SS::VertexBufferCount*>(
         vertex_buffer_count->AsBufferView().contents);
     EXPECT_EQ(v_count->count, golden_heart_vertices.size());
-    for (size_t i = 0; i < golden_heart_vertices.size(); i += 1) {
+    for (size_t i = 0; i < v_count->count; i += 1) {
       EXPECT_LT(std::abs(golden_heart_vertices[i].x - v->position[i].x), 1e-3);
       EXPECT_LT(std::abs(golden_heart_vertices[i].y - v->position[i].y), 1e-3);
     }
@@ -221,7 +221,9 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
 
     cmd.pipeline = renderer.GetSolidFillPipeline(options);
 
-    auto count = golden_heart_vertices.size();
+    auto count = reinterpret_cast<SS::VertexBufferCount*>(
+                     vertex_buffer_count->AsBufferView().contents)
+                     ->count;
     auto& host_buffer = pass.GetTransientsBuffer();
     std::vector<uint16_t> indices(count);
     std::iota(std::begin(indices), std::end(indices), 0);
