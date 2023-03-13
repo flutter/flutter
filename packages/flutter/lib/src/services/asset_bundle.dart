@@ -279,7 +279,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 
     if (result != null) {
       // The above code ran synchronously. We can synchronously return the result.
-      _structuredBinaryDataCache[key] = result!;
       return result!;
     }
 
