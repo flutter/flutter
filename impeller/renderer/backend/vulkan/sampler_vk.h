@@ -22,7 +22,7 @@ class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
   // |Sampler|
   ~SamplerVK() override;
 
-  vk::Sampler GetSampler() const;
+  vk::Sampler GetSamplerVK() const;
 
   const std::shared_ptr<SharedObjectVKT<vk::Sampler>>& GetSharedSampler() const;
 

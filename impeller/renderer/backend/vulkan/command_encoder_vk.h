@@ -4,12 +4,9 @@
 
 #pragma once
 
-#include <optional>
-#include <set>
+#include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -18,9 +15,6 @@ namespace impeller {
 class ContextVK;
 class DeviceBuffer;
 class Texture;
-class TextureSourceVK;
-class TrackedObjectsVK;
-class FenceWaiterVK;
 
 class CommandEncoderVK {
  public:
@@ -34,35 +28,26 @@ class CommandEncoderVK {
 
   bool Track(std::shared_ptr<const DeviceBuffer> buffer);
 
-  bool Track(const std::shared_ptr<const Texture>& texture);
+  bool Track(std::shared_ptr<const Texture> texture);
 
-  bool Track(std::shared_ptr<const TextureSourceVK> texture);
-
-  vk::CommandBuffer GetCommandBuffer() const;
+  const vk::CommandBuffer& GetCommandBuffer() const;
 
   void PushDebugGroup(const char* label) const;
 
   void PopDebugGroup() const;
-
-  void InsertDebugMarker(const char* label) const;
-
-  std::optional<vk::DescriptorSet> AllocateDescriptorSet(
-      const vk::DescriptorSetLayout& layout);
 
  private:
   friend class ContextVK;
 
   vk::Device device_ = {};
   vk::Queue queue_ = {};
-
-  std::shared_ptr<FenceWaiterVK> fence_waiter_;
-  std::shared_ptr<TrackedObjectsVK> tracked_objects_;
+  vk::UniqueCommandBuffer command_buffer_;
+  std::vector<std::shared_ptr<SharedObjectVK>> tracked_objects_;
+  std::vector<std::shared_ptr<const DeviceBuffer>> tracked_buffers_;
+  std::vector<std::shared_ptr<const Texture>> tracked_textures_;
   bool is_valid_ = false;
 
-  CommandEncoderVK(vk::Device device,
-                   vk::Queue queue,
-                   const std::shared_ptr<CommandPoolVK>& pool,
-                   std::shared_ptr<FenceWaiterVK> fence_waiter);
+  CommandEncoderVK(vk::Device device, vk::Queue queue, vk::CommandPool pool);
 
   void Reset();
 
