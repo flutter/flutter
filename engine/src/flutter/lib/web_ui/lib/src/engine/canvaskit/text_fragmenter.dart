@@ -43,7 +43,7 @@ final Map<IntlSegmenterGranularity, DomSegmenter> _intlSegmenters = <IntlSegment
   IntlSegmenterGranularity.word: createIntlSegmenter(granularity: 'word'),
 };
 
-SkUint32List fragmentUsingIntlSegmenter(
+Uint32List fragmentUsingIntlSegmenter(
   String text,
   IntlSegmenterGranularity granularity,
 ) {
@@ -55,10 +55,7 @@ SkUint32List fragmentUsingIntlSegmenter(
     breaks.add(iterator.current.index);
   }
   breaks.add(text.length);
-
-  final SkUint32List mallocedList = mallocUint32List(breaks.length);
-  mallocedList.toTypedArray().setAll(0, breaks);
-  return mallocedList;
+  return Uint32List.fromList(breaks);
 }
 
 // These are the soft/hard line break values expected by Skia's SkParagraph.
@@ -67,13 +64,12 @@ const int _kHardLineBreak = 1;
 
 final DomV8BreakIterator _v8LineBreaker = createV8BreakIterator();
 
-SkUint32List fragmentUsingV8LineBreaker(String text) {
+Uint32List fragmentUsingV8LineBreaker(String text) {
   final List<LineBreakFragment> fragments =
       breakLinesUsingV8BreakIterator(text, _v8LineBreaker);
 
   final int size = (fragments.length + 1) * 2;
-  final SkUint32List mallocedList = mallocUint32List(size);
-  final Uint32List typedArray = mallocedList.toTypedArray();
+  final Uint32List typedArray = Uint32List(size);
 
   typedArray[0] = 0; // start index
   typedArray[1] = _kSoftLineBreak; // break type
@@ -87,5 +83,5 @@ SkUint32List fragmentUsingV8LineBreaker(String text) {
         : _kSoftLineBreak;
   }
 
-  return mallocedList;
+  return typedArray;
 }

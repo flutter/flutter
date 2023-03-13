@@ -1911,12 +1911,12 @@ extension SkParagraphBuilderExtension on SkParagraphBuilder {
   // into a utf16 string.
   String getText() => utf8.decode(getTextUtf8().codeUnits);
 
-  external void setWordsUtf8(SkUint32List words);
-  external void setWordsUtf16(SkUint32List words);
-  external void setGraphemeBreaksUtf8(SkUint32List graphemes);
-  external void setGraphemeBreaksUtf16(SkUint32List graphemes);
-  external void setLineBreaksUtf8(SkUint32List lineBreaks);
-  external void setLineBreaksUtf16(SkUint32List lineBreaks);
+  external void setWordsUtf8(Uint32List words);
+  external void setWordsUtf16(Uint32List words);
+  external void setGraphemeBreaksUtf8(Uint32List graphemes);
+  external void setGraphemeBreaksUtf16(Uint32List graphemes);
+  external void setLineBreaksUtf8(Uint32List lineBreaks);
+  external void setLineBreaksUtf16(Uint32List lineBreaks);
 
   external SkParagraph build();
   external void delete();
