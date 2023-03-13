@@ -94,13 +94,30 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   // called both in initState and when the EditableText receives focus.
   T? _lastValue;
 
+  // Whether a value has been pushed and is not yet saved in the history.
+  // Returns true while a push is delayed due to the throttling delay.
+  bool _hasPendingChange = false;
+
   UndoHistoryController? _controller;
 
   UndoHistoryController get _effectiveController => widget.controller ?? (_controller ??= UndoHistoryController());
 
   @override
   void undo() {
-    _update(_stack.undo());
+    if (_stack.currentValue == null)  {
+      // Returns early if there is not a first value registered in the history.
+      // This is important because, if an undo is received while the initial
+      // value is being pushed (a.k.a when the field get the focus but the
+      // throttling delay is pending), the initial push should not be canceled.
+      return;
+    }
+    _throttleTimer?.cancel(); // Cancel ongoing push, if any.
+    if (_hasPendingChange) {
+      _hasPendingChange = false;
+      _update(_stack.currentValue);
+    } else {
+      _update(_stack.undo());
+    }
     _updateState();
   }
 
@@ -168,6 +185,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
 
     _lastValue = widget.value.value;
 
+    _hasPendingChange = true;
     _throttleTimer = _throttledPush(widget.value.value);
   }
 
@@ -197,6 +215,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     _throttledPush = _throttle<T>(
       duration: _kThrottleDuration,
       function: (T currentValue) {
+        _hasPendingChange = false;
         _stack.push(currentValue);
         _updateState();
       },
@@ -455,27 +474,17 @@ typedef _Throttled<T> = Timer Function(T currentArg);
 _Throttled<T> _throttle<T>({
   required Duration duration,
   required _Throttleable<T> function,
-  // If true, calls at the start of the timer.
-  bool leadingEdge = false,
 }) {
   Timer? timer;
-  bool calledDuringTimer = false;
   late T arg;
 
   return (T currentArg) {
     arg = currentArg;
-    if (timer != null) {
-      calledDuringTimer = true;
+    if (timer != null && timer!.isActive) {
       return timer!;
     }
-    if (leadingEdge) {
-      function(arg);
-    }
-    calledDuringTimer = false;
     timer = Timer(duration, () {
-      if (!leadingEdge || calledDuringTimer) {
-        function(arg);
-      }
+      function(arg);
       timer = null;
     });
     return timer!;
