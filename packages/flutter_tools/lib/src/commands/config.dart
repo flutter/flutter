@@ -111,12 +111,12 @@ class ConfigCommand extends FlutterCommand {
           '    flutter config --android-studio-dir "/opt/Android Studio"');
     }
 
-    if (boolArgDeprecated('machine')) {
+    if (boolArg('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();
     }
 
-    if (boolArgDeprecated('clear-features')) {
+    if (boolArg('clear-features')) {
       for (final Feature feature in allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
@@ -127,7 +127,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('analytics') ?? false) {
-      final bool value = boolArgDeprecated('analytics');
+      final bool value = boolArg('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
@@ -142,11 +142,11 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('android-sdk') ?? false) {
-      _updateConfig('android-sdk', stringArgDeprecated('android-sdk')!);
+      _updateConfig('android-sdk', stringArg('android-sdk')!);
     }
 
     if (argResults?.wasParsed('android-studio-dir') ?? false) {
-      _updateConfig('android-studio-dir', stringArgDeprecated('android-studio-dir')!);
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
     }
 
     if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
@@ -154,7 +154,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults?.wasParsed('build-dir') ?? false) {
-      final String buildDir = stringArgDeprecated('build-dir')!;
+      final String buildDir = stringArg('build-dir')!;
       if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
@@ -167,7 +167,7 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults?.wasParsed(configSetting) ?? false) {
-        final bool keyValue = boolArgDeprecated(configSetting);
+        final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
       }

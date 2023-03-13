@@ -78,14 +78,14 @@ class BuildBundleCommand extends BuildSubCommand {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     return CustomDimensions(
-      commandBuildBundleTargetPlatform: stringArgDeprecated('target-platform'),
+      commandBuildBundleTargetPlatform: stringArg('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
     );
   }
 
   @override
   Future<void> validateCommand() async {
-    if (boolArgDeprecated('tree-shake-icons')) {
+    if (boolArg('tree-shake-icons')) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
@@ -93,7 +93,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArgDeprecated('target-platform')!;
+    final String targetPlatform = stringArg('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
@@ -133,8 +133,8 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      depfilePath: stringArgDeprecated('depfile'),
-      assetDirPath: stringArgDeprecated('asset-dir'),
+      depfilePath: stringArg('depfile'),
+      assetDirPath: stringArg('asset-dir'),
     );
     return FlutterCommandResult.success();
   }

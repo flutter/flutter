@@ -73,7 +73,6 @@ class DriveCommand extends RunCommandBase {
     addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
-        defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
               'By default, "flutter drive" stops the application after tests are finished, '
               'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '
@@ -171,7 +170,7 @@ class DriveCommand extends RunCommandBase {
   // specified not to.
   @override
   bool get shouldRunPub {
-    if (argResults!.wasParsed('pub') && !boolArgDeprecated('pub')) {
+    if (argResults!.wasParsed('pub') && !boolArg('pub')) {
       return false;
     }
     return true;
@@ -196,9 +195,9 @@ class DriveCommand extends RunCommandBase {
   @override
   final List<String> aliases = <String>['driver'];
 
-  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  String? get screenshot => stringArgDeprecated('screenshot');
+  String? get screenshot => stringArg('screenshot');
 
   @override
   bool get startPausedDefault => true;
@@ -206,7 +205,7 @@ class DriveCommand extends RunCommandBase {
   @override
   bool get cachePubGet => false;
 
-  String? get applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+  String? get applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
 
   Future<Device?> get targetedDevice async {
     return findTargetDevice(
@@ -226,7 +225,7 @@ class DriveCommand extends RunCommandBase {
       _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
-    return !boolArgDeprecated('publish-port');
+    return !boolArg('publish-port');
   }
 
   @override
@@ -279,7 +278,7 @@ class DriveCommand extends RunCommandBase {
 
     bool screenshotTaken = false;
     try {
-      if (stringArgDeprecated('use-existing-app') == null) {
+      if (stringArg('use-existing-app') == null) {
         await driverService.start(
           buildInfo,
           device,
@@ -294,14 +293,14 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArgDeprecated('multidex'))
+            if (boolArg('multidex'))
               'multidex': true,
           }
         );
       } else {
-        final Uri? uri = Uri.tryParse(stringArgDeprecated('use-existing-app')!);
+        final Uri? uri = Uri.tryParse(stringArg('use-existing-app')!);
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArgDeprecated('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
         }
         await driverService.reuseApplication(
           uri,
@@ -316,16 +315,16 @@ class DriveCommand extends RunCommandBase {
         stringsArg('test-arguments'),
         <String, String>{},
         packageConfig,
-        chromeBinary: stringArgDeprecated('chrome-binary'),
-        headless: boolArgDeprecated('headless'),
+        chromeBinary: stringArg('chrome-binary'),
+        headless: boolArg('headless'),
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
-        browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
-        browserName: stringArgDeprecated('browser-name'),
-        driverPort: stringArgDeprecated('driver-port') != null
-          ? int.tryParse(stringArgDeprecated('driver-port')!)
+        browserDimension: stringArg('browser-dimension')!.split(','),
+        browserName: stringArg('browser-name'),
+        driverPort: stringArg('driver-port') != null
+          ? int.tryParse(stringArg('driver-port')!)
           : null,
-        androidEmulator: boolArgDeprecated('android-emulator'),
-        profileMemory: stringArgDeprecated('profile-memory'),
+        androidEmulator: boolArg('android-emulator'),
+        profileMemory: stringArg('profile-memory'),
       );
 
       // If the test is sent a signal or times out, take a screenshot
@@ -344,11 +343,11 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArgDeprecated('keep-app-running')) {
+      if (boolArg('keep-app-running')) {
         _logger.printStatus('Leaving the application running.');
       } else {
-        final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null
-          ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
+        final File? skslFile = stringArg('write-sksl-on-exit') != null
+          ? _fileSystem.file(stringArg('write-sksl-on-exit'))
           : null;
         await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
       }
@@ -422,7 +421,7 @@ class DriveCommand extends RunCommandBase {
 
   String? _getTestFile() {
     if (argResults!['driver'] != null) {
-      return stringArgDeprecated('driver');
+      return stringArg('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from
