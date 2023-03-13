@@ -41,7 +41,7 @@ void main() {
 
     expect(manifest.listAssets(), unorderedEquals(<String>['assets/foo.png', 'assets/bar.png']));
 
-    final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png')!;
+    final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png');
     expect(fooVariants.length, 2);
     final AssetMetadata firstFooVariant = fooVariants[0];
     expect(firstFooVariant.key, 'assets/foo.png');
@@ -52,7 +52,7 @@ void main() {
     expect(secondFooVariant.targetDevicePixelRatio, 2.0);
     expect(secondFooVariant.main, false);
 
-    final List<AssetMetadata> barVariants = manifest.getAssetVariants('assets/bar.png')!;
+    final List<AssetMetadata> barVariants = manifest.getAssetVariants('assets/bar.png');
     expect(barVariants.length, 1);
     final AssetMetadata firstBarVariant = barVariants[0];
     expect(firstBarVariant.key, 'assets/bar.png');
@@ -60,8 +60,9 @@ void main() {
     expect(firstBarVariant.main, true);
   });
 
-  test('getAssetVariants returns null if the key not contained in the asset manifest', () async {
+  test('getAssetVariants throws if given a key not contained in the asset manifest', () async {
     final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(TestAssetBundle());
-    expect(manifest.getAssetVariants('invalid asset key'), isNull);
+
+    expect(() => manifest.getAssetVariants('invalid asset key'), throwsArgumentError);
   });
 }

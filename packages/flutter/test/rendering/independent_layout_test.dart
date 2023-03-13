@@ -44,7 +44,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.platformDispatcher.views.single);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -66,7 +66,6 @@ void main() {
     pipelineOwner.flushPaint();
     expect(offscreen.painted, isTrue);
   });
-
   test('offscreen layout does not affect onscreen', () {
     final TestLayout onscreen = TestLayout();
     final TestLayout offscreen = TestLayout();
@@ -75,7 +74,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.platformDispatcher.views.single);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: RendererBinding.instance.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;

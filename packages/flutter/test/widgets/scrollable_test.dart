@@ -1690,6 +1690,57 @@ void main() {
     expect(tester.takeException(), isNull);
     semantics.dispose();
   });
+
+  testWidgets('deltaToScrollOrigin getter', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+            ],
+          ),
+        )
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.unknown);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200);
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.deltaToScrollOrigin, const Offset(0.0, 200));
+  });
+
+  testWidgets('resolvedPhysics getter', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light().copyWith(
+            platform: TargetPlatform.android,
+          ),
+          home: const CustomScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+            ],
+          ),
+        )
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.unknown);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200);
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+
+    expect(
+      types(scrollable.resolvedPhysics),
+      'AlwaysScrollableScrollPhysics ClampingScrollPhysics RangeMaintainingScrollPhysics',
+    );
+  });
 }
 
 // ignore: must_be_immutable

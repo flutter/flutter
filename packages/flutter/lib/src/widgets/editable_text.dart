@@ -35,6 +35,7 @@ import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
@@ -2775,7 +2776,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
+      SelectionChangedCause cause;
+      if (_textInputConnection?.scribbleInProgress ?? false) {
+        cause = SelectionChangedCause.scribble;
+      } else if (_pointOffsetOrigin != null) {
+        cause = SelectionChangedCause.forcePress;
+      } else {
+        cause = SelectionChangedCause.keyboard;
+      }
+      _handleSelectionChanged(value.selection, cause);
     } else {
       if (value.text != _value.text) {
         // Hide the toolbar if the text was changed, but only hide the toolbar
