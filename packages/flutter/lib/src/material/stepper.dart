@@ -208,7 +208,7 @@ class Stepper extends StatefulWidget {
     this.elevation,
     this.margin,
     this.connectorColor,
-    this.connectorThickness = 2.0,
+    this.connectorThickness = 1.0,
   }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
