@@ -296,6 +296,21 @@ class TestTextInput {
     );
   }
 
+  /// Simulates a scribble interaction finishing.
+  Future<void> finishScribbleInteraction() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionFinished',
+           <dynamic>[_client ?? -1,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
   /// Simulates a Scribble focus.
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
