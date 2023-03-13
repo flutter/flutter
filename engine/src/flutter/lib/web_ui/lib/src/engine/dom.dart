@@ -2053,7 +2053,7 @@ extension DomListExtension on _DomList {
       js_util.callMethod<DomNode>(this, 'item', <Object>[index.toDouble()]);
 }
 
-class _DomListIterator<T> extends Iterator<T> {
+class _DomListIterator<T> implements Iterator<T> {
   _DomListIterator(this.list);
 
   final _DomList list;
@@ -2101,7 +2101,7 @@ extension DomTouchListExtension on _DomTouchList {
       js_util.callMethod<DomTouch>(this, 'item', <Object>[index.toDouble()]);
 }
 
-class _DomTouchListIterator<T> extends Iterator<T> {
+class _DomTouchListIterator<T> implements Iterator<T> {
   _DomTouchListIterator(this.list);
 
   final _DomTouchList list;
