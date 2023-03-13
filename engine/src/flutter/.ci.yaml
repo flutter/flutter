@@ -24,7 +24,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_lto: "true"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -47,7 +46,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_lto: "true"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -70,7 +68,6 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      no_lto: "true"
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
         [
@@ -87,8 +84,6 @@ targets:
       build_android_aot: "true"
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Android Debug Engine
@@ -100,8 +95,6 @@ targets:
       build_android_vulkan: "true"
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Android Emulator Tests
@@ -117,8 +110,6 @@ targets:
         ]
       upload_packages: "true"
       clobber: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -135,8 +126,6 @@ targets:
     properties:
       build_host: "true"
       upload_metrics: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Benchmarks (no-upload)
@@ -154,8 +143,6 @@ targets:
       fuchsia_ctl_version: version:0.0.27
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
       clobber: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 90
 
   - name: Linux Fuchsia FEMU
@@ -168,8 +155,6 @@ targets:
       clobber: "true"
       emulator_arch: "x64"
       enable_cso: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Fuchsia arm64 FEMU
@@ -182,8 +167,6 @@ targets:
       clobber: "true"
       emulator_arch: "arm64"
       enable_cso: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Framework Smoke Tests
@@ -201,8 +184,6 @@ targets:
       add_recipes_cq: "true"
       build_host: "true"
       cores: "32"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux Unopt
@@ -210,8 +191,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       clobber: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Linux License
@@ -228,8 +207,6 @@ targets:
       cores: "32"
       lint_android: "false"
       lint_host: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -250,8 +227,6 @@ targets:
       cores: "32"
       lint_android: "true"
       lint_host: "false"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -271,8 +246,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       build_host: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 90
 
   - name: Linux linux_arm_host_engine
@@ -281,8 +254,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_arm_host_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
@@ -290,8 +261,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_host_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux linux_host_desktop_engine
     bringup: true
@@ -300,8 +269,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_host_desktop_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
@@ -309,8 +276,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_android_aot_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux linux_android_debug_engine
     recipe: engine_v2/engine_v2
@@ -318,8 +283,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_android_debug_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux linux_web_engine
     recipe: engine_v2/engine_v2
@@ -327,8 +290,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_web_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Linux Web Engine
     recipe: engine/web_engine
@@ -345,8 +306,6 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       no_goma: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -377,8 +336,6 @@ targets:
       shard: web_tests
       subshards: >-
               ["0", "1", "2", "3", "4", "5", "6", "7_last"]
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -395,8 +352,6 @@ targets:
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
       build_android_aot: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Mac Host Engine
@@ -406,8 +361,6 @@ targets:
         {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 75
 
   - name: Mac mac_android_aot_engine
@@ -417,8 +370,6 @@ targets:
       config_name: mac_android_aot_engine
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
@@ -428,8 +379,6 @@ targets:
       config_name: mac_host_engine
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Mac Unopt
     recipe: engine/engine_unopt
@@ -439,8 +388,6 @@ targets:
         [
           "ios-16-0_14a5294e"
         ]
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 75
 
   - name: Mac Host clang-tidy
@@ -450,8 +397,6 @@ targets:
       cores: "12"
       lint_host: "true"
       lint_ios: "false"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 75
     runIf:
       - DEPS
@@ -473,8 +418,6 @@ targets:
       add_recipes_cq: "true"
       lint_host: "false"
       lint_ios: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 75
     runIf:
       - DEPS
@@ -496,8 +439,6 @@ targets:
       add_recipes_cq: "true"
       build_ios: "true"
       ios_debug: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Mac Web Engine
@@ -512,8 +453,6 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       no_goma: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -536,8 +475,6 @@ targets:
         [
           {"dependency": "jazzy", "version": "0.14.1"}
         ]
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Windows Android AOT Engine
     recipe: engine/engine
@@ -545,8 +482,6 @@ targets:
       build_android_aot: "true"
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
 
   - name: Windows Host Engine
@@ -557,8 +492,6 @@ targets:
         {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Windows windows_android_aot_engine
     recipe: engine_v2/engine_v2
@@ -566,8 +499,6 @@ targets:
     properties:
       release_build: "true"
       config_name: windows_android_aot_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Windows windows_host_engine
     recipe: engine_v2/engine_v2
@@ -575,8 +506,6 @@ targets:
     properties:
       release_build: "true"
       config_name: windows_host_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Windows windows_arm_host_engine
     recipe: engine_v2/engine_v2
@@ -584,15 +513,11 @@ targets:
     properties:
       release_build: "true"
       config_name: windows_arm_host_engine
-    postsubmit_properties:
-      no_lto: "false"
 
   - name: Windows Unopt
     recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 75
 
   - name: Windows Web Engine
@@ -606,8 +531,6 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:111.0"}
         ]
       no_goma: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 60
     runIf:
       - DEPS
@@ -620,8 +543,6 @@ targets:
     properties:
       build_ios: "true"
       ios_profile: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 90
     runIf:
       - DEPS
@@ -633,8 +554,6 @@ targets:
     properties:
       build_ios: "true"
       ios_release: "true"
-    postsubmit_properties:
-      no_lto: "false"
     timeout: 90
     runIf:
       - DEPS
