@@ -12,7 +12,7 @@ class SystemNavigator {
   // prevents instantiation and extension.
   SystemNavigator._();
 
-  static bool _navigationStackHasMultiple = false;
+  static bool _frameworkHandlesPop = false;
 
   /// Inform the platform of whether or not the navigation stack is empty.
   ///
@@ -27,7 +27,7 @@ class SystemNavigator {
   static Future<void> updateNavigationStackStatus(bool frameworkHandlesPop) async {
     // Yes, because this should include the presence of CanPopScopes too, not
     // just the presence of routes.
-    if (frameworkHandlesPop == _navigationStackHasMultiple) {
+    if (frameworkHandlesPop == _frameworkHandlesPop) {
       return;
     }
     // Currently, this method call is only relevant on Android.
@@ -44,7 +44,7 @@ class SystemNavigator {
       case TargetPlatform.android:
         // Set the local boolean before the call is made, so that duplicate
         // calls to this method don't cause duplicate calls to the platform.
-        _navigationStackHasMultiple = frameworkHandlesPop;
+        _frameworkHandlesPop = frameworkHandlesPop;
         try {
           print('justin telling platform to do predictive back: ${!frameworkHandlesPop}');
           await SystemChannels.platform.invokeMethod<void>(
@@ -52,7 +52,7 @@ class SystemNavigator {
             frameworkHandlesPop,
           );
         } catch (error) {
-          _navigationStackHasMultiple = !frameworkHandlesPop;
+          _frameworkHandlesPop = !frameworkHandlesPop;
           rethrow;
         }
         break;

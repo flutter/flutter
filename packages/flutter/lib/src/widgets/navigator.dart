@@ -4597,6 +4597,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
     _cancelActivePointers();
+    // TODO(justinmc): Also should probably set this on app start, because it
+    // will otherwise carry over during shift+r restart.
+    // TODO(justinmc): This also doesn't consider nested navigators.
+    SystemNavigator.updateNavigationStackStatus(canPop());
   }
 
   /// Replace the current route of the navigator by pushing the given route and
@@ -5267,12 +5271,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-
-    // TODO(justinmc): Probably not the best place for this. Doesn't consider
-    // nested Navigators.
-    //final int numberOfRoutes = _history.where(_RouteEntry.isPresentPredicate).length;
-    //print('justin calling updateNavigationStackStatus, _history length is ${_history.length}, numberOfRoutes is $numberOfRoutes');
-    //SystemNavigator.updateNavigationStackStatus(numberOfRoutes > 1);
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
