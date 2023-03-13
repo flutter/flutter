@@ -260,7 +260,7 @@ Map<String, dynamic> getDesiredCapabilities(
         'chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,
-          'w3c': false,
+          'w3c': true,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',
