@@ -144,12 +144,9 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool suggestionFlag = boolArg('suggestions');
-    final bool machineFlag = boolArg('machine');
-    if (suggestionFlag) {
+    if (boolArg('suggestions')) {
       final String directoryPath;
-      final bool watchFlag = boolArg('watch');
-      if (watchFlag) {
+      if (boolArg('watch')) {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
@@ -171,7 +168,7 @@ class AnalyzeCommand extends FlutterCommand {
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
-        machine: machineFlag,
+        machine: boolArg('machine'),
       ).run();
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
