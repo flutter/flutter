@@ -117,7 +117,7 @@ struct PipelineBuilder {
       // Configure the sole color attachments pixel format. This is by
       // convention.
       ColorAttachmentDescriptor color0;
-      color0.format = context.GetColorAttachmentPixelFormat();
+      color0.format = context.GetCapabilities()->GetDefaultColorFormat();
       color0.blending_enabled = true;
       desc.SetColorAttachmentDescriptor(0u, color0);
     }
@@ -128,7 +128,7 @@ struct PipelineBuilder {
       stencil0.stencil_compare = CompareFunction::kEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
       desc.SetStencilPixelFormat(
-          context.GetDeviceCapabilities().GetDefaultStencilFormat());
+          context.GetCapabilities()->GetDefaultStencilFormat());
     }
 
     return true;

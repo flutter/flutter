@@ -1409,10 +1409,18 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc +
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/debug_report_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/debug_report_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/fence_waiter_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/fence_waiter_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_library_vk.cc + ../../../flutter/LICENSE
@@ -1454,6 +1462,8 @@ ORIGIN: ../../../flutter/impeller/renderer/buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/buffer_view.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/buffer_view.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/capabilities.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/capabilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/command.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/command.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/command_buffer.cc + ../../../flutter/LICENSE
@@ -1468,13 +1478,10 @@ ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc + ../.
 ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/context.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/descriptor_set_layout.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_capabilities.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_capabilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/formats.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/formats.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/gpu_tracer.cc + ../../../flutter/LICENSE
@@ -3936,10 +3943,18 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/context_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/debug_report_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/debug_report_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/descriptor_pool_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/device_buffer_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/fence_waiter_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/fence_waiter_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/formats_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/pipeline_library_vk.cc
@@ -3981,6 +3996,8 @@ FILE: ../../../flutter/impeller/renderer/buffer.cc
 FILE: ../../../flutter/impeller/renderer/buffer.h
 FILE: ../../../flutter/impeller/renderer/buffer_view.cc
 FILE: ../../../flutter/impeller/renderer/buffer_view.h
+FILE: ../../../flutter/impeller/renderer/capabilities.cc
+FILE: ../../../flutter/impeller/renderer/capabilities.h
 FILE: ../../../flutter/impeller/renderer/command.cc
 FILE: ../../../flutter/impeller/renderer/command.h
 FILE: ../../../flutter/impeller/renderer/command_buffer.cc
@@ -3995,13 +4012,10 @@ FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h
 FILE: ../../../flutter/impeller/renderer/context.cc
 FILE: ../../../flutter/impeller/renderer/context.h
-FILE: ../../../flutter/impeller/renderer/descriptor_set_layout.h
 FILE: ../../../flutter/impeller/renderer/device_buffer.cc
 FILE: ../../../flutter/impeller/renderer/device_buffer.h
 FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.h
-FILE: ../../../flutter/impeller/renderer/device_capabilities.cc
-FILE: ../../../flutter/impeller/renderer/device_capabilities.h
 FILE: ../../../flutter/impeller/renderer/formats.cc
 FILE: ../../../flutter/impeller/renderer/formats.h
 FILE: ../../../flutter/impeller/renderer/gpu_tracer.cc
