@@ -496,11 +496,11 @@ class _DirectionalPolicyData {
 /// only want to implement new next/previous policies.
 ///
 /// Since hysteresis in the navigation order is undesirable, this implementation
-/// maintains a stack of previous locations that have been visited on the
-/// policy data for the affected [FocusScopeNode]. If the previous direction
-/// was the opposite of the current direction, then the this policy will request
-/// focus on the previously focused node. Change to another direction other than
-/// the current one or its opposite will clear the stack.
+/// maintains a stack of previous locations that have been visited on the policy
+/// data for the affected [FocusScopeNode]. If the previous direction was the
+/// opposite of the current direction, then the this policy will request focus
+/// on the previously focused node. Change to another direction other than the
+/// current one or its opposite will clear the stack.
 ///
 /// For instance, if the focus moves down, down, down, and then up, up, up, it
 /// will follow the same path through the widgets in both directions. However,
@@ -508,17 +508,31 @@ class _DirectionalPolicyData {
 /// follow the same path on the way up as it did on the way down, since changing
 /// the axis of motion resets the history.
 ///
+/// This class implements an algorithm that considers an infinite band extending
+/// along the direction of movement, the width or height (depending on
+/// direction) of the currently focused widget, and finds the closest widget in
+/// that band along the direction of movement. If nothing is found in that band,
+/// then it picks the widget with an edge closest to the band in the
+/// perpendicular direction. If two out-of-band widgets are the same distance
+/// from the band, then it picks the one closest along the direction of
+/// movement.
+///
+/// The goal of this algorithm is to pick a widget that (to the user) doesn't
+/// appear to traverse along the wrong axis, as it might if it only sorted
+/// widgets by distance along one axis, but also jumps to the next logical
+/// widget in a direction without skipping over widgets.
+///
 /// See also:
 ///
-///  * [FocusNode], for a description of the focus system.
-///  * [FocusTraversalGroup], a widget that groups together and imposes a
-///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
-///    creation order to describe the order of traversal.
-///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///    natural "reading order" for the current [Directionality].
-///  * [OrderedTraversalPolicy], a policy that describes the order
-///    explicitly using [FocusTraversalOrder] widgets.
+/// * [FocusNode], for a description of the focus system.
+/// * [FocusTraversalGroup], a widget that groups together and imposes a
+///   traversal policy on the [Focus] nodes below it in the widget hierarchy.
+/// * [WidgetOrderTraversalPolicy], a policy that relies on the widget creation
+///   order to describe the order of traversal.
+/// * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///   natural "reading order" for the current [Directionality].
+/// * [OrderedTraversalPolicy], a policy that describes the order explicitly
+///   using [FocusTraversalOrder] widgets.
 mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   final Map<FocusScopeNode, _DirectionalPolicyData> _policyData = <FocusScopeNode, _DirectionalPolicyData>{};
 
