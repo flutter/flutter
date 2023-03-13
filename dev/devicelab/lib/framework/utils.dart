@@ -474,24 +474,15 @@ Future<int> flutter(String command, {
   final List<String> args = flutterCommandArgs(command, options);
   final int rc = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment);
-  
-  // When uninstalling an application we need to make sure the device is back
-  // before proceeding.
-  if (command == 'install' && options.contains('--uninstall-only')) {
-    print('Checking for device status.');
-    int deviceIndex = options.indexOf('-d');
-    final String deviceId = options.elementAt(deviceIndex++);
-    sleep(const Duration(seconds: 1));
-    try {
-      await devices.deviceReady(deviceId);
-    } catch (e) {
-      print('Device did not come back to active state in time.');
-    }
-  }
 
   return rc;
 }
 
+
+// Future<void> waitForDevice() async {
+//   final Device device = await devices.workingDevice;
+//   await devices.deviceReady(device.deviceId);
+// }
 
 
 
