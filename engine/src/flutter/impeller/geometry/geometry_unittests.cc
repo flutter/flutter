@@ -1646,6 +1646,13 @@ TEST(GeometryTest, RectGetPoints) {
   ASSERT_POINT_NEAR(points[3], Point(400, 600));
 }
 
+TEST(GeometryTest, RectShift) {
+  auto r = Rect::MakeLTRB(0, 0, 100, 100);
+
+  ASSERT_EQ(r.Shift(Point(10, 5)), Rect::MakeLTRB(10, 5, 110, 105));
+  ASSERT_EQ(r.Shift(Point(-10, -5)), Rect::MakeLTRB(-10, -5, 90, 95));
+}
+
 TEST(GeometryTest, RectGetTransformedPoints) {
   Rect r(100, 200, 300, 400);
   auto points = r.GetTransformedPoints(Matrix::MakeTranslation({10, 20}));

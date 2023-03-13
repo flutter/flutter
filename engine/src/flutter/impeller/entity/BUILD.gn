@@ -120,6 +120,8 @@ impeller_component("entity") {
     "contents/clip_contents.h",
     "contents/color_source_contents.cc",
     "contents/color_source_contents.h",
+    "contents/color_source_text_contents.cc",
+    "contents/color_source_text_contents.h",
     "contents/content_context.cc",
     "contents/content_context.h",
     "contents/contents.cc",

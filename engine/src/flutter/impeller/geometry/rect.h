@@ -238,6 +238,12 @@ struct TRect {
 
     return *this;
   }
+
+  /// @brief  Returns a new rectangle translated by the given offset.
+  constexpr TRect<T> Shift(TPoint<T> offset) const {
+    return TRect(origin.x + offset.x, origin.y + offset.y, size.width,
+                 size.height);
+  }
 };
 
 using Rect = TRect<Scalar>;
