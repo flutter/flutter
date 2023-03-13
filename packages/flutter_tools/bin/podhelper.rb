@@ -278,6 +278,12 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     # Keep pod path relative so it can be checked into Podfile.lock.
     relative = flutter_relative_path_from_podfile(symlink)
 
+    # Should we skip if there's no podspec or if there is a swift package?
+    # Leaning towards if there's a swift package so that they can support both cocoapods and swift, but is that necessary?
+
+    next if File.exists?(File.join(relative, platform_directory, plugin_name, "Package.swift"))
+    # next unless File.exists?(File.join(relative, platform_directory, plugin_name + ".podspec"))
+
     pod plugin_name, path: File.join(relative, platform_directory)
   end
 end
