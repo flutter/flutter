@@ -538,7 +538,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);

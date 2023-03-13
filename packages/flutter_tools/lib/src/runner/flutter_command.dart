@@ -31,6 +31,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
+import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
@@ -708,6 +709,11 @@ abstract class FlutterCommand extends Command<void> {
     }
     return null;
   }();
+
+  late final TargetDevices _targetDevices = TargetDevices(
+    deviceManager: globals.deviceManager!,
+    logger: globals.logger,
+  );
 
   void addBuildModeFlags({
     required bool verboseHelp,
@@ -1530,113 +1536,10 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    if (!globals.doctor!.canLaunchAnything) {
-      globals.printError(userMessages.flutterNoDevelopmentDevice);
-      return null;
-    }
-    final DeviceManager deviceManager = globals.deviceManager!;
-    List<Device> devices = await deviceManager.findTargetDevices(
+    return _targetDevices.findAllTargetDevices(
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      timeout: deviceDiscoveryTimeout,
     );
-
-    if (devices.isEmpty) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllDevices();
-        if (allDevices.isNotEmpty) {
-          globals.logger.printStatus('');
-          globals.logger.printStatus('The following devices were found:');
-          await Device.printDevices(allDevices, globals.logger);
-        }
-        return null;
-      } else if (deviceManager.hasSpecifiedAllDevices) {
-        globals.logger.printStatus(userMessages.flutterNoDevicesFound);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      } else {
-        globals.logger.printStatus(userMessages.flutterNoSupportedDevices);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      }
-    } else if (devices.length > 1) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
-        return null;
-      } else if (!deviceManager.hasSpecifiedAllDevices) {
-        if (globals.terminal.stdinHasTerminal) {
-          // If DeviceManager was not able to prioritize a device. For example, if the user
-          // has two active Android devices running, then we request the user to
-          // choose one. If the user has two nonEphemeral devices running, we also
-          // request input to choose one.
-          globals.logger.printStatus(userMessages.flutterMultipleDevicesFound);
-          await Device.printDevices(devices, globals.logger);
-          final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-
-          // Update the [DeviceManager.specifiedDeviceId] so that we will not be prompted again.
-          deviceManager.specifiedDeviceId = chosenDevice.id;
-
-          devices = <Device>[chosenDevice];
-        } else {
-          // Show an error message asking the user to specify `-d all` if they
-          // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllDevices();
-          globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
-          globals.logger.printStatus('');
-          await Device.printDevices(allDevices, globals.logger);
-          return null;
-        }
-      }
-    }
-
-    return devices;
-  }
-
-  Future<void> _printUnsupportedDevice(DeviceManager deviceManager) async {
-    final List<Device> unsupportedDevices = await deviceManager.getDevices();
-    if (unsupportedDevices.isNotEmpty) {
-      final StringBuffer result = StringBuffer();
-      result.writeln(userMessages.flutterFoundButUnsupportedDevices);
-      result.writeAll(
-        (await Device.descriptions(unsupportedDevices))
-            .map((String desc) => desc)
-            .toList(),
-        '\n',
-      );
-      result.writeln();
-      result.writeln(userMessages.flutterMissPlatformProjects(
-        Device.devicesPlatformTypes(unsupportedDevices),
-      ));
-      globals.logger.printStatus(result.toString());
-    }
-  }
-
-  Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
-    _displayDeviceOptions(devices);
-    final String userInput =  await _readUserInput(devices.length);
-    if (userInput.toLowerCase() == 'q') {
-      throwToolExit('');
-    }
-    return devices[int.parse(userInput) - 1];
-  }
-
-  void _displayDeviceOptions(List<Device> devices) {
-    int count = 1;
-    for (final Device device in devices) {
-      globals.logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
-      count++;
-    }
-  }
-
-  Future<String> _readUserInput(int deviceCount) async {
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
-      displayAcceptedCharacters: false,
-      logger: globals.logger,
-      prompt: userMessages.flutterChooseOne,
-    );
-    return result;
   }
 
   /// Find and return the target [Device] based upon currently connected
