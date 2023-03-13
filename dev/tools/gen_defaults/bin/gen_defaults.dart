@@ -102,6 +102,7 @@ Future<void> main(List<String> args) async {
     'navigation_drawer.json',
     'navigation_rail.json',
     'navigation_tab_primary.json',
+    'navigation_tab_secondary.json',
     'palette.json',
     'progress_indicator_circular.json',
     'progress_indicator_linear.json',
