@@ -266,6 +266,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       .then<T>(parser)
       .then<void>((T value) {
         result = SynchronousFuture<T>(value);
+        _structuredBinaryDataCache[key] = result!;
         if (completer != null) {
           // The load and parse operation ran asynchronously. We already returned
           // from the loadStructuredBinaryData function and therefore the caller
