@@ -1708,7 +1708,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  testWidgets('the selection behavior when clicking `Copy` item', (WidgetTester tester) async {
+  testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1728,9 +1728,8 @@ void main() {
     );
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
-    addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
@@ -1766,7 +1765,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  testWidgets('the handles do not disappear when clicking `Select all` item', (WidgetTester tester) async {
+  testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1786,9 +1785,8 @@ void main() {
     );
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
-    addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
@@ -1800,9 +1798,21 @@ void main() {
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
-    expect(regionState.selectionOverlay, isNotNull);
-    expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
-    expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+        // Test doesn't run these platforms.
+        break;
+    }
+
   },
     skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),

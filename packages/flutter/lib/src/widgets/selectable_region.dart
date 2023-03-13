@@ -1012,7 +1012,18 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
       },
       onSelectAll: () {
-        selectAll(SelectionChangedCause.toolbar);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.iOS:
+            selectAll(SelectionChangedCause.toolbar);
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            selectAll();
+            break;
+        }
       },
     );
   }
