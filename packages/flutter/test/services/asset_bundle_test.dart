@@ -50,29 +50,30 @@ class SynchronousTestAssetBundle extends CachingAssetBundle {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  group('CachingAssetBundle', () {
-    test('Caching asset bundle test', () async {
-      final TestAssetBundle bundle = TestAssetBundle();
 
-      final ByteData assetData = await bundle.load('one');
-      expect(assetData.getInt8(0), equals(49));
+  test('Caching asset bundle test', () async {
+    final TestAssetBundle bundle = TestAssetBundle();
 
-      expect(bundle.loadCallCount['one'], 1);
+    final ByteData assetData = await bundle.load('one');
+    expect(assetData.getInt8(0), equals(49));
 
-      final String assetString = await bundle.loadString('one');
-      expect(assetString, equals('1'));
+    expect(bundle.loadCallCount['one'], 1);
 
-      expect(bundle.loadCallCount['one'], 2);
+    final String assetString = await bundle.loadString('one');
+    expect(assetString, equals('1'));
 
-      late Object loadException;
-      try {
-        await bundle.loadString('foo');
-      } catch (e) {
-        loadException = e;
-      }
-      expect(loadException, isFlutterError);
-    });
+    expect(bundle.loadCallCount['one'], 2);
 
+    late Object loadException;
+    try {
+      await bundle.loadString('foo');
+    } catch (e) {
+      loadException = e;
+    }
+    expect(loadException, isFlutterError);
+  });
+
+  group('CachingAssetBundle caching behavior', () {
     test('caches results for loadString, loadStructuredData, and loadBinaryStructuredData', () async {
       final TestAssetBundle bundle = TestAssetBundle();
 
@@ -128,14 +129,6 @@ void main() {
       bundle.evict('AssetManifest.bin');
       final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('two'));
       expect(secondLoadStructuredBinaryDataResult, 'two');
-    });
-
-    test('loadStructuredBinaryData correctly loads ByteData', () async {
-      final TestAssetBundle bundle = TestAssetBundle();
-      final Map<Object?, Object?> assetManifest =
-        await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
-      expect(assetManifest.keys.toList(), equals(<String>['one']));
-      expect(assetManifest['one'], <Object>[]);
     });
 
     test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () {
@@ -196,4 +189,12 @@ void main() {
       ),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
+
+  test('loadStructuredBinaryData correctly loads ByteData', () async {
+    final TestAssetBundle bundle = TestAssetBundle();
+    final Map<Object?, Object?> assetManifest =
+      await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
+    expect(assetManifest.keys.toList(), equals(<String>['one']));
+    expect(assetManifest['one'], <Object>[]);
+  });
 }
