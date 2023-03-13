@@ -30,7 +30,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     super.initInstances();
     _instance = this;
     _pipelineOwner = PipelineOwner(
-      onNeedVisualUpdate: ensureVisualUpdate,
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsUpdate: _handleSemanticsUpdate,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
@@ -45,8 +44,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame);
     }
-    addSemanticsEnabledListener(_handleSemanticsEnabledChanged);
-    _handleSemanticsEnabledChanged();
+    _pipelineOwner.attach(_manifold);
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -201,6 +199,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     }
   }
 
+  late final PipelineManifold _manifold = _BindingPipelineManifold(this);
+
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
   /// will be rendered when the next frame is requested.
@@ -328,17 +328,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
-  }
-
-  SemanticsHandle? _semanticsHandle;
-
-  void _handleSemanticsEnabledChanged() {
-    if (semanticsEnabled) {
-      _semanticsHandle ??= _pipelineOwner.ensureSemantics();
-    } else {
-      _semanticsHandle?.dispose();
-      _semanticsHandle = null;
-    }
   }
 
   @override
@@ -619,5 +608,28 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
       RenderingFlutterBinding();
     }
     return RendererBinding.instance;
+  }
+}
+
+/// A [PipelineManifold] implementation that is backed by the [RendererBinding].
+class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifold {
+  _BindingPipelineManifold(this._binding) {
+    _binding.addSemanticsEnabledListener(notifyListeners);
+  }
+
+  final RendererBinding _binding;
+
+  @override
+  void requestVisualUpdate() {
+    _binding.ensureVisualUpdate();
+  }
+
+  @override
+  bool get semanticsEnabled => _binding.semanticsEnabled;
+
+  @override
+  void dispose() {
+    _binding.removeSemanticsEnabledListener(notifyListeners);
+    super.dispose();
   }
 }
