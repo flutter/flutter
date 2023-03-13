@@ -21,7 +21,7 @@ class _${blockName}DefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get dividerColor => ${componentColor("md.comp.primary-navigation-tab.divider")};
+  Color? get dividerColor => _colors.surfaceVariant;
 
   @override
   Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};

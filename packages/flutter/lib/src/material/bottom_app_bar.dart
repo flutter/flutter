@@ -309,7 +309,7 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
-  Color get shadowColor => Colors.transparent;
+  Color? get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar
