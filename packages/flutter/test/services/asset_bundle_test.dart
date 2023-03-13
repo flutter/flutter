@@ -131,11 +131,12 @@ void main() {
       expect(secondLoadStructuredBinaryDataResult, 'two');
     });
 
-    test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () {
+    test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () async {
       final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
       bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
       final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 0);
       expect(data, isA<SynchronousFuture<int>>());
+      expect(await data, 1);
     });
   });
 
