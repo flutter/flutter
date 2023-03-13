@@ -49,7 +49,7 @@ void main() {
 
   CubicData cubic = cubics.data[ident];
 
-  vec2 err_v = 3.0 * (cubic.cp2 - cubic.cp1) + cubic.p1 - cubic.p2;
+  vec2 err_v = (3.0 * cubic.cp2 - cubic.p2) - (3.0 * cubic.cp1 - cubic.p1);
   float err = dot(err_v, err_v);
   float quad_count = max(1., ceil(pow(err * (1.0 / max_hypot2), 1. / 6.0)));
 

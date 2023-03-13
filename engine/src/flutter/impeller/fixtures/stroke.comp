@@ -47,10 +47,17 @@ void main() {
 
   atomicAdd(vertex_buffer_count.count, 4);
 
-  vec2 offset = compute_offset(ident);
   uint index = ident - 1;
+  vec2 offset = compute_offset(index);
   vertex_buffer.position[index * 4 + 0] = polyline.data[ident - 1] + offset;
   vertex_buffer.position[index * 4 + 1] = polyline.data[ident - 1] - offset;
   vertex_buffer.position[index * 4 + 2] = polyline.data[ident] + offset;
   vertex_buffer.position[index * 4 + 3] = polyline.data[ident] - offset;
+
+  // TODO(dnfield): Implement other cap/join mechanisms.
+  if (ident == polyline.count - 1) {
+    vertex_buffer.position[index * 4 + 4] = vec2(140, 20);
+    vertex_buffer.position[index * 4 + 5] = vec2(140, 20);
+    atomicAdd(vertex_buffer_count.count, 2);
+  }
 }
