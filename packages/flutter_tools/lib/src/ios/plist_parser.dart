@@ -72,7 +72,7 @@ class PlistParser {
     final List<String> args;
     if (value == null) {
       args = <String>[
-        _plutilExecutable, '-remove', key, '-', plistFilePath,
+        _plutilExecutable, '-remove', key, plistFilePath,
       ];
     } else {
       args = <String>[
