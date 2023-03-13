@@ -325,7 +325,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         // Depending on whether the context has threading restrictions, stay on
         // the concurrent runner to perform texture upload or move to an IO
         // runner.
-        if (context->GetDeviceCapabilities().HasThreadingRestrictions()) {
+        if (context->GetCapabilities()->HasThreadingRestrictions()) {
           io_runner->PostTask(upload_texture_and_invoke_result);
         } else {
           upload_texture_and_invoke_result();

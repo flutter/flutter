@@ -16,8 +16,8 @@
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
+#include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/sampler.h"
 
 namespace impeller {
@@ -36,22 +36,6 @@ class ContextMTL final : public Context,
   ~ContextMTL() override;
 
   id<MTLDevice> GetMTLDevice() const;
-
- private:
-  id<MTLDevice> device_ = nullptr;
-  id<MTLCommandQueue> command_queue_ = nullptr;
-  std::shared_ptr<ShaderLibraryMTL> shader_library_;
-  std::shared_ptr<PipelineLibraryMTL> pipeline_library_;
-  std::shared_ptr<SamplerLibrary> sampler_library_;
-  std::shared_ptr<AllocatorMTL> resource_allocator_;
-  std::shared_ptr<WorkQueue> work_queue_;
-  std::shared_ptr<GPUTracerMTL> gpu_tracer_;
-  std::unique_ptr<IDeviceCapabilities> device_capabilities_;
-  bool is_valid_ = false;
-
-  ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
-
-  bool SupportsFramebufferFetch() const;
 
   // |Context|
   bool IsValid() const override;
@@ -78,7 +62,24 @@ class ContextMTL final : public Context,
   std::shared_ptr<GPUTracer> GetGPUTracer() const override;
 
   // |Context|
-  const IDeviceCapabilities& GetDeviceCapabilities() const override;
+  const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
+
+  // |Context|
+  bool UpdateOffscreenLayerPixelFormat(PixelFormat format) override;
+
+ private:
+  id<MTLDevice> device_ = nullptr;
+  id<MTLCommandQueue> command_queue_ = nullptr;
+  std::shared_ptr<ShaderLibraryMTL> shader_library_;
+  std::shared_ptr<PipelineLibraryMTL> pipeline_library_;
+  std::shared_ptr<SamplerLibrary> sampler_library_;
+  std::shared_ptr<AllocatorMTL> resource_allocator_;
+  std::shared_ptr<WorkQueue> work_queue_;
+  std::shared_ptr<GPUTracerMTL> gpu_tracer_;
+  std::shared_ptr<const Capabilities> device_capabilities_;
+  bool is_valid_ = false;
+
+  ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;

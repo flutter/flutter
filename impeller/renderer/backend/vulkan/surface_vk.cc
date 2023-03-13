@@ -43,9 +43,8 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
   resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 
   std::shared_ptr<Texture> resolve_tex =
-      std::make_shared<TextureVK>(resolve_tex_desc,  //
-                                  context,           //
-                                  swapchain_image    //
+      std::make_shared<TextureVK>(context,         //
+                                  swapchain_image  //
       );
 
   if (!resolve_tex) {
@@ -65,8 +64,7 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
   stencil0_tex.storage_mode = StorageMode::kDeviceTransient;
   stencil0_tex.type = TextureType::kTexture2D;
   stencil0_tex.sample_count = SampleCount::kCount4;
-  stencil0_tex.format =
-      context->GetDeviceCapabilities().GetDefaultStencilFormat();
+  stencil0_tex.format = context->GetCapabilities()->GetDefaultStencilFormat();
   stencil0_tex.size = msaa_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
