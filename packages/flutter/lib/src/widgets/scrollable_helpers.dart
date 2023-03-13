@@ -23,10 +23,9 @@ export 'package:flutter/physics.dart' show Tolerance;
 
 /// Describes the aspects of a Scrollable widget to inform inherited widgets
 /// like [ScrollBehavior] for decorating.
-// TODO(Piinks): Fix doc with 2DScrollable change, be clear on how these
-//  properties are applied and by which class.
+// TODO(Piinks): Fix doc with 2DScrollable change.
 // / or enumerate the properties of combined
-// / Scrollables, like [TwoDimensionalScrollView] & [TwoDimensionalScrollable].
+// / Scrollables, such as [TwoDimensionalScrollable].
 ///
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
@@ -37,7 +36,6 @@ class ScrollableDetails {
   const ScrollableDetails({
     required this.direction,
     this.controller,
-    this.primary,
     this.physics,
     @Deprecated(
       'Migrate to decorationClipBehavior. '
@@ -47,52 +45,29 @@ class ScrollableDetails {
     )
     Clip? clipBehavior,
     Clip? decorationClipBehavior,
-  }) : assert(
-         !(controller != null && (primary ?? false)),
-         'Primary Scrollables obtain their ScrollController via inheritance '
-         'from a PrimaryScrollController widget. You cannot both set primary to '
-         'true and pass an explicit controller.',
-       ),
-       decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
+  }) : decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
 
   /// A constructor specific to a [Scrollable] with an [Axis.vertical].
   const ScrollableDetails.vertical({
     bool reverse = false,
     this.controller,
-    this.primary,
     this.physics,
     this.decorationClipBehavior,
-  }) : assert(
-         !(controller != null && (primary ?? false)),
-         'Primary Scrollables obtain their ScrollController via inheritance '
-         'from a PrimaryScrollController widget. You cannot both set primary to '
-         'true and pass an explicit controller.',
-       ),
-       direction = reverse ? AxisDirection.up : AxisDirection.down;
+  }) : direction = reverse ? AxisDirection.up : AxisDirection.down;
 
   /// A constructor specific to a [Scrollable] with an [Axis.horizontal].
   const ScrollableDetails.horizontal({
     bool reverse = false,
     this.controller,
-    this.primary,
     this.physics,
     this.decorationClipBehavior,
-  }) : assert(
-         !(controller != null && (primary ?? false)),
-         'Primary Scrollables obtain their ScrollController via inheritance '
-         'from a PrimaryScrollController widget. You cannot both set primary to '
-         'true and pass an explicit controller.',
-       ),
-       direction = reverse ? AxisDirection.left : AxisDirection.right;
+  }) : direction = reverse ? AxisDirection.left : AxisDirection.right;
 
   /// {@macro flutter.widgets.Scrollable.axisDirection}
   final AxisDirection direction;
 
   /// {@macro flutter.widgets.Scrollable.controller}
   final ScrollController? controller;
-
-  /// {@template flutter.widgets.scroll_view.primary}
-  final bool? primary;
 
   /// {@macro flutter.widgets.Scrollable.physics}
   final ScrollPhysics? physics;
@@ -123,14 +98,12 @@ class ScrollableDetails {
   ScrollableDetails copyWith({
     AxisDirection? direction,
     ScrollController? controller,
-    bool? primary,
     ScrollPhysics? physics,
     Clip? decorationClipBehavior,
   }) {
     return ScrollableDetails(
       direction: direction ?? this.direction,
       controller: controller ?? this.controller,
-      primary: primary ?? this.primary,
       physics: physics ?? this.physics,
       decorationClipBehavior: decorationClipBehavior ?? this.decorationClipBehavior,
     );
@@ -147,7 +120,6 @@ class ScrollableDetails {
       }
     }
     addIfNonNull('scroll controller: ', controller);
-    addIfNonNull('primary: ', primary);
     addIfNonNull('scroll physics: ', physics);
     addIfNonNull('decorationClipBehavior: ', decorationClipBehavior);
     return '${describeIdentity(this)}(${description.join(", ")})';
@@ -157,7 +129,6 @@ class ScrollableDetails {
   int get hashCode => Object.hash(
     direction,
     controller,
-    primary,
     physics,
     decorationClipBehavior,
   );
@@ -173,7 +144,6 @@ class ScrollableDetails {
     return other is ScrollableDetails
       && other.direction == direction
       && other.controller == controller
-      && other.primary == primary
       && other.physics == physics
       && other.decorationClipBehavior == decorationClipBehavior;
   }

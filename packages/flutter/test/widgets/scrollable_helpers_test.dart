@@ -14,53 +14,10 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
 void main() {
   group('ScrollableDetails', (){
     final ScrollController controller = ScrollController();
-    test('constructors assert when controller and primary conflict', () {
-      expect(
-        () {
-          ScrollableDetails(
-            direction: AxisDirection.down,
-            controller: controller,
-            primary: true,
-          );
-        },
-        throwsA(
-          isA<AssertionError>().having((AssertionError error) => error.toString(),
-          'description', contains('!(controller != null && (primary ?? false))')),
-        ),
-      );
-
-      expect(
-        () {
-          ScrollableDetails.vertical(
-            controller: controller,
-            primary: true,
-          );
-        },
-        throwsA(
-          isA<AssertionError>().having((AssertionError error) => error.toString(),
-          'description', contains('!(controller != null && (primary ?? false))')),
-        ),
-      );
-
-      expect(
-        () {
-          ScrollableDetails.horizontal(
-            controller: controller,
-            primary: true,
-          );
-        },
-        throwsA(
-          isA<AssertionError>().having((AssertionError error) => error.toString(),
-          'description', contains('!(controller != null && (primary ?? false))')),
-        ),
-      );
-    });
-
     test('copyWith / == / hashCode', () {
       final ScrollableDetails details = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
-        primary: false,
         physics: const AlwaysScrollableScrollPhysics(),
         decorationClipBehavior: Clip.hardEdge,
       );
@@ -78,7 +35,6 @@ void main() {
         ScrollableDetails(
           direction: AxisDirection.left,
           controller: controller,
-          primary: false,
           physics: const ClampingScrollPhysics(),
           decorationClipBehavior: Clip.none,
         ),
@@ -98,7 +54,6 @@ void main() {
       final ScrollableDetails fullDetails = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
-        primary: false,
         physics: const AlwaysScrollableScrollPhysics(),
         decorationClipBehavior: Clip.hardEdge,
       );
@@ -108,7 +63,6 @@ void main() {
           'ScrollableDetails#00000('
           'axisDirection: AxisDirection.down, '
           'scroll controller: ScrollController#00000(no clients), '
-          'primary: false, '
           'scroll physics: AlwaysScrollableScrollPhysics, '
           'decorationClipBehavior: Clip.hardEdge)'
         ),
