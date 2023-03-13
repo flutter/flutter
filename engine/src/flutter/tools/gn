@@ -559,6 +559,10 @@ def to_gn_args(args):
 
   if args.malioc_path is not None:
     gn_args['impeller_malioc_path'] = args.malioc_path
+  else:
+    malioc_path = os.environ.get('MALIOC_PATH')
+    if malioc_path:
+      gn_args['impeller_malioc_path'] = malioc_path
 
   # ANGLE is exclusively used for:
   #  - Windows at runtime
