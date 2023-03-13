@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -35,7 +36,16 @@ class TestAssetBundle extends CachingAssetBundle {
 
     throw FlutterError('key not found');
   }
+}
 
+class SynchronousTestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) {
+    if (key == 'one') {
+      return SynchronousFuture<ByteData>(ByteData(1)..setInt8(0, 49));
+    }
+    throw FlutterError('key not found');
+  }
 }
 
 void main() {
@@ -177,5 +187,12 @@ void main() {
       await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
     expect(assetManifest.keys.toList(), equals(<String>['one']));
     expect(assetManifest['one'], <Object>[]);
+  });
+
+  test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () {
+    final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
+    bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
+    final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 0);
+    expect(data, isA<SynchronousFuture<int>>());
   });
 }
