@@ -581,25 +581,6 @@ class FakePub extends Fake implements Pub {
   }) async { }
 }
 
-class FakeDeviceManager extends Fake implements DeviceManager {
-  List<Device> devices = <Device>[];
-
-  @override
-  String? specifiedDeviceId;
-
-  @override
-  Future<List<Device>> getDevices({
-    DeviceDiscoveryFilter? filter,
-  }) async => devices;
-
-  @override
-  Future<List<Device>> findTargetDevices({
-    bool includeDevicesUnsupportedByProject = false,
-    Duration? timeout,
-    bool promptUserToChooseDevice = true,
-  }) async => devices;
-}
-
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
 class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
   NeverEndingFlutterDriverFactory(this.callback);
