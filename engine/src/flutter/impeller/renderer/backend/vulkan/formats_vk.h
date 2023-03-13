@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/descriptor_set_layout.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/shader_types.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -204,8 +205,6 @@ constexpr vk::SampleCountFlagBits ToVKSampleCount(SampleCount sample_count) {
     case SampleCount::kCount4:
       return vk::SampleCountFlagBits::e4;
   }
-
-  FML_UNREACHABLE();
 }
 
 constexpr vk::Filter ToVKSamplerMinMagFilter(MinMagFilter filter) {
@@ -270,7 +269,7 @@ constexpr vk::DescriptorSetLayoutBinding ToVKDescriptorSetLayoutBinding(
     const DescriptorSetLayout& layout) {
   vk::DescriptorSetLayoutBinding binding;
   binding.binding = layout.binding;
-  binding.descriptorCount = 1u;
+  binding.descriptorCount = layout.descriptor_count;
   vk::DescriptorType desc_type = vk::DescriptorType();
   switch (layout.descriptor_type) {
     case DescriptorType::kSampledImage:
@@ -547,60 +546,9 @@ constexpr uint32_t ToArrayLayerCount(TextureType type) {
   FML_UNREACHABLE();
 }
 
-constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
-  switch (type) {
-    case TextureType::kTexture2D:
-    case TextureType::kTexture2DMultisample:
-      return vk::ImageViewType::e2D;
-    case TextureType::kTextureCube:
-      return vk::ImageViewType::eCube;
-  }
-  FML_UNREACHABLE();
-}
-
-constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
-  switch (type) {
-    case TextureType::kTexture2D:
-    case TextureType::kTexture2DMultisample:
-      return {};
-    case TextureType::kTextureCube:
-      return vk::ImageCreateFlagBits::eCubeCompatible;
-  }
-  FML_UNREACHABLE();
-}
-
 vk::PipelineDepthStencilStateCreateInfo ToVKPipelineDepthStencilStateCreateInfo(
     std::optional<DepthAttachmentDescriptor> depth,
     std::optional<StencilAttachmentDescriptor> front,
     std::optional<StencilAttachmentDescriptor> back);
-
-constexpr vk::ImageAspectFlags ToImageAspectFlags(vk::ImageLayout layout) {
-  switch (layout) {
-    case vk::ImageLayout::eColorAttachmentOptimal:
-    case vk::ImageLayout::eShaderReadOnlyOptimal:
-    case vk::ImageLayout::eTransferSrcOptimal:
-    case vk::ImageLayout::eTransferDstOptimal:
-    case vk::ImageLayout::ePresentSrcKHR:
-      return vk::ImageAspectFlagBits::eColor;
-    case vk::ImageLayout::eDepthAttachmentOptimal:
-      return vk::ImageAspectFlagBits::eDepth;
-    case vk::ImageLayout::eStencilAttachmentOptimal:
-      return vk::ImageAspectFlagBits::eStencil;
-    default:
-      FML_DLOG(INFO) << "Unknown layout to determine aspect: "
-                     << vk::to_string(layout);
-      return vk::ImageAspectFlagBits::eNone;
-  }
-  FML_UNREACHABLE();
-}
-
-struct LayoutTransition {
-  vk::CommandBuffer cmd_buffer = {};
-  vk::ImageLayout new_layout = vk::ImageLayout::eUndefined;
-  vk::PipelineStageFlags src_stage = vk::PipelineStageFlagBits::eNone;
-  vk::AccessFlags src_access = vk::AccessFlagBits::eNone;
-  vk::PipelineStageFlags dst_stage = vk::PipelineStageFlagBits::eNone;
-  vk::AccessFlags dst_access = vk::AccessFlagBits::eNone;
-};
 
 }  // namespace impeller

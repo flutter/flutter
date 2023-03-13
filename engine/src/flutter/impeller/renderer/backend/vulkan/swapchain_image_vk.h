@@ -14,7 +14,10 @@ namespace impeller {
 
 class SwapchainImageVK final : public TextureSourceVK {
  public:
-  SwapchainImageVK(TextureDescriptor desc, vk::Device device, vk::Image image);
+  SwapchainImageVK(vk::Device device,
+                   vk::Image image,
+                   PixelFormat image_format,
+                   ISize image_size);
 
   // |TextureSourceVK|
   ~SwapchainImageVK() override;
@@ -26,13 +29,15 @@ class SwapchainImageVK final : public TextureSourceVK {
   ISize GetSize() const;
 
   // |TextureSourceVK|
-  vk::Image GetImage() const override;
+  vk::Image GetVKImage() const override;
 
   // |TextureSourceVK|
-  vk::ImageView GetImageView() const override;
+  vk::ImageView GetVKImageView() const override;
 
  private:
   vk::Image image_ = VK_NULL_HANDLE;
+  PixelFormat image_format_ = PixelFormat::kUnknown;
+  ISize image_size_;
   vk::UniqueImageView image_view_ = {};
   bool is_valid_ = false;
 

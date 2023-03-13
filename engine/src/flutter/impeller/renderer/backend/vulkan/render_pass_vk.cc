@@ -6,11 +6,9 @@
 
 #include <array>
 #include <cstdint>
-#include <unordered_map>
 #include <vector>
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/trace_event.h"
+#include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -42,9 +40,8 @@ static vk::AttachmentDescription CreateAttachmentDescription(
   );
 }
 
-static SharedHandleVK<vk::RenderPass> CreateVKRenderPass(
-    const vk::Device& device,
-    const RenderTarget& target) {
+static vk::UniqueRenderPass CreateVKRenderPass(const vk::Device& device,
+                                               const RenderTarget& target) {
   std::vector<vk::AttachmentDescription> attachments;
 
   std::vector<vk::AttachmentReference> color_refs;
@@ -111,7 +108,7 @@ static SharedHandleVK<vk::RenderPass> CreateVKRenderPass(
     return {};
   }
 
-  return MakeSharedVK(std::move(pass));
+  return std::move(pass);
 }
 
 RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
@@ -138,7 +135,7 @@ void RenderPassVK::OnSetLabel(std::string label) {
   if (!context) {
     return;
   }
-  ContextVK::Cast(*context).SetDebugName(render_pass_->Get(), label.c_str());
+  ContextVK::Cast(*context).SetDebugName(*render_pass_, label.c_str());
   debug_label_ = std::move(label);
 }
 
@@ -228,60 +225,34 @@ static vk::UniqueFramebuffer CreateFramebuffer(const vk::Device& device,
   return std::move(framebuffer);
 }
 
-static bool ConfigureAttachments(const RenderTarget& target,
-                                 const vk::CommandBuffer& command_buffer,
-                                 CommandEncoderVK& encoder) {
+static bool ConfigureRenderTargetAttachmentLayouts(
+    const RenderTarget& target,
+    const vk::CommandBuffer& command_buffer) {
   for (const auto& [_, color] : target.GetColorAttachments()) {
-    const auto& color_tex = color.texture;
-    const auto& color_resolve_tex = color.resolve_texture;
-
-    LayoutTransition color_tran;
-    color_tran.cmd_buffer = command_buffer;
-    color_tran.src_access = vk::AccessFlagBits::eColorAttachmentWrite |
-                            vk::AccessFlagBits::eShaderWrite |
-                            vk::AccessFlagBits::eTransferWrite;
-    color_tran.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                           vk::PipelineStageFlagBits::eFragmentShader |
-                           vk::PipelineStageFlagBits::eTransfer;
-    color_tran.dst_access = vk::AccessFlagBits::eShaderRead;
-    color_tran.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
-
-    color_tran.new_layout = vk::ImageLayout::eColorAttachmentOptimal;
-
-    // Transition and track the color texture.
-    if (!TextureVK::Cast(*color_tex).SetLayout(color_tran) ||
-        !encoder.Track(color_tex)) {
+    if (!TextureVK::Cast(*color.texture)
+             .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
+                        command_buffer)) {
       return false;
     }
-
-    // Transition and track the resolve texture, if there is one.
-    if (color_resolve_tex) {
-      if (!TextureVK::Cast(*color_resolve_tex).SetLayout(color_tran) ||
-          !encoder.Track(color_resolve_tex)) {
+    if (color.resolve_texture) {
+      if (!TextureVK::Cast(*color.resolve_texture)
+               .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
+                          command_buffer)) {
         return false;
       }
     }
   }
-
-  LayoutTransition depth_stencil_tran;
-  depth_stencil_tran.cmd_buffer = command_buffer;
-  depth_stencil_tran.src_access = {};
-  depth_stencil_tran.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  depth_stencil_tran.dst_access = vk::AccessFlagBits::eShaderRead;
-  depth_stencil_tran.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
-
-  depth_stencil_tran.new_layout = vk::ImageLayout::eDepthAttachmentOptimal;
   if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
-    if (!TextureVK::Cast(*depth->texture).SetLayout(depth_stencil_tran) ||
-        !encoder.Track(depth->texture)) {
+    if (!TextureVK::Cast(*depth->texture)
+             .SetLayout(vk::ImageLayout::eDepthAttachmentOptimal,
+                        command_buffer)) {
       return false;
     }
   }
-
-  depth_stencil_tran.new_layout = vk::ImageLayout::eStencilAttachmentOptimal;
   if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
-    if (!TextureVK::Cast(*stencil->texture).SetLayout(depth_stencil_tran) ||
-        !encoder.Track(stencil->texture)) {
+    if (!TextureVK::Cast(*stencil->texture)
+             .SetLayout(vk::ImageLayout::eStencilAttachmentOptimal,
+                        command_buffer)) {
       return false;
     }
   }
@@ -290,19 +261,9 @@ static bool ConfigureAttachments(const RenderTarget& target,
 
 static bool UpdateBindingLayouts(const Bindings& bindings,
                                  const vk::CommandBuffer& buffer) {
-  LayoutTransition transition;
-  transition.cmd_buffer = buffer;
-  transition.src_access = vk::AccessFlagBits::eColorAttachmentWrite |
-                          vk::AccessFlagBits::eTransferWrite;
-  transition.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                         vk::PipelineStageFlagBits::eTransfer;
-  transition.dst_access = vk::AccessFlagBits::eShaderRead;
-  transition.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
-
-  transition.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
   for (const auto& [_, texture] : bindings.textures) {
-    if (!TextureVK::Cast(*texture.resource).SetLayout(transition)) {
+    if (!TextureVK::Cast(*texture.resource)
+             .SetLayout(vk::ImageLayout::eShaderReadOnlyOptimal, buffer)) {
       return false;
     }
   }
@@ -325,124 +286,160 @@ static bool UpdateBindingLayouts(const std::vector<Command>& commands,
   return true;
 }
 
-static bool AllocateAndBindDescriptorSets(const ContextVK& context,
-                                          const Command& command,
-                                          CommandEncoderVK& encoder,
-                                          const PipelineVK& pipeline) {
-  auto desc_set =
-      encoder.AllocateDescriptorSet(pipeline.GetDescriptorSetLayout());
-  if (!desc_set) {
-    return false;
-  }
-
-  auto& allocator = *context.GetResourceAllocator();
-
-  std::unordered_map<uint32_t, vk::DescriptorBufferInfo> buffers;
-  std::unordered_map<uint32_t, vk::DescriptorImageInfo> images;
+static bool UpdateDescriptorSets(vk::Device device,
+                                 const Bindings& bindings,
+                                 Allocator& allocator,
+                                 vk::DescriptorSet desc_set,
+                                 CommandEncoderVK& encoder) {
   std::vector<vk::WriteDescriptorSet> writes;
 
-  auto bind_images = [&encoder,  //
-                      &images,   //
-                      &writes,   //
-                      &desc_set  //
-  ](const Bindings& bindings) -> bool {
-    for (const auto& [index, sampler_handle] : bindings.samplers) {
-      if (bindings.textures.find(index) == bindings.textures.end()) {
-        return false;
-      }
+  //----------------------------------------------------------------------------
+  /// Setup buffer descriptors.
+  ///
+  std::vector<vk::DescriptorBufferInfo> buffer_desc;
+  for (const auto& [buffer_index, view] : bindings.buffers) {
+    const auto& buffer_view = view.resource.buffer;
 
-      auto texture = bindings.textures.at(index).resource;
-      const auto& texture_vk = TextureVK::Cast(*texture);
-      const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
-
-      if (!encoder.Track(texture) ||
-          !encoder.Track(sampler.GetSharedSampler())) {
-        return false;
-      }
-
-      const SampledImageSlot& slot = bindings.sampled_images.at(index);
-
-      vk::DescriptorImageInfo image_info;
-      image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-      image_info.sampler = sampler.GetSampler();
-      image_info.imageView = texture_vk.GetImageView();
-
-      vk::WriteDescriptorSet write_set;
-      write_set.dstSet = desc_set.value();
-      write_set.dstBinding = slot.binding;
-      write_set.descriptorCount = 1u;
-      write_set.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-      write_set.pImageInfo = &(images[slot.binding] = image_info);
-
-      writes.push_back(write_set);
+    auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
+    if (!device_buffer) {
+      VALIDATION_LOG << "Failed to get device buffer for vertex binding";
+      return false;
     }
 
-    return true;
-  };
-
-  auto bind_buffers = [&allocator,  //
-                       &encoder,    //
-                       &buffers,    //
-                       &writes,     //
-                       &desc_set    //
-  ](const Bindings& bindings) -> bool {
-    for (const auto& [buffer_index, view] : bindings.buffers) {
-      const auto& buffer_view = view.resource.buffer;
-
-      auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
-      if (!device_buffer) {
-        VALIDATION_LOG << "Failed to get device buffer for vertex binding";
-        return false;
-      }
-
-      auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
-      if (!buffer) {
-        return false;
-      }
-
-      // Reserved index used for per-vertex data.
-      if (buffer_index == VertexDescriptor::kReservedVertexBufferIndex) {
-        continue;
-      }
-
-      if (!encoder.Track(device_buffer)) {
-        return false;
-      }
-
-      uint32_t offset = view.resource.range.offset;
-
-      vk::DescriptorBufferInfo buffer_info;
-      buffer_info.buffer = buffer;
-      buffer_info.offset = offset;
-      buffer_info.range = view.resource.range.length;
-
-      const ShaderUniformSlot& uniform = bindings.uniforms.at(buffer_index);
-
-      vk::WriteDescriptorSet write_set;
-      write_set.dstSet = desc_set.value();
-      write_set.dstBinding = uniform.binding;
-      write_set.descriptorCount = 1u;
-      write_set.descriptorType = vk::DescriptorType::eUniformBuffer;
-      write_set.pBufferInfo = &(buffers[uniform.binding] = buffer_info);
-
-      writes.push_back(write_set);
+    auto buffer = DeviceBufferVK::Cast(*device_buffer).GetVKBufferHandle();
+    if (!buffer) {
+      return false;
     }
+
+    // Reserved index used for per-vertex data.
+    if (buffer_index == VertexDescriptor::kReservedVertexBufferIndex) {
+      continue;
+    }
+
+    if (!encoder.Track(device_buffer)) {
+      return false;
+    }
+
+    uint32_t offset = view.resource.range.offset;
+
+    vk::DescriptorBufferInfo desc_buffer_info;
+    desc_buffer_info.setBuffer(buffer);
+    desc_buffer_info.setOffset(offset);
+    desc_buffer_info.setRange(view.resource.range.length);
+    buffer_desc.push_back(desc_buffer_info);
+
+    const ShaderUniformSlot& uniform = bindings.uniforms.at(buffer_index);
+
+    vk::WriteDescriptorSet write_set;
+    write_set.setDstSet(desc_set);
+    write_set.setDstBinding(uniform.binding);
+    write_set.setDescriptorCount(1);
+    write_set.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+    write_set.setPBufferInfo(&buffer_desc.back());
+
+    writes.push_back(write_set);
+  }
+
+  //----------------------------------------------------------------------------
+  /// Setup image descriptors.
+  ///
+  std::vector<vk::DescriptorImageInfo> image_descs;
+  for (const auto& [index, sampler_handle] : bindings.samplers) {
+    if (bindings.textures.find(index) == bindings.textures.end()) {
+      VALIDATION_LOG << "Missing texture for sampler: " << index;
+      return false;
+    }
+
+    auto texture = bindings.textures.at(index).resource;
+    const auto& texture_vk = TextureVK::Cast(*texture);
+    const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
+
+    if (!encoder.Track(texture) || !encoder.Track(sampler.GetSharedSampler())) {
+      return false;
+    }
+
+    const SampledImageSlot& slot = bindings.sampled_images.at(index);
+
+    vk::DescriptorImageInfo desc_image_info;
+    desc_image_info.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+    desc_image_info.setSampler(sampler.GetSamplerVK());
+    desc_image_info.setImageView(texture_vk.GetImageView());
+    image_descs.push_back(desc_image_info);
+
+    vk::WriteDescriptorSet write_set;
+    write_set.setDstSet(desc_set);
+    write_set.setDstBinding(slot.binding);
+    write_set.setDescriptorCount(1);
+    write_set.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+    write_set.setPImageInfo(&image_descs.back());
+
+    writes.push_back(write_set);
+  }
+
+  if (writes.empty()) {
     return true;
+  }
+  device.updateDescriptorSets(writes, {});
+  return true;
+}
+
+static bool AllocateAndBindDescriptorSets(
+    const ContextVK& context,
+    const Command& command,
+    CommandEncoderVK& encoder,
+    PipelineCreateInfoVK* pipeline_create_info) {
+  auto& allocator = *context.GetResourceAllocator();
+  vk::PipelineLayout pipeline_layout =
+      pipeline_create_info->GetPipelineLayout();
+
+  vk::DescriptorSetAllocateInfo alloc_info;
+  std::array<vk::DescriptorSetLayout, 1> dsls = {
+      pipeline_create_info->GetDescriptorSetLayout(),
   };
 
-  if (!bind_buffers(command.vertex_bindings) ||
-      !bind_buffers(command.fragment_bindings) ||
-      !bind_images(command.fragment_bindings)) {
+  alloc_info.setDescriptorPool(context.GetDescriptorPool());
+  alloc_info.setSetLayouts(dsls);
+
+  auto [sets_result, sets] =
+      context.GetDevice().allocateDescriptorSetsUnique(alloc_info);
+  if (sets_result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to allocate descriptor sets: "
+                   << vk::to_string(sets_result);
     return false;
   }
 
-  context.GetDevice().updateDescriptorSets(writes, {});
+  const auto set = MakeSharedVK<vk::DescriptorSet>(std::move(sets[0]));
+
+  if (!encoder.Track(set)) {
+    return false;
+  }
+
+  bool update_vertex_descriptors =
+      UpdateDescriptorSets(context.GetDevice(),      //
+                           command.vertex_bindings,  //
+                           allocator,                //
+                           *set,                     //
+                           encoder                   //
+      );
+  if (!update_vertex_descriptors) {
+    return false;
+  }
+  bool update_frag_descriptors =
+      UpdateDescriptorSets(context.GetDevice(),        //
+                           command.fragment_bindings,  //
+                           allocator,                  //
+                           *set,                       //
+                           encoder                     //
+      );
+  if (!update_frag_descriptors) {
+    return false;
+  }
 
   encoder.GetCommandBuffer().bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics,  // bind point
-      pipeline.GetPipelineLayout(),      // layout
+      pipeline_layout,                   // layout
       0,                                 // first set
-      {vk::DescriptorSet{*desc_set}},    // sets
+      {vk::DescriptorSet{*set}},         // sets
       nullptr                            // offsets
   );
   return true;
@@ -489,18 +486,19 @@ static bool EncodeCommand(const Context& context,
 
   const auto& cmd_buffer = encoder.GetCommandBuffer();
 
-  const auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
+  auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
+  PipelineCreateInfoVK* pipeline_create_info = pipeline_vk.GetCreateInfo();
 
   if (!AllocateAndBindDescriptorSets(ContextVK::Cast(context),  //
                                      command,                   //
                                      encoder,                   //
-                                     pipeline_vk                //
+                                     pipeline_create_info       //
                                      )) {
     return false;
   }
 
   cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                          pipeline_vk.GetPipeline());
+                          pipeline_create_info->GetVKPipeline());
 
   // Set the viewport and scissors.
   SetViewportAndScissor(command, cmd_buffer, target_size);
@@ -534,13 +532,15 @@ static bool EncodeCommand(const Context& context,
   }
 
   // Bind the vertex buffer.
-  auto vertex_buffer_handle = DeviceBufferVK::Cast(*vertex_buffer).GetBuffer();
+  auto vertex_buffer_handle =
+      DeviceBufferVK::Cast(*vertex_buffer).GetVKBufferHandle();
   vk::Buffer vertex_buffers[] = {vertex_buffer_handle};
   vk::DeviceSize vertex_buffer_offsets[] = {vertex_buffer_view.range.offset};
   cmd_buffer.bindVertexBuffers(0u, 1u, vertex_buffers, vertex_buffer_offsets);
 
   // Bind the index buffer.
-  auto index_buffer_handle = DeviceBufferVK::Cast(*index_buffer).GetBuffer();
+  auto index_buffer_handle =
+      DeviceBufferVK::Cast(*index_buffer).GetVKBufferHandle();
   cmd_buffer.bindIndexBuffer(index_buffer_handle,
                              index_buffer_view.range.offset,
                              ToVKIndexType(command.index_type));
@@ -556,9 +556,12 @@ static bool EncodeCommand(const Context& context,
 }
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
-  TRACE_EVENT0("impeller", "RenderPassVK::OnEncodeCommands");
   if (!IsValid()) {
     return false;
+  }
+
+  if (commands_.empty()) {
+    return true;
   }
 
   const auto& vk_context = ContextVK::Cast(context);
@@ -590,23 +593,16 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
     return false;
   }
 
-  if (!ConfigureAttachments(render_target, cmd_buffer, *encoder)) {
+  if (!ConfigureRenderTargetAttachmentLayouts(render_target, cmd_buffer)) {
     VALIDATION_LOG << "Could not complete attachment layout transitions.";
     return false;
-  }
-
-  if (commands_.empty()) {
-    // All the necessary layout transitions of the attchments have been
-    // completed by this point. If there are no commands, there is nothing
-    // further to do.
-    return true;
   }
 
   const auto& target_size = render_target.GetRenderTargetSize();
 
   auto framebuffer = MakeSharedVK(
       CreateFramebuffer(vk_context.GetDevice(), render_target_, *render_pass_));
-  if (!encoder->Track(framebuffer) || !encoder->Track(render_pass_)) {
+  if (!encoder->Track(framebuffer)) {
     return false;
   }
 
@@ -621,7 +617,6 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   pass_info.setClearValues(clear_values);
 
   {
-    TRACE_EVENT0("impeller", "EncodeRenderPassCommands");
     cmd_buffer.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
     fml::ScopedCleanupClosure end_render_pass(

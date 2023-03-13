@@ -22,6 +22,8 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #include "impeller/renderer/compute_command.h"            {# // nogncheck #}
 
+#include "impeller/renderer/descriptor_set_layout.h"      {# // nogncheck #}
+
 #include "impeller/renderer/sampler.h"                    {# // nogncheck #}
 
 #include "impeller/renderer/shader_types.h"               {# // nogncheck #}
@@ -164,15 +166,17 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
 {% for buffer in buffers %}
     DescriptorSetLayout{
       {{buffer.binding}}, // binding = {{buffer.binding}}
-      DescriptorType::kUniformBuffer, // descriptor_type = Uniform Buffer
-      {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
+      DescriptorType::kUniformBuffer, // descriptorType = Uniform Buffer
+      1, // descriptorCount = 1
+      {{to_shader_stage(shader_stage)}}, // stageFlags = {{to_shader_stage(shader_stage)}}
     },
 {% endfor %}
 {% for sampled_image in sampled_images %}
     DescriptorSetLayout{
       {{sampled_image.binding}}, // binding = {{sampled_image.binding}}
-      DescriptorType::kSampledImage, // descriptor_type = Sampled Image
-      {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
+      DescriptorType::kSampledImage, // descriptorType = Sampled Image
+      1, // descriptorCount = 1
+      {{to_shader_stage(shader_stage)}}, // stageFlags = {{to_shader_stage(shader_stage)}}
     },
 {% endfor %}
   };

@@ -6,22 +6,25 @@
 
 namespace impeller {
 
-SwapchainImageVK::SwapchainImageVK(TextureDescriptor desc,
-                                   vk::Device device,
-                                   vk::Image image)
-    : TextureSourceVK(desc), image_(image) {
+SwapchainImageVK::SwapchainImageVK(vk::Device device,
+                                   vk::Image image,
+                                   PixelFormat image_format,
+                                   ISize image_size)
+    : image_(image), image_format_(image_format), image_size_(image_size) {
   vk::ImageViewCreateInfo view_info;
   view_info.image = image_;
   view_info.viewType = vk::ImageViewType::e2D;
-  view_info.format = ToVKImageFormat(desc.format);
+  view_info.format = ToVKImageFormat(image_format_);
   view_info.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
   view_info.subresourceRange.baseMipLevel = 0u;
+  view_info.subresourceRange.levelCount = 1u;
   view_info.subresourceRange.baseArrayLayer = 0u;
-  view_info.subresourceRange.levelCount = desc.mip_count;
-  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
+  view_info.subresourceRange.layerCount = 1u;
 
   auto [view_result, view] = device.createImageViewUnique(view_info);
   if (view_result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create image view: "
+                   << vk::to_string(view_result);
     return;
   }
 
@@ -36,20 +39,20 @@ bool SwapchainImageVK::IsValid() const {
 }
 
 PixelFormat SwapchainImageVK::GetPixelFormat() const {
-  return desc_.format;
+  return image_format_;
 }
 
 ISize SwapchainImageVK::GetSize() const {
-  return desc_.size;
+  return image_size_;
 }
 
 // |TextureSourceVK|
-vk::Image SwapchainImageVK::GetImage() const {
+vk::Image SwapchainImageVK::GetVKImage() const {
   return image_;
 }
 
 // |TextureSourceVK|
-vk::ImageView SwapchainImageVK::GetImageView() const {
+vk::ImageView SwapchainImageVK::GetVKImageView() const {
   return image_view_.get();
 }
 

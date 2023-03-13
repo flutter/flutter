@@ -6,7 +6,6 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command.h"
@@ -23,7 +22,7 @@ class RenderPassVK final : public RenderPass {
  private:
   friend class CommandBufferVK;
 
-  SharedHandleVK<vk::RenderPass> render_pass_;
+  vk::UniqueRenderPass render_pass_;
   std::weak_ptr<CommandEncoderVK> encoder_;
   std::string debug_label_;
   bool is_valid_ = false;

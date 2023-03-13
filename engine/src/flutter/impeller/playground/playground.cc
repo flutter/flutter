@@ -402,13 +402,8 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
-  auto texture = CreateTextureForFixture(OpenAssetAsMapping(fixture_name),
-                                         enable_mipmapping);
-  if (texture == nullptr) {
-    return nullptr;
-  }
-  texture->SetLabel(fixture_name);
-  return texture;
+  return CreateTextureForFixture(OpenAssetAsMapping(fixture_name),
+                                 enable_mipmapping);
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(

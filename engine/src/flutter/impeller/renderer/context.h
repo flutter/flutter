@@ -8,7 +8,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/formats.h"
 
 namespace impeller {
@@ -27,11 +27,9 @@ class Context : public std::enable_shared_from_this<Context> {
 
   virtual bool IsValid() const = 0;
 
-  virtual const std::shared_ptr<const Capabilities>& GetCapabilities()
-      const = 0;
-
-  virtual bool UpdateOffscreenLayerPixelFormat(PixelFormat format);
-
+  //----------------------------------------------------------------------------
+  /// @return     A resource allocator.
+  ///
   virtual std::shared_ptr<Allocator> GetResourceAllocator() const = 0;
 
   virtual std::shared_ptr<ShaderLibrary> GetShaderLibrary() const = 0;
@@ -44,7 +42,14 @@ class Context : public std::enable_shared_from_this<Context> {
 
   virtual std::shared_ptr<WorkQueue> GetWorkQueue() const = 0;
 
+  //----------------------------------------------------------------------------
+  /// @return A GPU Tracer to trace gpu rendering.
+  ///
   virtual std::shared_ptr<GPUTracer> GetGPUTracer() const;
+
+  virtual PixelFormat GetColorAttachmentPixelFormat() const;
+
+  virtual const IDeviceCapabilities& GetDeviceCapabilities() const = 0;
 
  protected:
   Context();

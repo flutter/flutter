@@ -102,9 +102,10 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   /// Get or create runtime stage pipeline.
   ///
 
-  const auto& caps = context->GetCapabilities();
-  const auto color_attachment_format = caps->GetDefaultColorFormat();
-  const auto stencil_attachment_format = caps->GetDefaultStencilFormat();
+  const auto& device_capabilities = context->GetDeviceCapabilities();
+  const auto color_attachment_format = context->GetColorAttachmentPixelFormat();
+  const auto stencil_attachment_format =
+      device_capabilities.GetDefaultStencilFormat();
 
   using VS = RuntimeEffectVertexShader;
   PipelineDescriptor desc;

@@ -7,7 +7,7 @@
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
 #include "impeller/base/work_queue_common.h"
-#include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/device_capabilities.h"
 
 namespace impeller {
 
@@ -72,7 +72,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
   // Create the device capabilities.
   {
     device_capabilities_ =
-        CapabilitiesBuilder()
+        DeviceCapabilitiesBuilder()
             .SetHasThreadingRestrictions(true)
             .SetSupportsOffscreenMSAA(false)
             .SetSupportsSSBO(false)
@@ -145,9 +145,13 @@ std::shared_ptr<WorkQueue> ContextGLES::GetWorkQueue() const {
 }
 
 // |Context|
-const std::shared_ptr<const Capabilities>& ContextGLES::GetCapabilities()
-    const {
-  return device_capabilities_;
+const IDeviceCapabilities& ContextGLES::GetDeviceCapabilities() const {
+  return *device_capabilities_;
+}
+
+// |Context|
+PixelFormat ContextGLES::GetColorAttachmentPixelFormat() const {
+  return PixelFormat::kR8G8B8A8UNormInt;
 }
 
 }  // namespace impeller

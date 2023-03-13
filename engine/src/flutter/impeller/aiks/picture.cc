@@ -54,7 +54,7 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
   // features to Image someday.
   auto impeller_context = context.GetContext();
   RenderTarget target;
-  if (impeller_context->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (impeller_context->GetDeviceCapabilities().SupportsOffscreenMSAA()) {
     target = RenderTarget::CreateOffscreenMSAA(*impeller_context, size);
   } else {
     target = RenderTarget::CreateOffscreen(*impeller_context, size);
