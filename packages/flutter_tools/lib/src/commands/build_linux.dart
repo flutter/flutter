@@ -59,7 +59,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     final TargetPlatform targetPlatform =
-        getTargetPlatformForName(stringArgDeprecated('target-platform')!);
+        getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
         getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform)
             != getNameForTargetPlatformArch(targetPlatform);
@@ -92,7 +92,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       ),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
-      targetSysroot: stringArgDeprecated('target-sysroot')!,
+      targetSysroot: stringArg('target-sysroot')!,
     );
     return FlutterCommandResult.success();
   }

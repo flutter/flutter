@@ -3108,7 +3108,7 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-309.30, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-310.30, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
@@ -3496,10 +3496,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4045,10 +4042,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4180,10 +4174,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4822,7 +4813,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 25.0);
+    expect(scrollController.offset, 27.0);
   });
 
   testWidgets('disabled state golden', (WidgetTester tester) async {
@@ -7858,7 +7849,6 @@ void main() {
   testWidgets('placeholder style overflow works', (WidgetTester tester) async {
     final String placeholder = 'hint text' * 20;
     const TextStyle placeholderStyle = TextStyle(
-      fontFamily: 'Ahem',
       fontSize: 14.0,
       overflow: TextOverflow.fade,
     );
