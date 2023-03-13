@@ -357,10 +357,10 @@ class IOSDevice extends Device {
       'Installing and launching...',
     );
     try {
-      ProtocolDiscovery? observatoryDiscovery;
+      ProtocolDiscovery? vmServiceDiscovery;
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
-        _logger.printTrace('Debugging is enabled, connecting to observatory');
+        _logger.printTrace('Debugging is enabled, connecting to vmService');
         final DeviceLogReader deviceLogReader = getLogReader(app: package);
 
         // If the device supports syslog reading, prefer launching the app without
@@ -378,8 +378,8 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port forward if debugging with a network device.
-        observatoryDiscovery = ProtocolDiscovery.observatory(
+        // Don't port foward if debugging with a network device.
+        vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
           portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
@@ -435,7 +435,7 @@ class IOSDevice extends Device {
       Uri? localUri;
       if (interfaceType == IOSDeviceConnectionInterface.network) {
         // Wait for Dart VM Service to start up.
-        final Uri? serviceURL = await observatoryDiscovery?.uri;
+        final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
           return LaunchResult.failed();
@@ -463,14 +463,14 @@ class IOSDevice extends Device {
 
         mDNSLookupTimer.cancel();
       } else {
-        localUri = await observatoryDiscovery?.uri;
+        localUri = await vmServiceDiscovery?.uri;
       }
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
-      return LaunchResult.succeeded(observatoryUri: localUri);
+      return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);

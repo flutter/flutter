@@ -42,7 +42,6 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
-import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
@@ -61,10 +60,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
   bool launchDevToolsInNewWindow,
-  SdkConfigurationProvider sdkConfigurationProvider,
   bool emitDebugEvents,
   bool isInternalBuild,
-  bool isFlutterApp,
+  Future<bool> Function()? isFlutterApp,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -301,7 +299,6 @@ class WebAssetServer implements AssetReader {
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
-      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts!),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -419,6 +416,18 @@ class WebAssetServer implements AssetReader {
 
     File file = _resolveDartFile(requestPath);
 
+    if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
+      final String canvasKitPath = globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      );
+      final Uri potential = globals.fs
+          .directory(canvasKitPath)
+          .uri
+          .resolve(requestPath.replaceFirst('canvaskit/', ''));
+      file = globals.fs.file(potential);
+    }
+
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
@@ -440,7 +449,8 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync()) {
       // Paths starting with these prefixes should've been resolved above.
       if (requestPath.startsWith('assets/') ||
-          requestPath.startsWith('packages/')) {
+          requestPath.startsWith('packages/') ||
+          requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
       return _serveIndex();

@@ -183,6 +183,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArgDeprecated('trace-startup');
@@ -196,6 +197,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArgDeprecated('track-widget-creation');
   bool get enableImpeller => boolArgDeprecated('enable-impeller');
   bool get uninstallFirst => boolArgDeprecated('uninstall-first');
+  bool get enableEmbedderApi => boolArgDeprecated('enable-embedder-api');
 
   @override
   bool get reportNullSafety => true;
@@ -234,6 +236,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -282,6 +285,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         uninstallFirst: uninstallFirst,
         serveObservatory: boolArgDeprecated('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
+        enableEmbedderApi: enableEmbedderApi,
       );
     }
   }

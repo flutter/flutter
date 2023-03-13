@@ -236,6 +236,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
         doUpgrade: true,
@@ -255,6 +256,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
       );

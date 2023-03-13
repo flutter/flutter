@@ -67,6 +67,11 @@ enum ScrollDecelerationRate {
 /// // ...
 /// final ScrollPhysics mergedPhysics = physics.applyTo(const AlwaysScrollableScrollPhysics());
 /// ```
+///
+/// When implementing a subclass, you must override [applyTo] so that it returns
+/// an appropriate instance of your subclass.  Otherwise, classes like
+/// [Scrollable] that inform a [ScrollPosition] will combine them with
+/// the default [ScrollPhysics] object instead of your custom subclass.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -707,6 +712,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
         : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
+    if (easing && decelerationRate == ScrollDecelerationRate.fast) {
+      return direction * offset.abs();
+    }
     return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
