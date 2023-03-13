@@ -149,9 +149,6 @@ function upgrade_flutter () (
       export PUB_SUMMARY_ONLY=1
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
-    if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
-      export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
-    fi
     pub_upgrade_with_retry
 
     # Move the old snapshot - we can't just overwrite it as the VM might currently have it

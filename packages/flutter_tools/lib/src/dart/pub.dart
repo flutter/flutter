@@ -34,39 +34,29 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
 typedef MessageFilter = String? Function(String message);
 
-/// globalCachePath is the directory in which the content of the localCachePath will be moved in
-void joinCaches({
-  required FileSystem fileSystem,
-  required Directory globalCacheDirectory,
-  required Directory dependencyDirectory,
+/// Load any package-files stored in [preloadCacheDir] into the pub cache if it
+/// exists.
+///
+/// Deletes the [preloadCacheDir].
+@visibleForTesting
+void preloadPubCache({
+  required Directory preloadCacheDir,
+  required ProcessManager processManager,
+  required Logger logger,
+  required List<String> pubCommand,
 }) {
-  for (final FileSystemEntity entity in dependencyDirectory.listSync()) {
-    final String newPath = fileSystem.path.join(globalCacheDirectory.path, entity.basename);
-    if (entity is File) {
-      if (!fileSystem.file(newPath).existsSync()) {
-        entity.copySync(newPath);
-      }
-    } else if (entity is Directory) {
-      if (!globalCacheDirectory.childDirectory(entity.basename).existsSync()) {
-        final Directory newDirectory = globalCacheDirectory.childDirectory(entity.basename);
-        newDirectory.createSync();
-        joinCaches(
-          fileSystem: fileSystem,
-          globalCacheDirectory: newDirectory,
-          dependencyDirectory: entity,
-        );
-      }
-    }
+  if (preloadCacheDir.existsSync()) {
+    final Iterable<String> cacheFiles =
+          preloadCacheDir
+            .listSync()
+            .map((FileSystemEntity f) => f.path)
+            .where((String path) => path.endsWith('.tar.gz'));
+    processManager.runSync(<String>[...pubCommand, 'cache', 'preload',...cacheFiles]);
+    _tryDeleteDirectory(preloadCacheDir, logger);
   }
 }
 
-Directory createDependencyDirectory(Directory pubGlobalDirectory, String dependencyName) {
-  final Directory newDirectory = pubGlobalDirectory.childDirectory(dependencyName);
-  newDirectory.createSync();
-  return newDirectory;
-}
-
-bool tryDelete(Directory directory, Logger logger) {
+bool _tryDeleteDirectory(Directory directory, Logger logger) {
   try {
     if (directory.existsSync()) {
       directory.deleteSync(recursive: true);
@@ -76,24 +66,6 @@ bool tryDelete(Directory directory, Logger logger) {
     return false;
   }
   return true;
-}
-
-/// When local cache (flutter_root/.pub-cache) and global cache (HOME/.pub-cache) are present a
-/// merge needs to be done leaving only the global
-///
-/// Valid pubCache should look like this ./localCachePath/.pub-cache/hosted/pub.dartlang.org
-bool needsToJoinCache({
-  required FileSystem fileSystem,
-  required String localCachePath,
-  required Directory? globalDirectory,
-}) {
-  if (globalDirectory == null) {
-    return false;
-  }
-  final Directory localDirectory = fileSystem.directory(localCachePath);
-
-  return globalDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync() &&
-    localDirectory.childDirectory('hosted').childDirectory('pub.dartlang.org').existsSync();
 }
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -402,7 +374,7 @@ class _DefaultPub implements Pub {
   }) async {
     int exitCode;
 
-    final List<String> pubCommand = _pubCommand(arguments);
+    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
 
     try {
@@ -536,7 +508,7 @@ class _DefaultPub implements Pub {
       arguments.insert(0, '--trace');
     }
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride);
-    final List<String> pubCommand = _pubCommand(arguments);
+    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
     final int code = await _processUtils.stream(
         pubCommand,
         workingDirectory: directory,
@@ -590,7 +562,9 @@ class _DefaultPub implements Pub {
   }
 
   /// The command used for running pub.
-  List<String> _pubCommand(List<String> arguments) {
+  late final List<String> _pubCommand = _computePubCommand();
+
+  List<String> _computePubCommand() {
     // TODO(zanderso): refactor to use artifacts.
     final String sdkPath = _fileSystem.path.joinAll(<String>[
       Cache.flutterRoot!,
@@ -607,7 +581,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, '--no-analytics', 'pub', ...arguments];
+    return <String>[sdkPath, '--no-analytics', 'pub'];
   }
 
   // Returns the environment value that should be used when running pub.
@@ -629,85 +603,23 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  /// There are 3 ways to get the pub cache location
+  /// There are 2 ways to get the pub cache location
   ///
   /// 1) Provide the _kPubCacheEnvironmentKey.
-  /// 2) There is a local cache (in the Flutter SDK) but not a global one (in the user's home directory).
-  /// 3) If both local and global are available then merge the local into global and return the global.
+  /// 2) The pub default user-level pub cache.
+  ///
+  /// If we are using 2, check if there are pre-packaged packages in
+  /// $FLUTTER_ROOT/.pub-preload-cache and install them in the user-level cache.
   String? _getPubCacheIfAvailable() {
     if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
       return _platform.environment[_kPubCacheEnvironmentKey];
     }
 
-    final String localCachePath = _fileSystem.path.join(Cache.flutterRoot!, '.pub-cache');
-    final Directory? globalDirectory;
-    if (_platform.isWindows) {
-      globalDirectory = _getWindowsGlobalDirectory;
-    }
-    else {
-      if (_platform.environment['HOME'] == null) {
-        globalDirectory = null;
-      } else {
-        final String homeDirectoryPath = _platform.environment['HOME']!;
-        globalDirectory = _fileSystem.directory(_fileSystem.path.join(homeDirectoryPath, '.pub-cache'));
-      }
-    }
-
-    if (needsToJoinCache(
-      fileSystem: _fileSystem,
-      localCachePath: localCachePath,
-      globalDirectory: globalDirectory,
-    )) {
-      final Directory localDirectoryPub = _fileSystem.directory(
-        _fileSystem.path.join(localCachePath, 'hosted', 'pub.dartlang.org')
-      );
-      final Directory globalDirectoryPub = _fileSystem.directory(
-        _fileSystem.path.join(globalDirectory!.path, 'hosted', 'pub.dartlang.org')
-      );
-      for (final FileSystemEntity entity in localDirectoryPub.listSync()) {
-        if (entity is Directory && !globalDirectoryPub.childDirectory(entity.basename).existsSync()){
-          try {
-            final Directory newDirectory = createDependencyDirectory(globalDirectoryPub, entity.basename);
-            joinCaches(
-              fileSystem: _fileSystem,
-              globalCacheDirectory: newDirectory,
-              dependencyDirectory: entity,
-            );
-          } on FileSystemException {
-            if (!tryDelete(globalDirectoryPub.childDirectory(entity.basename), _logger)) {
-              _logger.printWarning('The join of pub-caches failed');
-              _logger.printStatus('Running "dart pub cache repair"');
-              _processManager.runSync(<String>['dart', 'pub', 'cache', 'repair']);
-            }
-          }
-        }
-      }
-      tryDelete(_fileSystem.directory(localCachePath), _logger);
-      return globalDirectory.path;
-    } else if (globalDirectory != null && globalDirectory.existsSync()) {
-      return globalDirectory.path;
-    } else if (_fileSystem.directory(localCachePath).existsSync()) {
-      return localCachePath;
-    }
+    final String flutterRootPath = Cache.flutterRoot!;
+    final Directory flutterRoot = _fileSystem.directory(flutterRootPath);
+    final Directory preloadCacheDir = flutterRoot.childDirectory('.pub-preload-cache');
+    preloadPubCache(preloadCacheDir: preloadCacheDir,logger: _logger,processManager: _processManager, pubCommand: _pubCommand);
     // Use pub's default location by returning null.
-    return null;
-  }
-
-  Directory? get _getWindowsGlobalDirectory {
-    // %LOCALAPPDATA% is preferred as the cache location over %APPDATA%, because the latter is synchronised between
-    // devices when the user roams between them, whereas the former is not.
-    // The default cache dir used to be in %APPDATA%, so to avoid breaking old installs,
-    // we use the old dir in %APPDATA% if it exists. Else, we use the new default location
-    // in %LOCALAPPDATA%.
-    for (final String envVariable in <String>['APPDATA', 'LOCALAPPDATA']) {
-      if (_platform.environment[envVariable] != null) {
-        final String homePath = _platform.environment[envVariable]!;
-        final Directory globalDirectory = _fileSystem.directory(_fileSystem.path.join(homePath, 'Pub', 'Cache'));
-        if (globalDirectory.existsSync()) {
-          return globalDirectory;
-        }
-      }
-    }
     return null;
   }
 
