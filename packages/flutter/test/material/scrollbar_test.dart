@@ -5,9 +5,10 @@
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20230313"
+// Fails with "flutter test --test-randomize-ordering-seed=382757700"
 @Tags(<String>['no-shuffle'])
 library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -147,7 +148,7 @@ void main() {
       pixels: 0.0,
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
-      devicePixelRatio: tester.view.devicePixelRatio,
+      devicePixelRatio: tester.binding.window.devicePixelRatio,
     );
     scrollPainter!.update(metrics, AxisDirection.down);
 
