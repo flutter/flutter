@@ -12,6 +12,8 @@
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/macros.h"
 
+class GrDirectContext;
+
 namespace impeller {
 class AiksContext;
 }  // namespace impeller

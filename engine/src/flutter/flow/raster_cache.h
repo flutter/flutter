@@ -19,6 +19,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
+class GrDirectContext;
 class SkColorSpace;
 
 namespace flutter {
