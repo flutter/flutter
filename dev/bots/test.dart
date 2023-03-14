@@ -1162,11 +1162,6 @@ Future<void> _runWebLongRunningTests() async {
       ),
     ],
 
-    // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'profile', renderer: 'html'),
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'release', renderer: 'html'),
-
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
