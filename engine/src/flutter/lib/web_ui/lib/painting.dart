@@ -351,6 +351,8 @@ abstract class Image {
 
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;
 
+  ColorSpace get colorSpace => ColorSpace.sRGB;
+
   @override
   String toString() => '[$width\u00D7$height]';
 }
@@ -429,6 +431,11 @@ class ImageFilter {
 
   factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
     engine.renderer.composeImageFilters(outer: outer, inner: inner);
+}
+
+enum ColorSpace {
+  sRGB,
+  extendedSRGB,
 }
 
 enum ImageByteFormat {
