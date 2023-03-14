@@ -94,10 +94,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   // called both in initState and when the EditableText receives focus.
   T? _lastValue;
 
-  // Whether a value has been pushed and is not yet saved in the history.
-  // Returns true while a push is delayed due to the throttling delay.
-  bool _hasPendingChange = false;
-
   UndoHistoryController? _controller;
 
   UndoHistoryController get _effectiveController => widget.controller ?? (_controller ??= UndoHistoryController());
@@ -111,9 +107,8 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
       // throttling delay is pending), the initial push should not be canceled.
       return;
     }
-    _throttleTimer?.cancel(); // Cancel ongoing push, if any.
-    if (_hasPendingChange) {
-      _hasPendingChange = false;
+    if (_throttleTimer?.isActive ?? false) {
+      _throttleTimer?.cancel(); // Cancel ongoing push, if any.
       _update(_stack.currentValue);
     } else {
       _update(_stack.undo());
@@ -185,7 +180,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
 
     _lastValue = widget.value.value;
 
-    _hasPendingChange = true;
     _throttleTimer = _throttledPush(widget.value.value);
   }
 
@@ -215,7 +209,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     _throttledPush = _throttle<T>(
       duration: _kThrottleDuration,
       function: (T currentValue) {
-        _hasPendingChange = false;
         _stack.push(currentValue);
         _updateState();
       },
