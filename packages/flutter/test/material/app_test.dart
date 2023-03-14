@@ -1445,6 +1445,92 @@ void main() {
     );
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it (vertical)', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
+          ),
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(
+      direction: AxisDirection.down,
+    );
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description', contains('details.controller != null')),
+          ),
+        );
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it (horizontal)', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
+          ),
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(
+      direction: AxisDirection.left,
+    );
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        // Does not throw if we aren't using it.
+        // Horizontal axis gets no scrollbars for all platforms.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class MockScrollBehavior extends ScrollBehavior {

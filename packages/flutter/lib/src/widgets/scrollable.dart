@@ -99,18 +99,21 @@ class Scrollable extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
+  /// {@template flutter.widgets.Scrollable.axisDirection}
   /// The direction in which this widget scrolls.
   ///
-  /// For example, if the [axisDirection] is [AxisDirection.down], increasing
-  /// the scroll position will cause content below the bottom of the viewport to
-  /// become visible through the viewport. Similarly, if [axisDirection] is
-  /// [AxisDirection.right], increasing the scroll position will cause content
-  /// beyond the right edge of the viewport to become visible through the
-  /// viewport.
+  /// For example, if the [Scrollable.axisDirection] is [AxisDirection.down],
+  /// increasing the scroll position will cause content below the bottom of the
+  /// viewport to become visible through the viewport. Similarly, if the
+  /// axisDirection is [AxisDirection.right], increasing the scroll position
+  /// will cause content beyond the right edge of the viewport to become visible
+  /// through the viewport.
   ///
   /// Defaults to [AxisDirection.down].
+  /// {@endtemplate}
   final AxisDirection axisDirection;
 
+  /// {@template flutter.widgets.Scrollable.controller}
   /// An object that can be used to control the position to which this widget is
   /// scrolled.
   ///
@@ -122,12 +125,17 @@ class Scrollable extends StatefulWidget {
   /// scroll position (see [ScrollController.offset]), or change it (see
   /// [ScrollController.animateTo]).
   ///
+  /// If null, a [ScrollController] will be created internally by [Scrollable]
+  /// in order to create and manage the [ScrollPosition].
+  ///
   /// See also:
   ///
-  ///  * [ensureVisible], which animates the scroll position to reveal a given
-  ///    [BuildContext].
+  ///  * [Scrollable.ensureVisible], which animates the scroll position to
+  ///    reveal a given [BuildContext].
+  /// {@endtemplate}
   final ScrollController? controller;
 
+  /// {@template flutter.widgets.Scrollable.physics}
   /// How the widgets should respond to user input.
   ///
   /// For example, determines how the widget continues to animate after the
@@ -136,9 +144,9 @@ class Scrollable extends StatefulWidget {
   /// Defaults to matching platform conventions via the physics provided from
   /// the ambient [ScrollConfiguration].
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If an explicit [ScrollBehavior] is provided to
+  /// [Scrollable.scrollBehavior], the [ScrollPhysics] provided by that behavior
+  /// will take precedence after [Scrollable.physics].
   ///
   /// The physics can be changed dynamically, but new physics will only take
   /// effect if the _class_ of the provided object changes. Merely constructing
@@ -153,6 +161,7 @@ class Scrollable extends StatefulWidget {
   ///  * [AlwaysScrollableScrollPhysics], which can be used to indicate that the
   ///    scrollable should react to scroll requests (and possible overscroll)
   ///    even if the scrollable's contents fit without scrolling being necessary.
+  /// {@endtemplate}
   final ScrollPhysics? physics;
 
   /// Builds the viewport through which the scrollable content is displayed.
@@ -902,7 +911,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
-      clipBehavior: widget.clipBehavior,
+      decorationClipBehavior: widget.clipBehavior,
     );
 
     result = _configuration.buildScrollbar(
