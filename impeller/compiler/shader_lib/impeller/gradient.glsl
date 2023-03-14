@@ -7,6 +7,29 @@
 
 #include <impeller/texture.glsl>
 
+/// Compute the t value for a conical gradient at point `p` between the 2
+/// circles defined by (c0, r0) and (c1, r1).
+///
+/// This assumes that c0 != c1.
+float IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 p) {
+  float w = 1.0;
+  float result = 0.0;
+  vec2 ab = c1 - c0;
+  float dr = r1 - r0;
+  // Set sample rate to a minimum for the case where c0 and c1 are close.
+  float delta = max(1.0 / length(ab), 100.0);
+  while (w >= 0.0) {
+    vec2 cw = w * ab + c0;
+    float rw = w * dr + r0;
+    if (length(p - cw) <= rw) {
+      result = w;
+      break;
+    }
+    w -= delta;
+  }
+  return 1.0 - result;
+}
+
 /// Compute the indexes and mix coefficient used to mix colors for an
 /// arbitrarily sized color gradient.
 ///

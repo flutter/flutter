@@ -1123,6 +1123,8 @@ ORIGIN: ../../../flutter/impeller/entity/contents/color_source_contents.cc + ../
 ORIGIN: ../../../flutter/impeller/entity/contents/color_source_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/color_source_text_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/color_source_text_contents.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/contents/conical_gradient_contents.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/contents/conical_gradient_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/content_context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/content_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/contents.cc + ../../../flutter/LICENSE
@@ -1237,6 +1239,8 @@ ORIGIN: ../../../flutter/impeller/entity/shaders/border_mask_blur.frag + ../../.
 ORIGIN: ../../../flutter/impeller/entity/shaders/border_mask_blur.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.vert + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/conical_gradient_fill.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/conical_gradient_ssbo_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur.vert + ../../../flutter/LICENSE
@@ -3652,6 +3656,8 @@ FILE: ../../../flutter/impeller/entity/contents/color_source_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/color_source_contents.h
 FILE: ../../../flutter/impeller/entity/contents/color_source_text_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/color_source_text_contents.h
+FILE: ../../../flutter/impeller/entity/contents/conical_gradient_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/conical_gradient_contents.h
 FILE: ../../../flutter/impeller/entity/contents/content_context.cc
 FILE: ../../../flutter/impeller/entity/contents/content_context.h
 FILE: ../../../flutter/impeller/entity/contents/contents.cc
@@ -3766,6 +3772,8 @@ FILE: ../../../flutter/impeller/entity/shaders/border_mask_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/border_mask_blur.vert
 FILE: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.frag
 FILE: ../../../flutter/impeller/entity/shaders/color_matrix_color_filter.vert
+FILE: ../../../flutter/impeller/entity/shaders/conical_gradient_fill.frag
+FILE: ../../../flutter/impeller/entity/shaders/conical_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.glsl
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur.vert

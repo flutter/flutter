@@ -2794,6 +2794,123 @@
       }
     }
   },
+  "flutter/impeller/entity/gles/conical_gradient_fill.frag.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/conical_gradient_fill.frag.gles",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 61,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.25,
+              0.234375,
+              0.25,
+              0.1875,
+              0.0,
+              0.125,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "total_cycles": [
+              0.59375,
+              0.375,
+              0.59375,
+              0.1875,
+              0.0,
+              0.125,
+              0.25
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 14,
+          "work_registers_used": 20
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/conical_gradient_fill.frag.gles",
+      "has_uniform_computation": true,
+      "type": "Fragment",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "shortest_path_cycles": [
+              1.9800000190734863,
+              1.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arithmetic"
+            ],
+            "total_cycles": [
+              9.333333015441895,
+              1.0,
+              1.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 3,
+          "work_registers_used": 2
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/gles/gaussian_blur.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
