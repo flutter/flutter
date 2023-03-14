@@ -919,7 +919,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
 
-    await WebBuiltInAssets(globals.fs, isWasm: false).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: false).build(environment);
 
     // No caching of source maps.
     final String fileGeneratorsPath = environment.artifacts
@@ -936,7 +936,7 @@ void main() {
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       .createSync(recursive: true);
 
-    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: true).build(environment);
 
     expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
     expect(environment.outputDir.childDirectory('canvaskit')

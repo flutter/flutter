@@ -549,25 +549,10 @@ class WebBuiltInAssets extends Target {
     }
 
     if (isWasm) {
-      final String dartSdkPath = 
-        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath);
-      final File dart2wasmRuntime = fileSystem.directory(dartSdkPath)
-        .childDirectory('bin')
-        .childFile('dart2wasm_runtime.mjs');
-      final String targetPath = fileSystem.path.join(
-        environment.outputDir.path, 
-        'dart2wasm_runtime.mjs');
-      dart2wasmRuntime.copySync(targetPath);
-
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
       bootstrapFile.writeAsStringSync(
         wasm_bootstrap.generateWasmBootstrapFile(webRenderer == WebRendererMode.skwasm)
       );
-    }
-
-    if (isWasm) {
-      final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
-      bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
     }
 
     // Write the flutter.js file
