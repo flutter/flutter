@@ -365,7 +365,10 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
+      // To minmize changes to goldens tests, use a static color.
+      final Color lineColor = const bool.fromEnvironment('FLUTTER_TEST') 
+        ? const Color(0xFF027DFD) // Flutter Blue 
+        : Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
         final Paint fill = Paint()
