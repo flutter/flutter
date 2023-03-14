@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -423,7 +422,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
 
     final Device networkDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.network;
+      ..connectionInterface = DeviceConnectionInterface.wireless;
     fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
@@ -456,7 +455,7 @@ void main() {
     ]), throwsToolExit());
 
     final Device usbDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.usb;
+      ..connectionInterface = DeviceConnectionInterface.attached;
     fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -481,7 +480,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
 
     final Device networkDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.network;
+      ..connectionInterface = DeviceConnectionInterface.wireless;
     fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
@@ -661,7 +660,11 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 // ignore: avoid_implementing_value_types
 class FakeIosDevice extends Fake implements IOSDevice {
   @override
-  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb;
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

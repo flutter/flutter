@@ -486,28 +486,24 @@ void main() {
           expect(devices[0].name, 'An iPhone (Space Gray)');
           expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
-          expect(devices[0].interfaceType, IOSDeviceConnectionInterface.usb);
           expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
 
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
           expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
-          expect(devices[1].interfaceType, IOSDeviceConnectionInterface.usb);
           expect(devices[1].connectionInterface, DeviceConnectionInterface.attached);
 
           expect(devices[2].id, '234234234234234234345445687594e089dede3c44');
           expect(devices[2].name, 'A networked iPad');
           expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
-          expect(devices[2].interfaceType, IOSDeviceConnectionInterface.network);
           expect(devices[2].connectionInterface, DeviceConnectionInterface.wireless);
 
           expect(devices[3].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
           expect(devices[3].name, 'iPad 2');
           expect(await devices[3].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[3].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
-          expect(devices[3].interfaceType, IOSDeviceConnectionInterface.usb);
           expect(devices[3].connectionInterface, DeviceConnectionInterface.attached);
 
           expect(fakeProcessManager, hasNoRemainingExpectations);
