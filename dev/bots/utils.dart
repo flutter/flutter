@@ -95,6 +95,7 @@ void foundError(List<String> messages) {
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
+  print('hascolor: $hasColor, isLuci $isLuci');
   print('$red╔═╡${bold}ERROR$reset$red╞═${"═" * (width - 9)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
