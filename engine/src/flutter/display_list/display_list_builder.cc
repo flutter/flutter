@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_color_source.h"
 #include "flutter/display_list/display_list_ops.h"
 #include "fml/logging.h"
@@ -249,8 +250,8 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
         new (pod) DlMatrixImageFilter(matrix_filter);
         break;
       }
-      case DlImageFilterType::kCompose:
-      case DlImageFilterType::kLocalMatrix:
+      case DlImageFilterType::kComposeFilter:
+      case DlImageFilterType::kLocalMatrixFilter:
       case DlImageFilterType::kColorFilter: {
         Push<SetSharedImageFilterOp>(0, 0, filter);
         break;
@@ -842,7 +843,7 @@ void DisplayListBuilder::drawPoints(PointMode mode,
   }
 
   void* data_ptr;
-  FML_DCHECK(count < DlOpReceiver::kMaxDrawPointsCount);
+  FML_DCHECK(count < Dispatcher::kMaxDrawPointsCount);
   int bytes = count * sizeof(SkPoint);
   RectBoundsAccumulator ptBounds;
   for (size_t i = 0; i < count; i++) {
@@ -946,7 +947,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                                        const SkRect& dst,
                                        DlImageSampling sampling,
                                        bool render_with_attributes,
-                                       SrcRectConstraint constraint) {
+                                       SkCanvas::SrcRectConstraint constraint) {
   Push<DrawImageRectOp>(0, 1, image, src, dst, sampling, render_with_attributes,
                         constraint);
   CheckLayerOpacityCompatibility(render_with_attributes);
@@ -960,7 +961,10 @@ void DisplayListBuilder::DrawImageRect(const sk_sp<DlImage>& image,
                                        const SkRect& dst,
                                        DlImageSampling sampling,
                                        const DlPaint* paint,
-                                       SrcRectConstraint constraint) {
+                                       bool enforce_src_edges) {
+  SkCanvas::SrcRectConstraint constraint =
+      enforce_src_edges ? SkCanvas::kStrict_SrcRectConstraint
+                        : SkCanvas::kFast_SrcRectConstraint;
   if (paint != nullptr) {
     SetAttributesFromPaint(*paint,
                            DisplayListOpFlags::kDrawImageRectWithPaintFlags);
@@ -1073,12 +1077,18 @@ void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
 void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                          SkScalar opacity) {
   DlPaint current_paint = current_;
-  Push<DrawDisplayListOp>(0, 1, display_list, opacity);
-  // Not really necessary if the developer is interacting with us via
-  // our attribute-state-less DlCanvas methods, but this avoids surprises
-  // for those who may have been using the stateful Dispatcher methods.
-  SetAttributesFromPaint(current_paint,
-                         DisplayListOpFlags::kSaveLayerWithPaintFlags);
+  if (opacity < SK_Scalar1) {
+    SaveLayer(&display_list->bounds(), &DlPaint().setOpacity(opacity));
+  }
+  Push<DrawDisplayListOp>(0, 1, display_list);
+  if (opacity < SK_Scalar1) {
+    Restore();
+    // Not really necessary if the developer is interacting with us via
+    // our attribute-state-less DlCanvas methods, but this avoids surprises
+    // for those who may have been using the stateful Dispatcher methods.
+    SetAttributesFromPaint(current_paint,
+                           DisplayListOpFlags::kSaveLayerWithPaintFlags);
+  }
 
   const SkRect bounds = display_list->bounds();
   switch (accumulator()->type()) {
@@ -1132,8 +1142,8 @@ void DisplayListBuilder::DrawShadow(const SkPath& path,
       ? Push<DrawShadowTransparentOccluderOp>(0, 1, path, color, elevation, dpr)
       : Push<DrawShadowOp>(0, 1, path, color, elevation, dpr);
 
-  SkRect shadow_bounds =
-      DlCanvas::ComputeShadowBounds(path, elevation, dpr, GetTransform());
+  SkRect shadow_bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
+      path, elevation, dpr, GetTransform());
   AccumulateOpBounds(shadow_bounds, kDrawShadowFlags);
   UpdateLayerOpacityCompatibility(false);
 }
@@ -1180,7 +1190,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
         pad = std::max(pad, SK_ScalarSqrt2);
       }
       SkScalar min_stroke_width = 0.01;
-      pad *= std::max(current_.getStrokeWidth() * 0.5f, min_stroke_width);
+      pad *= std::max(getStrokeWidth() * 0.5f, min_stroke_width);
       bounds.outset(pad, pad);
     }
   }
@@ -1249,7 +1259,7 @@ bool DisplayListBuilder::paint_nops_on_transparency() {
   // For example, DstIn is used by masking layers.
   // https://code.google.com/p/skia/issues/detail?id=1291
   // https://crbug.com/401593
-  switch (current_.getBlendMode()) {
+  switch (getBlendMode()) {
     // For each of the following transfer modes, if the source
     // alpha is zero (our transparent black), the resulting
     // blended pixel is not necessarily equal to the original
