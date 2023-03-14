@@ -11,7 +11,7 @@ void main() {
     int mutatedIndex = -1;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    widgetSetup(tester, 3000, windowHeight: 3000);
+    widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
       scaffoldKey,
       NavigationDrawer(
@@ -154,7 +154,7 @@ void main() {
 
   testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    widgetSetup(tester, 500, windowHeight: 300);
+    widgetSetup(tester, 500, viewHeight: 300);
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
@@ -201,8 +201,8 @@ void main() {
 
   testWidgets('Safe Area test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    const double windowHeight = 300;
-    widgetSetup(tester, 500, windowHeight: windowHeight);
+    const double viewHeight = 300;
+    widgetSetup(tester, 500, viewHeight: viewHeight);
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -237,7 +237,7 @@ void main() {
     );
 
     // No Safe area padding at the bottom.
-    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
+    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, viewHeight);
    });
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
@@ -387,11 +387,8 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
       .decoration as ShapeDecoration?;
 }
 
-void widgetSetup(WidgetTester tester, double windowWidth,
-    {double? windowHeight}) {
-  final double height = windowHeight ?? 1000;
-  tester.binding.window.devicePixelRatioTestValue = 2;
-  final double dpi = tester.binding.window.devicePixelRatio;
-  tester.binding.window.physicalSizeTestValue =
-      Size(windowWidth * dpi, height * dpi);
+void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 1000}) {
+  tester.view.devicePixelRatio = 2;
+  final double dpi = tester.view.devicePixelRatio;
+  tester.view.physicalSize = Size(viewWidth * dpi, viewHeight * dpi);
 }
