@@ -1126,6 +1126,10 @@ class FakeDevice extends Fake implements Device {
   @override
   bool get isConnected => true;
 
+  @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
   bool supported = true;
 
   @override

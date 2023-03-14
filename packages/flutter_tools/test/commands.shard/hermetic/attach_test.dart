@@ -1238,6 +1238,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
+  @override
   bool isSupported() => true;
 
   @override
@@ -1301,6 +1305,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final IOSDeviceConnectionInterface interfaceType;
+
+  @override
+  DeviceConnectionInterface get connectionInterface {
+    return interfaceType == IOSDeviceConnectionInterface.network
+        ? DeviceConnectionInterface.wireless
+        : DeviceConnectionInterface.attached;
+  }
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;

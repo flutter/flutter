@@ -185,6 +185,13 @@ class IOSDevice extends Device {
   final IMobileDevice _iMobileDevice;
   final IProxy _iproxy;
 
+  @override
+  DeviceConnectionInterface get connectionInterface {
+    return interfaceType == IOSDeviceConnectionInterface.network
+        ? DeviceConnectionInterface.wireless
+        : DeviceConnectionInterface.attached;
+  }
+
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
     final String? majorVersionString = _sdkVersion?.split('.').first.trim();
