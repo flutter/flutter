@@ -28,6 +28,7 @@ void main() {
         expect(analyze.allProjectValidators().length, 2);
       }
     }
+    expect('a', 'b');
   }));
 
   testUsingContext('bool? safe argResults', () async {
