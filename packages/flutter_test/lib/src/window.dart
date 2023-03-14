@@ -124,6 +124,9 @@ class FakeViewPadding implements ViewPadding {
     right = base.right,
     bottom = base.bottom;
 
+  /// A view padding that has zeros for each edge.
+  static const FakeViewPadding zero = FakeViewPadding();
+
   @override
   final double left;
 

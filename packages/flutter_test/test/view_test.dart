@@ -82,7 +82,7 @@ void main() {
       verifyPropertyFaked<ViewPadding>(
         tester: tester,
         realValue: trueImplicitView().padding,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().padding,
         propertyFaker: (_, ViewPadding fakeValue) {
           tester.view.padding = fakeValue as FakeViewPadding;
@@ -94,7 +94,7 @@ void main() {
     testWidgets('can reset padding', (WidgetTester tester) async {
       verifyPropertyReset<ViewPadding>(
         tester: tester,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().padding,
         propertyResetter: () {
           tester.view.resetPadding();
@@ -180,7 +180,7 @@ void main() {
       verifyPropertyFaked<ViewPadding>(
         tester: tester,
         realValue: trueImplicitView().systemGestureInsets,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().systemGestureInsets,
         propertyFaker: (_, ViewPadding fakeValue) {
           tester.view.systemGestureInsets = fakeValue as FakeViewPadding;
@@ -192,7 +192,7 @@ void main() {
     testWidgets('can reset systemGestureInsets', (WidgetTester tester) async {
       verifyPropertyReset<ViewPadding>(
         tester: tester,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().systemGestureInsets,
         propertyResetter: () {
           tester.view.resetSystemGestureInsets();
@@ -208,7 +208,7 @@ void main() {
       verifyPropertyFaked<ViewPadding>(
         tester: tester,
         realValue: trueImplicitView().viewInsets,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().viewInsets,
         propertyFaker: (_, ViewPadding fakeValue) {
           tester.view.viewInsets = fakeValue as FakeViewPadding;
@@ -220,7 +220,7 @@ void main() {
     testWidgets('can reset viewInsets', (WidgetTester tester) async {
       verifyPropertyReset<ViewPadding>(
         tester: tester,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().viewInsets,
         propertyResetter: () {
           tester.view.resetViewInsets();
@@ -236,7 +236,7 @@ void main() {
       verifyPropertyFaked<ViewPadding>(
         tester: tester,
         realValue: trueImplicitView().viewPadding,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().viewPadding,
         propertyFaker: (_, ViewPadding fakeValue) {
           tester.view.viewPadding = fakeValue as FakeViewPadding;
@@ -248,7 +248,7 @@ void main() {
     testWidgets('can reset viewPadding', (WidgetTester tester) async {
       verifyPropertyReset<ViewPadding>(
         tester: tester,
-        fakeValue: const FakeViewPadding(),
+        fakeValue: FakeViewPadding.zero,
         propertyRetriever: () => boundImplicitView().viewPadding,
         propertyResetter: () {
           tester.view.resetViewPadding();
@@ -265,11 +265,11 @@ void main() {
 
       tester.view.devicePixelRatio = 7;
       tester.view.displayFeatures = <DisplayFeature>[const DisplayFeature(bounds: Rect.fromLTWH(0, 0, 20, 300), type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)];
-      tester.view.padding = const FakeViewPadding();
+      tester.view.padding = FakeViewPadding.zero;
       tester.view.physicalGeometry = const Rect.fromLTWH(0, 0, 505, 805);
-      tester.view.systemGestureInsets = const FakeViewPadding();
-      tester.view.viewInsets = const FakeViewPadding();
-      tester.view.viewPadding = const FakeViewPadding();
+      tester.view.systemGestureInsets = FakeViewPadding.zero;
+      tester.view.viewInsets = FakeViewPadding.zero;
+      tester.view.viewPadding = FakeViewPadding.zero;
       tester.view.gestureSettings = const GestureSettings(physicalTouchSlop: 4, physicalDoubleTapSlop: 5);
 
       final FlutterViewSnapshot faked = FlutterViewSnapshot(tester.view);
