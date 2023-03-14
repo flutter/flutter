@@ -6,7 +6,6 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
-
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -113,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
     final Iterable<AndroidArch> targetArchitectures =
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
-    final String? buildNumberArg = stringArgDeprecated('build-number');
+    final String? buildNumberArg = stringArg('build-number');
     final String buildNumber = argParser.options.containsKey('build-number')
       && buildNumberArg != null
       && buildNumberArg.isNotEmpty
@@ -122,7 +121,7 @@ class BuildAarCommand extends BuildSubCommand {
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (boolArgDeprecated(buildMode)) {
+      if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(

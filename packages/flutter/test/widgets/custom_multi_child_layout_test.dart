@@ -374,7 +374,7 @@ void main() {
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
           '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
           '       _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
-          '       TestWindow#00000] ← [root]\n'
+          '       TestFlutterView#00000] ← [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'

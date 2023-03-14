@@ -120,9 +120,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = window.devicePixelRatio;
     final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return TestViewConfiguration(
+    return TestViewConfiguration.fromView(
       size: size,
-      window: window,
+      view: window,
     );
   }
 
