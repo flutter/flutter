@@ -114,7 +114,6 @@ class DevicesCommandOutput {
     }
 
     if (allDevices.isEmpty) {
-      globals.printStatus('No devices detected.');
       _printNoDevicesDetected();
     } else {
       if (attachedDevices.isNotEmpty) {
@@ -133,7 +132,8 @@ class DevicesCommandOutput {
   }
 
   void _printNoDevicesDetected() {
-    final StringBuffer status = StringBuffer();
+    final StringBuffer status = StringBuffer('No devices detected.');
+    status.writeln();
     status.writeln();
     status.writeln('Run "flutter emulators" to list and start any available device emulators.');
     status.writeln();

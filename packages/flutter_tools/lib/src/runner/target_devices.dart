@@ -8,7 +8,7 @@ import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 
-const String wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
+const String _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
 
 /// This class handles functionality of finding and selecting target devices.
 ///
@@ -58,6 +58,14 @@ class TargetDevices {
     );
   }
 
+  DeviceDiscoverySupportFilter _defaultSupportFilter(
+    bool includeDevicesUnsupportedByProject,
+  ) {
+    return _deviceManager.deviceSupportFilter(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
+  }
+
   /// Find and return all target [Device]s based upon criteria entered by the
   /// user on the command line.
   ///
@@ -102,14 +110,10 @@ class TargetDevices {
     }
 
     final List<Device> attachedDevices = await _getAttachedDevices(
-      supportFilter: _deviceManager.deviceSupportFilter(
-        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      ),
+      supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
     );
     final List<Device> wirelessDevices = await _getWirelessDevices(
-      supportFilter: _deviceManager.deviceSupportFilter(
-        includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      ),
+      supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
     );
     final List<Device> allDevices = attachedDevices + wirelessDevices;
 
@@ -154,8 +158,9 @@ class TargetDevices {
   /// ephemeral devices. If a single ephemeral device is found, return it
   /// immediately.
   ///
-  /// Otherwise, prompt the user to select a device if there is a terminal with stdin. If there is not a terminal, display the
-  /// list of devices with instructions to use a device selection flag.
+  /// Otherwise, prompt the user to select a device if there is a terminal
+  /// with stdin. If there is not a terminal, display the list of devices with
+  /// instructions to use a device selection flag.
   Future<List<Device>?> _handleMultipleDevices(
     List<Device> attachedDevices,
     List<Device> wirelessDevices,
@@ -207,7 +212,7 @@ class TargetDevices {
       if (_deviceManager.hasSpecifiedDeviceId || attachedDevices.isNotEmpty) {
         _logger.printStatus('');
       }
-      _logger.printStatus(wirelesslyConnectedDevicesMessage);
+      _logger.printStatus(_wirelesslyConnectedDevicesMessage);
       await Device.printDevices(wirelessDevices, _logger);
     }
 
@@ -235,14 +240,14 @@ class TargetDevices {
 
     if (wirelessDevices.isNotEmpty) {
       _logger.printStatus('');
-      _logger.printStatus(wirelesslyConnectedDevicesMessage);
+      _logger.printStatus(_wirelesslyConnectedDevicesMessage);
       await Device.printDevices(wirelessDevices, _logger);
       _logger.printStatus('');
     }
 
     final Device chosenDevice = await _chooseOneOfAvailableDevices(allDevices);
 
-    // Update the [DeviceManager.specifiedDeviceId] so that we will not be prompted again.
+    // Update the [DeviceManager.specifiedDeviceId] so that the user will not be prompted again.
     _deviceManager.specifiedDeviceId = chosenDevice.id;
 
     return <Device>[chosenDevice];
