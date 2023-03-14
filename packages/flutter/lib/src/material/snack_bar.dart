@@ -854,7 +854,6 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
-
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
