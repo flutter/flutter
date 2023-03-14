@@ -303,10 +303,12 @@ class ColorScheme with Diagnosticable {
     Color? scrim,
     Color? surfaceTint,
   }) async {
-    final Iterable<int> imageBytes = await getImageBytes(image);
-    final QuantizerResult result = await QuantizerCelebi().quantize(imageBytes, 256);
+    final Iterable<int> bytesList = await getImageBytes(image);
+    final quantizerResult = await QuantizerCelebi().quantize(bytesList, 128);
+    final scored = Score.score(quantizerResult.colorToCount, filter: false /* allows grayscale for content color */);
 
-    final Color baseColor = Color((result.colorToCount.keys.toList())[0]);
+    final Color baseColor = Color(scored.first);
+    print('New base color: $baseColor');
 
     final Scheme scheme;
 

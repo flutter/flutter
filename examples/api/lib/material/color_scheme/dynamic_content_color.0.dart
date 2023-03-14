@@ -14,40 +14,40 @@ void main() => runApp(DynamicColorExample());
 class DynamicColorExample extends StatefulWidget {
   DynamicColorExample({super.key});
 
-  final Map<Image, String> images = {
+  final List<Image> images = [
     Image.asset(
       'assets/yellow.png',
       height: 150,
-    ): 'as expected',
+    ),
     Image.asset(
       'assets/yellow_transparent.png',
       height: 150,
-    ): 'as expected',
+    ),
     Image.asset(
       'assets/yellow_full.png',
       height: 150,
-    ): 'expected previous yellow',
+    ),
     Image.asset(
       'assets/squares.png',
       height: 150,
-    ): 'expected green',
+    ),
     Image.asset(
       'assets/material_3_base.png',
       height: 150,
-    ): 'Material 3 base: as expected',
+    ),
     Image.asset(
       'assets/rugby_japan.png',
       height: 150,
-    ): 'expected pink',
+    ),
     Image.asset(
       'assets/football_leeds.png',
       height: 150,
-    ): 'as expected',
+    ),
     Image.asset(
       'assets/rugby_england.png',
       height: 150,
-    ): 'very unexpected',
-  };
+    ),
+  ];
 
   @override
   State<DynamicColorExample> createState() => _DynamicColorExampleState();
@@ -70,8 +70,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     final ColorScheme newColorScheme = await ColorScheme.fromImage(
         image: image, brightness: isLight ? Brightness.light : Brightness.dark);
     setState(() {
-      selectedImage = widget.images.keys.toList().indexOf(image) ??
-          widget.images.length + 1;
+      selectedImage = widget.images.indexOf(image) ?? widget.images.length + 1;
       currentColorScheme = newColorScheme;
     });
   }
@@ -176,7 +175,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                   onChanged: (bool value) {
                     setState(() {
                       isLight = value;
-                      _updateImage(widget.images.keys.toList()[selectedImage]);
+                      _updateImage(widget.images[selectedImage]);
                     });
                   })
             ],
@@ -188,39 +187,34 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [
-                    ...widget.images.keys
+                    ...widget.images
                         .map((image) => GestureDetector(
                             onTap: () => _updateImage(image),
                             child: Card(
                               color:
-                                  widget.images.keys.toList().indexOf(image) ==
-                                          selectedImage
+                                  widget.images.indexOf(image) == selectedImage
                                       ? colorScheme.surfaceVariant
                                       : null,
                               child: Padding(
                                 padding: EdgeInsets.all(10.0),
-                                child: Column(
-                                  children: [
-                                    image,
-                                    Text(widget.images[image] ?? ''),
-                                  ],
-                                ),
+                                child: image,
                               ),
                             )))
                         .toList(),
-                    // Image upload tile
-                    // GestureDetector(
-                    //   onTap: () => networkAssetDialog(context),
-                    //   child: Card(
-                    //     child: Padding(
-                    //         padding: EdgeInsets.all(10.0),
-                    //         child: Container(
-                    //             height: 150,
-                    //             child: Icon(Icons.link, size: 96.0))),
-                    //   ),
-                    // ),
                   ],
                 ),
+                // Image upload tile
+                // GestureDetector(
+                //   onTap: () => networkAssetDialog(context),
+                //   child: Card(
+                //     child: Padding(
+                //         padding: EdgeInsets.all(10.0),
+                //         child: Container(
+                //             height: 150,
+                //             child: Icon(Icons.link, size: 96.0))),
+                //   ),
+                // ),
+
                 Expanded(
                   child: LayoutBuilder(builder: (context, constraints) {
                     if (constraints.maxWidth < narrowScreenWidthThreshold) {
