@@ -24,6 +24,9 @@ class SkwasmImage implements ui.Image {
   }
 
   @override
+  ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
+
+  @override
   void dispose() {
     throw UnimplementedError();
   }
