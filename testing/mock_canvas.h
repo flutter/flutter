@@ -247,12 +247,13 @@ class MockCanvas final : public DlCanvas {
                  const SkPoint point,
                  DlImageSampling sampling,
                  const DlPaint* paint = nullptr) override;
-  void DrawImageRect(const sk_sp<DlImage>& image,
-                     const SkRect& src,
-                     const SkRect& dst,
-                     DlImageSampling sampling,
-                     const DlPaint* paint = nullptr,
-                     bool enforce_src_edges = false) override;
+  void DrawImageRect(
+      const sk_sp<DlImage>& image,
+      const SkRect& src,
+      const SkRect& dst,
+      DlImageSampling sampling,
+      const DlPaint* paint = nullptr,
+      SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
   void DrawImageNine(const sk_sp<DlImage>& image,
                      const SkIRect& center,
                      const SkRect& dst,

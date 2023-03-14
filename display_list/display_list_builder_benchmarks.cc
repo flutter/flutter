@@ -6,6 +6,11 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 
 namespace flutter {
+
+DlOpReceiver& DisplayListBuilderBenchmarkAccessor(DisplayListBuilder& builder) {
+  return builder.asReceiver();
+}
+
 namespace {
 
 static std::vector<testing::DisplayListInvocationGroup> allRenderingOps =
@@ -19,10 +24,11 @@ enum class DisplayListBuilderBenchmarkType {
 };
 
 static void InvokeAllRenderingOps(DisplayListBuilder& builder) {
+  DlOpReceiver& receiver = DisplayListBuilderBenchmarkAccessor(builder);
   for (auto& group : allRenderingOps) {
     for (size_t i = 0; i < group.variants.size(); i++) {
       auto& invocation = group.variants[i];
-      invocation.Invoke(builder);
+      invocation.Invoke(receiver);
     }
   }
 }
@@ -69,8 +75,8 @@ static void BM_DisplayListBuilderWithScaleAndTranslate(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
-    builder.scale(3.5, 3.5);
-    builder.translate(10.3, 6.9);
+    builder.Scale(3.5, 3.5);
+    builder.Translate(10.3, 6.9);
     InvokeAllRenderingOps(builder);
     Complete(builder, type);
   }
@@ -82,7 +88,7 @@ static void BM_DisplayListBuilderWithPerspective(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
-    builder.transformFullPerspective(0, 1, 0, 12, 1, 0, 0, 33, 3, 2, 5, 29, 0,
+    builder.TransformFullPerspective(0, 1, 0, 12, 1, 0, 0, 33, 3, 2, 5, 29, 0,
                                      0, 0, 12);
     InvokeAllRenderingOps(builder);
     Complete(builder, type);
@@ -96,7 +102,7 @@ static void BM_DisplayListBuilderWithClipRect(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
-    builder.clipRect(clip_bounds, DlCanvas::ClipOp::kIntersect, true);
+    builder.ClipRect(clip_bounds, DlCanvas::ClipOp::kIntersect, true);
     InvokeAllRenderingOps(builder);
     Complete(builder, type);
   }
@@ -108,12 +114,13 @@ static void BM_DisplayListBuilderWithSaveLayer(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
+    DlOpReceiver& receiver = DisplayListBuilderBenchmarkAccessor(builder);
     for (auto& group : allRenderingOps) {
       for (size_t i = 0; i < group.variants.size(); i++) {
         auto& invocation = group.variants[i];
-        builder.saveLayer(nullptr, false);
-        invocation.Invoke(builder);
-        builder.restore();
+        builder.SaveLayer(nullptr, nullptr);
+        invocation.Invoke(receiver);
+        builder.Restore();
       }
     }
     Complete(builder, type);
@@ -129,11 +136,12 @@ static void BM_DisplayListBuilderWithSaveLayerAndImageFilter(
   bool prepare_rtree = NeedPrepareRTree(type);
   while (state.KeepRunning()) {
     DisplayListBuilder builder(prepare_rtree);
+    DlOpReceiver& receiver = DisplayListBuilderBenchmarkAccessor(builder);
     for (auto& group : allRenderingOps) {
       for (size_t i = 0; i < group.variants.size(); i++) {
         auto& invocation = group.variants[i];
         builder.SaveLayer(&layer_bounds, &layer_paint);
-        invocation.Invoke(builder);
+        invocation.Invoke(receiver);
         builder.Restore();
       }
     }
