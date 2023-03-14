@@ -596,7 +596,7 @@ class _DefaultPub implements Pub {
     // Use pub's default location by returning null.
     return null;
   }
-  
+
   /// Load any package-files stored in FLUTTER_ROOT/.pub-preload-cache into the
   /// pub cache if it exists.
   ///
