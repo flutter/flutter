@@ -95,7 +95,16 @@ class TextureRegistry {
 
  private:
   std::map<int64_t, std::shared_ptr<Texture>> mapping_;
-  std::map<uintptr_t, std::weak_ptr<ContextListener>> images_;
+  size_t image_counter_;
+  // This map keeps track of registered context listeners by their own
+  // externally provided id. It indexes into ordered_images_.
+  std::map<uintptr_t, size_t> image_indices_;
+  // This map makes sure that iteration of images happens in insertion order
+  // (managed by image_counter_) so that images which depend on other images get
+  // re-created in the right order.
+  using InsertionOrderMap =
+      std::map<size_t, std::pair<uintptr_t, std::weak_ptr<ContextListener>>>;
+  InsertionOrderMap ordered_images_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureRegistry);
 };
