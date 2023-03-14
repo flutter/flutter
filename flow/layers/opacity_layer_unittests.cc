@@ -606,23 +606,24 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithIncompatibleChild) {
 
   DisplayListBuilder expected_builder;
   /* opacity_layer_1::Paint */ {
-    expected_builder.Save();
+    expected_builder.save();
     {
-      expected_builder.Translate(offset1.fX, offset1.fY);
+      expected_builder.translate(offset1.fX, offset1.fY);
       /* opacity_layer_2::Paint */ {
-        expected_builder.Save();
+        expected_builder.save();
         {
-          expected_builder.Translate(offset2.fX, offset2.fY);
-          expected_builder.SaveLayer(&mock_layer->paint_bounds(),
-                                     &savelayer_paint);
+          expected_builder.translate(offset2.fX, offset2.fY);
+          expected_builder.setColor(savelayer_paint.getAlpha() << 24);
+          expected_builder.saveLayer(&mock_layer->paint_bounds(), true);
           /* mock_layer::Paint */ {
-            expected_builder.DrawPath(mock_path, DlPaint());
+            expected_builder.setColor(0xFF000000);
+            expected_builder.drawPath(mock_path);
           }
         }
-        expected_builder.Restore();
+        expected_builder.restore();
       }
     }
-    expected_builder.Restore();
+    expected_builder.restore();
   }
 
   opacity_layer_1->Paint(display_list_paint_context());

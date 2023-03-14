@@ -30,7 +30,7 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   static DlImageSampling SamplingFromIndex(int filterQualityIndex);
   static DlFilterMode FilterModeFromIndex(int index);
 
-  void initBlur(double sigma_x, double sigma_y, DlTileMode tile_mode);
+  void initBlur(double sigma_x, double sigma_y, SkTileMode tile_mode);
   void initDilate(double radius_x, double radius_y);
   void initErode(double radius_x, double radius_y);
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
@@ -38,6 +38,9 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
 
   const std::shared_ptr<const DlImageFilter> filter() const { return filter_; }
+  const DlImageFilter* dl_filter() const {
+    return (filter_ && filter_->skia_object()) ? filter_.get() : nullptr;
+  }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

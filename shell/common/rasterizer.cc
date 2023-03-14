@@ -272,9 +272,9 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
   };
 
   sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
-  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
-  canvas.Clear(DlColor::kTransparent());
-  canvas.DrawDisplayList(display_list);
+  SkCanvas* canvas = surface->getCanvas();
+  canvas->clear(SK_ColorTRANSPARENT);
+  display_list->RenderTo(canvas);
 
   sk_sp<SkImage> image = surface->makeImageSnapshot();
   return std::make_unique<SnapshotDelegate::GpuImageResult>(
@@ -342,9 +342,9 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
               return;
             }
 
-            auto canvas = DlSkCanvasAdapter(sk_surface->getCanvas());
-            canvas.Clear(DlColor::kTransparent());
-            canvas.DrawDisplayList(display_list);
+            SkCanvas* canvas = sk_surface->getCanvas();
+            canvas->clear(SK_ColorTRANSPARENT);
+            display_list->RenderTo(canvas);
 
             result = std::make_unique<SnapshotDelegate::GpuImageResult>(
                 texture, sk_ref_sp(context), nullptr, "");
