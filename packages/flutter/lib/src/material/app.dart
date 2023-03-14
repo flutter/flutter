@@ -825,6 +825,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            assert(details.controller != null);
             return Scrollbar(
               controller: details.controller,
               child: child,

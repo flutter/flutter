@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
@@ -15,12 +16,16 @@ import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
+import 'scroll_physics.dart';
 import 'scrollable.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
 /// Describes the aspects of a Scrollable widget to inform inherited widgets
 /// like [ScrollBehavior] for decorating.
+// TODO(Piinks): Fix doc with 2DScrollable change.
+// or enumerate the properties of combined
+// Scrollables, such as [TwoDimensionalScrollable].
 ///
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
@@ -30,28 +35,118 @@ class ScrollableDetails {
   /// cannot be null.
   const ScrollableDetails({
     required this.direction,
-    required this.controller,
-    this.clipBehavior,
-  });
+    this.controller,
+    this.physics,
+    @Deprecated(
+      'Migrate to decorationClipBehavior. '
+      'This property was deprecated so that its application is clearer. This clip '
+      'applies to decorators, and does not directly clip a scroll view. '
+      'This feature was deprecated after v3.9.0-1.0.pre.'
+    )
+    Clip? clipBehavior,
+    Clip? decorationClipBehavior,
+  }) : decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
 
-  /// The direction in which this widget scrolls.
-  ///
-  /// Cannot be null.
+  /// A constructor specific to a [Scrollable] with an [Axis.vertical].
+  const ScrollableDetails.vertical({
+    bool reverse = false,
+    this.controller,
+    this.physics,
+    this.decorationClipBehavior,
+  }) : direction = reverse ? AxisDirection.up : AxisDirection.down;
+
+  /// A constructor specific to a [Scrollable] with an [Axis.horizontal].
+  const ScrollableDetails.horizontal({
+    bool reverse = false,
+    this.controller,
+    this.physics,
+    this.decorationClipBehavior,
+  }) : direction = reverse ? AxisDirection.left : AxisDirection.right;
+
+  /// {@macro flutter.widgets.Scrollable.axisDirection}
   final AxisDirection direction;
 
-  /// A [ScrollController] that can be used to control the position of the
-  /// [Scrollable] widget.
-  ///
-  /// This can be used by [ScrollBehavior] to apply a [Scrollbar] to the associated
-  /// [Scrollable].
-  final ScrollController controller;
+  /// {@macro flutter.widgets.Scrollable.controller}
+  final ScrollController? controller;
+
+  /// {@macro flutter.widgets.Scrollable.physics}
+  final ScrollPhysics? physics;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// This can be used by [MaterialScrollBehavior] to clip [StretchingOverscrollIndicator].
+  /// This can be used by [MaterialScrollBehavior] to clip a
+  /// [StretchingOverscrollIndicator].
+  ///
+  /// This [Clip] does not affect the [Viewport.clipBehavior], but is rather
+  /// passed from the same value by [Scrollable] so that decorators like
+  /// [StretchingOverscrollIndicator] honor the same clip.
   ///
   /// Defaults to null.
-  final Clip? clipBehavior;
+  final Clip? decorationClipBehavior;
+
+  /// Deprecated getter for [decorationClipBehavior].
+  @Deprecated(
+    'Migrate to decorationClipBehavior. '
+    'This property was deprecated so that its application is clearer. This clip '
+    'applies to decorators, and does not directly clip a scroll view. '
+    'This feature was deprecated after v3.9.0-1.0.pre.'
+  )
+  Clip? get clipBehavior => decorationClipBehavior;
+
+  /// Copy the current [ScrollableDetails] with the given values replacing the
+  /// current values.
+  ScrollableDetails copyWith({
+    AxisDirection? direction,
+    ScrollController? controller,
+    ScrollPhysics? physics,
+    Clip? decorationClipBehavior,
+  }) {
+    return ScrollableDetails(
+      direction: direction ?? this.direction,
+      controller: controller ?? this.controller,
+      physics: physics ?? this.physics,
+      decorationClipBehavior: decorationClipBehavior ?? this.decorationClipBehavior,
+    );
+  }
+
+  @override
+  String toString() {
+    final List<String> description = <String>[];
+    description.add('axisDirection: $direction');
+
+    void addIfNonNull(String prefix, Object? value) {
+      if (value != null) {
+        description.add(prefix + value.toString());
+      }
+    }
+    addIfNonNull('scroll controller: ', controller);
+    addIfNonNull('scroll physics: ', physics);
+    addIfNonNull('decorationClipBehavior: ', decorationClipBehavior);
+    return '${describeIdentity(this)}(${description.join(", ")})';
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    direction,
+    controller,
+    physics,
+    decorationClipBehavior,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ScrollableDetails
+      && other.direction == direction
+      && other.controller == controller
+      && other.physics == physics
+      && other.decorationClipBehavior == decorationClipBehavior;
+  }
 }
 
 /// An auto scroller that scrolls the [scrollable] if a drag gesture drags close

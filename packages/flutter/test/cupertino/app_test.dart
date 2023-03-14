@@ -424,6 +424,49 @@ void main() {
 
     debugBrightnessOverride = null;
   });
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(ScrollConfiguration(
+      // Avoid the default ones here.
+      behavior: const CupertinoScrollBehavior().copyWith(scrollbars: false),
+      child: SingleChildScrollView(
+        child: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return Container(height: 1000.0);
+          },
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+                'description', contains('details.controller != null')),
+          ),
+        );
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class MockScrollBehavior extends ScrollBehavior {
