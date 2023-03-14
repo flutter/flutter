@@ -175,11 +175,15 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<LinearGradientFillPipeline>(*context_);
   radial_gradient_fill_pipelines_[{}] =
       CreateDefaultPipeline<RadialGradientFillPipeline>(*context_);
+  conical_gradient_fill_pipelines_[{}] =
+      CreateDefaultPipeline<ConicalGradientFillPipeline>(*context_);
   if (context_->GetDeviceCapabilities().SupportsSSBO()) {
     linear_gradient_ssbo_fill_pipelines_[{}] =
         CreateDefaultPipeline<LinearGradientSSBOFillPipeline>(*context_);
     radial_gradient_ssbo_fill_pipelines_[{}] =
         CreateDefaultPipeline<RadialGradientSSBOFillPipeline>(*context_);
+    conical_gradient_ssbo_fill_pipelines_[{}] =
+        CreateDefaultPipeline<ConicalGradientSSBOFillPipeline>(*context_);
     sweep_gradient_ssbo_fill_pipelines_[{}] =
         CreateDefaultPipeline<SweepGradientSSBOFillPipeline>(*context_);
   }
