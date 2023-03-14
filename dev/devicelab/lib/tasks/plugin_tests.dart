@@ -355,7 +355,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     podspecContent = podspecContent.replaceFirst(
       versionString,
       target == 'ios'
-          ? "s.platform = :ios, '12.0'"
+          ? "s.platform = :ios, '10.0'"
           : "s.platform = :osx, '10.8'"
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
