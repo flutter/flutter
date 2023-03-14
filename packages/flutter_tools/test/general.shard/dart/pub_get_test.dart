@@ -762,6 +762,7 @@ exit code: 66
     final Directory preloadCache = fileSystem.currentDirectory.childDirectory('.pub-preload-cache');
     preloadCache.childFile('a.tar.gz').createSync(recursive: true);
     preloadCache.childFile('b.tar.gz').createSync();
+    fileSystem.currentDirectory.childFile('version').createSync();
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -775,8 +776,8 @@ exit code: 66
           '.pub-preload-cache/b.tar.gz',
         ],
       ),
-      const FakeCommand(
-        command: <String>[
+      FakeCommand(
+        command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '--no-analytics',
           'pub',
@@ -785,38 +786,123 @@ exit code: 66
           'get',
           '--example',
         ],
-        exitCode: 69,
-        environment: <String, String>{
+        environment: const <String, String>{
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
+        onRun: () {
+          fileSystem
+            .currentDirectory
+            .childDirectory('.dart_tool')
+            .childFile('package_config.json')
+            .createSync(recursive: true);        }
       ),
     ]);
 
     final Platform platform = FakePlatform(
       environment: <String, String>{'HOME': '/global'}
     );
+    final BufferLogger logger = BufferLogger.test();
     final Pub pub = Pub.test(
       platform: platform,
       usage: TestUsage(),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
     );
 
-    try {
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests
-      );
-    } on ToolExit {
-      // Ignore.
-    }
+    await pub.get(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      context: PubContext.flutterTests
+    );
+    expect(logger.statusText, isNot(contains('Found an existing Pub cache')));
+    expect(logger.statusText, isNot(contains('Found an existing Dart Analysis Server cache')));
 
     expect(processManager, hasNoRemainingExpectations);
     expect(preloadCache.existsSync(), false);
+  });
+  
+  testWithoutContext('Notifies about existing caches, on first run only', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory preloadCache = fileSystem.currentDirectory.childDirectory('.pub-preload-cache');
+    preloadCache.childFile('a.tar.gz').createSync(recursive: true);
+    fileSystem.currentDirectory.childFile('version').createSync();
+    fileSystem.directory('/global/.pub-cache').createSync(recursive: true);
+    fileSystem.directory('/global/.dartServer').createSync(recursive: true);
+
+    const FakeCommand dartPreloadCommand = FakeCommand(
+      command: <String>[
+        'bin/cache/dart-sdk/bin/dart',
+        '--no-analytics',
+        'pub',
+        'cache',
+        'preload',
+        '.pub-preload-cache/a.tar.gz',
+      ],
+    );
+    final FakeCommand dartPubGetCommand = FakeCommand(
+      command: const <String>[
+        'bin/cache/dart-sdk/bin/dart',
+        '--no-analytics',
+        'pub',
+        '--directory',
+        '.',
+        'get',
+        '--example',
+      ],
+      environment: const <String, String>{
+        'FLUTTER_ROOT': '',
+        'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+      },
+      onRun: () {
+        fileSystem
+          .currentDirectory
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+      }
+    );
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      dartPreloadCommand,
+      dartPubGetCommand,
+      dartPubGetCommand,
+    ]);
+
+    final Platform platform = FakePlatform(
+      environment: <String, String>{'HOME': '/global'}
+    );
+    final BufferLogger logger = BufferLogger.test();
+    final Pub pub = Pub.test(
+      platform: platform,
+      usage: TestUsage(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
+    );
+
+    await pub.get(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      context: PubContext.flutterTests
+    );
+    expect(logger.statusText, contains('Found an existing Pub cache at /global/.pub-cache'));
+    expect(
+      logger.statusText,
+      contains('Found an existing Dart Analysis Server cache at /global/.dartServer'),
+    );
+    expect(preloadCache.existsSync(), false);
+    logger.clear();
+    await pub.get(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      context: PubContext.flutterTests
+    );
+    expect(logger.statusText, isNot(contains('Found an existing Pub cache')));
+    expect(logger.statusText, isNot(contains('Found an existing Dart Analysis Server cache')));
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('pub cache in environment is used', () async {
