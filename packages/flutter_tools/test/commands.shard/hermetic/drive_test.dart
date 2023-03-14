@@ -68,7 +68,7 @@ void main() {
 
     final Device screenshotDevice = ThrowingScreenshotDevice()
       ..supportsScreenshot = false;
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -104,7 +104,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -142,7 +142,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -184,7 +184,7 @@ void main() {
     fileSystem.file('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -222,7 +222,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
     bool caughtToolExit = false;
@@ -293,7 +293,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
 
@@ -424,7 +424,7 @@ void main() {
 
     final Device networkDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -457,7 +457,7 @@ void main() {
 
     final Device usbDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.usb;
-    fakeDeviceManager.devices = <Device>[usbDevice];
+    fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
     expect(options.disablePortPublication, true);
@@ -482,7 +482,7 @@ void main() {
 
     final Device networkDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
