@@ -36,6 +36,33 @@ void testMain() {
     EngineSemanticsOwner.debugResetSemantics();
   });
 
+  group('$SemanticsTextEditingStrategy pre-initialization tests', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    test('Calling dispose() pre-initialization will not throw an error', () {
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: 'hi',
+        isFocused: true,
+      );
+      final TextField textField =
+          textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
+
+      // ensureInitialized() isn't called prior to calling dispose() here.
+      // Since we are conditionally calling dispose() on our
+      // SemanticsTextEditingStrategy._instance, we shouldn't expect an error.
+      // ref: https://github.com/flutter/engine/pull/40146
+      expect(() => textField.dispose(), returnsNormally);
+    });
+  });
+
   group('$SemanticsTextEditingStrategy', () {
     late HybridTextEditing testTextEditing;
     late SemanticsTextEditingStrategy strategy;
@@ -866,6 +893,7 @@ void testMain() {
     });
   }, skip: !isSafari);
 }
+
 
 SemanticsObject createTextFieldSemantics({
   required String value,
