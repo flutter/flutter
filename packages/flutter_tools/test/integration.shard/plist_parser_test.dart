@@ -124,7 +124,7 @@ void main() {
       'JSON error: JSON text did not start with array or object and option to allow fragments not '
       'set. around line 1, column 0.\n'));
     expect(logger.errorText, 'ProcessException: The command failed\n'
-              '  Command: /usr/bin/plutil -convert xml1 -o - /Users/gspencer/code/flutter/packages/flutter_tools/foo.plist\n');
+              '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n');
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getStringValueFromFile throws when /usr/bin/plutil is not found', () async {
