@@ -2733,7 +2733,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: arm64
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
@@ -2789,7 +2788,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: arm64
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
