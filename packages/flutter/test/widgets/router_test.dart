@@ -823,8 +823,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
   testWidgets('PlatformRouteInformationProvider updates route information', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     TestDefaultBinaryMessengerBinding
-      .instance!
-      .defaultBinaryMessenger
+      .instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
         SystemChannels.navigation,
         (MethodCall methodCall) async {
@@ -1361,7 +1360,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       routeInformationProvider: provider,
       routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
         parserCalled = true;
-        final DefaultTextStyle style = context.getElementForInheritedWidgetOfExactType<DefaultTextStyle>()!.widget as DefaultTextStyle;
+        final DefaultTextStyle style = context.getInheritedWidgetOfExactType<DefaultTextStyle>()!;
         return RouteInformation(location: '${style.maxLines}');
       }),
       routerDelegate: SimpleRouterDelegate(

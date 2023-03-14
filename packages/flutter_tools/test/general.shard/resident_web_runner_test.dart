@@ -74,6 +74,10 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'service': 'flutterMemoryInfo',
     'alias': 'Flutter Tools',
   }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': 'flutterGetIOSBuildOptions',
+    'alias': 'Flutter Tools',
+  }),
   FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{
@@ -546,8 +550,6 @@ void main() {
       'Launching lib/main.dart on FakeDevice in debug mode...\n'
       'Waiting for connection from debug service on FakeDevice...\n'
       'Debug service listening on ws://127.0.0.1/abcd/\n'
-      '\n'
-      '💪 Running with sound null safety 💪\n'
       '\n'
       'first\n'
       '\n'
@@ -1599,7 +1601,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
+  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
@@ -1639,6 +1641,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     int? hostVmServicePort,
     int? ddsPort,

@@ -14,6 +14,11 @@ void main() {
     expect(const TimePickerThemeData().hashCode, const TimePickerThemeData().copyWith().hashCode);
   });
 
+  test('TimePickerThemeData lerp special cases', () {
+    const TimePickerThemeData data = TimePickerThemeData();
+    expect(identical(TimePickerThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TimePickerThemeData null fields by default', () {
     const TimePickerThemeData timePickerTheme = TimePickerThemeData();
     expect(timePickerTheme.backgroundColor, null);

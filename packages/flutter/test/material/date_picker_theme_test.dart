@@ -75,6 +75,11 @@ void main() {
     expect(const DatePickerThemeData().hashCode, const DatePickerThemeData().copyWith().hashCode);
   });
 
+  test('DatePickerThemeData lerp special cases', () {
+    const DatePickerThemeData data = DatePickerThemeData();
+    expect(identical(DatePickerThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('DatePickerThemeData defaults', () {
     const DatePickerThemeData theme = DatePickerThemeData();
     expect(theme.backgroundColor, null);
@@ -140,9 +145,9 @@ void main() {
     expect(m3.headerBackgroundColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.headerForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.headerHeadlineStyle, textTheme.headlineLarge);
-    expect(m3.headerHelpStyle, textTheme.labelMedium);
-    expect(m3.weekdayStyle, textTheme.bodySmall?.apply(color: colorScheme.onSurface));
-    expect(m3.dayStyle, textTheme.bodySmall);
+    expect(m3.headerHelpStyle, textTheme.labelLarge);
+    expect(m3.weekdayStyle, textTheme.bodyLarge?.apply(color: colorScheme.onSurface));
+    expect(m3.dayStyle, textTheme.bodyLarge);
     expect(m3.dayForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurface);
     expect(m3.dayForegroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.onPrimary);
     expect(m3.dayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.onSurface.withOpacity(0.38));

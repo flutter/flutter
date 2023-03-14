@@ -49,8 +49,8 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           subtitle: const Text('Custom expansion arrow icon'),
           trailing: Icon(
             _customTileExpanded
-                ? Icons.arrow_drop_down_circle
-                : Icons.arrow_drop_down,
+              ? Icons.arrow_drop_down_circle
+              : Icons.arrow_drop_down,
           ),
           children: const <Widget>[
             ListTile(title: Text('This is tile number 2')),

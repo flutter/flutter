@@ -87,6 +87,9 @@ class DividerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DividerThemeData lerp(DividerThemeData? a, DividerThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DividerThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       space: lerpDouble(a?.space, b?.space, t),

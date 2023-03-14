@@ -17,7 +17,8 @@ class ListTileApp extends StatelessWidget {
       theme: ThemeData(
         listTileTheme: const ListTileThemeData(
           textColor: Colors.white,
-        )
+        ),
+        useMaterial3: true,
       ),
       home: const LisTileExample(),
     );

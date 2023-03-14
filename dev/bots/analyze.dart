@@ -47,10 +47,9 @@ Future<void> main(List<String> arguments) async {
   printProgress('STARTING ANALYSIS');
   await run(arguments);
   if (hasError) {
-    printProgress('${bold}Test failed.$reset');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}Analysis failed.$reset');
   }
-  printProgress('${bold}Analysis successful.$reset');
+  reportSuccessAndExit('${bold}Analysis successful.$reset');
 }
 
 /// Scans [arguments] for an argument of the form `--dart-sdk` or
@@ -1049,7 +1048,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
     Directory(path.join(workingDirectory, '.github', 'ISSUE_TEMPLATE'))
       .listSync()
       .whereType<File>()
-      .where((File file) => path.extension(file.path) == '.md')
+      .where((File file) => path.extension(file.path) == '.md' || path.extension(file.path) == '.yml')
       .map<String>((File file) => path.basename(file.path))
       .toSet();
   final String kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
@@ -1843,7 +1842,7 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   }
 }
 
-final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply)\b', caseSensitive: false);
+final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
 
 Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatches = 100 }) async {
   final List<String> errors = <String>[];
@@ -1860,7 +1859,8 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
   if (errors.isNotEmpty) {
     foundError(<String>[
       '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
-      '${bold}In many cases the word can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
+      '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
+      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
   }

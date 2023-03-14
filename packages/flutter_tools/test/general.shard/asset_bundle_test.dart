@@ -9,15 +9,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
@@ -73,13 +69,9 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testWithoutContext('wildcard directories do not include subdirectories', () async {
-      final Platform platform = FakePlatform();
-      final FileSystem fs = MemoryFileSystem.test();
-      Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: fs, userMessages: UserMessages());
-
-      fs.file('.packages').createSync();
-      fs.file('pubspec.yaml').writeAsStringSync(
+    testUsingContext('wildcard directories do not include subdirectories', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
 dependencies:
@@ -100,21 +92,14 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = fs.file(asset);
+        final File assetFile = globals.fs.file(
+          globals.fs.path.joinAll(asset.split('/'))
+        );
         assetFile.createSync(recursive: true);
-        assetFile.writeAsStringSync(asset);
       }
 
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
-        logger: BufferLogger.test(),
-        fileSystem: fs,
-        platform: platform,
-      );
-
-      await bundle.build(
-        packagesPath: '.packages',
-        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
-      );
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages');
 
       expect(bundle.entries.keys, unorderedEquals(<String>[
         'AssetManifest.json',
@@ -124,6 +109,9 @@ flutter:
         'assets/foo/dog.png',
         'assets/bar/lizard.png'
       ]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {

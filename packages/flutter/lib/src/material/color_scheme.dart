@@ -827,6 +827,9 @@ class ColorScheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return ColorScheme(
       brightness: t < 0.5 ? a.brightness : b.brightness,
       primary: Color.lerp(a.primary, b.primary, t)!,

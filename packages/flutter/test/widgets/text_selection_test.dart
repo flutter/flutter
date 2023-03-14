@@ -461,6 +461,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
@@ -477,6 +478,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
@@ -503,6 +505,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.tap);
 
     // Right clicking on a word within a selection shouldn't change the selection
     renderEditable.selectWordCalled = false;
@@ -589,6 +592,7 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
@@ -596,6 +600,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
     }
   }, variant: TargetPlatformVariant.all());
@@ -628,6 +633,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
         break;
     }
   }, variant: TargetPlatformVariant.all());
@@ -711,6 +717,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.doubleTap);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
@@ -1415,11 +1422,11 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(hasStringsThrows: true);
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
@@ -1435,11 +1442,11 @@ void main() {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('update sets value based on clipboard contents', () async {
@@ -1706,7 +1713,7 @@ class FakeEditable extends LeafRenderObjectWidget {
 class FakeRenderEditable extends RenderEditable {
   FakeRenderEditable(EditableTextState delegate) : super(
     text: const TextSpan(
-      style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      style: TextStyle(height: 1.0, fontSize: 10.0),
       text: 'placeholder',
     ),
     startHandleLayerLink: LayerLink(),
@@ -1722,11 +1729,14 @@ class FakeRenderEditable extends RenderEditable {
     ),
   );
 
+  SelectionChangedCause? lastCause;
+
   bool selectWordsInRangeCalled = false;
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectWordEdgeCalled = false;
@@ -1734,6 +1744,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionAtCalled = false;
@@ -1745,12 +1756,14 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionCalled = false;
   @override
   void selectPosition({ required SelectionChangedCause cause }) {
     selectPositionCalled = true;
+    lastCause = cause;
     return super.selectPosition(cause: cause);
   }
 
@@ -1759,6 +1772,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   @override

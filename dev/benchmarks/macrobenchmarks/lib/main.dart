@@ -201,7 +201,7 @@ class HomePage extends StatelessWidget {
           ),
           ElevatedButton(
             key: const Key(kColorFilterWithUnstableChildName),
-            child: const Text('Color Filter with Ustable Child'),
+            child: const Text('Color Filter with Unstable Child'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterWithUnstableChildName);
             },

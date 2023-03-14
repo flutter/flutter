@@ -388,6 +388,7 @@ void main() {
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -580,19 +581,6 @@ class FakePub extends Fake implements Pub {
   }) async { }
 }
 
-class FakeDeviceManager extends Fake implements DeviceManager {
-  List<Device> devices = <Device>[];
-
-  @override
-  String? specifiedDeviceId;
-
-  @override
-  Future<List<Device>> getDevices() async => devices;
-
-  @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout, bool promptUserToChooseDevice = true}) async => devices;
-}
-
 /// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
 class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
   NeverEndingFlutterDriverFactory(this.callback);
@@ -605,7 +593,7 @@ class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFacto
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
-/// This is to similate when the test will take a long time, but a signal is
+/// This is to simulate when the test will take a long time, but a signal is
 /// expected to interrupt the process.
 class NeverEndingDriverService extends Fake implements DriverService {
   NeverEndingDriverService(this.callback);

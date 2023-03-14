@@ -22,7 +22,6 @@ const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait)
 
 TaskFunction createHotModeTest({
   String? deviceIdOverride,
-  Map<String, String>? environment,
   bool checkAppRunningOnLocalDevice = false,
 }) {
   // This file is modified during the test and needs to be restored at the end.
@@ -63,71 +62,83 @@ TaskFunction createHotModeTest({
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {
-          smallReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
-            if (!line.contains('Reloaded ')) {
-              return;
-            }
-            if (hotReloadCount == 0) {
-              // Update a file for 2 library invalidation.
-              final File appDartSource = file(path.join(
-                _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
-              ));
-              appDartSource.writeAsStringSync(
-                appDartSource.readAsStringSync().replaceFirst(
-                  "'Flutter Gallery'", "'Updated Flutter Gallery'",
-                ));
-              process.stdin.writeln('r');
-              hotReloadCount += 1;
-            } else {
-              process.stdin.writeln('q');
-            }
-          });
-
-          mediumReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
-            if (!line.contains('Reloaded ')) {
-              return;
-            }
-            if (hotReloadCount == 1) {
-              // Update a file for ~50 library invalidation.
-              final File appDartSource = file(path.join(
-                _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
-              ));
-              appDartSource.writeAsStringSync(
-                appDartSource.readAsStringSync().replaceFirst(kSourceLine, kReplacementLine)
-              );
-              process.stdin.writeln('r');
-              hotReloadCount += 1;
-            } else {
-              process.stdin.writeln('q');
-            }
-          });
-
-          largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) async {
-            if (!line.contains('Reloaded ')) {
-              return;
-            }
-            if (hotReloadCount == 2) {
-              // Trigger a framework invalidation (370 libraries) without modifying the source
-              flutterFrameworkSource.writeAsStringSync(
-                '${flutterFrameworkSource.readAsStringSync()}\n'
-              );
-              process.stdin.writeln('r');
-              hotReloadCount += 1;
-            } else {
-              if (checkAppRunningOnLocalDevice) {
-                await _checkAppRunning(true);
+          smallReloadData = await captureReloadData(
+            options: options,
+            benchmarkFile: benchmarkFile,
+            onLine: (String line, Process process) {
+              if (!line.contains('Reloaded ')) {
+                return;
               }
-              process.stdin.writeln('q');
-            }
-          });
+              if (hotReloadCount == 0) {
+                // Update a file for 2 library invalidation.
+                final File appDartSource = file(path.join(
+                  _editedFlutterGalleryDir.path,
+                  'lib/gallery/app.dart',
+                ));
+                appDartSource.writeAsStringSync(appDartSource.readAsStringSync().replaceFirst(
+                  "'Flutter Gallery'",
+                  "'Updated Flutter Gallery'",
+                ));
+                process.stdin.writeln('r');
+                hotReloadCount += 1;
+              } else {
+                process.stdin.writeln('q');
+              }
+            },
+          );
+
+          mediumReloadData = await captureReloadData(
+            options: options,
+            benchmarkFile: benchmarkFile,
+            onLine: (String line, Process process) {
+              if (!line.contains('Reloaded ')) {
+                return;
+              }
+              if (hotReloadCount == 1) {
+                // Update a file for ~50 library invalidation.
+                final File appDartSource = file(path.join(
+                  _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
+                ));
+                appDartSource.writeAsStringSync(
+                  appDartSource.readAsStringSync().replaceFirst(kSourceLine, kReplacementLine)
+                );
+                process.stdin.writeln('r');
+                hotReloadCount += 1;
+              } else {
+                process.stdin.writeln('q');
+              }
+            },
+          );
+
+          largeReloadData = await captureReloadData(
+            options: options,
+            benchmarkFile: benchmarkFile,
+            onLine: (String line, Process process) async {
+              if (!line.contains('Reloaded ')) {
+                return;
+              }
+              if (hotReloadCount == 2) {
+                // Trigger a framework invalidation (370 libraries) without modifying the source
+                flutterFrameworkSource.writeAsStringSync(
+                  '${flutterFrameworkSource.readAsStringSync()}\n'
+                );
+                process.stdin.writeln('r');
+                hotReloadCount += 1;
+              } else {
+                if (checkAppRunningOnLocalDevice) {
+                  await _checkAppRunning(true);
+                }
+                process.stdin.writeln('q');
+              }
+            },
+          );
 
           // Start `flutter run` again to make sure it loads from the previous
           // state. Frontend loads up from previously generated kernel files.
           {
-            final Process process = await startProcess(
-                path.join(flutterDirectory.path, 'bin', 'flutter'),
-                flutterCommandArgs('run', options),
-                environment: environment,
+            final Process process = await startFlutter(
+              'run',
+              options: options,
             );
             final Completer<void> stdoutDone = Completer<void>();
             final Completer<void> stderrDone = Completer<void>();
@@ -233,16 +244,14 @@ TaskFunction createHotModeTest({
   };
 }
 
-Future<Map<String, dynamic>> captureReloadData(
-  List<String> options,
-  Map<String, String>? environment,
-  File benchmarkFile,
-  void Function(String, Process) onLine,
-) async {
-  final Process process = await startProcess(
-    path.join(flutterDirectory.path, 'bin', 'flutter'),
-    flutterCommandArgs('run', options),
-    environment: environment,
+Future<Map<String, dynamic>> captureReloadData({
+  required List<String> options,
+  required File benchmarkFile,
+  required void Function(String, Process) onLine,
+}) async {
+  final Process process = await startFlutter(
+    'run',
+    options: options,
   );
 
   final Completer<void> stdoutDone = Completer<void>();

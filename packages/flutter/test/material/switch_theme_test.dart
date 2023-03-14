@@ -15,10 +15,16 @@ void main() {
     expect(const SwitchThemeData().hashCode, const SwitchThemeData().copyWith().hashCode);
   });
 
+  test('SwitchThemeData lerp special cases', () {
+    const SwitchThemeData data = SwitchThemeData();
+    expect(identical(SwitchThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('SwitchThemeData defaults', () {
     const SwitchThemeData themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);
     expect(themeData.trackColor, null);
+    expect(themeData.trackOutlineColor, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.overlayColor, null);
@@ -28,6 +34,7 @@ void main() {
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
     expect(theme.data.trackColor, null);
+    expect(theme.data.trackOutlineColor, null);
     expect(theme.data.mouseCursor, null);
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.overlayColor, null);
@@ -52,6 +59,7 @@ void main() {
     const SwitchThemeData(
       thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      trackOutlineColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
       mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
@@ -66,11 +74,12 @@ void main() {
 
     expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
     expect(description[1], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[3], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[5], 'splashRadius: 1.0');
-    expect(description[6], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[2], 'trackOutlineColor: MaterialStatePropertyAll(Color(0xfffffff3))');
+    expect(description[3], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
+    expect(description[4], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[5], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[6], 'splashRadius: 1.0');
+    expect(description[7], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
@@ -80,6 +89,8 @@ void main() {
     const Color selectedThumbColor = Color(0xfffffff1);
     const Color defaultTrackColor = Color(0xfffffff2);
     const Color selectedTrackColor = Color(0xfffffff3);
+    const Color defaultTrackOutlineColor = Color(0xfffffff4);
+    const Color selectedTrackOutlineColor = Color(0xfffffff5);
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Color focusOverlayColor = Color(0xfffffff4);
@@ -89,7 +100,6 @@ void main() {
     const Icon icon2 = Icon(Icons.close);
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
@@ -102,6 +112,12 @@ void main() {
             return selectedTrackColor;
           }
           return defaultTrackColor;
+        }),
+        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return selectedTrackOutlineColor;
+          }
+          return defaultTrackOutlineColor;
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
         materialTapTargetSize: materialTapTargetSize,
@@ -146,12 +162,13 @@ void main() {
       material3
       ? (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: themeData.colorScheme.outline)
+        ..rrect(color: defaultTrackOutlineColor)
         ..rrect(color: defaultThumbColor)
         ..paragraph()
       )
       : (paints
         ..rrect(color: defaultTrackColor)
+        ..rrect(color: defaultTrackOutlineColor)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -168,10 +185,12 @@ void main() {
       _getSwitchMaterial(tester),
       material3
       ? (paints
-        ..rrect(color: selectedTrackColor)..rrect()
+        ..rrect(color: selectedTrackColor)
+        ..rrect(color: selectedTrackOutlineColor)
         ..rrect(color: selectedThumbColor)..paragraph())
       : (paints
         ..rrect(color: selectedTrackColor)
+        ..rrect(color: selectedTrackOutlineColor)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -198,6 +217,8 @@ void main() {
     const Color themeSelectedThumbColor = Color(0xfffffff1);
     const Color themeDefaultTrackColor = Color(0xfffffff2);
     const Color themeSelectedTrackColor = Color(0xfffffff3);
+    const Color themeDefaultOutlineColor = Color(0xfffffff6);
+    const Color themeSelectedOutlineColor = Color(0xfffffff7);
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const Color themeFocusOverlayColor = Color(0xfffffff4);
@@ -208,6 +229,8 @@ void main() {
     const Color selectedThumbColor = Color(0xffffff1f);
     const Color defaultTrackColor = Color(0xffffff2f);
     const Color selectedTrackColor = Color(0xffffff3f);
+    const Color defaultOutlineColor = Color(0xffffff6f);
+    const Color selectedOutlineColor = Color(0xffffff7f);
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Color focusColor = Color(0xffffff4f);
@@ -227,6 +250,12 @@ void main() {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
+        }),
+        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedOutlineColor;
+          }
+          return themeDefaultOutlineColor;
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
         materialTapTargetSize: themeMaterialTapTargetSize,
@@ -270,6 +299,12 @@ void main() {
               }
               return defaultTrackColor;
             }),
+            trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return selectedOutlineColor;
+              }
+              return defaultOutlineColor;
+            }),
             mouseCursor: mouseCursor,
             materialTapTargetSize: materialTapTargetSize,
             focusColor: focusColor,
@@ -294,10 +329,11 @@ void main() {
       material3
       ? (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: themeData.colorScheme.outline)
+        ..rrect(color: defaultOutlineColor)
         ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(12, 16)))
       : (paints
         ..rrect(color: defaultTrackColor)
+        ..rrect(color: defaultOutlineColor)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -313,10 +349,11 @@ void main() {
       _getSwitchMaterial(tester),
       material3
       ? (paints
-        ..rrect(color: selectedTrackColor)
+        ..rrect(color: selectedTrackColor)..rrect(color: selectedOutlineColor)
         ..rrect(color: selectedThumbColor))
       : (paints
         ..rrect(color: selectedTrackColor)
+        ..rrect(color: selectedOutlineColor)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -496,13 +533,16 @@ void main() {
   testWidgets('Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
+    const Color globalThemeOutlineColor = Color(0xfffffff3);
     const Color localThemeThumbColor = Color(0xffff0000);
     const Color localThemeTrackColor = Color(0xffff0000);
+    const Color localThemeOutlineColor = Color(0xffff0000);
 
     final ThemeData themeData = ThemeData(
       switchTheme: const SwitchThemeData(
         thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
         trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
+        trackOutlineColor: MaterialStatePropertyAll<Color>(globalThemeOutlineColor),
       ),
     );
     final bool material3 = themeData.useMaterial3;
@@ -514,6 +554,7 @@ void main() {
             data: const SwitchThemeData(
               thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
               trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
+              trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
             ),
             child: Switch(
               value: selected,
@@ -532,9 +573,11 @@ void main() {
       material3
       ? (paints
         ..rrect(color: localThemeTrackColor)
+        ..rrect(color: localThemeOutlineColor)
         ..rrect(color: localThemeThumbColor))
       : (paints
         ..rrect(color: localThemeTrackColor)
+        ..rrect(color: localThemeOutlineColor)
         ..rrect()
         ..rrect()
         ..rrect()

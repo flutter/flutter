@@ -13,6 +13,12 @@ void main() {
     expect(const FloatingActionButtonThemeData().hashCode, const FloatingActionButtonThemeData().copyWith().hashCode);
   });
 
+  test('FloatingActionButtonThemeData lerp special cases', () {
+    expect(FloatingActionButtonThemeData.lerp(null, null, 0), null);
+    const FloatingActionButtonThemeData data = FloatingActionButtonThemeData();
+    expect(identical(FloatingActionButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

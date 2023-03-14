@@ -13,8 +13,9 @@ class ListTileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LisTileExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const LisTileExample(),
     );
   }
 }

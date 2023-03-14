@@ -28,12 +28,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'empty'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   group('SelectableRegion', () {
@@ -1604,7 +1604,7 @@ void main() {
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
           (WidgetTester tester) async {
-        const String text = 'Monkies and rabbits in my soup';
+        const String text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1780,6 +1780,51 @@ void main() {
     await tester.pump();
     expect(content, isNotNull);
     expect(content!.plainText, 'How');
+  });
+
+  group('BrowserContextMenu', () {
+    setUp(() async {
+      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      });
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+    });
+
+    testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            onSelectionChanged: (SelectedContent? selectedContent) {},
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+
+      final SelectableRegionState state =
+          tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+      expect(find.text('Copy'), findsNothing);
+
+      state.selectAll(SelectionChangedCause.toolbar);
+      await tester.pumpAndSettle();
+      expect(find.text('Copy'), findsOneWidget);
+
+      state.hideToolbar();
+      await tester.pumpAndSettle();
+      expect(find.text('Copy'), findsNothing);
+    },
+      skip: !kIsWeb, // [intended]
+    );
   });
 }
 

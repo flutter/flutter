@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -673,6 +674,23 @@ void main() {
           FakeDevice(targetPlatform: TargetPlatform.android_arm, platformType: PlatformType.android),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -696,6 +714,23 @@ void main() {
           FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -720,6 +755,23 @@ void main() {
           FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -745,6 +797,22 @@ void main() {
           FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -938,6 +1006,7 @@ void main() {
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1053,6 +1122,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get isConnected => true;
 
   bool supported = true;
 

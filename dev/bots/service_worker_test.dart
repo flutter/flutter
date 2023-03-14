@@ -60,9 +60,9 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
 
   if (hasError) {
-    print('One or more tests failed.');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}One or more tests failed.$reset');
   }
+  reportSuccessAndExit('${bold}Tests successful.$reset');
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/109093.

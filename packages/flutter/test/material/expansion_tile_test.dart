@@ -541,14 +541,14 @@ void main() {
     Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
-    expect(getIconColor(), theme.colorScheme.onSurface);
-    expect(getTextColor(), theme.textTheme.bodyLarge!.color);
+    expect(getIconColor(), theme.colorScheme.onSurfaceVariant);
+    expect(getTextColor(), theme.colorScheme.onSurface);
 
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
     expect(getIconColor(), theme.colorScheme.primary);
-    expect(getTextColor(), theme.textTheme.bodyLarge!.color);
+    expect(getTextColor(), theme.colorScheme.onSurface);
   });
 
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {

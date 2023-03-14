@@ -1158,9 +1158,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
-        // Whether a floating SnackBar has been offsetted too high.
+        // Whether a floating SnackBar has been offset too high.
         //
-        // To improve the developper experience, this assert is done after the call to positionChild.
+        // To improve the developer experience, this assert is done after the call to positionChild.
         // if we assert sooner the SnackBar is visible because its defaults position is (0,0) and
         // it can cause confusion to the user as the error message states that the SnackBar is off screen.
         if (isSnackBarFloating) {

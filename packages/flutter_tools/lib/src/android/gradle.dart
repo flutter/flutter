@@ -16,6 +16,7 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -180,6 +181,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   }) async {
     await buildGradleApp(
       project: project,
@@ -187,6 +189,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       target: target,
       isBuildingBundle: false,
       localGradleErrors: gradleErrors,
+      configOnly: configOnly,
     );
   }
 
@@ -198,6 +201,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   }) async {
     await buildGradleApp(
       project: project,
@@ -207,6 +211,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       localGradleErrors: gradleErrors,
       validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
+      configOnly: configOnly,
     );
   }
 
@@ -224,6 +229,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required String target,
     required bool isBuildingBundle,
     required List<GradleHandledError> localGradleErrors,
+    required bool configOnly,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,
@@ -248,8 +254,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+    updateLocalProperties(
+        project: project, buildInfo: androidBuildInfo.buildInfo);
 
+    final List<String> command = <String>[
+      // This does more than get gradlewrapper. It creates the file, ensures it
+      // exists and verifies the file is executable.
+      _gradleUtils.getExecutable(project),
+    ];
+
+    // All automatically created files should exist.
+    if (configOnly) {
+      _logger.printStatus('Config complete.');
+      return;
+    }
+
+    // Assembly work starts here.
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String assembleTask = isBuildingBundle
         ? getBundleTaskFor(buildInfo)
@@ -259,9 +279,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       "Running Gradle task '$assembleTask'...",
     );
 
-    final List<String> command = <String>[
-      _gradleUtils.getExecutable(project),
-    ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
       command.add('--info');
@@ -427,6 +444,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               localGradleErrors: localGradleErrors,
               retry: retry,
               maxRetries: maxRetries,
+              configOnly: configOnly,
             );
             final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
             BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
@@ -532,8 +550,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         .trim();
     _logger.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-            'flutter pub global activate devtools; flutter pub global run devtools '
-            '--appSizeBase=$relativeAppSizePath'
+            'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
 
@@ -696,7 +713,7 @@ void printHowToConsumeAar({
   1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 
-      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"
+      String storageUrl = System.env.$kFlutterStorageBaseUrl ?: "https://storage.googleapis.com"
       repositories {
         maven {
             url '${repoDirectory.path}'

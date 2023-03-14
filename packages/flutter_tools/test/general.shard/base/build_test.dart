@@ -209,6 +209,7 @@ void main() {
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
           '--dwarf-stack-traces',
+          '--resolve-dwarf-paths',
           '--save-debugging-info=$debugPath',
           'main.dill',
         ]),
@@ -444,6 +445,7 @@ void main() {
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '--dwarf-stack-traces',
+          '--resolve-dwarf-paths',
           '--save-debugging-info=$debugPath',
           'main.dill',
         ]

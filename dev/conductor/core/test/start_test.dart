@@ -531,7 +531,7 @@ void main() {
           '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision =
           'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-      // note that this significantly behind the candidate branch name
+      // This is significantly behind the candidate branch name
       const String previousVersion = '0.9.0-1.0.pre';
       // This is what this release will be
       const String nextVersion = '0.9.0-1.1.pre';
@@ -1143,10 +1143,8 @@ void main() {
         candidateBranch: candidateBranch,
         checkouts: checkouts,
         dartRevision: nextDartRevision,
-        engineCherrypickRevisions: <String>[],
         engineMirror: engineMirror,
         engineUpstream: EngineRepository.defaultUpstream,
-        frameworkCherrypickRevisions: <String>[],
         frameworkMirror: frameworkMirror,
         frameworkUpstream: FrameworkRepository.defaultUpstream,
         releaseChannel: releaseChannel,
