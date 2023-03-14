@@ -3460,7 +3460,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
-
     bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final bool blockChildInteractions = blockUserActions || config.isBlockingUserActions;
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
@@ -3565,7 +3564,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _marksExplicitInMergeGroup(mergeUpFragments, isMergeUp: true);
       siblingMergeFragmentGroups.forEach(_marksExplicitInMergeGroup);
       result = _SwitchableSemanticsFragment(
-        config: config..isBlockingUserActions |= blockUserActions,
+        config: config,
+        blockUserActions: blockUserActions,
         mergeIntoParent: mergeIntoParent,
         siblingMergeGroups: siblingMergeFragmentGroups,
         owner: this,
@@ -4575,13 +4575,19 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     required bool mergeIntoParent,
+    required bool blockUserActions,
     required SemanticsConfiguration config,
     required List<List<_InterestingSemanticsFragment>> siblingMergeGroups,
     required super.owner,
     required super.dropsSemanticsOfPreviousSiblings,
   }) : _siblingMergeGroups = siblingMergeGroups,
        _mergeIntoParent = mergeIntoParent,
-       _config = config;
+       _config = config {
+    if (blockUserActions && !_config.isBlockingUserActions) {
+      _ensureConfigIsWritable();
+      _config.isBlockingUserActions = true;
+    }
+  }
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;

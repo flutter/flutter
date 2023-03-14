@@ -861,6 +861,125 @@ void main() {
       );
     });
 
+    testWidgets('can toggle the ignoring.', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      final UniqueKey key3 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestIgnorePointer(
+            child: Semantics(
+              key: key1,
+              label: '1',
+              onTap: (){ },
+              container: true,
+              child: Semantics(
+                key: key2,
+                label: '2',
+                onTap: (){ },
+                container: true,
+                child: Semantics(
+                  key: key3,
+                  label: '3',
+                  onTap: (){ },
+                  container: true,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      final TestIgnorePointerState state = tester.state<TestIgnorePointerState>(find.byType(TestIgnorePointer));
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+
+      state.setIgnore(true);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+    });
+
     testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
@@ -1079,5 +1198,32 @@ class _MockCanvas extends Fake implements Canvas {
   void drawRect(Rect rect, Paint paint) {
     rects.add(rect);
     paints.add(paint);
+  }
+}
+
+
+class TestIgnorePointer extends StatefulWidget {
+  const TestIgnorePointer({super.key, required this.child});
+
+  final Widget child;
+  @override
+  State<StatefulWidget> createState() => TestIgnorePointerState();
+}
+
+class TestIgnorePointerState extends State<TestIgnorePointer> {
+  bool ignore = true;
+
+  void setIgnore(bool newIgnore) {
+    setState(() {
+      ignore = newIgnore;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: ignore,
+      child: widget.child,
+    );
   }
 }

@@ -1183,7 +1183,6 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [IgnorePointer], the equivalent widget for boxes.
->>>>>>> 38d7ad5e15 (Fixes IgnorePointer and AbsorbPointer to only block user interactions in a11y)
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
   ///
