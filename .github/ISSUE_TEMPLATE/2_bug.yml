@@ -1,7 +1,7 @@
 name: Report a bug
 description: |
-  You found a bug in the application but it is crashing or
-  throws an exception, a widget is buggy or something looks wrong.
+    You found a bug in Flutter. It is crashing or throws an exception,
+    a widget is buggy or something looks wrong.
 body:
   - type: markdown
     attributes:
@@ -15,8 +15,7 @@ body:
           - https://api.flutter.dev/
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
-        If you have found a bug or if our documentation doesn't have an answer
-        to what you're looking for, then fill out the template below.
+        If you have found a bug, then fill out the template below.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -79,6 +78,8 @@ body:
         ```
 
         </details>
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Screenshots or Video
