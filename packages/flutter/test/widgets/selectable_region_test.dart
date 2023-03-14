@@ -1744,6 +1744,7 @@ void main() {
     // In Android copy should clear the selection.
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         expect(regionState.selectionOverlay, isNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
@@ -1756,8 +1757,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        // Test doesn't run these platforms.
+        expect(regionState.selectionOverlay, isNotNull);
         break;
     }
   },
@@ -1801,6 +1801,7 @@ void main() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
         expect(regionState.selectionOverlay, isNotNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
@@ -1808,8 +1809,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        // Test doesn't run these platforms.
+        expect(regionState.selectionOverlay, isNotNull);
         break;
     }
 

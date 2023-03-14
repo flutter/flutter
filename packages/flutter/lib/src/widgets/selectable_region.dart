@@ -998,12 +998,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // In Android copy should clear the selection.
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
             _clearSelection();
             break;
           case TargetPlatform.iOS:
             hideToolbar(false);
             break;
-          case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
@@ -1015,9 +1015,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.iOS:
+          case TargetPlatform.fuchsia:
             selectAll(SelectionChangedCause.toolbar);
             break;
-          case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
