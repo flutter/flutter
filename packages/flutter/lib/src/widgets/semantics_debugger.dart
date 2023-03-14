@@ -365,8 +365,10 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      // To minmize changes to goldens tests, use a static color.
-      final Color lineColor = const bool.fromEnvironment('FLUTTER_TEST')
+      // Passing `--dart-define=static_semnatics=true` will use a static color
+      // for semantics, instead of a unique color for each node. When used
+      // in goldens testing, it minimizes the diffs that will happen.
+      final Color lineColor = const bool.fromEnvironment('static_semantics')
         ? const Color(0xFF027DFD) // Flutter Blue
         : Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
       final Rect innerRect = rect.deflate(rank * 1.0);
