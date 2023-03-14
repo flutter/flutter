@@ -30,7 +30,7 @@ void main() {
         expect(analyze.allProjectValidators().length, 2);
       }
     }
-    expect(Platform.environment['LUCI_CI'], 'azx');
+    expect(Platform.environment['LUCI_CI'], 'True');
     expect('a', 'b');
   }));
 
