@@ -1882,11 +1882,10 @@ class _SliderDefaultsM2 extends SliderThemeData {
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
-    : _colors = Theme.of(context).colorScheme,
-      super(trackHeight: 4.0);
+    : super(trackHeight: 4.0);
 
   final BuildContext context;
-  final ColorScheme _colors;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get activeTrackColor => _colors.primary;

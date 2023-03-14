@@ -5,12 +5,14 @@
 import 'template.dart';
 
 class BottomSheetTemplate extends TokenTemplate {
-  const BottomSheetTemplate(super.blockName, super.fileName, super.tokens);
+  const BottomSheetTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
 
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends BottomSheetThemeData {
-   const _${blockName}DefaultsM3(this.context)
+  _${blockName}DefaultsM3(this.context)
     : super(
       elevation: ${elevation("md.comp.sheet.bottom.docked.standard.container")},
       modalElevation: ${elevation("md.comp.sheet.bottom.docked.modal.container")},
@@ -18,6 +20,7 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
     );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get backgroundColor => ${componentColor("md.comp.sheet.bottom.docked.container")};

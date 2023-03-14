@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
+import 'color_scheme.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -217,7 +218,7 @@ class _CardDefaultsM2 extends CardTheme {
 // Token database version: v0_162
 
 class _CardDefaultsM3 extends CardTheme {
-  const _CardDefaultsM3(this.context)
+  _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
@@ -226,15 +227,16 @@ class _CardDefaultsM3 extends CardTheme {
       );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.surface;
+  Color? get color => _colors.surface;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 }
 
 // END GENERATED TOKEN PROPERTIES - Card

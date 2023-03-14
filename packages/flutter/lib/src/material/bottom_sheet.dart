@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -1148,7 +1149,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // Token database version: v0_162
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
-   const _BottomSheetDefaultsM3(this.context)
+  _BottomSheetDefaultsM3(this.context)
     : super(
       elevation: 1.0,
       modalElevation: 1.0,
@@ -1156,12 +1157,13 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
     );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;
