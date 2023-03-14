@@ -207,49 +207,173 @@ TEST_P(DisplayListTest, CanDrawArc) {
 }
 
 TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
-  flutter::DisplayListBuilder builder;
-  builder.setColor(SK_ColorRED);
-  builder.setStyle(flutter::DlDrawStyle::kStroke);
-  builder.setStrokeWidth(10);
+  auto callback = [&]() {
+    flutter::DisplayListBuilder builder;
+    builder.setColor(SK_ColorRED);
+    builder.setStyle(flutter::DlDrawStyle::kStroke);
 
-  // Rectangle
-  builder.translate(100, 100);
-  builder.drawRect(SkRect::MakeSize({100, 100}));
+    static float stroke_width = 10.0f;
+    static int selected_stroke_type = 0;
+    static int selected_join_type = 0;
+    const char* stroke_types[] = {"Butte", "Round", "Square"};
+    const char* join_type[] = {"kMiter", "Round", "kBevel"};
 
-  // Rounded rectangle
-  builder.translate(150, 0);
-  builder.drawRRect(SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10));
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Combo("Cap", &selected_stroke_type, stroke_types,
+                 sizeof(stroke_types) / sizeof(char*));
+    ImGui::Combo("Join", &selected_join_type, join_type,
+                 sizeof(join_type) / sizeof(char*));
+    ImGui::SliderFloat("Stroke Width", &stroke_width, 10.0f, 50.0f);
+    ImGui::End();
 
-  // Double rounded rectangle
-  builder.translate(150, 0);
-  builder.drawDRRect(
-      SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10),
-      SkRRect::MakeRectXY(SkRect::MakeXYWH(10, 10, 80, 30), 10, 10));
+    flutter::DlStrokeCap cap;
+    flutter::DlStrokeJoin join;
+    switch (selected_stroke_type) {
+      case 0:
+        cap = flutter::DlStrokeCap::kButt;
+        break;
+      case 1:
+        cap = flutter::DlStrokeCap::kRound;
+        break;
+      case 2:
+        cap = flutter::DlStrokeCap::kSquare;
+        break;
+      default:
+        cap = flutter::DlStrokeCap::kButt;
+        break;
+    }
+    switch (selected_join_type) {
+      case 0:
+        join = flutter::DlStrokeJoin::kMiter;
+        break;
+      case 1:
+        join = flutter::DlStrokeJoin::kRound;
+        break;
+      case 2:
+        join = flutter::DlStrokeJoin::kBevel;
+        break;
+      default:
+        join = flutter::DlStrokeJoin::kMiter;
+        break;
+    }
+    builder.setStrokeCap(cap);
+    builder.setStrokeJoin(join);
+    builder.setStrokeWidth(stroke_width);
 
-  // Contour with duplicate join points
-  {
+    // Make rendering better to watch.
+    builder.scale(1.5f, 1.5f);
+
+    // Rectangle
+    builder.translate(100, 100);
+    builder.drawRect(SkRect::MakeSize({100, 100}));
+
+    // Rounded rectangle
     builder.translate(150, 0);
-    SkPath path;
-    path.lineTo({100, 0});
-    path.lineTo({100, 0});
-    path.lineTo({100, 100});
-    builder.drawPath(path);
-  }
+    builder.drawRRect(SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10));
 
-  // Contour with duplicate end points
-  {
-    builder.setStrokeCap(flutter::DlStrokeCap::kRound);
+    // Double rounded rectangle
     builder.translate(150, 0);
-    SkPath path;
-    path.moveTo(0, 0);
-    path.lineTo({0, 0});
-    path.lineTo({50, 50});
-    path.lineTo({100, 0});
-    path.lineTo({100, 0});
-    builder.drawPath(path);
-  }
+    builder.drawDRRect(
+        SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10),
+        SkRRect::MakeRectXY(SkRect::MakeXYWH(10, 10, 80, 30), 10, 10));
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+    // Contour with duplicate join points
+    {
+      builder.translate(150, 0);
+      SkPath path;
+      path.moveTo(0, 0);
+      path.lineTo(0, 0);
+      path.lineTo({100, 0});
+      path.lineTo({100, 0});
+      path.lineTo({100, 100});
+      builder.drawPath(path);
+    }
+
+    // Contour with duplicate start and end points
+
+    // Line.
+    builder.translate(200, 0);
+    {
+      builder.save();
+
+      SkPath line_path;
+      line_path.moveTo(0, 0);
+      line_path.moveTo(0, 0);
+      line_path.lineTo({0, 0});
+      line_path.lineTo({0, 0});
+      line_path.lineTo({50, 50});
+      line_path.lineTo({50, 50});
+      line_path.lineTo({100, 0});
+      line_path.lineTo({100, 0});
+      builder.drawPath(line_path);
+
+      builder.translate(0, 100);
+      builder.drawPath(line_path);
+
+      builder.translate(0, 100);
+      SkPath line_path2;
+      line_path2.moveTo(0, 0);
+      line_path2.lineTo(0, 0);
+      line_path2.lineTo(0, 0);
+      builder.drawPath(line_path2);
+
+      builder.restore();
+    }
+
+    // Cubic.
+    builder.translate(150, 0);
+    {
+      builder.save();
+
+      SkPath cubic_path;
+      cubic_path.moveTo({0, 0});
+      cubic_path.cubicTo(0, 0, 140.0, 100.0, 140, 20);
+      builder.drawPath(cubic_path);
+
+      builder.translate(0, 100);
+      SkPath cubic_path2;
+      cubic_path2.moveTo({0, 0});
+      cubic_path2.cubicTo(0, 0, 0, 0, 150, 150);
+      builder.drawPath(cubic_path2);
+
+      builder.translate(0, 100);
+      SkPath cubic_path3;
+      cubic_path3.moveTo({0, 0});
+      cubic_path3.cubicTo(0, 0, 0, 0, 0, 0);
+      builder.drawPath(cubic_path3);
+
+      builder.restore();
+    }
+
+    // Quad.
+    builder.translate(200, 0);
+    {
+      builder.save();
+
+      SkPath quad_path;
+      quad_path.moveTo(0, 0);
+      quad_path.moveTo(0, 0);
+      quad_path.quadTo({100, 40}, {50, 80});
+      builder.drawPath(quad_path);
+
+      builder.translate(0, 150);
+      SkPath quad_path2;
+      quad_path2.moveTo(0, 0);
+      quad_path2.moveTo(0, 0);
+      quad_path2.quadTo({0, 0}, {100, 100});
+      builder.drawPath(quad_path2);
+
+      builder.translate(0, 100);
+      SkPath quad_path3;
+      quad_path3.moveTo(0, 0);
+      quad_path3.quadTo({0, 0}, {0, 0});
+      builder.drawPath(quad_path3);
+
+      builder.restore();
+    }
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {

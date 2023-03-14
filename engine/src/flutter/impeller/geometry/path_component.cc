@@ -70,10 +70,16 @@ std::vector<Point> LinearPathComponent::Extrema() const {
 }
 
 std::optional<Vector2> LinearPathComponent::GetStartDirection() const {
+  if (p1 == p2) {
+    return std::nullopt;
+  }
   return (p1 - p2).Normalize();
 }
 
 std::optional<Vector2> LinearPathComponent::GetEndDirection() const {
+  if (p1 == p2) {
+    return std::nullopt;
+  }
   return (p2 - p1).Normalize();
 }
 
@@ -150,11 +156,23 @@ std::vector<Point> QuadraticPathComponent::Extrema() const {
 }
 
 std::optional<Vector2> QuadraticPathComponent::GetStartDirection() const {
-  return (p1 - cp).Normalize();
+  if (p1 != cp) {
+    return (p1 - cp).Normalize();
+  }
+  if (p1 != p2) {
+    return (p1 - p2).Normalize();
+  }
+  return std::nullopt;
 }
 
 std::optional<Vector2> QuadraticPathComponent::GetEndDirection() const {
-  return (p2 - cp).Normalize();
+  if (p2 != cp) {
+    return (p2 - cp).Normalize();
+  }
+  if (p2 != p1) {
+    return (p2 - p1).Normalize();
+  }
+  return std::nullopt;
 }
 
 Point CubicPathComponent::Solve(Scalar time) const {
@@ -302,11 +320,29 @@ std::vector<Point> CubicPathComponent::Extrema() const {
 }
 
 std::optional<Vector2> CubicPathComponent::GetStartDirection() const {
-  return (p1 - cp1).Normalize();
+  if (p1 != cp1) {
+    return (p1 - cp1).Normalize();
+  }
+  if (p1 != cp2) {
+    return (p1 - cp2).Normalize();
+  }
+  if (p1 != p2) {
+    return (p1 - p2).Normalize();
+  }
+  return std::nullopt;
 }
 
 std::optional<Vector2> CubicPathComponent::GetEndDirection() const {
-  return (p2 - cp2).Normalize();
+  if (p2 != cp2) {
+    return (p2 - cp2).Normalize();
+  }
+  if (p2 != cp1) {
+    return (p2 - cp1).Normalize();
+  }
+  if (p2 != p1) {
+    return (p2 - p1).Normalize();
+  }
+  return std::nullopt;
 }
 
 }  // namespace impeller
