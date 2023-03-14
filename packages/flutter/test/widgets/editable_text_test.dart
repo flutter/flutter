@@ -15068,7 +15068,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         true;
       const TextEditingValue value = TextEditingValue(
         text: 'tset test test',
-        // composing: TextRange(start: 0, end: 4),
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
       );
       controller.value = value;
@@ -15099,14 +15098,24 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       );
       await tester.pumpAndSettle();
 
-      // Test misspelled word replacement buttons.
+      // Set last tap down position so that selecting the word edge will be
+      // a valid operation.
+      final Offset pos1 = textOffsetToPosition(tester, 1);
+      final TestGesture gesture = await tester.startGesture(pos1);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(1));
+
+      // Test that tapping misspelled word replacement buttons will replace
+      // the correct word and select the word edge.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      // debugDumpApp();
       expect(find.text('sets'), findsOneWidget);
       await tester.tap(find.text('sets'));
       await tester.pumpAndSettle();
       expect(state.currentTextEditingValue.text, equals('sets test test'));
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(4));
     });
 
     testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
@@ -15139,23 +15148,21 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
       state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
-      // state.renderEditable.selectWordsInRange(
-      //   from: Offset.zero,
-      //   cause: SelectionChangedCause.tap,
-      // );
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
       await tester.pumpAndSettle();
-
-      const Offset position = Offset(25.0, 200.0);
-      await tester.tapAt(position);
-      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
 
       // Test misspelled word replacement buttons.
-      // state.showSpellCheckSuggestionsToolbar();
-      // await tester.pumpAndSettle();
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
       expect(find.text('sets'), findsOneWidget);
       await tester.tap(find.text('sets'));
       await tester.pumpAndSettle();
       expect(state.currentTextEditingValue.text, equals('sets test test'));
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
 
       // Test delete button.
       state.showSpellCheckSuggestionsToolbar();
@@ -15163,40 +15170,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       await tester.tap(find.text('DELETE'));
       await tester.pumpAndSettle();
       expect(state.currentTextEditingValue.text, equals(' test test'));
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
     });
-
-    // TODO(camsim99): Move this to valid place.
-    // testWidgets('replaceText succeeds when composing region is valid', (WidgetTester tester) async {
-    //   const TextEditingValue value = TextEditingValue(
-    //     text: 'test tset test',
-    //     selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
-    //     composing: TextRange(start: 5, end: 9),
-    //   );
-    //   controller.value = value;
-    //   await tester.pumpWidget(
-    //     MaterialApp(
-    //       home: EditableText(
-    //         backgroundCursorColor: Colors.grey,
-    //         controller: controller,
-    //         focusNode: focusNode,
-    //         style: textStyle,
-    //         cursorColor: cursorColor,
-    //         selectionControls: materialTextSelectionControls,
-    //       ),
-    //     ),
-    //   );
-
-    //   final EditableTextState state =
-    //       tester.state<EditableTextState>(find.byType(EditableText));
-    //   state.replaceText(
-    //     cause: SelectionChangedCause.toolbar,
-    //     replacementRange: value.composing,
-    //     text: 'test',
-    //   );
-
-    //   await tester.pumpAndSettle();
-    //   expect(state.currentTextEditingValue.text, equals('test test test'));
-    // });
   });
 
   group('magnifier', () {
