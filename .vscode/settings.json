@@ -2,8 +2,10 @@
 // This only affects subdirectories of this project.
 {
     // VSCode formats files on save by default. Since Flutter source code is
-    // hand-formatted, the default setting is changed to prevent inadvertent
+    // hand-formatted, the default settings are changed to prevent inadvertent
     // reformatting of code.
     "editor.formatOnSave": false,
-    "html.format.enable": false,
+    "editor.formatOnType": false,
+
+    "html.format.enable": false
 }
