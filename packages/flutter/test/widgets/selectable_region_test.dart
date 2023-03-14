@@ -1760,10 +1760,7 @@ void main() {
         expect(regionState.selectionOverlay, isNotNull);
         break;
     }
-  },
-    skip: kIsWeb, // [intended]
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-  );
+  });
 
   testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
@@ -1809,13 +1806,13 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(regionState.selectionOverlay, isNotNull);
+        // Test doesn't run these platforms.
         break;
     }
 
   },
     skip: kIsWeb, // [intended]
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
   testWidgets('builds the correct button items', (WidgetTester tester) async {
