@@ -41,13 +41,16 @@ class _BodyState extends State<Body> {
   bool _shouldExit = false;
   String lastResponse = 'No exit requested yet';
 
-  @override
+ @override
   void initState() {
     super.initState();
-    listener = AppLifecycleListener(
-      binding: WidgetsBinding.instance,
-      onExitRequested: _handleExitRequest,
-    );
+    listener = AppLifecycleListener(onExitRequested: _handleExitRequest);
+  }
+
+  @override
+  void dispose() {
+    listener.dispose();
+    super.dispose();
   }
 
   Future<void> _quit() async {
@@ -84,14 +87,14 @@ class _BodyState extends State<Body> {
         child: IntrinsicHeight(
           child: Column(
             children: <Widget>[
-              LabeledRadio(
-                label: const Text('Do Not Allow Exit'),
+              RadioListTile<bool>(
+                title: const Text('Do Not Allow Exit'),
                 groupValue: _shouldExit,
                 value: false,
                 onChanged: _radioChanged,
               ),
-              LabeledRadio(
-                label: const Text('Allow Exit'),
+              RadioListTile<bool>(
+                title: const Text('Allow Exit'),
                 groupValue: _shouldExit,
                 value: true,
                 onChanged: _radioChanged,
@@ -105,50 +108,6 @@ class _BodyState extends State<Body> {
               Text(lastResponse),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// Just a simple labeled radio button.
-class LabeledRadio extends StatelessWidget {
-  const LabeledRadio({
-    super.key,
-    required this.label,
-    this.padding = EdgeInsets.zero,
-    required this.groupValue,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final Widget label;
-  final EdgeInsets padding;
-  final bool groupValue;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        if (value != groupValue) {
-          onChanged(value);
-        }
-      },
-      child: Padding(
-        padding: padding,
-        child: Row(
-          children: <Widget>[
-            Radio<bool>(
-              groupValue: groupValue,
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-            label,
-          ],
         ),
       ),
     );

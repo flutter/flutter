@@ -311,7 +311,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Exits the application by calling the native application API method for
   /// exiting an application cleanly.
   ///
-  /// The [ui.AppExitType] indicates what kind of exit to perform. For
+  /// This differs from calling `dart:io`'s [exit] function in that it gives the
+  /// engine a chance to clean up resources so that it doesn't crash on exit, so
+  /// calling this is always preferred over calling [exit]. It also optionally
+  /// gives handlers of [handleRequestAppExit] or [AppLifecycleListener]s that
+  /// set an [AppLifecycleListener.onExitRequested] a chance to cancel the
+  /// application exit.
+  ///
+  /// The [exitType] indicates what kind of exit to perform. For
   /// [ui.AppExitType.cancelable] exits, the application is queried through a
   /// call to [handleRequestAppExit], where the application can optionally
   /// cancel the request for exit. If the [exitType] is

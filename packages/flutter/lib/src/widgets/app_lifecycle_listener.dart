@@ -43,11 +43,12 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   /// Creates an [AppLifecycleListener].
   AppLifecycleListener({
-    required this.binding,
+    WidgetsBinding? binding,
     this.onExitRequested,
     this.onStateChange,
-  }) : _lifecycleState = AppLifecycleState.detached {
-    binding.addObserver(this);
+  }) : binding = binding ?? WidgetsBinding.instance,
+      _lifecycleState = AppLifecycleState.detached {
+    this.binding.addObserver(this);
   }
 
   /// Returns the most recent lifecycle state seen by this
@@ -62,10 +63,6 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   final WidgetsBinding binding;
 
   /// Called anytime the state changes, passing the new state.
-  ///
-  /// The [AppLifecycleListener] class is also a [ChangeNotifier], which
-  /// performs a similar function as this callback, but as a notifier that can
-  /// be supplied to another listener.
   final ValueChanged<AppLifecycleState>? onStateChange;
 
   /// A callback used to ask the application if it will allow exiting the
