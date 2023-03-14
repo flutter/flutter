@@ -137,7 +137,6 @@ void DlDeferredImageGPUSkia::ImageWrapper::OnGrContextCreated() {
 
 void DlDeferredImageGPUSkia::ImageWrapper::OnGrContextDestroyed() {
   FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
-
   DeleteTexture();
 }
 
