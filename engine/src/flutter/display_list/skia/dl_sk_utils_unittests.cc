@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list_utils.h"
+#include "flutter/display_list/skia/dl_sk_utils.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
-class MockDispatchHelper final : public virtual Dispatcher,
+class MockDispatchHelper final : public virtual DlOpReceiver,
                                  public SkPaintDispatchHelper,
                                  public IgnoreClipDispatchHelper,
                                  public IgnoreTransformDispatchHelper,

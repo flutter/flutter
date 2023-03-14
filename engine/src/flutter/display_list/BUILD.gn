@@ -24,8 +24,6 @@ source_set("display_list") {
     "display_list_blend_mode.h",
     "display_list_builder.cc",
     "display_list_builder.h",
-    "display_list_canvas_dispatcher.cc",
-    "display_list_canvas_dispatcher.h",
     "display_list_color.h",
     "display_list_color_filter.cc",
     "display_list_color_filter.h",
@@ -37,8 +35,6 @@ source_set("display_list") {
     "display_list_complexity_gl.h",
     "display_list_complexity_metal.cc",
     "display_list_complexity_metal.h",
-    "display_list_dispatcher.cc",
-    "display_list_dispatcher.h",
     "display_list_flags.cc",
     "display_list_flags.h",
     "display_list_image.cc",
@@ -67,9 +63,18 @@ source_set("display_list") {
     "display_list_utils.h",
     "display_list_vertices.cc",
     "display_list_vertices.h",
+    "dl_canvas.cc",
     "dl_canvas.h",
+    "dl_op_receiver.cc",
+    "dl_op_receiver.h",
     "skia/dl_sk_canvas.cc",
     "skia/dl_sk_canvas.h",
+    "skia/dl_sk_conversions.cc",
+    "skia/dl_sk_conversions.h",
+    "skia/dl_sk_dispatcher.cc",
+    "skia/dl_sk_dispatcher.h",
+    "skia/dl_sk_utils.cc",
+    "skia/dl_sk_utils.h",
     "types.h",
   ]
 
@@ -99,7 +104,6 @@ if (enable_unittests) {
       "display_list_color_source_unittests.cc",
       "display_list_color_unittests.cc",
       "display_list_complexity_unittests.cc",
-      "display_list_enum_unittests.cc",
       "display_list_image_filter_unittests.cc",
       "display_list_mask_filter_unittests.cc",
       "display_list_matrix_clip_tracker_unittests.cc",
@@ -107,8 +111,9 @@ if (enable_unittests) {
       "display_list_path_effect_unittests.cc",
       "display_list_rtree_unittests.cc",
       "display_list_unittests.cc",
-      "display_list_utils_unittests.cc",
       "display_list_vertices_unittests.cc",
+      "skia/dl_sk_conversions_unittests.cc",
+      "skia/dl_sk_utils_unittests.cc",
     ]
 
     deps = [
@@ -136,7 +141,7 @@ if (enable_unittests) {
   executable("display_list_rendertests") {
     testonly = true
 
-    sources = [ "display_list_canvas_unittests.cc" ]
+    sources = [ "dl_rendering_unittests.cc" ]
 
     deps = [
       ":display_list",

@@ -6,7 +6,6 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_ops.h"
 #include "flutter/fml/trace_event.h"
 
@@ -134,38 +133,40 @@ class VectorCuller final : public Culler {
   std::vector<int>::const_iterator end_;
 };
 
-void DisplayList::Dispatch(Dispatcher& ctx) const {
+void DisplayList::Dispatch(DlOpReceiver& receiver) const {
   uint8_t* ptr = storage_.get();
-  Dispatch(ctx, ptr, ptr + byte_count_, NopCuller::instance);
+  Dispatch(receiver, ptr, ptr + byte_count_, NopCuller::instance);
 }
-void DisplayList::Dispatch(Dispatcher& ctx, const SkRect& cull_rect) const {
+
+void DisplayList::Dispatch(DlOpReceiver& receiver,
+                           const SkRect& cull_rect) const {
   if (cull_rect.isEmpty()) {
     return;
   }
   if (cull_rect.contains(bounds())) {
-    Dispatch(ctx);
+    Dispatch(receiver);
     return;
   }
   const DlRTree* rtree = this->rtree().get();
   FML_DCHECK(rtree != nullptr);
   if (rtree == nullptr) {
     FML_LOG(ERROR) << "dispatched with culling rect on DL with no rtree";
-    Dispatch(ctx);
+    Dispatch(receiver);
     return;
   }
   uint8_t* ptr = storage_.get();
   std::vector<int> rect_indices;
   rtree->search(cull_rect, &rect_indices);
   VectorCuller culler(rtree, rect_indices);
-  Dispatch(ctx, ptr, ptr + byte_count_, culler);
+  Dispatch(receiver, ptr, ptr + byte_count_, culler);
 }
 
-void DisplayList::Dispatch(Dispatcher& dispatcher,
+void DisplayList::Dispatch(DlOpReceiver& receiver,
                            uint8_t* ptr,
                            uint8_t* end,
                            Culler& culler) const {
   DispatchContext context = {
-      .dispatcher = dispatcher,
+      .receiver = receiver,
       .cur_index = 0,
       // next_render_index will be initialized by culler.init()
       .next_restore_index = std::numeric_limits<int>::max(),
@@ -292,27 +293,6 @@ static bool CompareOps(uint8_t* ptrA,
     }
   }
   return true;
-}
-
-void DisplayList::RenderTo(DisplayListBuilder* builder) const {
-  if (!builder) {
-    return;
-  }
-  if (has_rtree()) {
-    Dispatch(builder->asDispatcher(), builder->GetLocalClipBounds());
-  } else {
-    Dispatch(builder->asDispatcher());
-  }
-}
-
-void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {
-  FML_DCHECK(can_apply_group_opacity() || opacity >= SK_Scalar1);
-  DisplayListCanvasDispatcher dispatcher(canvas, opacity);
-  if (has_rtree()) {
-    Dispatch(dispatcher, canvas->getLocalClipBounds());
-  } else {
-    Dispatch(dispatcher);
-  }
 }
 
 bool DisplayList::Equals(const DisplayList* other) const {

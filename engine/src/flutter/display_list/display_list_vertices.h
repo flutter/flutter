@@ -30,14 +30,6 @@ enum class DlVertexMode {
   kTriangleFan,
 };
 
-inline SkVertices::VertexMode ToSk(DlVertexMode dl_mode) {
-  return static_cast<SkVertices::VertexMode>(dl_mode);
-}
-
-inline DlVertexMode ToDl(SkVertices::VertexMode sk_mode) {
-  return static_cast<DlVertexMode>(sk_mode);
-}
-
 //------------------------------------------------------------------------------
 /// @brief      Holds all of the data (both required and optional) for a
 ///             DisplayList drawVertices call.
@@ -232,9 +224,6 @@ class DlVertices {
   const uint16_t* indices() const {
     return static_cast<const uint16_t*>(pod(indices_offset_));
   }
-
-  // Returns an equivalent sk_sp<SkVertices> analog to this object.
-  sk_sp<SkVertices> skia_object() const;
 
   bool operator==(DlVertices const& other) const;
 
