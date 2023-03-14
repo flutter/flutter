@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=456"
 @Tags(<String>['no-shuffle'])
+@TestOn('!chrome')
+library;
 
 import 'dart:ui';
 
@@ -24,14 +25,18 @@ Future<void> startTransitionBetween(
   String? toTitle,
   TextDirection textDirection = TextDirection.ltr,
   CupertinoThemeData? theme,
+  double textScale = 1.0,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
       theme: theme,
       builder: (BuildContext context, Widget? navigator) {
-        return Directionality(
-          textDirection: textDirection,
-          child: navigator!,
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          child: Directionality(
+            textDirection: textDirection,
+            child: navigator!,
+          )
         );
       },
       home: const Placeholder(),
@@ -460,7 +465,7 @@ void main() {
     mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
     expect(mode, equals(DartPerformanceMode.latency));
 
-    // end of transitio, go back to no requests active.
+    // end of transition, go back to no requests active.
     await tester.pump(const Duration(milliseconds: 500));
     mode = SchedulerBinding.instance.debugGetRequestedPerformanceMode();
     expect(mode, isNull);
@@ -615,6 +620,71 @@ void main() {
       toTitle: 'Page 2',
     );
 
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
+  });
+
+  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
+    const Widget userMiddle = Placeholder();
+    await startTransitionBetween(
+      tester,
+      from: const CupertinoSliverNavigationBar(
+        middle: userMiddle,
+        alwaysShowMiddle: false,
+      ),
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
+  });
+
+  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
+    const Widget userMiddle = Placeholder();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Page 1'),
+                middle: userMiddle,
+                alwaysShowMiddle: false,
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is visible when nav bar is collapsed.
+    final RenderAnimatedOpacity userMiddleOpacity = tester
+        .element(find.byWidget(userMiddle))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(userMiddleOpacity.opacity.value, 1.0);
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(CupertinoPageRoute<void>(
+          title: 'Page 2',
+          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+        ));
+
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
@@ -1222,6 +1292,14 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
     // Just the bottom route's middle now.
     expect(find.text('Page 1'), findsOneWidget);
+  });
+
+  testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
+    await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
   });
 
   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {

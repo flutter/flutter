@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Action.Action.overridable].
+// Flutter code sample for [Action.Action.overridable].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,14 +64,14 @@ class VerificationCodeGenerator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>> { CopyTextIntent: CallbackAction<CopyTextIntent>(onInvoke: _copy) },
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('Press Ctrl-C to Copy'),
-          const SizedBox(height: 10),
+          Text('Press Ctrl-C to Copy'),
+          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               CopyableText(text: '111'),
               SizedBox(width: 5,),
               CopyableText(text: '222'),

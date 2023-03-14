@@ -221,15 +221,4 @@ void main() {
           '_compute_caller_invalid_message.dart');
     });
   }, skip: kIsWeb); // [intended] isn't supported on the web.
-
-  group('compute() works with unsound null safety caller', () {
-    test('returning', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_unsound_null_safety.dart', true);
-    });
-    test('erroring', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_unsound_null_safety_error.dart', true);
-    });
-  }, skip: kIsWeb); // [intended] isn't supported on the web.
 }

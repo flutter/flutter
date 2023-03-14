@@ -18,7 +18,7 @@ import 'common.dart';
 void expectExitCode(ProcessResult result, int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
     fail(
-      'Process ${result.pid} exitted with the wrong exit code.\n'
+      'Process ${result.pid} exited with the wrong exit code.\n'
       '\n'
       'EXPECTED: exit code $expectedExitCode\n'
       'ACTUAL: exit code ${result.exitCode}\n'
@@ -82,23 +82,23 @@ void main() {
     });
   });
 
-  group('flutter/plugins version', () {
+  group('flutter/pacakges version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    final fs.File pluginsVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_plugins.version'));
+    final fs.File packagesVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_packages.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
-      pluginsVersionFile.createSync(recursive: true);
+      packagesVersionFile.createSync(recursive: true);
     });
 
     test('commit hash', () async {
-      pluginsVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      packagesVersionFile.writeAsStringSync(kSampleHash);
+      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
-      pluginsVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      packagesVersionFile.writeAsStringSync('\n$kSampleHash\n');
+      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });

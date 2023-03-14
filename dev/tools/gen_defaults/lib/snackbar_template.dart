@@ -19,7 +19,6 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
-
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override
@@ -69,8 +68,10 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   bool get showCloseIcon => false;
 
   @override
-  Color get iconColor => _colors.onInverseSurface;
-  }
+  Color? get closeIconColor => ${componentColor("$tokenGroup.icon")};
 
+  @override
+  double get actionOverflowThreshold => 0.25;
+}
 ''';
 }

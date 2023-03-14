@@ -117,7 +117,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 
 /// Generate a snapshot of the dart code used in the program.
 ///
-/// Note that this target depends on the `.dart_tool/package_config.json` file
+/// This target depends on the `.dart_tool/package_config.json` file
 /// even though it is not listed as an input. Pub inserts a timestamp into
 /// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
@@ -190,7 +190,7 @@ class KernelSnapshot extends Target {
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
-    bool forceLinkPlatform;
+    final bool forceLinkPlatform;
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:

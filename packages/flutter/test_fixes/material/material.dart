@@ -307,4 +307,14 @@ void main() {
   ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
   scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
   scrollbarTheme.showTrackOnHover;
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOverride(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    clipBehavior: Clip.none,
+  );
+  final Clip clip = details.clipBehavior;
 }

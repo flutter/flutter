@@ -7,8 +7,10 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -83,11 +85,7 @@ class ChoiceChip extends StatelessWidget
     this.iconTheme,
     this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -191,10 +189,10 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
-  const _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
+  _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -204,47 +202,49 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   final BuildContext context;
   final bool isEnabled;
   final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
-    ? Theme.of(context).colorScheme.secondaryContainer
-    : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+    ? _colors.secondaryContainer
+    : _colors.onSurface.withOpacity(0.12);
 
   @override
-  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get checkmarkColor => _colors.onSecondaryContainer;
 
   @override
   Color? get disabledColor => isSelected
-   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
+   ? _colors.onSurface.withOpacity(0.12)
    : null;
 
   @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get deleteIconColor => _colors.onSecondaryContainer;
 
   @override
   BorderSide? get side => !isSelected
     ? isEnabled
-      ? BorderSide(color: Theme.of(context).colorScheme.outline)
-      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
+      ? BorderSide(color: _colors.outline)
+      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? null
-      : Theme.of(context).colorScheme.onSurface,
+      : _colors.onSurface,
     size: 18.0,
   );
 
@@ -259,7 +259,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

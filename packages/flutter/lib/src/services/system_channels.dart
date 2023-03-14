@@ -244,6 +244,12 @@ class SystemChannels {
       'flutter/spellcheck',
   );
 
+  /// A JSON [MethodChannel] for handling undo events.
+  static const MethodChannel undoManager = OptionalMethodChannel(
+    'flutter/undomanager',
+    JSONMethodCodec(),
+  );
+
   /// A JSON [BasicMessageChannel] for keyboard events.
   ///
   /// Each incoming message received on this channel (registered using
@@ -465,4 +471,17 @@ class SystemChannels {
   ///
   ///  * [DefaultPlatformMenuDelegate], which uses this channel.
   static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
+
+  /// A [MethodChannel] for configuring the browser's context menu on web.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
+  ///    app starts, the browser's context menu is already enabled.
+  ///  * `disableContextMenu`: disables the browser's context menu.
+  static const MethodChannel contextMenu = OptionalMethodChannel(
+    'flutter/contextmenu',
+    JSONMethodCodec(),
+  );
 }

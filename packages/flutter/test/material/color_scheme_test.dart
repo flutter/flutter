@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('ColorScheme lerp special cases', () {
+    const ColorScheme scheme = ColorScheme.light();
+    expect(identical(ColorScheme.lerp(scheme, scheme, 0.5), scheme), true);
+  });
+
   test('light scheme matches the spec', () {
     // Colors should match the Material Design baseline default theme:
     // https://material.io/design/color/dark-theme.html#ui-application

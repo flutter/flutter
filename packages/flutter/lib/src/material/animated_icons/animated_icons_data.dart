@@ -8,7 +8,7 @@
 // while the _AnimatedIconData interface which used to deliver the icon data is
 // kept private.
 
-part of material_animated_icons;
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 /// Identifier for the supported Material Design animated icons.
 ///
@@ -25,6 +25,9 @@ part of material_animated_icons;
 ///
 ///  * [Icons], for the list of available static Material Icons.
 abstract class AnimatedIcons {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  AnimatedIcons._();
 
   /// The Material Design add to event icon animation.
   ///

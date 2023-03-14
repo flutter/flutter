@@ -130,7 +130,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -174,11 +174,11 @@ class FlutterTesterDevice extends Device {
       if (debuggingOptions.disableServiceAuthCodes)
         '--disable-service-auth-codes',
       if (debuggingOptions.hostVmServicePort != null)
-        '--observatory-port=${debuggingOptions.hostVmServicePort}',
+        '--vm-service-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,
     ];
 
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
     try {
       _logger.printTrace(command.join(' '));
       _process = await _processManager.start(command,
@@ -190,7 +190,7 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -199,9 +199,9 @@ class FlutterTesterDevice extends Device {
       );
       _logReader.initializeProcess(_process!);
 
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Failed to launch $package: '
@@ -210,14 +210,14 @@ class FlutterTesterDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Failed to launch $package: $error');
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     _process?.kill();
@@ -236,7 +236,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(
-    covariant ApplicationPackage app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return LocalDevFSWriter(

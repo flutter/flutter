@@ -48,7 +48,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
@@ -61,7 +61,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-    ).devices, hasLength(1));
+    ).devices(), hasLength(1));
   });
 
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
@@ -101,9 +101,9 @@ void main() {
     final WindowsDevice windowsDevice = setUpWindowsDevice();
     final FakeWindowsApp fakeApp = FakeWindowsApp();
 
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.debug), 'debug/executable');
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.profile), 'profile/executable');
-    expect(windowsDevice.executablePathForDevice(fakeApp, BuildMode.release), 'release/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.debug), 'debug/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.profile), 'profile/executable');
+    expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.release), 'release/executable');
   });
 }
 

@@ -27,8 +27,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          Column(
-            children: const <Widget>[
+          const Column(
+            children: <Widget>[
               Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.black),
@@ -52,8 +52,8 @@ void main() {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           _boilerplate(
-            Column(
-              children: const <Widget>[
+            const Column(
+              children: <Widget>[
                 Text(
                   'this is a test',
                   style: TextStyle(fontSize: 14.0, color: Colors.black),
@@ -107,8 +107,8 @@ void main() {
           width: 200.0,
           height: 300.0,
           color: Colors.white,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text(
                 'this is a white text',
                 style: TextStyle(fontSize: 14.0, color: Colors.white),

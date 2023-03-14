@@ -287,10 +287,10 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - horizontal(16)
-  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///   * `textScaleFactor <= 1` - horizontal(24)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(24), horizontal(12))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(12), horizontal(6))
+  ///   * `3 < textScaleFactor` - horizontal(6)
   /// * `minimumSize` - Size(64, 40)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
@@ -307,6 +307,9 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [OutlinedButton.icon] factory, the start (generally the left) value of
+  /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -347,11 +350,13 @@ class OutlinedButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  final bool useMaterial3 = Theme.of(context).useMaterial3;
+  final double padding1x = useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
-    const EdgeInsets.symmetric(horizontal: 16),
-    const EdgeInsets.symmetric(horizontal: 8),
-    const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+     EdgeInsets.symmetric(horizontal: padding1x),
+     EdgeInsets.symmetric(horizontal: padding1x / 2),
+     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
+    MediaQuery.textScaleFactorOf(context),
   );
 }
 
@@ -417,13 +422,28 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _OutlinedButtonWithIconChild(icon: icon, label: label),
       );
+
+  @override
+  ButtonStyle defaultStyleOf(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    if (!useMaterial3) {
+      return super.defaultStyleOf(context);
+    }
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+      MediaQuery.textScaleFactorOf(context),
+    );
+    return super.defaultStyleOf(context).copyWith(
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+    );
+  }
 }
 
 class _OutlinedButtonWithIconChild extends StatelessWidget {
@@ -437,7 +457,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -453,7 +473,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   _OutlinedButtonDefaultsM3(this.context)

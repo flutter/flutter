@@ -113,6 +113,12 @@ void main() {
     expect(EdgeInsets.lerp(a, null, 0.25), equals(a * 0.75));
   });
 
+  test('EdgeInsets.lerp identical a,b', () {
+    expect(EdgeInsets.lerp(null, null, 0), null);
+    const EdgeInsets insets = EdgeInsets.zero;
+    expect(identical(EdgeInsets.lerp(insets, insets, 0.5), insets), true);
+  });
+
   test('EdgeInsets.resolve()', () {
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
     expect(const EdgeInsetsDirectional.fromSTEB(99.0, 98.0, 97.0, 96.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(97.0, 98.0, 99.0, 96.0));
@@ -178,6 +184,18 @@ void main() {
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 10.0), const EdgeInsets.only(left: 20.0), 0.5), const EdgeInsetsDirectional.only(start: 5.0).add(const EdgeInsets.only(left: 10.0)));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 1.0), const EdgeInsetsDirectional.only(start: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsets.only(bottom: 1.0), const EdgeInsetsDirectional.only(end: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(end: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+  });
+
+  test('EdgeInsetsGeometry.lerp identical a,b', () {
+    expect(EdgeInsetsGeometry.lerp(null, null, 0), null);
+    const EdgeInsetsGeometry insets = EdgeInsets.zero;
+    expect(identical(EdgeInsetsGeometry.lerp(insets, insets, 0.5), insets), true);
+  });
+
+  test('EdgeInsetsDirectional.lerp identical a,b', () {
+    expect(EdgeInsetsDirectional.lerp(null, null, 0), null);
+    const EdgeInsetsDirectional insets = EdgeInsetsDirectional.zero;
+    expect(identical(EdgeInsetsDirectional.lerp(insets, insets, 0.5), insets), true);
   });
 
   test('EdgeInsetsGeometry.lerp(normal, ...)', () {

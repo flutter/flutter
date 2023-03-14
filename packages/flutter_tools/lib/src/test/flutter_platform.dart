@@ -34,7 +34,7 @@ import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
-/// processes will host the Observatory server.
+/// processes will host the VmService server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
   InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
@@ -46,13 +46,15 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 ///
 /// On systems where each [FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
-/// main()`), you can set an observatory port explicitly.
+/// main()`), you can set a VM Service port explicitly.
 FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   required String shellPath,
   required DebuggingOptions debuggingOptions,
   TestWatcher? watcher,
+  // TODO(bkonyi): remove after roll into google3.
   bool enableObservatory = false,
+  bool enableVmService = false,
   bool machine = false,
   String? precompiledDillPath,
   Map<String, String>? precompiledDillFiles,
@@ -68,8 +70,7 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
 }) {
-  assert(testWrapper != null);
-  assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
+  assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
@@ -85,7 +86,7 @@ FlutterPlatform installHook({
     debuggingOptions: debuggingOptions,
     watcher: watcher,
     machine: machine,
-    enableObservatory: enableObservatory,
+    enableVmService: enableVmService || enableObservatory,
     host: _kHosts[serverType],
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
@@ -122,7 +123,7 @@ FlutterPlatform installHook({
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.
 ///
-// NOTE: this API is used by the fuchsia source tree, do not add new
+// This API is used by the Fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
   required Uri testUrl,
@@ -134,9 +135,6 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  assert(testUrl != null);
-  assert(host != null);
-  assert(updateGoldens != null);
 
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
@@ -280,7 +278,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.shellPath,
     required this.debuggingOptions,
     this.watcher,
-    this.enableObservatory,
+    this.enableVmService,
     this.machine,
     this.host,
     this.precompiledDillPath,
@@ -294,12 +292,12 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
-  }) : assert(shellPath != null);
+  });
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
   final TestWatcher? watcher;
-  final bool? enableObservatory;
+  final bool? enableVmService;
   final bool? machine;
   final InternetAddress? host;
   final String? precompiledDillPath;
@@ -361,7 +359,7 @@ class FlutterPlatform extends PlatformPlugin {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
-        throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+        throwToolExit('installHook() was called with a VM Service port or debugger mode enabled, but then more than one test suite was run.');
       }
       // Fail if we're passing in a precompiled entry-point.
       if (precompiledDillPath != null) {
@@ -428,7 +426,7 @@ class FlutterPlatform extends PlatformPlugin {
       processManager: globals.processManager,
       logger: globals.logger,
       shellPath: shellPath,
-      enableObservatory: enableObservatory!,
+      enableVmService: enableVmService!,
       machine: machine,
       debuggingOptions: debuggingOptions,
       host: host,
@@ -516,13 +514,13 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri? processObservatoryUri = await testDevice.observatoryUri;
-          if (processObservatoryUri != null) {
-            globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
+          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
+          if (processVmServiceUri != null) {
+            globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
           } else {
-            globals.printTrace('test $ourTestCount: Observatory uri is not available');
+            globals.printTrace('test $ourTestCount: VM Service uri is not available');
           }
-          watcher?.handleStartedDevice(processObservatoryUri);
+          watcher?.handleStartedDevice(processVmServiceUri);
 
           final StreamChannel<String> remoteChannel = await remoteChannelFuture;
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');

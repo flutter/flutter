@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -71,6 +72,10 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
     'service': 'flutterMemoryInfo',
+    'alias': 'Flutter Tools',
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': 'flutterGetIOSBuildOptions',
     'alias': 'Flutter Tools',
   }),
   FakeVmServiceRequest(
@@ -428,25 +433,69 @@ void main() {
       () async {
     final ResidentRunner residentWebRunner =
         setUpResidentRunner(flutterDevice, logger: testLogger);
-    final Map<String, String> extensionData = <String, String>{
-      'test': 'data',
-      'renderedErrorText': 'error text',
-    };
-    final Map<String, String> emptyExtensionData = <String, String>{
-      'test': 'data',
-      'renderedErrorText': '',
-    };
-    final Map<String, String> nonStructuredErrorData = <String, String>{
-      'other': 'other stuff',
-    };
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+    final List<VmServiceExpectation> requests = <VmServiceExpectation>[
       ...kAttachExpectations,
+      // This is the first error message of a session.
       FakeVmServiceStreamResponse(
         streamId: 'Extension',
         event: vm_service.Event(
           timestamp: 0,
           extensionKind: 'Flutter.Error',
-          extensionData: vm_service.ExtensionData.parse(extensionData),
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'errorsSinceReload': 0,
+            'renderedErrorText': 'first',
+          }),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is the second error message of a session.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'errorsSinceReload': 1,
+            'renderedErrorText': 'second',
+          }),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is not Flutter.Error kind data, so it should not be logged, even though it has a renderedErrorText field.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Other',
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'errorsSinceReload': 2,
+            'renderedErrorText': 'not an error',
+          }),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is the third error message of a session.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'errorsSinceReload': 2,
+            'renderedErrorText': 'third',
+          }),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is bogus error data.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'other': 'bad stuff',
+          }),
           kind: vm_service.EventStreams.kExtension,
         ),
       ),
@@ -456,21 +505,33 @@ void main() {
         event: vm_service.Event(
           timestamp: 0,
           extensionKind: 'Flutter.Error',
-          extensionData: vm_service.ExtensionData.parse(emptyExtensionData),
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'test': 'data',
+            'renderedErrorText': '',
+          }),
           kind: vm_service.EventStreams.kExtension,
         ),
       ),
-      // This is not Flutter.Error kind data, so it should not be logged.
+      // Messages without errorsSinceReload should act as if errorsSinceReload: 0
       FakeVmServiceStreamResponse(
         streamId: 'Extension',
         event: vm_service.Event(
           timestamp: 0,
-          extensionKind: 'Other',
-          extensionData: vm_service.ExtensionData.parse(nonStructuredErrorData),
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+            'test': 'data',
+            'renderedErrorText': 'error text',
+          }),
           kind: vm_service.EventStreams.kExtension,
         ),
       ),
-    ]);
+      // When adding things here, make sure the last one is supposed to output something
+      // to the statusLog, otherwise you won't be able to distinguish the absence of output
+      // due to it passing the test from absence due to it not running the test.
+    ];
+    // We use requests below, so make a copy of it here (FakeVmServiceHost will
+    // clear its copy internally, which would affect our pumping below).
+    fakeVmServiceHost = FakeVmServiceHost(requests: requests.toList());
 
     setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -479,10 +540,32 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    await null;
+    assert(requests.length > 5, 'requests was modified');
+    for (final Object _ in requests) {
+      // pump the task queue once for each message
+      await null;
+    }
 
-    expect(testLogger.statusText, contains('\nerror text'));
-    expect(testLogger.statusText, isNot(contains('other stuff')));
+    expect(testLogger.statusText,
+      'Launching lib/main.dart on FakeDevice in debug mode...\n'
+      'Waiting for connection from debug service on FakeDevice...\n'
+      'Debug service listening on ws://127.0.0.1/abcd/\n'
+      '\n'
+      'first\n'
+      '\n'
+      'second\n'
+      'third\n'
+      '\n'
+      '\n' // the empty message
+      '\n'
+      '\n'
+      'error text\n'
+      '\n'
+    );
+
+    expect(testLogger.errorText,
+      'Received an invalid Flutter.Error message from app: {other: bad stuff}\n'
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1273,7 +1356,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage? package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -1287,7 +1370,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     if (count > 0) {
@@ -1401,6 +1484,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -1517,7 +1601,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
+  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
@@ -1557,6 +1641,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     int? hostVmServicePort,
     int? ddsPort,

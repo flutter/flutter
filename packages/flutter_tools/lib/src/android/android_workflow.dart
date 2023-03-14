@@ -258,7 +258,7 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Success.
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 }
 
@@ -327,7 +327,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
@@ -436,11 +436,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       unawaited(process.stdin.addStream(_stdio.stdin)
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
-        .catchError((dynamic err, StackTrace stack) {
-          _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
-          _logger.printTrace('$err\n$stack');
-        }
-      ));
+        .then(
+          (Object? socket) => socket,
+          onError: (dynamic err, StackTrace stack) {
+            _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+            _logger.printTrace('$err\n$stack');
+          },
+        ),
+      );
 
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
@@ -455,7 +458,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
 
       final int exitCode = await process.exitCode;
-      return exitCode == 0;
+      if (exitCode != 0) {
+        throwToolExit(_userMessages.androidCannotRunSdkManager(
+          _androidSdk?.sdkManagerPath ?? '',
+          'exited code $exitCode',
+          _platform,
+        ));
+      }
+      return true;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
         _androidSdk?.sdkManagerPath ?? '',

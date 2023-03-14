@@ -114,7 +114,7 @@ void main() {
     );
     final ValidationResult result = await linuxDoctorValidator.validate();
 
-    expect(result.type, ValidationType.installed);
+    expect(result.type, ValidationType.success);
     expect(result.messages, const <ValidationMessage>[
       ValidationMessage('clang version 4.0.1-6+build1'),
       ValidationMessage('cmake version 3.16.3'),

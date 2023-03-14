@@ -231,7 +231,7 @@ class Factory<T> {
   /// Creates a new factory.
   ///
   /// The `constructor` parameter must not be null.
-  const Factory(this.constructor) : assert(constructor != null);
+  const Factory(this.constructor);
 
   /// Creates a new object of type T.
   final ValueGetter<T> constructor;

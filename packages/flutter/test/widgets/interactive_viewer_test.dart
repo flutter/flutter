@@ -207,7 +207,7 @@ void main() {
                 constrained: false,
                 scaleEnabled: false,
                 transformationController: transformationController,
-                child: const SizedBox(width: 0.0, height: 0.0),
+                child: const SizedBox.shrink(),
               ),
             ),
           ),
@@ -1190,6 +1190,8 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
@@ -1222,8 +1224,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Shrink the size of the screen.
-      tester.binding.window.physicalSizeTestValue = const Size(100.0, 100.0);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(100.0, 100.0);
       await tester.pump();
 
       // Attempting to drag to pan still doesn't work, because the image has
@@ -1722,6 +1723,50 @@ void main() {
       expect(translation2.y, lessThan(translation1.y));
     });
 
+    testWidgets('discrete scroll pointer events', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0);
+      expect(translation.y, 0);
+
+      // Send a mouse scroll event, it should cause a scale.
+      final TestPointer mouse = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(mouse.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(mouse.scroll(const Offset(300, -200)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5);
+      translation = transformationController.value.getTranslation();
+      // Will be translated to maintain centering.
+      expect(translation.x, -150);
+      expect(translation.y, -150);
+
+      // Send a trackpad scroll event, it should cause a pan and no scale.
+      final TestPointer trackpad = TestPointer(1, PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(trackpad.hover(tester.getCenter(find.byType(SizedBox))));
+      await tester.sendEventToBinding(trackpad.scroll(const Offset(100, -25)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 2.5);
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, -250);
+      expect(translation.y, -125);
+    });
+
     testWidgets('discrete scale pointer event', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
@@ -1757,6 +1802,78 @@ void main() {
       await tester.sendEventToBinding(pointer.scale(1.5));
       await tester.pump();
       expect(transformationController.value.getMaxScaleOnAxis(), 2.5); // capped at maxScale (2.5)
+    });
+
+    testWidgets('trackpadScrollCausesScale', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                trackpadScrollCausesScale: true,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a vertical scroll.
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      await tester.sendEventToBinding(pointer.panZoomStart(center));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+      await tester.sendEventToBinding(pointer.panZoomUpdate(center, pan: const Offset(0, -81)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
+
+      // Send a horizontal scroll (should have no effect).
+      await tester.sendEventToBinding(pointer.panZoomUpdate(center, pan: const Offset(81, -81)));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
+    });
+
+    testWidgets('Scaling inertia', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                trackpadScrollCausesScale: true,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a vertical scroll fling, which will cause inertia.
+      await tester.trackpadFling(
+        find.byType(InteractiveViewer),
+        const Offset(0, -100),
+        3000
+      );
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.6487212707001282));
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.7966838346780103));
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
+      await tester.pump(const Duration(seconds: 10));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9984509673751225));
     });
   });
 

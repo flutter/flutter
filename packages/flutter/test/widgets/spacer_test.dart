@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {
-    await tester.pumpWidget(Column(
-      children: const <Widget>[
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
         Spacer(),
         SizedBox(width: 10.0, height: 10.0),
@@ -24,9 +24,9 @@ void main() {
     const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);
     const Spacer spacer4 = Spacer(flex: 4);
-    await tester.pumpWidget(Row(
+    await tester.pumpWidget(const Row(
       textDirection: TextDirection.rtl,
-      children: const <Widget>[
+      children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
         spacer1,
         SizedBox(width: 10.0, height: 10.0),
@@ -54,10 +54,10 @@ void main() {
   });
 
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {
-    await tester.pumpWidget(UnconstrainedBox(
+    await tester.pumpWidget(const UnconstrainedBox(
       constrainedAxis: Axis.vertical,
       child: Column(
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox(width: 20.0, height: 10.0),
           Spacer(),
           SizedBox(width: 10.0, height: 10.0),
