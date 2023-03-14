@@ -1,4 +1,4 @@
-Signature: 943c8628754a36c980fd63c32c301539
+Signature: 56f488395eb53b09caaac9abc364724b
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -33,7 +33,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/nameser_compat.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ipc.h
@@ -42,7 +41,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/setjmp.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fenv.h
@@ -54,6 +52,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/shm.h
@@ -61,7 +60,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/ioctl.h
@@ -237,7 +235,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/nameser_compat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ipc.h
@@ -246,7 +243,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fenv.h
@@ -258,6 +254,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/shm.h
@@ -265,7 +262,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/ioctl.h
@@ -420,7 +416,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
@@ -1789,7 +1784,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/nameser_compat.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ipc.h
@@ -1798,7 +1792,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/setjmp.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fenv.h
@@ -1810,6 +1803,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/shm.h
@@ -1817,7 +1811,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/ioctl.h
@@ -1993,7 +1986,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/nameser_compat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ipc.h
@@ -2002,7 +1994,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fenv.h
@@ -2014,6 +2005,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/shm.h
@@ -2021,7 +2013,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/ioctl.h
@@ -2176,7 +2167,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
@@ -4151,7 +4141,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/nameser_compat.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ipc.h
@@ -4160,7 +4149,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/setjmp.
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fenv.h
@@ -4172,6 +4160,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/shm.h
@@ -4179,7 +4168,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/ioctl.h
@@ -4355,7 +4343,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/nameser_compat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/telnet.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/tftp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ipc.h
@@ -4364,7 +4351,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fenv.h
@@ -4376,6 +4362,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/null.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/posix.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/reg.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/riscv64/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/shm.h
@@ -4383,7 +4370,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/signal.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/endian.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/fenv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/ioctl.h
@@ -4538,7 +4524,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cmx
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/libc.ifs
