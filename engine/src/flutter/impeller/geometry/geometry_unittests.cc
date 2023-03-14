@@ -1493,6 +1493,22 @@ TEST(GeometryTest, RectIntersection) {
     auto u = a.Intersection(b);
     ASSERT_FALSE(u.has_value());
   }
+
+  {
+    Rect a = Rect::MakeMaximum();
+    Rect b(10, 10, 300, 300);
+    auto u = a.Intersection(b);
+    ASSERT_TRUE(u);
+    ASSERT_RECT_NEAR(u.value(), b);
+  }
+
+  {
+    Rect a = Rect::MakeMaximum();
+    Rect b = Rect::MakeMaximum();
+    auto u = a.Intersection(b);
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u, Rect::MakeMaximum());
+  }
 }
 
 TEST(GeometryTest, RectIntersectsWithRect) {
@@ -1518,6 +1534,18 @@ TEST(GeometryTest, RectIntersectsWithRect) {
     Rect a(0, 0, 100, 100);
     Rect b(100, 100, 100, 100);
     ASSERT_FALSE(a.IntersectsWithRect(b));
+  }
+
+  {
+    Rect a = Rect::MakeMaximum();
+    Rect b(10, 10, 100, 100);
+    ASSERT_TRUE(a.IntersectsWithRect(b));
+  }
+
+  {
+    Rect a = Rect::MakeMaximum();
+    Rect b = Rect::MakeMaximum();
+    ASSERT_TRUE(a.IntersectsWithRect(b));
   }
 }
 
@@ -1603,6 +1631,12 @@ TEST(GeometryTest, RectContainsPoint) {
     Point p(199, 199);
     ASSERT_TRUE(r.Contains(p));
   }
+
+  {
+    Rect r = Rect::MakeMaximum();
+    Point p(199, 199);
+    ASSERT_TRUE(r.Contains(p));
+  }
 }
 
 TEST(GeometryTest, RectContainsRect) {
@@ -1635,15 +1669,35 @@ TEST(GeometryTest, RectContainsRect) {
     Rect b(0, 0, 300, 300);
     ASSERT_FALSE(a.Contains(b));
   }
+  {
+    Rect a = Rect::MakeMaximum();
+    Rect b(0, 0, 300, 300);
+    ASSERT_TRUE(a.Contains(b));
+  }
 }
 
 TEST(GeometryTest, RectGetPoints) {
-  Rect r(100, 200, 300, 400);
-  auto points = r.GetPoints();
-  ASSERT_POINT_NEAR(points[0], Point(100, 200));
-  ASSERT_POINT_NEAR(points[1], Point(400, 200));
-  ASSERT_POINT_NEAR(points[2], Point(100, 600));
-  ASSERT_POINT_NEAR(points[3], Point(400, 600));
+  {
+    Rect r(100, 200, 300, 400);
+    auto points = r.GetPoints();
+    ASSERT_POINT_NEAR(points[0], Point(100, 200));
+    ASSERT_POINT_NEAR(points[1], Point(400, 200));
+    ASSERT_POINT_NEAR(points[2], Point(100, 600));
+    ASSERT_POINT_NEAR(points[3], Point(400, 600));
+  }
+
+  {
+    Rect r = Rect::MakeMaximum();
+    auto points = r.GetPoints();
+    ASSERT_EQ(points[0], Point(-std::numeric_limits<float>::infinity(),
+                               -std::numeric_limits<float>::infinity()));
+    ASSERT_EQ(points[1], Point(std::numeric_limits<float>::infinity(),
+                               -std::numeric_limits<float>::infinity()));
+    ASSERT_EQ(points[2], Point(-std::numeric_limits<float>::infinity(),
+                               std::numeric_limits<float>::infinity()));
+    ASSERT_EQ(points[3], Point(std::numeric_limits<float>::infinity(),
+                               std::numeric_limits<float>::infinity()));
+  }
 }
 
 TEST(GeometryTest, RectShift) {
