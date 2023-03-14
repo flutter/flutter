@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
@@ -28,6 +30,7 @@ void main() {
         expect(analyze.allProjectValidators().length, 2);
       }
     }
+    expect(Platform.environment['LUCI_CI'], 'azx');
     expect('a', 'b');
   }));
 
