@@ -24,7 +24,7 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      # CIPD flutter_internal/java/openjdk/$platform
+      # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "version:11"},
@@ -46,7 +46,7 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      # CIPD flutter_internal/java/openjdk/$platform
+      # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "version:11"}
@@ -68,7 +68,7 @@ platform_properties:
       ios_debug: "false"
       ios_profile: "false"
       ios_release: "false"
-      # CIPD flutter_internal/java/openjdk/$platform
+      # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
           {"dependency": "open_jdk", "version": "version:11"}
