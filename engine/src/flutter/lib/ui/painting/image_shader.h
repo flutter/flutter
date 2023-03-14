@@ -25,8 +25,8 @@ class ImageShader : public Shader {
   static void Create(Dart_Handle wrapper);
 
   Dart_Handle initWithImage(CanvasImage* image,
-                            SkTileMode tmx,
-                            SkTileMode tmy,
+                            DlTileMode tmx,
+                            DlTileMode tmy,
                             int filter_quality_index,
                             Dart_Handle matrix_handle);
 

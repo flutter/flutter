@@ -4,7 +4,6 @@
 
 #include "flutter/flow/layers/physical_shape_layer.h"
 
-#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/flow/paint_utils.h"
 
 namespace flutter {
@@ -36,9 +35,9 @@ void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
   if (elevation_ == 0) {
     bounds = path_.getBounds();
   } else {
-    bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
-        path_, elevation_, context->frame_device_pixel_ratio(),
-        context->GetTransform3x3());
+    bounds = DlCanvas::ComputeShadowBounds(path_, elevation_,
+                                           context->frame_device_pixel_ratio(),
+                                           context->GetTransform3x3());
   }
 
   context->AddLayerBounds(bounds);
@@ -65,7 +64,7 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context) {
   } else {
     // We will draw the shadow in Paint(), so add some margin to the paint
     // bounds to leave space for the shadow.
-    paint_bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
+    paint_bounds = DlCanvas::ComputeShadowBounds(
         path_, elevation_, context->frame_device_pixel_ratio,
         context->state_stack.transform_3x3());
   }

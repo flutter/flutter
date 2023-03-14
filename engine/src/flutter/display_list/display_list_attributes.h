@@ -36,10 +36,6 @@ namespace flutter {
 //     wrong type of instance.
 //     (eg. DlColorFilter::asBlend() or DlMaskFilter::asBlur())
 //
-// - Skiafiable:
-//     The classes override an |skia_object| method to easily obtain a Skia
-//     version of the attribute on demand.
-//
 // - Immutable:
 //     Neither the base class or any of the subclasses specify any mutation
 //     methods. Instances are often passed around as const as a reminder,
@@ -56,7 +52,7 @@ namespace flutter {
 //     compared using a |memcmp| when performing a |DisplayList::Equals|.
 //
 // - Passed by Pointer:
-//     The data shared via the |Dispatcher::set<Attribute>| calls are stored
+//     The data shared via the |DlOpReceiver::set<Attribute>| calls are stored
 //     in the buffer itself and so their lifetime is controlled by the
 //     DisplayList. That memory cannot be shared as by a |shared_ptr|
 //     because the memory may be freed outside the control of the shared
@@ -70,7 +66,7 @@ namespace flutter {
 // - Shared_Ptr-able:
 //     The classes support a method to return a |std::shared_ptr| version of
 //     themselves, safely instantiating a new copy of the object into a
-//     shared_ptr using |std::make_shared|. For those dispatcher objects
+//     shared_ptr using |std::make_shared|. For those receiver objects
 //     that may want to hold on to the contents of the object (typically
 //     in a |current_attribute_| field), they can obtain a shared_ptr
 //     copy safely and easily using the |shared| method.
@@ -79,11 +75,9 @@ namespace flutter {
 
 // |D| is the base type for the attribute
 //     (i.e. DlColorFilter, etc.)
-// |S| is the base type for the Skia version of the attribute
-//     (i.e. SkColorFilter, etc.)
 // |T| is the enum that describes the specific subclasses
 //     (i.e DlColorFilterType, etc.)
-template <class D, class S, typename T>
+template <class D, typename T>
 class DlAttribute {
  public:
   // Return the recognized specific type of the attribute.
@@ -97,9 +91,6 @@ class DlAttribute {
   // will reference a copy of this object so that the lifetime of the shared
   // version is not tied to the storage of this particular instance.
   virtual std::shared_ptr<D> shared() const = 0;
-
-  // Return an equivalent sk_sp<Skia> version of this object.
-  virtual sk_sp<S> skia_object() const = 0;
 
   // Perform a content aware |==| comparison of the Attribute.
   bool operator==(D const& other) const {

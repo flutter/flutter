@@ -29,9 +29,9 @@ enum class DlImageFilterType {
   kDilate,
   kErode,
   kMatrix,
-  kComposeFilter,
+  kCompose,
   kColorFilter,
-  kLocalMatrixFilter,
+  kLocalMatrix,
 };
 
 class DlBlurImageFilter;
@@ -42,8 +42,7 @@ class DlLocalMatrixImageFilter;
 class DlComposeImageFilter;
 class DlColorFilterImageFilter;
 
-class DlImageFilter
-    : public DlAttribute<DlImageFilter, SkImageFilter, DlImageFilterType> {
+class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
  public:
   enum class MatrixCapability {
     kTranslate,
@@ -227,6 +226,16 @@ class DlBlurImageFilter final : public DlImageFilter {
   explicit DlBlurImageFilter(const DlBlurImageFilter& filter)
       : DlBlurImageFilter(&filter) {}
 
+  static std::shared_ptr<DlImageFilter> Make(SkScalar sigma_x,
+                                             SkScalar sigma_y,
+                                             DlTileMode tile_mode) {
+    if (SkScalarIsFinite(sigma_x) && sigma_x > SK_ScalarNearlyZero &&
+        SkScalarIsFinite(sigma_y) && sigma_y > SK_ScalarNearlyZero) {
+      return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode);
+    }
+    return nullptr;
+  }
+
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlBlurImageFilter>(this);
   }
@@ -262,10 +271,6 @@ class DlBlurImageFilter final : public DlImageFilter {
   SkScalar sigma_y() const { return sigma_y_; }
   DlTileMode tile_mode() const { return tile_mode_; }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::Blur(sigma_x_, sigma_y_, ToSk(tile_mode_), nullptr);
-  }
-
  protected:
   bool equals_(const DlImageFilter& other) const override {
     FML_DCHECK(other.type() == DlImageFilterType::kBlur);
@@ -288,6 +293,15 @@ class DlDilateImageFilter final : public DlImageFilter {
       : DlDilateImageFilter(filter->radius_x_, filter->radius_y_) {}
   explicit DlDilateImageFilter(const DlDilateImageFilter& filter)
       : DlDilateImageFilter(&filter) {}
+
+  static std::shared_ptr<DlImageFilter> Make(SkScalar radius_x,
+                                             SkScalar radius_y) {
+    if (SkScalarIsFinite(radius_x) && radius_x > SK_ScalarNearlyZero &&
+        SkScalarIsFinite(radius_y) && radius_y > SK_ScalarNearlyZero) {
+      return std::make_shared<DlDilateImageFilter>(radius_x, radius_y);
+    }
+    return nullptr;
+  }
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlDilateImageFilter>(this);
@@ -323,10 +337,6 @@ class DlDilateImageFilter final : public DlImageFilter {
   SkScalar radius_x() const { return radius_x_; }
   SkScalar radius_y() const { return radius_y_; }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::Dilate(radius_x_, radius_y_, nullptr);
-  }
-
  protected:
   bool equals_(const DlImageFilter& other) const override {
     FML_DCHECK(other.type() == DlImageFilterType::kDilate);
@@ -347,6 +357,15 @@ class DlErodeImageFilter final : public DlImageFilter {
       : DlErodeImageFilter(filter->radius_x_, filter->radius_y_) {}
   explicit DlErodeImageFilter(const DlErodeImageFilter& filter)
       : DlErodeImageFilter(&filter) {}
+
+  static std::shared_ptr<DlImageFilter> Make(SkScalar radius_x,
+                                             SkScalar radius_y) {
+    if (SkScalarIsFinite(radius_x) && radius_x > SK_ScalarNearlyZero &&
+        SkScalarIsFinite(radius_y) && radius_y > SK_ScalarNearlyZero) {
+      return std::make_shared<DlErodeImageFilter>(radius_x, radius_y);
+    }
+    return nullptr;
+  }
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlErodeImageFilter>(this);
@@ -382,10 +401,6 @@ class DlErodeImageFilter final : public DlImageFilter {
   SkScalar radius_x() const { return radius_x_; }
   SkScalar radius_y() const { return radius_y_; }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::Erode(radius_x_, radius_y_, nullptr);
-  }
-
  protected:
   bool equals_(const DlImageFilter& other) const override {
     FML_DCHECK(other.type() == DlImageFilterType::kErode);
@@ -406,6 +421,14 @@ class DlMatrixImageFilter final : public DlImageFilter {
       : DlMatrixImageFilter(filter->matrix_, filter->sampling_) {}
   explicit DlMatrixImageFilter(const DlMatrixImageFilter& filter)
       : DlMatrixImageFilter(&filter) {}
+
+  static std::shared_ptr<DlImageFilter> Make(const SkMatrix& matrix,
+                                             DlImageSampling sampling) {
+    if (matrix.isFinite() && !matrix.isIdentity()) {
+      return std::make_shared<DlMatrixImageFilter>(matrix, sampling);
+    }
+    return nullptr;
+  }
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlMatrixImageFilter>(this);
@@ -460,10 +483,6 @@ class DlMatrixImageFilter final : public DlImageFilter {
     return &input_bounds;
   }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::MatrixTransform(matrix_, ToSk(sampling_), nullptr);
-  }
-
  protected:
   bool equals_(const DlImageFilter& other) const override {
     FML_DCHECK(other.type() == DlImageFilterType::kMatrix);
@@ -478,8 +497,8 @@ class DlMatrixImageFilter final : public DlImageFilter {
 
 class DlComposeImageFilter final : public DlImageFilter {
  public:
-  DlComposeImageFilter(std::shared_ptr<DlImageFilter> outer,
-                       std::shared_ptr<DlImageFilter> inner)
+  DlComposeImageFilter(std::shared_ptr<const DlImageFilter> outer,
+                       std::shared_ptr<const DlImageFilter> inner)
       : outer_(std::move(outer)), inner_(std::move(inner)) {}
   DlComposeImageFilter(const DlImageFilter* outer, const DlImageFilter* inner)
       : outer_(outer->shared()), inner_(inner->shared()) {}
@@ -490,17 +509,29 @@ class DlComposeImageFilter final : public DlImageFilter {
   explicit DlComposeImageFilter(const DlComposeImageFilter& filter)
       : DlComposeImageFilter(&filter) {}
 
+  static std::shared_ptr<const DlImageFilter> Make(
+      std::shared_ptr<const DlImageFilter> outer,
+      std::shared_ptr<const DlImageFilter> inner) {
+    if (!outer) {
+      return inner;
+    }
+    if (!inner) {
+      return outer;
+    }
+    return std::make_shared<DlComposeImageFilter>(outer, inner);
+  }
+
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlComposeImageFilter>(this);
   }
 
   DlImageFilterType type() const override {
-    return DlImageFilterType::kComposeFilter;
+    return DlImageFilterType::kCompose;
   }
   size_t size() const override { return sizeof(*this); }
 
-  std::shared_ptr<DlImageFilter> outer() const { return outer_; }
-  std::shared_ptr<DlImageFilter> inner() const { return inner_; }
+  std::shared_ptr<const DlImageFilter> outer() const { return outer_; }
+  std::shared_ptr<const DlImageFilter> inner() const { return inner_; }
 
   const DlComposeImageFilter* asCompose() const override { return this; }
 
@@ -525,30 +556,25 @@ class DlComposeImageFilter final : public DlImageFilter {
                                    const SkMatrix& ctm,
                                    SkIRect& input_bounds) const override;
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::Compose(outer_->skia_object(),
-                                   inner_->skia_object());
-  }
-
   MatrixCapability matrix_capability() const override {
     return std::min(outer_->matrix_capability(), inner_->matrix_capability());
   }
 
  protected:
   bool equals_(const DlImageFilter& other) const override {
-    FML_DCHECK(other.type() == DlImageFilterType::kComposeFilter);
+    FML_DCHECK(other.type() == DlImageFilterType::kCompose);
     auto that = static_cast<const DlComposeImageFilter*>(&other);
     return (Equals(outer_, that->outer_) && Equals(inner_, that->inner_));
   }
 
  private:
-  std::shared_ptr<DlImageFilter> outer_;
-  std::shared_ptr<DlImageFilter> inner_;
+  std::shared_ptr<const DlImageFilter> outer_;
+  std::shared_ptr<const DlImageFilter> inner_;
 };
 
 class DlColorFilterImageFilter final : public DlImageFilter {
  public:
-  explicit DlColorFilterImageFilter(std::shared_ptr<DlColorFilter> filter)
+  explicit DlColorFilterImageFilter(std::shared_ptr<const DlColorFilter> filter)
       : color_filter_(std::move(filter)) {}
   explicit DlColorFilterImageFilter(const DlColorFilter* filter)
       : color_filter_(filter->shared()) {}
@@ -559,6 +585,14 @@ class DlColorFilterImageFilter final : public DlImageFilter {
   explicit DlColorFilterImageFilter(const DlColorFilterImageFilter& filter)
       : DlColorFilterImageFilter(&filter) {}
 
+  static std::shared_ptr<DlImageFilter> Make(
+      std::shared_ptr<const DlColorFilter> filter) {
+    if (filter) {
+      return std::make_shared<DlColorFilterImageFilter>(filter);
+    }
+    return nullptr;
+  }
+
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlColorFilterImageFilter>(color_filter_);
   }
@@ -568,7 +602,7 @@ class DlColorFilterImageFilter final : public DlImageFilter {
   }
   size_t size() const override { return sizeof(*this); }
 
-  const std::shared_ptr<DlColorFilter> color_filter() const {
+  const std::shared_ptr<const DlColorFilter> color_filter() const {
     return color_filter_;
   }
 
@@ -602,10 +636,6 @@ class DlColorFilterImageFilter final : public DlImageFilter {
     return map_device_bounds(output_bounds, ctm, input_bounds);
   }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    return SkImageFilters::ColorFilter(color_filter_->skia_object(), nullptr);
-  }
-
   MatrixCapability matrix_capability() const override {
     return MatrixCapability::kComplex;
   }
@@ -623,7 +653,7 @@ class DlColorFilterImageFilter final : public DlImageFilter {
   }
 
  private:
-  std::shared_ptr<DlColorFilter> color_filter_;
+  std::shared_ptr<const DlColorFilter> color_filter_;
 };
 
 class DlLocalMatrixImageFilter final : public DlImageFilter {
@@ -640,7 +670,7 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
   }
 
   DlImageFilterType type() const override {
-    return DlImageFilterType::kLocalMatrixFilter;
+    return DlImageFilterType::kLocalMatrix;
   }
   size_t size() const override { return sizeof(*this); }
 
@@ -689,20 +719,9 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
         output_bounds, SkMatrix::Concat(ctm, matrix_), input_bounds);
   }
 
-  sk_sp<SkImageFilter> skia_object() const override {
-    if (!image_filter_) {
-      return nullptr;
-    }
-    sk_sp<SkImageFilter> skia_object = image_filter_->skia_object();
-    if (!skia_object) {
-      return nullptr;
-    }
-    return skia_object->makeWithLocalMatrix(matrix_);
-  }
-
  protected:
   bool equals_(const DlImageFilter& other) const override {
-    FML_DCHECK(other.type() == DlImageFilterType::kLocalMatrixFilter);
+    FML_DCHECK(other.type() == DlImageFilterType::kLocalMatrix);
     auto that = static_cast<const DlLocalMatrixImageFilter*>(&other);
     return (matrix_ == that->matrix_ &&
             Equals(image_filter_, that->image_filter_));

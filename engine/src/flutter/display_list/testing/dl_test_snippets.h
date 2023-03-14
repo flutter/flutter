@@ -20,7 +20,7 @@ sk_sp<DisplayList> GetSampleDisplayList();
 sk_sp<DisplayList> GetSampleDisplayList(int ops);
 sk_sp<DisplayList> GetSampleNestedDisplayList();
 
-typedef const std::function<void(DisplayListBuilder&)> DlInvoker;
+typedef const std::function<void(DlOpReceiver&)> DlInvoker;
 
 constexpr SkPoint kEndPoints[] = {
     {0, 0},
@@ -214,8 +214,7 @@ static std::shared_ptr<const DlVertices> TestVertices2 =
 
 static sk_sp<DisplayList> MakeTestDisplayList(int w, int h, SkColor color) {
   DisplayListBuilder builder;
-  builder.setColor(color);
-  builder.drawRect(SkRect::MakeWH(w, h));
+  builder.DrawRect(SkRect::MakeWH(w, h), DlPaint(color));
   return builder.Build();
 }
 static sk_sp<DisplayList> TestDisplayList1 =
@@ -271,13 +270,13 @@ struct DisplayListInvocation {
   // through an SkCanvas interface, comparable to |DisplayList.byte_count().
   size_t sk_byte_count() { return sizeof(DisplayList) + sk_byte_count_; }
 
-  void Invoke(DisplayListBuilder& builder) { invoker(builder); }
+  void Invoke(DlOpReceiver& builder) { invoker(builder); }
 
-  sk_sp<DisplayList> Build() {
-    DisplayListBuilder builder;
-    invoker(builder);
-    return builder.Build();
-  }
+  // sk_sp<DisplayList> Build() {
+  //   DisplayListBuilder builder;
+  //   invoker(builder.asReceiver());
+  //   return builder.Build();
+  // }
 };
 
 struct DisplayListInvocationGroup {
