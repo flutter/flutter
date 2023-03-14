@@ -2775,6 +2775,52 @@ void main() {
     expect(env['flutter']!.allows(Version(2, 4, 9)), false);
   });
 
+  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterToolsAbsolutePath = globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+    );
+    final List<String> iosPluginTemplates = <String>[
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-objc.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-swift.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin_ffi',
+        'ios.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+    ];
+
+    for (final String templatePath in iosPluginTemplates) {
+      final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
+      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+    }
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
+        exists);
+    final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
+    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
+  });
+
   testUsingContext('default app uses flutter default versions', () async {
     Cache.flutterRoot = '../..';
 
