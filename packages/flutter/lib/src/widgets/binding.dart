@@ -901,15 +901,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Used by [runApp] to wrap the provided `rootWidget` in the default [View].
   ///
   /// The [View] determines into what [FlutterView] the app is rendered into.
-  /// For backwards-compatibility reasons, this method currently chooses
-  /// [window] (which is a [FlutterView]) as the rendering target. This will
-  /// change in a future version of Flutter.
+  /// This is currently [PlatformDispatcher.implicitView] from [platformDispatcher].
   ///
   /// The `rootWidget` widget provided to this method must not already be
   /// wrapped in a [View].
   Widget wrapWithDefaultView(Widget rootWidget) {
     return View(
-      view: window,
+      view: platformDispatcher.implicitView!,
       child: rootWidget,
     );
   }

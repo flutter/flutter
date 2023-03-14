@@ -4960,6 +4960,7 @@ void main() {
     );
 
     final RenderEditable editable = findRenderEditable(tester);
+    assert(editable.size.width == 300);
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
@@ -11765,7 +11766,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74566
@@ -11798,7 +11799,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The ListView has scrolled to keep the TextField visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
     expect(textFieldScrollController.offset, 0.0);
 
     // After entering some long text, the last input character remains on the screen.

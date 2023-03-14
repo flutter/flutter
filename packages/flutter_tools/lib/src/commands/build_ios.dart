@@ -49,10 +49,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArgDeprecated('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArgDeprecated('config-only');
+  bool get configOnly => boolArg('config-only');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -131,7 +131,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final bool configOnly = false;
 
-  String? get exportOptionsPlist => stringArgDeprecated('export-options-plist');
+  String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
@@ -455,7 +455,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArgDeprecated('export-method')!;
+    final String exportMethod = stringArg('export-method')!;
     final bool isAppStoreUpload = exportMethod  == 'app-store';
     File? generatedExportPlist;
     try {
@@ -540,7 +540,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>${stringArgDeprecated('export-method')}</string>
+        <string>${stringArg('export-method')}</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -596,7 +596,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArgDeprecated('codesign');
+  bool get shouldCodesign => boolArg('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
