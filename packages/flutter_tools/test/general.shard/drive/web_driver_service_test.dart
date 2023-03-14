@@ -43,7 +43,7 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
+      'goog:chromeOptions': <String, dynamic>{
         'w3c': true,
         'args': <String>[
           ...kChromeArgs,
@@ -70,7 +70,7 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
+      'goog:chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
         'w3c': true,
         'args': kChromeArgs,
@@ -100,7 +100,7 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
+      'goog:chromeOptions': <String, dynamic>{
         'w3c': true,
         'args': <String>[
           ...kChromeArgs,
