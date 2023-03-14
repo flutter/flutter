@@ -109,8 +109,8 @@ struct TRect {
   }
 
   constexpr bool Contains(const TPoint<Type>& p) const {
-    return p.x >= origin.x && p.x < origin.x + size.width && p.y >= origin.y &&
-           p.y < origin.y + size.height;
+    return p.x >= GetLeft() && p.x < GetRight() && p.y >= GetTop() &&
+           p.y < GetBottom();
   }
 
   constexpr bool Contains(const TRect& o) const {
@@ -124,27 +124,35 @@ struct TRect {
   constexpr bool IsMaximum() const { return *this == MakeMaximum(); }
 
   constexpr auto GetLeft() const {
+    if (IsMaximum()) {
+      return -std::numeric_limits<Type>::infinity();
+    }
     return std::min(origin.x, origin.x + size.width);
   }
 
   constexpr auto GetTop() const {
+    if (IsMaximum()) {
+      return -std::numeric_limits<Type>::infinity();
+    }
     return std::min(origin.y, origin.y + size.height);
   }
 
   constexpr auto GetRight() const {
+    if (IsMaximum()) {
+      return std::numeric_limits<Type>::infinity();
+    }
     return std::max(origin.x, origin.x + size.width);
   }
 
   constexpr auto GetBottom() const {
+    if (IsMaximum()) {
+      return std::numeric_limits<Type>::infinity();
+    }
     return std::max(origin.y, origin.y + size.height);
   }
 
   constexpr std::array<T, 4> GetLTRB() const {
-    const auto left = std::min(origin.x, origin.x + size.width);
-    const auto top = std::min(origin.y, origin.y + size.height);
-    const auto right = std::max(origin.x, origin.x + size.width);
-    const auto bottom = std::max(origin.y, origin.y + size.height);
-    return {left, top, right, bottom};
+    return {GetLeft(), GetTop(), GetRight(), GetBottom()};
   }
 
   /// @brief  Get a version of this rectangle that has a non-negative size.
