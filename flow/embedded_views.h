@@ -22,6 +22,8 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 enum MutatorType {

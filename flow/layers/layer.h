@@ -33,6 +33,8 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 namespace testing {

@@ -15,6 +15,8 @@
 #include "flutter/fml/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 namespace testing {

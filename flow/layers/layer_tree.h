@@ -17,6 +17,8 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSize.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 class LayerTree {
