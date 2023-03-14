@@ -1585,6 +1585,178 @@ void main() {
       clear();
     });
 
+    testWidgets('Closest vertical is picked when only out of band items are considered', (WidgetTester tester) async {
+      const int rows = 4;
+      List<bool?> focus = List<bool?>.generate(rows, (int _) => null);
+      final List<FocusNode> nodes = List<FocusNode>.generate(rows, (int index) => FocusNode(debugLabel: 'Node $index'));
+
+      Widget makeFocus(int row) {
+        return Padding(
+          padding: EdgeInsetsDirectional.only(end: row != 0 ? 110.0 : 0),
+          child: Focus(
+            focusNode: nodes[row],
+            onFocusChange: (bool isFocused) => focus[row] = isFocused,
+            child: Container(
+              width: row == 1 ? 150 : 100,
+              height: 100,
+              color: Colors.primaries[row],
+              child: Text('[$row]'),
+            ),
+          ),
+        );
+      }
+
+      /// Layout is:
+      ///           [0]
+      ///    [  1]
+      ///     [ 2]
+      ///     [ 3]
+      ///
+      /// The important feature is that nothing is in the vertical band defined
+      /// by widget [0]. We want it to traverse to 1, 2, 3 in order, even though
+      /// the center of [2] is horizontally closer to the vertical axis of [0]'s
+      /// center than [1]'s.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: FocusScope(
+              debugLabel: 'Scope',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  makeFocus(0),
+                  makeFocus(1),
+                  makeFocus(2),
+                  makeFocus(3),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      void clear() {
+        focus = List<bool?>.generate(focus.length, (int _) => null);
+      }
+
+      final FocusNode scope = nodes[0].enclosingScope!;
+
+      // Go down the column and make sure that the focus goes to the next
+      // closest one.
+      nodes[0].requestFocus();
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[true, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[false, true, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, false, true, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, false, true]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isFalse);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null]));
+      clear();
+    });
+
+    testWidgets('Closest horizontal is picked when only out of band items are considered', (WidgetTester tester) async {
+      const int cols = 4;
+      List<bool?> focus = List<bool?>.generate(cols, (int _) => null);
+      final List<FocusNode> nodes = List<FocusNode>.generate(cols, (int index) => FocusNode(debugLabel: 'Node $index'));
+
+      Widget makeFocus(int col) {
+        return Padding(
+          padding: EdgeInsetsDirectional.only(top: col != 0 ? 110.0 : 0),
+          child: Focus(
+            focusNode: nodes[col],
+            onFocusChange: (bool isFocused) => focus[col] = isFocused,
+            child: Container(
+              width: 100,
+              height: col == 1 ? 150 : 100,
+              color: Colors.primaries[col],
+              child: Text('[$col]'),
+            ),
+          ),
+        );
+      }
+
+      /// Layout is:
+      ///    [0]
+      ///        [ ][2][3]
+      ///        [1]
+      /// ([ ] is part of [1], [1] is just taller than [2] and [3]).
+      ///
+      /// The important feature is that nothing is in the horizontal band
+      /// defined by widget [0]. We want it to traverse to 1, 2, 3 in order,
+      /// even though the center of [2] is vertically closer to the horizontal
+      /// axis of [0]'s center than [1]'s.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: FocusScope(
+              debugLabel: 'Scope',
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  makeFocus(0),
+                  makeFocus(1),
+                  makeFocus(2),
+                  makeFocus(3),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      void clear() {
+        focus = List<bool?>.generate(focus.length, (int _) => null);
+      }
+
+      final FocusNode scope = nodes[0].enclosingScope!;
+
+      // Go down the row and make sure that the focus goes to the next
+      // closest one.
+      nodes[0].requestFocus();
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[true, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.right), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[false, true, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.right), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, false, true, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.right), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, false, true]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.right), isFalse);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null]));
+      clear();
+    });
+
     testWidgets('Can find first focus in all directions.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
       final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
