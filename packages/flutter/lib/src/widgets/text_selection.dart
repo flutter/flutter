@@ -2480,26 +2480,27 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onTripleTapDown(TapDragDownDetails details) {
-    if (delegate.selectionEnabled) {
-      if (renderEditable.maxLines == 1) {
-        editableText.selectAll(SelectionChangedCause.tap);
-      } else {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            _selectParagraphsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
-            break;
-          case TargetPlatform.linux:
-            _selectLinesInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
-            break;
-        }
+    if (!delegate.selectionEnabled) {
+      return;
+    }
+    if (renderEditable.maxLines == 1) {
+      editableText.selectAll(SelectionChangedCause.tap);
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          _selectParagraphsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.linux:
+          _selectLinesInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
+          break;
       }
-      if (shouldShowSelectionToolbar) {
-        editableText.showToolbar();
-      }
+    }
+    if (shouldShowSelectionToolbar) {
+      editableText.showToolbar();
     }
   }
 
@@ -2958,7 +2959,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         // selection is moved to the precise click position, on the fifth click
         // the word at the position is selected, and on the sixth click the
         // paragraph at the position is selected.
-        return rawCount <= 3 ? rawCount : 0 + (rawCount % 3 == 0 ? 3 : rawCount % 3);
+        return rawCount <= 3 ? rawCount : (rawCount % 3 == 0 ? 3 : rawCount % 3);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         // From observation, these platform's either hold their tap count at 3.
