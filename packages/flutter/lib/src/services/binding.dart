@@ -298,6 +298,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// By default, returns [ui.AppExitResponse.exit].
   ///
+  /// {@tool sample}
+  /// This examples shows how an application can cancel (or not) OS requests for
+  /// quitting an application. Currently this is only supported on macOS and
+  /// Linux.
+  ///
+  /// ** See code in examples/api/lib/services/binding/handle_request_app_exit.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   /// * [WidgetsBindingObserver.didRequestAppExit], which can be overridden to

@@ -129,4 +129,20 @@ void main() {
     expect((methodCall!.arguments as Map<String, dynamic>)['type'], equals('required'));
     expect(response, equals(AppExitResponse.cancel));
   });
+
+  test('Default handleRequestAppExit returns exit', () async {
+    const MethodCall incomingCall = MethodCall('System.requestAppExit', <dynamic>[<String, dynamic>{'type': 'cancelable'}]);
+    bool receivedReply = false;
+    Map<String, dynamic>? result;
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/platform', const JSONMethodCodec().encodeMethodCall(incomingCall),
+      (ByteData? message) async {
+        result = (const JSONMessageCodec().decodeMessage(message) as List<dynamic>)[0] as Map<String, dynamic>;
+        receivedReply = true;
+      },
+    );
+
+    expect(receivedReply, isTrue);
+    expect(result, isNotNull);
+    expect(result!['response'], equals('exit'));
+  });
 }
