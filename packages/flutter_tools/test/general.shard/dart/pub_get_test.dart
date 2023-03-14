@@ -823,7 +823,7 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
     expect(preloadCache.existsSync(), false);
   });
-  
+
   testWithoutContext('Notifies about existing caches, on first run only', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory preloadCache = fileSystem.currentDirectory.childDirectory('.pub-preload-cache');
