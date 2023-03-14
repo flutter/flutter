@@ -146,7 +146,7 @@ Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowe
     assert(position.dx.round() < image.width);
     assert(position.dy.round() >= 0);
     assert(position.dy.round() < image.height);
-    final Offset precisePosition = position * binding.window.devicePixelRatio;
+    final Offset precisePosition = position * tester.view.devicePixelRatio;
     final Color actual = _getPixel(bytes, precisePosition.dx.round(), precisePosition.dy.round(), image.width);
     expect(actual, expected, reason: 'Pixel at $position is $actual but expected $expected.');
   });

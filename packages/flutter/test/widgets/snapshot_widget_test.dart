@@ -264,12 +264,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
-    tester.binding.window
-      ..physicalSizeTestValue = const Size(10, 10)
-      ..devicePixelRatioTestValue = 1;
-    addTearDown(() => tester.binding.window
-      ..clearPhysicalSizeTestValue()
-      ..clearDevicePixelRatioTestValue());
+    addTearDown(tester.view.reset);
+
+    tester.view
+      ..physicalSize = const Size(10, 10)
+      ..devicePixelRatio = 1;
 
     const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
     final SnapshotController controller = SnapshotController();

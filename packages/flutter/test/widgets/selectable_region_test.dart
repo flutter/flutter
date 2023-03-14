@@ -1668,6 +1668,8 @@ void main() {
   });
 
   testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
@@ -1677,7 +1679,6 @@ void main() {
         ),
       ),
     );
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1690,7 +1691,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
 
     // Hide the toolbar by changing orientation.
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
     await tester.pumpAndSettle();
     expect(find.text('Copy'), findsNothing);
 

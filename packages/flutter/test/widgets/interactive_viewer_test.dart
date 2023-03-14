@@ -1190,6 +1190,8 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
 
     testWidgets('viewport changes size', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
@@ -1222,8 +1224,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Shrink the size of the screen.
-      tester.binding.window.physicalSizeTestValue = const Size(100.0, 100.0);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(100.0, 100.0);
       await tester.pump();
 
       // Attempting to drag to pan still doesn't work, because the image has

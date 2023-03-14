@@ -142,7 +142,7 @@ void main() {
 
     // Set the starting viewportDimension to 0.0
     await tester.binding.setSurfaceSize(Size.zero);
-    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.binding.window);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
     Widget build(Size size) {
       return MediaQuery(
@@ -1048,7 +1048,7 @@ void main() {
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
-      devicePixelRatio: tester.binding.window.devicePixelRatio,
+      devicePixelRatio: tester.view.devicePixelRatio,
     );
     expect(page.page, 6);
     final PageMetrics page2 = page.copyWith(
