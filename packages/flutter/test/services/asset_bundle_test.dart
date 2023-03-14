@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -34,24 +33,6 @@ class TestAssetBundle extends CachingAssetBundle {
       return ByteData(1)..setInt8(0, 49);
     }
 
-    throw FlutterError('key not found');
-  }
-}
-
-class SynchronousTestAssetBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) {
-    if (key == 'one') {
-      return SynchronousFuture<ByteData>(ByteData(1)..setInt8(0, 49));
-    }
-    throw FlutterError('key not found');
-  }
-
-  @override
-  Future<String> loadString(String key, {bool cache = true}) {
-    if (key == 'one') {
-      return SynchronousFuture<String>('1');
-    }
     throw FlutterError('key not found');
   }
 }
@@ -139,18 +120,18 @@ void main() {
       expect(secondLoadStructuredBinaryDataResult, 'two');
     });
 
-    test('loadStructuredBinaryData cache is populated synchronously if load is synchronous', () async {
-      final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
-      bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
-      final FutureOr<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
+    test('for a given key, subsequent loadStructuredData calls are synchronous after the first call resolves', () async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      await bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
+      final Future<int> data = bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(2));
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
 
-    test('loadStructuredData cache is populated synchronously if load is synchronous', () async {
-      final SynchronousTestAssetBundle bundle = SynchronousTestAssetBundle();
-      bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
-      final Future<int> data = bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(2));
+    test('for a given key, subsequent loadStructuredBinaryData calls are synchronous after the first call resolves', () async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      await bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
+      final Future<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
