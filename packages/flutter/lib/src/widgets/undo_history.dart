@@ -107,7 +107,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     if (_stack.currentValue == null)  {
       // Returns early if there is not a first value registered in the history.
       // This is important because, if an undo is received while the initial
-      // value is being pushed (a.k.a when the field get the focus but the
+      // value is being pushed (a.k.a when the field gets the focus but the
       // throttling delay is pending), the initial push should not be canceled.
       return;
     }

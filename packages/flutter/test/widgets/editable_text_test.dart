@@ -13012,7 +13012,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
     // Regression test for https://github.com/flutter/flutter/issues/120194.
-    testWidgets('Cursor do not jump after undo', (WidgetTester tester) async {
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
       final TextEditingController controller = TextEditingController(text: textA);
       final FocusNode focusNode = FocusNode();
@@ -13057,7 +13057,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       // Undo the insertion.
       await sendUndo(tester);
 
-      // Initial text should have been recorded and restore.
+      // Initial text should have been recorded and restored.
       expect(controller.value, textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
