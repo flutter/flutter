@@ -72,7 +72,7 @@ class TargetDevices {
   /// with stdin is not available, print a list of available devices and
   /// return null.
   ///
-  /// When no devices meet user specificiations, print a list of unsupported
+  /// When no devices meet user specifications, print a list of unsupported
   /// devices and return null.
   Future<List<Device>?> findAllTargetDevices({
     Duration? deviceDiscoveryTimeout,
@@ -89,6 +89,10 @@ class TargetDevices {
     }
 
     if (_deviceManager.hasSpecifiedDeviceId) {
+      // Must check for device match separately from `_getAttachedDevices` and
+      // `_getWirelessDevices` because if an exact match is found in one
+      // and a partial match is found in another, there is no way to distinguish
+      // between them.
       final List<Device> devices = await _getDeviceById(
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
       );
@@ -146,8 +150,8 @@ class TargetDevices {
 
   /// Determine which device to use when multiple found.
   ///
-  /// If user has not specificed a device id/name, attempt to prioritize
-  /// ephemeral devices. If a single ephermal device is found, return it
+  /// If user has not specified a device id/name, attempt to prioritize
+  /// ephemeral devices. If a single ephemeral device is found, return it
   /// immediately.
   ///
   /// Otherwise, prompt the user to select a device if there is a terminal with stdin. If there is not a terminal, display the
