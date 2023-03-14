@@ -239,7 +239,7 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOverride(context);
 
-  // Changes made in TBD
+  // Changes made in https://github.com/flutter/flutter/pull/122555
   final ScrollableDetails details = ScrollableDetails(
     direction: AxisDirection.down,
     clipBehavior: Clip.none,

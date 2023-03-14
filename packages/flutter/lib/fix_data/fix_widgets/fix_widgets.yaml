@@ -23,7 +23,7 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/122555
   - title: "Migrate to 'decorationClipBehavior'"
     date: 2023-03-13
     element:
@@ -34,7 +34,7 @@ transforms:
       - kind: 'rename'
         newName: 'decorationClipBehavior'
 
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/122555
   - title: "Migrate to 'decorationClipBehavior'"
     date: 2023-03-13
     element:
