@@ -12,6 +12,8 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
+class GrDirectContext;
+
 namespace flutter {
 
 class OffscreenSurface {
