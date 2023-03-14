@@ -65,8 +65,7 @@ class DisplayListGLComplexityCalculator
                        const SkRect& dst,
                        DlFilterMode filter,
                        bool render_with_attributes) override;
-    void drawDisplayList(const sk_sp<DisplayList> display_list,
-                         SkScalar opacity) override;
+    void drawDisplayList(const sk_sp<DisplayList> display_list) override;
     void drawTextBlob(const sk_sp<SkTextBlob> blob,
                       SkScalar x,
                       SkScalar y) override;
@@ -80,7 +79,7 @@ class DisplayListGLComplexityCalculator
     void ImageRect(const SkISize& size,
                    bool texture_backed,
                    bool render_with_attributes,
-                   bool enforce_src_edges) override;
+                   SkCanvas::SrcRectConstraint constraint) override;
 
     unsigned int BatchedComplexity() override;
 

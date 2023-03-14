@@ -28,11 +28,10 @@ class DisplayList;
 ///             through the DisplayListBuilder and also the methods that will be
 ///             invoked through the DisplayList::dispatch() method.
 ///
-class DlOpReceiver {
+class Dispatcher {
  protected:
   using ClipOp = DlCanvas::ClipOp;
   using PointMode = DlCanvas::PointMode;
-  using SrcRectConstraint = DlCanvas::SrcRectConstraint;
 
  public:
   // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
@@ -220,13 +219,12 @@ class DlOpReceiver {
                          const SkPoint point,
                          DlImageSampling sampling,
                          bool render_with_attributes) = 0;
-  virtual void drawImageRect(
-      const sk_sp<DlImage> image,
-      const SkRect& src,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      bool render_with_attributes,
-      SrcRectConstraint constraint = SrcRectConstraint::kFast) = 0;
+  virtual void drawImageRect(const sk_sp<DlImage> image,
+                             const SkRect& src,
+                             const SkRect& dst,
+                             DlImageSampling sampling,
+                             bool render_with_attributes,
+                             SkCanvas::SrcRectConstraint constraint) = 0;
   virtual void drawImageNine(const sk_sp<DlImage> image,
                              const SkIRect& center,
                              const SkRect& dst,
@@ -241,8 +239,7 @@ class DlOpReceiver {
                          DlImageSampling sampling,
                          const SkRect* cull_rect,
                          bool render_with_attributes) = 0;
-  virtual void drawDisplayList(const sk_sp<DisplayList> display_list,
-                               SkScalar opacity = SK_Scalar1) = 0;
+  virtual void drawDisplayList(const sk_sp<DisplayList> display_list) = 0;
   virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
                             SkScalar x,
                             SkScalar y) = 0;

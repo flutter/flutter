@@ -7,8 +7,8 @@
 
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_complexity.h"
+#include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/display_list_utils.h"
-#include "flutter/display_list/dl_op_receiver.h"
 
 namespace flutter {
 
@@ -92,7 +92,7 @@ namespace flutter {
 //   y = 4x
 
 class ComplexityCalculatorHelper
-    : public virtual DlOpReceiver,
+    : public virtual Dispatcher,
       public virtual IgnoreClipDispatchHelper,
       public virtual IgnoreTransformDispatchHelper {
  public:
@@ -121,7 +121,7 @@ class ComplexityCalculatorHelper
   void setAntiAlias(bool aa) override { current_paint_.setAntiAlias(aa); }
 
   void setStyle(DlDrawStyle style) override {
-    current_paint_.setDrawStyle(style);
+    current_paint_.setStyle(ToSk(style));
   }
 
   void setStrokeWidth(SkScalar width) override {
@@ -145,18 +145,17 @@ class ComplexityCalculatorHelper
     AccumulateComplexity(50);
   }
 
-  void drawImageRect(
-      const sk_sp<DlImage> image,
-      const SkRect& src,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      bool render_with_attributes,
-      SrcRectConstraint constraint = SrcRectConstraint::kFast) override {
+  void drawImageRect(const sk_sp<DlImage> image,
+                     const SkRect& src,
+                     const SkRect& dst,
+                     DlImageSampling sampling,
+                     bool render_with_attributes,
+                     SkCanvas::SrcRectConstraint constraint) override {
     if (IsComplex()) {
       return;
     }
     ImageRect(image->dimensions(), image->isTextureBacked(),
-              render_with_attributes, constraint == SrcRectConstraint::kStrict);
+              render_with_attributes, constraint);
   }
 
   void drawAtlas(const sk_sp<DlImage> atlas,
@@ -175,7 +174,8 @@ class ComplexityCalculatorHelper
     // This is equivalent to calling drawImageRect lots of times
     for (int i = 0; i < count; i++) {
       ImageRect(SkISize::Make(tex[i].width(), tex[i].height()), true,
-                render_with_attributes, true);
+                render_with_attributes,
+                SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);
     }
   }
 
@@ -211,7 +211,7 @@ class ComplexityCalculatorHelper
 
   inline bool IsAntiAliased() { return current_paint_.isAntiAlias(); }
   inline bool IsHairline() { return current_paint_.getStrokeWidth() == 0.0f; }
-  inline DlDrawStyle DrawStyle() { return current_paint_.getDrawStyle(); }
+  inline SkPaint::Style Style() { return current_paint_.getStyle(); }
   inline bool IsComplex() { return is_complex_; }
   inline unsigned int Ceiling() { return ceiling_; }
   inline unsigned int CurrentComplexityScore() { return complexity_score_; }
@@ -248,7 +248,7 @@ class ComplexityCalculatorHelper
   virtual void ImageRect(const SkISize& size,
                          bool texture_backed,
                          bool render_with_attributes,
-                         bool enforce_src_edges) = 0;
+                         SkCanvas::SrcRectConstraint constraint) = 0;
 
   // This calculates and returns the cost of draw calls which are batched and
   // thus have a time cost proportional to the number of draw calls made, such
@@ -256,7 +256,7 @@ class ComplexityCalculatorHelper
   virtual unsigned int BatchedComplexity() = 0;
 
  private:
-  DlPaint current_paint_;
+  SkPaint current_paint_;
 
   // If we exceed the ceiling (defaults to the largest number representable
   // by unsigned int), then set the is_complex_ bool and we no longer

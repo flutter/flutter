@@ -35,7 +35,6 @@ struct DlColor {
   uint32_t argb;
 
   bool isOpaque() const { return getAlpha() == 0xFF; }
-  bool isTransparent() const { return getAlpha() == 0; }
 
   int getAlpha() const { return argb >> 24; }
   int getRed() const { return (argb >> 16) & 0xFF; }
