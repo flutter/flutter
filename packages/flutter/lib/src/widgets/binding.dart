@@ -233,6 +233,7 @@ abstract class WidgetsBindingObserver {
   /// exit. All observers will be asked before exiting.
   ///
   /// See also:
+  ///
   /// * [ServicesBinding.exitApplication] for a function to call that will request
   ///   that the application exits.
   /// * [AppLifecycleListener] for a class that can listen to exit requests and
@@ -541,17 +542,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
-    final AppExitResponse response = await super.handleRequestAppExit();
-    if (response == AppExitResponse.cancel) {
-      return AppExitResponse.cancel;
-    }
     bool didCancel = false;
     for (final WidgetsBindingObserver observer in _observers) {
       if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
         didCancel = true;
         // Don't early return. For the case where someone is just using the
         // observer to know when exit happens, we want to call all the
-        // observers.
+        // observers, even if we already know we're going to cancel.
       }
     }
     return didCancel ? AppExitResponse.cancel : AppExitResponse.exit;
