@@ -359,6 +359,31 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
+TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
+  auto info = SkImageInfo::Make(10, 10, SkColorType::kRGBA_F32_SkColorType,
+                                SkAlphaType::kUnpremul_SkAlphaType);
+  SkBitmap bitmap;
+  bitmap.allocPixels(info, 10 * 16);
+  auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 16);
+  auto image = SkImage::MakeFromBitmap(bitmap);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
+  ASSERT_EQ(nullptr, image->colorSpace());
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      std::move(data), image->imageInfo(), 10 * 16);
+
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<SkBitmap> decompressed =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          /*supports_wide_gamut=*/true);
+  ASSERT_TRUE(decompressed);
+  ASSERT_EQ(decompressed->colorType(), kRGBA_F16_SkColorType);
+  ASSERT_EQ(decompressed->colorSpace(), nullptr);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
 namespace {
 float DecodeBGR10(uint32_t x) {
   const float max = 1.25098f;

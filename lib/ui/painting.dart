@@ -1663,13 +1663,19 @@ enum ImageByteFormat {
 enum PixelFormat {
   /// Each pixel is 32 bits, with the highest 8 bits encoding red, the next 8
   /// bits encoding green, the next 8 bits encoding blue, and the lowest 8 bits
-  /// encoding alpha.
+  /// encoding alpha. Premultiplied alpha is used.
   rgba8888,
 
   /// Each pixel is 32 bits, with the highest 8 bits encoding blue, the next 8
   /// bits encoding green, the next 8 bits encoding red, and the lowest 8 bits
-  /// encoding alpha.
+  /// encoding alpha. Premultiplied alpha is used.
   bgra8888,
+
+  /// Each pixel is 128 bits, where each color component is a 32 bit float that
+  /// is normalized across the sRGB gamut.  The first float is the red
+  /// component, followed by: green, blue and alpha. Premultiplied alpha isn't
+  /// used, matching [ImageByteFormat.rawExtendedRgba128].
+  rgbaFloat32,
 }
 
 /// Signature for [Image] lifecycle events.
