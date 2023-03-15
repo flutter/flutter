@@ -542,6 +542,7 @@ Future<String> evalFlutter(String command, {
 
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
   final List<String> args = _flutterCommandArgs(command, options);
   final ProcessResult processResult = await _processManager.run(
@@ -549,40 +550,44 @@ Future<ProcessResult> executeFlutter(String command, {
     workingDirectory: cwd,
   );
 
-  if (processResult.exitCode != 0) {
+  if (processResult.exitCode != 0 && !canFail) {
     await _flutterScreenshot();
   }
   return processResult;
 }
 
 Future<void> _flutterScreenshot({ String? workingDirectory }) async {
-  final Directory? dumpDirectory = hostAgent.dumpDirectory;
-  if (dumpDirectory == null) {
-    return;
-  }
-  // On command failure try uploading screenshot of failing command.
-  final String screenshotPath = path.join(
-    dumpDirectory.path,
-    'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
-  );
+  try {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    if (dumpDirectory == null) {
+      return;
+    }
+    // On command failure try uploading screenshot of failing command.
+    final String screenshotPath = path.join(
+      dumpDirectory.path,
+      'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
+    );
 
-  final String deviceId = (await devices.workingDevice).deviceId;
-  print('Taking screenshot of working device $deviceId at $screenshotPath');
-  final List<String> args = _flutterCommandArgs(
-    'screenshot',
-    <String>[
-      '--out',
-      screenshotPath,
-      '-d', deviceId,
-    ],
-  );
-  final ProcessResult screenshot = await _processManager.run(
-    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
-    workingDirectory: workingDirectory ?? cwd,
-  );
+    final String deviceId = (await devices.workingDevice).deviceId;
+    print('Taking screenshot of working device $deviceId at $screenshotPath');
+    final List<String> args = _flutterCommandArgs(
+      'screenshot',
+      <String>[
+        '--out',
+        screenshotPath,
+        '-d', deviceId,
+      ],
+    );
+    final ProcessResult screenshot = await _processManager.run(
+      <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+      workingDirectory: workingDirectory ?? cwd,
+    );
 
-  if (screenshot.exitCode != 0) {
-    print('Failed to take screenshot. Continuing.');
+    if (screenshot.exitCode != 0) {
+      print('Failed to take screenshot. Continuing.');
+    }
+  } catch (exception) {
+    print('Failed to take screenshot. Continuing.\n$exception');
   }
 }
 
