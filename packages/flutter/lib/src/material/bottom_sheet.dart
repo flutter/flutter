@@ -117,13 +117,18 @@ class BottomSheet extends StatefulWidget {
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
-  ///
+  /// 
+  /// This applies to the content below the drag handle, if showDragHandle is true.
+  /// 
   /// Default is true.
   final bool enableDrag;
 
-  /// Specifies whether a drag handle is shown when [enableDrag] is true.
+  /// Specifies whether a drag handle is shown.
   ///
-  /// The drag handle appears at the top of the bottom sheet. The default color is XXX and can be customized using XXX. The default size is XXX and can be customized with XXX.
+  /// The drag handle appears at the top of the bottom sheet. The default color is 
+  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized 
+  /// using dragHandleColor. The default size is Size(32,4) and can be customized 
+  /// with dragHandleSize.
   ///
   /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
   /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
@@ -259,8 +264,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(
-      widget.enableDrag && widget.animationController != null,
-      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway) {
@@ -271,8 +276,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
   void _handleDragEnd(DragEndDetails details) {
     assert(
-      widget.enableDrag && widget.animationController != null,
-      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway) {
@@ -353,22 +358,37 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child: (!widget.enableDrag || !showDragHandle)
-          ? widget.builder(context)
-          : Stack(
-              alignment: Alignment.topCenter,
-              children: <Widget>[
-                _DragHandle(
-                  onSemanticsTap: widget.onClosing,
-                  handleHover: _handleDragHandleHover,
-                  materialState: dragHandleMaterialState,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                  child: widget.builder(context),
-                ),
-              ],
-            ),
+        child: !showDragHandle
+            ? widget.builder(context)
+            : Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  // If the whole bottom sheet is draggable, no need to add 
+                  // GestureDetector on the drag handle.
+                  widget.enableDrag
+                      ? _DragHandle(
+                          onSemanticsTap: widget.onClosing,
+                          handleHover: _handleDragHandleHover,
+                          materialState: dragHandleMaterialState,
+                        )
+                      : GestureDetector(
+                          onVerticalDragStart: _handleDragStart,
+                          onVerticalDragUpdate: _handleDragUpdate,
+                          onVerticalDragEnd: _handleDragEnd,
+                          excludeFromSemantics: true,
+                          child: _DragHandle(
+                            onSemanticsTap: widget.onClosing,
+                            handleHover: _handleDragHandleHover,
+                            materialState: dragHandleMaterialState,
+                          ),
+                        ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: kMinInteractiveDimension),
+                    child: widget.builder(context),
+                  ),
+                ],
+              ),
       ),
     );
 
@@ -885,11 +905,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
+  /// 
+  /// This applies to the content below the drag handle, if showDragHandle is true.
   ///
   /// Defaults is true.
   final bool enableDrag;
 
-  /// Specifies whether a drag handle is shown when [enableDrag] is true.
+  /// Specifies whether a drag handle is shown.
+  ///
+  /// The drag handle appears at the top of the bottom sheet. The default color is 
+  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized 
+  /// using dragHandleColor. The default size is Size(32,4) and can be customized 
+  /// with dragHandleSize.
   ///
   /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
   /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
