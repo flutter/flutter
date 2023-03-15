@@ -6,15 +6,16 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/display_list/display_list_sampling_options.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 #include "flutter/fml/math.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -134,6 +135,18 @@ const SkPoint kHorizontalMiterDiamondPoints[] = {
 const int kHorizontalMiterDiamondPointCount =
     (sizeof(kHorizontalMiterDiamondPoints) /
      sizeof(kHorizontalMiterDiamondPoints[0]));
+
+class SkImageSampling {
+ public:
+  static constexpr SkSamplingOptions kNearestNeighbor =
+      SkSamplingOptions(SkFilterMode::kNearest);
+  static constexpr SkSamplingOptions kLinear =
+      SkSamplingOptions(SkFilterMode::kLinear);
+  static constexpr SkSamplingOptions kMipmapLinear =
+      SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+  static constexpr SkSamplingOptions kCubic =
+      SkSamplingOptions(SkCubicResampler{1 / 3.0f, 1 / 3.0f});
+};
 
 // A class to specify how much tolerance to allow in bounds estimates.
 // For some attributes, the machinery must make some conservative
@@ -409,7 +422,7 @@ struct DisplayListJobRenderer : public JobRenderer {
       : display_list_(std::move(display_list)) {}
 
   void Render(SkCanvas* canvas, const RenderJobInfo& info) {
-    display_list_->RenderTo(canvas, info.opacity);
+    DlSkCanvasAdapter(canvas).DrawDisplayList(display_list_, info.opacity);
   }
 
  private:
@@ -998,12 +1011,12 @@ class CanvasCompareTester {
           RenderEnvironment::MakeN32(env.provider());
       SkSetup sk_backdrop_setup = [=](SkCanvas* cv, SkPaint& p) {
         SkPaint setup_p;
-        setup_p.setShader(kTestImageColorSource.skia_object());
+        setup_p.setShader(kTestSkImageColorSource);
         cv->drawPaint(setup_p);
       };
       DlSetup dl_backdrop_setup = [=](DlCanvas* cv, DlPaint& p) {
         DlPaint setup_p;
-        setup_p.setColorSource(&kTestImageColorSource);
+        setup_p.setColorSource(&kTestDlImageColorSource);
         cv->DrawPaint(setup_p);
       };
       SkSetup sk_content_setup = [=](SkCanvas* cv, SkPaint& p) {
@@ -1016,38 +1029,39 @@ class CanvasCompareTester {
                             dl_backdrop_setup, testP.dl_renderer());
       quickCompareToReference(backdrop_env, "backdrop");
 
-      DlBlurImageFilter backdrop(5, 5, DlTileMode::kDecal);
+      DlBlurImageFilter dl_backdrop(5, 5, DlTileMode::kDecal);
+      auto sk_backdrop =
+          SkImageFilters::Blur(5, 5, SkTileMode::kDecal, nullptr);
       RenderWith(testP, backdrop_env, tolerance,
                  CaseParameters(
                      "saveLayer with backdrop",
                      [=](SkCanvas* cv, SkPaint& p) {
                        sk_backdrop_setup(cv, p);
                        cv->saveLayer(SkCanvas::SaveLayerRec(
-                           nullptr, nullptr, backdrop.skia_object().get(), 0));
+                           nullptr, nullptr, sk_backdrop.get(), 0));
                        sk_content_setup(cv, p);
                      },
                      [=](DlCanvas* cv, DlPaint& p) {
                        dl_backdrop_setup(cv, p);
-                       cv->SaveLayer(nullptr, nullptr, &backdrop);
+                       cv->SaveLayer(nullptr, nullptr, &dl_backdrop);
                        dl_content_setup(cv, p);
                      })
                      .with_restore(sk_safe_restore, dl_safe_restore, true));
-      RenderWith(
-          testP, backdrop_env, tolerance,
-          CaseParameters(
-              "saveLayer with bounds and backdrop",
-              [=](SkCanvas* cv, SkPaint& p) {
-                sk_backdrop_setup(cv, p);
-                cv->saveLayer(SkCanvas::SaveLayerRec(
-                    &layer_bounds, nullptr, backdrop.skia_object().get(), 0));
-                sk_content_setup(cv, p);
-              },
-              [=](DlCanvas* cv, DlPaint& p) {
-                dl_backdrop_setup(cv, p);
-                cv->SaveLayer(&layer_bounds, nullptr, &backdrop);
-                dl_content_setup(cv, p);
-              })
-              .with_restore(sk_safe_restore, dl_safe_restore, true));
+      RenderWith(testP, backdrop_env, tolerance,
+                 CaseParameters(
+                     "saveLayer with bounds and backdrop",
+                     [=](SkCanvas* cv, SkPaint& p) {
+                       sk_backdrop_setup(cv, p);
+                       cv->saveLayer(SkCanvas::SaveLayerRec(
+                           &layer_bounds, nullptr, sk_backdrop.get(), 0));
+                       sk_content_setup(cv, p);
+                     },
+                     [=](DlCanvas* cv, DlPaint& p) {
+                       dl_backdrop_setup(cv, p);
+                       cv->SaveLayer(&layer_bounds, nullptr, &dl_backdrop);
+                       dl_content_setup(cv, p);
+                     })
+                     .with_restore(sk_safe_restore, dl_safe_restore, true));
       RenderWith(testP, backdrop_env, tolerance,
                  CaseParameters(
                      "clipped saveLayer with backdrop",
@@ -1055,13 +1069,13 @@ class CanvasCompareTester {
                        sk_backdrop_setup(cv, p);
                        cv->clipRect(layer_bounds);
                        cv->saveLayer(SkCanvas::SaveLayerRec(
-                           nullptr, nullptr, backdrop.skia_object().get(), 0));
+                           nullptr, nullptr, sk_backdrop.get(), 0));
                        sk_content_setup(cv, p);
                      },
                      [=](DlCanvas* cv, DlPaint& p) {
                        dl_backdrop_setup(cv, p);
                        cv->ClipRect(layer_bounds);
-                       cv->SaveLayer(nullptr, nullptr, &backdrop);
+                       cv->SaveLayer(nullptr, nullptr, &dl_backdrop);
                        dl_content_setup(cv, p);
                      })
                      .with_restore(sk_safe_restore, dl_safe_restore, true));
@@ -1076,20 +1090,22 @@ class CanvasCompareTester {
           0, 0, 0, 0.5, 0,
       };
       // clang-format on
-      DlMatrixColorFilter filter(rotate_alpha_color_matrix);
+      DlMatrixColorFilter dl_alpha_rotate_filter(rotate_alpha_color_matrix);
+      auto sk_alpha_rotate_filter =
+          SkColorFilters::Matrix(rotate_alpha_color_matrix);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ColorFilter, no bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter.skia_object());
+                         save_p.setColorFilter(sk_alpha_rotate_filter);
                          cv->saveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          DlPaint save_p;
-                         save_p.setColorFilter(&filter);
+                         save_p.setColorFilter(&dl_alpha_rotate_filter);
                          cv->SaveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        })
@@ -1101,13 +1117,13 @@ class CanvasCompareTester {
                        "saveLayer ColorFilter and bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter.skia_object());
+                         save_p.setColorFilter(sk_alpha_rotate_filter);
                          cv->saveLayer(kRenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          DlPaint save_p;
-                         save_p.setColorFilter(&filter);
+                         save_p.setColorFilter(&dl_alpha_rotate_filter);
                          cv->SaveLayer(&kRenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        })
@@ -1124,21 +1140,23 @@ class CanvasCompareTester {
           0, 0, 0, 1, 0,
       };
       // clang-format on
-      DlMatrixColorFilter color_filter(color_matrix);
-      DlColorFilterImageFilter filter(color_filter);
+      DlMatrixColorFilter dl_color_filter(color_matrix);
+      DlColorFilterImageFilter dl_cf_image_filter(dl_color_filter);
+      auto sk_cf_image_filter = SkImageFilters::ColorFilter(
+          SkColorFilters::Matrix(color_matrix), nullptr);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ImageFilter, no bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setImageFilter(filter.skia_object());
+                         save_p.setImageFilter(sk_cf_image_filter);
                          cv->saveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          DlPaint save_p;
-                         save_p.setImageFilter(&filter);
+                         save_p.setImageFilter(&dl_cf_image_filter);
                          cv->SaveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        })
@@ -1150,13 +1168,13 @@ class CanvasCompareTester {
                        "saveLayer ImageFilter and bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setImageFilter(filter.skia_object());
+                         save_p.setImageFilter(sk_cf_image_filter);
                          cv->saveLayer(kRenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          DlPaint save_p;
-                         save_p.setImageFilter(&filter);
+                         save_p.setImageFilter(&dl_cf_image_filter);
                          cv->SaveLayer(&kRenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        })
@@ -1225,12 +1243,12 @@ class CanvasCompareTester {
       } else {
         DlColor dither_bg = DlColor::kBlack();
         SkSetup sk_dither_setup = [=](SkCanvas*, SkPaint& p) {
-          p.setShader(kTestImageColorSource.skia_object());
+          p.setShader(kTestSkImageColorSource);
           p.setAlpha(0xf0);
           p.setStrokeWidth(5.0);
         };
         DlSetup dl_dither_setup = [=](DlCanvas*, DlPaint& p) {
-          p.setColorSource(&kTestImageColorSource);
+          p.setColorSource(&kTestDlImageColorSource);
           p.setAlpha(0xf0);
           p.setStrokeWidth(5.0);
         };
@@ -1316,17 +1334,19 @@ class CanvasCompareTester {
       // (for drawPaint) so we create a new environment for these tests.
       RenderEnvironment blur_env = RenderEnvironment::MakeN32(env.provider());
       SkSetup sk_blur_setup = [=](SkCanvas*, SkPaint& p) {
-        p.setShader(kTestImageColorSource.skia_object());
+        p.setShader(kTestSkImageColorSource);
         p.setStrokeWidth(5.0);
       };
       DlSetup dl_blur_setup = [=](DlCanvas*, DlPaint& p) {
-        p.setColorSource(&kTestImageColorSource);
+        p.setColorSource(&kTestDlImageColorSource);
         p.setStrokeWidth(5.0);
       };
       blur_env.init_ref(sk_blur_setup, testP.sk_renderer(),  //
                         dl_blur_setup, testP.dl_renderer());
       quickCompareToReference(blur_env, "blur");
-      DlBlurImageFilter filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
+      DlBlurImageFilter dl_filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
+      auto sk_filter_decal_5 =
+          SkImageFilters::Blur(5.0, 5.0, SkTileMode::kDecal, nullptr);
       BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
       {
         RenderWith(testP, blur_env, blur_5_tolerance,
@@ -1334,25 +1354,27 @@ class CanvasCompareTester {
                        "ImageFilter == Decal Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
                          sk_blur_setup(cv, p);
-                         p.setImageFilter(filter_decal_5.skia_object());
+                         p.setImageFilter(sk_filter_decal_5);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          dl_blur_setup(cv, p);
-                         p.setImageFilter(&filter_decal_5);
+                         p.setImageFilter(&dl_filter_decal_5);
                        }));
       }
-      DlBlurImageFilter filter_clamp_5(5.0, 5.0, DlTileMode::kClamp);
+      DlBlurImageFilter dl_filter_clamp_5(5.0, 5.0, DlTileMode::kClamp);
+      auto sk_filter_clamp_5 =
+          SkImageFilters::Blur(5.0, 5.0, SkTileMode::kClamp, nullptr);
       {
         RenderWith(testP, blur_env, blur_5_tolerance,
                    CaseParameters(
                        "ImageFilter == Clamp Blur 5",
                        [=](SkCanvas* cv, SkPaint& p) {
                          sk_blur_setup(cv, p);
-                         p.setImageFilter(filter_clamp_5.skia_object());
+                         p.setImageFilter(sk_filter_clamp_5);
                        },
                        [=](DlCanvas* cv, DlPaint& p) {
                          dl_blur_setup(cv, p);
-                         p.setImageFilter(&filter_clamp_5);
+                         p.setImageFilter(&dl_filter_clamp_5);
                        }));
       }
     }
@@ -1363,27 +1385,28 @@ class CanvasCompareTester {
       // (for drawPaint) so we create a new environment for these tests.
       RenderEnvironment dilate_env = RenderEnvironment::MakeN32(env.provider());
       SkSetup sk_dilate_setup = [=](SkCanvas*, SkPaint& p) {
-        p.setShader(kTestImageColorSource.skia_object());
+        p.setShader(kTestSkImageColorSource);
         p.setStrokeWidth(5.0);
       };
       DlSetup dl_dilate_setup = [=](DlCanvas*, DlPaint& p) {
-        p.setColorSource(&kTestImageColorSource);
+        p.setColorSource(&kTestDlImageColorSource);
         p.setStrokeWidth(5.0);
       };
       dilate_env.init_ref(sk_dilate_setup, testP.sk_renderer(),  //
                           dl_dilate_setup, testP.dl_renderer());
       quickCompareToReference(dilate_env, "dilate");
-      DlDilateImageFilter filter_5(5.0, 5.0);
+      DlDilateImageFilter dl_dilate_filter_5(5.0, 5.0);
+      auto sk_dilate_filter_5 = SkImageFilters::Dilate(5.0, 5.0, nullptr);
       RenderWith(testP, dilate_env, tolerance,
                  CaseParameters(
                      "ImageFilter == Dilate 5",
                      [=](SkCanvas* cv, SkPaint& p) {
                        sk_dilate_setup(cv, p);
-                       p.setImageFilter(filter_5.skia_object());
+                       p.setImageFilter(sk_dilate_filter_5);
                      },
                      [=](DlCanvas* cv, DlPaint& p) {
                        dl_dilate_setup(cv, p);
-                       p.setImageFilter(&filter_5);
+                       p.setImageFilter(&dl_dilate_filter_5);
                      }));
     }
 
@@ -1393,11 +1416,11 @@ class CanvasCompareTester {
       // (for drawPaint) so we create a new environment for these tests.
       RenderEnvironment erode_env = RenderEnvironment::MakeN32(env.provider());
       SkSetup sk_erode_setup = [=](SkCanvas*, SkPaint& p) {
-        p.setShader(kTestImageColorSource.skia_object());
+        p.setShader(kTestSkImageColorSource);
         p.setStrokeWidth(6.0);
       };
       DlSetup dl_erode_setup = [=](DlCanvas*, DlPaint& p) {
-        p.setColorSource(&kTestImageColorSource);
+        p.setColorSource(&kTestDlImageColorSource);
         p.setStrokeWidth(6.0);
       };
       erode_env.init_ref(sk_erode_setup, testP.sk_renderer(),  //
@@ -1405,17 +1428,18 @@ class CanvasCompareTester {
       quickCompareToReference(erode_env, "erode");
       // do not erode too much, because some tests assert there are enough
       // pixels that are changed.
-      DlErodeImageFilter filter_1(1.0, 1.0);
+      DlErodeImageFilter dl_erode_filter_1(1.0, 1.0);
+      auto sk_erode_filter_1 = SkImageFilters::Erode(1.0, 1.0, nullptr);
       RenderWith(testP, erode_env, tolerance,
                  CaseParameters(
                      "ImageFilter == Erode 1",
                      [=](SkCanvas* cv, SkPaint& p) {
                        sk_erode_setup(cv, p);
-                       p.setImageFilter(filter_1.skia_object());
+                       p.setImageFilter(sk_erode_filter_1);
                      },
                      [=](DlCanvas* cv, DlPaint& p) {
                        dl_erode_setup(cv, p);
-                       p.setImageFilter(&filter_1);
+                       p.setImageFilter(&dl_erode_filter_1);
                      }));
     }
 
@@ -1434,7 +1458,8 @@ class CanvasCompareTester {
          1.0,  1.0,  1.0, 1.0,   0,
       };
       // clang-format on
-      DlMatrixColorFilter filter(rotate_color_matrix);
+      DlMatrixColorFilter dl_color_filter(rotate_color_matrix);
+      auto sk_color_filter = SkColorFilters::Matrix(rotate_color_matrix);
       {
         DlColor bg = DlColor::kWhite();
         RenderWith(testP, env, tolerance,
@@ -1442,34 +1467,35 @@ class CanvasCompareTester {
                        "ColorFilter == RotateRGB",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setColor(DlColor::kYellow());
-                         p.setColorFilter(filter.skia_object());
+                         p.setColorFilter(sk_color_filter);
                        },
                        [=](DlCanvas*, DlPaint& p) {
                          p.setColor(DlColor::kYellow());
-                         p.setColorFilter(&filter);
+                         p.setColorFilter(&dl_color_filter);
                        })
                        .with_bg(bg));
       }
-      filter = DlMatrixColorFilter(invert_color_matrix);
       {
         DlColor bg = DlColor::kWhite();
-        RenderWith(testP, env, tolerance,
-                   CaseParameters(
-                       "ColorFilter == Invert",
-                       [=](SkCanvas*, SkPaint& p) {
-                         p.setColor(DlColor::kYellow());
-                         p.setColorFilter(filter.skia_object());
-                       },
-                       [=](DlCanvas*, DlPaint& p) {
-                         p.setColor(DlColor::kYellow());
-                         p.setInvertColors(true);
-                       })
-                       .with_bg(bg));
+        RenderWith(
+            testP, env, tolerance,
+            CaseParameters(
+                "ColorFilter == Invert",
+                [=](SkCanvas*, SkPaint& p) {
+                  p.setColor(DlColor::kYellow());
+                  p.setColorFilter(SkColorFilters::Matrix(invert_color_matrix));
+                },
+                [=](DlCanvas*, DlPaint& p) {
+                  p.setColor(DlColor::kYellow());
+                  p.setInvertColors(true);
+                })
+                .with_bg(bg));
       }
     }
 
     {
-      const DlBlurMaskFilter filter(kNormal_SkBlurStyle, 5.0);
+      const DlBlurMaskFilter dl_mask_filter(kNormal_SkBlurStyle, 5.0);
+      auto sk_mask_filter = SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, 5.0);
       BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
       {
         // Stroked primitives need some non-trivial stroke size to be blurred
@@ -1478,11 +1504,11 @@ class CanvasCompareTester {
                        "MaskFilter == Blur 5",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setStrokeWidth(5.0);
-                         p.setMaskFilter(filter.skia_object());
+                         p.setMaskFilter(sk_mask_filter);
                        },
                        [=](DlCanvas*, DlPaint& p) {
                          p.setStrokeWidth(5.0);
-                         p.setMaskFilter(&filter);
+                         p.setMaskFilter(&dl_mask_filter);
                        }));
       }
     }
@@ -1492,27 +1518,33 @@ class CanvasCompareTester {
           SkPoint::Make(kRenderBounds.fLeft, kRenderBounds.fTop),
           SkPoint::Make(kRenderBounds.fRight, kRenderBounds.fBottom),
       };
-      DlColor colors[] = {
+      DlColor dl_colors[] = {
           DlColor::kGreen(),
           DlColor::kYellow().withAlpha(0x7f),
           DlColor::kBlue(),
+      };
+      SkColor sk_colors[] = {
+          SK_ColorGREEN,
+          SkColorSetA(SK_ColorYELLOW, 0x7f),
+          SK_ColorBLUE,
       };
       float stops[] = {
           0.0,
           0.5,
           1.0,
       };
-      std::shared_ptr<DlColorSource> source = DlColorSource::MakeLinear(
-          end_points[0], end_points[1], 3, colors, stops, DlTileMode::kMirror);
+      auto dl_gradient =
+          DlColorSource::MakeLinear(end_points[0], end_points[1], 3, dl_colors,
+                                    stops, DlTileMode::kMirror);
+      auto sk_gradient = SkGradientShader::MakeLinear(
+          end_points, sk_colors, stops, 3, SkTileMode::kMirror, 0, nullptr);
       {
         RenderWith(
             testP, env, tolerance,
             CaseParameters(
                 "LinearGradient GYB",
-                [=](SkCanvas*, SkPaint& p) {
-                  p.setShader(source->skia_object());
-                },
-                [=](DlCanvas*, DlPaint& p) { p.setColorSource(source); }));
+                [=](SkCanvas*, SkPaint& p) { p.setShader(sk_gradient); },
+                [=](DlCanvas*, DlPaint& p) { p.setColorSource(dl_gradient); }));
       }
     }
   }
@@ -1697,7 +1729,8 @@ class CanvasCompareTester {
     {
       const SkScalar test_dashes_1[] = {29.0, 2.0};
       const SkScalar test_dashes_2[] = {17.0, 1.5};
-      auto effect = DlDashPathEffect::Make(test_dashes_1, 2, 0.0f);
+      auto dl_dash_effect = DlDashPathEffect::Make(test_dashes_1, 2, 0.0f);
+      auto sk_dash_effect = SkDashPathEffect::Make(test_dashes_1, 2, 0.0f);
       {
         RenderWith(testP, stroke_base_env, tolerance,
                    CaseParameters(
@@ -1705,12 +1738,12 @@ class CanvasCompareTester {
                        [=](SkCanvas*, SkPaint& p) {
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect->skia_object());
+                         p.setPathEffect(sk_dash_effect);
                        },
                        [=](DlCanvas*, DlPaint& p) {
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect);
+                         p.setPathEffect(dl_dash_effect);
                        }));
       }
       {
@@ -1722,17 +1755,18 @@ class CanvasCompareTester {
                          p.setStyle(SkPaint::kStroke_Style);
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect->skia_object());
+                         p.setPathEffect(sk_dash_effect);
                        },
                        [=](DlCanvas*, DlPaint& p) {
                          // Need stroke style to see dashing properly
                          p.setDrawStyle(DlDrawStyle::kStroke);
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect);
+                         p.setPathEffect(dl_dash_effect);
                        }));
       }
-      effect = DlDashPathEffect::Make(test_dashes_2, 2, 0.0f);
+      dl_dash_effect = DlDashPathEffect::Make(test_dashes_2, 2, 0.0f);
+      sk_dash_effect = SkDashPathEffect::Make(test_dashes_2, 2, 0.0f);
       {
         RenderWith(testP, stroke_base_env, tolerance,
                    CaseParameters(
@@ -1742,14 +1776,14 @@ class CanvasCompareTester {
                          p.setStyle(SkPaint::kStroke_Style);
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect->skia_object());
+                         p.setPathEffect(sk_dash_effect);
                        },
                        [=](DlCanvas*, DlPaint& p) {
                          // Need stroke style to see dashing properly
                          p.setDrawStyle(DlDrawStyle::kStroke);
                          // Provide some non-trivial stroke size to get dashed
                          p.setStrokeWidth(5.0);
-                         p.setPathEffect(effect);
+                         p.setPathEffect(dl_dash_effect);
                        }));
       }
     }
@@ -2178,6 +2212,23 @@ class CanvasCompareTester {
     ASSERT_GT(pixels_touched, 0) << info;
   }
 
+  static int countModifiedTransparentPixels(const RenderResult* ref_result,
+                                            const RenderResult* test_result) {
+    int count = 0;
+    for (int y = 0; y < kTestHeight; y++) {
+      const uint32_t* ref_row = ref_result->addr32(0, y);
+      const uint32_t* test_row = test_result->addr32(0, y);
+      for (int x = 0; x < kTestWidth; x++) {
+        if (ref_row[x] != test_row[x]) {
+          if (ref_row[x] == 0) {
+            count++;
+          }
+        }
+      }
+    }
+    return count;
+  }
+
   static void quickCompareToReference(const RenderEnvironment& env,
                                       const std::string& info) {
     quickCompareToReference(env.ref_sk_result(), env.ref_dl_result(), true,
@@ -2198,7 +2249,7 @@ class CanvasCompareTester {
       const uint32_t* test_row = test_result->addr32(0, y);
       for (int x = 0; x < w; x++) {
         if (ref_row[x] != test_row[x]) {
-          if (should_match) {
+          if (should_match && pixels_different < 5) {
             FML_LOG(ERROR) << std::hex << ref_row[x] << " != " << test_row[x];
           }
           pixels_different++;
@@ -2258,7 +2309,7 @@ class CanvasCompareTester {
         bool match = fuzzyCompares ? fuzzyCompare(test_row[x], ref_row[x], 1)
                                    : test_row[x] == ref_row[x];
         if (!match) {
-          if (printMismatches) {
+          if (printMismatches && pixels_different < 5) {
             FML_LOG(ERROR) << "pix[" << x << ", " << y
                            << "] mismatch: " << std::hex << test_row[x]
                            << "(test) != (ref)" << ref_row[x] << std::dec;
@@ -2347,7 +2398,8 @@ class CanvasCompareTester {
     return surface->makeImageSnapshot();
   }
 
-  static const DlImageColorSource kTestImageColorSource;
+  static const DlImageColorSource kTestDlImageColorSource;
+  static const sk_sp<SkShader> kTestSkImageColorSource;
 
   static sk_sp<SkTextBlob> MakeTextBlob(const std::string& string,
                                         SkScalar font_height) {
@@ -2365,11 +2417,15 @@ BoundsTolerance CanvasCompareTester::DefaultTolerance =
     BoundsTolerance().addAbsolutePadding(1, 1);
 
 const sk_sp<SkImage> CanvasCompareTester::kTestImage = makeTestImage();
-const DlImageColorSource CanvasCompareTester::kTestImageColorSource(
+const DlImageColorSource CanvasCompareTester::kTestDlImageColorSource(
     DlImage::Make(kTestImage),
     DlTileMode::kRepeat,
     DlTileMode::kRepeat,
     DlImageSampling::kLinear);
+const sk_sp<SkShader> CanvasCompareTester::kTestSkImageColorSource =
+    kTestImage->makeShader(SkTileMode::kRepeat,
+                           SkTileMode::kRepeat,
+                           SkImageSampling::kLinear);
 
 // Eventually this bare bones testing::Test fixture will subsume the
 // CanvasCompareTester and the TestParameters could then become just
@@ -2870,21 +2926,27 @@ TEST_F(DisplayListCanvas, DrawVerticesWithColors) {
       SkPoint::Make(kRenderLeft, kRenderCenterY),
       SkPoint::Make(kRenderRight, kRenderBottom),
   };
-  const DlColor colors[6] = {
+  const DlColor dl_colors[6] = {
+      DlColor::kRed(),  DlColor::kBlue(),   DlColor::kGreen(),
+      DlColor::kCyan(), DlColor::kYellow(), DlColor::kMagenta(),
+  };
+  const SkColor sk_colors[6] = {
       SK_ColorRED,  SK_ColorBLUE,   SK_ColorGREEN,
       SK_ColorCYAN, SK_ColorYELLOW, SK_ColorMAGENTA,
   };
-  const std::shared_ptr<DlVertices> vertices =
-      DlVertices::Make(DlVertexMode::kTriangles, 6, pts, nullptr, colors);
+  const std::shared_ptr<DlVertices> dl_vertices =
+      DlVertices::Make(DlVertexMode::kTriangles, 6, pts, nullptr, dl_colors);
+  const auto sk_vertices =
+      SkVertices::MakeCopy(SkVertices::VertexMode::kTriangles_VertexMode, 6,
+                           pts, nullptr, sk_colors);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawVertices(vertices->skia_object(), SkBlendMode::kSrcOver,
-                                 paint);
+            canvas->drawVertices(sk_vertices, SkBlendMode::kSrcOver, paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
-            canvas->DrawVertices(vertices, DlBlendMode::kSrcOver, paint);
+            canvas->DrawVertices(dl_vertices, DlBlendMode::kSrcOver, paint);
           },
           kDrawVerticesFlags));
 }
@@ -2917,27 +2979,27 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
       SkPoint::Make(0, 0),
       SkPoint::Make(kRenderWidth, 0),
   };
-  const std::shared_ptr<DlVertices> vertices =
+  const std::shared_ptr<DlVertices> dl_vertices =
       DlVertices::Make(DlVertexMode::kTriangles, 6, pts, tex, nullptr);
+  const auto sk_vertices = SkVertices::MakeCopy(
+      SkVertices::VertexMode::kTriangles_VertexMode, 6, pts, tex, nullptr);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
             SkPaint v_paint = paint;
             if (v_paint.getShader() == nullptr) {
-              v_paint.setShader(
-                  CanvasCompareTester::kTestImageColorSource.skia_object());
+              v_paint.setShader(CanvasCompareTester::kTestSkImageColorSource);
             }
-            canvas->drawVertices(vertices->skia_object(), SkBlendMode::kSrcOver,
-                                 v_paint);
+            canvas->drawVertices(sk_vertices, SkBlendMode::kSrcOver, v_paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             DlPaint v_paint = paint;
             if (v_paint.getColorSource() == nullptr) {
               v_paint.setColorSource(
-                  &CanvasCompareTester::kTestImageColorSource);
+                  &CanvasCompareTester::kTestDlImageColorSource);
             }
-            canvas->DrawVertices(vertices, DlBlendMode::kSrcOver, v_paint);
+            canvas->DrawVertices(dl_vertices, DlBlendMode::kSrcOver, v_paint);
           },
           kDrawVerticesFlags));
 }
@@ -2948,7 +3010,7 @@ TEST_F(DisplayListCanvas, DrawImageNearest) {
           [=](SkCanvas* canvas, const SkPaint& paint) {         //
             canvas->drawImage(CanvasCompareTester::kTestImage,  //
                               kRenderLeft, kRenderTop,
-                              ToSk(DlImageSampling::kNearestNeighbor), &paint);
+                              SkImageSampling::kNearestNeighbor, &paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawImage(DlImage::Make(CanvasCompareTester::kTestImage),
@@ -2964,7 +3026,7 @@ TEST_F(DisplayListCanvas, DrawImageNearestNoPaint) {
           [=](SkCanvas* canvas, const SkPaint& paint) {         //
             canvas->drawImage(CanvasCompareTester::kTestImage,  //
                               kRenderLeft, kRenderTop,
-                              ToSk(DlImageSampling::kNearestNeighbor), nullptr);
+                              SkImageSampling::kNearestNeighbor, nullptr);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawImage(DlImage::Make(CanvasCompareTester::kTestImage),
@@ -2979,8 +3041,8 @@ TEST_F(DisplayListCanvas, DrawImageLinear) {
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {         //
             canvas->drawImage(CanvasCompareTester::kTestImage,  //
-                              kRenderLeft, kRenderTop,
-                              ToSk(DlImageSampling::kLinear), &paint);
+                              kRenderLeft, kRenderTop, SkImageSampling::kLinear,
+                              &paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawImage(DlImage::Make(CanvasCompareTester::kTestImage),
@@ -2997,13 +3059,14 @@ TEST_F(DisplayListCanvas, DrawImageRectNearest) {
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
             canvas->drawImageRect(CanvasCompareTester::kTestImage, src, dst,
-                                  ToSk(DlImageSampling::kNearestNeighbor),
-                                  &paint, SkCanvas::kFast_SrcRectConstraint);
+                                  SkImageSampling::kNearestNeighbor, &paint,
+                                  SkCanvas::kFast_SrcRectConstraint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawImageRect(
                 DlImage::Make(CanvasCompareTester::kTestImage), src, dst,
-                DlImageSampling::kNearestNeighbor, &paint, false);
+                DlImageSampling::kNearestNeighbor, &paint,
+                DlCanvas::SrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }
@@ -3015,13 +3078,14 @@ TEST_F(DisplayListCanvas, DrawImageRectNearestNoPaint) {
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
             canvas->drawImageRect(CanvasCompareTester::kTestImage, src, dst,
-                                  ToSk(DlImageSampling::kNearestNeighbor),
-                                  nullptr, SkCanvas::kFast_SrcRectConstraint);
+                                  SkImageSampling::kNearestNeighbor, nullptr,
+                                  SkCanvas::kFast_SrcRectConstraint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawImageRect(
                 DlImage::Make(CanvasCompareTester::kTestImage), src, dst,
-                DlImageSampling::kNearestNeighbor, nullptr, false);
+                DlImageSampling::kNearestNeighbor, nullptr,
+                DlCanvas::SrcRectConstraint::kFast);
           },
           kDrawImageRectFlags));
 }
@@ -3033,13 +3097,14 @@ TEST_F(DisplayListCanvas, DrawImageRectLinear) {
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
             canvas->drawImageRect(CanvasCompareTester::kTestImage, src, dst,
-                                  ToSk(DlImageSampling::kLinear), &paint,
+                                  SkImageSampling::kLinear, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawImageRect(
                 DlImage::Make(CanvasCompareTester::kTestImage), src, dst,
-                DlImageSampling::kLinear, &paint, false);
+                DlImageSampling::kLinear, &paint,
+                DlCanvas::SrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }
@@ -3125,17 +3190,19 @@ TEST_F(DisplayListCanvas, DrawAtlasNearest) {
       DlColor::kMagenta(),
   };
   const sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  const DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  const DlImageSampling dl_sampling = DlImageSampling::kNearestNeighbor;
+  const SkSamplingOptions sk_sampling = SkImageSampling::kNearestNeighbor;
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {
             canvas->drawAtlas(image.get(), xform, tex, sk_colors, 4,
-                              SkBlendMode::kSrcOver, ToSk(sampling), nullptr,
+                              SkBlendMode::kSrcOver, sk_sampling, nullptr,
                               &paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawAtlas(DlImage::Make(image), xform, tex, dl_colors, 4,
-                              DlBlendMode::kSrcOver, sampling, nullptr, &paint);
+                              DlBlendMode::kSrcOver, dl_sampling, nullptr,
+                              &paint);
           },
           kDrawAtlasWithPaintFlags));
 }
@@ -3170,17 +3237,18 @@ TEST_F(DisplayListCanvas, DrawAtlasNearestNoPaint) {
       DlColor::kMagenta(),
   };
   const sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  const DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  const DlImageSampling dl_sampling = DlImageSampling::kNearestNeighbor;
+  const SkSamplingOptions sk_sampling = SkImageSampling::kNearestNeighbor;
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {
             canvas->drawAtlas(image.get(), xform, tex, sk_colors, 4,
-                              SkBlendMode::kSrcOver, ToSk(sampling),  //
+                              SkBlendMode::kSrcOver, sk_sampling,  //
                               nullptr, nullptr);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawAtlas(DlImage::Make(image), xform, tex, dl_colors, 4,
-                              DlBlendMode::kSrcOver, sampling, nullptr,
+                              DlBlendMode::kSrcOver, dl_sampling, nullptr,
                               nullptr);
           },
           kDrawAtlasFlags));
@@ -3216,34 +3284,39 @@ TEST_F(DisplayListCanvas, DrawAtlasLinear) {
       DlColor::kMagenta(),
   };
   const sk_sp<SkImage> image = CanvasCompareTester::kTestImage;
-  const DlImageSampling sampling = DlImageSampling::kLinear;
+  const DlImageSampling dl_sampling = DlImageSampling::kLinear;
+  const SkSamplingOptions sk_sampling = SkImageSampling::kLinear;
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {
             canvas->drawAtlas(image.get(), xform, tex, sk_colors, 2,  //
-                              SkBlendMode::kSrcOver, ToSk(sampling), nullptr,
+                              SkBlendMode::kSrcOver, sk_sampling, nullptr,
                               &paint);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {
             canvas->DrawAtlas(DlImage::Make(image), xform, tex, dl_colors, 2,
-                              DlBlendMode::kSrcOver, sampling, nullptr, &paint);
+                              DlBlendMode::kSrcOver, dl_sampling, nullptr,
+                              &paint);
           },
           kDrawAtlasWithPaintFlags));
 }
 
 sk_sp<DisplayList> makeTestDisplayList() {
   DisplayListBuilder builder;
-  builder.setStyle(DlDrawStyle::kFill);
-  builder.setColor(SK_ColorRED);
-  builder.drawRect({kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY});
-  builder.setColor(SK_ColorBLUE);
-  builder.drawRect({kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY});
-  builder.setColor(SK_ColorGREEN);
-  builder.drawRect(
-      {kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom});
-  builder.setColor(SK_ColorYELLOW);
-  builder.drawRect(
-      {kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom});
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kFill);
+  paint.setColor(SK_ColorRED);
+  builder.DrawRect({kRenderLeft, kRenderTop, kRenderCenterX, kRenderCenterY},
+                   paint);
+  paint.setColor(SK_ColorBLUE);
+  builder.DrawRect({kRenderCenterX, kRenderTop, kRenderRight, kRenderCenterY},
+                   paint);
+  paint.setColor(SK_ColorGREEN);
+  builder.DrawRect({kRenderLeft, kRenderCenterY, kRenderCenterX, kRenderBottom},
+                   paint);
+  paint.setColor(SK_ColorYELLOW);
+  builder.DrawRect(
+      {kRenderCenterX, kRenderCenterY, kRenderRight, kRenderBottom}, paint);
   return builder.Build();
 }
 
@@ -3252,7 +3325,7 @@ TEST_F(DisplayListCanvas, DrawDisplayList) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            display_list->RenderTo(canvas);
+            DlSkCanvasAdapter(canvas).DrawDisplayList(display_list);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawDisplayList(display_list);
@@ -3310,8 +3383,8 @@ TEST_F(DisplayListCanvas, DrawShadow) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            DisplayListCanvasDispatcher::DrawShadow(canvas, path, color,
-                                                    elevation, false, 1.0);
+            DlSkCanvasDispatcher::DrawShadow(canvas, path, color, elevation,
+                                             false, 1.0);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawShadow(path, color, elevation, false, 1.0);
@@ -3336,8 +3409,8 @@ TEST_F(DisplayListCanvas, DrawShadowTransparentOccluder) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            DisplayListCanvasDispatcher::DrawShadow(canvas, path, color,
-                                                    elevation, true, 1.0);
+            DlSkCanvasDispatcher::DrawShadow(canvas, path, color, elevation,
+                                             true, 1.0);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawShadow(path, color, elevation, true, 1.0);
@@ -3362,8 +3435,8 @@ TEST_F(DisplayListCanvas, DrawShadowDpr) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            DisplayListCanvasDispatcher::DrawShadow(canvas, path, color,
-                                                    elevation, false, 1.5);
+            DlSkCanvasDispatcher::DrawShadow(canvas, path, color, elevation,
+                                             false, 1.5);
           },
           [=](DlCanvas* canvas, const DlPaint& paint) {  //
             canvas->DrawShadow(path, color, elevation, false, 1.5);
@@ -3554,6 +3627,318 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
     }
   }
 }
+
+TEST_F(DisplayListCanvas, MatrixColorFilterModifyTransparencyCheck) {
+  std::vector<std::unique_ptr<RenderEnvironment>> environments;
+  for (auto& provider : CanvasCompareTester::kTestProviders) {
+    auto env = std::make_unique<RenderEnvironment>(
+        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+    environments.push_back(std::move(env));
+  }
+
+  auto test_matrix = [&environments](int element, SkScalar value) {
+    // clang-format off
+    float matrix[] = {
+        1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0,
+    };
+    // clang-format on
+    std::string desc =
+        "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
+    float original_value = matrix[element];
+    matrix[element] = value;
+    DlMatrixColorFilter filter(matrix);
+    auto dl_filter = DlMatrixColorFilter::Make(matrix);
+    bool is_identity = (dl_filter == nullptr || original_value == value);
+
+    DlPaint paint(0x7f7f7f7f);
+    DlPaint filter_save_paint = DlPaint().setColorFilter(&filter);
+
+    DisplayListBuilder builder1;
+    builder1.Translate(kTestCenter.fX, kTestCenter.fY);
+    builder1.Rotate(45);
+    builder1.Translate(-kTestCenter.fX, -kTestCenter.fY);
+    builder1.DrawRect(kRenderBounds, paint);
+    auto display_list1 = builder1.Build();
+
+    DisplayListBuilder builder2;
+    builder2.Translate(kTestCenter.fX, kTestCenter.fY);
+    builder2.Rotate(45);
+    builder2.Translate(-kTestCenter.fX, -kTestCenter.fY);
+    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.DrawRect(kRenderBounds, paint);
+    builder2.Restore();
+    auto display_list2 = builder2.Build();
+
+    for (auto& env : environments) {
+      auto results1 = env->getResult(display_list1);
+      auto results2 = env->getResult(display_list2);
+      CanvasCompareTester::quickCompareToReference(
+          results1.get(), results2.get(), is_identity,
+          desc + " filter affects rendering");
+      int modified_transparent_pixels =
+          CanvasCompareTester::countModifiedTransparentPixels(results1.get(),
+                                                              results2.get());
+      EXPECT_EQ(filter.modifies_transparent_black(),
+                modified_transparent_pixels != 0)
+          << desc;
+    }
+  };
+
+  // Tests identity (matrix[0] already == 1 in an identity filter)
+  test_matrix(0, 1);
+  // test_matrix(19, 1);
+  for (int i = 0; i < 20; i++) {
+    test_matrix(i, -0.25);
+    test_matrix(i, 0);
+    test_matrix(i, 0.25);
+    test_matrix(i, 1);
+    test_matrix(i, 1.25);
+    test_matrix(i, SK_ScalarNaN);
+    test_matrix(i, SK_ScalarInfinity);
+    test_matrix(i, -SK_ScalarInfinity);
+  }
+}
+
+TEST_F(DisplayListCanvas, MatrixColorFilterOpacityCommuteCheck) {
+  std::vector<std::unique_ptr<RenderEnvironment>> environments;
+  for (auto& provider : CanvasCompareTester::kTestProviders) {
+    auto env = std::make_unique<RenderEnvironment>(
+        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+    environments.push_back(std::move(env));
+  }
+
+  auto test_matrix = [&environments](int element, SkScalar value) {
+    // clang-format off
+    float matrix[] = {
+        1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0,
+    };
+    // clang-format on
+    std::string desc =
+        "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
+    matrix[element] = value;
+    auto filter = DlMatrixColorFilter::Make(matrix);
+    EXPECT_EQ(SkScalarIsFinite(value), filter != nullptr);
+
+    DlPaint paint(0x80808080);
+    DlPaint opacity_save_paint = DlPaint().setOpacity(0.5);
+    DlPaint filter_save_paint = DlPaint().setColorFilter(filter);
+
+    DisplayListBuilder builder1;
+    builder1.SaveLayer(&kTestBounds, &opacity_save_paint);
+    builder1.SaveLayer(&kTestBounds, &filter_save_paint);
+    // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
+    builder1.DrawRect(kRenderBounds, paint);
+    builder1.Restore();
+    builder1.Restore();
+    auto display_list1 = builder1.Build();
+
+    DisplayListBuilder builder2;
+    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds, &opacity_save_paint);
+    // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
+    builder2.DrawRect(kRenderBounds, paint);
+    builder2.Restore();
+    builder2.Restore();
+    auto display_list2 = builder2.Build();
+
+    for (auto& env : environments) {
+      auto results1 = env->getResult(display_list1);
+      auto results2 = env->getResult(display_list2);
+      if (!filter || filter->can_commute_with_opacity()) {
+        CanvasCompareTester::compareToReference(
+            results2.get(), results1.get(), desc, nullptr, nullptr,
+            DlColor::kTransparent(), true, kTestWidth, kTestHeight, true);
+      } else {
+        CanvasCompareTester::quickCompareToReference(
+            results1.get(), results2.get(), false, desc);
+      }
+    }
+  };
+
+  // Tests identity (matrix[0] already == 1 in an identity filter)
+  test_matrix(0, 1);
+  // test_matrix(19, 1);
+  for (int i = 0; i < 20; i++) {
+    test_matrix(i, -0.25);
+    test_matrix(i, 0);
+    test_matrix(i, 0.25);
+    test_matrix(i, 1);
+    test_matrix(i, 1.1);
+    test_matrix(i, SK_ScalarNaN);
+    test_matrix(i, SK_ScalarInfinity);
+    test_matrix(i, -SK_ScalarInfinity);
+  }
+}
+
+#define FOR_EACH_BLEND_MODE_ENUM(FUNC) \
+  FUNC(kSrc)                           \
+  FUNC(kClear)                         \
+  FUNC(kSrc)                           \
+  FUNC(kDst)                           \
+  FUNC(kSrcOver)                       \
+  FUNC(kDstOver)                       \
+  FUNC(kSrcIn)                         \
+  FUNC(kDstIn)                         \
+  FUNC(kSrcOut)                        \
+  FUNC(kDstOut)                        \
+  FUNC(kSrcATop)                       \
+  FUNC(kDstATop)                       \
+  FUNC(kXor)                           \
+  FUNC(kPlus)                          \
+  FUNC(kModulate)                      \
+  FUNC(kScreen)                        \
+  FUNC(kOverlay)                       \
+  FUNC(kDarken)                        \
+  FUNC(kLighten)                       \
+  FUNC(kColorDodge)                    \
+  FUNC(kColorBurn)                     \
+  FUNC(kHardLight)                     \
+  FUNC(kSoftLight)                     \
+  FUNC(kDifference)                    \
+  FUNC(kExclusion)                     \
+  FUNC(kMultiply)                      \
+  FUNC(kHue)                           \
+  FUNC(kSaturation)                    \
+  FUNC(kColor)                         \
+  FUNC(kLuminosity)
+
+TEST_F(DisplayListCanvas, BlendColorFilterModifyTransparencyCheck) {
+  std::vector<std::unique_ptr<RenderEnvironment>> environments;
+  for (auto& provider : CanvasCompareTester::kTestProviders) {
+    auto env = std::make_unique<RenderEnvironment>(
+        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+    environments.push_back(std::move(env));
+  }
+
+  auto test_mode_color = [&environments](DlBlendMode mode, DlColor color) {
+    std::stringstream desc_str;
+    desc_str << "blend[" << mode << ", " << color << "]";
+    std::string desc = desc_str.str();
+    DlBlendColorFilter filter(color, mode);
+    if (filter.modifies_transparent_black()) {
+      ASSERT_NE(DlBlendColorFilter::Make(color, mode), nullptr) << desc;
+    }
+
+    DlPaint paint(0x7f7f7f7f);
+    DlPaint filter_save_paint = DlPaint().setColorFilter(&filter);
+
+    DisplayListBuilder builder1;
+    builder1.Translate(kTestCenter.fX, kTestCenter.fY);
+    builder1.Rotate(45);
+    builder1.Translate(-kTestCenter.fX, -kTestCenter.fY);
+    builder1.DrawRect(kRenderBounds, paint);
+    auto display_list1 = builder1.Build();
+
+    DisplayListBuilder builder2;
+    builder2.Translate(kTestCenter.fX, kTestCenter.fY);
+    builder2.Rotate(45);
+    builder2.Translate(-kTestCenter.fX, -kTestCenter.fY);
+    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.DrawRect(kRenderBounds, paint);
+    builder2.Restore();
+    auto display_list2 = builder2.Build();
+
+    for (auto& env : environments) {
+      auto results1 = env->getResult(display_list1);
+      auto results2 = env->getResult(display_list2);
+      int modified_transparent_pixels =
+          CanvasCompareTester::countModifiedTransparentPixels(results1.get(),
+                                                              results2.get());
+      EXPECT_EQ(filter.modifies_transparent_black(),
+                modified_transparent_pixels != 0)
+          << desc;
+    }
+  };
+
+  auto test_mode = [&test_mode_color](DlBlendMode mode) {
+    test_mode_color(mode, DlColor::kTransparent());
+    test_mode_color(mode, DlColor::kWhite());
+    test_mode_color(mode, DlColor::kWhite().modulateOpacity(0.5));
+    test_mode_color(mode, DlColor::kBlack());
+    test_mode_color(mode, DlColor::kBlack().modulateOpacity(0.5));
+  };
+
+#define TEST_MODE(V) test_mode(DlBlendMode::V);
+  FOR_EACH_BLEND_MODE_ENUM(TEST_MODE)
+#undef TEST_MODE
+}
+
+TEST_F(DisplayListCanvas, BlendColorFilterOpacityCommuteCheck) {
+  std::vector<std::unique_ptr<RenderEnvironment>> environments;
+  for (auto& provider : CanvasCompareTester::kTestProviders) {
+    auto env = std::make_unique<RenderEnvironment>(
+        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+    environments.push_back(std::move(env));
+  }
+
+  auto test_mode_color = [&environments](DlBlendMode mode, DlColor color) {
+    std::stringstream desc_str;
+    desc_str << "blend[" << mode << ", " << color << "]";
+    std::string desc = desc_str.str();
+    DlBlendColorFilter filter(color, mode);
+    if (filter.can_commute_with_opacity()) {
+      // If it can commute with opacity, then it might also be a NOP,
+      // so we won't necessarily get a non-null return from |::Make()|
+    } else {
+      ASSERT_NE(DlBlendColorFilter::Make(color, mode), nullptr) << desc;
+    }
+
+    DlPaint paint(0x80808080);
+    DlPaint opacity_save_paint = DlPaint().setOpacity(0.5);
+    DlPaint filter_save_paint = DlPaint().setColorFilter(&filter);
+
+    DisplayListBuilder builder1;
+    builder1.SaveLayer(&kTestBounds, &opacity_save_paint);
+    builder1.SaveLayer(&kTestBounds, &filter_save_paint);
+    // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
+    builder1.DrawRect(kRenderBounds, paint);
+    builder1.Restore();
+    builder1.Restore();
+    auto display_list1 = builder1.Build();
+
+    DisplayListBuilder builder2;
+    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds, &opacity_save_paint);
+    // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
+    builder2.DrawRect(kRenderBounds, paint);
+    builder2.Restore();
+    builder2.Restore();
+    auto display_list2 = builder2.Build();
+
+    for (auto& env : environments) {
+      auto results1 = env->getResult(display_list1);
+      auto results2 = env->getResult(display_list2);
+      if (filter.can_commute_with_opacity()) {
+        CanvasCompareTester::compareToReference(
+            results2.get(), results1.get(), desc, nullptr, nullptr,
+            DlColor::kTransparent(), true, kTestWidth, kTestHeight, true);
+      } else {
+        CanvasCompareTester::quickCompareToReference(
+            results1.get(), results2.get(), false, desc);
+      }
+    }
+  };
+
+  auto test_mode = [&test_mode_color](DlBlendMode mode) {
+    test_mode_color(mode, DlColor::kTransparent());
+    test_mode_color(mode, DlColor::kWhite());
+    test_mode_color(mode, DlColor::kWhite().modulateOpacity(0.5));
+    test_mode_color(mode, DlColor::kBlack());
+    test_mode_color(mode, DlColor::kBlack().modulateOpacity(0.5));
+  };
+
+#define TEST_MODE(V) test_mode(DlBlendMode::V);
+  FOR_EACH_BLEND_MODE_ENUM(TEST_MODE)
+#undef TEST_MODE
+}
+
+#undef FOR_EACH_ENUM
 
 }  // namespace testing
 }  // namespace flutter

@@ -19,7 +19,7 @@ static void DlGradientDeleter(void* p) {
   ::operator delete(p);
 }
 
-std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
+std::shared_ptr<DlLinearGradientColorSource> DlColorSource::MakeLinear(
     const SkPoint start_point,
     const SkPoint end_point,
     uint32_t stop_count,
@@ -37,10 +37,10 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeLinear(
                 DlLinearGradientColorSource(start_point, end_point, stop_count,
                                             colors, stops, tile_mode, matrix),
             DlGradientDeleter);
-  return std::move(ret);
+  return ret;
 }
 
-std::shared_ptr<DlColorSource> DlColorSource::MakeRadial(
+std::shared_ptr<DlRadialGradientColorSource> DlColorSource::MakeRadial(
     SkPoint center,
     SkScalar radius,
     uint32_t stop_count,
@@ -57,10 +57,10 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeRadial(
   ret.reset(new (storage) DlRadialGradientColorSource(
                 center, radius, stop_count, colors, stops, tile_mode, matrix),
             DlGradientDeleter);
-  return std::move(ret);
+  return ret;
 }
 
-std::shared_ptr<DlColorSource> DlColorSource::MakeConical(
+std::shared_ptr<DlConicalGradientColorSource> DlColorSource::MakeConical(
     SkPoint start_center,
     SkScalar start_radius,
     SkPoint end_center,
@@ -80,10 +80,10 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeConical(
                 start_center, start_radius, end_center, end_radius, stop_count,
                 colors, stops, tile_mode, matrix),
             DlGradientDeleter);
-  return std::move(ret);
+  return ret;
 }
 
-std::shared_ptr<DlColorSource> DlColorSource::MakeSweep(
+std::shared_ptr<DlSweepGradientColorSource> DlColorSource::MakeSweep(
     SkPoint center,
     SkScalar start,
     SkScalar end,
@@ -102,7 +102,7 @@ std::shared_ptr<DlColorSource> DlColorSource::MakeSweep(
                 DlSweepGradientColorSource(center, start, end, stop_count,
                                            colors, stops, tile_mode, matrix),
             DlGradientDeleter);
-  return std::move(ret);
+  return ret;
 }
 
 std::shared_ptr<DlRuntimeEffectColorSource> DlColorSource::MakeRuntimeEffect(
