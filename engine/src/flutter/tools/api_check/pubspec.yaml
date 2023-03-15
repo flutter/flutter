@@ -14,7 +14,7 @@ publish_to: none
 # relative to this directory into //third_party/dart
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 
 # Do not add any dependencies that require more than what is provided in
 # //third_party/pkg, //third_party/dart/pkg, or

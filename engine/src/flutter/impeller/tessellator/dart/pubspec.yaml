@@ -8,4 +8,4 @@ publish_to: none
 homepage: https://github.com/flutter/impeller/tree/main/tessellator/dart
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
