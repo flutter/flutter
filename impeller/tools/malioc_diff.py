@@ -223,6 +223,8 @@ def compare_variants(befores, afters):
   return differences
 
 
+# Compares two shaders. Prints a report and returns True if there are
+# differences, and returns False otherwise.
 def compare_shaders(malioc_tree, before_shader, after_shader):
   differences = []
   for key, before_val in before_shader.items():
