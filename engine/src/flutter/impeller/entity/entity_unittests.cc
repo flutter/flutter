@@ -246,6 +246,27 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_P(EntityTest, StrokeWithTextureContents) {
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  Path path = PathBuilder{}
+                  .MoveTo({100, 100})
+                  .LineTo({100, 200})
+                  .MoveTo({100, 300})
+                  .LineTo({100, 400})
+                  .MoveTo({100, 500})
+                  .LineTo({100, 600})
+                  .TakePath();
+
+  Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  auto contents = std::make_unique<TiledTextureContents>();
+  contents->SetGeometry(Geometry::MakeStrokePath(path, 100.0));
+  contents->SetTexture(bridge);
+  contents->SetTileModes(Entity::TileMode::kClamp, Entity::TileMode::kClamp);
+  entity.SetContents(std::move(contents));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
 TEST_P(EntityTest, TriangleInsideASquare) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
     Point offset(100, 100);
