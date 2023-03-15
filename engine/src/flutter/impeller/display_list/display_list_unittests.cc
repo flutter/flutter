@@ -1076,36 +1076,60 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 }
 
 TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
-  flutter::DisplayListBuilder builder;
-  builder.Save();
-  builder.Scale(2.0, 2.0);
-  flutter::DlPaint paint;
-  paint.setColor(flutter::DlColor::kYellow());
-  builder.DrawRect(SkRect::MakeWH(300, 300), paint);
-  paint.setStrokeWidth(1.0);
-  paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
-  paint.setColor(flutter::DlColor::kBlack().withAlpha(0x80));
-  builder.DrawLine(SkPoint::Make(150, 0), SkPoint::Make(150, 300), paint);
-  builder.DrawLine(SkPoint::Make(0, 150), SkPoint::Make(300, 150), paint);
+  auto callback = [&]() {
+    static float translation[2] = {0, 0};
+    static bool enable_save_layer = true;
 
-  SkRect bounds = SkRect::MakeXYWH(100, 100, 100, 100);
-  flutter::DlPaint save_paint;
-  SkMatrix filter_matrix = SkMatrix::I();
-  filter_matrix.postTranslate(-150, -150);
-  filter_matrix.postScale(0.2f, 0.2f);
-  filter_matrix.postTranslate(150, 150);
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat2("Translation", translation, -130, 130);
+    ImGui::Checkbox("Enable save layer", &enable_save_layer);
+    ImGui::End();
 
-  auto filter = flutter::DlMatrixImageFilter(
-      filter_matrix, flutter::DlImageSampling::kNearestNeighbor);
-  save_paint.setImageFilter(filter.shared());
+    flutter::DisplayListBuilder builder;
+    builder.Save();
+    builder.Scale(2.0, 2.0);
+    flutter::DlPaint paint;
+    paint.setColor(flutter::DlColor::kYellow());
+    builder.DrawRect(SkRect::MakeWH(300, 300), paint);
+    paint.setStrokeWidth(1.0);
+    paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+    paint.setColor(flutter::DlColor::kBlack().withAlpha(0x80));
+    builder.DrawLine(SkPoint::Make(150, 0), SkPoint::Make(150, 300), paint);
+    builder.DrawLine(SkPoint::Make(0, 150), SkPoint::Make(300, 150), paint);
 
-  builder.SaveLayer(&bounds, &save_paint);
-  flutter::DlPaint paint2;
-  paint2.setColor(flutter::DlColor::kBlue());
-  builder.DrawRect(bounds, paint2);
-  builder.Restore();
+    flutter::DlPaint save_paint;
+    SkRect bounds = SkRect::MakeXYWH(100, 100, 100, 100);
+    SkMatrix translate_matrix =
+        SkMatrix::Translate(translation[0], translation[1]);
+    if (enable_save_layer) {
+      auto filter = flutter::DlMatrixImageFilter(
+          translate_matrix, flutter::DlImageSampling::kNearestNeighbor);
+      save_paint.setImageFilter(filter.shared());
+      builder.SaveLayer(&bounds, &save_paint);
+    } else {
+      builder.Save();
+      builder.Transform(translate_matrix);
+    }
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+    SkMatrix filter_matrix = SkMatrix::I();
+    filter_matrix.postTranslate(-150, -150);
+    filter_matrix.postScale(0.2f, 0.2f);
+    filter_matrix.postTranslate(150, 150);
+    auto filter = flutter::DlMatrixImageFilter(
+        filter_matrix, flutter::DlImageSampling::kNearestNeighbor);
+
+    save_paint.setImageFilter(filter.shared());
+
+    builder.SaveLayer(&bounds, &save_paint);
+    flutter::DlPaint paint2;
+    paint2.setColor(flutter::DlColor::kBlue());
+    builder.DrawRect(bounds, paint2);
+    builder.Restore();
+    builder.Restore();
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(DisplayListTest, CanDrawRectWithLinearToSrgbColorFilter) {

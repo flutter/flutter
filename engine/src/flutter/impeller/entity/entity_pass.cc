@@ -358,7 +358,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     auto offscreen_texture_contents =
         subpass->delegate_->CreateContentsForSubpassTarget(
-            subpass_texture, subpass->xformation_);
+            subpass_texture,
+            Matrix::MakeTranslation(Vector3{-position}) * subpass->xformation_);
 
     if (!offscreen_texture_contents) {
       // This is an error because the subpass delegate said the pass couldn't
