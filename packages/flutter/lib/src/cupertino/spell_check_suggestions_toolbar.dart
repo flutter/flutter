@@ -12,7 +12,7 @@ import 'text_selection_toolbar_button.dart';
 /// iOS only shows 3 spell check suggestions in the toolbar.
 const int _maxSuggestions = 3;
 
-/// The default spell check suggestions toolbar for Android.
+/// The default spell check suggestions toolbar for iOS.
 ///
 /// Tries to position itself below the [anchors], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
@@ -50,7 +50,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     final SuggestionSpan? spanAtCursorIndex =
       editableTextState.findSuggestionSpanAtCursorIndex(
         editableTextState.currentTextEditingValue.selection.baseOffset,
-    );
+      );
 
     if (spanAtCursorIndex == null) {
       return null;
@@ -72,16 +72,16 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       if (suggestionCount >= _maxSuggestions) {
         break;
       }
-        buttonItems.add(ContextMenuButtonItem(
-          onPressed: () {
-            _replaceText(
-              editableTextState,
-              suggestion,
-              spanAtCursorIndex.range,
-            );
-          },
-          label: suggestion,
-        ));
+      buttonItems.add(ContextMenuButtonItem(
+        onPressed: () {
+          _replaceText(
+            editableTextState,
+            suggestion,
+            spanAtCursorIndex.range,
+          );
+        },
+        label: suggestion,
+      ));
       suggestionCount += 1;
     }
     return buttonItems;
@@ -91,13 +91,11 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
 
-    final ReplaceTextIntent intent = ReplaceTextIntent(editableTextState.textEditingValue, text, replacementRange, SelectionChangedCause.toolbar);
-
-    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
-      intent.replacementRange,
-      intent.replacementText,
+    final TextEditingValue newValue = editableTextState.textEditingValue.replaced(
+      replacementRange,
+      text,
     );
-    editableTextState.userUpdateTextEditingValue(newValue, intent.cause);
+    editableTextState.userUpdateTextEditingValue(newValue,SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -106,7 +104,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
     });
     editableTextState.hideToolbar();
-    editableTextState.renderEditable.selectWordEdge(cause: intent.cause);
+    editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.toolbar);
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].

@@ -2225,9 +2225,7 @@ class TextSelectionGestureDetectorBuilder {
                   editableText.toggleToolbar(false);
                 }
               }
-              else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
-                  || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame))
-                  && renderEditable.hasFocus) {
+              else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed) || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame)) && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);
               } else {
                 renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);

@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
+const int kSingleTapUpTimeout = 500;
+
 void main() {
   late int tapCount;
   late int singleTapUpCount;
@@ -680,7 +682,7 @@ void main() {
     // Reset and test text selection toolbar is toggled for additional taps.
     state.showSpellCheckSuggestionsToolbarCalled = false;
     renderEditable.selection = selection;
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
 
     // Test first tap.
     await tester.tapAt(position);
@@ -691,7 +693,7 @@ void main() {
 
     // Reset and test second tap.
     state.toggleToolbarCalled = false;
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
 
     await tester.tapAt(position);
     await tester.pumpAndSettle();

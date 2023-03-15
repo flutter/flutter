@@ -112,13 +112,11 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
 
-    final ReplaceTextIntent intent = ReplaceTextIntent(editableTextState.textEditingValue, text, replacementRange, SelectionChangedCause.toolbar);
-
-    final TextEditingValue newValue = intent.currentTextEditingValue.replaced(
-      intent.replacementRange,
-      intent.replacementText,
+    final TextEditingValue newValue = editableTextState.textEditingValue.replaced(
+      replacementRange,
+      text,
     );
-    editableTextState.userUpdateTextEditingValue(newValue, intent.cause);
+    editableTextState.userUpdateTextEditingValue(newValue,  SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
     SchedulerBinding.instance.addPostFrameCallback((_) {
