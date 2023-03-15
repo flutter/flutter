@@ -117,17 +117,17 @@ class BottomSheet extends StatefulWidget {
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
-  /// 
+  ///
   /// This applies to the content below the drag handle, if showDragHandle is true.
-  /// 
+  ///
   /// Default is true.
   final bool enableDrag;
 
   /// Specifies whether a drag handle is shown.
   ///
-  /// The drag handle appears at the top of the bottom sheet. The default color is 
-  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized 
-  /// using dragHandleColor. The default size is Size(32,4) and can be customized 
+  /// The drag handle appears at the top of the bottom sheet. The default color is
+  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized
+  /// using dragHandleColor. The default size is Size(32,4) and can be customized
   /// with dragHandleSize.
   ///
   /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
@@ -906,7 +906,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
-  /// 
+  ///
   /// This applies to the content below the drag handle, if showDragHandle is true.
   ///
   /// Defaults is true.
@@ -914,9 +914,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Specifies whether a drag handle is shown.
   ///
-  /// The drag handle appears at the top of the bottom sheet. The default color is 
-  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized 
-  /// using dragHandleColor. The default size is Size(32,4) and can be customized 
+  /// The drag handle appears at the top of the bottom sheet. The default color is
+  /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized
+  /// using dragHandleColor. The default size is Size(32,4) and can be customized
   /// with dragHandleSize.
   ///
   /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
