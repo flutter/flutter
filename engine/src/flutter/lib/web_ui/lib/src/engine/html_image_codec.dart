@@ -204,9 +204,6 @@ class HtmlImage implements ui.Image {
     }
   }
 
-  @override
-  ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
-
   DomHTMLImageElement cloneImageElement() {
     if (!_didClone) {
       _didClone = true;
