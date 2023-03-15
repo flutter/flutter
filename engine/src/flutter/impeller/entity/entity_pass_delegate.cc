@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/entity_pass_delegate.h"
+#include "impeller/entity/entity_pass.h"
 
 namespace impeller {
 
@@ -24,7 +25,9 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
   bool CanElide() override { return false; }
 
   // |EntityPassDelegate|
-  bool CanCollapseIntoParentPass() override { return true; }
+  bool CanCollapseIntoParentPass(EntityPass* entity_pass) override {
+    return true;
+  }
 
   // |EntityPassDelegate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(

@@ -41,6 +41,11 @@ class ClipContents final : public Contents {
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
+  // |Contents|
+  bool CanAcceptOpacity(const Entity& entity) const override;
+
+  // |Contents|
+  void InheritOpacity(Scalar opacity) override;
 
  private:
   std::unique_ptr<Geometry> geometry_;
@@ -77,6 +82,12 @@ class ClipRestoreContents final : public Contents {
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
+
+  // |Contents|
+  bool CanAcceptOpacity(const Entity& entity) const override;
+
+  // |Contents|
+  void InheritOpacity(Scalar opacity) override;
 
  private:
   std::optional<Rect> restore_coverage_;
