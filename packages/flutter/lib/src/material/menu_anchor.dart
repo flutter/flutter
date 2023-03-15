@@ -463,10 +463,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _handleScroll() {
-    // If an ancestor scrolls, and we're a top level or root anchor, then close
-    // the menus. Don't just close it on *any* scroll, since we want to be able
-    // to scroll menus themselves if they're too big for the view.
-    if (_isTopLevel || _isRoot) {
+    // If an ancestor scrolls, and we're a root anchor, then close the menus.
+    // Don't just close it on *any* scroll, since we want to be able to scroll
+    // menus themselves if they're too big for the view.
+    if (_isRoot) {
       _root._close();
     }
   }

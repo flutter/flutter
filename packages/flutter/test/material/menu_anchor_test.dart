@@ -1387,6 +1387,78 @@ void main() {
       expect(closed, isNotEmpty);
     });
 
+    testWidgets('menus do not close on root menu internal scroll', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/122168.
+      final ScrollController scrollController = ScrollController();
+      bool rootOpened = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            menuButtonTheme: MenuButtonThemeData(
+              // Increase menu items height to make root menu scrollable.
+              style: TextButton.styleFrom(minimumSize: const Size.fromHeight(200)),
+            ),
+          ),
+          home: Material(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Container(
+                height: 1000,
+                alignment: Alignment.topLeft,
+                child: MenuAnchor(
+                  controller: controller,
+                  alignmentOffset: const Offset(0, 10),
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton.tonal(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Show menu'),
+                    );
+                  },
+                  onOpen: () { rootOpened = true; },
+                  onClose: () { rootOpened = false; },
+                  menuChildren: createTestMenus(
+                    onPressed: onPressed,
+                    onOpen: onOpen,
+                    onClose: onClose,
+                    includeExtraGroups: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show menu'));
+      await tester.pump();
+      expect(rootOpened, true);
+
+      // Hover the first item.
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.text(TestMenu.mainMenu0.label))));
+      await tester.pump();
+      expect(opened, isNotEmpty);
+
+      // Menus do not close on internal scroll.
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+      await tester.pump();
+      expect(rootOpened, true);
+      expect(closed, isEmpty);
+
+      // Menus close on external scroll.
+      scrollController.jumpTo(1000);
+      await tester.pump();
+      expect(rootOpened, false);
+      expect(closed, isNotEmpty);
+    });
+
     testWidgets('menus close on view size change', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
