@@ -1,4 +1,4 @@
-Signature: 0945b8d0b215c9c3e48d4fb76a17f1e7
+Signature: 2dacb15fec70eea2936f61c55a33ee73
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9001,6 +9001,7 @@ ORIGIN: ../../../third_party/skia/src/image/SkSurface_Null.cpp + ../../../third_
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLIsDynamicallyUniformExpression.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLRewriteIndexedSwizzle.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCubicQuadRoots.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp
@@ -9047,6 +9048,7 @@ FILE: ../../../third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsDynamicallyUniformExpression.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLRewriteIndexedSwizzle.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google LLC
 
