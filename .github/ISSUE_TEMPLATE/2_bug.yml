@@ -15,8 +15,8 @@ body:
           - https://api.flutter.dev/
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
-        If our documentation doesn't have an answer
-        to what you're looking for, then fill out the template below.
+        You found a bug in Flutter causing your application to crash or
+        throw an exception, a widget is buggy, or something looks wrong.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
