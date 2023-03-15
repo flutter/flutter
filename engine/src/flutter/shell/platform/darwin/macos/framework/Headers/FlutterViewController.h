@@ -61,7 +61,7 @@ FLUTTER_DARWIN_EXPORT
  * If the view controller is unattached (see FlutterViewController#attached),
  * reading this property throws an assertion.
  */
-@property(nonatomic, readonly) uint64_t id;
+@property(nonatomic, readonly) uint64_t viewId;
 
 /**
  * The style of mouse tracking to use for the view. Defaults to
