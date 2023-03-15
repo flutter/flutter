@@ -2415,6 +2415,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
       // a native spell checker must be supported.
+      print("Spell check was enabled with spellCheckConfiguration, but the current platform does not have a supported spell check service, and none was provided.");
       return const SpellCheckConfiguration.disabled();
     }
 
