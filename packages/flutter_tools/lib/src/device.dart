@@ -17,7 +17,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
-import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -1098,7 +1097,7 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
-    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+    DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1137,7 +1136,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
-      if (interfaceType == IOSDeviceConnectionInterface.network)
+      if (interfaceType == DeviceConnectionInterface.wireless)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
       if (enableEmbedderApi) '--enable-embedder-api',
     ];

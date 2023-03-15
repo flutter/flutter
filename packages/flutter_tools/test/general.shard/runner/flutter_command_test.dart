@@ -705,15 +705,15 @@ void main() {
       });
 
       testUsingContext('finds single device', () async {
-        testDeviceManager.addDevice(device1);
+        testDeviceManager.addAttachedDevice(device1);
         final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
 
       testUsingContext('finds multiple devices', () async {
-        testDeviceManager.addDevice(device1);
-        testDeviceManager.addDevice(device2);
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
         final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
         final Device? device = await flutterCommand.findTargetDevice();

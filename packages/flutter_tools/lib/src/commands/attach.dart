@@ -24,7 +24,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
@@ -287,7 +286,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-    final bool isNetworkDevice = (device is IOSDevice) && device.interfaceType == IOSDeviceConnectionInterface.network;
+    final bool isNetworkDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if ((debugPort == null && debugUri == null) || isNetworkDevice) {
       if (device is FuchsiaDevice) {

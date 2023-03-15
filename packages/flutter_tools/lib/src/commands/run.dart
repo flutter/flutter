@@ -20,7 +20,6 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -426,7 +425,7 @@ class RunCommand extends RunCommandBase {
       final TargetPlatform platform = await device.targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
-      if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+      if (device is IOSDevice && device.isWirelesslyConnected) {
         anyIOSNetworkDevices = true;
       }
       deviceType = getNameForTargetPlatform(platform);
@@ -440,7 +439,7 @@ class RunCommand extends RunCommandBase {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
-        if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+        if (device is IOSDevice && device.isWirelesslyConnected) {
           anyIOSNetworkDevices = true;
         }
         if (anyAndroidDevices && anyIOSDevices) {

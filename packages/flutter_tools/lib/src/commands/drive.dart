@@ -23,7 +23,6 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -220,7 +219,7 @@ class DriveCommand extends RunCommandBase {
   Future<bool> get disablePortPublication async {
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
-    final bool isNetworkDevice = device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
+    final bool isNetworkDevice = device is IOSDevice && device.isWirelesslyConnected;
     if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
       _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
       return false;

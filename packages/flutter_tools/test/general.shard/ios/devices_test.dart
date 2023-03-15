@@ -74,7 +74,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
       expect(device.isSupported(), isTrue);
     });
@@ -90,7 +90,7 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.armv7,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
       expect(device.isSupported(), isFalse);
     });
@@ -107,7 +107,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -120,7 +120,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -133,7 +133,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -146,7 +146,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -159,7 +159,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 0);
     });
 
@@ -175,7 +175,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -193,7 +193,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -217,7 +217,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
-              interfaceType: IOSDeviceConnectionInterface.usb,
+              connectionInterface: DeviceConnectionInterface.attached,
             );
           },
           throwsAssertionError,
@@ -307,7 +307,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
-          interfaceType: IOSDeviceConnectionInterface.usb,
+          connectionInterface: DeviceConnectionInterface.attached,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -368,7 +368,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       device2 = IOSDevice(
@@ -382,7 +382,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
     });
 

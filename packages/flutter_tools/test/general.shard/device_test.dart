@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -832,7 +831,7 @@ void main() {
         EnvironmentType.physical,
         null,
         <String, Object?>{},
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(
@@ -856,7 +855,7 @@ void main() {
         null,
         <String, Object?>{},
         ipv6: true,
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(

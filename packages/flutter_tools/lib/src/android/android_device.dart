@@ -89,6 +89,14 @@ class AndroidDevice extends Device {
   final String modelID;
   final String? deviceCodeName;
 
+  @override
+  // Wirelessly paired Android devices should have `adb-tls-connect` in the id.
+  // Source: https://android.googlesource.com/platform/packages/modules/adb/+/f4ba8d73079b99532069dbe888a58167b8723d6c/adb_mdns.h#30
+  DeviceConnectionInterface get connectionInterface =>
+      id.contains('adb-tls-connect')
+          ? DeviceConnectionInterface.wireless
+          : DeviceConnectionInterface.attached;
+
   late final Future<Map<String, String>> _properties = () async {
     Map<String, String> properties = <String, String>{};
 

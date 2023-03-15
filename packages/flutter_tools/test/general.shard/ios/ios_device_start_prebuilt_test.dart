@@ -250,7 +250,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
-      interfaceType: IOSDeviceConnectionInterface.network,
+      interfaceType: DeviceConnectionInterface.wireless,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -560,7 +560,7 @@ IOSDevice setUpIOSDevice({
   Logger? logger,
   ProcessManager? processManager,
   IOSDeploy? iosDeploy,
-  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb,
+  DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -598,7 +598,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: interfaceType,
+    connectionInterface: interfaceType,
   );
 }
 
