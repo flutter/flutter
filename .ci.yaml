@@ -990,7 +990,6 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/121707
     timeout: 60
     properties:
       dependencies: >-
