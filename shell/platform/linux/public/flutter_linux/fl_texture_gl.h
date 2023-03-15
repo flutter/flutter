@@ -30,26 +30,24 @@ G_DECLARE_DERIVABLE_TYPE(FlTextureGL, fl_texture_gl, FL, TEXTURE_GL, GObject)
  * ![<!-- language="C" -->
  *   #include <epoxy/gl.h>
  *
- *   // Type definition, constructor, init, destructor, and class_init are
- *   // omitted.
- *   struct _VideoTextureGL { // extends FlTextureGL
+ *   struct _MyTextureGL {
  *     FlTextureGL parent_instance;
  *
  *     GLuint texture_id;
  *   };
  *
- *   G_DEFINE_TYPE(VideoTexture,
- *                 video_texture,
+ *   G_DEFINE_TYPE(MyTextureGL,
+ *                 my_texture_gl,
  *                 fl_texture_gl_get_type ())
  *
  *   static gboolean
- *   video_texture_populate (FlTextureGL *texture,
+ *   my_texture_gl_populate (FlTextureGL *texture,
  *                           uint32_t *target,
  *                           uint32_t *name,
  *                           uint32_t *width,
  *                           uint32_t *height,
  *                           GError **error) {
- *     VideoTextureGL *self = VIDEO_TEXTURE_GL (texture);
+ *     MyTextureGL *self = MY_TEXTURE_GL (texture);
  *     if (self->texture_id == 0) {
  *       glGenTextures (1, &self->texture_id);
  *       glBindTexture (GL_TEXTURE_2D, self->texture_id);
@@ -71,6 +69,12 @@ G_DECLARE_DERIVABLE_TYPE(FlTextureGL, fl_texture_gl, FL, TEXTURE_GL, GObject)
  *
  *     return TRUE;
  *   }
+ *
+ *   static void my_texture_class_init(MyTextureClass* klass) {
+ *     FL_TEXTURE_GL_CLASS(klass)->populate = my_texture_gl_populate;
+ *   }
+ *
+ *   static void my_texture_init(MyTexture* self) {}
  * ]|
  */
 

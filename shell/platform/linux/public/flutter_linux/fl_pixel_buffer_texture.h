@@ -27,24 +27,22 @@ G_DECLARE_DERIVABLE_TYPE(FlPixelBufferTexture,
  *
  * The following example shows how to implement an #FlPixelBufferTexture.
  * ![<!-- language="C" -->
- *   // Type definition, constructor, init, destructor and class_init are
- *   // omitted.
- *   struct _VideoPixelBufferTexture {  // extends FlPixelBufferTexture
+ *   struct _MyTexture {
  *     FlPixelBufferTexture parent_instance;
  *
  *     uint8_t *buffer;  // your pixel buffer.
  *   }
  *
- *   G_DEFINE_TYPE(VideoTexture,
- *                 video_texture,
+ *   G_DEFINE_TYPE(MyTexture,
+ *                 my_texture,
  *                 fl_pixel_buffer_texture_get_type ())
  *
  *   static gboolean
- *   video_texture_copy_pixels (FlPixelBufferTexture* texture,
- *                              const uint8_t** out_buffer,
- *                              uint32_t* width,
- *                              uint32_t* height,
- *                              GError** error) {
+ *   my_texture_copy_pixels (FlPixelBufferTexture* texture,
+ *                           const uint8_t** out_buffer,
+ *                           uint32_t* width,
+ *                           uint32_t* height,
+ *                           GError** error) {
  *     // This method is called on Render Thread. Be careful with your
  *     // cross-thread operation.
  *
@@ -72,6 +70,13 @@ G_DECLARE_DERIVABLE_TYPE(FlPixelBufferTexture,
  *       return FALSE;
  *     }
  *   }
+ *
+ *   static void my_texture_class_init(MyTextureClass* klass) {
+ *     FL_PIXEL_BUFFER_TEXTURE_CLASS(klass)->copy_pixels =
+ * my_texture_copy_pixels;
+ *   }
+ *
+ *   static void my_texture_init(MyTexture* self) {}
  * ]|
  */
 
