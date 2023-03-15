@@ -70,6 +70,12 @@ bool ClipContents::ShouldRender(
   return true;
 }
 
+bool ClipContents::CanAcceptOpacity(const Entity& entity) const {
+  return true;
+}
+
+void ClipContents::InheritOpacity(Scalar opacity) {}
+
 bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass) const {
@@ -165,6 +171,12 @@ bool ClipRestoreContents::ShouldRender(
     const std::optional<Rect>& stencil_coverage) const {
   return true;
 }
+
+bool ClipRestoreContents::CanAcceptOpacity(const Entity& entity) const {
+  return true;
+}
+
+void ClipRestoreContents::InheritOpacity(Scalar opacity) {}
 
 bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  const Entity& entity,

@@ -46,6 +46,8 @@ class TextureContents final : public Contents {
 
   void SetOpacity(Scalar opacity);
 
+  Scalar GetOpacity() const;
+
   void SetStencilEnabled(bool enabled);
 
   // |Contents|
@@ -62,6 +64,12 @@ class TextureContents final : public Contents {
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
+
+  // |Contents|
+  bool CanAcceptOpacity(const Entity& entity) const override;
+
+  // |Contents|
+  void InheritOpacity(Scalar opacity) override;
 
   void SetDeferApplyingOpacity(bool defer_applying_opacity);
 

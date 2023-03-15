@@ -363,8 +363,15 @@ void Canvas::SaveLayer(
   Save(true, paint.blend_mode, backdrop_filter);
 
   auto& new_layer_pass = GetCurrentPass();
-  new_layer_pass.SetDelegate(
-      std::make_unique<PaintPassDelegate>(paint, bounds));
+
+  // Only apply opacity peephole on default blending.
+  if (paint.blend_mode == BlendMode::kSourceOver) {
+    new_layer_pass.SetDelegate(
+        std::make_unique<OpacityPeepholePassDelegate>(paint, bounds));
+  } else {
+    new_layer_pass.SetDelegate(
+        std::make_unique<PaintPassDelegate>(paint, bounds));
+  }
 
   if (bounds.has_value() && !backdrop_filter.has_value()) {
     // Render target switches due to a save layer can be elided. In such cases

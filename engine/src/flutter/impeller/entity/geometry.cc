@@ -4,6 +4,7 @@
 
 #include "impeller/entity/geometry.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/entity.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"

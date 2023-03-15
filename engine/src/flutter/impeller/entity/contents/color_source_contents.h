@@ -33,10 +33,16 @@ class ColorSourceContents : public Contents {
   bool ShouldRender(const Entity& entity,
                     const std::optional<Rect>& stencil_coverage) const override;
 
- protected:
-  const std::shared_ptr<Geometry>& GetGeometry() const;
+  // | Contents|
+  bool CanAcceptOpacity(const Entity& entity) const override;
+
+  // | Contents|
+  void InheritOpacity(Scalar opacity) override;
 
   Scalar GetAlpha() const;
+
+ protected:
+  const std::shared_ptr<Geometry>& GetGeometry() const;
 
  private:
   std::shared_ptr<Geometry> geometry_;

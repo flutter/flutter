@@ -26,6 +26,7 @@
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
@@ -74,7 +75,9 @@ class TestPassDelegate final : public EntityPassDelegate {
   bool CanElide() override { return false; }
 
   // |EntityPassDelgate|
-  bool CanCollapseIntoParentPass() override { return collapse_; }
+  bool CanCollapseIntoParentPass(EntityPass* entity_pass) override {
+    return collapse_;
+  }
 
   // |EntityPassDelgate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
@@ -2343,6 +2346,71 @@ TEST_P(EntityTest, RuntimeEffect) {
     return contents->Render(context, entity, pass);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, InheritOpacityTest) {
+  Entity entity;
+
+  // Texture contents can always accept opacity.
+  auto texture_contents = std::make_shared<TextureContents>();
+  texture_contents->SetOpacity(0.5);
+  ASSERT_TRUE(texture_contents->CanAcceptOpacity(entity));
+
+  texture_contents->InheritOpacity(0.5);
+  ASSERT_EQ(texture_contents->GetOpacity(), 0.25);
+
+  // Solid color contents can accept opacity if their geometry
+  // doesn't overlap.
+  auto solid_color = std::make_shared<SolidColorContents>();
+  solid_color->SetGeometry(
+      Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
+  solid_color->SetColor(Color::Blue().WithAlpha(0.5));
+
+  ASSERT_TRUE(solid_color->CanAcceptOpacity(entity));
+
+  solid_color->InheritOpacity(0.5);
+  ASSERT_EQ(solid_color->GetColor().alpha, 0.25);
+
+  // Color source contents can accept opacity if their geometry
+  // doesn't overlap.
+  auto tiled_texture = std::make_shared<TiledTextureContents>();
+  tiled_texture->SetGeometry(
+      Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
+  tiled_texture->SetAlpha(0.5);
+
+  ASSERT_TRUE(tiled_texture->CanAcceptOpacity(entity));
+
+  tiled_texture->InheritOpacity(0.5);
+  ASSERT_EQ(tiled_texture->GetAlpha(), 0.25);
+
+  // Text contents can accept opacity if the text frames do not
+  // overlap
+  SkFont font;
+  font.setSize(30);
+  auto blob = SkTextBlob::MakeFromString("A", font);
+  auto frame = TextFrameFromTextBlob(blob);
+  auto lazy_glyph_atlas = std::make_shared<LazyGlyphAtlas>();
+  lazy_glyph_atlas->AddTextFrame(frame);
+
+  auto text_contents = std::make_shared<TextContents>();
+  text_contents->SetTextFrame(frame);
+  text_contents->SetColor(Color::Blue().WithAlpha(0.5));
+
+  ASSERT_TRUE(text_contents->CanAcceptOpacity(entity));
+
+  text_contents->InheritOpacity(0.5);
+  ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
+
+  // Clips and restores trivially accept opacity.
+  ASSERT_TRUE(ClipContents().CanAcceptOpacity(entity));
+  ASSERT_TRUE(ClipRestoreContents().CanAcceptOpacity(entity));
+
+  // Potentially overlapping geometry always returns false.
+  auto solid_color_2 = std::make_shared<TiledTextureContents>();
+  Path path = PathBuilder{}.MoveTo({100, 100}).LineTo({100, 200}).TakePath();
+  solid_color_2->SetGeometry(Geometry::MakeStrokePath(path, 5.0));
+
+  ASSERT_FALSE(solid_color_2->CanAcceptOpacity(entity));
 }
 
 }  // namespace testing

@@ -253,5 +253,18 @@ TEST_P(TypographerTest, FontGlyphPairTypeChangesHashAndEquals) {
   ASSERT_FALSE(FontGlyphPair::Equal{}(pair_1, pair_3));
 }
 
+TEST_P(TypographerTest, MaybeHasOverlapping) {
+  SkFont sk_font;
+  auto frame = TextFrameFromTextBlob(SkTextBlob::MakeFromString("1", sk_font));
+  // Single character has no overlapping
+  ASSERT_FALSE(frame.MaybeHasOverlapping());
+
+  auto frame_2 =
+      TextFrameFromTextBlob(SkTextBlob::MakeFromString("123456789", sk_font));
+  // Characters probably have overlap due to low fidelity text metrics, but this
+  // could be fixed.
+  ASSERT_TRUE(frame_2.MaybeHasOverlapping());
+}
+
 }  // namespace testing
 }  // namespace impeller

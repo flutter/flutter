@@ -110,6 +110,14 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   return snapshot;
 }
 
+bool Contents::CanAcceptOpacity(const Entity& entity) const {
+  return false;
+}
+
+void Contents::InheritOpacity(Scalar opacity) {
+  FML_UNREACHABLE();
+}
+
 bool Contents::ShouldRender(const Entity& entity,
                             const std::optional<Rect>& stencil_coverage) const {
   if (!stencil_coverage.has_value()) {

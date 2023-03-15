@@ -57,6 +57,18 @@ void TextureContents::SetStencilEnabled(bool enabled) {
   stencil_enabled_ = enabled;
 }
 
+bool TextureContents::CanAcceptOpacity(const Entity& entity) const {
+  return true;
+}
+
+void TextureContents::InheritOpacity(Scalar opacity) {
+  opacity_ = opacity_ * opacity;
+}
+
+Scalar TextureContents::GetOpacity() const {
+  return opacity_;
+}
+
 std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
   if (opacity_ == 0) {
     return std::nullopt;

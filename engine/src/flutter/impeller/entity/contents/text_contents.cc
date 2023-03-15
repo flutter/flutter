@@ -50,6 +50,19 @@ void TextContents::SetColor(Color color) {
   color_ = color;
 }
 
+Color TextContents::GetColor() const {
+  return color_;
+}
+
+bool TextContents::CanAcceptOpacity(const Entity& entity) const {
+  return !frame_.MaybeHasOverlapping();
+}
+
+void TextContents::InheritOpacity(Scalar opacity) {
+  auto color = color_;
+  color_ = color.WithAlpha(color.alpha * opacity);
+}
+
 void TextContents::SetInverseMatrix(Matrix matrix) {
   inverse_matrix_ = matrix;
 }
@@ -122,9 +135,9 @@ static bool CommonRender(
   // interpolated vertex information is also used in the fragment shader to
   // sample from the glyph atlas.
 
-  const std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
-                                            Point{0, 1}, Point{1, 1}};
-  const std::array<uint32_t, 6> indices = {0, 1, 2, 1, 2, 3};
+  constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
+                                                Point{0, 1}, Point{1, 1}};
+  constexpr std::array<uint32_t, 6> indices = {0, 1, 2, 1, 2, 3};
 
   VertexBufferBuilder<typename VS::PerVertexData> vertex_builder;
 
