@@ -181,5 +181,14 @@ void testMain() {
       expect(fontCollection.debugRegisteredFonts, isNotEmpty);
       expect(warnings, isEmpty);
     });
+
+    test('FlutterTest is the default test font', () async {
+      final SkiaFontCollection fontCollection = SkiaFontCollection();
+
+      await fontCollection.debugDownloadTestFonts();
+      fontCollection.registerDownloadedFonts();
+      expect(fontCollection.debugRegisteredFonts, isNotEmpty);
+      expect(fontCollection.debugRegisteredFonts!.first.family, 'FlutterTest');
+    });
   });
 }

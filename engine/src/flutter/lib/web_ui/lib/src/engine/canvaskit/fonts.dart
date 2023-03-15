@@ -184,12 +184,15 @@ class SkiaFontCollection implements FontCollection {
       }
     }
     final List<UnregisteredFont?> completedPendingFonts = await Future.wait(pendingFonts);
-    completedPendingFonts.add(UnregisteredFont(
+    final List<UnregisteredFont> fonts = <UnregisteredFont>[
+      UnregisteredFont(
         EmbeddedTestFont.flutterTest.data.buffer,
         '<embedded>',
         EmbeddedTestFont.flutterTest.fontFamily,
-    ));
-    _unregisteredFonts.addAll(completedPendingFonts.whereType<UnregisteredFont>());
+      ),
+      ...completedPendingFonts.whereType<UnregisteredFont>(),
+    ];
+    _unregisteredFonts.addAll(fonts);
 
     // Ahem must be added to font fallbacks list regardless of where it was
     // downloaded from.
