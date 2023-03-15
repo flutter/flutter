@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: _title,
       home: const MyStatelessWidget(),
       theme: ThemeData(useMaterial3: true),
@@ -35,7 +36,7 @@ class MyStatelessWidget extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Primary and secondary TabBar'),
-          bottom: const TabBar.primary(
+          bottom: const TabBar(
             dividerColor: Colors.transparent,
             tabs: <Widget>[
               Tab(

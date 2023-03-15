@@ -619,7 +619,7 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
-/// Creates a Material Design primary tab bar.
+/// A Material Design primary tab bar.
 ///
 /// Primary tabs are placed at the top of the content pane under a top app bar.
 /// They display the main content destinations.
@@ -663,14 +663,13 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// See also:
 ///
-///  * [TabBarView], which displays page views that correspond to each tab.
-///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView]
-///  * [TabBar.primary], for a primary tab bar.
 ///  * [TabBar.secondary], for a secondary tab bar.
+///  * [TabBarView], which displays page views that correspond to each tab.
+///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
-///    tab bar specification.
+///     tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
-  /// Creates a Material Design tab bar.
+  /// Creates a Material Design primary tab bar.
   ///
   /// The [tabs] argument must not be null and its length must match the [controller]'s
   /// [TabController.length].
@@ -684,57 +683,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight] and [indicatorColor] are ignored.
-  // TODO(guidezpl): Deprecate in favor of [TabBar.primary] and [TabBar.secondary].
   const TabBar({
-    super.key,
-    required this.tabs,
-    this.controller,
-    this.isScrollable = false,
-    this.padding,
-    this.indicatorColor,
-    this.automaticIndicatorColorAdjustment = true,
-    this.indicatorWeight = 2.0,
-    this.indicatorPadding = EdgeInsets.zero,
-    this.indicator,
-    this.indicatorSize,
-    this.dividerColor,
-    this.labelColor,
-    this.labelStyle,
-    this.labelPadding,
-    this.unselectedLabelColor,
-    this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.overlayColor,
-    this.mouseCursor,
-    this.enableFeedback,
-    this.onTap,
-    this.physics,
-    this.splashFactory,
-    this.splashBorderRadius,
-  })  : _isPrimary = true,
-        assert(indicator != null || (indicatorWeight > 0.0));
-
-  /// Creates a Material Design primary tab bar.
-  ///
-  /// Primary tabs are placed at the top of the content pane under a top app
-  /// bar. They display the main content destinations.
-  ///
-  /// {@tool dartpad}
-  /// This sample showcases nested Material 3 [TabBar]s. It consists of a primary
-  /// [TabBar] with nested a secondary [TabBar]. The primary [TabBar] uses a
-  /// [DefaultTabController] while the secondary [TabBar] uses a [TabController].
-  ///
-  /// ** See code in examples/api/lib/material/tabs/tab_bar.2.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [TabBarView], which displays page views that correspond to each tab.
-  ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * [TabBar.secondary], for a secondary tab bar.
-  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
-  ///     tab bar specification.
-  const TabBar.primary({
     super.key,
     required this.tabs,
     this.controller,
@@ -778,9 +727,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// See also:
   ///
+  ///  * [TabBar], for a primary tab bar.
   ///  * [TabBarView], which displays page views that correspond to each tab.
   ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * [TabBar.primary], for a primary tab bar.
   ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
   ///     tab bar specification.
   const TabBar.secondary({
