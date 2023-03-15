@@ -212,7 +212,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugIsRenderViewInitialized = true;
       return true;
     }());
-    renderView = RenderView(configuration: createViewConfiguration(), window: window);
+    renderView = RenderView(configuration: createViewConfiguration(), window: platformDispatcher.implicitView!);
     renderView.prepareInitialFrame();
   }
   bool _debugIsRenderViewInitialized = false;
@@ -300,9 +300,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
-      size: window.physicalSize / devicePixelRatio,
+      size: view.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }

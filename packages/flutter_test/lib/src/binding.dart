@@ -485,8 +485,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -1730,7 +1731,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      window: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1921,7 +1922,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ViewConfiguration createViewConfiguration() {
     return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      view: window,
+      view: platformDispatcher.implicitView!,
     );
   }
 

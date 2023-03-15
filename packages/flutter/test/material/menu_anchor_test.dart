@@ -18,7 +18,6 @@ void main() {
   final List<TestMenu> opened = <TestMenu>[];
   final List<TestMenu> closed = <TestMenu>[];
   final GlobalKey menuItemKey = GlobalKey();
-  late Size defaultSize;
 
   void onPressed(TestMenu item) {
     selected.add(item);
@@ -36,11 +35,6 @@ void main() {
     focusedMenu = (primaryFocus?.debugLabel ?? primaryFocus).toString();
   }
 
-  setUpAll(() {
-    final MediaQueryData mediaQueryData = MediaQueryData.fromView(TestWidgetsFlutterBinding.instance.window);
-    defaultSize = mediaQueryData.size;
-  });
-
   setUp(() {
     focusedMenu = null;
     selected.clear();
@@ -53,7 +47,7 @@ void main() {
   Future<void> changeSurfaceSize(WidgetTester tester, Size size) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() async {
-      await tester.binding.setSurfaceSize(defaultSize);
+      await tester.binding.setSurfaceSize(null);
     });
   }
 
@@ -1395,7 +1389,7 @@ void main() {
 
     testWidgets('menus close on view size change', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
-      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.binding.window);
+      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
       Widget build(Size size) {
         return MaterialApp(

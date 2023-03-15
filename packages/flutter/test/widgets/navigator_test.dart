@@ -206,7 +206,7 @@ void main() {
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
     await tester.pumpWidget(
       MediaQuery(
-        data: MediaQueryData.fromView(tester.binding.window),
+        data: MediaQueryData.fromView(tester.view),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -221,7 +221,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: MediaQueryData.fromView(tester.binding.window),
+        data: MediaQueryData.fromView(tester.view),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -2810,7 +2810,7 @@ void main() {
 
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromView(tester.binding.window),
+          data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2849,7 +2849,7 @@ void main() {
       };
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromView(tester.binding.window),
+          data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
