@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import '../dom.dart';
 import '../text/line_breaker.dart';
 import 'canvaskit_api.dart';
-import 'renderer.dart';
 
 /// Injects required ICU data into the [builder].
 ///
@@ -15,7 +14,7 @@ import 'renderer.dart';
 /// without ICU data.
 void injectClientICU(SkParagraphBuilder builder) {
   assert(
-    canvasKitVariant == CanvasKitVariant.chromium,
+    canvasKit.ParagraphBuilder.RequiresClientICU(),
     'This method should only be used with the CanvasKit Chromium variant.',
   );
 
