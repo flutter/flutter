@@ -91,6 +91,12 @@ class VertexBufferBuilder {
     return buffer;
   };
 
+  void IterateVertices(const std::function<void(VertexType&)>& iterator) {
+    for (auto& vertex : vertices_) {
+      iterator(vertex);
+    }
+  }
+
  private:
   std::vector<VertexType> vertices_;
   std::vector<IndexType> indices_;
