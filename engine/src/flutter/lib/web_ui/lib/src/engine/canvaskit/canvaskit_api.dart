@@ -28,9 +28,21 @@ import 'renderer.dart';
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
 
-// TODO(mdebbar): Turn this on when CanvasKit Chromium is ready.
-// https://github.com/flutter/flutter/issues/122329
-const bool _enableCanvasKitChromiumInAutoMode = false;
+late CanvasKitVariant _canvasKitVariant;
+
+/// Which variant of CanvasKit we are using.
+CanvasKitVariant get canvasKitVariant => _canvasKitVariant;
+set canvasKitVariant(CanvasKitVariant value) {
+  if (value == CanvasKitVariant.auto) {
+    throw ArgumentError.value(
+      value,
+      'value',
+      'CanvasKitVariant.auto is not a valid value for canvasKitVariant',
+    );
+  }
+  _canvasKitVariant = value;
+}
+
 
 /// Sets the [CanvasKit] object on `window` so we can use `@JS()` to bind to
 /// static APIs.
@@ -1872,13 +1884,6 @@ extension SkParagraphBuilderNamespaceExtension on SkParagraphBuilderNamespace {
     SkParagraphStyle paragraphStyle,
     TypefaceFontProvider? fontManager,
   );
-
-  bool RequiresClientICU() {
-    if (!js_util.hasProperty(this, 'RequiresClientICU')) {
-      return false;
-    }
-    return js_util.callMethod(this, 'RequiresClientICU', const <Object>[],) as bool;
-  }
 }
 
 @JS()
@@ -2694,26 +2699,47 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   }
 }
 
+String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
+
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
 
-String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
-List<String> get _canvasKitJsFileNames {
+// TODO(mdebbar): Replace this with a Record once it's supported in Dart.
+class _CanvasKitVariantUrl {
+  const _CanvasKitVariantUrl(this.url, this.variant)
+      : assert(
+          variant != CanvasKitVariant.auto,
+          'CanvasKitVariant.auto cannot have a url',
+        );
+
+  final String url;
+  final CanvasKitVariant variant;
+
+  static _CanvasKitVariantUrl chromium = _CanvasKitVariantUrl(
+    '$_canvasKitBaseUrl$_kChromiumCanvasKitJsFileName',
+    CanvasKitVariant.chromium,
+  );
+
+  static _CanvasKitVariantUrl full = _CanvasKitVariantUrl(
+    '$_canvasKitBaseUrl$_kFullCanvasKitJsFileName',
+    CanvasKitVariant.full,
+  );
+}
+
+List<_CanvasKitVariantUrl> get _canvasKitUrls {
   switch (configuration.canvasKitVariant) {
     case CanvasKitVariant.auto:
-      return <String>[
-        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-        _kFullCanvasKitJsFileName,
+      return <_CanvasKitVariantUrl>[
+        if (browserSupportsCanvaskitChromium) _CanvasKitVariantUrl.chromium,
+        _CanvasKitVariantUrl.full,
       ];
     case CanvasKitVariant.full:
-      return <String>[_kFullCanvasKitJsFileName];
+      return <_CanvasKitVariantUrl>[_CanvasKitVariantUrl.full];
     case CanvasKitVariant.chromium:
-      return <String>[_kChromiumCanvasKitJsFileName];
+      return <_CanvasKitVariantUrl>[_CanvasKitVariantUrl.chromium];
   }
 }
-Iterable<String> get _canvasKitJsUrls {
-  return _canvasKitJsFileNames.map((String filename) => '$_canvasKitBaseUrl$filename');
-}
+
 @visibleForTesting
 String canvasKitWasmModuleUrl(String file, String canvasKitBase) =>
     canvasKitBase + file;
@@ -2723,29 +2749,23 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) =>
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
 /// and intialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
-  await _downloadOneOf(_canvasKitJsUrls);
+  await _downloadOneOf(_canvasKitUrls);
 
-  final CanvasKit canvasKit = await CanvasKitInit(CanvasKitInitOptions(
+  return CanvasKitInit(CanvasKitInitOptions(
     locateFile: allowInterop(canvasKitWasmModuleUrl),
   ));
-
-  if (canvasKit.ParagraphBuilder.RequiresClientICU() && !browserSupportsCanvaskitChromium) {
-    throw Exception(
-      'The CanvasKit variant you are using only works on Chromium browsers. '
-      'Please use a different CanvasKit variant, or use a Chromium browser.',
-    );
-  }
-
-  return canvasKit;
 }
 
-/// Finds the first URL in [urls] that can be downloaded successfully, and
+/// Finds the first entry in [urls] that can be downloaded successfully, and
 /// downloads it.
 ///
 /// If none of the URLs can be downloaded, throws an [Exception].
-Future<void> _downloadOneOf(Iterable<String> urls) async {
-  for (final String url in urls) {
-    if (await _downloadCanvasKitJs(url)) {
+///
+/// Also sets [canvasKitVariant] to the variant of CanvasKit that was downloaded.
+Future<void> _downloadOneOf(Iterable<_CanvasKitVariantUrl> urls) async {
+  for (final _CanvasKitVariantUrl entry in urls) {
+    if (await _downloadCanvasKitJs(entry.url)) {
+      canvasKitVariant = entry.variant;
       return;
     }
   }
