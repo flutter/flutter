@@ -1097,9 +1097,7 @@ class _TabBarState extends State<TabBar> {
     // If indicatorSize is TabIndicatorSize.label, _tabKeys[i] is used to find
     // the width of tab widget i. See _IndicatorPainter.indicatorRect().
     _tabKeys = widget.tabs.map((Widget tab) => GlobalKey()).toList();
-    _labelPaddings = List<EdgeInsetsGeometry>.filled(
-        widget.tabs.length, EdgeInsets.zero,
-        growable: true);
+    _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero, growable: true);
   }
 
   TabBarTheme get _defaults {
@@ -1148,15 +1146,15 @@ class _TabBarState extends State<TabBar> {
 
     return UnderlineTabIndicator(
       borderRadius: theme.useMaterial3
-          // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
-          // when `preferredSize`and `indicatorWeight` are updated to support Material 3
-          // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
-          // https://github.com/flutter/flutter/issues/116136
-          ? const BorderRadius.only(
-              topLeft: Radius.circular(3.0),
-              topRight: Radius.circular(3.0),
-            )
-          : null,
+        // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
+        // when `preferredSize`and `indicatorWeight` are updated to support Material 3
+        // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
+        // https://github.com/flutter/flutter/issues/116136
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(3.0),
+            topRight: Radius.circular(3.0),
+          )
+        : null,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -1204,24 +1202,16 @@ class _TabBarState extends State<TabBar> {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
-    _indicatorPainter = !_controllerIsValid
-        ? null
-        : _IndicatorPainter(
-            controller: _controller!,
-            indicator: _getIndicator(),
-            indicatorSize: widget.indicatorSize ??
-                tabBarTheme.indicatorSize ??
-                _defaults.indicatorSize!,
-            indicatorPadding: widget.indicatorPadding,
-            tabKeys: _tabKeys,
-            old: _indicatorPainter,
-            dividerColor: theme.useMaterial3
-                ? widget.dividerColor ??
-                    tabBarTheme.dividerColor ??
-                    _defaults.dividerColor
-                : null,
-            labelPaddings: _labelPaddings,
-          );
+    _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
+      controller: _controller!,
+      indicator: _getIndicator(),
+      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
+      indicatorPadding: widget.indicatorPadding,
+      tabKeys: _tabKeys,
+      old: _indicatorPainter,
+      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor : null,
+      labelPaddings: _labelPaddings,
+    );
   }
 
   @override
