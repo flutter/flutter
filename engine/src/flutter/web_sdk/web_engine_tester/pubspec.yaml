@@ -2,7 +2,7 @@ name: web_engine_tester
 
 # Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: ">=2.12.0-0 <3.0.0"
 
 dependencies:
   js: 0.6.4

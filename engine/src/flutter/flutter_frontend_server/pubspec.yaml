@@ -18,7 +18,7 @@ homepage: https://flutter.dev
 # relative to this directory into //third_party/dart
 
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   args: any

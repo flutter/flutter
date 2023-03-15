@@ -304,14 +304,19 @@ abstract class FormatChecker {
 /// Checks and formats C++/ObjC/Shader files using clang-format.
 class ClangFormatChecker extends FormatChecker {
   ClangFormatChecker({
-    super.processManager,
-    required super.baseGitRef,
-    required super.repoDir,
+    ProcessManager processManager = const LocalProcessManager(),
+    required String baseGitRef,
+    required Directory repoDir,
     required Directory srcDir,
-    super.allFiles,
-    super.messageCallback,
+    bool allFiles = false,
+    MessageCallback? messageCallback,
   }) : super(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
+          repoDir: repoDir,
           srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
         ) {
     /*late*/ String clangOs;
     if (Platform.isLinux) {
@@ -444,14 +449,19 @@ class ClangFormatChecker extends FormatChecker {
 /// Checks the format of Java files uing the Google Java format checker.
 class JavaFormatChecker extends FormatChecker {
   JavaFormatChecker({
-    super.processManager,
-    required super.baseGitRef,
-    required super.repoDir,
+    ProcessManager processManager = const LocalProcessManager(),
+    required String baseGitRef,
+    required Directory repoDir,
     required Directory srcDir,
-    super.allFiles,
-    super.messageCallback,
+    bool allFiles = false,
+    MessageCallback? messageCallback,
   }) : super(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
+          repoDir: repoDir,
           srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
         ) {
     googleJavaFormatJar = File(
       path.absolute(
@@ -586,14 +596,19 @@ class JavaFormatChecker extends FormatChecker {
 /// Checks the format of any BUILD.gn files using the "gn format" command.
 class GnFormatChecker extends FormatChecker {
   GnFormatChecker({
-    super.processManager,
-    required super.baseGitRef,
+    ProcessManager processManager = const LocalProcessManager(),
+    required String baseGitRef,
     required Directory repoDir,
-    required super.srcDir,
-    super.allFiles,
-    super.messageCallback,
+    required Directory srcDir,
+    bool allFiles = false,
+    MessageCallback? messageCallback,
   }) : super(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
           repoDir: repoDir,
+          srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
         ) {
     gnBinary = File(
       path.join(
@@ -672,14 +687,19 @@ class GnFormatChecker extends FormatChecker {
 /// Checks the format of any .py files using the "yapf" command.
 class PythonFormatChecker extends FormatChecker {
   PythonFormatChecker({
-    super.processManager,
-    required super.baseGitRef,
+    ProcessManager processManager = const LocalProcessManager(),
+    required String baseGitRef,
     required Directory repoDir,
-    required super.srcDir,
-    super.allFiles,
-    super.messageCallback,
+    required Directory srcDir,
+    bool allFiles = false,
+    MessageCallback? messageCallback,
   }) : super(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
           repoDir: repoDir,
+          srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
         ) {
     yapfBin = File(path.join(
       repoDir.absolute.path,
@@ -767,13 +787,20 @@ class _GrepResult {
 /// Checks for trailing whitspace in Dart files.
 class WhitespaceFormatChecker extends FormatChecker {
   WhitespaceFormatChecker({
-    super.processManager,
-    required super.baseGitRef,
-    required super.repoDir,
-    required super.srcDir,
-    super.allFiles,
-    super.messageCallback,
-  });
+    ProcessManager processManager = const LocalProcessManager(),
+    required String baseGitRef,
+    required Directory repoDir,
+    required Directory srcDir,
+    bool allFiles = false,
+    MessageCallback? messageCallback,
+  }) : super(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
+          repoDir: repoDir,
+          srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
+        );
 
   @override
   Future<bool> checkFormatting() async {

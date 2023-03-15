@@ -14,7 +14,7 @@ publish_to: none
 # relative to this directory into //third_party/dart
 
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   litetest: any
