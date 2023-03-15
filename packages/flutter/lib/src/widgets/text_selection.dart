@@ -3112,7 +3112,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        // From observation, these platform's reset their tap count to 0 when
+        // From observation, these platform's reset their tap count to 1 when
         // the number of consecutive taps exceeds 3. For example on Debian Linux
         // with GTK, when going past a triple click, on the fourth click the
         // selection is moved to the precise click position, on the fifth click
