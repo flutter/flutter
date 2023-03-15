@@ -358,11 +358,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
-class SystemChrome {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChrome._();
-
+abstract final class SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///

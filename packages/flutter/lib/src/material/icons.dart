@@ -150,11 +150,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///  * <https://material.io/resources/icons>
 ///  * [AnimatedIcons], for the list of available animated Material Icons.
 @staticIconProvider
-class Icons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Icons._();
-
+abstract final class Icons {
   /// A set of platform-adaptive Material Design icons.
   ///
   /// Provides a convenient way to show a certain set of platform-appropriate
