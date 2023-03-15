@@ -305,13 +305,12 @@ ui.PointerData _pointerData(
   PointerDeviceKind kind = PointerDeviceKind.mouse,
   int pointer = 0,
 }) {
-  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
     change: change,
-    physicalX: logicalPosition.dx * devicePixelRatio,
-    physicalY: logicalPosition.dy * devicePixelRatio,
+    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
     kind: kind,
     device: device,
   );

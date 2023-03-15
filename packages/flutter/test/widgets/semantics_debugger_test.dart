@@ -301,7 +301,7 @@ void main() {
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData.fromView(tester.view),
+                data: MediaQueryData.fromView(tester.binding.window),
                 child: Material(
                   child: Center(
                     child: Slider(
