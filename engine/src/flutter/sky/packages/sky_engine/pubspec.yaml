@@ -5,4 +5,4 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: ">=2.12.0-0 <3.0.0"
