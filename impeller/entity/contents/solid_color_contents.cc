@@ -28,6 +28,17 @@ void SolidColorContents::SetGeometry(std::shared_ptr<Geometry> geometry) {
   geometry_ = std::move(geometry);
 }
 
+// | Contents|
+bool SolidColorContents::CanAcceptOpacity(const Entity& entity) const {
+  return true;
+}
+
+// | Contents|
+void SolidColorContents::InheritOpacity(Scalar opacity) {
+  auto color = color_;
+  color_ = color.WithAlpha(color.alpha * opacity);
+}
+
 std::optional<Rect> SolidColorContents::GetCoverage(
     const Entity& entity) const {
   if (color_.IsTransparent()) {

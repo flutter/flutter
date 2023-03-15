@@ -35,6 +35,12 @@ class SolidColorContents final : public Contents {
 
   const Color& GetColor() const;
 
+  // | Contents|
+  bool CanAcceptOpacity(const Entity& entity) const override;
+
+  // | Contents|
+  void InheritOpacity(Scalar opacity) override;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
