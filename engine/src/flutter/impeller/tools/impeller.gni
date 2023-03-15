@@ -394,7 +394,7 @@ template("impellerc_reflect") {
   }
 }
 
-template("impeller_shaders_metal") {
+template("_impeller_shaders_metal") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
 
@@ -478,7 +478,7 @@ template("blobcat_library") {
   }
 }
 
-template("impeller_shaders_gles") {
+template("_impeller_shaders_gles") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
   assert(defined(invoker.analyze), "Whether to analyze must be specified.")
@@ -557,9 +557,10 @@ template("impeller_shaders_gles") {
   }
 }
 
-template("impeller_shaders_vk") {
+template("_impeller_shaders_vk") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
+  assert(defined(invoker.analyze), "Whether to analyze must be specified.")
 
   shaders_base_name = string_join("",
                                   [
@@ -583,10 +584,23 @@ template("impeller_shaders_vk") {
     defines = [ "IMPELLER_TARGET_VULKAN" ]
   }
 
+  vk_shaders =
+      filter_include(get_target_outputs(":$impellerc_vk"), [ "*.vkspv" ])
+
+  if (invoker.analyze) {
+    analyze_lib = "analyze_$target_name"
+    malioc_analyze_shaders(analyze_lib) {
+      shaders = vk_shaders
+      if (defined(invoker.vulkan_language_version)) {
+        vulkan_language_version = invoker.vulkan_language_version
+      }
+      deps = [ ":$impellerc_vk" ]
+    }
+  }
+
   vk_lib = "genlib_$target_name"
   blobcat_library(vk_lib) {
-    shaders =
-        filter_include(get_target_outputs(":$impellerc_vk"), [ "*.vkspv" ])
+    shaders = vk_shaders
     deps = [ ":$impellerc_vk" ]
   }
 
@@ -608,12 +622,50 @@ template("impeller_shaders_vk") {
   group(target_name) {
     public_deps = [ ":$embed_vk_lib" ]
 
+    if (invoker.analyze) {
+      public_deps += [ ":$analyze_lib" ]
+    }
+
     if (!impeller_enable_metal) {
       public_deps += [ ":$reflect_vk" ]
     }
   }
 }
 
+# ------------------------------------------------------------------------------
+# @brief           A target for precompiled shaders and the associated
+#                  generated reflection library.
+#
+# @param[required] name
+#
+#    The base name for the reflected C++ library.
+#
+# @param[required] shaders
+#
+#    A list of GLSL shader files.
+#
+# @param[optional] analyze
+#
+#    Whether to analyze shaders with malioc. Defaults to false. Shaders will
+#    only be analyzed if the GN argument "impeller_malioc_path" is defined.
+#
+# @param[optional] enable_opengles
+#
+#    Whether to compile the shaders for the OpenGL ES backend. Defaults to the
+#    value of the GN argument "impeller_enable_opengles".
+#
+# @param[optional] gles_language_version
+#
+#    The GLES version required by the shaders.
+#
+# @param[optional] metal_version
+#
+#    The version of the Metal API required by the shaders.
+#
+# @param[optional] vulkan_language_version
+#
+#    The SPIR-V version required by the shaders.
+#
 template("impeller_shaders") {
   metal_version = "1.2"
   if (defined(invoker.metal_version)) {
@@ -628,7 +680,7 @@ template("impeller_shaders") {
 
   if (impeller_enable_metal) {
     mtl_shaders = "mtl_$target_name"
-    impeller_shaders_metal(mtl_shaders) {
+    _impeller_shaders_metal(mtl_shaders) {
       name = invoker.name
       shaders = invoker.shaders
       metal_version = metal_version
@@ -641,7 +693,7 @@ template("impeller_shaders") {
       analyze = false
     }
     gles_shaders = "gles_$target_name"
-    impeller_shaders_gles(gles_shaders) {
+    _impeller_shaders_gles(gles_shaders) {
       name = invoker.name
       if (defined(invoker.gles_language_version)) {
         gles_language_version = invoker.gles_language_version
@@ -656,11 +708,19 @@ template("impeller_shaders") {
   }
 
   if (impeller_enable_vulkan) {
+    analyze = true
+    if (defined(invoker.analyze) && !invoker.analyze) {
+      analyze = false
+    }
     vk_shaders = "vk_$target_name"
-    impeller_shaders_vk(vk_shaders) {
+    _impeller_shaders_vk(vk_shaders) {
       name = invoker.name
+      if (defined(invoker.vulkan_language_version)) {
+        vulkan_language_version = invoker.vulkan_language_version
+      }
       shaders = invoker.shaders
       metal_version = metal_version
+      analyze = analyze
     }
   }
 

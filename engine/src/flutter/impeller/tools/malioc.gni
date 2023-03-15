@@ -10,109 +10,114 @@ declare_args() {
   # Path to the Mali offline compiler tool 'malioc'.
   impeller_malioc_path = ""
 
-  impeller_malioc_cores = []
+  impeller_malioc_core_filter = [
+    "Mali-G78",
+    "Mali-T880",
+  ]
 }
 
-if (impeller_malioc_path != "" && impeller_malioc_cores == []) {
-  core_list_file = "$root_build_dir/mali_core_list.json"
-  exec_script("//build/gn_run_binary.py",
+if (impeller_malioc_path != "") {
+  _core_list_file = "$root_build_dir/mali_core_list.json"
+  exec_script("//flutter/impeller/tools/malioc_cores.py",
               [
+                "--malioc",
                 rebase_path(impeller_malioc_path, root_build_dir),
-                "--list",
-                "--format",
-                "json",
                 "--output",
-                rebase_path(core_list_file),
+                rebase_path(_core_list_file),
               ])
-  _mali_cores = read_file(core_list_file, "json")
-  foreach(mali_core, _mali_cores.cores) {
-    impeller_malioc_cores += [ mali_core.core ]
-  }
+  _impeller_malioc_cores = read_file(_core_list_file, "json")
 }
 
 template("malioc_analyze_shaders") {
-  # TODO(zra): Check that gles_language_version is in the supported set. For now
-  # assume that if it is set, it is being set to 460, which malioc does not
-  # support.
-  if (impeller_malioc_path == "" || defined(invoker.gles_language_version)) {
-    if (defined(invoker.gles_language_version) &&
-        invoker.gles_language_version != "460") {
-      print("Disabling analysis for shaders in $target_name due to gles",
-            "version explicitly set to ${invoker.gles_language_version}.")
-    }
+  if (impeller_malioc_path == "") {
     group(target_name) {
       not_needed(invoker, "*")
     }
   } else {
     target_deps = []
-    foreach(core, impeller_malioc_cores) {
-      foreach(source, invoker.shaders) {
-        shader_file_name = get_path_info(source, "name")
-        analysis_target = "${target_name}_${shader_file_name}_${core}_malioc"
-        target_deps += [ ":$analysis_target" ]
-        action(analysis_target) {
-          forward_variables_from(invoker,
-                                 "*",
-                                 [
-                                   "args",
-                                   "depfile",
-                                   "inputs",
-                                   "outputs",
-                                   "pool",
-                                   "script",
-                                 ])
+    foreach(core, _impeller_malioc_cores) {
+      foreach(filter_core, impeller_malioc_core_filter) {
+        if (core.core == filter_core) {
+          foreach(source, invoker.shaders) {
+            # Should be "gles" or "vkspv"
+            backend_ext = get_path_info(source, "extension")
+            assert(
+                backend_ext == "gles" || backend_ext == "vkspv",
+                "Shader for unsupported backend passed to malioc: {{source}}")
+            shader_file_name = get_path_info(source, "name")
+            analysis_target =
+                "${target_name}_${shader_file_name}_${core.core}_malioc"
+            if ((backend_ext == "gles" &&
+                 defined(invoker.gles_language_version) &&
+                 core.opengles_max_version < invoker.gles_language_version) ||
+                (backend_ext == "vkspv" &&
+                 defined(invoker.vulkan_language_version) &&
+                 core.vulkan_max_version < invoker.vulkan_language_version)) {
+              group(analysis_target) {
+                not_needed(invoker, "*")
+              }
+            } else {
+              target_deps += [ ":$analysis_target" ]
+              action(analysis_target) {
+                forward_variables_from(invoker,
+                                       "*",
+                                       [
+                                         "args",
+                                         "depfile",
+                                         "inputs",
+                                         "outputs",
+                                         "pool",
+                                         "script",
+                                       ])
 
-          script = "//build/gn_run_binary.py"
-          pool = "//flutter/impeller/tools:malioc_pool"
+                script = "//build/gn_run_binary.py"
+                pool = "//flutter/impeller/tools:malioc_pool"
 
-          # Should be "gles" or "vkspv"
-          backend_ext = get_path_info(source, "extension")
-          assert(backend_ext == "gles",
-                 "Shader for unsupported backend passed to malioc: {{source}}")
+                # Nest all malioc output under its own subdirectory of root_gen_dir
+                # so that it's easier to diff it against the state before any changes.
+                subdir = rebase_path(target_gen_dir, root_gen_dir)
+                output_file = "$root_gen_dir/malioc/$subdir/${shader_file_name}.${backend_ext}.${core.core}.json"
+                outputs = [ output_file ]
 
-          # Nest all malioc output under its own subdirectory of root_gen_dir
-          # so that it's easier to diff it against the state before any changes.
-          subdir = rebase_path(target_gen_dir, root_gen_dir)
-          output_file =
-              "$root_gen_dir/malioc/$subdir/${shader_file_name}.$core.json"
-          outputs = [ output_file ]
+                # Determine the kind of the shader from the file name
+                name = get_path_info(source, "name")
+                shader_kind_ext = get_path_info(name, "extension")
 
-          # Determine the kind of the shader from the file name
-          name = get_path_info(source, "name")
-          shader_kind_ext = get_path_info(name, "extension")
+                if (shader_kind_ext == "comp") {
+                  shader_kind_flag = "--compute"
+                } else if (shader_kind_ext == "frag") {
+                  shader_kind_flag = "--fragment"
+                } else if (shader_kind_ext == "geom") {
+                  shader_kind_flag = "--geometry"
+                } else if (shader_kind_ext == "tesc") {
+                  shader_kind_flag = "--tessellation_control"
+                } else if (shader_kind_ext == "tese") {
+                  shader_kind_flag = "--tessellation_evaluation"
+                } else if (shader_kind_ext == "vert") {
+                  shader_kind_flag = "--vertex"
+                } else {
+                  assert(false, "Unknown shader kind: {{source}}")
+                }
 
-          if (shader_kind_ext == "comp") {
-            shader_kind_flag = "--compute"
-          } else if (shader_kind_ext == "frag") {
-            shader_kind_flag = "--fragment"
-          } else if (shader_kind_ext == "geom") {
-            shader_kind_flag = "--geometry"
-          } else if (shader_kind_ext == "tesc") {
-            shader_kind_flag = "--tessellation_control"
-          } else if (shader_kind_ext == "tese") {
-            shader_kind_flag = "--tessellation_evaluation"
-          } else if (shader_kind_ext == "vert") {
-            shader_kind_flag = "--vertex"
-          } else {
-            assert(false, "Unknown shader kind: {{source}}")
+                args = [
+                  rebase_path(impeller_malioc_path, root_build_dir),
+                  "--format",
+                  "json",
+                  shader_kind_flag,
+                  "--core",
+                  core.core,
+                  "--output",
+                  rebase_path(output_file),
+                ]
+
+                if (backend_ext == "vkspv") {
+                  args += [ "--vulkan" ]
+                }
+
+                args += [ rebase_path(source) ]
+              }
+            }
           }
-
-          args = [
-            rebase_path(impeller_malioc_path, root_build_dir),
-            "--format",
-            "json",
-            shader_kind_flag,
-            "--core",
-            core,
-            "--output",
-            rebase_path(output_file),
-          ]
-
-          if (backend_ext == "vkspv") {
-            args += [ "--vulkan" ]
-          }
-
-          args += [ rebase_path(source) ]
         }
       }
     }

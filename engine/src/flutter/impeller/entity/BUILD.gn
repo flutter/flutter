@@ -7,6 +7,10 @@ import("//flutter/impeller/tools/impeller.gni")
 impeller_shaders("entity_shaders") {
   name = "entity"
 
+  if (impeller_enable_vulkan) {
+    vulkan_language_version = 130
+  }
+
   shaders = [
     "shaders/blending/advanced_blend.vert",
     "shaders/blending/advanced_blend_color.frag",
@@ -69,7 +73,11 @@ impeller_shaders("modern_entity_shaders") {
   name = "modern"
 
   if (impeller_enable_opengles) {
-    gles_language_version = "460"
+    gles_language_version = 460
+  }
+
+  if (impeller_enable_vulkan) {
+    vulkan_language_version = 130
   }
 
   shaders = [
@@ -91,7 +99,11 @@ impeller_shaders("framebuffer_blend_entity_shaders") {
 
   # This version is to disable malioc checks.
   if (impeller_enable_opengles) {
-    gles_language_version = "460"
+    gles_language_version = 460
+  }
+
+  if (impeller_enable_vulkan) {
+    vulkan_language_version = 130
   }
 
   shaders = [
