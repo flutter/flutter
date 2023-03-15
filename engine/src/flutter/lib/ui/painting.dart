@@ -1568,6 +1568,31 @@ class Paint {
   }
 }
 
+/// The color space describes the colors that are available to an [Image].
+///
+/// This value can help decide which [ImageByteFormat] to use with
+/// [Image.toByteData]. Images that are in the [extendedSRGB] color space
+/// should use something like [ImageByteFormat.rawExtendedRgba128] so that
+/// colors outside of the sRGB gamut aren't lost.
+///
+/// This is also the result of [Image.colorSpace].
+///
+/// See also: https://en.wikipedia.org/wiki/Color_space
+enum ColorSpace {
+  /// The sRGB color space.
+  ///
+  /// You may know this as the standard color space for the web or the color
+  /// space of non-wide-gamut Flutter apps.
+  ///
+  /// See also: https://en.wikipedia.org/wiki/SRGB
+  sRGB,
+  /// A color space that is backwards compatible with sRGB but can represent
+  /// colors outside of that gamut with values outside of [0..1]. In order to
+  /// see the extended values an [ImageByteFormat] like
+  /// [ImageByteFormat.rawExtendedRgba128] must be used.
+  extendedSRGB,
+}
+
 /// The format in which image bytes should be returned when using
 /// [Image.toByteData].
 // We do not expect to add more encoding formats to the ImageByteFormat enum,
@@ -1590,6 +1615,31 @@ enum ImageByteFormat {
   /// Unencoded bytes, in the image's existing format. For example, a grayscale
   /// image may use a single 8-bit channel for each pixel.
   rawUnmodified,
+
+  /// Raw extended range RGBA format.
+  ///
+  /// Unencoded bytes, in RGBA row-primary form with straight alpha, 32 bit
+  /// float (IEEE 754 binary32) per channel.
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// import 'dart:ui' as ui;
+  /// import 'dart:typed_data';
+  ///
+  /// Future<Map<String, double>> getFirstPixel(ui.Image image) async {
+  ///   final ByteData data =
+  ///       (await image.toByteData(format: ui.ImageByteFormat.rawExtendedRgba128))!;
+  ///   final Float32List floats = Float32List.view(data.buffer);
+  ///   return <String, double>{
+  ///     'r': floats[0],
+  ///     'g': floats[1],
+  ///     'b': floats[2],
+  ///     'a': floats[3],
+  ///   };
+  /// }
+  /// ```
+  rawExtendedRgba128,
 
   /// PNG format.
   ///
@@ -1726,6 +1776,10 @@ class Image {
   /// The [format] argument specifies the format in which the bytes will be
   /// returned.
   ///
+  /// Using [ImageByteFormat.rawRgba] on an image in the color space
+  /// [ColorSpace.extendedSRGB] will result in the gamut being squished to fit
+  /// into the sRGB gamut, resulting in the loss of wide-gamut colors.
+  ///
   /// Returns a future that completes with the binary image data or an error
   /// if encoding fails.
   // We do not expect to add more encoding formats to the ImageByteFormat enum,
@@ -1735,6 +1789,29 @@ class Image {
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
     assert(!_disposed && !_image._disposed);
     return _image.toByteData(format: format);
+  }
+
+  /// The color space that is used by the [Image]'s colors.
+  ///
+  /// This value is a consequence of how the [Image] has been created.  For
+  /// example, loading a PNG that is in the Display P3 color space will result
+  /// in a [ColorSpace.extendedSRGB] image.
+  ///
+  /// On rendering backends that don't support wide gamut colors (anything but
+  /// iOS impeller), wide gamut images will still report [ColorSpace.sRGB] if
+  /// rendering wide gamut colors isn't supported.
+  // Note: The docstring will become outdated as new platforms support wide
+  // gamut color, please keep it up to date.
+  ColorSpace get colorSpace {
+    final int colorSpaceValue = _image.colorSpace;
+    switch (colorSpaceValue) {
+      case 0:
+        return ColorSpace.sRGB;
+      case 1:
+        return ColorSpace.extendedSRGB;
+      default:
+        throw UnsupportedError('Unrecognized color space: $colorSpaceValue');
+    }
   }
 
   /// If asserts are enabled, returns the [StackTrace]s of each open handle from
@@ -1902,6 +1979,9 @@ class _Image extends NativeFieldWrapperClass1 {
   external void _dispose();
 
   final Set<Image> _handles = <Image>{};
+
+  @Native<Int32 Function(Pointer<Void>)>(symbol: 'Image::colorSpace')
+  external int get colorSpace;
 
   @override
   String toString() => '[$width\u00D7$height]';
