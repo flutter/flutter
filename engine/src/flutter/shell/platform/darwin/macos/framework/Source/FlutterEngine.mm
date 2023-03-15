@@ -556,7 +556,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
            @"The incoming view controller is already attached to an engine.");
   NSAssert([_viewControllers objectForKey:@(viewId)] == nil, @"The requested view ID is occupied.");
   [controller attachToEngine:self withId:viewId];
-  NSAssert(controller.id == viewId, @"Failed to assign view ID.");
+  NSAssert(controller.viewId == viewId, @"Failed to assign view ID.");
   [_viewControllers setObject:controller forKey:@(viewId)];
 }
 
@@ -576,7 +576,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (FlutterViewController*)viewControllerForId:(uint64_t)viewId {
   FlutterViewController* controller = [_viewControllers objectForKey:@(viewId)];
-  NSAssert(controller == nil || controller.id == viewId,
+  NSAssert(controller == nil || controller.viewId == viewId,
            @"The stored controller has unexpected view ID.");
   return controller;
 }
@@ -598,8 +598,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
              controller.engine);
     [self registerViewController:controller forId:kFlutterDefaultViewId];
   } else if (currentController != nil && controller == nil) {
-    NSAssert(currentController.id == kFlutterDefaultViewId,
-             @"The default controller has an unexpected ID %llu", currentController.id);
+    NSAssert(currentController.viewId == kFlutterDefaultViewId,
+             @"The default controller has an unexpected ID %llu", currentController.viewId);
     // From non-nil to nil.
     [self deregisterViewControllerForId:kFlutterDefaultViewId];
     [self shutDownIfNeeded];
@@ -669,7 +669,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 - (void)removeViewController:(nonnull FlutterViewController*)viewController {
   NSAssert([viewController attached] && viewController.engine == self,
            @"The given view controller is not associated with this engine.");
-  [self deregisterViewControllerForId:viewController.id];
+  [self deregisterViewControllerForId:viewController.viewId];
   [self shutDownIfNeeded];
 }
 
@@ -733,7 +733,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)updateWindowMetricsForViewController:(FlutterViewController*)viewController {
-  if (viewController.id != kFlutterDefaultViewId) {
+  if (viewController.viewId != kFlutterDefaultViewId) {
     // TODO(dkwingsmt): The embedder API only supports single-view for now. As
     // embedder APIs are converted to multi-view, this method should support any
     // views.
@@ -742,7 +742,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   if (!_engine || !viewController || !viewController.viewLoaded) {
     return;
   }
-  NSAssert([self viewControllerForId:viewController.id] == viewController,
+  NSAssert([self viewControllerForId:viewController.viewId] == viewController,
            @"The provided view controller is not attached to this engine.");
   NSView* view = viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];

@@ -315,11 +315,9 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   FlutterDartProject* _project;
 
   std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
-
-  uint64_t _id;
 }
 
-@dynamic id;
+@synthesize viewId = _viewId;
 @dynamic view;
 @dynamic accessibilityBridge;
 
@@ -341,7 +339,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"The FlutterViewController unexpectedly stays unattached after initialization. "
             @"In unit tests, this is likely because either the FlutterViewController or "
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
-            controller.engine, controller.id);
+            controller.engine, controller.viewId);
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller initializeKeyboard];
@@ -457,9 +455,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [_flutterView setBackgroundColor:_backgroundColor];
 }
 
-- (uint64_t)id {
+- (uint64_t)viewId {
   NSAssert([self attached], @"This view controller is not attched.");
-  return _id;
+  return _viewId;
 }
 
 - (void)onPreEngineRestart {
@@ -489,7 +487,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 - (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
-  _id = viewId;
+  _viewId = viewId;
 }
 
 - (void)detachFromEngine {
