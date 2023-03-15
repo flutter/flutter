@@ -167,6 +167,7 @@ class _TabStyle extends AnimatedWidget {
   const _TabStyle({
     required Animation<double> animation,
     required this.isSelected,
+    required this.isPrimary,
     required this.labelColor,
     required this.unselectedLabelColor,
     required this.labelStyle,
@@ -177,14 +178,25 @@ class _TabStyle extends AnimatedWidget {
   final TextStyle? labelStyle;
   final TextStyle? unselectedLabelStyle;
   final bool isSelected;
+  final bool isPrimary;
   final Color? labelColor;
   final Color? unselectedLabelColor;
   final Widget child;
 
+  TabBarTheme _defaults(BuildContext context) {
+    if (Theme.of(context).useMaterial3) {
+      return isPrimary
+          ? _TabsPrimaryDefaultsM3(context)
+          : _TabsSecondaryDefaultsM3(context);
+    } else {
+      return _TabsDefaultsM2(context);
+    }
+  }
+
   MaterialStateColor _resolveWithLabelColor(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = themeData.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
+    final TabBarTheme defaults = _defaults(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
@@ -219,9 +231,8 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = themeData.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
+    final TabBarTheme defaults = _defaults(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     final Set<MaterialState> states = isSelected
@@ -608,7 +619,10 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
-/// A Material Design widget that displays a horizontal row of tabs.
+/// Creates a Material Design primary tab bar.
+///
+/// Primary tabs are placed at the top of the content pane under a top app bar.
+/// They display the main content destinations.
 ///
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
@@ -639,10 +653,22 @@ class _TabBarScrollController extends ScrollController {
 /// ** See code in examples/api/lib/material/tabs/tab_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample showcases nested Material 3 [TabBar]s. It consists of a primary
+/// [TabBar] with nested a secondary [TabBar]. The primary [TabBar] uses a
+/// [DefaultTabController] while the secondary [TabBar] uses a [TabController].
+///
+/// ** See code in examples/api/lib/material/tabs/tab_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
-///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
+///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView]
+///  * [TabBar.primary], for a primary tab bar.
+///  * [TabBar.secondary], for a secondary tab bar.
+///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+///    tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design tab bar.
   ///
@@ -658,6 +684,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight] and [indicatorColor] are ignored.
+  // TODO(guidezpl): Deprecate in favor of [TabBar.primary] and [TabBar.secondary].
   const TabBar({
     super.key,
     required this.tabs,
@@ -684,7 +711,106 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
-  }) : assert(indicator != null || (indicatorWeight > 0.0));
+  })  : _isPrimary = true,
+        assert(indicator != null || (indicatorWeight > 0.0));
+
+  /// Creates a Material Design primary tab bar.
+  ///
+  /// Primary tabs are placed at the top of the content pane under a top app
+  /// bar. They display the main content destinations.
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases nested Material 3 [TabBar]s. It consists of a primary
+  /// [TabBar] with nested a secondary [TabBar]. The primary [TabBar] uses a
+  /// [DefaultTabController] while the secondary [TabBar] uses a [TabController].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.2.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TabBarView], which displays page views that correspond to each tab.
+  ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
+  ///  * [TabBar.secondary], for a secondary tab bar.
+  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///     tab bar specification.
+  const TabBar.primary({
+    super.key,
+    required this.tabs,
+    this.controller,
+    this.isScrollable = false,
+    this.padding,
+    this.indicatorColor,
+    this.automaticIndicatorColorAdjustment = true,
+    this.indicatorWeight = 2.0,
+    this.indicatorPadding = EdgeInsets.zero,
+    this.indicator,
+    this.indicatorSize,
+    this.dividerColor,
+    this.labelColor,
+    this.labelStyle,
+    this.labelPadding,
+    this.unselectedLabelColor,
+    this.unselectedLabelStyle,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.overlayColor,
+    this.mouseCursor,
+    this.enableFeedback,
+    this.onTap,
+    this.physics,
+    this.splashFactory,
+    this.splashBorderRadius,
+  })  : _isPrimary = true,
+        assert(indicator != null || (indicatorWeight > 0.0));
+
+  /// Creates a Material Design secondary tab bar.
+  ///
+  /// Secondary tabs are used within a content area to further separate related
+  /// content and establish hierarchy.
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases nested Material 3 [TabBar]s. It consists of a primary
+  /// [TabBar] with nested a secondary [TabBar]. The primary [TabBar] uses a
+  /// [DefaultTabController] while the secondary [TabBar] uses a [TabController].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.2.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TabBarView], which displays page views that correspond to each tab.
+  ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
+  ///  * [TabBar.primary], for a primary tab bar.
+  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///     tab bar specification.
+  const TabBar.secondary({
+    super.key,
+    required this.tabs,
+    this.controller,
+    this.isScrollable = false,
+    this.padding,
+    this.indicatorColor,
+    this.automaticIndicatorColorAdjustment = true,
+    this.indicatorWeight = 2.0,
+    this.indicatorPadding = EdgeInsets.zero,
+    this.indicator,
+    this.indicatorSize,
+    this.dividerColor,
+    this.labelColor,
+    this.labelStyle,
+    this.labelPadding,
+    this.unselectedLabelColor,
+    this.unselectedLabelStyle,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.overlayColor,
+    this.mouseCursor,
+    this.enableFeedback,
+    this.onTap,
+    this.physics,
+    this.splashFactory,
+    this.splashBorderRadius,
+  })  : _isPrimary = false,
+        assert(indicator != null || (indicatorWeight > 0.0));
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -997,6 +1123,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     return false;
   }
 
+  /// Whether this tab bar is a primary tab bar.
+  ///
+  /// Otherwise, it is a secondary tab bar.
+  final bool _isPrimary;
+
   @override
   State<TabBar> createState() => _TabBarState();
 }
@@ -1017,13 +1148,24 @@ class _TabBarState extends State<TabBar> {
     // If indicatorSize is TabIndicatorSize.label, _tabKeys[i] is used to find
     // the width of tab widget i. See _IndicatorPainter.indicatorRect().
     _tabKeys = widget.tabs.map((Widget tab) => GlobalKey()).toList();
-    _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero, growable: true);
+    _labelPaddings = List<EdgeInsetsGeometry>.filled(
+        widget.tabs.length, EdgeInsets.zero,
+        growable: true);
+  }
+
+  TabBarTheme get _defaults {
+    if (Theme.of(context).useMaterial3) {
+      return widget._isPrimary
+          ? _TabsPrimaryDefaultsM3(context)
+          : _TabsSecondaryDefaultsM3(context);
+    } else {
+      return _TabsDefaultsM2(context);
+    }
   }
 
   Decoration _getIndicator() {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = theme.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
 
     if (widget.indicator != null) {
       return widget.indicator!;
@@ -1034,7 +1176,7 @@ class _TabBarState extends State<TabBar> {
 
     Color color = widget.indicatorColor
       ?? (theme.useMaterial3
-         ? tabBarTheme.indicatorColor ?? defaults.indicatorColor!
+         ? tabBarTheme.indicatorColor ?? _defaults.indicatorColor!
          : Theme.of(context).indicatorColor);
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
@@ -1050,21 +1192,22 @@ class _TabBarState extends State<TabBar> {
     // TODO(xu-baolin): Remove automatic adjustment to white color indicator
     // with a better long-term solution.
     // https://github.com/flutter/flutter/pull/68171#pullrequestreview-517753917
-    if (widget.automaticIndicatorColorAdjustment && color.value == Material.maybeOf(context)?.color?.value) {
+    if (widget.automaticIndicatorColorAdjustment &&
+        color.value == Material.maybeOf(context)?.color?.value) {
       color = Colors.white;
     }
 
     return UnderlineTabIndicator(
       borderRadius: theme.useMaterial3
-        // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
-        // when `preferredSize`and `indicatorWeight` are updated to support Material 3
-        // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
-        // https://github.com/flutter/flutter/issues/116136
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(3.0),
-            topRight: Radius.circular(3.0),
-          )
-        : null,
+          // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
+          // when `preferredSize`and `indicatorWeight` are updated to support Material 3
+          // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
+          // https://github.com/flutter/flutter/issues/116136
+          ? const BorderRadius.only(
+              topLeft: Radius.circular(3.0),
+              topRight: Radius.circular(3.0),
+            )
+          : null,
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -1111,18 +1254,25 @@ class _TabBarState extends State<TabBar> {
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = theme.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
 
-    _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
-      controller: _controller!,
-      indicator: _getIndicator(),
-      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? defaults.indicatorSize!,
-      indicatorPadding: widget.indicatorPadding,
-      tabKeys: _tabKeys,
-      old: _indicatorPainter,
-      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? defaults.dividerColor : null,
-      labelPaddings: _labelPaddings,
-    );
+    _indicatorPainter = !_controllerIsValid
+        ? null
+        : _IndicatorPainter(
+            controller: _controller!,
+            indicator: _getIndicator(),
+            indicatorSize: widget.indicatorSize ??
+                tabBarTheme.indicatorSize ??
+                _defaults.indicatorSize!,
+            indicatorPadding: widget.indicatorPadding,
+            tabKeys: _tabKeys,
+            old: _indicatorPainter,
+            dividerColor: theme.useMaterial3
+                ? widget.dividerColor ??
+                    tabBarTheme.dividerColor ??
+                    _defaults.dividerColor
+                : null,
+            labelPaddings: _labelPaddings,
+          );
   }
 
   @override
@@ -1272,6 +1422,7 @@ class _TabBarState extends State<TabBar> {
     return _TabStyle(
       animation: animation,
       isSelected: isSelected,
+      isPrimary: widget._isPrimary,
       labelColor: widget.labelColor,
       unselectedLabelColor: widget.unselectedLabelColor,
       labelStyle: widget.labelStyle,
@@ -1315,9 +1466,7 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = theme.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
@@ -1395,7 +1544,7 @@ class _TabBarState extends State<TabBar> {
       final MaterialStateProperty<Color?> defaultOverlay = MaterialStateProperty.resolveWith<Color?>(
         (Set<MaterialState> states) {
           final Set<MaterialState> effectiveStates = selectedState..addAll(states);
-          return defaults.overlayColor?.resolve(effectiveStates);
+          return _defaults.overlayColor?.resolve(effectiveStates);
         },
       );
       wrappedTabs[index] = InkWell(
@@ -1403,7 +1552,7 @@ class _TabBarState extends State<TabBar> {
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor ?? defaultOverlay,
-        splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory ?? defaults.splashFactory,
+        splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory ?? _defaults.splashFactory,
         borderRadius: widget.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
@@ -1428,6 +1577,7 @@ class _TabBarState extends State<TabBar> {
       child: _TabStyle(
         animation: kAlwaysDismissedAnimation,
         isSelected: false,
+        isPrimary: widget._isPrimary,
         labelColor: widget.labelColor,
         unselectedLabelColor: widget.unselectedLabelColor,
         labelStyle: widget.labelStyle,
@@ -1985,8 +2135,8 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
 // Token database version: v0_162
 
-class _TabsDefaultsM3 extends TabBarTheme {
-  _TabsDefaultsM3(this.context)
+class _TabsPrimaryDefaultsM3 extends TabBarTheme {
+  _TabsPrimaryDefaultsM3(this.context)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
   final BuildContext context;
@@ -2034,6 +2184,64 @@ class _TabsDefaultsM3 extends TabBarTheme {
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
+      }
+      return null;
+    });
+  }
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
+
+class _TabsSecondaryDefaultsM3 extends TabBarTheme {
+  _TabsSecondaryDefaultsM3(this.context)
+    : super(indicatorSize: TabBarIndicatorSize.tab);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get dividerColor => _colors.surfaceVariant;
+
+  @override
+  Color? get indicatorColor => _colors.primary;
+
+  @override
+  Color? get labelColor => _colors.onSurface;
+
+  @override
+  TextStyle? get labelStyle => _textTheme.titleSmall;
+
+  @override
+  Color? get unselectedLabelColor => _colors.onSurfaceVariant;
+
+  @override
+  TextStyle? get unselectedLabelStyle => _textTheme.titleSmall;
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.onSurface.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
+        return null;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
       }
       return null;
     });
