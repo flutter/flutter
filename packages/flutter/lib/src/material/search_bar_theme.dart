@@ -49,52 +49,34 @@ class SearchBarThemeData with Diagnosticable {
     this.constraints,
   });
 
-  /// The elevation of the search bar's [Material].
-  ///
-  /// If specified, overrides the default value of the [SearchBar.elevation].
+  /// Overrides the default value of the [SearchBar.elevation].
   final MaterialStateProperty<double?>? elevation;
 
-  /// The search bar's background fill color.
-  ///
-  /// If specified, overrides the default value of the [SearchBar.backgroundColor].
+  /// Overrides the default value of the [SearchBar.backgroundColor].
   final MaterialStateProperty<Color?>? backgroundColor;
 
-  /// The shadow color of the search bar's [Material].
-  ///
-  /// If specified, overrides the default value of the [SearchBar.shadowColor].
+  /// Overrides the default value of the [SearchBar.shadowColor].
   final MaterialStateProperty<Color?>? shadowColor;
 
-  /// The surface tint color of the button's [Material].
-  ///
-  /// If specified, overrides the default value of the [SearchBar.surfaceTintColor].
+  /// Overrides the default value of the [SearchBar.surfaceTintColor].
   final MaterialStateProperty<Color?>? surfaceTintColor;
 
-  /// The highlight color that's typically used to indicate that the button
-  /// is focused, hovered, or pressed. If specified, overrides the default
-  /// value of the [SearchBar.overlayColor].
+  /// Overrides the default value of the [SearchBar.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
-  /// The color and weight of the search bar's outline.
-  ///
-  /// This value is combined with [shape] to create a shape decorated
-  /// with an outline. This overrides the default value of the [SearchBar.side].
+  /// Overrides the default value of the [SearchBar.side].
   final MaterialStateProperty<BorderSide?>? side;
 
-  /// The shape of the search bar's underlying [Material].
-  ///
-  /// This overrides the default value of the [SearchBar.side].
+  /// Overrides the default value of the [SearchBar.shape].
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
   /// Overrides the default value for [SearchBar.padding].
   final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
-  /// The style to use for the text being edited. This overrides the default value
-  /// for [SearchBar.padding].
+  /// Overrides the default value for [SearchBar.textStyle].
   final MaterialStateProperty<TextStyle?>? textStyle;
 
-  /// The style to use for the [SearchBar.hintText].
-  ///
-  /// This overrides the default value for [SearchBar.hintStyle].
+  /// Overrides the default value for [SearchBar.hintStyle].
   final MaterialStateProperty<TextStyle?>? hintStyle;
 
   /// Overrides the value of size constraints for [SearchBar].

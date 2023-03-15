@@ -23,21 +23,16 @@ import 'theme.dart';
 /// [trailing] icons. A search bar is typically used to open a search view.
 /// It is the default trigger for a search view.
 ///
-/// The [leading] widget is on the left side of the bar and should contain either
-/// a navigational action (such as a menu or up-arrow) or a non-functional
-/// search icon.
+/// For [TextDirection.ltr], the [leading] widget is on the left side of the bar.
+/// It should contain either a navigational action (such as a menu or up-arrow)
+/// or a non-functional search icon.
 ///
-/// The [trailing] is an optional list. There should be up to two action icons
-/// that are located on the bar’s right-hand side. These actions can represent
-/// additional modes of searching (like voice search), a separate high-level
-/// action (such as current location) or an overflow menu.
+/// The [trailing] is an optional list that appears at the other end of
+/// the search bar. Typically only one or two action icons are included.
+/// These actions can represent additional modes of searching (like voice search),
+/// a separate high-level action (such as current location) or an overflow menu.
 class SearchBar extends StatefulWidget {
   /// Creates a Material Design search bar.
-  ///
-  /// If [trailing] is specified, there should not be more than two
-  /// widgets in [trailing].
-  ///
-  /// Typically used in combination with a search view.
   const SearchBar({
     super.key,
     this.controller,
@@ -58,9 +53,9 @@ class SearchBar extends StatefulWidget {
     this.padding,
     this.textStyle,
     this.hintStyle,
-  }) : assert(trailing == null || trailing.length <= 2);
+  });
 
-  /// Controls the text being edited.
+  /// Controls the text being edited in the search bar's text field.
   ///
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
@@ -153,7 +148,7 @@ class SearchBar extends StatefulWidget {
   /// Defaults to [StadiumBorder].
   final MaterialStateProperty<OutlinedBorder?>? shape;
 
-  /// The padding between the search bar's boundary and its child.
+  /// The padding between the search bar's boundary and its contents.
   ///
   /// If null, the value of [SearchBarThemeData.padding] will be used.
   /// If this is also null, then the default value is 16.0 horizontally.
@@ -205,20 +200,31 @@ class _SearchBarState extends State<SearchBar> {
     final SearchBarThemeData searchBarTheme = SearchBarTheme.of(context);
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
-    T? resolve<T>(MaterialStateProperty<T>? property) {
-      return property?.resolve(_internalStatesController.value);
+    T? resolve<T>(
+      MaterialStateProperty<T>? widgetValue,
+      MaterialStateProperty<T>? themeValue,
+      MaterialStateProperty<T>? defaultValue,
+    ) {
+      final Set<MaterialState> states = _internalStatesController.value;
+      return widgetValue?.resolve(states) ?? themeValue?.resolve(states) ?? defaultValue?.resolve(states);
     }
 
-    final TextStyle? effectiveTextStyle = resolve<TextStyle?>(widget.textStyle ?? searchBarTheme.textStyle ?? defaults.textStyle);
-    final TextStyle? effectiveHintStyle = resolve<TextStyle?>(widget.hintStyle ?? searchBarTheme.hintStyle ?? widget.textStyle ?? searchBarTheme.textStyle ?? defaults.hintStyle);
-    final double? effectiveElevation = resolve<double?>(widget.elevation ?? searchBarTheme.elevation ?? defaults.elevation);
-    final Color? effectiveShadowColor = resolve<Color?>(widget.shadowColor ?? searchBarTheme.shadowColor ?? defaults.shadowColor);
-    final Color? effectiveBackgroundColor = resolve<Color?>(widget.backgroundColor ?? searchBarTheme.backgroundColor ?? defaults.backgroundColor);
-    final Color? effectiveSurfaceTintColor = resolve<Color?>(widget.surfaceTintColor ?? searchBarTheme.surfaceTintColor ?? defaults.surfaceTintColor);
-    final OutlinedBorder? effectiveShape = resolve<OutlinedBorder?>(widget.shape ?? searchBarTheme.shape ?? defaults.shape);
-    final BorderSide? effectiveSide = resolve<BorderSide?>(widget.side ?? searchBarTheme.side ?? defaults.side);
-    final EdgeInsetsGeometry? effectivePadding = resolve<EdgeInsetsGeometry?>(widget.padding ?? searchBarTheme.padding ?? defaults.padding);
+    final TextStyle? effectiveTextStyle = resolve<TextStyle?>(widget.textStyle, searchBarTheme.textStyle, defaults.textStyle);
+    final double? effectiveElevation = resolve<double?>(widget.elevation, searchBarTheme.elevation, defaults.elevation);
+    final Color? effectiveShadowColor = resolve<Color?>(widget.shadowColor, searchBarTheme.shadowColor, defaults.shadowColor);
+    final Color? effectiveBackgroundColor = resolve<Color?>(widget.backgroundColor, searchBarTheme.backgroundColor, defaults.backgroundColor);
+    final Color? effectiveSurfaceTintColor = resolve<Color?>(widget.surfaceTintColor, searchBarTheme.surfaceTintColor, defaults.surfaceTintColor);
+    final OutlinedBorder? effectiveShape = resolve<OutlinedBorder?>(widget.shape, searchBarTheme.shape, defaults.shape);
+    final BorderSide? effectiveSide = resolve<BorderSide?>(widget.side, searchBarTheme.side, defaults.side);
+    final EdgeInsetsGeometry? effectivePadding = resolve<EdgeInsetsGeometry?>(widget.padding, searchBarTheme.padding, defaults.padding);
     final MaterialStateProperty<Color?>? effectiveOverlayColor = widget.overlayColor ?? searchBarTheme.overlayColor ?? defaults.overlayColor;
+
+    final Set<MaterialState> states = _internalStatesController.value;
+    final TextStyle? effectiveHintStyle = widget.hintStyle?.resolve(states)
+      ?? searchBarTheme.hintStyle?.resolve(states)
+      ?? widget.textStyle?.resolve(states)
+      ?? searchBarTheme.textStyle?.resolve(states)
+      ?? defaults.hintStyle?.resolve(states);
 
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     bool isIconThemeColorDefault(Color? color) {

@@ -600,13 +600,13 @@ void main() {
 
   testWidgets('SearchBar respects padding property', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Material(
             child: SearchBar(
-              leading: const Icon(Icons.search),
-              padding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
-              trailing: const <Widget>[
+              leading: Icon(Icons.search),
+              padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
+              trailing: <Widget>[
                 Icon(Icons.menu),
               ]
             ),
