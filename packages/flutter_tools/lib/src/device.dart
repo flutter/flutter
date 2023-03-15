@@ -245,76 +245,11 @@ abstract class DeviceManager {
     ];
   }
 
-  /// Find and return all target [Device]s based upon currently connected
-  /// devices, the current project, and criteria entered by the user on
-  /// the command line.
-  ///
-  /// If no device can be found that meets specified criteria,
-  /// then print an error message and return null.
-  ///
-  /// Returns a list of devices specified by the user.
-  ///
-  /// * If the user specified '-d all', then return all connected devices which
-  /// support the current project, except for fuchsia and web.
-  ///
-  /// * If the user specified a device id, then do nothing as the list is already
-  /// filtered by [getDevices].
-  ///
-  /// * If the user did not specify a device id and there is more than one
-  /// device connected, then filter out unsupported devices and prioritize
-  /// ephemeral devices.
-  ///
-  /// * If [promptUserToChooseDevice] is true, and there are more than one
-  /// device after the aforementioned filters, and the user is connected to a
-  /// terminal, then show a prompt asking the user to choose one.
-  Future<List<Device>> findTargetDevices({
-    bool includeDevicesUnsupportedByProject = false,
-    Duration? timeout,
-  }) async {
-    if (timeout != null) {
-      // Reset the cache with the specified timeout.
-      await refreshAllDevices(timeout: timeout);
-    }
-
-    final List<Device> devices = await getDevices(
-      filter: DeviceDiscoveryFilter(
-        supportFilter: deviceSupportFilter(
-          includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-        ),
-      ),
-    );
-
-    if (!hasSpecifiedDeviceId) {
-      // User did not specify the device.
-
-      if (devices.length > 1) {
-        // If there are still multiple devices and the user did not specify to run
-        // all, then attempt to prioritize ephemeral devices. For example, if the
-        // user only typed 'flutter run' and both an Android device and desktop
-        // device are available, choose the Android device.
-
-        // Ephemeral is nullable for device types where this is not well
-        // defined.
-        final List<Device> ephemeralDevices = <Device>[
-          for (final Device device in devices)
-            if (device.ephemeral == true)
-              device,
-        ];
-
-        if (ephemeralDevices.length == 1) {
-          return ephemeralDevices;
-        }
-      }
-    }
-
-    return devices;
-  }
-
   /// Determines how to filter devices.
   ///
   /// By default, filters to only include devices that are supported by Flutter.
   ///
-  /// If the user has not specificied a device, filters to only include devices
+  /// If the user has not specified a device, filters to only include devices
   /// that are supported by Flutter and supported by the project.
   ///
   /// If the user has specified `--device all`, filters to only include devices
@@ -342,6 +277,27 @@ abstract class DeviceManager {
     } else {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter();
     }
+  }
+
+  /// If the user did not specify to run all or a specific device, then attempt
+  /// to prioritize ephemeral devices.
+  ///
+  /// If there is not exactly one ephemeral device return null.
+  ///
+  /// For example, if the user only typed 'flutter run' and both an Android
+  /// device and desktop device are available, choose the Android device.
+  ///
+  /// Note: ephemeral is nullable for device types where this is not well
+  /// defined.
+  Device? getSingleEphemeralDevice(List<Device> devices){
+    if (!hasSpecifiedDeviceId) {
+      try {
+        return devices.singleWhere((Device device) => device.ephemeral == true);
+      } on StateError {
+        return null;
+      }
+    }
+    return null;
   }
 }
 
