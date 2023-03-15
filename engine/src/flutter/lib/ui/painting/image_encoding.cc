@@ -38,7 +38,6 @@ enum ImageByteFormat {
   kRawRGBA,
   kRawStraightRGBA,
   kRawUnmodified,
-  kRawExtendedRgba128,
   kPNG,
 };
 
@@ -124,21 +123,19 @@ sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
         return nullptr;
       };
       return png_image;
-    }
-    case kRawRGBA:
+    } break;
+    case kRawRGBA: {
       return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
                                kPremul_SkAlphaType);
-
-    case kRawStraightRGBA:
+    } break;
+    case kRawStraightRGBA: {
       return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
                                kUnpremul_SkAlphaType);
-
-    case kRawUnmodified:
+    } break;
+    case kRawUnmodified: {
       return CopyImageByteData(raster_image, raster_image->colorType(),
                                raster_image->alphaType());
-    case kRawExtendedRgba128:
-      return CopyImageByteData(raster_image, kRGBA_F32_SkColorType,
-                               kUnpremul_SkAlphaType);
+    } break;
   }
 
   FML_LOG(ERROR) << "Unknown error encoding image.";

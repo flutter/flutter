@@ -7,9 +7,6 @@
 #include <algorithm>
 #include <limits>
 
-#if IMPELLER_SUPPORTS_RENDERING
-#include "flutter/lib/ui/painting/image_encoding_impeller.h"
-#endif
 #include "flutter/lib/ui/painting/image_encoding.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -36,18 +33,6 @@ Dart_Handle CanvasImage::toByteData(int format, Dart_Handle callback) {
 void CanvasImage::dispose() {
   image_.reset();
   ClearDartWrapper();
-}
-
-int CanvasImage::colorSpace() {
-  if (image_->skia_image()) {
-    return ColorSpace::kSRGB;
-  } else if (image_->impeller_texture()) {
-#if IMPELLER_SUPPORTS_RENDERING
-    return ImageEncodingImpeller::GetColorSpace(image_->impeller_texture());
-#endif  // IMPELLER_SUPPORTS_RENDERING
-  }
-
-  return -1;
 }
 
 }  // namespace flutter

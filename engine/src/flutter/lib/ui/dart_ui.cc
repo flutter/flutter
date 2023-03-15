@@ -190,7 +190,6 @@ typedef CanvasPath Path;
   V(Image, width, 1)                                   \
   V(Image, height, 1)                                  \
   V(Image, toByteData, 3)                              \
-  V(Image, colorSpace, 1)                              \
   V(ImageDescriptor, bytesPerPixel, 1)                 \
   V(ImageDescriptor, dispose, 1)                       \
   V(ImageDescriptor, height, 1)                        \
