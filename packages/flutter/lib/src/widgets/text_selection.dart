@@ -457,6 +457,7 @@ class TextSelectionOverlay {
     _selectionOverlay.showHandles();
   }
 
+  /// {@macro flutter.widgets.SelectionOverlay.rebuildHandles}
   void rebuildHandles() {
     _updateSelectionOverlay();
     _selectionOverlay.rebuildHandles();
@@ -1333,6 +1334,9 @@ class SelectionOverlay {
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
+  /// {@template flutter.widgets.SelectionOverlay.rebuildHandles}
+  /// Rebuilds the selection handles if they are present.
+  /// {@endtemplate}
   void rebuildHandles() {
     if (_handles == null) {
       return;
