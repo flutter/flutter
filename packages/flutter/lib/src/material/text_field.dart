@@ -582,7 +582,11 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
 
-  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  /// Whether the cursor will animate from fully transparent to fully opaque
+  /// during each cursor blink.
+  ///
+  /// By default, the cursor opacity will animate on iOS platforms and will not
+  /// animate on Android platforms.
   final bool? cursorOpacityAnimates;
 
   /// The color of the cursor.
