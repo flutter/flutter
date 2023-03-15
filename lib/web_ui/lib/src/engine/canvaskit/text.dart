@@ -984,7 +984,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   /// Builds the CkParagraph with the builder and deletes the builder.
   SkParagraph _buildSkParagraph() {
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
+    if (canvasKitVariant == CanvasKitVariant.chromium) {
       injectClientICU(_paragraphBuilder);
     }
     final SkParagraph result = _paragraphBuilder.build();
