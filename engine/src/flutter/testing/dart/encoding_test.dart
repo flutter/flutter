@@ -17,6 +17,43 @@ const Color _kBlack = Color.fromRGBO(0, 0, 0, 1.0);
 const Color _kGreen = Color.fromRGBO(0, 255, 0, 1.0);
 
 void main() {
+  test('decodeImageFromPixels float32', () async {
+    const int width = 2;
+    const int height = 2;
+    final Float32List pixels = Float32List(width * height * 4);
+    final List<List<double>> pixels2d = <List<double>>[
+      <double>[1, 0, 0, 1],
+      <double>[0, 1, 0, 1],
+      <double>[0, 0, 1, 1],
+      <double>[1, 1, 1, 0],
+    ];
+    int offset = 0;
+    for (final List<double> color in pixels2d) {
+      pixels[offset + 0] = color[0];
+      pixels[offset + 1] = color[1];
+      pixels[offset + 2] = color[2];
+      pixels[offset + 3] = color[3];
+      offset += 4;
+    }
+
+    final Completer<Image> completer = Completer<Image>();
+    decodeImageFromPixels(
+        Uint8List.view(pixels.buffer), width, height, PixelFormat.rgbaFloat32,
+        (Image result) {
+      completer.complete(result);
+    });
+
+    final Image image = await completer.future;
+    final ByteData data =
+        (await image.toByteData(format: ImageByteFormat.rawStraightRgba))!;
+    final Uint32List readPixels = Uint32List.view(data.buffer);
+    expect(width * height, readPixels.length);
+    expect(readPixels[0], 0xff0000ff);
+    expect(readPixels[1], 0xff00ff00);
+    expect(readPixels[2], 0xffff0000);
+    expect(readPixels[3], 0x00ffffff);
+  });
+
   test('Image.toByteData RGBA format works with simple image', () async {
     final Image image = await Square4x4Image.image;
     final ByteData data = (await image.toByteData())!;

@@ -37,6 +37,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   enum PixelFormat {
     kRGBA8888,
     kBGRA8888,
+    kRGBAFloat32,
   };
 
   /// @brief  Asynchronously initializes an ImageDescriptor for an encoded
