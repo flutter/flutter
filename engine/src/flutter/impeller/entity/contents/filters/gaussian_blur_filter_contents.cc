@@ -113,7 +113,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto radius = Radius{blur_sigma_}.radius;
 
-  auto transform = entity.GetTransformation() * effect_transform;
+  auto transform = entity.GetTransformation() * effect_transform.Basis();
   auto transformed_blur_radius =
       transform.TransformDirection(blur_direction_ * radius);
 
@@ -311,7 +311,7 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
     return std::nullopt;
   }
 
-  auto transform = inputs[0]->GetTransform(entity) * effect_transform;
+  auto transform = inputs[0]->GetTransform(entity) * effect_transform.Basis();
   auto transformed_blur_vector =
       transform.TransformDirection(blur_direction_* Radius{blur_sigma_}.radius)
           .Abs();

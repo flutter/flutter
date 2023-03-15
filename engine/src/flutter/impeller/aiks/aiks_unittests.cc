@@ -1931,7 +1931,7 @@ TEST_P(AiksTest, PaintWithFilters) {
   ASSERT_TRUE(paint.HasColorFilter());
 
   paint.image_filter = [](const FilterInput::Ref& input,
-                          const Matrix& effect_transform) {
+                          const Matrix& effect_transform, bool is_subpass) {
     return FilterContents::MakeGaussianBlur(
         input, Sigma(1.0), Sigma(1.0), FilterContents::BlurStyle::kNormal,
         Entity::TileMode::kClamp, effect_transform);
