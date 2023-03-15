@@ -52,7 +52,7 @@ body:
         Please create a minimal reproducible sample that shows the problem
         and attach it below between the lines with the backticks.
 
-        To create it, use `flutter create bug` command and update the `main.dart` file.
+        To create it, use the `flutter create bug` command and update the `main.dart` file.
 
         Alternatively, you can use https://dartpad.dev/ or create a public GitHub
         repository to share your sample.
