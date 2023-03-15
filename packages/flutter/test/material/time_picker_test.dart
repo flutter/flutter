@@ -361,9 +361,11 @@ void main() {
       }
 
       testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+
         // portrait
-        tester.binding.window.physicalSizeTestValue = const Size(800, 800.5);
-        tester.binding.window.devicePixelRatioTestValue = 1;
+        tester.view.physicalSize = const Size(800, 800.5);
+        tester.view.devicePixelRatio = 1;
         await mediaQueryBoilerplate(tester, materialType: materialType);
 
         RenderObject render = tester.renderObject(
@@ -372,32 +374,28 @@ void main() {
         expect((render as dynamic).orientation, Orientation.portrait); // ignore: avoid_dynamic_calls
 
         // landscape
-        tester.binding.window.physicalSizeTestValue = const Size(800.5, 800);
-        tester.binding.window.devicePixelRatioTestValue = 1;
+        tester.view.physicalSize = const Size(800.5, 800);
+        tester.view.devicePixelRatio = 1;
         await mediaQueryBoilerplate(tester, tapButton: false, materialType: materialType);
 
         render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
         expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
-
-        tester.binding.window.clearPhysicalSizeTestValue();
-        tester.binding.window.clearDevicePixelRatioTestValue();
       });
 
       testWidgets('setting orientation should override MediaQuery orientation', (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+
         // portrait media query
-        tester.binding.window.physicalSizeTestValue = const Size(800, 800.5);
-        tester.binding.window.devicePixelRatioTestValue = 1;
+        tester.view.physicalSize = const Size(800, 800.5);
+        tester.view.devicePixelRatio = 1;
         await mediaQueryBoilerplate(tester, orientation: Orientation.landscape, materialType: materialType);
 
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
         expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
-
-        tester.binding.window.clearPhysicalSizeTestValue();
-        tester.binding.window.clearDevicePixelRatioTestValue();
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {
@@ -444,7 +442,7 @@ void main() {
         // Verify that the time picker is being laid out RTL.
         // We expect the left edge of the 'OK' button in the RTL
         // layout to match the gap between right edge of the 'OK'
-        // button and the right edge of the 800 wide window.
+        // button and the right edge of the 800 wide view.
         expect(tester.getBottomLeft(find.text(okString)).dx, 800 - ltrOkRight);
       });
 
@@ -783,19 +781,21 @@ void main() {
       group('Works for various view sizes', () {
         for (final Size size in const <Size>[Size(100, 100), Size(300, 300), Size(800, 600)]) {
           testWidgets('Draws dial without overflows at $size', (WidgetTester tester) async {
-            tester.binding.window.physicalSizeTestValue = size;
+            tester.view.physicalSize = size;
+            addTearDown(tester.view.reset);
+
             await mediaQueryBoilerplate(tester, entryMode: TimePickerEntryMode.input, materialType: materialType);
             await tester.pumpAndSettle();
             expect(tester.takeException(), isNot(throwsAssertionError));
-            tester.binding.window.clearPhysicalSizeTestValue();
           });
 
           testWidgets('Draws input without overflows at $size', (WidgetTester tester) async {
-            tester.binding.window.physicalSizeTestValue = size;
+            tester.view.physicalSize = size;
+            addTearDown(tester.view.reset);
+
             await mediaQueryBoilerplate(tester, materialType: materialType);
             await tester.pumpAndSettle();
             expect(tester.takeException(), isNot(throwsAssertionError));
-            tester.binding.window.clearPhysicalSizeTestValue();
           });
         }
       });
@@ -1035,8 +1035,10 @@ void main() {
 
       testWidgets('header touch regions are large enough', (WidgetTester tester) async {
         // Ensure picker is displayed in portrait mode.
-        tester.binding.window.physicalSizeTestValue = const Size(400, 800);
-        tester.binding.window.devicePixelRatioTestValue = 1;
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
         await mediaQueryBoilerplate(tester, materialType: materialType);
 
         final Size dayPeriodControlSize = tester.getSize(
@@ -1058,9 +1060,6 @@ void main() {
         ));
         expect(minuteSize.width, greaterThanOrEqualTo(48));
         expect(minuteSize.height, greaterThanOrEqualTo(48));
-
-        tester.binding.window.clearPhysicalSizeTestValue();
-        tester.binding.window.clearDevicePixelRatioTestValue();
       });
     });
 
@@ -1551,7 +1550,7 @@ Future<void> mediaQueryBoilerplate(
               alwaysUse24HourFormat: alwaysUse24HourFormat,
               textScaleFactor: textScaleFactor,
               accessibleNavigation: accessibleNavigation,
-              size: tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio,
+              size: tester.view.physicalSize / tester.view.devicePixelRatio,
             ),
             child: Material(
               child: Center(
