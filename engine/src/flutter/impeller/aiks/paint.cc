@@ -57,13 +57,12 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
 
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input,
-    std::optional<bool> is_solid_color,
-    const Matrix& effect_transform) const {
+    std::optional<bool> is_solid_color) const {
   bool is_solid_color_val = is_solid_color.value_or(!color_source);
   input = WithColorFilter(input);
   input = WithInvertFilter(input);
-  input = WithMaskBlur(input, is_solid_color_val, effect_transform);
-  input = WithImageFilter(input, effect_transform, /*is_subpass=*/false);
+  input = WithMaskBlur(input, is_solid_color_val, Matrix());
+  input = WithImageFilter(input, Matrix(), /*is_subpass=*/false);
   return input;
 }
 

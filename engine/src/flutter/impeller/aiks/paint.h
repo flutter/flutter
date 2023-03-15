@@ -87,8 +87,7 @@ struct Paint {
   ///             original contents is returned.
   std::shared_ptr<Contents> WithFilters(
       std::shared_ptr<Contents> input,
-      std::optional<bool> is_solid_color = std::nullopt,
-      const Matrix& effect_transform = Matrix()) const;
+      std::optional<bool> is_solid_color = std::nullopt) const;
 
   /// @brief      Wrap this paint's configured filters to the given contents of
   ///             subpass target.
