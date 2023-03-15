@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, ViewPadding;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -138,26 +133,6 @@ class TestFormatter extends TextInputFormatter {
     onFormatEditUpdate(oldValue, newValue);
     return newValue;
   }
-}
-
-// Used to set window.viewInsets since the real ui.WindowPadding has only a
-// private constructor.
-class _TestViewPadding implements ui.ViewPadding {
-  const _TestViewPadding({
-    required this.bottom,
-  });
-
-  @override
-  final double bottom;
-
-  @override
-  double get top => 0.0;
-
-  @override
-  double get left => 0.0;
-
-  @override
-  double get right => 0.0;
 }
 
 void main() {
@@ -2241,7 +2216,7 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -3549,10 +3524,8 @@ void main() {
       // Add a viewInset tall enough to push the field to the top, where there
       // is no room to display the toolbar above. This is similar to when the
       // keyboard is shown.
-      tester.binding.window.viewInsetsTestValue = const _TestViewPadding(
-        bottom: 500.0,
-      );
-      addTearDown(tester.binding.window.clearViewInsetsTestValue);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+      addTearDown(tester.view.reset);
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.
@@ -3561,7 +3534,7 @@ void main() {
       expect(toolbarTopLeft.dy, greaterThan(textFieldTopLeft.dy));
 
       // Remove the viewInset, as if the keyboard were hidden.
-      tester.binding.window.clearViewInsetsTestValue();
+      tester.view.resetViewInsets();
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.
@@ -4960,13 +4933,14 @@ void main() {
     );
 
     final RenderEditable editable = findRenderEditable(tester);
+    assert(editable.size.width == 300);
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    // The overlay() function centers its child within a 800x600 window.
-    // Default cursorWidth is 2.0, test windowWidth is 800
-    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    // The overlay() function centers its child within a 800x600 view.
+    // Default cursorWidth is 2.0, test viewWidth is 800
+    // Centered cursor topLeft.dx: 399 == viewWidth/2 - cursorWidth/2
     expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
@@ -5000,9 +4974,9 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    // The overlay() function centers its child within a 800x600 window.
-    // Default cursorWidth is 2.0, test windowWidth is 800
-    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    // The overlay() function centers its child within a 800x600 view.
+    // Default cursorWidth is 2.0, test viewWidth is 800
+    // Centered cursor topLeft.dx: 399 == viewWidth/2 - cursorWidth/2
     expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
@@ -6913,20 +6887,26 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
@@ -6935,17 +6915,17 @@ void main() {
       ),
     );
 
-    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
     //  A  abc  B
-    //  ---------   baseline
-    //  2  4    6   space below the baseline = 0.2 * fontSize
-    //  ---------   rowBottomY
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -6966,19 +6946,25 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
               ),
             ),
           ],
@@ -6986,18 +6972,18 @@ void main() {
       ),
     );
 
-    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
     //  A  abc  B
-    //  ---------   baseline
-    //  2  4    6   space below the baseline = 0.2 * fontSize
-    //  ---------   rowBottomY
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
     // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -11753,7 +11739,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74566
@@ -11786,7 +11772,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The ListView has scrolled to keep the TextField visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
     expect(textFieldScrollController.offset, 0.0);
 
     // After entering some long text, the last input character remains on the screen.

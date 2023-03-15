@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -25,7 +26,6 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -673,6 +673,23 @@ void main() {
           FakeDevice(targetPlatform: TargetPlatform.android_arm, platformType: PlatformType.android),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -693,9 +710,26 @@ void main() {
 
       testUsingContext('with only iOS usb device', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -717,9 +751,29 @@ void main() {
 
       testUsingContext('with only iOS network device', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -741,10 +795,29 @@ void main() {
 
       testUsingContext('with both iOS usb and network devices', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -1058,6 +1131,10 @@ class FakeDevice extends Fake implements Device {
   @override
   bool get isConnected => true;
 
+  @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
   bool supported = true;
 
   @override
@@ -1141,7 +1218,7 @@ class FakeDevice extends Fake implements Device {
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    this.interfaceType = IOSDeviceConnectionInterface.none,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     bool isLocalEmulator = false,
     String sdkNameAndVersion = '',
   }): _isLocalEmulator = isLocalEmulator,
@@ -1157,7 +1234,11 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  final IOSDeviceConnectionInterface interfaceType;
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
