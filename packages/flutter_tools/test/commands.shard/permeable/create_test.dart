@@ -2762,7 +2762,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('newly created plugin has min flutter sdk version as 2.5.0', () async {
+  testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2771,8 +2771,8 @@ void main() {
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
     final Map<String, VersionConstraint?> env = pubspec.environment!;
-    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
-    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
+    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
+    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
 
   testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
