@@ -378,9 +378,6 @@ class CkImage implements ui.Image, StackTraceDebugger {
     }
   }
 
-  @override
-  ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
-
   Future<ByteData> _readPixelsFromSkImage(ui.ImageByteFormat format) {
     final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba ? canvasKit.AlphaType.Unpremul : canvasKit.AlphaType.Premul;
     final ByteData? data = _encodeImage(
