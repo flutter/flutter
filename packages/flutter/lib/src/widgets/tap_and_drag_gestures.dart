@@ -521,6 +521,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // tracked in [addAllowedPointer].
   double? get slopTolerance;
 
+  // The consecutive tap tracker has reset.
+  //
+  // This triggers when the timer between two taps has elapsed, or when
+  // the previous pointers buttons does not match the most recent pointers
+  // buttons, or when the pointer has drifted past the consecutive tap
+  // tolerance [kDoubleTapSlop].
+  VoidCallback? onTapTrackReset;
+
   // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
@@ -645,6 +653,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _keysPressedOnDown = null;
     _down = null;
     _up = null;
+    onTapTrackReset?.call();
   }
 }
 

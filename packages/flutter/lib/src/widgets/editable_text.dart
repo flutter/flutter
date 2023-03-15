@@ -3327,6 +3327,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return selectionOverlay;
   }
 
+  /// Toggles the gesture handling of the selection handles.
+  ///
+  /// If [TextSelectionOverlay.handlesAllowPointers] is true, this will set it
+  /// to false.
+  ///
+  /// If [TextSelectionOverlay.handlesAllowPointers] is false, this will set it
+  /// to true.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionOverlay.handlesAllowPointers], which is the flag that this
+  /// method toggles.
+  void toggleSelectionHandleOverlayGestureHandling() {
+    if (_selectionOverlay == null) {
+      _selectionOverlay = _createSelectionOverlay();
+    }
+    _selectionOverlay!.handlesAllowPointers = !_selectionOverlay!.handlesAllowPointers;
+    _selectionOverlay!.rebuildHandles();
+  }
+
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
