@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
@@ -298,6 +297,17 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// By default, returns [ui.AppExitResponse.exit].
   ///
+  /// {@template flutter.services.binding.ServicesBinding.requestAppExit}
+  /// Not all exits are cancelable, so not all exits will call this function. Do
+  /// not rely on this function as a place to save critical data, because you
+  /// will be disappointed. There are a number of ways that the application can
+  /// exit without letting the application know first: power can be unplugged,
+  /// the battery removed, the application can be killed in a task manager or
+  /// command line, or the device could have a rapid unplanned disassembly (i.e.
+  /// it could explode). In all of those cases (and probably others), no
+  /// notification will be given to the application that it is about to exit.
+  /// {@endtemplate}
+  ///
   /// {@tool sample}
   /// This examples shows how an application can cancel (or not) OS requests for
   /// quitting an application. Currently this is only supported on macOS and
@@ -322,8 +332,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// This differs from calling `dart:io`'s [exit] function in that it gives the
   /// engine a chance to clean up resources so that it doesn't crash on exit, so
   /// calling this is always preferred over calling [exit]. It also optionally
-  /// gives handlers of [handleRequestAppExit] or [AppLifecycleListener]s that
-  /// set an [AppLifecycleListener.onExitRequested] a chance to cancel the
+  /// gives handlers of [handleRequestAppExit] a chance to cancel the
   /// application exit.
   ///
   /// The [exitType] indicates what kind of exit to perform. For
@@ -344,15 +353,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// ignored. It defaults to zero.
   ///
   /// See also:
-  /// * [AppLifecycleListener] for a class that can listen to exit requests and
-  ///   respond to them without needing to create a [WidgetsBindingObserver].
+  ///
   /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
   ///   override on a [WidgetsBindingObserver] to receive exit requests.
   @mustCallSuper
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
-    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod<Map<String, dynamic>>(
+    final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
       'System.exitApplication',
-      <String, dynamic>{'type': exitType.name, 'exitCode': exitCode},
+      <String, Object?>{'type': exitType.name, 'exitCode': exitCode},
     );
     if (result == null ) {
       return ui.AppExitResponse.cancel;

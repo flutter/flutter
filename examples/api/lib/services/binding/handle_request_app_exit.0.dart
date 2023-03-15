@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ApplicationLifecycleListener].
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Flutter code sample for [ServicesBinding.handleRequestAppExit].
+
 void main() {
   runApp(const ApplicationExitExample());
 }
 
-class ApplicationExitExample extends StatefulWidget {
+class ApplicationExitExample extends StatelessWidget {
   const ApplicationExitExample({super.key});
 
-  @override
-  State<ApplicationExitExample> createState() => _ApplicationExitExampleState();
-}
-
-class _ApplicationExitExampleState extends State<ApplicationExitExample> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(

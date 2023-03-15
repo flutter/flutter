@@ -232,12 +232,12 @@ abstract class WidgetsBindingObserver {
   /// If any observer responds with [AppExitResponse.cancel], it will cancel the
   /// exit. All observers will be asked before exiting.
   ///
+  /// {@macro flutter.services.binding.ServicesBinding.requestAppExit}
+  ///
   /// See also:
   ///
   /// * [ServicesBinding.exitApplication] for a function to call that will request
   ///   that the application exits.
-  /// * [AppLifecycleListener] for a class that can listen to exit requests and
-  ///   respond to them without needing to create a [WidgetsBindingObserver].
   Future<AppExitResponse> didRequestAppExit() async {
     return AppExitResponse.exit;
   }
