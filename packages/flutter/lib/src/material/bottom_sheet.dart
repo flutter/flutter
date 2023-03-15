@@ -363,25 +363,26 @@ class _BottomSheetState extends State<BottomSheet> {
             : Stack(
                 alignment: Alignment.topCenter,
                 children: <Widget>[
-                  // If the whole bottom sheet is draggable, no need to add 
+                  // If the whole bottom sheet is draggable, no need to add
                   // GestureDetector on the drag handle.
-                  widget.enableDrag
-                      ? _DragHandle(
-                          onSemanticsTap: widget.onClosing,
-                          handleHover: _handleDragHandleHover,
-                          materialState: dragHandleMaterialState,
-                        )
-                      : GestureDetector(
-                          onVerticalDragStart: _handleDragStart,
-                          onVerticalDragUpdate: _handleDragUpdate,
-                          onVerticalDragEnd: _handleDragEnd,
-                          excludeFromSemantics: true,
-                          child: _DragHandle(
-                            onSemanticsTap: widget.onClosing,
-                            handleHover: _handleDragHandleHover,
-                            materialState: dragHandleMaterialState,
-                          ),
-                        ),
+                  if (widget.enableDrag)
+                    _DragHandle(
+                      onSemanticsTap: widget.onClosing,
+                      handleHover: _handleDragHandleHover,
+                      materialState: dragHandleMaterialState,
+                    )
+                  else
+                    GestureDetector(
+                      onVerticalDragStart: _handleDragStart,
+                      onVerticalDragUpdate: _handleDragUpdate,
+                      onVerticalDragEnd: _handleDragEnd,
+                      excludeFromSemantics: true,
+                      child: _DragHandle(
+                        onSemanticsTap: widget.onClosing,
+                        handleHover: _handleDragHandleHover,
+                        materialState: dragHandleMaterialState,
+                      ),
+                    ),
                   Padding(
                     padding:
                         const EdgeInsets.only(top: kMinInteractiveDimension),
