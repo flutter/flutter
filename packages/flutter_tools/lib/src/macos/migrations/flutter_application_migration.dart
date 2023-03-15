@@ -32,7 +32,7 @@ class FlutterApplicationMigration extends ProjectMigrator {
         // have substituted something else.
         logger.printTrace('${_infoPlistFile.basename} has an '
           '${PlistParser.kNSPrincipalClassKey} of $principleClass, not '
-          'NSApplication, skipping FlutterApplication migration.\nYou may need '
+          'NSApplication, skipping FlutterApplication migration.\nYou will need '
           'to modify your application class to derive from FlutterApplication.');
         return;
       }
