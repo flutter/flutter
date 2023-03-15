@@ -78,7 +78,9 @@ class FilterContents : public Contents {
   static std::shared_ptr<FilterContents> MakeMatrixFilter(
       FilterInput::Ref input,
       const Matrix& matrix,
-      const SamplerDescriptor& desc);
+      const SamplerDescriptor& desc,
+      const Matrix& effect_transform,
+      bool is_subpass);
 
   static std::shared_ptr<FilterContents> MakeLocalMatrixFilter(
       FilterInput::Ref input,

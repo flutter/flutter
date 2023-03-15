@@ -1075,6 +1075,39 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
+  flutter::DisplayListBuilder builder;
+  builder.Save();
+  builder.Scale(2.0, 2.0);
+  flutter::DlPaint paint;
+  paint.setColor(flutter::DlColor::kYellow());
+  builder.DrawRect(SkRect::MakeWH(300, 300), paint);
+  paint.setStrokeWidth(1.0);
+  paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+  paint.setColor(flutter::DlColor::kBlack().withAlpha(0x80));
+  builder.DrawLine(SkPoint::Make(150, 0), SkPoint::Make(150, 300), paint);
+  builder.DrawLine(SkPoint::Make(0, 150), SkPoint::Make(300, 150), paint);
+
+  SkRect bounds = SkRect::MakeXYWH(100, 100, 100, 100);
+  flutter::DlPaint save_paint;
+  SkMatrix filter_matrix = SkMatrix::I();
+  filter_matrix.postTranslate(-150, -150);
+  filter_matrix.postScale(0.2f, 0.2f);
+  filter_matrix.postTranslate(150, 150);
+
+  auto filter = flutter::DlMatrixImageFilter(
+      filter_matrix, flutter::DlImageSampling::kNearestNeighbor);
+  save_paint.setImageFilter(filter.shared());
+
+  builder.SaveLayer(&bounds, &save_paint);
+  flutter::DlPaint paint2;
+  paint2.setColor(flutter::DlColor::kBlue());
+  builder.DrawRect(bounds, paint2);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawRectWithLinearToSrgbColorFilter) {
   flutter::DlPaint paint;
   paint.setColor(flutter::DlColor(0xFF2196F3).withAlpha(128));
