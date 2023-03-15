@@ -36,13 +36,13 @@ body:
   - type: textarea
     attributes:
       label: Expected results
-      description: Please tell us what is expected to happen
+      description: Please tell us what is expected to happen.
     validations:
       required: true
   - type: textarea
     attributes:
       label: Actual results
-      description: Please tell us what is actually happening
+      description: Please tell us what is actually happening.
     validations:
       required: true
   - type: textarea
@@ -52,13 +52,10 @@ body:
         Please create a minimal reproducible sample that shows the problem
         and attach it below between the lines with the backticks.
 
-        To create it you can use `flutter create bug` command and update the `main.dart` file.
+        To create it, use `flutter create bug` command and update the `main.dart` file.
 
-        Alternatively, you can use https://dartpad.dev/
-        which is capable of creating and running small Flutter apps.
-
-        If your sample includes changes to native code, ideally you can create
-        a public Github repository and paste the link to it here
+        Alternatively, you can use https://dartpad.dev/ or create a public GitHub
+        repository to share your sample.
 
         Without this we will unlikely be able to progress on the issue, and because of that
         we regretfully will have to close it.
@@ -99,7 +96,7 @@ body:
         please include the output of running them with `--verbose`; for example,
         the output of running `flutter --verbose create foo`.
 
-        If the logs are too large to be uploaded to Github, you may upload
+        If the logs are too large to be uploaded to GitHub, you may upload
         them as a `txt` file or use online tools like https://pastebin.com to
         share it.
 
