@@ -86,7 +86,12 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
 static SkColorType ChooseCompatibleColorType(SkColorType type) {
-  return kRGBA_8888_SkColorType;
+  switch (type) {
+    case kRGBA_F32_SkColorType:
+      return kRGBA_F16_SkColorType;
+    default:
+      return kRGBA_8888_SkColorType;
+  }
 }
 
 static SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
@@ -176,11 +181,25 @@ std::shared_ptr<SkBitmap> ImageDecoderImpeller::DecompressTexture(
       FML_DLOG(ERROR) << "Could not decompress image.";
       return nullptr;
     }
-  } else {
+  } else if (image_info.colorType() == base_image_info.colorType()) {
     bitmap->setInfo(image_info);
     auto pixel_ref = SkMallocPixelRef::MakeWithData(
         image_info, descriptor->row_bytes(), descriptor->data());
     bitmap->setPixelRef(pixel_ref, 0, 0);
+    bitmap->setImmutable();
+  } else {
+    auto temp_bitmap = std::make_shared<SkBitmap>();
+    temp_bitmap->setInfo(base_image_info);
+    auto pixel_ref = SkMallocPixelRef::MakeWithData(
+        base_image_info, descriptor->row_bytes(), descriptor->data());
+    temp_bitmap->setPixelRef(pixel_ref, 0, 0);
+
+    if (!bitmap->tryAllocPixels(image_info)) {
+      FML_DLOG(ERROR)
+          << "Could not allocate intermediate for pixel conversion.";
+      return nullptr;
+    }
+    temp_bitmap->readPixels(bitmap->pixmap());
     bitmap->setImmutable();
   }
 
