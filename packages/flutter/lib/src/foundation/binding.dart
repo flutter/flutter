@@ -187,15 +187,15 @@ abstract class BindingBase {
   ///
   /// If a [BuildContext] is available, consider looking up the current
   /// [FlutterView] associated with that context via [View.of]. It gives access
-  /// to the same functionality as this deprecated property. However, some
-  /// functionality has moved to the [PlatformDispatcher], which should be
-  /// accessed from the view returned by [View.of] via
+  /// to the same functionality as this deprecated property. However, the
+  /// platform-specific functionality has moved to the [PlatformDispatcher],
+  /// which may be accessed from the view returned by [View.of] via
   /// [FlutterView.platformDispatcher]. Using [View.of] with a [BuildContext] is
   /// the preferred option to migrate away from this deprecated [window]
   /// property.
   ///
   /// If no context is available to look up a [FlutterView], the
-  /// [platformDispatcher] exposed by this binding can be consulted directly for
+  /// [platformDispatcher] exposed by this binding can be used directly for
   /// platform-specific functionality. It also maintains a list of all available
   /// [FlutterView]s in [PlatformDispatcher.views] to access view-specific
   /// functionality without a context.
