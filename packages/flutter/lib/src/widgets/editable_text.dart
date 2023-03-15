@@ -3340,9 +3340,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///  * [TextSelectionOverlay.handlesAllowPointers], which is the flag that this
   /// method toggles.
   void toggleSelectionHandleOverlayGestureHandling() {
-    if (_selectionOverlay == null) {
-      _selectionOverlay = _createSelectionOverlay();
-    }
+    _selectionOverlay ??= _createSelectionOverlay();
     _selectionOverlay!.handlesAllowPointers = !_selectionOverlay!.handlesAllowPointers;
     _selectionOverlay!.rebuildHandles();
   }
