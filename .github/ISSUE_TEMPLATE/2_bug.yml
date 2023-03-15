@@ -15,7 +15,8 @@ body:
           - https://api.flutter.dev/
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
-        If you have found a bug, then fill out the template below.
+        If our documentation doesn't have an answer
+        to what you're looking for, then fill out the template below.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
