@@ -4,6 +4,7 @@
 
 @Tags(<String>['reduced-test-set'])
 library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -239,52 +240,44 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window insets', (WidgetTester tester) async {
-    late Size oldSize;
-    late ui.ViewPadding oldInsets;
-    try {
-      oldSize = tester.binding.window.physicalSize;
-      oldInsets = tester.binding.window.viewInsets;
-      tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
-      tester.binding.window.viewInsetsTestValue = ui.ViewPadding.zero;
+  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1000, 1000);
+    tester.view.viewInsets = FakeViewPadding.zero;
 
-      // Intentionally use nested scaffolds to simulate the view insets being
-      // consumed.
-      final Key key = GlobalKey();
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: key,
-          child: MaterialApp(
-            onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const Scaffold(body: Scaffold(
-                    body: Material(child: SizedBox.shrink())
-                  ));
-                },
-              );
-            },
-          ),
+    // Intentionally use nested scaffolds to simulate the view insets being
+    // consumed.
+    final Key key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return const Scaffold(body: Scaffold(
+                  body: Material(child: SizedBox.shrink())
+                ));
+              },
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
 
-       // Change the view insets.
-      tester.binding.window.viewInsetsTestValue = const TestViewPadding(left: 0, top: 0, right: 0, bottom: 500);
+    // Change the view insets.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
 
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
-    } finally {
-      tester.binding.window.physicalSizeTestValue = oldSize;
-      tester.binding.window.viewInsetsTestValue = oldInsets;
-    }
+    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets(
@@ -1332,22 +1325,4 @@ class TestDependencies extends StatelessWidget {
       ),
     );
   }
-}
-
-class TestViewPadding implements ui.ViewPadding {
-  const TestViewPadding({
-    required this.left,
-    required this.top,
-    required this.right,
-    required this.bottom,
-  });
-
-  @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double right;
-  @override
-  final double bottom;
 }

@@ -54,7 +54,7 @@ void main() {
     verifyPropertyFaked<ViewPadding>(
       tester: tester,
       realValue: ui.window.viewInsets,
-      fakeValue: const FakeViewPadding(),
+      fakeValue: FakeViewPadding.zero,
       propertyRetriever: () {
         return WidgetsBinding.instance.window.viewInsets;
       },
@@ -69,7 +69,7 @@ void main() {
     verifyPropertyFaked<ViewPadding>(
       tester: tester,
       realValue: ui.window.padding,
-      fakeValue: const FakeViewPadding(),
+      fakeValue: FakeViewPadding.zero,
       propertyRetriever: () {
         return WidgetsBinding.instance.window.padding;
       },
@@ -220,11 +220,11 @@ void main() {
   testWidgets('Updates to window also update tester.view', (WidgetTester tester) async {
     tester.binding.window.devicePixelRatioTestValue = 7;
     tester.binding.window.displayFeaturesTestValue = <DisplayFeature>[const DisplayFeature(bounds: Rect.fromLTWH(0, 0, 20, 300), type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)];
-    tester.binding.window.paddingTestValue = const FakeViewPadding();
+    tester.binding.window.paddingTestValue = FakeViewPadding.zero;
     tester.binding.window.physicalSizeTestValue = const Size(505, 805);
-    tester.binding.window.systemGestureInsetsTestValue = const FakeViewPadding();
-    tester.binding.window.viewInsetsTestValue = const FakeViewPadding();
-    tester.binding.window.viewPaddingTestValue = const FakeViewPadding();
+    tester.binding.window.systemGestureInsetsTestValue = FakeViewPadding.zero;
+    tester.binding.window.viewInsetsTestValue = FakeViewPadding.zero;
+    tester.binding.window.viewPaddingTestValue = FakeViewPadding.zero;
     tester.binding.window.gestureSettingsTestValue = const GestureSettings(physicalTouchSlop: 4, physicalDoubleTapSlop: 5);
 
     expect(tester.binding.window.devicePixelRatio, tester.view.devicePixelRatio);
