@@ -243,6 +243,8 @@ _flutter.loader = null;
      * Loads flutter main entrypoint, specified by `entrypointUrl`, and calls a
      * user-specified `onEntrypointLoaded` callback with an EngineInitializer
      * object when it's done.
+     * Appends the `serviceWorkerVersion` to prevent browsers from using the
+     * cached version when a new build exists.
      *
      * @param {*} options
      * @returns {Promise | undefined} that will eventually resolve with an
@@ -250,7 +252,7 @@ _flutter.loader = null;
      * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
     async loadEntrypoint(options) {
-      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded } =
+      const { entrypointUrl = `${baseUri}main.dart.js?v=${serviceWorkerVersion}`, onEntrypointLoaded } =
         options || {};
 
       return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
