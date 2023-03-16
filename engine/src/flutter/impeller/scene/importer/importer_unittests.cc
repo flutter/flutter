@@ -41,7 +41,7 @@ TEST(ImporterTest, CanParseUnskinnedGLTF) {
   auto& vertex = vertices[0];
 
   Vector3 position = ToVector3(vertex.position());
-  ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, -0.133178));
+  ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, 0.133178));
 
   Vector3 normal = ToVector3(vertex.normal());
   ASSERT_VECTOR3_NEAR(normal, Vector3(0.556997, -0.810833, 0.179733));
@@ -111,14 +111,14 @@ TEST(ImporterTest, CanParseSkinnedGLTF) {
   ASSERT_EQ(scene.animations[0]->name, "Idle");
   ASSERT_EQ(scene.animations[1]->name, "Metronome");
   ASSERT_EQ(scene.animations[1]->channels.size(), 6u);
-  auto& channel = scene.animations[1]->channels[4];
+  auto& channel = scene.animations[1]->channels[3];
   ASSERT_EQ(channel->keyframes.type, fb::Keyframes::RotationKeyframes);
   auto* keyframes = channel->keyframes.AsRotationKeyframes();
   ASSERT_EQ(keyframes->values.size(), 40u);
   ASSERT_VECTOR4_NEAR(ToVector4(keyframes->values[0]),
-                      Vector4(0.653281, 0.270598, -0.270598, 0.653281));
+                      Vector4(0.653281, -0.270598, 0.270598, 0.653281));
   ASSERT_VECTOR4_NEAR(ToVector4(keyframes->values[10]),
-                      Vector4(0.425122, 0.565041, -0.565041, 0.425122));
+                      Vector4(0.700151, 0.0989373, -0.0989373, 0.700151));
 }
 
 }  // namespace testing
