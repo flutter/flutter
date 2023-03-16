@@ -118,7 +118,8 @@ class BottomSheet extends StatefulWidget {
   /// If true, the bottom sheet can be dragged up and down and dismissed by
   /// swiping downwards.
   ///
-  /// This applies to the content below the drag handle, if showDragHandle is true.
+  /// If [showDragHandle] is true, this only applies to the content below the drag handle,
+  /// because the drag handle is always draggable.
   ///
   /// Default is true.
   final bool enableDrag;
