@@ -318,7 +318,6 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
 }
 
 @synthesize viewId = _viewId;
-@dynamic view;
 @dynamic accessibilityBridge;
 
 /**
