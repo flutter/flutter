@@ -28,7 +28,22 @@ G_DECLARE_INTERFACE(FlTexture, fl_texture, FL, TEXTURE, GObject)
 
 struct _FlTextureInterface {
   GTypeInterface g_iface;
+
+  void (*set_id)(FlTexture* texture, int64_t id);
+
+  int64_t (*get_id)(FlTexture* texture);
 };
+
+/**
+ * fl_texture_get_id:
+ * @texture: a #FlTexture.
+ *
+ * Get the ID for this texture, which can be passed to Flutter code to refer to
+ * this texture.
+ *
+ * Returns: a texture ID.
+ */
+int64_t fl_texture_get_id(FlTexture* texture);
 
 G_END_DECLS
 

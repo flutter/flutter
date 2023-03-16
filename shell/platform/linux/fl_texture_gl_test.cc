@@ -59,15 +59,14 @@ static FlTestTexture* fl_test_texture_new() {
 }
 
 // Test that getting the texture ID works.
-TEST(FlTextureTest, TextureID) {
-  // Texture ID is not assigned until the testure is populated.
+TEST(FlTextureGLTest, TextureID) {
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_texture_new());
-  EXPECT_EQ(fl_texture_get_texture_id(texture),
-            reinterpret_cast<int64_t>(texture));
+  fl_texture_set_id(texture, 42);
+  EXPECT_EQ(fl_texture_get_id(texture), static_cast<int64_t>(42));
 }
 
 // Test that populating an OpenGL texture works.
-TEST(FlTextureTest, PopulateTexture) {
+TEST(FlTextureGLTest, PopulateTexture) {
   g_autoptr(FlTextureGL) texture = FL_TEXTURE_GL(fl_test_texture_new());
   FlutterOpenGLTexture opengl_texture = {0};
   g_autoptr(GError) error = nullptr;
