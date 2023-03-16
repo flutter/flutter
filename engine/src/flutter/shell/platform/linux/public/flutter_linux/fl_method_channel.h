@@ -44,14 +44,19 @@ G_DECLARE_FINAL_TYPE(FlMethodChannel,
  *     g_autoptr(GError) bar_error = NULL;
  *     g_autoptr(FlValue) result =
  *         do_bar (fl_method_call_get_args (method_call), &bar_error);
- *     if (result == NULL)
+ *     if (result == NULL) {
  *       response =
  *         FL_METHOD_RESPONSE (fl_method_error_response_new ("bar error",
- *                                                           bar_error->message));
- *     else
- *       response = FL_METHOD_RESPONSE (fl_method_success_response_new
- * (result)); } else response = FL_METHOD_RESPONSE
- * (fl_method_not_implemented_response_new ());
+ *                                                           bar_error->message,
+ *                                                           nullptr);
+ *     } else {
+ *       response =
+ *         FL_METHOD_RESPONSE (fl_method_success_response_new (result));
+ *     }
+ *   } else {
+ *     response =
+ *       FL_METHOD_RESPONSE (fl_method_not_implemented_response_new ());
+ *   }
  *
  *   g_autoptr(GError) error = NULL;
  *   if (!fl_method_call_respond(method_call, response, &error))
