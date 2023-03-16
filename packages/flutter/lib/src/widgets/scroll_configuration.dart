@@ -163,6 +163,7 @@ class ScrollBehavior {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        assert(details.controller != null);
         return RawScrollbar(
           controller: details.controller,
           child: child,
