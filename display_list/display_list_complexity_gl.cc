@@ -114,7 +114,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRect(const SkRect& rect) {
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // No real difference for AA with filled styles
     unsigned int area = rect.width() * rect.height();
 
@@ -165,7 +165,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawOval(
 
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // With filled styles, there is no significant AA penalty.
     // m = 1/6000
     // c = 0
@@ -199,7 +199,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawCircle(
 
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // We can ignore pi here
     unsigned int area = radius * radius;
     // m = 1/525
@@ -245,7 +245,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawRRect(
   // These values were worked out by creating a straight line graph (y=mx+c)
   // approximately matching the measured data, normalising the data so that
   // 0.0005ms resulted in a score of 100 then simplifying down the formula.
-  if (DrawStyle() == DlDrawStyle::kFill ||
+  if (Style() == SkPaint::Style::kFill_Style ||
       ((rrect.getType() == SkRRect::Type::kSimple_Type) && IsAntiAliased())) {
     unsigned int area = rrect.width() * rrect.height();
     // m = 1/3200
@@ -295,7 +295,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDRRect(
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     unsigned int area = outer.width() * outer.height();
     if (outer.getType() == SkRRect::Type::kComplex_Type) {
       // m = 1/500
@@ -382,7 +382,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawArc(
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kStroke) {
+  if (Style() == SkPaint::Style::kStroke_Style) {
     if (IsAntiAliased()) {
       // m = 1/3800
       // c = 12
@@ -550,7 +550,7 @@ void DisplayListGLComplexityCalculator::GLHelper::ImageRect(
     const SkISize& size,
     bool texture_backed,
     bool render_with_attributes,
-    bool enforce_src_edges) {
+    SkCanvas::SrcRectConstraint constraint) {
   if (IsComplex()) {
     return;
   }
@@ -563,8 +563,10 @@ void DisplayListGLComplexityCalculator::GLHelper::ImageRect(
   // approximately matching the measured data, normalising the data so that
   // 0.0005ms resulted in a score of 100 then simplifying down the formula.
   unsigned int complexity;
-  if (!texture_backed || (texture_backed && render_with_attributes &&
-                          enforce_src_edges && IsAntiAliased())) {
+  if (!texture_backed ||
+      (texture_backed && render_with_attributes &&
+       constraint == SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint &&
+       IsAntiAliased())) {
     unsigned int area = size.width() * size.height();
     // m = 1/4000
     // c = 5
@@ -608,15 +610,11 @@ void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawDisplayList(
-    const sk_sp<DisplayList> display_list,
-    SkScalar opacity) {
+    const sk_sp<DisplayList> display_list) {
   if (IsComplex()) {
     return;
   }
   GLHelper helper(Ceiling() - CurrentComplexityScore());
-  if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
-    helper.saveLayer(nullptr, SaveLayerOptions::kWithAttributes, nullptr);
-  }
   display_list->Dispatch(helper);
   AccumulateComplexity(helper.ComplexityScore());
 }
