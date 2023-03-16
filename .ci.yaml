@@ -2603,7 +2603,7 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
-  - name: Mac_benchmark flutter_view_macos__start_up
+  - name: Mac flutter_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
