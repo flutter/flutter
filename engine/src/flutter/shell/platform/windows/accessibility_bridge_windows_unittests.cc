@@ -168,8 +168,8 @@ ui::AXNode* AXNodeFromID(std::shared_ptr<AccessibilityBridge> bridge,
 std::shared_ptr<AccessibilityBridgeWindowsSpy> GetAccessibilityBridgeSpy(
     FlutterWindowsEngine* engine) {
   FlutterWindowsEngineSpy* engine_spy =
-      reinterpret_cast<FlutterWindowsEngineSpy*>(engine);
-  return std::reinterpret_pointer_cast<AccessibilityBridgeWindowsSpy>(
+      static_cast<FlutterWindowsEngineSpy*>(engine);
+  return std::static_pointer_cast<AccessibilityBridgeWindowsSpy>(
       engine_spy->accessibility_bridge().lock());
 }
 
