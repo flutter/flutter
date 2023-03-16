@@ -127,7 +127,7 @@ class BottomSheet extends StatefulWidget {
   ///
   /// The drag handle appears at the top of the bottom sheet. The default color is
   /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized
-  /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
+  /// using [dragHandleColor]. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
   /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
