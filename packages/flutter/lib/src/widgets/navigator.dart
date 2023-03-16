@@ -4602,7 +4602,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // If this is the root NavigatorState, then update the SystemNavigator with
     // its status.
     if (context.findAncestorStateOfType<NavigatorState>() == null) {
-      SystemNavigator.updateNavigationStackStatus(canPop());
+      // If canPop is true then CanPopScopes aren't going to have any effect.
+      if (canPop()) {
+        SystemNavigator.updateNavigationStackStatus(true);
+        return;
+      }
+      final _RouteEntry currentRouteEntry =
+          _history.firstWhere(_RouteEntry.isPresentPredicate);
+      final bool canPopScopeIsDisablingPop =
+          currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
+      SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
     }
   }
 
