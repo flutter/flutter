@@ -437,6 +437,7 @@ void main() {
         });
 
         testUsingContext('upgrade continue prints welcome message', () async {
+          fakeProcessManager = FakeProcessManager.any();
           final UpgradeCommand upgradeCommand = UpgradeCommand(
             verboseHelp: false,
             commandRunner: fakeCommandRunner,
