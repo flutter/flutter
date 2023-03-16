@@ -79,13 +79,18 @@ class LicensesCommand extends Command<bool> {
   }
 
   List<io.File> _flatListSourceFiles(io.Directory directory) {
+    // This is the old path that tests used to be built into. Ignore anything
+    // within this path.
+    final String legacyBuildPath = path.join(environment.webUiRootDir.path, 'build');
+
     return directory.listSync(recursive: true).whereType<io.File>().where((io.File f) {
       if (!f.path.endsWith('.dart') && !f.path.endsWith('.js')) {
         // Not a source file we're checking.
         return false;
       }
       if (path.isWithin(environment.webUiBuildDir.path, f.path) ||
-          path.isWithin(environment.webUiDartToolDir.path, f.path)) {
+          path.isWithin(environment.webUiDartToolDir.path, f.path) ||
+          path.isWithin(legacyBuildPath, f.path)) {
         // Generated files.
         return false;
       }

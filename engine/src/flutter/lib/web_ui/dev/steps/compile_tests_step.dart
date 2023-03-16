@@ -47,7 +47,7 @@ class CompileTestsStep implements PipelineStep {
 
   @override
   Future<void> run() async {
-    await environment.webUiBuildDir.create();
+    await environment.webUiBuildDir.create(recursive: true);
     if (isWasm) {
       await copyDart2WasmTestScript();
       await copySkwasm();
