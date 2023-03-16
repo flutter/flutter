@@ -117,7 +117,7 @@ class SearchBar extends StatefulWidget {
   /// If this is also null, then the default value is [ColorScheme.shadow].
   final MaterialStateProperty<Color?>? shadowColor;
 
-  /// The surface tint color of the button's [Material].
+  /// The surface tint color of the search bar's [Material].
   ///
   /// See [Material.surfaceTintColor] for more details.
   ///
@@ -126,7 +126,7 @@ class SearchBar extends StatefulWidget {
   final MaterialStateProperty<Color?>? surfaceTintColor;
 
   /// The highlight color that's typically used to indicate that
-  /// the button is focused, hovered, or pressed.
+  /// the search bar is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// The color and weight of the search bar's outline.
