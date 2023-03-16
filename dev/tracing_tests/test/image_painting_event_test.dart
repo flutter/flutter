@@ -13,8 +13,6 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 void main() {
-  LiveTestWidgetsFlutterBinding.ensureInitialized();
-
   late VmService vmService;
   late LiveTestWidgetsFlutterBinding binding;
   setUpAll(() async {
@@ -29,7 +27,7 @@ void main() {
     await vmService.streamListen(EventStreams.kExtension);
 
     // Initialize bindings
-    binding = LiveTestWidgetsFlutterBinding.instance;
+    binding = LiveTestWidgetsFlutterBinding();
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
     binding.attachRootWidget(const SizedBox.expand());
     expect(binding.framesEnabled, true);
