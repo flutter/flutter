@@ -74,7 +74,7 @@ class BrowserPlatform extends PlatformPlugin {
         .add(_packageUrlHandler)
         .add(_canvasKitOverrideHandler)
 
-        // Serves files from the web_ui/build/ directory at the root (/) URL path.
+        // Serves files from the out/web_tests/ directory at the root (/) URL path.
         .add(buildDirectoryHandler)
         .add(_testImageListingHandler)
 
@@ -214,7 +214,7 @@ class BrowserPlatform extends PlatformPlugin {
     );
   }
 
-  /// Lists available test images under `web_ui/build/test_images`.
+  /// Lists available test images under `out/web_tests/test_images`.
   Future<shelf.Response> _testImageListingHandler(shelf.Request request) async {
     const Map<String, String> supportedImageTypes = <String, String>{
       '.png': 'image/png',
@@ -555,7 +555,7 @@ class BrowserPlatform extends PlatformPlugin {
     _checkNotClosed();
 
     final Uri suiteUrl = url.resolveUri(p.toUri('${p.withoutExtension(
-            p.relative(path, from: env.environment.webUiBuildDir.path))}.html'));
+            p.relative(path, from: env.environment.webUiRootDir.path))}.html'));
     _checkNotClosed();
 
     final BrowserManager? browserManager = await _startBrowserManager();
@@ -951,8 +951,8 @@ class BrowserManager {
               '${p.basename(path)}.browser_test.dart.js.map';
           final String pathToTest = p.dirname(path);
 
-          final String mapPath = p.join(env.environment.webUiRootDir.path,
-              'build', getBuildDirForRenderer(_renderer), pathToTest, sourceMapFileName);
+          final String mapPath = p.join(env.environment.webUiBuildDir.path,
+              getBuildDirForRenderer(_renderer), pathToTest, sourceMapFileName);
 
           final Map<String, Uri> packageMap = <String, Uri>{
             for (Package p in packageConfig.packages) p.name: p.packageUriRoot
