@@ -2,7 +2,7 @@ name: web_test_utils
 
 # Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
 environment:
-  sdk: ">=2.12.0-0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   collection: 1.15.0

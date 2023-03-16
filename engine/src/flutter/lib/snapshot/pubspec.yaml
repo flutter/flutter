@@ -5,4 +5,4 @@
 # This file is needed by Fuchsia's dart_library template.
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
