@@ -255,8 +255,6 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
-  bool _isHoveringDragHandle = false;
-
   Set<MaterialState> dragHandleMaterialState = <MaterialState>{};
 
   void _handleDragStart(DragStartDetails details) {
@@ -350,7 +348,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
-    final bool showDragHandle = widget.showDragHandle ?? bottomSheetTheme.showDragHandle ?? useMaterial3;
+    final bool showDragHandle = widget.showDragHandle ?? (widget.enableDrag && (bottomSheetTheme.showDragHandle ?? useMaterial3));
 
     Widget? dragHandle;
     if (showDragHandle){
@@ -1035,7 +1033,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
-            showDragHandle: showDragHandle ?? sheetTheme.showDragHandle ?? Theme.of(context).useMaterial3,
+            showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? Theme.of(context).useMaterial3)),
           );
         },
       ),

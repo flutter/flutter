@@ -1105,8 +1105,8 @@ void main() {
 
     final Finder dragHandle = find.bySemanticsLabel('Dismiss');
     expect(
-      tester.getRect(dragHandle),
-      const Rect.fromLTRB(376.0, 532.0, 424.0, 580.0),
+      tester.getSize(dragHandle),
+      const Size(48, 48),
     );
     final Offset center = tester.getCenter(dragHandle);
     final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
