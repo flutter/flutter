@@ -365,7 +365,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      // Passing `--dart-define=static_semnatics=true` will use a static color
+      // Passing `--dart-define=static_semantics=true` will use a static color
       // for semantics, instead of a unique color for each node. When used
       // in goldens testing, it minimizes the diffs that will happen.
       final Color lineColor = const bool.fromEnvironment('static_semantics')
