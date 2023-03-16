@@ -418,7 +418,6 @@ class _BottomSheetState extends State<BottomSheet> {
       child: bottomSheet,
     );
   }
-
 }
 
 // PERSISTENT BOTTOM SHEETS
