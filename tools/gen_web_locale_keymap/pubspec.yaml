@@ -2,7 +2,7 @@ name: gen_web_keyboard_keymap
 description: Generates keyboard layouts for Web from external sources.
 
 environment:
-  sdk: ">=2.18.0-0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   args: any
