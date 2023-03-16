@@ -351,6 +351,29 @@ class _BottomSheetState extends State<BottomSheet> {
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
     final bool showDragHandle = widget.showDragHandle ?? bottomSheetTheme.showDragHandle ?? useMaterial3;
 
+    Widget? dragHandle;
+    if(showDragHandle){
+      dragHandle= _DragHandle(
+        onSemanticsTap: widget.onClosing,
+        handleHover: _handleDragHandleHover,
+        materialState: dragHandleMaterialState,
+        dragHandleColor: widget.dragHandleColor,
+        dragHandleSize: widget.dragHandleSize,
+      );
+      // Only Add GestureDetector to the drag handle when the rest of the
+      // bottom sheet is not draggable. If the whole bottom sheet is draggable,
+      // no need to add it.
+      if(!widget.enableDrag) {
+        dragHandle = GestureDetector(
+          onVerticalDragStart: _handleDragStart,
+          onVerticalDragUpdate: _handleDragUpdate,
+          onVerticalDragEnd: _handleDragEnd,
+          excludeFromSemantics: true,
+          child: dragHandle,
+        );
+      }
+    }
+
     Widget bottomSheet = Material(
       key: _childKey,
       color: color,
@@ -366,30 +389,7 @@ class _BottomSheetState extends State<BottomSheet> {
           : Stack(
               alignment: Alignment.topCenter,
               children: <Widget>[
-                // If the whole bottom sheet is draggable, no need to add
-                // GestureDetector on the drag handle.
-                if (widget.enableDrag)
-                  _DragHandle(
-                    onSemanticsTap: widget.onClosing,
-                    handleHover: _handleDragHandleHover,
-                    materialState: dragHandleMaterialState,
-                    dragHandleColor: widget.dragHandleColor,
-                    dragHandleSize: widget.dragHandleSize,
-                  )
-                else
-                  GestureDetector(
-                    onVerticalDragStart: _handleDragStart,
-                    onVerticalDragUpdate: _handleDragUpdate,
-                    onVerticalDragEnd: _handleDragEnd,
-                    excludeFromSemantics: true,
-                    child: _DragHandle(
-                      onSemanticsTap: widget.onClosing,
-                      handleHover: _handleDragHandleHover,
-                      materialState: dragHandleMaterialState,
-                      dragHandleColor: widget.dragHandleColor,
-                    dragHandleSize: widget.dragHandleSize,
-                    ),
-                  ),
+                dragHandle!,
                 Padding(
                   padding: const EdgeInsets.only(top: kMinInteractiveDimension),
                   child: widget.builder(context),
