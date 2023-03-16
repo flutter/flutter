@@ -1259,6 +1259,46 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
+
+  testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconBuilder: (int index, StepState state) {
+              if(state == StepState.complete) {
+                return const FlutterLogo(size: 18);
+              }
+              return const Icon(Icons.star, size: 18);
+            },
+            steps: const <Step>[
+              Step(
+                title: Text('A'),
+                state: StepState.complete,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('B'),
+                state: StepState.editing,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('C'),
+                state: StepState.error,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+
+    expect(find.byType(FlutterLogo), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsOneWidget);
+    expect(find.text('!'), findsOneWidget);
+  });
+
 }
 
 class _TappableColorWidget extends StatefulWidget {

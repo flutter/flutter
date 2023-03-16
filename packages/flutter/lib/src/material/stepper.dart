@@ -106,6 +106,10 @@ class ControlsDetails {
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
+/// A builder that creates the icon widget for the step given [stepIndex], and
+/// [stepState].
+typedef StepIconBuilder = Widget Function(int stepIndex, StepState stepState);
+
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
   color: Colors.white,
@@ -207,6 +211,7 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
+    this.stepIconBuilder,
   }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
@@ -303,8 +308,14 @@ class Stepper extends StatefulWidget {
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
 
-  /// custom margin on vertical stepper.
+  /// Custom margin on vertical stepper.
   final EdgeInsetsGeometry? margin;
+
+  /// Callback for creating custom icons for the [steps].
+  ///
+  /// The callback is called for all the [StepState] except for [StepState.error].
+  /// If null, the default icons will be used for respective [StepState].
+  final StepIconBuilder? stepIconBuilder;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -373,6 +384,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
+    if(widget.stepIconBuilder != null && state != StepState.error) {
+      return widget.stepIconBuilder!(index, state);
+    }
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:
