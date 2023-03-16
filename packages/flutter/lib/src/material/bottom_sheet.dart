@@ -360,7 +360,7 @@ class _BottomSheetState extends State<BottomSheet> {
         dragHandleColor: widget.dragHandleColor,
         dragHandleSize: widget.dragHandleSize,
       );
-      // Only Add GestureDetector to the drag handle when the rest of the
+      // Only add [GestureDetector] to the drag handle when the rest of the
       // bottom sheet is not draggable. If the whole bottom sheet is draggable,
       // no need to add it.
       if(!widget.enableDrag) {
