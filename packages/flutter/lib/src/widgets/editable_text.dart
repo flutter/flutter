@@ -2682,7 +2682,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (widget.style != oldWidget.style) {
-      final TextStyle style = widget.style;
+      final TextStyle style = updateStyleForBold();
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
       if (_hasInputConnection) {
@@ -3154,7 +3154,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
-      final TextStyle style = widget.style;
+      final TextStyle style = updateStyleForBold();
       _textInputConnection!
         ..setStyle(
           fontFamily: style.fontFamily,
@@ -3222,7 +3222,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
-    final TextStyle style = widget.style;
+    final TextStyle style = updateStyleForBold();
     newConnection
       ..show()
       ..setStyle(
@@ -4631,15 +4631,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
+  /// Checks the [MediaQuery.boldTextOf] on the [context].
+  ///
+  /// This makes sure that accessibility settings related to bold text are
+  /// respected.
+  TextStyle updateStyleForBold() {
+    return MediaQuery.boldTextOf(context)
+        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : widget.style;
+  }
+
   /// Builds [TextSpan] from current editing value.
   ///
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    final TextStyle style = MediaQuery.boldTextOf(context)
-        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
-        : widget.style;
-
+    final TextStyle style = updateStyleForBold();
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
