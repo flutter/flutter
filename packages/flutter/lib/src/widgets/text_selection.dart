@@ -449,6 +449,7 @@ class TextSelectionOverlay {
     }
     _handlesAllowPointers = allowPointers;
     _updateTextSelectionHandlesOverlayIgnorePointerBehavior();
+    _rebuildHandles();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
@@ -457,9 +458,9 @@ class TextSelectionOverlay {
     _selectionOverlay.showHandles();
   }
 
-  /// {@macro flutter.widgets.SelectionOverlay.rebuildHandles}
-  void rebuildHandles() {
+  void _rebuildHandles() {
     _updateSelectionOverlay();
+    assert(context.mounted);
     _selectionOverlay.rebuildHandles();
   }
 
@@ -1370,9 +1371,7 @@ class SelectionOverlay {
     }
   }
 
-  /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  /// {@endtemplate}
   void showToolbar({
     BuildContext? context,
     WidgetBuilder? contextMenuBuilder,
@@ -2930,7 +2929,7 @@ class TextSelectionGestureDetectorBuilder {
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           _buildScheduled = false;
           // If the current editableText state is not available we should
-          // exit out. This can occur at the end of tests, or when the
+          // return. This can occur at the end of tests, or when the
           // editableText has been disposed before the consecutive tap timer
           // has elapsed.
           if (delegate.editableTextKey.currentState == null) {

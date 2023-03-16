@@ -3342,7 +3342,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void toggleSelectionHandleOverlayGestureHandling() {
     _selectionOverlay ??= _createSelectionOverlay();
     _selectionOverlay!.handlesAllowPointers = !_selectionOverlay!.handlesAllowPointers;
-    _selectionOverlay!.rebuildHandles();
   }
 
   @pragma('vm:notify-debugger-on-exception')
