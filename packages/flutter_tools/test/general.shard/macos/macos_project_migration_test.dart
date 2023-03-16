@@ -5,13 +5,17 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/macos/migrations/flutter_application_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/macos_deployment_target_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('remove link and embed migration', () {
@@ -275,11 +279,106 @@ platform :osx, '10.14'
       expect('Updating minimum macOS deployment target to 10.14'.allMatches(testLogger.statusText).length, 1);
     });
   });
+
+  group('update NSPrincipalClass to FlutterApplication', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeMacOSProject project;
+    late File infoPlistFile;
+    late FakePlistParser fakePlistParser;
+    late FlutterProjectFactory flutterProjectFactory;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      fakePlistParser = FakePlistParser();
+      testLogger = BufferLogger.test();
+      project = FakeMacOSProject();
+      infoPlistFile = memoryFileSystem.file('Info.plist');
+      project.defaultHostInfoPlist = infoPlistFile;
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: memoryFileSystem,
+        logger: testLogger,
+      );
+    });
+
+    void testWithMocks(String description, Future<void> Function() testMethod) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => fakePlistParser,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+    }
+
+    testWithMocks('skipped if files are missing', () async {
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      macOSProjectMigration.migrate();
+      expect(infoPlistFile.existsSync(), isFalse);
+
+      expect(testLogger.traceText, contains('${infoPlistFile.basename} not found, skipping FlutterApplication migration.'));
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('skipped if no NSPrincipalClass key exists to upgrade', () async {
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('skipped if already upgraded', () async {
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'FlutterApplication');
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('Info.plist migrated to use FlutterApplication', () async {
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'FlutterApplication');
+      // Only print once.
+      expect('Updating ${infoPlistFile.basename} to use FlutterApplication instead of NSApplication.'.allMatches(testLogger.statusText).length, 1);
+    });
+
+    testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
+      const String differentApp = 'DIFFERENTApplication';
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, differentApp);
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
+      expect(testLogger.traceText, contains('${infoPlistFile.basename} has an ${PlistParser.kNSPrincipalClassKey} of $differentApp, not NSApplication, skipping FlutterApplication migration'));
+    });
+  });
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
+
+  @override
+  File defaultHostInfoPlist = MemoryFileSystem.test().file('InfoplistFile');
 
   @override
   File podfile = MemoryFileSystem.test().file('Podfile');
