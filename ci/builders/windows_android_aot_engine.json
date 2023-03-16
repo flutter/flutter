@@ -11,7 +11,10 @@
                     "name": "android_profile"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "profile",
@@ -36,7 +39,10 @@
                     "name": "android_profile_arm64"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "profile",
@@ -62,7 +68,10 @@
                     "name": "android_profile_x64"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "profile",
@@ -88,7 +97,10 @@
                     "name": "android_release"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "release",
@@ -113,7 +125,10 @@
                     "name": "android_release_arm64"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "release",
@@ -139,7 +154,10 @@
                     "name": "android_release_x64"
                 }
             ],
-            "drone_dimensions": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
             "gn": [
                 "--runtime-mode",
                 "release",
