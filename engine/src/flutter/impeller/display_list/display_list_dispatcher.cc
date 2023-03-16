@@ -938,8 +938,7 @@ static Entity::ClipOperation ToClipOperation(
 void DisplayListDispatcher::clipRect(const SkRect& rect,
                                      ClipOp clip_op,
                                      bool is_aa) {
-  auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
-  canvas_.ClipPath(path, ToClipOperation(clip_op));
+  canvas_.ClipRect(ToRect(rect), ToClipOperation(clip_op));
 }
 
 static PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
@@ -1038,7 +1037,12 @@ static Path ToPath(const SkRRect& rrect) {
 void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
                                       ClipOp clip_op,
                                       bool is_aa) {
-  canvas_.ClipPath(ToPath(rrect), ToClipOperation(clip_op));
+  if (rrect.isSimple()) {
+    canvas_.ClipRRect(ToRect(rrect.rect()), rrect.getSimpleRadii().fX,
+                      ToClipOperation(clip_op));
+  } else {
+    canvas_.ClipPath(ToPath(rrect), ToClipOperation(clip_op));
+  }
 }
 
 // |flutter::DlOpReceiver|

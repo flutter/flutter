@@ -219,6 +219,18 @@ TEST_P(EntityTest, CanDrawRect) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_P(EntityTest, CanDrawRRect) {
+  auto contents = std::make_shared<SolidColorContents>();
+  contents->SetGeometry(Geometry::MakeRRect({100, 100, 100, 100}, 10.0));
+  contents->SetColor(Color::Red());
+
+  Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  entity.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
 TEST_P(EntityTest, GeometryBoundsAreTransformed) {
   auto geometry = Geometry::MakeRect({100, 100, 100, 100});
   auto transform = Matrix::MakeScale({2.0, 2.0, 2.0});

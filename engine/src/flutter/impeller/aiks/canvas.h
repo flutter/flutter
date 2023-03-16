@@ -91,6 +91,15 @@ class Canvas {
       const Path& path,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
+  void ClipRect(
+      const Rect& rect,
+      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
+
+  void ClipRRect(
+      const Rect& rect,
+      Scalar corner_radius,
+      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
+
   void DrawPicture(Picture picture);
 
   void DrawTextFrame(const TextFrame& text_frame,
@@ -125,6 +134,9 @@ class Canvas {
   EntityPass& GetCurrentPass();
 
   size_t GetStencilDepth() const;
+
+  void ClipGeometry(std::unique_ptr<Geometry> geometry,
+                    Entity::ClipOperation clip_op);
 
   void Save(bool create_subpass,
             BlendMode = BlendMode::kSourceOver,

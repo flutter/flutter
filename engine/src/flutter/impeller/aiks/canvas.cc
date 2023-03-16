@@ -237,7 +237,20 @@ void Canvas::DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, corner_radius, paint)) {
     return;
   }
-  DrawPath(PathBuilder{}.AddRoundedRect(rect, corner_radius).TakePath(), paint);
+  if (paint.style == Paint::Style::kFill) {
+    Entity entity;
+    entity.SetTransformation(GetCurrentTransformation());
+    entity.SetStencilDepth(GetStencilDepth());
+    entity.SetBlendMode(paint.blend_mode);
+    entity.SetContents(paint.WithFilters(paint.CreateContentsForGeometry(
+        Geometry::MakeRRect(rect, corner_radius))));
+
+    GetCurrentPass().AddEntity(entity);
+    return;
+  } else {
+    DrawPath(PathBuilder{}.AddRoundedRect(rect, corner_radius).TakePath(),
+             paint);
+  }
 }
 
 void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
@@ -250,8 +263,23 @@ void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
 }
 
 void Canvas::ClipPath(const Path& path, Entity::ClipOperation clip_op) {
+  ClipGeometry(Geometry::MakeFillPath(path), clip_op);
+}
+
+void Canvas::ClipRect(const Rect& rect, Entity::ClipOperation clip_op) {
+  ClipGeometry(Geometry::MakeRect(rect), clip_op);
+}
+
+void Canvas::ClipRRect(const Rect& rect,
+                       Scalar corner_radius,
+                       Entity::ClipOperation clip_op) {
+  ClipGeometry(Geometry::MakeRRect(rect, corner_radius), clip_op);
+}
+
+void Canvas::ClipGeometry(std::unique_ptr<Geometry> geometry,
+                          Entity::ClipOperation clip_op) {
   auto contents = std::make_shared<ClipContents>();
-  contents->SetGeometry(Geometry::MakeFillPath(path));
+  contents->SetGeometry(std::move(geometry));
   contents->SetClipOperation(clip_op);
 
   Entity entity;
@@ -379,7 +407,7 @@ void Canvas::SaveLayer(
     // the size of the render target that would have been allocated will be
     // absent. Explicitly add back a clip to reproduce that behavior. Since
     // clips never require a render target switch, this is a cheap operation.
-    ClipPath(PathBuilder{}.AddRect(bounds.value()).TakePath());
+    ClipRect(bounds.value());
   }
 }
 
