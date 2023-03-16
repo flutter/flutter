@@ -130,6 +130,11 @@ bool BlitPassGLES::OnCopyTextureToBufferCommand(
   return true;
 }
 
+bool BlitPassGLES::OnOptimizeForGPUAccess(std::shared_ptr<Texture> texture,
+                                          std::string label) {
+  return true;
+}
+
 // |BlitPass|
 bool BlitPassGLES::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                            std::string label) {
