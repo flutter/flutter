@@ -106,7 +106,7 @@ class EventChannel {
             if (error) {
               result = codec->EncodeErrorEnvelope(error->error_code,
                                                   error->error_message,
-                                                  error->error_details);
+                                                  error->error_details.get());
             } else {
               result = codec->EncodeSuccessEnvelope();
             }
@@ -119,7 +119,7 @@ class EventChannel {
               if (error) {
                 result = codec->EncodeErrorEnvelope(error->error_code,
                                                     error->error_message,
-                                                    error->error_details);
+                                                    error->error_details.get());
               } else {
                 result = codec->EncodeSuccessEnvelope();
               }
