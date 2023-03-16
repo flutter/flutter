@@ -60,8 +60,9 @@ void main() {
     for (final double n in numbers) {
       expect((topStart * n).add(topStart), topStart * (n + 1.0));
       expect((topEnd * n).add(topEnd), topEnd * (n + 1.0));
-      for (final double m in numbers)
+      for (final double m in numbers) {
         expect((topStart * n).add(topStart * m), topStart * (n + m));
+      }
     }
     expect(topStart + topStart + topStart, topStart * 3.0); // without using "add"
     for (final TextDirection x in TextDirection.values) {

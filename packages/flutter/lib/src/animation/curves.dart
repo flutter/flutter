@@ -8,6 +8,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+export 'dart:ui' show Offset;
+
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
 /// A parametric curve transforms a parameter (hence the name) `t` along a curve
@@ -164,12 +166,12 @@ class Interval extends Curve {
 
   /// The largest value for which this interval is 0.0.
   ///
-  /// From t=0.0 to t=`begin`, the interval's value is 0.0.
+  /// From t=0.0 to t=[begin], the interval's value is 0.0.
   final double begin;
 
   /// The smallest value for which this interval is 1.0.
   ///
-  /// From t=`end` to t=1.0, the interval's value is 1.0.
+  /// From t=[end] to t=1.0, the interval's value is 1.0.
   final double end;
 
   /// The curve to apply between [begin] and [end].
@@ -182,16 +184,18 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
-    if (t == 0.0 || t == 1.0)
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
+    if (t == 0.0 || t == 1.0) {
       return t;
+    }
     return curve.transform(t);
   }
 
   @override
   String toString() {
-    if (curve is! _Linear)
+    if (curve is! _Linear) {
       return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)\u27A9$curve';
+    }
     return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)';
   }
 }
@@ -302,7 +306,7 @@ class Cubic extends Curve {
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
   ///
-  /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
+  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
     : assert(a != null),
       assert(b != null),
@@ -348,12 +352,14 @@ class Cubic extends Curve {
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
-      if ((t - estimate).abs() < _cubicErrorBound)
+      if ((t - estimate).abs() < _cubicErrorBound) {
         return _evaluateCubic(b, d, midpoint);
-      if (estimate < t)
+      }
+      if (estimate < t) {
         start = midpoint;
-      else
+      } else {
         end = midpoint;
+      }
     }
   }
 
@@ -502,7 +508,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     double end = 1.0,
     double tolerance = 1e-10,
   }) {
-    // The sampling  algorithm is:
+    // The sampling algorithm is:
     // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
     //    curve) formed by two points and a test point.
     // 2. If the area of the triangle is small enough (below tolerance), then
@@ -669,7 +675,7 @@ class CatmullRomSpline extends Curve2D {
   /// interpolate.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the structures,
+  /// [transform] is called. If you would rather pre-compute the structures,
   /// use [CatmullRomSpline.precompute] instead.
   CatmullRomSpline(
       List<Offset> controlPoints, {
@@ -845,7 +851,7 @@ class CatmullRomCurve extends Curve {
   /// is equivalent to a linear interpolation between points.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the curve, use
+  /// [transform] is called. If you would rather pre-compute the curve, use
   /// [CatmullRomCurve.precompute] instead.
   ///
   /// All of the arguments must not be null.
@@ -932,7 +938,7 @@ class CatmullRomCurve extends Curve {
 
   /// The "tension" of the curve.
   ///
-  /// The `tension` attribute controls how tightly the curve approaches the
+  /// The [tension] attribute controls how tightly the curve approaches the
   /// given [controlPoints]. It must be in the range 0.0 to 1.0, inclusive. It
   /// is optional, and defaults to 0.0, which provides the smoothest curve. A
   /// value of 1.0 is equivalent to a linear interpolation between control
@@ -1219,10 +1225,11 @@ class _BounceInOutCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    if (t < 0.5)
+    if (t < 0.5) {
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
-    else
+    } else {
       return _bounce(t * 2.0 - 1.0) * 0.5 + 0.5;
+    }
   }
 }
 
@@ -1304,10 +1311,11 @@ class ElasticInOutCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = 2.0 * t - 1.0;
-    if (t < 0.0)
+    if (t < 0.0) {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
-    else
+    } else {
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+    }
   }
 
   @override

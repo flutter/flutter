@@ -58,7 +58,15 @@ class DebugAdapterCommand extends FlutterCommand {
       platform: globals.platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
-      test: boolArg('test'),
+      test: boolArgDeprecated('test'),
+      onError: (Object? e) {
+        globals.printError(
+          'Input could not be parsed as a Debug Adapter Protocol message.\n'
+          'The "flutter debug-adapter" command is intended for use by tooling '
+          'that communicates using the Debug Adapter Protocol.\n\n'
+          '$e',
+        );
+      },
     );
 
     await server.channel.closed;

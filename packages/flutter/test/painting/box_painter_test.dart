@@ -54,8 +54,8 @@ void main() {
       style: BorderStyle.solid,
     );
 
-    expect(side1.toString(), equals('BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)'));
-    expect(side2.toString(), equals('BorderSide(Color(0xff00ffff), 2.0, BorderStyle.solid)'));
+    expect(side1.toString(), equals('BorderSide'));
+    expect(side2.toString(), equals('BorderSide(color: Color(0xff00ffff), width: 2.0)'));
   });
 
   test('Border control test', () {
@@ -76,9 +76,7 @@ void main() {
   test('Border toString test', () {
     expect(
       Border.all(width: 4.0).toString(),
-      equals(
-        'Border.all(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
-      ),
+      equals('Border.all(BorderSide(width: 4.0))'),
     );
     expect(
       const Border(
@@ -87,9 +85,7 @@ void main() {
         bottom: BorderSide(width: 3.0),
         left: BorderSide(width: 3.0),
       ).toString(),
-      equals(
-        'Border.all(BorderSide(Color(0xff000000), 3.0, BorderStyle.solid))',
-      ),
+      equals('Border.all(BorderSide(width: 3.0))'),
     );
   });
 
@@ -147,8 +143,8 @@ void main() {
   });
 
   test('BoxShadow toString test', () {
-    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.normal'));
-    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.solid'));
+    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal)'));
+    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'));
   });
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {

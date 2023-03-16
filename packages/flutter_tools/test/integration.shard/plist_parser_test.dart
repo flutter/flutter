@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -52,9 +50,9 @@ void main() {
   // `ProcessManager` because doing so wouldn't actually test what we want to
   // test, which is that the underlying tool we're using to parse Plist files
   // works with the way we're calling it.
-  File file;
-  PlistParser parser;
-  BufferLogger logger;
+  late File file;
+  late PlistParser parser;
+  late BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger(

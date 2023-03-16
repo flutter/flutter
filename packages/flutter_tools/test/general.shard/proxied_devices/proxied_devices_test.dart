@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
@@ -15,32 +14,32 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 
 void main() {
+  late BufferLogger bufferLogger;
+  late DaemonConnection serverDaemonConnection;
+  late DaemonConnection clientDaemonConnection;
+  setUp(() {
+    bufferLogger = BufferLogger.test();
+    final FakeDaemonStreams serverDaemonStreams = FakeDaemonStreams();
+    serverDaemonConnection = DaemonConnection(
+      daemonStreams: serverDaemonStreams,
+      logger: bufferLogger,
+    );
+    final FakeDaemonStreams clientDaemonStreams = FakeDaemonStreams();
+    clientDaemonConnection = DaemonConnection(
+      daemonStreams: clientDaemonStreams,
+      logger: bufferLogger,
+    );
+
+    serverDaemonStreams.inputs.addStream(clientDaemonStreams.outputs.stream);
+    clientDaemonStreams.inputs.addStream(serverDaemonStreams.outputs.stream);
+  });
+
+  tearDown(() async {
+    await serverDaemonConnection.dispose();
+    await clientDaemonConnection.dispose();
+  });
+
   group('ProxiedPortForwarder', () {
-    late BufferLogger bufferLogger;
-    late DaemonConnection serverDaemonConnection;
-    late DaemonConnection clientDaemonConnection;
-    setUp(() {
-      bufferLogger = BufferLogger.test();
-      final FakeDaemonStreams serverDaemonStreams = FakeDaemonStreams();
-      serverDaemonConnection = DaemonConnection(
-        daemonStreams: serverDaemonStreams,
-        logger: bufferLogger,
-      );
-      final FakeDaemonStreams clientDaemonStreams = FakeDaemonStreams();
-      clientDaemonConnection = DaemonConnection(
-        daemonStreams: clientDaemonStreams,
-        logger: bufferLogger,
-      );
-
-      serverDaemonStreams.inputs.addStream(clientDaemonStreams.outputs.stream);
-      clientDaemonStreams.inputs.addStream(serverDaemonStreams.outputs.stream);
-    });
-
-    tearDown(() async {
-      await serverDaemonConnection.dispose();
-      await clientDaemonConnection.dispose();
-    });
-
     testWithoutContext('works correctly without device id', () async {
       final FakeServerSocket fakeServerSocket = FakeServerSocket(200);
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
@@ -87,6 +86,28 @@ void main() {
       serverDaemonConnection.sendEvent('proxy.disconnected.$id');
       await pumpEventQueue();
       expect(fakeSocket.closeCalled, true);
+    });
+
+    testWithoutContext('handles errors', () async {
+      final FakeServerSocket fakeServerSocket = FakeServerSocket(200);
+      final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
+        FakeDaemonConnection(
+          handledRequests: <String, Object?>{
+            'proxy.connect': '1', // id
+          },
+        ),
+        logger: bufferLogger,
+        createSocketServer: (Logger logger, int? hostPort) async =>
+            fakeServerSocket,
+      );
+      final int result = await portForwarder.forward(100);
+      expect(result, 200);
+
+      final FakeSocket fakeSocket = FakeSocket();
+      fakeServerSocket.controller.add(fakeSocket);
+
+      fakeSocket.controller.add(Uint8List.fromList(<int>[1, 2, 3]));
+      await pumpEventQueue();
     });
 
     testWithoutContext('forwards the port from the remote end with device id', () async {
@@ -136,6 +157,106 @@ void main() {
         'devicePort': 300,
         'hostPort': 350,
       });
+    });
+
+    group('socket done', () {
+      late Stream<DaemonMessage> broadcastOutput;
+      late FakeSocket fakeSocket;
+      const String id = 'random_id';
+
+      setUp(() async {
+        final FakeServerSocket fakeServerSocket = FakeServerSocket(400);
+        final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
+          clientDaemonConnection,
+          deviceId: 'device_id',
+          logger: bufferLogger,
+          createSocketServer: (Logger logger, int? hostPort) async =>
+              fakeServerSocket,
+        );
+
+        broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+        unawaited(portForwarder.forward(300));
+
+        // Consumes the message.
+        DaemonMessage message = await broadcastOutput.first;
+        serverDaemonConnection.sendResponse(message.data['id']!, <String, Object?>{'hostPort': 350});
+
+        fakeSocket = FakeSocket();
+        fakeServerSocket.controller.add(fakeSocket);
+        // Consumes the message.
+        message = await broadcastOutput.first;
+
+        serverDaemonConnection.sendResponse(message.data['id']!, id);
+        // Pump the event queue so that the socket future error handler has a
+        // chance to be listened to.
+        await pumpEventQueue();
+      });
+
+      testWithoutContext('without error, should calls proxy.disconnect', () async {
+        // It will try to disconnect the remote port when socket is done.
+        fakeSocket.doneCompleter.complete(true);
+        final DaemonMessage message = await broadcastOutput.first;
+
+        expect(message.data['id'], isNotNull);
+        expect(message.data['method'], 'proxy.disconnect');
+        expect(message.data['params'], <String, Object?>{
+          'id': 'random_id',
+        });
+      });
+
+      testWithoutContext('with error, should also calls proxy.disconnect', () async {
+
+        fakeSocket.doneCompleter.complete(true);
+        final DaemonMessage message = await broadcastOutput.first;
+
+        expect(message.data['id'], isNotNull);
+        expect(message.data['method'], 'proxy.disconnect');
+        expect(message.data['params'], <String, Object?>{
+          'id': 'random_id',
+        });
+
+        // Send an error response and make sure that it won't crash the client.
+        serverDaemonConnection.sendErrorResponse(message.data['id']!, 'some error', StackTrace.current);
+
+        // Wait the event queue and make sure that it doesn't crash.
+        await pumpEventQueue();
+      });
+    });
+  });
+
+  group('ProxiedDevice', () {
+    final Map<String, Object> fakeDevice = <String, Object>{
+      'name': 'device-name',
+      'id': 'device-id',
+      'category': 'mobile',
+      'platformType': 'android',
+      'platform': 'android-arm',
+      'emulator': true,
+      'ephemeral': false,
+      'sdk': 'Test SDK (1.2.3)',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    };
+    testWithoutContext('calls stopApp without application package if not passed', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+      final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
+      unawaited(device.stopApp(null, userIdentifier: 'user-id'));
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.stopApp');
+      expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
     });
   });
 }
@@ -221,4 +342,34 @@ class FakeSocket extends Fake implements Socket {
 
   @override
   void destroy() {}
+}
+
+class FakeDaemonConnection extends Fake implements DaemonConnection {
+  FakeDaemonConnection({
+    this.handledRequests = const <String, Object?>{},
+    this.daemonEventStreams = const <String, List<DaemonEventData>>{},
+  });
+
+  /// Mapping of method name to returned object from the [sendRequest] method.
+  final Map<String, Object?> handledRequests;
+
+  final Map<String, List<DaemonEventData>> daemonEventStreams;
+
+  @override
+  Stream<DaemonEventData> listenToEvent(String eventToListen) {
+    final List<DaemonEventData>? iterable = daemonEventStreams[eventToListen];
+    if (iterable != null) {
+      return Stream<DaemonEventData>.fromIterable(iterable);
+    }
+    return const Stream<DaemonEventData>.empty();
+  }
+
+  @override
+  Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
+    final Object? response = handledRequests[method];
+    if (response != null) {
+      return response;
+    }
+    throw Exception('"$method" request failed');
+  }
 }

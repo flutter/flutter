@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Divider
+/// Flutter code sample for [Divider].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('Divider Sample')),
+        body: const DividerExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class DividerExample extends StatelessWidget {
+  const DividerExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +53,7 @@ class MyStatelessWidget extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 'Subheader',
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.start,
               ),
             ),

@@ -85,7 +85,7 @@ void main() {
     const ValueKey<int> key1 = ValueKey<int>(1);
     const ValueKey<int> key2 = ValueKey<int>(2);
 
-    Future<void> _buildWithKey(Key key) {
+    Future<void> buildWithKey(Key key) {
       return tester.pumpWidget(Column(
         children: <Widget>[
           const Text('Text 1', textDirection: TextDirection.ltr, key: key1),
@@ -95,11 +95,11 @@ void main() {
     }
 
     // Initial build with two different keys.
-    await _buildWithKey(key2);
+    await buildWithKey(key2);
     expect(tester.takeException(), isNull);
 
     // Subsequent build with duplicated keys.
-    await _buildWithKey(key1);
+    await buildWithKey(key1);
     expect(
       tester.takeException(),
       isA<FlutterError>().having(

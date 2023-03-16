@@ -5,6 +5,7 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../devfs.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -14,6 +15,7 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -135,14 +137,15 @@ abstract class BundleLinuxAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final String versionInfo = FlutterProject.current().getVersionInfo();
+    final String versionInfo = getVersionInfo(environment.defines);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,
       targetPlatform: targetPlatform,
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
-      }
+      },
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -152,6 +155,23 @@ abstract class BundleLinuxAssets extends Target {
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
+  }
+
+  /// Return json encoded string that contains data about version for package_info
+  String getVersionInfo(Map<String, String> defines) {
+    final Map<String, dynamic> versionInfo =
+        jsonDecode(FlutterProject.current().getVersionInfo())
+            as Map<String, dynamic>;
+
+    if (defines.containsKey(kBuildNumber)) {
+      versionInfo['build_number'] = defines[kBuildNumber];
+    }
+
+    if (defines.containsKey(kBuildName)) {
+      versionInfo['version'] = defines[kBuildName];
+    }
+
+    return jsonEncode(versionInfo);
   }
 }
 

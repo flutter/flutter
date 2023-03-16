@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'arena.dart' show GestureDisposition;
+export 'events.dart' show PointerDownEvent, PointerEvent;
+export 'velocity_tracker.dart' show Velocity;
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressDown].
 ///
@@ -246,20 +250,16 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
-    double? postAcceptSlopTolerance,
+    super.postAcceptSlopTolerance = null,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-    Object? debugOwner,
+    super.kind,
+    super.supportedDevices,
+    super.debugOwner,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
-         postAcceptSlopTolerance: postAcceptSlopTolerance,
-         kind: kind,
-         supportedDevices: supportedDevices,
-         debugOwner: debugOwner,
        );
 
   bool _longPressAccepted = false;
@@ -577,8 +577,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onLongPress == null &&
             onLongPressMoveUpdate == null &&
             onLongPressEnd == null &&
-            onLongPressUp == null)
+            onLongPressUp == null) {
           return false;
+        }
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown == null &&
@@ -587,8 +588,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onSecondaryLongPress == null &&
             onSecondaryLongPressMoveUpdate == null &&
             onSecondaryLongPressEnd == null &&
-            onSecondaryLongPressUp == null)
+            onSecondaryLongPressUp == null) {
           return false;
+        }
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown == null &&
@@ -597,8 +599,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onTertiaryLongPress == null &&
             onTertiaryLongPressMoveUpdate == null &&
             onTertiaryLongPressEnd == null &&
-            onTertiaryLongPressUp == null)
+            onTertiaryLongPressUp == null) {
           return false;
+        }
         break;
       default:
         return false;
@@ -663,16 +666,19 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     );
     switch (_initialButtons) {
       case kPrimaryButton:
-        if (onLongPressDown != null)
+        if (onLongPressDown != null) {
           invokeCallback<void>('onLongPressDown', () => onLongPressDown!(details));
+        }
         break;
       case kSecondaryButton:
-        if (onSecondaryLongPressDown != null)
+        if (onSecondaryLongPressDown != null) {
           invokeCallback<void>('onSecondaryLongPressDown', () => onSecondaryLongPressDown!(details));
+        }
         break;
       case kTertiaryButton:
-        if (onTertiaryLongPressDown != null)
+        if (onTertiaryLongPressDown != null) {
           invokeCallback<void>('onTertiaryLongPressDown', () => onTertiaryLongPressDown!(details));
+        }
         break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
@@ -683,16 +689,19 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (state == GestureRecognizerState.possible) {
       switch (_initialButtons) {
         case kPrimaryButton:
-          if (onLongPressCancel != null)
+          if (onLongPressCancel != null) {
             invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
+          }
           break;
         case kSecondaryButton:
-          if (onSecondaryLongPressCancel != null)
+          if (onSecondaryLongPressCancel != null) {
             invokeCallback<void>('onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
+          }
           break;
         case kTertiaryButton:
-          if (onTertiaryLongPressCancel != null)
+          if (onTertiaryLongPressCancel != null) {
             invokeCallback<void>('onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
+          }
           break;
         default:
           assert(false, 'Unhandled button $_initialButtons');

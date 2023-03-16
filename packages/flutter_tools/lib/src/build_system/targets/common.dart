@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -18,6 +19,7 @@ import 'assets.dart';
 import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
+import 'shader_compiler.dart';
 
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
@@ -33,6 +35,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
@@ -44,7 +47,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<String> get depfiles => <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override
@@ -72,6 +75,7 @@ class CopyFlutterBundle extends Target {
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -204,7 +208,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
         break;
     }
@@ -225,6 +228,8 @@ class KernelSnapshot extends Target {
       trackWidgetCreation: trackWidgetCreation && buildMode != BuildMode.release,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
+      initializeFromDill: buildMode.isPrecompiled ? null :
+          environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
@@ -291,7 +296,6 @@ abstract class AotElfBase extends Target {
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: outputPath,
-      bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
@@ -388,5 +392,50 @@ abstract class CopyFlutterAotBundle extends Target {
       outputFile.parent.createSync(recursive: true);
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+/// Lipo CLI tool wrapper shared by iOS and macOS builds.
+class Lipo {
+  /// Static only.
+  Lipo._();
+
+  /// Create a "fat" binary by combining multiple architecture-specific ones.
+  /// `skipMissingInputs` can be changed to `true` to first check whether
+  /// the expected input paths exist and ignore the command if they don't.
+  /// Otherwise, `lipo` would fail if the given paths didn't exist.
+  static Future<void> create(
+    Environment environment,
+    List<DarwinArch> darwinArchs, {
+    required String relativePath,
+    required String inputDir,
+    bool skipMissingInputs = false,
+  }) async {
+
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, relativePath);
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+
+    Iterable<String> inputPaths = darwinArchs.map(
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), relativePath)
+    );
+    if (skipMissingInputs) {
+      inputPaths = inputPaths.where(environment.fileSystem.isFileSync);
+      if (inputPaths.isEmpty) {
+        return;
+      }
+    }
+
+    final List<String> lipoArgs = <String>[
+      'lipo',
+      ...inputPaths,
+      '-create',
+      '-output',
+      resultPath,
+    ];
+
+    final ProcessResult result = await environment.processManager.run(lipoArgs);
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
+    }
   }
 }

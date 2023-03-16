@@ -46,9 +46,6 @@ import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
-/// The flutter GitHub repository.
-String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;
@@ -251,7 +248,11 @@ PlistParser? _plistInstance;
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 
-ShutdownHooks? get shutdownHooks => context.get<ShutdownHooks>();
+/// Global [ShutdownHooks] that should be run before the tool process exits.
+///
+/// This is depended on by [localFileSystem] which is called before any
+/// [Context] is set up, and thus this cannot be a Context getter.
+final ShutdownHooks shutdownHooks = ShutdownHooks();
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance

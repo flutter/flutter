@@ -14,7 +14,9 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  BuildApkCommand({
+    required super.logger, bool verboseHelp = false
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -53,7 +55,7 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => boolArgDeprecated('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -73,11 +75,11 @@ class BuildApkCommand extends BuildSubCommand {
   Future<CustomDimensions> get usageValues async {
     String buildMode;
 
-    if (boolArg('release')) {
+    if (boolArgDeprecated('release')) {
       buildMode = 'release';
-    } else if (boolArg('debug')) {
+    } else if (boolArgDeprecated('debug')) {
       buildMode = 'debug';
-    } else if (boolArg('profile')) {
+    } else if (boolArgDeprecated('profile')) {
       buildMode = 'profile';
     } else {
       // The build defaults to release.
@@ -87,7 +89,7 @@ class BuildApkCommand extends BuildSubCommand {
     return CustomDimensions(
       commandBuildApkTargetPlatform: stringsArg('target-platform').join(','),
       commandBuildApkBuildMode: buildMode,
-      commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
+      commandBuildApkSplitPerAbi: boolArgDeprecated('split-per-abi'),
     );
   }
 
@@ -99,9 +101,9 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
-      splitPerAbi: boolArg('split-per-abi'),
+      splitPerAbi: boolArgDeprecated('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArg('multidex'),
+      multidexEnabled: boolArgDeprecated('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);

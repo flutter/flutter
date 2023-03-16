@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../scheduler/scheduler_tester.dart';
 
 class BogusCurve extends Curve {
+  const BogusCurve();
+
   @override
   double transform(double t) => 100.0;
 }
@@ -234,7 +236,7 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: BogusCurve());
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: const BogusCurve());
     FlutterError? error;
     try {
       curved.value;

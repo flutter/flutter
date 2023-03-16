@@ -12,6 +12,7 @@ import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -70,16 +71,16 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = stringArgDeprecated('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
-      force: boolArg('force'),
-      continueFlow: boolArg('continue'),
-      testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(globals.processUtils),
-      flutterVersion: stringArg('working-directory') == null
+      force: boolArgDeprecated('force'),
+      continueFlow: boolArgDeprecated('continue'),
+      testFlow: stringArgDeprecated('working-directory') != null,
+      gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
+      flutterVersion: stringArgDeprecated('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
-      verifyOnly: boolArg('verify-only'),
+      verifyOnly: boolArgDeprecated('verify-only'),
     );
   }
 }
@@ -243,9 +244,9 @@ class UpgradeCommandRunner {
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-      // '@{u}' means upstream HEAD
+      // Get the latest commit revision of the upstream
       final RunResult result = await globals.processUtils.run(
-          <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
+          <String>['git', 'rev-parse', '--verify', kGitTrackingUpstream],
           throwOnError: true,
           workingDirectory: workingDirectory,
       );
@@ -303,7 +304,7 @@ class UpgradeCommandRunner {
   /// Update the engine repository and precache all artifacts.
   ///
   /// Check for and download any engine and pkg/ updates. We run the 'flutter'
-  /// shell script re-entrantly here so that it will download the updated
+  /// shell script reentrantly here so that it will download the updated
   /// Dart and so forth if necessary.
   Future<void> precacheArtifacts() async {
     globals.printStatus('');
@@ -330,7 +331,7 @@ class UpgradeCommandRunner {
       globals.printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,
-        directory: projectRoot,
+        project: FlutterProject.fromDirectory(globals.fs.directory(projectRoot)),
         upgrade: true,
       );
     }

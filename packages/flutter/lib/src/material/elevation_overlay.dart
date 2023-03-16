@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
@@ -23,11 +24,12 @@ class ElevationOverlay {
   /// elevated. The amount of opacity will vary with the elevation as described
   /// in: https://m3.material.io/styles/color/the-color-system/color-roles.
   ///
-  /// If [surfaceTint] is not null then the returned color will be the given
-  /// [color] with the [surfaceTint] of the appropriate opacity applies to it.
-  /// Otherwise it will just return [color] unmodified.
+  /// If [surfaceTint] is not null and not completely transparent ([Color.alpha]
+  /// is 0), then the returned color will be the given [color] with the
+  /// [surfaceTint] of the appropriate opacity applied to it. Otherwise it will
+  /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
-    if (surfaceTint != null) {
+    if (surfaceTint != null && surfaceTint != Colors.transparent) {
       return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
     }
     return color;
@@ -151,13 +153,14 @@ class _ElevationOpacity {
   final double opacity;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - SurfaceTint
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Token database version: v0_143
 
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
@@ -172,4 +175,4 @@ const List<_ElevationOpacity> _surfaceTintElevationOpacities = <_ElevationOpacit
   _ElevationOpacity(12.0, 0.14), // Elevation level 5
 ];
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - SurfaceTint

@@ -212,7 +212,7 @@ class VisualStudio {
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
   static const List<String> _requiredWorkloads = <String>[
     'Microsoft.VisualStudio.Workload.NativeDesktop',
-    'Microsoft.VisualStudio.Workload.VCTools'
+    'Microsoft.VisualStudio.Workload.VCTools',
   ];
 
   /// Components for use with vswhere requirements.
@@ -279,7 +279,7 @@ class VisualStudio {
               '-requires',
               requiredWorkload,
             ],
-            ..._requiredComponents(_minimumSupportedVersion).keys
+            ..._requiredComponents(_minimumSupportedVersion).keys,
           ]
         : <String>[];
     try {

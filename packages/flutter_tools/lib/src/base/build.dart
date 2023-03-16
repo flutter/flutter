@@ -57,6 +57,7 @@ class GenSnapshot {
     DarwinArch? darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
+    assert(darwinArch != DarwinArch.armv7);
     assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
     final List<String> args = <String>[
       ...additionalArgs,
@@ -115,16 +116,11 @@ class AOTSnapshotter {
     DarwinArch? darwinArch,
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
-    required bool bitcode,
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || darwinArch != null);
-    if (bitcode && platform != TargetPlatform.ios) {
-      _logger.printError('Bitcode is only supported for iOS.');
-      return 1;
-    }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -138,10 +134,17 @@ class AOTSnapshotter {
       '--deterministic',
     ];
 
+    final bool targetingApplePlatform =
+        platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
+    _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
+
+    final bool extractAppleDebugSymbols =
+        buildMode == BuildMode.profile || buildMode == BuildMode.release;
+    _logger.printTrace('extractAppleDebugSymbols = $extractAppleDebugSymbols');
+
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
     bool shouldStrip = true;
-
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       for (final String option in extraGenSnapshotOptions) {
@@ -154,7 +157,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
+    if (targetingApplePlatform) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
@@ -167,13 +170,24 @@ class AOTSnapshotter {
       ]);
     }
 
-    if (shouldStrip) {
-      genSnapshotArgs.add('--strip');
+    // When buiding for iOS and splitting out debug info, we want to strip
+    // manually after the dSYM export, instead of in the `gen_snapshot`.
+    final bool stripAfterBuild;
+    if (targetingApplePlatform) {
+      stripAfterBuild = shouldStrip;
+      if (stripAfterBuild) {
+        _logger.printTrace('Will strip AOT snapshot manually after build and dSYM generation.');
+      }
+    } else {
+      stripAfterBuild = false;
+      if (shouldStrip) {
+        genSnapshotArgs.add('--strip');
+        _logger.printTrace('Will strip AOT snapshot during build.');
+      }
     }
 
-    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
+    if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
-      // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
@@ -197,7 +211,7 @@ class AOTSnapshotter {
       // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}'
+        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
         '--obfuscate',
@@ -218,33 +232,33 @@ class AOTSnapshotter {
 
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
-      final RunResult result = await _buildFramework(
+    if (targetingApplePlatform) {
+      return _buildFramework(
         appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
         sdkRoot: sdkRoot,
         assemblyPath: assembly,
         outputPath: outputDir.path,
-        bitcode: bitcode,
         quiet: quiet,
+        stripAfterBuild: stripAfterBuild,
+        extractAppleDebugSymbols: extractAppleDebugSymbols
       );
-      if (result.exitCode != 0) {
-        return result.exitCode;
-      }
+    } else {
+      return 0;
     }
-    return 0;
   }
 
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
-  Future<RunResult> _buildFramework({
+  Future<int> _buildFramework({
     required DarwinArch appleArch,
     required bool isIOS,
     String? sdkRoot,
     required String assemblyPath,
     required String outputPath,
-    required bool bitcode,
-    required bool quiet
+    required bool quiet,
+    required bool stripAfterBuild,
+    required bool extractAppleDebugSymbols
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
@@ -258,19 +272,17 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=11.0',
       if (sdkRoot != null) ...<String>[
         '-isysroot',
         sdkRoot,
       ],
     ];
 
-    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
 
     final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
-      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
@@ -278,7 +290,7 @@ class AOTSnapshotter {
     ]);
     if (compileResult.exitCode != 0) {
       _logger.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
-      return compileResult;
+      return compileResult.exitCode;
     }
 
     final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
@@ -290,15 +302,36 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) embedBitcodeArg,
       '-o', appLib,
       assemblyO,
     ];
+
     final RunResult linkResult = await _xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
-      _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${linkResult.exitCode}');
+      return linkResult.exitCode;
     }
-    return linkResult;
+
+    if (extractAppleDebugSymbols) {
+      final RunResult dsymResult = await _xcode.dsymutil(<String>['-o', '$frameworkDir.dSYM', appLib]);
+      if (dsymResult.exitCode != 0) {
+        _logger.printError('Failed to generate dSYM - dsymutil terminated with exit code ${dsymResult.exitCode}');
+        return dsymResult.exitCode;
+      }
+
+      if (stripAfterBuild) {
+        // See https://www.unix.com/man-page/osx/1/strip/ for arguments
+        final RunResult stripResult = await _xcode.strip(<String>['-x', appLib, '-o', appLib]);
+        if (stripResult.exitCode != 0) {
+          _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}');
+          return stripResult.exitCode;
+        }
+      }
+    } else {
+      assert(stripAfterBuild == false);
+    }
+
+    return 0;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
@@ -314,7 +347,6 @@ class AOTSnapshotter {
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
-      TargetPlatform.windows_uwp_x64,
     ].contains(platform);
   }
 }

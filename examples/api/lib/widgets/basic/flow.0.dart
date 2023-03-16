@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Flow
+/// Flutter code sample for [Flow].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const FlowApp());
 
 class FlowApp extends StatelessWidget {
-  const FlowApp({Key? key}) : super(key: key);
+  const FlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class FlowApp extends StatelessWidget {
 }
 
 class FlowMenu extends StatefulWidget {
-  const FlowMenu({Key? key}) : super(key: key);
+  const FlowMenu({super.key});
 
   @override
   State<FlowMenu> createState() => _FlowMenuState();

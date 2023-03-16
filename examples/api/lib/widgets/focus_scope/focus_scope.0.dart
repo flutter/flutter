@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FocusScope
+/// Flutter code sample for [FocusScope].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -27,13 +27,13 @@ class MyApp extends StatelessWidget {
 /// This is just a separate widget to simplify the example.
 class Pane extends StatelessWidget {
   const Pane({
-    Key? key,
+    super.key,
     required this.focusNode,
     this.onPressed,
     required this.backgroundColor,
     required this.icon,
     this.child,
-  }) : super(key: key);
+  });
 
   final FocusNode focusNode;
   final VoidCallback? onPressed;
@@ -67,7 +67,7 @@ class Pane extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -119,7 +119,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: const Text('ANOTHER BUTTON TO FOCUS'),
                 ),
                 DefaultTextStyle(
-                    style: Theme.of(context).textTheme.headline2!,
+                    style: Theme.of(context).textTheme.displayMedium!,
                     child: const Text('BACKDROP')),
               ],
             ),
@@ -148,7 +148,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 ? null
                 : () => setState(() => backdropIsVisible = true),
             child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.headline2!,
+                style: Theme.of(context).textTheme.displayMedium!,
                 child: const Text('FOREGROUND')),
           ),
         ),

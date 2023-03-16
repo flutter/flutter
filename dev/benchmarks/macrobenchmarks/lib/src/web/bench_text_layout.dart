@@ -393,7 +393,7 @@ class PaletteTabView extends StatelessWidget {
     600,
     700,
     800,
-    900
+    900,
   ];
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
@@ -401,9 +401,9 @@ class PaletteTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle =
-        textTheme.bodyText2!.copyWith(color: Colors.white);
+        textTheme.bodyMedium!.copyWith(color: Colors.white);
     final TextStyle blackTextStyle =
-        textTheme.bodyText2!.copyWith(color: Colors.black);
+        textTheme.bodyMedium!.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,

@@ -2,23 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'dart:async';
 import 'dart:io' hide Directory, File;
 
+import 'package:dwds/dwds.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -32,17 +38,18 @@ const List<int> kTransparentImage = <int>[
 ];
 
 void main() {
-  Testbed testbed;
-  WebAssetServer webAssetServer;
-  ReleaseAssetServer releaseAssetServer;
-  Platform linux;
-  PackageConfig packages;
-  Platform windows;
-  FakeHttpServer httpServer;
+  late Testbed testbed;
+  late WebAssetServer webAssetServer;
+  late ReleaseAssetServer releaseAssetServer;
+  late Platform linux;
+  late PackageConfig packages;
+  late Platform windows;
+  late FakeHttpServer httpServer;
+  late BufferLogger logger;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
-      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath())
+      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath()),
     ]);
   });
 
@@ -50,25 +57,50 @@ void main() {
     httpServer = FakeHttpServer();
     linux = FakePlatform(environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
+    logger = BufferLogger.test();
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
+        NullSafetyMode.unsound,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
-        fileSystem: null,
-        flutterRoot: null,
-        platform: null,
-        webBuildDirectory: null,
+        fileSystem: globals.fs,
+        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        platform: FakePlatform(),
+        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
         basePath: null,
       );
+    }, overrides: <Type, Generator>{
+      Logger: () => logger,
     });
   });
+
+  test('.log() reports warnings', () => testbed.run(() {
+    const String unresolvedUriMessage = 'Unresolved uri:';
+    const String otherMessage = 'Something bad happened';
+
+    final List<logging.LogRecord> events = <logging.LogRecord>[
+      logging.LogRecord(
+        logging.Level.WARNING,
+        unresolvedUriMessage,
+        'DartUri',
+      ),
+      logging.LogRecord(
+        logging.Level.WARNING,
+        otherMessage,
+        'DartUri',
+      ),
+    ];
+
+    events.forEach(log);
+    expect(logger.warningText, contains(unresolvedUriMessage));
+    expect(logger.warningText, contains(otherMessage));
+  }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = globals.fs.file('source')
@@ -80,17 +112,21 @@ void main() {
 
     // Missing ending offset.
     final File manifestMissingOffset = globals.fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0],
-        'sourcemap': <int>[0],
-        'metadata': <int>[0],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0],
+          'sourcemap': <int>[0],
+          'metadata': <int>[0],
+        },
+      }));
     final File manifestOutOfBounds = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, 100],
-        'sourcemap': <int>[0],
-        'metadata': <int>[0],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, 100],
+          'sourcemap': <int>[0],
+          'metadata': <int>[0],
+        },
+      }));
 
     expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
     expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
@@ -104,11 +140,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata':  <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata':  <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
@@ -117,7 +155,7 @@ void main() {
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
-      containsPair(HttpHeaders.etagHeader, isNotNull)
+      containsPair(HttpHeaders.etagHeader, isNotNull),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -133,17 +171,19 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync(metadataContents);
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, sourcemap.lengthSync()],
-        'metadata':  <int>[0, metadata.lengthSync()],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, sourcemap.lengthSync()],
+          'metadata':  <int>[0, metadata.lengthSync()],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
-    final String merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
+    final String? merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
     expect(merged, equals(metadataContents));
 
-    final String single = await webAssetServer.metadataContents('foo.js.metadata');
+    final String? single = await webAssetServer.metadataContents('foo.js.metadata');
     expect(single, equals(metadataContents));
   }, overrides: <Type, Generator>{
     Platform: () => linux,
@@ -165,7 +205,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -189,7 +229,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -249,9 +289,9 @@ void main() {
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
-      null,
-      null,
-      null,
+      <String, String>{},
+      <String, String>{},
+      NullSafetyMode.unsound,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -268,9 +308,9 @@ void main() {
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
-      null,
-      null,
-      null,
+      <String, String>{},
+      <String, String>{},
+      NullSafetyMode.unsound,
     );
 
     // Defaults to "/" when there's no base element.
@@ -289,9 +329,9 @@ void main() {
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
+        NullSafetyMode.unsound,
       ),
       throwsToolExit(),
     );
@@ -309,9 +349,9 @@ void main() {
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
+        NullSafetyMode.unsound,
       ),
       throwsToolExit(),
     );
@@ -327,7 +367,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, '9'),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
   }));
@@ -337,11 +377,11 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     final Response cachedResponse = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js'), headers: <String, String>{
-        HttpHeaders.ifNoneMatchHeader: etag
+        HttpHeaders.ifNoneMatchHeader: etag,
       }));
 
     expect(cachedResponse.statusCode, HttpStatus.notModified);
@@ -420,11 +460,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata': <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.dart.lib.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata': <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
@@ -441,11 +483,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata': <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata': <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
@@ -454,7 +498,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -472,7 +516,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -487,7 +531,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -503,7 +547,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{
@@ -575,14 +619,14 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     expect(etag.runes, everyElement(predicate((int char) => char < 255)));
   }));
 
   test('serves /packages/<package>/<path> files as if they were '
        'package:<package>/<path> uris', () => testbed.run(() async {
-    final Uri expectedUri = packages.resolve(
+    final Uri? expectedUri = packages.resolve(
         Uri.parse('package:flutter_tools/foo.dart'));
     final File source = globals.fs.file(globals.fs.path.fromUri(expectedUri))
       ..createSync(recursive: true)
@@ -619,7 +663,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -635,8 +679,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -644,13 +688,13 @@ void main() {
 
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    final String webPrecompiledSdk = globals.artifacts
+    final String webPrecompiledSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
@@ -679,6 +723,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: 'out.dill',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -731,7 +776,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -746,8 +791,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -760,13 +805,13 @@ void main() {
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    final String webPrecompiledSdk = globals.artifacts
+    final String webPrecompiledSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
@@ -790,6 +835,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       pathToReload: '',
       dillOutputPath: '',
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -825,6 +871,71 @@ void main() {
     Artifacts: () => Artifacts.test(),
   }));
 
+  test('.connect() will never call vmServiceFactory twice', () => testbed.run(() async {
+    await FakeAsync().run<Future<void>>((FakeAsync time) {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final WebDevFS webDevFS = WebDevFS(
+        // if this is any other value, we will do a real ip lookup
+        hostname: 'any',
+        port: 0,
+        packagesFilePath: '.packages',
+        urlTunneller: null,
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        nullAssertions: true,
+        nativeNullAssertions: true,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+        ),
+        enableDwds: true,
+        enableDds: false,
+        entrypoint: Uri.base,
+        testMode: true,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nullSafetyMode: NullSafetyMode.sound,
+      );
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+      final FakeAppConnection firstConnection = FakeAppConnection();
+      final FakeAppConnection secondConnection = FakeAppConnection();
+
+      final Future<void> done = webDevFS.create().then<void>((Uri _) {
+        // In non-test mode, webDevFS.create() would have initialized DWDS
+        webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
+
+        int vmServiceFactoryInvocationCount = 0;
+        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions? compression, required Logger logger}) {
+          if (vmServiceFactoryInvocationCount > 0) {
+            fail('Called vmServiceFactory twice!');
+          }
+          vmServiceFactoryInvocationCount += 1;
+          return Future<vm_service.VmService>.delayed(
+            const Duration(seconds: 2),
+            () => FakeVmService(),
+          );
+        }
+        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult? firstConnectionResult) {
+          return webDevFS.destroy();
+        });
+      });
+      time.elapse(const Duration(seconds: 1));
+      time.elapse(const Duration(seconds: 2));
+      return done;
+    });
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+  }));
+
   test('Can start web server with hostname any', () => testbed.run(() async {
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
@@ -836,7 +947,7 @@ void main() {
       hostname: 'any',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -845,8 +956,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
@@ -871,7 +982,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -889,8 +1000,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -914,7 +1025,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -932,8 +1043,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -964,7 +1075,7 @@ void main() {
       false,
       Uri.base,
       null,
-      null,
+      NullSafetyMode.unsound,
       testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1024,7 +1135,7 @@ void main() {
       hostname: 'localhost',
       port: 0,
       packagesFilePath: '.packages',
-      urlTunneller: null,
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1035,8 +1146,8 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null,
-      chromiumLauncher: null,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1065,20 +1176,62 @@ class FakeHttpServer extends Fake implements HttpServer {
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  CompilerOutput output;
+  CompilerOutput? output;
 
   @override
   void addFileSystemRoot(String root) { }
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    String projectRootPath,
-    FileSystem fs,
+  Future<CompilerOutput?> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
+    String? outputPath,
+    PackageConfig? packageConfig,
+    String? projectRootPath,
+    FileSystem? fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File? dartPluginRegistrant,
   }) async {
     return output;
   }
 }
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
+}
+
+class FakeDwds extends Fake implements Dwds {
+  FakeDwds(this.connectedAppsIterable) :
+    connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
+
+  final Iterable<AppConnection> connectedAppsIterable;
+
+  @override
+  final Stream<AppConnection> connectedApps;
+
+  @override
+  Future<DebugConnection> debugConnection(AppConnection appConnection) => Future<DebugConnection>.value(FakeDebugConnection());
+}
+
+class FakeAppConnection extends Fake implements AppConnection {
+  @override
+  void runMain() {}
+}
+
+class FakeDebugConnection extends Fake implements DebugConnection {
+  FakeDebugConnection({
+    this.uri = 'http://foo',
+  });
+
+  @override
+  final String uri;
+}
+
+class FakeVmService extends Fake implements vm_service.VmService {}

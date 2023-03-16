@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,6 +21,10 @@ const double _kToolbarContentDistance = 8.0;
 // screen.
 const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
+
+// Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
+// screen. Eyeballed value.
+const double _kArrowScreenPadding = 26.0;
 
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
@@ -45,6 +50,13 @@ typedef CupertinoToolbarBuilder = Widget Function(
   Widget child,
 );
 
+class _CupertinoToolbarButtonDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+  }
+}
+
 /// An iOS-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
@@ -58,20 +70,19 @@ typedef CupertinoToolbarBuilder = Widget Function(
 ///
 /// See also:
 ///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an iOS-style toolbar.
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
 class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
-    Key? key,
+    super.key,
     required this.anchorAbove,
     required this.anchorBelow,
     required this.children,
     this.toolbarBuilder = _defaultToolbarBuilder,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
   final Offset anchorAbove;
@@ -91,6 +102,19 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// The given anchor and isAbove can be used to position an arrow, as in the
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
+
+  // Add the visial vertical line spacer between children buttons.
+  static List<Widget> _addChildrenSpacers(List<Widget> children) {
+    final List<Widget> nextChildren = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      final Widget child = children[i];
+      if (i != 0) {
+        nextChildren.add(_CupertinoToolbarButtonDivider());
+      }
+      nextChildren.add(child);
+    }
+    return nextChildren;
+  }
 
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
@@ -116,8 +140,19 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         + _kToolbarHeight;
     final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
-    const Offset contentPaddingAdjustment = Offset(0.0, _kToolbarContentDistance);
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    // The arrow, which points to the anchor, has some margin so it can't get
+    // too close to the horizontal edges of the screen.
+    final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
+    final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
+
+    final Offset anchorAboveAdjusted = Offset(
+      clampDouble(anchorAbove.dx, leftMargin, rightMargin),
+      anchorAbove.dy - _kToolbarContentDistance - paddingAbove,
+    );
+    final Offset anchorBelowAdjusted = Offset(
+      clampDouble(anchorBelow.dx, leftMargin, rightMargin),
+      anchorBelow.dy - _kToolbarContentDistance + paddingAbove,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -128,14 +163,15 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
-          anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
-          anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+          anchorAbove: anchorAboveAdjusted,
+          anchorBelow: anchorBelowAdjusted,
+          fitsAbove: fitsAbove,
         ),
         child: _CupertinoTextSelectionToolbarContent(
-          anchor: fitsAbove ? anchorAbove : anchorBelow,
+          anchor: fitsAbove ? anchorAboveAdjusted : anchorBelowAdjusted,
           isAbove: fitsAbove,
           toolbarBuilder: toolbarBuilder,
-          children: children,
+          children: _addChildrenSpacers(children),
         ),
       ),
     );
@@ -148,13 +184,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
-    Key? key,
     required Offset anchor,
     required bool isAbove,
-    Widget? child,
+    super.child,
   }) : _anchor = anchor,
-       _isAbove = isAbove,
-       super(key: key, child: child);
+       _isAbove = isAbove;
 
   final Offset _anchor;
 
@@ -189,8 +223,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   _RenderCupertinoTextSelectionToolbarShape(
     this._anchor,
     this._isAbove,
-    RenderBox? child,
-  ) : super(child);
+    super.child,
+  );
 
 
   @override
@@ -360,14 +394,12 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
-    Key? key,
     required this.anchor,
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children != null),
-       assert(children.length > 0),
-       super(key: key);
+       assert(children.length > 0);
 
   final Offset anchor;
   final List<Widget> children;
@@ -467,7 +499,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 // _CupertinoTextSelectionToolbarItemsElement, paginates the menu items.
 class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
-    Key? key,
     required this.page,
     required this.children,
     required this.backButton,
@@ -480,8 +511,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
        assert(dividerWidth != null),
        assert(nextButton != null),
        assert(nextButtonDisabled != null),
-       assert(page != null),
-       super(key: key);
+       assert(page != null);
 
   final Widget backButton;
   final List<Widget> children;
@@ -512,8 +542,8 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
 // The custom RenderObjectElement that helps paginate the menu items.
 class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   _CupertinoTextSelectionToolbarItemsElement(
-    _CupertinoTextSelectionToolbarItems widget,
-  ) : super(widget);
+    _CupertinoTextSelectionToolbarItems super.widget,
+  );
 
   late List<Element> _children;
   final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};
@@ -587,8 +617,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
-      if (!_forgottenChildren.contains(child))
+      if (!_forgottenChildren.contains(child)) {
         visitor(child);
+      }
     }
   }
 
@@ -874,7 +905,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     }
   }
 
-  // Returns true iff the single child is hit by the given position.
+  // Returns true if the single child is hit by the given position.
   static bool hitTestChild(RenderBox? child, BoxHitTestResult result, { required Offset position }) {
     if (child == null) {
       return false;
@@ -1015,18 +1046,17 @@ enum _CupertinoTextSelectionToolbarItemsSlot {
 }
 
 class _NullElement extends Element {
-  _NullElement() : super(_NullWidget());
+  _NullElement() : super(const _NullWidget());
 
   static _NullElement instance = _NullElement();
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
-
-  @override
-  void performRebuild() { }
 }
 
 class _NullWidget extends Widget {
+  const _NullWidget();
+
   @override
   Element createElement() => throw UnimplementedError();
 }

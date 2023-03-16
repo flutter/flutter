@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,7 +15,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
 
   Cache.flutterRoot = '';
 
@@ -44,9 +42,9 @@ void main() {
       ]),
     );
 
-    final DevToolsServerAddress address = await launcher.serve();
-    expect(address.host, '127.0.0.1');
-    expect(address.port, 9100);
+    final DevToolsServerAddress? address = await launcher.serve();
+    expect(address?.host, '127.0.0.1');
+    expect(address?.port, 9100);
   });
 
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
@@ -68,14 +66,14 @@ void main() {
       ]),
     );
 
-    DevToolsServerAddress address = await launcher.serve();
-    expect(address.host, '127.0.0.1');
-    expect(address.port, 9100);
+    DevToolsServerAddress? address = await launcher.serve();
+    expect(address?.host, '127.0.0.1');
+    expect(address?.port, 9100);
 
     // Call `serve` again and verify that the already running server is returned.
     address = await launcher.serve();
-    expect(address.host, '127.0.0.1');
-    expect(address.port, 9100);
+    expect(address?.host, '127.0.0.1');
+    expect(address?.port, 9100);
   });
 
   testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
@@ -86,7 +84,7 @@ void main() {
           'devtools',
           '--no-launch-browser',
           '--vm-uri=localhost:8181/abcdefg',
-          '--profile-memory=foo'
+          '--profile-memory=foo',
         ],
         stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
       ),
@@ -118,7 +116,7 @@ void main() {
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
           ],
           exception: ProcessException('pub', <String>[]),
-        )
+        ),
       ]),
     );
 

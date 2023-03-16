@@ -13,6 +13,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
+import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
@@ -64,6 +65,7 @@ class BundleBuilder {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -119,7 +121,6 @@ Future<AssetBundle?> buildAssets({
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
   );
@@ -133,8 +134,10 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  { Logger? loggerOverride }
-) async {
+  Map<String, AssetKind> entryKinds, {
+  Logger? loggerOverride,
+  required TargetPlatform targetPlatform,
+}) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
@@ -148,6 +151,13 @@ Future<void> writeBundle(
   }
   bundleDir.createSync(recursive: true);
 
+  final ShaderCompiler shaderCompiler = ShaderCompiler(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -156,12 +166,36 @@ Future<void> writeBundle(
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`.  However, we have to keep it this way since the
+        // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
+        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         file.parent.createSync(recursive: true);
-        await file.writeAsBytes(await entry.value.contentsAsBytes());
+        final DevFSContent devFSContent = entry.value;
+        if (devFSContent is DevFSFileContent) {
+          final File input = devFSContent.file as File;
+          bool doCopy = true;
+          switch (assetKind) {
+            case AssetKind.regular:
+              break;
+            case AssetKind.font:
+              break;
+            case AssetKind.shader:
+              doCopy = !await shaderCompiler.compileShader(
+                input: input,
+                outputPath: file.path,
+                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                json: targetPlatform == TargetPlatform.web_javascript,
+              );
+              break;
+          }
+          if (doCopy) {
+            input.copySync(file.path);
+          }
+        } else {
+          await file.writeAsBytes(await entry.value.contentsAsBytes());
+        }
       } finally {
         resource.release();
       }

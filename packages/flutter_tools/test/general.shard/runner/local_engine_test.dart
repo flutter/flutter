@@ -93,31 +93,6 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
-  testWithoutContext('treats winuwp_debug_unopt as a host engine', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory localEngine = fileSystem
-        .directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/')
-        ..createSync(recursive: true);
-    fileSystem.directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/').createSync(recursive: true);
-
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
-      fileSystem: fileSystem,
-      flutterRoot: 'flutter/flutter',
-      logger: logger,
-      userMessages: UserMessages(),
-      platform: FakePlatform(environment: <String, String>{}),
-    );
-
-    expect(
-      await localEngineLocator.findEnginePath(null, localEngine.path, null),
-      matchesEngineBuildPaths(
-        hostEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
-        targetEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
-      ),
-    );
-  });
-
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
       'is determined by --local-engine', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -169,6 +144,30 @@ void main() {
       ),
     );
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
+  });
+
+  testWithoutContext('works if local engine is host engine with suffixes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt_arm64/')
+      ..createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(null, localEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
+        targetEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
+      ),
+    );
   });
 
   testWithoutContext('fails if host_debug does not exist', () async {
@@ -240,6 +239,52 @@ void main() {
       localEngineLocator.findEnginePath(null, '/path/to/nothing', null),
       contains('Unable to detect local Flutter engine src directory'),
     );
+  });
+
+  testWithoutContext('works for local web engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localWasmEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/wasm_whatever/')
+      ..createSync(recursive: true);
+    final Directory localWebEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/web_whatever/')
+      ..createSync(recursive: true);
+
+    final BufferLogger wasmLogger = BufferLogger.test();
+    final LocalEngineLocator localWasmEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: wasmLogger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localWasmEngineLocator.findEnginePath(null, localWasmEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/wasm_whatever',
+        targetEngine: '/arbitrary/engine/src/out/wasm_whatever',
+      ),
+    );
+    expect(wasmLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
+
+    final BufferLogger webLogger = BufferLogger.test();
+    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: webLogger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localWebEngineLocator.findEnginePath(null, localWebEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/web_whatever',
+        targetEngine: '/arbitrary/engine/src/out/web_whatever',
+      ),
+    );
+    expect(webLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 }
 

@@ -55,8 +55,9 @@ void debugPrintThrottled(String? message, { int? wrapWidth }) {
   } else {
     _debugPrintBuffer.addAll(messageLines);
   }
-  if (!_debugPrintScheduled)
+  if (!_debugPrintScheduled) {
     _debugPrintTask();
+  }
 }
 int _debugPrintedCharacters = 0;
 const int _kDebugPrintCapacity = 12 * 1024;
@@ -130,14 +131,16 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
   while (true) {
     switch (mode) {
       case _WordWrapParseMode.inSpace: // at start of break point (or start of line); can't break until next break
-        while ((index < message.length) && (message[index] == ' '))
+        while ((index < message.length) && (message[index] == ' ')) {
           index += 1;
+        }
         lastWordStart = index;
         mode = _WordWrapParseMode.inWord;
         break;
       case _WordWrapParseMode.inWord: // looking for a good break point
-        while ((index < message.length) && (message[index] != ' '))
+        while ((index < message.length) && (message[index] != ' ')) {
           index += 1;
+        }
         mode = _WordWrapParseMode.atBreak;
         break;
       case _WordWrapParseMode.atBreak: // at start of break point
@@ -154,14 +157,16 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
             wrapped.add(message.substring(start, lastWordEnd));
             addPrefix = true;
           }
-          if (lastWordEnd >= message.length)
+          if (lastWordEnd >= message.length) {
             return wrapped;
+          }
           // just yielded a line
           if (lastWordEnd == index) {
             // we broke at current position
             // eat all the spaces, then set our start point
-            while ((index < message.length) && (message[index] == ' '))
+            while ((index < message.length) && (message[index] == ' ')) {
               index += 1;
+            }
             start = index;
             mode = _WordWrapParseMode.inWord;
           } else {

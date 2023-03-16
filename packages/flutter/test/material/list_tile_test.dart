@@ -15,7 +15,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key? key }) : super(key: key);
+  const TestIcon({ super.key });
 
   @override
   TestIconState createState() => TestIconState();
@@ -32,7 +32,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key? key }) : super(key: key);
+  const TestText(this.text, { super.key });
 
   final String text;
 
@@ -88,8 +88,9 @@ void main() {
     void testChildren() {
       expect(find.byKey(leadingKey), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
-      if (hasSubtitle)
+      if (hasSubtitle) {
         expect(find.text('subtitle'), findsOneWidget);
+      }
       expect(find.byKey(trailingKey), findsOneWidget);
     }
 
@@ -109,8 +110,9 @@ void main() {
     void testHorizontalGeometry() {
       expect(leftKey(leadingKey), math.max(16.0, leftPadding));
       expect(left('title'), 56.0 + math.max(16.0, leftPadding));
-      if (hasSubtitle)
+      if (hasSubtitle) {
         expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+      }
       expect(left('title'), rightKey(leadingKey) + 32.0);
       expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
       expect(widthKey(trailingKey), 24.0);
@@ -353,48 +355,6 @@ void main() {
     );
 
     semantics.dispose();
-  });
-
-  testWidgets('ListTile contentPadding', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: textDirection,
-          child: Material(
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: const ListTile(
-                contentPadding: EdgeInsetsDirectional.only(
-                  start: 10.0,
-                  end: 20.0,
-                  top: 30.0,
-                  bottom: 40.0,
-                ),
-                leading: Text('L'),
-                title: Text('title'),
-                trailing: Text('T'),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
-
-    await tester.pumpWidget(buildFrame(TextDirection.ltr));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('L'), 10.0); // contentPadding.start = 10
-    expect(right('T'), 780.0); // 800 - contentPadding.end
-
-    await tester.pumpWidget(buildFrame(TextDirection.rtl));
-
-    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
-    expect(left('T'), 20.0); // contentPadding.end = 20
-    expect(right('L'), 790.0); // 800 - contentPadding.start
   });
 
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
@@ -1189,6 +1149,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1206,6 +1167,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1242,6 +1204,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1254,7 +1217,6 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(ListTile)));
 
     await tester.pumpWidget(buildApp());
@@ -1263,6 +1225,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1283,6 +1246,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
@@ -1292,6 +1256,30 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           ),
     );
+  });
+
+  testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
+    final Widget buildApp = MaterialApp(
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(
+              onTap: () {},
+              splashColor: const Color(0xff88ff88),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(ListTile)).center);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    await gesture.up();
   });
 
   testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
@@ -1390,51 +1378,22 @@ void main() {
     await tester.pumpWidget(buildListTile(rectShape));
     Rect rect = tester.getRect(find.byType(ListTile));
 
-    // Check if a path was painted with the correct color and shape
+    // Check if a rounded rectangle was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints..path(
-        color: tileColor,
-        // Corners should be included
-        includes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
-        // Points outside rect should be excluded
-        excludes: <Offset>[
-          Offset(rect.left - 1, rect.top - 1),
-          Offset(rect.right + 1, rect.top - 1),
-          Offset(rect.left - 1, rect.bottom + 1),
-          Offset(rect.right + 1, rect.bottom + 1),
-        ],
-      ),
+      paints..rect(color: tileColor, rect: rect),
     );
 
     // Test stadium shape
     await tester.pumpWidget(buildListTile(stadiumShape));
     rect = tester.getRect(find.byType(ListTile));
 
-    // Check if a path was painted with the correct color and shape
+    // Check if a rounded rectangle was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints..path(
+      paints..clipRect()..rrect(
         color: tileColor,
-        // Center points of sides should be included
-        includes: <Offset>[
-          Offset(rect.left + rect.width / 2, rect.top),
-          Offset(rect.left, rect.top + rect.height / 2),
-          Offset(rect.right, rect.top + rect.height / 2),
-          Offset(rect.left + rect.width / 2, rect.bottom),
-        ],
-        // Corners should be excluded
-        excludes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
+        rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
       ),
     );
   });
@@ -1459,7 +1418,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1518,6 +1476,34 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  testWidgets('ListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ListTile Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTile(
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
@@ -1546,14 +1532,14 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
@@ -1575,7 +1561,7 @@ void main() {
     );
 
     // Before ListTile is tapped, it should be tileColor
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to trigger ink effect and wait for it to be underway.
     await tester.tap(find.byType(ListTile));
@@ -1585,7 +1571,7 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..path(color: tileColor)
+        ..rect(color: tileColor)
         ..circle(),
     );
   });
@@ -1614,13 +1600,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: defaultColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: defaultColor));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
@@ -1787,7 +1773,6 @@ void main() {
       final Offset listTile = tester.getCenter(find.byKey(tileKey));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(listTile);
       await tester.pumpAndSettle();
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
@@ -2060,9 +2045,9 @@ void main() {
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     await tester.pumpWidget(buildFrame());
-    // Enabled color should be default bodyText2 color.
-    expect(textColor(leadingKey), theme.textTheme.bodyText2!.color);
-    expect(textColor(trailingKey), theme.textTheme.bodyText2!.color);
+    // Enabled color should be default bodyMedium color.
+    expect(textColor(leadingKey), theme.textTheme.bodyMedium!.color);
+    expect(textColor(trailingKey), theme.textTheme.bodyMedium!.color);
 
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
@@ -2080,8 +2065,6 @@ void main() {
   });
 
   testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/pull/77004
-
     const ColorScheme lightColorScheme = ColorScheme.light();
     const ColorScheme darkColorScheme = ColorScheme.dark();
     final Key leadingKey = UniqueKey();
@@ -2091,8 +2074,8 @@ void main() {
 
     Widget buildFrame({ required Brightness brightness, required bool selected }) {
       final ThemeData theme = brightness == Brightness.light
-        ? ThemeData.from(colorScheme: const ColorScheme.light())
-        : ThemeData.from(colorScheme: const ColorScheme.dark());
+        ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true)
+        : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: true);
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -2118,10 +2101,10 @@ void main() {
     expect(iconColor(trailingKey), lightColorScheme.primary);
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
-    expect(iconColor(leadingKey), Colors.black45);
-    expect(iconColor(titleKey), Colors.black45);
-    expect(iconColor(subtitleKey), Colors.black45);
-    expect(iconColor(trailingKey), Colors.black45);
+    expect(iconColor(leadingKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(titleKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(subtitleKey), lightColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(trailingKey), lightColorScheme.onSurface.withOpacity(0.38));
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
     await tester.pumpAndSettle(); // Animated theme change
@@ -2133,9 +2116,424 @@ void main() {
     // For this configuration, ListTile defers to the default IconTheme.
     // The default dark theme's IconTheme has color:white
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
-    expect(iconColor(leadingKey),  Colors.white);
-    expect(iconColor(titleKey),  Colors.white);
-    expect(iconColor(subtitleKey),  Colors.white);
-    expect(iconColor(trailingKey), Colors.white);
+    expect(iconColor(leadingKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(titleKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(subtitleKey), darkColorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(trailingKey), darkColorScheme.onSurface.withOpacity(0.38));
   });
+
+  testWidgets('ListTile font size', (WidgetTester tester) async {
+    Widget buildFrame({
+      bool dense = false,
+      bool enabled = true,
+      bool selected = false,
+      ListTileStyle? style,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  dense: dense,
+                  enabled: enabled,
+                  selected: selected,
+                  style: style,
+                  leading: const TestText('leading'),
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                  trailing: const TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ListTile - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 16.0);
+    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 14.0);
+    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - Densed - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame(dense: true));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 13.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 12.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 14.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 14.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+
+    // ListTile - Densed - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(dense: true, style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 14.0);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.fontSize, 13.0);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.fontSize, 12.0);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 14.0);
+  });
+
+  testWidgets('ListTile text color', (WidgetTester tester) async {
+    Widget buildFrame({
+      bool dense = false,
+      bool enabled = true,
+      bool selected = false,
+      ListTileStyle? style,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  dense: dense,
+                  enabled: enabled,
+                  selected: selected,
+                  style: style,
+                  leading: const TestText('leading'),
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                  trailing: const TestText('trailing'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    // ListTile - ListTileStyle.list (default).
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
+    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+
+    // ListTile - ListTileStyle.drawer.
+    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+    await tester.pumpAndSettle();
+    leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
+    subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+  });
+
+  testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTile().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('ListTile implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTile(
+      leading: Text('leading'),
+      title: Text('title'),
+      subtitle: Text('trailing'),
+      trailing: Text('trailing'),
+      isThreeLine: true,
+      dense: true,
+      visualDensity: VisualDensity.standard,
+      shape: RoundedRectangleBorder(),
+      style: ListTileStyle.list,
+      selectedColor: Color(0xff0000ff),
+      iconColor: Color(0xff00ff00),
+      textColor: Color(0xffff0000),
+      contentPadding: EdgeInsets.zero,
+      enabled: false,
+      selected: true,
+      focusColor: Color(0xff00ffff),
+      hoverColor: Color(0xff0000ff),
+      autofocus: true,
+      tileColor: Color(0xffffff00),
+      selectedTileColor: Color(0xff123456),
+      enableFeedback: false,
+      horizontalTitleGap: 4.0,
+      minVerticalPadding: 2.0,
+      minLeadingWidth: 6.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'leading: Text',
+        'title: Text',
+        'subtitle: Text',
+        'trailing: Text',
+        'isThreeLine: THREE_LINE',
+        'dense: true',
+        'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
+        'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+        'style: ListTileStyle.list',
+        'selectedColor: Color(0xff0000ff)',
+        'iconColor: Color(0xff00ff00)',
+        'textColor: Color(0xffff0000)',
+        'contentPadding: EdgeInsets.zero',
+        'enabled: false',
+        'selected: true',
+        'focusColor: Color(0xff00ffff)',
+        'hoverColor: Color(0xff0000ff)',
+        'autofocus: true',
+        'tileColor: Color(0xffffff00)',
+        'selectedTileColor: Color(0xff123456)',
+        'enableFeedback: false',
+        'horizontalTitleGap: 4.0',
+        'minVerticalPadding: 2.0',
+        'minLeadingWidth: 6.0',
+      ]),
+    );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('ListTile font size', (WidgetTester tester) async {
+      Widget buildFrame({
+        bool dense = false,
+        bool enabled = true,
+        bool selected = false,
+        ListTileStyle? style,
+      }) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    dense: dense,
+                    enabled: enabled,
+                    selected: selected,
+                    style: style,
+                    leading: const TestText('leading'),
+                    title: const TestText('title'),
+                    subtitle: const TestText('subtitle') ,
+                    trailing: const TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      // ListTile - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame());
+      RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 16.0);
+      RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 14.0);
+      RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - Densed - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame(dense: true));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 13.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 12.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 14.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 14.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+
+      // ListTile - Densed - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(dense: true, style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, 14.0);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, 13.0);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, 12.0);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, 14.0);
+    });
+
+    testWidgets('ListTile text color', (WidgetTester tester) async {
+      Widget buildFrame({
+        bool dense = false,
+        bool enabled = true,
+        bool selected = false,
+        ListTileStyle? style,
+      }) {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    dense: dense,
+                    enabled: enabled,
+                    selected: selected,
+                    style: style,
+                    leading: const TestText('leading'),
+                    title: const TestText('title'),
+                    subtitle: const TestText('subtitle') ,
+                    trailing: const TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      final ThemeData theme = ThemeData();
+
+      // ListTile - ListTileStyle.list (default).
+      await tester.pumpWidget(buildFrame());
+      RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+      RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
+      RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+      RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+
+      // ListTile - ListTileStyle.drawer.
+      await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
+      await tester.pumpAndSettle();
+      leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+      title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
+      subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+      trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+    });
+
+    testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/77004
+
+      const ColorScheme lightColorScheme = ColorScheme.light();
+      const ColorScheme darkColorScheme = ColorScheme.dark();
+      final Key leadingKey = UniqueKey();
+      final Key titleKey = UniqueKey();
+      final Key subtitleKey = UniqueKey();
+      final Key trailingKey = UniqueKey();
+
+      Widget buildFrame({ required Brightness brightness, required bool selected }) {
+        final ThemeData theme = brightness == Brightness.light
+          ? ThemeData.from(colorScheme: const ColorScheme.light())
+          : ThemeData.from(colorScheme: const ColorScheme.dark());
+        return MaterialApp(
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: ListTile(
+                selected: selected,
+                leading: TestIcon(key: leadingKey),
+                title: TestIcon(key: titleKey),
+                subtitle: TestIcon(key: subtitleKey),
+                trailing: TestIcon(key: trailingKey),
+              ),
+            ),
+          ),
+        );
+      }
+
+      Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
+      expect(iconColor(leadingKey), lightColorScheme.primary);
+      expect(iconColor(titleKey), lightColorScheme.primary);
+      expect(iconColor(subtitleKey), lightColorScheme.primary);
+      expect(iconColor(trailingKey), lightColorScheme.primary);
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
+      expect(iconColor(leadingKey), Colors.black45);
+      expect(iconColor(titleKey), Colors.black45);
+      expect(iconColor(subtitleKey), Colors.black45);
+      expect(iconColor(trailingKey), Colors.black45);
+
+      await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
+      await tester.pumpAndSettle(); // Animated theme change
+      expect(iconColor(leadingKey), darkColorScheme.primary);
+      expect(iconColor(titleKey), darkColorScheme.primary);
+      expect(iconColor(subtitleKey), darkColorScheme.primary);
+      expect(iconColor(trailingKey), darkColorScheme.primary);
+
+      // For this configuration, ListTile defers to the default IconTheme.
+      // The default dark theme's IconTheme has color:white
+      await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
+      expect(iconColor(leadingKey),  Colors.white);
+      expect(iconColor(titleKey),  Colors.white);
+      expect(iconColor(subtitleKey),  Colors.white);
+      expect(iconColor(trailingKey), Colors.white);
+    });
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.descendant(
+    of: find.byType(ListTile),
+    matching: find.text(text),
+  ));
 }

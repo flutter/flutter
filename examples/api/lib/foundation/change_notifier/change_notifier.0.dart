@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ChangeNotifier with an AnimatedBuilder
+/// Flutter code sample for a [ChangeNotifier] with an [AnimatedBuilder].
 
 import 'package:flutter/material.dart';
 
 class CounterBody extends StatelessWidget {
-  const CounterBody({Key? key, required this.counterValueNotifier}) : super(key: key);
+  const CounterBody({super.key, required this.counterValueNotifier});
 
   final ValueNotifier<int> counterValueNotifier;
 
@@ -36,7 +36,7 @@ class CounterBody extends StatelessWidget {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();

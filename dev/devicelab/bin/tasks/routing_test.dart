@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -67,8 +66,9 @@ void main() {
         });
       unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
-      if (!ok)
+      if (!ok) {
         throw 'Failed to run test app.';
+      }
       print('drive: starting...');
       final Process drive = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -91,11 +91,13 @@ void main() {
       await flutter('install', options: <String>[
         '--uninstall-only',
       ]);
-      if (result != 0)
+      if (result != 0) {
         throw 'Failed to drive test app (exit code $result).';
+      }
       result = await run.exitCode;
-      if (result != 0)
+      if (result != 0) {
         throw 'Received unexpected exit code $result from run process.';
+      }
     });
     return TaskResult.success(null);
   });

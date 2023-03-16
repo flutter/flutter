@@ -35,7 +35,6 @@ enum SupportedPlatform {
   macos,
   web,
   windows,
-  windowsuwp,
   fuchsia,
   root, // Special platform to represent the root project directory
 }
@@ -139,9 +138,16 @@ class FlutterProject {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      final String? bundleIdentifier = await ios.productBundleIdentifier(null);
-      if (bundleIdentifier != null) {
-        candidates.add(bundleIdentifier);
+      try {
+        final String? bundleIdentifier = await ios.productBundleIdentifier(null);
+        if (bundleIdentifier != null) {
+          candidates.add(bundleIdentifier);
+        }
+      } on ToolExit {
+        // It's possible that while parsing the build info for the ios project
+        // that the bundleIdentifier can't be resolve. However, we would like
+        // skip parsing that id in favor of searching in other place. We can
+        // consider a tool exit in this case to be non fatal for the program.
       }
     }
     if (android.existsSync()) {
@@ -193,9 +199,6 @@ class FlutterProject {
 
   /// The Windows sub project of this project.
   late final WindowsProject windows = WindowsProject.fromFlutter(this);
-
-  /// The Windows UWP sub project of this project.
-  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
   late final FuchsiaProject fuchsia = FuchsiaProject._(this);
@@ -278,9 +281,6 @@ class FlutterProject {
     if (windows.existsSync()) {
       platforms.add(SupportedPlatform.windows);
     }
-    if (windowsUwp.existsSync()) {
-      platforms.add(SupportedPlatform.windowsuwp);
-    }
     if (fuchsia.existsSync()) {
       platforms.add(SupportedPlatform.fuchsia);
     }
@@ -336,7 +336,6 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
-      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
       deprecationBehavior: deprecationBehavior,
     );
   }
@@ -350,7 +349,6 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool winUwpPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
     if (!directory.existsSync() || isPlugin) {
@@ -375,9 +373,6 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (winUwpPlatform) {
-      await windowsUwp.ensureReadyForPlatformSpecificTooling();
-    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -385,13 +380,11 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      webPlatform: webPlatform,
-      winUwpPlatform: winUwpPlatform,
     );
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
-    if (android.existsSync()) {
+    if (android.existsSync() && pubspecFile.existsSync()) {
       android.checkForDeprecation(deprecationBehavior: deprecationBehavior);
     }
   }
@@ -587,9 +580,13 @@ class AndroidProject extends FlutterProjectPlatform {
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
-        'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
+        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+        'compileSdkVersion': gradle.compileSdkVersion,
+        'minSdkVersion': gradle.minSdkVersion,
+        'ndkVersion': gradle.ndkVersion,
+        'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
     );
@@ -609,14 +606,11 @@ class AndroidProject extends FlutterProjectPlatform {
 Warning
 ──────────────────────────────────────────────────────────────────────────────
 Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. Follow the
-steps at
+embedding. It is being deprecated in favor of Android embedding v2. To migrate
+your project, follow the steps at:
 
-https://flutter.dev/go/android-project-migration
+https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
 
-to migrate your project. You may also pass the --ignore-deprecation flag to
-ignore this check and continue with the deprecated v1 embedding. However,
-the v1 Android embedding will be removed in future versions of Flutter.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 The detected reason was:
 
@@ -657,7 +651,7 @@ The detected reason was:
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
@@ -744,7 +738,20 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  /// The .dart_tool/dartpad directory
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
+    /// See: https://github.com/dart-lang/dart-services/pull/874
+    await injectBuildTimePluginFiles(
+      parent,
+      destination: dartpadToolDirectory,
+      webPlatform: true,
+    );
+  }
 }
 
 /// The Fuchsia sub project.

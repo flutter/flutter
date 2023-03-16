@@ -452,7 +452,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// If true, this focus node may request the primary focus.
   ///
-  /// Defaults to true.  Set to false if you want this node to do nothing when
+  /// Defaults to true. Set to false if you want this node to do nothing when
   /// [requestFocus] is called on it.
   ///
   /// If set to false on a [FocusScopeNode], will cause all of the children of
@@ -513,7 +513,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// use [canRequestFocus].
   ///
   /// If any descendants are focused when this is set to false, they will be
-  /// unfocused. When `descendantsAreFocusable` is set to true again, they will
+  /// unfocused. When [descendantsAreFocusable] is set to true again, they will
   /// not be refocused, although they will be able to accept focus again.
   ///
   /// Does not affect the value of [canRequestFocus] on the descendants.
@@ -531,7 +531,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///   traversal for a subtree.
   /// * [Focus], a widget that exposes this setting as a parameter.
   /// * [FocusTraversalGroup], a widget used to group together and configure
-  ///   the focus traversal policy for a widget subtree that also has an
+  ///   the focus traversal policy for a widget subtree that also has a
   ///   `descendantsAreFocusable` parameter that prevents its children from
   ///   being focused.
   bool get descendantsAreFocusable => _descendantsAreFocusable;
@@ -753,8 +753,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
     for (final FocusNode node in ancestors) {
-      if (node is FocusScopeNode)
+      if (node is FocusScopeNode) {
         return node;
+      }
     }
     return null;
   }
@@ -826,7 +827,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// If you want this node to lose focus and the focus to move to the next or
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
-  /// [previousFocus] instead of calling `unfocus`.
+  /// [previousFocus] instead of calling [unfocus].
   ///
   /// {@tool dartpad}
   /// This example shows the difference between the different [UnfocusDisposition]
@@ -1207,20 +1208,15 @@ class FocusScopeNode extends FocusNode {
   ///
   /// All parameters are optional.
   FocusScopeNode({
-    String? debugLabel,
-    FocusOnKeyEventCallback? onKeyEvent,
-    FocusOnKeyCallback? onKey,
-    bool skipTraversal = false,
-    bool canRequestFocus = true,
+    super.debugLabel,
+    super.onKeyEvent,
+    super.onKey,
+    super.skipTraversal,
+    super.canRequestFocus,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         super(
-          debugLabel: debugLabel,
-          onKeyEvent: onKeyEvent,
-          onKey: onKey,
-          canRequestFocus: canRequestFocus,
           descendantsAreFocusable: true,
-          skipTraversal: skipTraversal,
         );
 
   @override
@@ -1324,8 +1320,9 @@ class FocusScopeNode extends FocusNode {
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.
-    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus)
+    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus) {
       _focusedChildren.removeLast();
+    }
 
     final FocusNode? focusedChild = this.focusedChild;
     // If findFirstFocus is false, then the request is to make this scope the
@@ -1469,7 +1466,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();
@@ -1648,9 +1644,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         expectedMode = FocusHighlightMode.touch;
         break;
       case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         _lastInteractionWasTouch = false;
         expectedMode = FocusHighlightMode.traditional;
         break;
@@ -1699,7 +1694,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           handled = false;
           break;
       }
-      // Only KeyEventResult.ignored will continue the for loop.  All other
+      // Only KeyEventResult.ignored will continue the for loop. All other
       // options will stop the event propagation.
       assert(result != KeyEventResult.ignored);
       break;
@@ -1804,10 +1799,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         _dirtyNodes.add(_primaryFocus!);
       }
     }
-    assert(_focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     for (final FocusNode node in _dirtyNodes) {
       node._notify();
     }
+    assert(_focusDebug('Notified ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
       notifyListeners();

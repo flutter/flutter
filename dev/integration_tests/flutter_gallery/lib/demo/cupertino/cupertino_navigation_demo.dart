@@ -446,6 +446,7 @@ class CupertinoDemoTab2 extends StatelessWidget {
       ),
       child: CupertinoScrollbar(
         child: ListView(
+          primary: true,
           children: <Widget>[
             const CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Image.frameBuilder
+/// Flutter code sample for [Image.frameBuilder].
 
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ void main() {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key, required this.image}) : super(key: key);
+  const MyStatelessWidget({super.key, required this.image});
 
   final ImageProvider image;
 

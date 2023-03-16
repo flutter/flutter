@@ -1,13 +1,15 @@
 // Generated file. Do not edit.
 
 buildscript {
+    ext.kotlin_version = '{{kotlinVersion}}'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:{{agpVersionForModule}}'
+        classpath 'com.android.tools.build:gradle:{{gradleVersionForModule}}'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -18,6 +20,16 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion {{compileSdkVersion}}
+    defaultConfig {
+        minSdkVersion {{minSdkVersion}}
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

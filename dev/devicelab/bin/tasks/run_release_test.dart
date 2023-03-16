@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -115,8 +114,8 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app.apk...'),
-        'Installing build/app/outputs/flutter-apk/app.apk...',
+        (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app-release.apk...'),
+        'Installing build/app/outputs/flutter-apk/app-release.apk...',
       );
 
       _findNextMatcherInList(

@@ -21,8 +21,9 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
+    if (callback != null) {
       callback?.call(event);
+    }
   }
 
   @override

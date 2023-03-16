@@ -80,7 +80,7 @@ Future<TaskResult> _doTest() async {
           'am',
           'start',
           '-n',
-          '$_bundleName/$_bundleName.$_activityName'
+          '$_bundleName/$_bundleName.$_activityName',
         ]);
         await Future<void>.delayed(const Duration(seconds: 10));
         final Map<String, dynamic> memoryStats =
@@ -93,7 +93,7 @@ Future<TaskResult> _doTest() async {
           ListStatistics(totalMemorySamples);
 
       final Map<String, dynamic> results = <String, dynamic>{
-        ...totalMemoryStatistics.asMap('totalMemory')
+        ...totalMemoryStatistics.asMap('totalMemory'),
       };
       result = TaskResult.success(results,
           benchmarkScoreKeys: results.keys.toList());

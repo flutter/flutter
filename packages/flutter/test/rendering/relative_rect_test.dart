@@ -10,6 +10,24 @@ void main() {
     const RelativeRect r = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     expect(r, RelativeRect.fromSize(const Rect.fromLTWH(10.0, 20.0, 0.0, 0.0), const Size(40.0, 60.0)));
   });
+  test('RelativeRect.fromDirectional', () {
+    final RelativeRect r1 = RelativeRect.fromDirectional(
+      textDirection: TextDirection.ltr,
+      start: 10.0,
+      top: 20.0,
+      end: 30.0,
+      bottom: 40.0,
+    );
+    final RelativeRect r2 = RelativeRect.fromDirectional(
+      textDirection: TextDirection.rtl,
+      start: 10.0,
+      top: 20.0,
+      end: 30.0,
+      bottom: 40.0,
+    );
+    expect(r1, const RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+    expect(r2, const RelativeRect.fromLTRB(30.0, 20.0, 10.0, 40.0));
+  });
   test('RelativeRect.shift', () {
     const RelativeRect r1 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final RelativeRect r2 = r1.shift(const Offset(5.0, 50.0));

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -26,8 +25,14 @@ void main() {
       Cache.disableLocking();
     });
 
+    late FileSystem fileSystem;
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      fileSystem.file('pubspec.yaml').createSync(recursive: true);
+    });
+
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
@@ -36,10 +41,12 @@ void main() {
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -49,10 +56,12 @@ void main() {
         throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
-      final InstallCommand command = InstallCommand();
+      final InstallCommand command = InstallCommand(verboseHelp: false);
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
@@ -61,6 +70,56 @@ void main() {
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('fails when prebuilt binary not found', () async {
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
+
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      testDeviceManager.addDevice(device);
+
+      expect(() async => createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'bogus']),
+          throwsToolExit(message: 'Prebuilt binary bogus does not exist'));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('succeeds using prebuilt binary', () async {
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
+
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      testDeviceManager.addDevice(device);
+      fileSystem.file('binary').createSync(recursive: true);
+
+      await createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'binary']);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Passes flavor to application package.', () async {
+      const String flavor = 'free';
+      final InstallCommand command = InstallCommand(verboseHelp: false);
+      final FakeApplicationPackageFactory fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
+      command.applicationPackages = fakeAppFactory;
+
+      final FakeIOSDevice device = FakeIOSDevice();
+      testDeviceManager.addDevice(device);
+
+      await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
+      expect(fakeAppFactory.buildInfo, isNotNull);
+      expect(fakeAppFactory.buildInfo!.flavor, flavor);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }
@@ -69,9 +128,11 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   FakeApplicationPackageFactory(this.app);
 
   final ApplicationPackage app;
+  BuildInfo? buildInfo;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+    this.buildInfo = buildInfo;
     return app;
   }
 }
@@ -88,13 +149,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<bool> isAppInstalled(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     IOSApp app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }
 
@@ -108,12 +169,12 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   Future<bool> isAppInstalled(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
     AndroidApk app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 }

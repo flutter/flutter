@@ -86,10 +86,10 @@ void main() {
       'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
       'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'helpTextStyle: TextStyle(<all styles inherited>)',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'hourMinuteShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'dayPeriodBorderSide: BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'hourMinuteShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'dayPeriodBorderSide: BorderSide',
     ]);
   });
 
@@ -114,40 +114,40 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.headline2!
-          .merge(Typography.material2014().black.headline2)
+      Typography.material2014().englishLike.displayMedium!
+          .merge(Typography.material2014().black.displayMedium)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
 
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.headline2!
-          .merge(Typography.material2014().black.headline2)
+      Typography.material2014().englishLike.displayMedium!
+          .merge(Typography.material2014().black.displayMedium)
           .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
 
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
 
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.6)),
     );
 
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.overline!
-          .merge(Typography.material2014().black.overline),
+      Typography.material2014().englishLike.labelSmall!
+          .merge(Typography.material2014().black.labelSmall),
     );
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
@@ -157,8 +157,8 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-        .merge(Typography.material2014().black.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+        .merge(Typography.material2014().black.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
     // ignore: avoid_dynamic_calls
@@ -166,8 +166,8 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-        .merge(Typography.material2014().white.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+        .merge(Typography.material2014().white.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onPrimary),
     );
 
@@ -227,8 +227,8 @@ void main() {
     expect(hourDecoration.focusedErrorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(
       hourDecoration.hintStyle,
-      Typography.material2014().englishLike.headline2!
-          .merge(defaultTheme.textTheme.headline2!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
+      Typography.material2014().englishLike.displayMedium!
+          .merge(defaultTheme.textTheme.displayMedium!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
     );
   });
 
@@ -254,8 +254,8 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _selectedColor),
     );
@@ -263,8 +263,8 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _unselectedColor),
     );
@@ -272,8 +272,8 @@ void main() {
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _selectedColor),
     );
@@ -281,8 +281,8 @@ void main() {
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _unselectedColor),
     );
@@ -290,8 +290,8 @@ void main() {
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.helpTextStyle),
     );
 
@@ -302,8 +302,8 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-          .merge(Typography.material2014().black.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+          .merge(Typography.material2014().black.bodyLarge)
           .copyWith(color: _unselectedColor),
     );
     // ignore: avoid_dynamic_calls
@@ -311,8 +311,8 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-          .merge(Typography.material2014().white.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+          .merge(Typography.material2014().white.bodyLarge)
           .copyWith(color: _selectedColor),
     );
 
@@ -417,10 +417,9 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({
-    Key? key,
     this.themeData,
     this.entryMode = TimePickerEntryMode.dial,
-  }) : super(key: key);
+  });
 
   final ThemeData? themeData;
   final TimePickerEntryMode entryMode;

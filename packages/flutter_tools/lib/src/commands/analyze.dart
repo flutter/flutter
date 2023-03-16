@@ -2,16 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../project_validator.dart';
 import '../runner/flutter_command.dart';
+import 'analyze_base.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
+import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
@@ -23,11 +28,13 @@ class AnalyzeCommand extends FlutterCommand {
     required Logger logger,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    required List<ProjectValidator> allProjectValidators,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
+       _allProjectValidators = allProjectValidators,
        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
@@ -56,6 +63,15 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'The path to write the request and response protocol. This is '
               'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
+    argParser.addFlag('suggestions',
+        help: 'Show suggestions about the current flutter project.'
+    );
+    argParser.addFlag('machine',
+        negatable: false,
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              'and environment.',
+        hide: !verboseHelp,
+    );
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -92,6 +108,7 @@ class AnalyzeCommand extends FlutterCommand {
   final Terminal _terminal;
   final ProcessManager _processManager;
   final Platform _platform;
+  final List<ProjectValidator> _allProjectValidators;
 
   @override
   String get name => 'analyze';
@@ -102,10 +119,13 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   String get category => FlutterCommandCategory.project;
 
+  @visibleForTesting
+  List<ProjectValidator> allProjectValidators() => _allProjectValidators;
+
   @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!boolArg('current-package')) {
+    if (!boolArgDeprecated('current-package')) {
       return false;
     }
 
@@ -114,12 +134,46 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for machine output.
+    if (boolArg('machine') != null && boolArg('machine')!) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (boolArg('watch')) {
+    final bool? suggestionFlag = boolArg('suggestions');
+    final bool machineFlag = boolArg('machine') ?? false;
+    if (suggestionFlag != null && suggestionFlag == true) {
+      final String directoryPath;
+      final bool? watchFlag = boolArg('watch');
+      if (watchFlag != null && watchFlag) {
+        throwToolExit('flag --watch is not compatible with --suggestions');
+      }
+      if (workingDirectory == null) {
+        final Set<String> items = findDirectories(argResults!, _fileSystem);
+        if (items.isEmpty) { // user did not specify any path
+          directoryPath = _fileSystem.currentDirectory.path;
+          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
+        } else if (items.length > 1) { // if the user sends more than one path
+          throwToolExit('The suggestions flag can process only one directory path');
+        } else {
+          directoryPath = items.first;
+        }
+      } else {
+        directoryPath = workingDirectory!.path;
+      }
+      return ValidateProject(
+        fileSystem: _fileSystem,
+        logger: _logger,
+        allProjectValidators: _allProjectValidators,
+        userPath: directoryPath,
+        processManager: _processManager,
+        machine: machineFlag,
+      ).run();
+    } else if (boolArgDeprecated('watch')) {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoRoots(),

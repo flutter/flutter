@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -53,7 +53,7 @@ class Visibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const Visibility({
-    Key? key,
+    super.key,
     required this.child,
     this.replacement = const SizedBox.shrink(),
     this.visible = true,
@@ -83,8 +83,29 @@ class Visibility extends StatelessWidget {
        assert(
          maintainSize == true || maintainInteractivity == false,
          'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+       );
+
+  /// Control whether the given [child] is [visible].
+  ///
+  /// The [child] and [replacement] arguments must not be null.
+  ///
+  /// This is equivalent to the default [Visibility] constructor with all
+  /// "maintain" fields set to true. This constructor should be used in place of
+  /// an [Opacity] widget that only takes on values of `0.0` or `1.0`, as it
+  /// avoids extra compositing when fully opaque.
+  const Visibility.maintain({
+    super.key,
+    required this.child,
+    this.replacement = const SizedBox.shrink(),
+    this.visible = true,
+  }) :  assert(child != null),
+        assert(replacement != null),
+        assert(visible != null),
+        maintainState = true,
+        maintainAnimation = true,
+        maintainSize = true,
+        maintainSemantics = true,
+        maintainInteractivity = true;
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -169,7 +190,7 @@ class Visibility extends StatelessWidget {
   /// [child] subtree is not trivial then it is significantly cheaper to not
   /// even keep the state (see [maintainState]).
   ///
-  /// If this property is true, [Opacity] is used instead of [Offstage].
+  /// If this property is false, [Offstage] is used.
   ///
   /// If this property is false, then [maintainSemantics] and
   /// [maintainInteractivity] must also be false.
@@ -223,9 +244,9 @@ class Visibility extends StatelessWidget {
           child: child,
         );
       }
-      return Opacity(
-        opacity: visible ? 1.0 : 0.0,
-        alwaysIncludeSemantics: maintainSemantics,
+      return _Visibility(
+        visible: visible,
+        maintainSemantics: maintainSemantics,
         child: result,
       );
     }
@@ -234,8 +255,9 @@ class Visibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = child;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: child);
+      }
       return Offstage(
         offstage: !visible,
         child: result,
@@ -298,7 +320,7 @@ class SliverVisibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const SliverVisibility({
-    Key? key,
+    super.key,
     required this.sliver,
     this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
@@ -330,8 +352,29 @@ class SliverVisibility extends StatelessWidget {
        assert(
          maintainSize == true || maintainInteractivity == false,
          'Cannot maintain interactivity if size is not maintained.',
-       ),
-       super(key: key);
+       );
+
+  /// Control whether the given [sliver] is [visible].
+  ///
+  /// The [sliver] and [replacementSliver] arguments must not be null.
+  ///
+  /// This is equivalent to the default [SliverVisibility] constructor with all
+  /// "maintain" fields set to true. This constructor should be used in place of
+  /// a [SliverOpacity] widget that only takes on values of `0.0` or `1.0`, as it
+  /// avoids extra compositing when fully opaque.
+  const SliverVisibility.maintain({
+    super.key,
+    required this.sliver,
+    this.replacementSliver = const SliverToBoxAdapter(),
+    this.visible = true,
+  }) :  assert(sliver != null),
+        assert(replacementSliver != null),
+        assert(visible != null),
+        maintainState = true,
+        maintainAnimation = true,
+        maintainSize = true,
+        maintainSemantics = true,
+        maintainInteractivity = true;
 
   /// The sliver to show or hide, as controlled by [visible].
   final Widget sliver;
@@ -411,8 +454,7 @@ class SliverVisibility extends StatelessWidget {
   /// [sliver] subtree is not trivial then it is significantly cheaper to not
   /// even keep the state (see [maintainState]).
   ///
-  /// If this property is true, [SliverOpacity] is used instead of
-  /// [SliverOffstage].
+  /// If this property is false, [SliverOffstage] is used.
   ///
   /// If this property is false, then [maintainSemantics] and
   /// [maintainInteractivity] must also be false.
@@ -461,9 +503,9 @@ class SliverVisibility extends StatelessWidget {
           ignoringSemantics: !visible && !maintainSemantics,
         );
       }
-      return SliverOpacity(
-        opacity: visible ? 1.0 : 0.0,
-        alwaysIncludeSemantics: maintainSemantics,
+      return _SliverVisibility(
+        visible: visible,
+        maintainSemantics: maintainSemantics,
         sliver: result,
       );
     }
@@ -472,8 +514,9 @@ class SliverVisibility extends StatelessWidget {
     assert(!maintainSize);
     if (maintainState) {
       Widget result = sliver;
-      if (!maintainAnimation)
+      if (!maintainAnimation) {
         result = TickerMode(enabled: visible, child: sliver);
+      }
       return SliverOffstage(
         sliver: result,
         offstage: !visible,
@@ -493,5 +536,134 @@ class SliverVisibility extends StatelessWidget {
     properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
     properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
     properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+  }
+}
+
+// A widget that conditionally hides its child, but without the forced compositing of `Opacity`.
+//
+// A fully opaque `Opacity` widget is required to leave its opacity layer in the layer tree. This
+// forces all parent render objects to also composite, which can break a simple scene into many
+// different layers. This can be significantly more expensive, so the issue is avoided by a
+// specialized render object that does not ever force compositing.
+class _Visibility extends SingleChildRenderObjectWidget {
+  const _Visibility({ required this.visible, required this.maintainSemantics,  super.child });
+
+  final bool visible;
+  final bool maintainSemantics;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderVisibility(visible, maintainSemantics);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+    (renderObject as _RenderVisibility)
+      ..visible = visible
+      ..maintainSemantics = maintainSemantics;
+  }
+}
+
+class _RenderVisibility extends RenderProxyBox {
+  _RenderVisibility(this._visible, this._maintainSemantics);
+
+  bool get visible => _visible;
+  bool _visible;
+  set visible(bool value) {
+    if (value == visible) {
+      return;
+    }
+    _visible = value;
+    markNeedsPaint();
+  }
+
+  bool get maintainSemantics => _maintainSemantics;
+  bool _maintainSemantics;
+  set maintainSemantics(bool value) {
+    if (value == maintainSemantics) {
+      return;
+    }
+    _maintainSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (maintainSemantics || visible) {
+      super.visitChildrenForSemantics(visitor);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!visible) {
+      return;
+    }
+    super.paint(context, offset);
+  }
+}
+
+// A widget that conditionally hides its child, but without the forced compositing of `SliverOpacity`.
+//
+// A fully opaque `SliverOpacity` widget is required to leave its opacity layer in the layer tree.
+// This forces all parent render objects to also composite, which can break a simple scene into many
+// different layers. This can be significantly more expensive, so the issue is avoided by a
+// specialized render object that does not ever force compositing.
+class _SliverVisibility extends SingleChildRenderObjectWidget {
+  const _SliverVisibility({ required this.visible, required this.maintainSemantics, Widget? sliver })
+    : super(child: sliver);
+
+  final bool visible;
+  final bool maintainSemantics;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSliverVisibility(visible, maintainSemantics);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+    (renderObject as _RenderSliverVisibility)
+      ..visible = visible
+      ..maintainSemantics = maintainSemantics;
+  }
+}
+
+class _RenderSliverVisibility extends RenderProxySliver {
+  _RenderSliverVisibility(this._visible, this._maintainSemantics);
+
+  bool get visible => _visible;
+  bool _visible;
+  set visible(bool value) {
+    if (value == visible) {
+      return;
+    }
+    _visible = value;
+    markNeedsPaint();
+  }
+
+  bool get maintainSemantics => _maintainSemantics;
+  bool _maintainSemantics;
+  set maintainSemantics(bool value) {
+    if (value == maintainSemantics) {
+      return;
+    }
+    _maintainSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (maintainSemantics || visible) {
+      super.visitChildrenForSemantics(visitor);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!visible) {
+      return;
+    }
+    super.paint(context, offset);
   }
 }

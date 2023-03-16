@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Used with [ExpansionTileTheme] to define default property values for
 /// descendant [ExpansionTile] widgets.
@@ -48,6 +49,9 @@ class ExpansionTileThemeData with Diagnosticable {
     this.collapsedIconColor,
     this.textColor,
     this.collapsedTextColor,
+    this.shape,
+    this.collapsedShape,
+    this.clipBehavior,
   });
 
   /// Overrides the default value of [ExpansionTile.backgroundColor].
@@ -77,6 +81,15 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Overrides the default value of [ExpansionTile.collapsedTextColor].
   final Color? collapsedTextColor;
 
+  /// Overrides the default value of [ExpansionTile.shape].
+  final ShapeBorder? shape;
+
+  /// Overrides the default value of [ExpansionTile.collapsedShape].
+  final ShapeBorder? collapsedShape;
+
+  /// Overrides the default value of [ExpansionTile.clipBehavior].
+  final Clip? clipBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
@@ -89,6 +102,9 @@ class ExpansionTileThemeData with Diagnosticable {
     Color? collapsedIconColor,
     Color? textColor,
     Color? collapsedTextColor,
+    ShapeBorder? shape,
+    ShapeBorder? collapsedShape,
+    Clip? clipBehavior,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -100,14 +116,18 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor: collapsedIconColor ?? this.collapsedIconColor,
       textColor: textColor ?? this.textColor,
       collapsedTextColor: collapsedTextColor ?? this.collapsedTextColor,
+      shape: shape ?? this.shape,
+      collapsedShape: collapsedShape ?? this.collapsedShape,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
   /// Linearly interpolate between ExpansionTileThemeData objects.
   static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ExpansionTileThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       collapsedBackgroundColor: Color.lerp(a?.collapsedBackgroundColor, b?.collapsedBackgroundColor, t),
@@ -118,6 +138,8 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor: Color.lerp(a?.collapsedIconColor, b?.collapsedIconColor, t),
       textColor: Color.lerp(a?.textColor, b?.textColor, t),
       collapsedTextColor: Color.lerp(a?.collapsedTextColor, b?.collapsedTextColor, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      collapsedShape: ShapeBorder.lerp(a?.collapsedShape, b?.collapsedShape, t),
     );
   }
 
@@ -133,15 +155,20 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedIconColor,
       textColor,
       collapsedTextColor,
+      shape,
+      collapsedShape,
+      clipBehavior,
     );
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ExpansionTileThemeData
       && other.backgroundColor == backgroundColor
       && other.collapsedBackgroundColor == collapsedBackgroundColor
@@ -151,7 +178,10 @@ class ExpansionTileThemeData with Diagnosticable {
       && other.iconColor == iconColor
       && other.collapsedIconColor == collapsedIconColor
       && other.textColor == textColor
-      && other.collapsedTextColor == collapsedTextColor;
+      && other.collapsedTextColor == collapsedTextColor
+      && other.shape == shape
+      && other.collapsedShape == collapsedShape
+      && other.clipBehavior == clipBehavior;
   }
 
   @override
@@ -166,6 +196,9 @@ class ExpansionTileThemeData with Diagnosticable {
     properties.add(ColorProperty('collapsedIconColor', collapsedIconColor, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(ColorProperty('collapsedTextColor', collapsedTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('collapsedShape', collapsedShape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }
 
@@ -181,12 +214,11 @@ class ExpansionTileTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ExpansionTileTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies color, alignment, and text style values for
   /// descendant [ExpansionTile] widgets.

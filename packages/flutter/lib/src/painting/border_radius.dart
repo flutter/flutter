@@ -130,8 +130,9 @@ abstract class BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     a ??= BorderRadius.zero;
     b ??= BorderRadius.zero;
     return a.add((b.subtract(a)) * t);
@@ -171,20 +172,23 @@ abstract class BorderRadiusGeometry {
         comma = true;
       }
       if (_topRight != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('topRight: $_topRight');
         comma = true;
       }
       if (_bottomLeft != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomLeft: $_bottomLeft');
         comma = true;
       }
       if (_bottomRight != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomRight: $_bottomRight');
       }
       result.write(')');
@@ -210,40 +214,48 @@ abstract class BorderRadiusGeometry {
         comma = true;
       }
       if (_topEnd != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('topEnd: $_topEnd');
         comma = true;
       }
       if (_bottomStart != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomStart: $_bottomStart');
         comma = true;
       }
       if (_bottomEnd != Radius.zero) {
-        if (comma)
+        if (comma) {
           result.write(', ');
+        }
         result.write('bottomEnd: $_bottomEnd');
       }
       result.write(')');
       logical = result.toString();
     }
-    if (visual != null && logical != null)
+    if (visual != null && logical != null) {
       return '$visual + $logical';
-    if (visual != null)
+    }
+    if (visual != null) {
       return visual;
-    if (logical != null)
+    }
+    if (logical != null) {
       return logical;
+    }
     return 'BorderRadius.zero';
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderRadiusGeometry
         && other._topLeft == _topLeft
         && other._topRight == _topRight
@@ -380,27 +392,35 @@ class BorderRadius extends BorderRadiusGeometry {
   Radius get _bottomEnd => Radius.zero;
 
   /// Creates an [RRect] from the current border radius and a [Rect].
+  ///
+  /// If any of the radii have negative values in x or y, those values will be
+  /// clamped to zero in order to produce a valid [RRect].
   RRect toRRect(Rect rect) {
+    // Because the current radii could be negative, we must clamp them before
+    // converting them to an RRect to be rendered, since negative radii on
+    // RRects don't make sense.
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
+      topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
     );
   }
 
   @override
   BorderRadiusGeometry subtract(BorderRadiusGeometry other) {
-    if (other is BorderRadius)
+    if (other is BorderRadius) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   BorderRadiusGeometry add(BorderRadiusGeometry other) {
-    if (other is BorderRadius)
+    if (other is BorderRadius) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -488,12 +508,15 @@ class BorderRadius extends BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return BorderRadius.only(
       topLeft: Radius.lerp(a.topLeft, b.topLeft, t)!,
       topRight: Radius.lerp(a.topRight, b.topRight, t)!,
@@ -609,15 +632,17 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   @override
   BorderRadiusGeometry subtract(BorderRadiusGeometry other) {
-    if (other is BorderRadiusDirectional)
+    if (other is BorderRadiusDirectional) {
       return this - other;
+    }
     return super.subtract(other);
   }
 
   @override
   BorderRadiusGeometry add(BorderRadiusGeometry other) {
-    if (other is BorderRadiusDirectional)
+    if (other is BorderRadiusDirectional) {
       return this + other;
+    }
     return super.add(other);
   }
 
@@ -705,12 +730,15 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b! * t;
-    if (b == null)
+    }
+    if (b == null) {
       return a * (1.0 - t);
+    }
     return BorderRadiusDirectional.only(
       topStart: Radius.lerp(a.topStart, b.topStart, t)!,
       topEnd: Radius.lerp(a.topEnd, b.topEnd, t)!,

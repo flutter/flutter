@@ -19,6 +19,12 @@ import 'material_localizations.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 
+const double _kHandleSize = 22.0;
+
+// Padding between the toolbar and the anchor.
+const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
+const double _kToolbarContentDistance = 8.0;
+
 /// A fully-functional Material-style text selection toolbar.
 ///
 /// Tries to position itself above [anchorAbove], but if it doesn't fit, then
@@ -29,20 +35,19 @@ const double _kToolbarHeight = 44.0;
 ///
 /// See also:
 ///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an Android-style toolbar.
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.
 class TextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbar.
   const TextSelectionToolbar({
-    Key? key,
+    super.key,
     required this.anchorAbove,
     required this.anchorBelow,
     this.toolbarBuilder = _defaultToolbarBuilder,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// {@template flutter.material.TextSelectionToolbar.anchorAbove}
   /// The focal point above which the toolbar attempts to position itself.
@@ -88,10 +93,17 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Incorporate the padding distance between the content and toolbar.
+    final Offset anchorAbovePadded =
+        anchorAbove - const Offset(0.0, _kToolbarContentDistance);
+    final Offset anchorBelowPadded =
+        anchorBelow + const Offset(0.0, _kToolbarContentDistanceBelow);
+
     final double paddingAbove = MediaQuery.of(context).padding.top
         + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy - paddingAbove;
+    final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
+    // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
@@ -101,21 +113,17 @@ class TextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
-      child: Stack(
-        children: <Widget>[
-          CustomSingleChildLayout(
-            delegate: TextSelectionToolbarLayoutDelegate(
-              anchorAbove: anchorAbove - localAdjustment,
-              anchorBelow: anchorBelow - localAdjustment,
-              fitsAbove: fitsAbove,
-            ),
-            child: _TextSelectionToolbarOverflowable(
-              isAbove: fitsAbove,
-              toolbarBuilder: toolbarBuilder,
-              children: children,
-            ),
-          ),
-        ],
+      child: CustomSingleChildLayout(
+        delegate: TextSelectionToolbarLayoutDelegate(
+          anchorAbove: anchorAbovePadded - localAdjustment,
+          anchorBelow: anchorBelowPadded - localAdjustment,
+          fitsAbove: fitsAbove,
+        ),
+        child: _TextSelectionToolbarOverflowable(
+          isAbove: fitsAbove,
+          toolbarBuilder: toolbarBuilder,
+          children: children,
+        ),
       ),
     );
   }
@@ -126,12 +134,10 @@ class TextSelectionToolbar extends StatelessWidget {
 // menu.
 class _TextSelectionToolbarOverflowable extends StatefulWidget {
   const _TextSelectionToolbarOverflowable({
-    Key? key,
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   final List<Widget> children;
 
@@ -159,8 +165,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   // changed and saved values are no longer relevant. This should be called in
   // setState or another context where a rebuild is happening.
   void _reset() {
-    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes in
-    // order to cause it to rebuild. This lets it recalculate its
+    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes
+    // in order to cause it to rebuild. This lets it recalculate its
     // saved width for the new set of children, and it prevents AnimatedSize
     // from animating the size change.
     _containerKey = UniqueKey();
@@ -227,13 +233,12 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
 // to that side.
 class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidget {
   const _TextSelectionToolbarTrailingEdgeAlign({
-    Key? key,
-    required Widget child,
+    super.key,
+    required Widget super.child,
     required this.overflowOpen,
     required this.textDirection,
   }) : assert(child != null),
-       assert(overflowOpen != null),
-       super(key: key, child: child);
+       assert(overflowOpen != null);
 
   final bool overflowOpen;
   final TextDirection textDirection;
@@ -358,14 +363,12 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarItemsLayout({
-    Key? key,
     required this.isAbove,
     required this.overflowOpen,
-    required List<Widget> children,
+    required super.children,
   }) : assert(children != null),
        assert(isAbove != null),
-       assert(overflowOpen != null),
-       super(key: key, children: children);
+       assert(overflowOpen != null);
 
   final bool isAbove;
   final bool overflowOpen;
@@ -391,8 +394,8 @@ class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
 
 class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElement {
   _TextSelectionToolbarItemsLayoutElement(
-    MultiChildRenderObjectWidget widget,
-  ) : super(widget);
+    super.widget,
+  );
 
   static bool _shouldPaint(Element child) {
     return (child.renderObject!.parentData! as ToolbarItemsParentData).shouldPaint;
@@ -618,8 +621,9 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
           return child!.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
       child = childParentData.previousSibling;
     }
     return false;
@@ -642,9 +646,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 // overflow ability.
 class _TextSelectionToolbarContainer extends StatelessWidget {
   const _TextSelectionToolbarContainer({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -666,11 +669,10 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 // forward and back controls.
 class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   const _TextSelectionToolbarOverflowButton({
-    Key? key,
     required this.icon,
     this.onPressed,
     this.tooltip,
-  }) : super(key: key);
+  });
 
   final Icon icon;
   final VoidCallback? onPressed;

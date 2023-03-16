@@ -32,7 +32,7 @@ import 'constants.dart';
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
-///   const MyTabbedPage({ Key? key }) : super(key: key);
+///   const MyTabbedPage({ super.key });
 ///   @override
 ///   State<MyTabbedPage> createState() => _MyTabbedPageState();
 /// }
@@ -181,8 +181,9 @@ class TabController extends ChangeNotifier {
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
-    if (value == _index || length < 2)
+    if (value == _index || length < 2) {
       return;
+    }
     _previousIndex = index;
     _index = value;
     if (duration != null && duration > Duration.zero) {
@@ -256,8 +257,9 @@ class TabController extends ChangeNotifier {
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
-    if (value == offset)
+    if (value == offset) {
       return;
+    }
     _animationController!.value = value + _index.toDouble();
   }
 
@@ -271,11 +273,10 @@ class TabController extends ChangeNotifier {
 
 class _TabControllerScope extends InheritedWidget {
   const _TabControllerScope({
-    Key? key,
     required this.controller,
     required this.enabled,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final TabController controller;
   final bool enabled;
@@ -301,7 +302,9 @@ class _TabControllerScope extends InheritedWidget {
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
-///   final List<Tab> myTabs = <Tab>[
+///   const MyDemo({super.key});
+///
+///   static const List<Tab> myTabs = <Tab>[
 ///     Tab(text: 'LEFT'),
 ///     Tab(text: 'RIGHT'),
 ///   ];
@@ -312,13 +315,13 @@ class _TabControllerScope extends InheritedWidget {
 ///       length: myTabs.length,
 ///       child: Scaffold(
 ///         appBar: AppBar(
-///           bottom: TabBar(
+///           bottom: const TabBar(
 ///             tabs: myTabs,
 ///           ),
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             final String label = tab.text.toLowerCase();
+///             final String label = tab.text!.toLowerCase();
 ///             return Center(
 ///               child: Text(
 ///                 'This is the $label tab',
@@ -340,15 +343,14 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
-    Key? key,
+    super.key,
     required this.length,
     this.initialIndex = 0,
     required this.child,
     this.animationDuration,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
-       super(key: key);
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
 
   /// The total number of tabs.
   ///
@@ -373,18 +375,65 @@ class DefaultTabController extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context, or null if none is found.
   ///
-  /// {@tool snippet}
-  /// Typical usage is as follows:
+  /// {@tool snippet} Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabController.of(context)!;
+  /// TabController? controller = DefaultTabController.maybeOf(context);
   /// ```
   /// {@end-tool}
-  static TabController? of(BuildContext context) {
-    final _TabControllerScope? scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
-    return scope?.controller;
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.of], which is similar to this method, but asserts
+  ///   if no [DefaultTabController] ancestor is found.
+  static TabController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_TabControllerScope>()?.controller;
+  }
+
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context].
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabController controller = DefaultTabController.of(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.maybeOf], which is similar to this method, but
+  ///   returns null if no [DefaultTabController] ancestor is found.
+  static TabController of(BuildContext context) {
+    final TabController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'DefaultTabController.of() was called with a context that does not '
+          'contain a DefaultTabController widget.\n'
+          'No DefaultTabController widget ancestor could be found starting from '
+          'the context that was passed to DefaultTabController.of(). This can '
+          'happen because you are using a widget that looks for a DefaultTabController '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override

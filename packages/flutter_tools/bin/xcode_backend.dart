@@ -97,11 +97,17 @@ class Context {
     if (verbose) {
       print((result.stdout as String).trim());
     }
-    if ((result.stderr as String).isNotEmpty) {
-      echoError((result.stderr as String).trim());
+    final String resultStderr = result.stderr.toString().trim();
+    if (resultStderr.isNotEmpty) {
+      final StringBuffer errorOutput = StringBuffer();
+      if (result.exitCode != 0) {
+        // "error:" prefix makes this show up as an Xcode compilation error.
+        errorOutput.write('error: ');
+      }
+      errorOutput.write(resultStderr);
+      echoError(errorOutput.toString());
     }
     if (!allowFail && result.exitCode != 0) {
-      stderr.write('${result.stderr}\n');
       throw Exception(
         'Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}',
       );
@@ -260,7 +266,7 @@ class Context {
           'NSBonjourServices.0',
           '-string',
           '_dartobservatory._tcp',
-          builtProductsPlist
+          builtProductsPlist,
         ],
       );
     } else {
@@ -321,28 +327,7 @@ class Context {
       targetPath = environment['FLUTTER_TARGET']!;
     }
 
-    String derivedDir = '$sourceRoot/Flutter}';
-    if (existsDir('$projectPath/.ios')) {
-      derivedDir = '$projectPath/.ios/Flutter';
-    }
-
-    // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
-    // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
-    // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-
     final String buildMode = parseFlutterBuildMode();
-    String artifactVariant = 'unknown';
-    switch (buildMode) {
-      case 'release':
-        artifactVariant = 'ios-release';
-        break;
-      case 'profile':
-        artifactVariant = 'ios-profile';
-        break;
-      case 'debug':
-        artifactVariant = 'ios';
-        break;
-    }
 
     // Warn the user if not archiving (ACTION=install) in release mode.
     final String? action = environment['ACTION'];
@@ -351,46 +336,6 @@ class Context {
         'warning: Flutter archive not built in Release mode. Ensure '
         'FLUTTER_BUILD_MODE is set to release or run "flutter build ios '
         '--release", then re-run Archive from Xcode.',
-      );
-    }
-    final String frameworkPath = '${environmentEnsure('FLUTTER_ROOT')}/bin/cache/artifacts/engine/$artifactVariant';
-
-    String flutterFramework = '$frameworkPath/Flutter.xcframework';
-
-    final String? localEngine = environment['LOCAL_ENGINE'];
-    if (localEngine != null) {
-      if (!localEngine.toLowerCase().contains(buildMode)) {
-        echoError('========================================================================');
-        echoError("ERROR: Requested build with Flutter local engine at '$localEngine'");
-        echoError("This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.");
-        echoError('You can fix this by updating the LOCAL_ENGINE environment variable, or');
-        echoError('by running:');
-        echoError('  flutter build ios --local-engine=ios_$buildMode');
-        echoError('or');
-        echoError('  flutter build ios --local-engine=ios_${buildMode}_unopt');
-        echoError('========================================================================');
-        exitApp(-1);
-      }
-      flutterFramework = '${environmentEnsure('FLUTTER_ENGINE')}/out/$localEngine/Flutter.xcframework';
-    }
-    String bitcodeFlag = '';
-    if (environment['ENABLE_BITCODE'] == 'YES' && environment['ACTION'] == 'install') {
-      bitcodeFlag = 'true';
-    }
-
-    // TODO(jmagman): use assemble copied engine in add-to-app.
-    if (existsDir('$projectPath/.ios')) {
-      runSync(
-        'rsync',
-        <String>[
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store',
-          flutterFramework,
-          '$derivedDir/engine',
-        ],
-        verbose: verbose,
       );
     }
 
@@ -421,7 +366,7 @@ class Context {
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
-      '-dEnableBitcode=$bitcodeFlag',
+      '-dAction=${environment['ACTION'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',

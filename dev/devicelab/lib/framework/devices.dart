@@ -9,7 +9,6 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
-import '../common.dart';
 import 'utils.dart';
 
 const String DeviceIdEnvName = 'FLUTTER_DEVICELAB_DEVICEID';
@@ -253,8 +252,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
-    if (allDevices.isEmpty)
+    if (allDevices.isEmpty) {
       throw const DeviceException('No Android devices detected');
+    }
 
     if (cpu != null) {
       for (final AndroidDevice device in allDevices) {
@@ -269,8 +269,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
     }
 
-    if (_workingDevice == null)
+    if (_workingDevice == null) {
       throw const DeviceException('Cannot find a suitable Android device');
+    }
 
     print('Device chosen: $_workingDevice');
   }
@@ -301,11 +302,13 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final List<String> results = <String>[];
     for (final String line in output) {
       // Skip lines like: * daemon started successfully *
-      if (line.startsWith('* daemon '))
+      if (line.startsWith('* daemon ')) {
         continue;
+      }
 
-      if (line.startsWith('List of devices'))
+      if (line.startsWith('List of devices')) {
         continue;
+      }
 
       if (_kDeviceRegex.hasMatch(line)) {
         final Match match = _kDeviceRegex.firstMatch(line)!;
@@ -483,7 +486,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(_ffx, <String>['target', 'list', '--format', 's']))
+    final List<String> output = (await eval(_ffx, <String>['target', 'list', '-f', 's']))
       .trim()
       .split('\n');
 
@@ -506,7 +509,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
           <String>[
             'target',
             'list',
-            '--format',
+            '-f',
             'a',
             deviceId,
           ]
@@ -552,15 +555,17 @@ class AndroidDevice extends Device {
   /// Wake up the device if it is not awake using [togglePower].
   @override
   Future<void> wakeUp() async {
-    if (!(await isAwake()))
+    if (!(await isAwake())) {
       await togglePower();
+    }
   }
 
   /// Send the device to sleep mode if it is not asleep using [togglePower].
   @override
   Future<void> sendToSleep() async {
-    if (!(await isAsleep()))
+    if (!(await isAsleep())) {
       await togglePower();
+    }
   }
 
   /// Sends `KEYCODE_HOME` (3), which causes the device to go to the home screen.
@@ -841,8 +846,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .map<IosDevice>((String id) => IosDevice(deviceId: id))
       .toList();
 
-    if (allDevices.isEmpty)
+    if (allDevices.isEmpty) {
       throw const DeviceException('No iOS devices detected');
+    }
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
@@ -1212,8 +1218,9 @@ String get adbPath {
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
-  if (!canRun(adbPath))
+  if (!canRun(adbPath)) {
     throw DeviceException('adb not found at: $adbPath');
+  }
 
   return path.absolute(adbPath);
 }

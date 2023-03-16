@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -52,7 +51,6 @@ void main() {
         MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: const Center(child: Text('Body')),
               menus: createTestMenus(
                 onActivate: onActivate,
                 onOpen: onOpen,
@@ -64,110 +62,100 @@ void main() {
                   subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
                 },
               ),
+              child: const Center(child: Text('Body')),
             ),
           ),
         ),
       );
 
-      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenu'));
+      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenus'));
       expect(
         fakeMenuChannel.outgoingCalls.last.arguments,
-        equals(
-          <String, Object?>{
-            '0': <Map<String, Object?>>[
-              <String, Object?>{
-                'id': 2,
-                'label': 'Menu 0',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 1,
-                    'label': 'Sub Menu 00',
-                    'enabled': true,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 12,
-                'label': 'Menu 1',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 3,
-                    'label': 'Sub Menu 10',
-                    'enabled': true,
-                  },
-                  <String, Object?>{
-                    'id': 4,
-                    'isDivider': true,
-                  },
-                  <String, Object?>{
-                    'id': 10,
-                    'label': 'Sub Menu 11',
-                    'enabled': true,
-                    'children': <Map<String, Object?>>[
-                      <String, Object?>{
-                        'id': 5,
-                        'label': 'Sub Sub Menu 100',
-                        'enabled': true,
-                        'shortcutTrigger': 97,
-                        'shortcutModifiers': 8
-                      },
-                      <String, Object?>{
-                        'id': 6,
-                        'isDivider': true,
-                      },
-                      <String, Object?>{
-                        'id': 7,
-                        'label': 'Sub Sub Menu 101',
-                        'enabled': true,
-                        'shortcutTrigger': 98,
-                        'shortcutModifiers': 2
-                      },
-                      <String, Object?>{
-                        'id': 8,
-                        'label': 'Sub Sub Menu 102',
-                        'enabled': true,
-                        'shortcutTrigger': 99,
-                        'shortcutModifiers': 4
-                      },
-                      <String, Object?>{
-                        'id': 9,
-                        'label': 'Sub Sub Menu 103',
-                        'enabled': true,
-                        'shortcutTrigger': 100,
-                        'shortcutModifiers': 1
-                      }
-                    ]
-                  },
-                  <String, Object?>{
-                    'id': 11,
-                    'label': 'Sub Menu 12',
-                    'enabled': true,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 14,
-                'label': 'Menu 2',
-                'enabled': true,
-                'children': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'id': 13,
-                    'label': 'Sub Menu 20',
-                    'enabled': false,
-                  }
-                ]
-              },
-              <String, Object?>{
-                'id': 15,
-                'label': 'Menu 3',
-                'enabled': false,
-                'children': <Map<String, Object?>>[],
-              },
-            ],
-          },
-        ),
+        equals(<String, Object?>{
+          '0': <Map<String, Object?>>[
+            <String, Object?>{
+              'id': 2,
+              'label': 'Menu 0',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 1,
+                  'label': 'Sub Menu 00',
+                  'enabled': true,
+                },
+              ],
+            },
+            <String, Object?>{
+              'id': 18,
+              'label': 'Menu 1',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 4,
+                  'label': 'Sub Menu 10',
+                  'enabled': true,
+                },
+                <String, Object?>{'id': 5, 'isDivider': true},
+                <String, Object?>{
+                  'id': 16,
+                  'label': 'Sub Menu 11',
+                  'enabled': true,
+                  'children': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 7,
+                      'label': 'Sub Sub Menu 110',
+                      'enabled': true,
+                      'shortcutTrigger': 97,
+                      'shortcutModifiers': 8,
+                    },
+                    <String, Object?>{'id': 8, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 10,
+                      'label': 'Sub Sub Menu 111',
+                      'enabled': true,
+                      'shortcutTrigger': 98,
+                      'shortcutModifiers': 2,
+                    },
+                    <String, Object?>{'id': 11, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 12,
+                      'label': 'Sub Sub Menu 112',
+                      'enabled': true,
+                      'shortcutTrigger': 99,
+                      'shortcutModifiers': 4,
+                    },
+                    <String, Object?>{'id': 13, 'isDivider': true},
+                    <String, Object?>{
+                      'id': 14,
+                      'label': 'Sub Sub Menu 113',
+                      'enabled': true,
+                      'shortcutTrigger': 100,
+                      'shortcutModifiers': 1,
+                    },
+                  ],
+                },
+                <String, Object?>{
+                  'id': 17,
+                  'label': 'Sub Menu 12',
+                  'enabled': true,
+                },
+              ],
+            },
+            <String, Object?>{
+              'id': 20,
+              'label': 'Menu 2',
+              'enabled': true,
+              'children': <Map<String, Object?>>[
+                <String, Object?>{
+                  'id': 19,
+                  'label': 'Sub Menu 20',
+                  'enabled': false,
+                },
+              ],
+            },
+            <String, Object?>{'id': 21, 'label': 'Menu 3', 'enabled': false, 'children': <Map<String, Object?>>[]},
+          ],
+        }),
       );
     });
     testWidgets('asserts when more than one has locked the delegate', (WidgetTester tester) async {
@@ -175,11 +163,11 @@ void main() {
         const MaterialApp(
           home: Material(
             child: PlatformMenuBar(
-              body: PlatformMenuBar(
-                body: SizedBox(),
-                menus: <MenuItem>[],
+              menus: <PlatformMenuItem>[],
+              child: PlatformMenuBar(
+                menus: <PlatformMenuItem>[],
+                child: SizedBox(),
               ),
-              menus: <MenuItem>[],
             ),
           ),
         ),
@@ -192,8 +180,8 @@ void main() {
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
       const PlatformMenuBar menuBar = PlatformMenuBar(
-        body: SizedBox(),
-        menus: <MenuItem>[item],
+        menus: <PlatformMenuItem>[item],
+        child: SizedBox(),
       );
 
       await tester.pumpWidget(
@@ -209,7 +197,7 @@ void main() {
         menuBar.toStringDeep(),
         equalsIgnoringHashCodes(
           'PlatformMenuBar#00000\n'
-          ' └─PlatformMenuItem#00000\n'
+          ' └─PlatformMenuItem#00000(label2)\n'
           '     label: "label2"\n'
           '     shortcut: SingleActivator#00000(keys: Key A)\n'
           '     DISABLED\n',
@@ -217,14 +205,14 @@ void main() {
       );
     });
   });
-  group('PlatformMenuBarItem', () {
+  group('MenuBarItem', () {
     testWidgets('diagnostics', (WidgetTester tester) async {
       const PlatformMenuItem childItem = PlatformMenuItem(
         label: 'label',
       );
       const PlatformMenu item = PlatformMenu(
         label: 'label',
-        menus: <MenuItem>[childItem],
+        menus: <PlatformMenuItem>[childItem],
       );
 
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -238,6 +226,34 @@ void main() {
       expect(description, <String>[
         'label: "label"',
       ]);
+    });
+  });
+
+  group('ShortcutSerialization', () {
+    testWidgets('character constructor', (WidgetTester tester) async {
+      final ShortcutSerialization serialization = ShortcutSerialization.character('?');
+      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutCharacter': '?',
+        'shortcutModifiers': 0,
+      }));
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.character('?', alt: true, control: true, meta: true);
+      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutCharacter': '?',
+        'shortcutModifiers': 13,
+      }));
+    });
+
+    testWidgets('modifier constructor', (WidgetTester tester) async {
+      final ShortcutSerialization serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
+      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+        'shortcutModifiers': 0,
+      }));
+      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.modifier(LogicalKeyboardKey.home, alt: true, control: true, meta: true, shift: true);
+      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
+        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+        'shortcutModifiers': 15,
+      }));
     });
   });
 }
@@ -260,29 +276,29 @@ const List<String> subMenu1 = <String>[
 ];
 
 const List<String> subSubMenu10 = <String>[
-  'Sub Sub Menu 100',
-  'Sub Sub Menu 101',
-  'Sub Sub Menu 102',
-  'Sub Sub Menu 103',
+  'Sub Sub Menu 110',
+  'Sub Sub Menu 111',
+  'Sub Sub Menu 112',
+  'Sub Sub Menu 113',
 ];
 
 const List<String> subMenu2 = <String>[
   'Sub Menu 20',
 ];
 
-List<MenuItem> createTestMenus({
+List<PlatformMenuItem> createTestMenus({
   void Function(String)? onActivate,
   void Function(String)? onOpen,
   void Function(String)? onClose,
   Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
-  final List<MenuItem> result = <MenuItem>[
+  final List<PlatformMenuItem> result = <PlatformMenuItem>[
     PlatformMenu(
       label: mainMenu[0],
       onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[0]) : null,
-      menus: <MenuItem>[
+      menus: <PlatformMenuItem>[
         PlatformMenuItem(
           label: subMenu0[0],
           onSelected: onActivate != null ? () => onActivate(subMenu0[0]) : null,
@@ -294,9 +310,9 @@ List<MenuItem> createTestMenus({
       label: mainMenu[1],
       onOpen: onOpen != null ? () => onOpen(mainMenu[1]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[1]) : null,
-      menus: <MenuItem>[
+      menus: <PlatformMenuItem>[
         PlatformMenuItemGroup(
-          members: <MenuItem>[
+          members: <PlatformMenuItem>[
             PlatformMenuItem(
               label: subMenu1[0],
               onSelected: onActivate != null ? () => onActivate(subMenu1[0]) : null,
@@ -308,9 +324,9 @@ List<MenuItem> createTestMenus({
           label: subMenu1[1],
           onOpen: onOpen != null ? () => onOpen(subMenu1[1]) : null,
           onClose: onClose != null ? () => onClose(subMenu1[1]) : null,
-          menus: <MenuItem>[
+          menus: <PlatformMenuItem>[
             PlatformMenuItemGroup(
-              members: <MenuItem>[
+              members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[0],
                   onSelected: onActivate != null ? () => onActivate(subSubMenu10[0]) : null,
@@ -318,20 +334,28 @@ List<MenuItem> createTestMenus({
                 ),
               ],
             ),
-            PlatformMenuItem(
-              label: subSubMenu10[1],
-              onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
-              shortcut: shortcuts[subSubMenu10[1]],
+            PlatformMenuItemGroup(
+              members: <PlatformMenuItem>[
+                PlatformMenuItem(
+                  label: subSubMenu10[1],
+                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[1]) : null,
+                  shortcut: shortcuts[subSubMenu10[1]],
+                ),
+              ],
             ),
             PlatformMenuItem(
               label: subSubMenu10[2],
               onSelected: onActivate != null ? () => onActivate(subSubMenu10[2]) : null,
               shortcut: shortcuts[subSubMenu10[2]],
             ),
-            PlatformMenuItem(
-              label: subSubMenu10[3],
-              onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
-              shortcut: shortcuts[subSubMenu10[3]],
+            PlatformMenuItemGroup(
+              members: <PlatformMenuItem>[
+                PlatformMenuItem(
+                  label: subSubMenu10[3],
+                  onSelected: onActivate != null ? () => onActivate(subSubMenu10[3]) : null,
+                  shortcut: shortcuts[subSubMenu10[3]],
+                ),
+              ],
             ),
           ],
         ),
@@ -346,7 +370,7 @@ List<MenuItem> createTestMenus({
       label: mainMenu[2],
       onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
-      menus: <MenuItem>[
+      menus: <PlatformMenuItem>[
         PlatformMenuItem(
           // Always disabled.
           label: subMenu2[0],
@@ -359,7 +383,7 @@ List<MenuItem> createTestMenus({
       label: mainMenu[3],
       onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
       onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
-      menus: <MenuItem>[],
+      menus: <PlatformMenuItem>[],
     ),
   ];
   return result;

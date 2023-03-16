@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for InputDecorator
+/// Flutter code sample for [InputDecorator].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class InputDecoratorExample extends StatelessWidget {
-  const InputDecoratorExample({Key? key}) : super(key: key);
+  const InputDecoratorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class InputDecoratorExample extends StatelessWidget {
         // is in its error state.
         labelStyle: MaterialStateTextStyle.resolveWith(
           (Set<MaterialState> states) {
-            final Color color = states.contains(MaterialState.error) ? Theme.of(context).errorColor: Colors.orange;
+            final Color color = states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error: Colors.orange;
             return TextStyle(color: color, letterSpacing: 1.3);
           }
         ),

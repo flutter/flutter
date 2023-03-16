@@ -13,6 +13,7 @@ void main() {
   group('repository', () {
     late FakePlatform platform;
     const String rootDir = '/';
+    const String revision = 'deadbeef';
     late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
     late TestStdio stdio;
@@ -31,8 +32,6 @@ void main() {
     });
 
     test('canCherryPick returns true if git cherry-pick returns 0', () async {
-      const String commit = 'abc123';
-
       processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
@@ -53,7 +52,7 @@ void main() {
           'git',
           'rev-parse',
           'HEAD',
-        ], stdout: commit),
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -63,7 +62,7 @@ void main() {
           'git',
           'cherry-pick',
           '--no-commit',
-          commit,
+          revision,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -80,7 +79,7 @@ void main() {
         stdio: stdio,
       );
       final Repository repository = FrameworkRepository(checkouts);
-      expect(await repository.canCherryPick(commit), true);
+      expect(await repository.canCherryPick(revision), true);
     });
 
     test('canCherryPick returns false if git cherry-pick returns non-zero', () async {
@@ -262,7 +261,8 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'commit',
-          "--message='$message'",
+          '--message',
+          message,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -318,7 +318,8 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'commit',
-          "--message='$message'",
+          '--message',
+          message,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -500,6 +501,66 @@ vars = {
 
       expect(processManager.hasRemainingExpectations, false);
       expect(createdCandidateBranch, true);
+    });
+
+    test('.listRemoteBranches() parses git output', () async {
+      const String remoteName = 'mirror';
+      const String lsRemoteOutput = '''
+Extraneous debug information that should be ignored.
+
+4d44dca340603e25d4918c6ef070821181202e69        refs/heads/experiment
+35185330c6af3a435f615ee8ac2fed8b8bb7d9d4        refs/heads/feature-a
+6f60a1e7b2f3d2c2460c9dc20fe54d0e9654b131        refs/heads/feature-b
+c1436c42c0f3f98808ae767e390c3407787f1a67        refs/heads/fix_bug_1234
+bbbcae73699263764ad4421a4b2ca3952a6f96cb        refs/heads/stable
+
+Extraneous debug information that should be ignored.
+''';
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          '${rootDir}flutter_conductor_checkouts/engine',
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'main',
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
+        FakeCommand(
+          command: <String>['git', 'ls-remote', '--heads', remoteName],
+          stdout: lsRemoteOutput,
+        ),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Repository repo = EngineRepository(
+        checkouts,
+        localUpstream: true,
+      );
+      final List<String> branchNames = await repo.listRemoteBranches(remoteName);
+      expect(branchNames, equals(<String>[
+        'experiment',
+        'feature-a',
+        'feature-b',
+        'fix_bug_1234',
+        'stable',
+      ]));
     });
   });
 }

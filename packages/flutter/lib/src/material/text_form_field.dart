@@ -5,11 +5,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
 /// A [FormField] that contains a [TextField].
 ///
@@ -18,8 +19,8 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// A [Form] ancestor is not required. The [Form] simply makes it easier to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
-/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
-/// save or reset the form field.
+/// pass a `GlobalKey<FormFieldState>` (see [GlobalKey]) to the constructor and use
+/// [GlobalKey.currentState] to save or reset the form field.
 ///
 /// When a [controller] is specified, its [TextEditingController.text]
 /// defines the [initialValue]. If this [FormField] is part of a scrolling
@@ -34,8 +35,8 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// {@macro flutter.material.textfield.wantKeepAlive}
 ///
 /// Remember to call [TextEditingController.dispose] of the [TextEditingController]
-/// when it is no longer needed. This will ensure we discard any resources used
-/// by the object.
+/// when it is no longer needed. This will ensure any resources used by the object
+/// are discarded.
 ///
 /// By default, `decoration` will apply the [ThemeData.inputDecorationTheme] for
 /// the current context to the [InputDecoration], see
@@ -95,7 +96,7 @@ class TextFormField extends FormField<String> {
   /// For documentation about the various parameters, see the [TextField] class
   /// and [TextField.new], the constructor.
   TextFormField({
-    Key? key,
+    super.key,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -110,6 +111,10 @@ class TextFormField extends FormField<String> {
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     bool? showCursor,
     String obscuringCharacter = '•',
@@ -125,10 +130,11 @@ class TextFormField extends FormField<String> {
     int? maxLength,
     ValueChanged<String>? onChanged,
     GestureTapCallback? onTap,
+    TapRegionCallback? onTapOutside,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
-    FormFieldSetter<String>? onSaved,
-    FormFieldValidator<String>? validator,
+    super.onSaved,
+    super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     double cursorWidth = 2.0,
@@ -144,9 +150,10 @@ class TextFormField extends FormField<String> {
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
-    String? restorationId,
+    super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
+    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -171,11 +178,7 @@ class TextFormField extends FormField<String> {
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableIMEPersonalizedLearning != null),
        super(
-         key: key,
-         restorationId: restorationId,
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
-         onSaved: onSaved,
-         validator: validator,
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
@@ -220,6 +223,7 @@ class TextFormField extends FormField<String> {
                maxLength: maxLength,
                onChanged: onChangedHandler,
                onTap: onTap,
+               onTapOutside: onTapOutside,
                onEditingComplete: onEditingComplete,
                onSubmitted: onFieldSubmitted,
                inputFormatters: inputFormatters,
@@ -238,6 +242,7 @@ class TextFormField extends FormField<String> {
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
+               contextMenuBuilder: contextMenuBuilder,
              ),
            );
          },
@@ -248,6 +253,12 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   @override
   FormFieldState<String> createState() => _TextFormFieldState();
@@ -329,8 +340,9 @@ class _TextFormFieldState extends FormFieldState<String> {
   void didChange(String? value) {
     super.didChange(value);
 
-    if (_effectiveController.text != value)
+    if (_effectiveController.text != value) {
       _effectiveController.text = value ?? '';
+    }
   }
 
   @override
@@ -349,7 +361,8 @@ class _TextFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_effectiveController.text != value)
+    if (_effectiveController.text != value) {
       didChange(_effectiveController.text);
+    }
   }
 }

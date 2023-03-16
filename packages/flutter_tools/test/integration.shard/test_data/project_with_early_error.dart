@@ -25,7 +25,7 @@ class ProjectWithEarlyError extends Project {
 
   Future<void> main() async {
     while (true) {
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }

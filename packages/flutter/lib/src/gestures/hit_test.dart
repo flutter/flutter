@@ -8,6 +8,12 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
 
+export 'dart:ui' show Offset;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'events.dart' show PointerEvent;
+
 /// An object that can hit-test pointers.
 abstract class HitTestable {
   // This class is intended to be used as an interface, and should not be
@@ -268,10 +274,11 @@ class HitTestResult {
   ///    function pair in more details.
   @protected
   void popTransform() {
-    if (_localTransforms.isNotEmpty)
+    if (_localTransforms.isNotEmpty) {
       _localTransforms.removeLast();
-    else
+    } else {
       _transforms.removeLast();
+    }
     assert(_transforms.isNotEmpty);
   }
 

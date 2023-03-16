@@ -86,33 +86,48 @@ class VMServiceFlutterDriver extends FlutterDriver {
     _log('Connecting to Flutter application at $dartVmServiceUrl');
     final vms.VmService client = await vmServiceConnectFunction(dartVmServiceUrl, headers);
 
-    Future<vms.IsolateRef?> _waitForRootIsolate() async {
-      bool _checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
+    Future<vms.IsolateRef?> waitForRootIsolate() async {
+      bool checkIsolate(vms.IsolateRef ref) => ref.number == isolateNumber.toString();
       while (true) {
         final vms.VM vm = await client.getVM();
-        if (vm.isolates!.isEmpty || (isolateNumber != null && !vm.isolates!.any(_checkIsolate))) {
+        if (vm.isolates!.isEmpty || (isolateNumber != null && !vm.isolates!.any(checkIsolate))) {
           await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
           continue;
         }
         return isolateNumber == null
           ? vm.isolates!.first
-          : vm.isolates!.firstWhere(_checkIsolate);
+          : vm.isolates!.firstWhere(checkIsolate);
+      }
+    }
+
+    // Refreshes the isolate state periodically until the isolate reports as
+    // being runnable.
+    Future<vms.Isolate> waitForIsolateToBeRunnable(vms.IsolateRef ref) async {
+      while (true) {
+        final vms.Isolate isolate = await client.getIsolate(ref.id!);
+        if (isolate.pauseEvent!.kind == vms.EventKind.kNone) {
+          await Future<void>.delayed(_kPauseBetweenIsolateRefresh);
+        } else {
+          return isolate;
+        }
       }
     }
 
     final vms.IsolateRef isolateRef = (await _warnIfSlow<vms.IsolateRef?>(
-      future: _waitForRootIsolate(),
+      future: waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
         ? 'The root isolate is taking an unusually long time to start.'
         : 'Isolate $isolateNumber is taking an unusually long time to start.',
     ))!;
     _log('Isolate found with number: ${isolateRef.number}');
-    vms.Isolate isolate = await client.getIsolate(isolateRef.id!);
-
-    if (isolate.pauseEvent!.kind == vms.EventKind.kNone) {
-      isolate = await client.getIsolate(isolateRef.id!);
-    }
+    final vms.Isolate isolate = await _warnIfSlow<vms.Isolate>(
+      future: waitForIsolateToBeRunnable(isolateRef),
+      timeout: kUnusuallyLongTimeout,
+      message: 'The isolate ${isolateRef.number} is taking unusually long time '
+          'to initialize. It still reports ${vms.EventKind.kNone} as pause '
+          'event which is incorrect.',
+    );
 
     final VMServiceFlutterDriver driver = VMServiceFlutterDriver.connectedTo(
       client,
@@ -201,7 +216,8 @@ class VMServiceFlutterDriver extends FlutterDriver {
     } else if (isolate.pauseEvent!.kind == vms.EventKind.kPauseExit ||
         isolate.pauseEvent!.kind == vms.EventKind.kPauseBreakpoint ||
         isolate.pauseEvent!.kind == vms.EventKind.kPauseException ||
-        isolate.pauseEvent!.kind == vms.EventKind.kPauseInterrupted) {
+        isolate.pauseEvent!.kind == vms.EventKind.kPauseInterrupted ||
+        isolate.pauseEvent!.kind == vms.EventKind.kPausePostRequest) {
       // If the isolate is paused for any other reason, assume the extension is
       // already there.
       _log('Isolate is paused mid-flight.');
@@ -321,14 +337,16 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-    if ((response['isError'] as bool?) ?? false)
+    if ((response['isError'] as bool?) ?? false) {
       throw DriverError('Error in Flutter application: ${response['response']}');
+    }
     return response['response'] as Map<String, dynamic>;
   }
 
   void _logCommunication(String message) {
-    if (_printCommunication)
+    if (_printCommunication) {
       _log(message);
+    }
     if (_logCommunicationToFile) {
       assert(_logFilePathName != null);
       final f.File file = fs.file(_logFilePathName);
@@ -533,8 +551,9 @@ String _getWebSocketUrl(String url) {
     if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
     'ws',
   ];
-  if (uri.scheme == 'http')
+  if (uri.scheme == 'http') {
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  }
   return uri.toString();
 }
 
@@ -579,6 +598,9 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
 const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
+
+/// The amount of time we wait prior to refreshing the isolate state.
+const Duration _kPauseBetweenIsolateRefresh = Duration(milliseconds: 100);
 
 // See `timeline_streams` in
 // https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc

@@ -32,6 +32,13 @@
 // dart dev/tools/localization/bin/gen_localizations.dart
 // ```
 //
+// If you have removed localizations from the canonical localizations, then
+// add the '--remove-undefined' flag to also remove them from the other files.
+//
+// ```
+// dart dev/tools/localization/bin/gen_localizations.dart --remove-undefined
+// ```
+//
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
 // packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart
 // and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
@@ -156,8 +163,9 @@ String generateArbBasedLocalizationSubclasses({
         output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale]!;
         for (final String key in scriptResources.keys.toList()..sort()) {
-          if (languageResources[key] == scriptResources[key])
+          if (languageResources[key] == scriptResources[key]) {
             continue;
+          }
           final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, scriptResources[key], attributes, languageLocale));
         }
@@ -165,12 +173,15 @@ String generateArbBasedLocalizationSubclasses({
 
         final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
         for (final LocaleInfo locale in localeCodes) {
-          if (locale.originalString == languageName)
+          if (locale.originalString == languageName) {
             continue;
-          if (locale.originalString == '${languageName}_$scriptCode')
+          }
+          if (locale.originalString == '${languageName}_$scriptCode') {
             continue;
-          if (locale.scriptCode != scriptCode)
+          }
+          if (locale.scriptCode != scriptCode) {
             continue;
+          }
           countryCodeCount += 1;
           output.writeln(generateClassDeclaration(
             locale,
@@ -181,8 +192,9 @@ String generateArbBasedLocalizationSubclasses({
           final Map<String, String> localeResources = localeToResources[locale]!;
           for (final String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
-            if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
+            if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key]) {
               continue;
+            }
             final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
             output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
@@ -194,8 +206,9 @@ String generateArbBasedLocalizationSubclasses({
       // doesn't exist).
       final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
       for (final LocaleInfo locale in localeCodes) {
-        if (locale.originalString == languageName)
+        if (locale.originalString == languageName) {
           continue;
+        }
         countryCodeCount += 1;
         final Map<String, String> localeResources = localeToResources[locale]!;
         output.writeln(generateClassDeclaration(
@@ -205,8 +218,9 @@ String generateArbBasedLocalizationSubclasses({
         ));
         output.writeln(generateConstructor(locale));
         for (final String key in localeResources.keys) {
-          if (languageResources[key] == localeResources[key])
+          if (languageResources[key] == localeResources[key]) {
             continue;
+          }
           final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
@@ -216,10 +230,11 @@ String generateArbBasedLocalizationSubclasses({
 
     final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
-      if (scriptCodeCount == 0)
+      if (scriptCodeCount == 0) {
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
-      else
+      } else {
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'})');
+      }
 
     } else if (countryCodeCount == 1) {
       supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
@@ -274,8 +289,9 @@ $factoryDeclaration
     case '$language': {
       switch (locale.countryCode) {''');
       for (final LocaleInfo locale in languageToLocales[language]!) {
-        if (locale.originalString == language)
+        if (locale.originalString == language) {
           continue;
+        }
         assert(locale.length > 1);
         final String countryCode = locale.countryCode!;
         output.writeln('''
@@ -299,14 +315,17 @@ $factoryDeclaration
           output.writeln('''
           switch (locale.countryCode) {''');
           for (final LocaleInfo locale in languageToLocales[language]!) {
-            if (locale.countryCode == null)
+            if (locale.countryCode == null) {
               continue;
-            else
+            } else {
               hasCountryCode = true;
-            if (locale.originalString == language)
+            }
+            if (locale.originalString == language) {
               continue;
-            if (locale.scriptCode != scriptCode && locale.scriptCode != null)
+            }
+            if (locale.scriptCode != scriptCode && locale.scriptCode != null) {
               continue;
+            }
             final String countryCode = locale.countryCode!;
             output.writeln('''
             case '$countryCode':
@@ -328,8 +347,9 @@ $factoryDeclaration
           // Not Explicitly defined, fallback to first locale with the same language and
           // script:
           for (final LocaleInfo locale in languageToLocales[language]!) {
-            if (locale.scriptCode != scriptCode)
+            if (locale.scriptCode != scriptCode) {
               continue;
+            }
             if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
               output.writeln('''
           }''');
@@ -347,11 +367,13 @@ $factoryDeclaration
       output.writeln('''
       switch (locale.countryCode) {''');
         for (final LocaleInfo locale in languageToLocales[language]!) {
-          if (locale.originalString == language)
+          if (locale.originalString == language) {
             continue;
+          }
           assert(locale.length > 1);
-          if (locale.countryCode == null)
+          if (locale.countryCode == null) {
             continue;
+          }
           final String countryCode = locale.countryCode!;
           output.writeln('''
         case '$countryCode':
@@ -405,17 +427,20 @@ String generateType(Map<String, dynamic>? attributes) {
 /// Used by [generateGetter] below.
 String generateKey(String key, Map<String, dynamic>? attributes) {
   if (attributes != null) {
-    if (attributes.containsKey('parameters'))
+    if (attributes.containsKey('parameters')) {
       return '${key}Raw';
+    }
     switch (attributes['x-flutter-type'] as String?) {
       case 'icuShortTimePattern':
         return '${key}Raw';
     }
   }
-  if (key == 'datePickerDateOrder')
+  if (key == 'datePickerDateOrder') {
     return 'datePickerDateOrderString';
-  if (key == 'datePickerDateTimeOrder')
+  }
+  if (key == 'datePickerDateTimeOrder') {
     return 'datePickerDateTimeOrderString';
+  }
   return key;
 }
 
@@ -445,8 +470,9 @@ const Map<String, String> _scriptCategoryToEnum = <String, String>{
 ///
 /// Used by [generateGetter] below.
 String? generateValue(String? value, Map<String, dynamic>? attributes, LocaleInfo locale) {
-  if (value == null)
+  if (value == null) {
     return null;
+  }
   // cupertino_en.arb doesn't use x-flutter-type.
   if (attributes != null) {
     switch (attributes['x-flutter-type'] as String?) {
@@ -542,10 +568,15 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
+  }
+
+  if (options.removeUndefined) {
+    removeUndefinedLocalizations(materialLocaleToResources);
+    removeUndefinedLocalizations(cupertinoLocaleToResources);
   }
 
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly

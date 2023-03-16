@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -21,13 +19,31 @@ const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
+/// Android Material styled text selection handle controls.
+///
+/// Specifically does not manage the toolbar, which is left to
+/// [EditableText.contextMenuBuilder].
+@Deprecated(
+  'Use `MaterialTextSelectionControls`. '
+  'This feature was deprecated after v3.3.0-0.5.pre.',
+)
+class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
+}
+
 /// Android Material styled text selection controls.
+///
+/// The [materialTextSelectionControls] global variable has a
+/// suitable instance of this class.
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -39,7 +55,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    return _TextSelectionControlsToolbar(
+   return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
@@ -106,6 +122,10 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     }
   }
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
     // Android allows SelectAll when selection is not collapsed, unless
@@ -131,7 +151,6 @@ class _TextSelectionToolbarItemData {
 // The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.delegate,
     required this.endpoints,
@@ -142,7 +161,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final TextSelectionDelegate delegate;
@@ -183,8 +202,8 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
   @override
   void dispose() {
-    super.dispose();
     widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    super.dispose();
   }
 
   @override
@@ -207,9 +226,12 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
       ? widget.endpoints[1]
       : widget.endpoints[0];
+    final double topAmountInEditableRegion = startTextSelectionPoint.point.dy - widget.textLineHeight;
+    final double anchorTop = math.max(topAmountInEditableRegion, 0) + widget.globalEditableRegion.top - _kToolbarContentDistance;
+
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
+      anchorTop,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
@@ -247,7 +269,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
     // If there is no option available, build an empty widget.
     if (itemDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     return TextSelectionToolbar(
@@ -285,6 +307,13 @@ class _TextSelectionHandlePainter extends CustomPainter {
     return color != oldPainter.color;
   }
 }
+
+/// Text selection handle controls that follow the Material Design specification.
+@Deprecated(
+  'Use `materialTextSelectionControls` instead. '
+  'This feature was deprecated after v3.3.0-0.5.pre.',
+)
+final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 
 /// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = MaterialTextSelectionControls();

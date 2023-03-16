@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -15,17 +13,16 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  AndroidWorkflow androidWorkflow;
+  late AndroidWorkflow androidWorkflow;
 
   setUp(() {
     androidWorkflow = AndroidWorkflow(
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -36,7 +33,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
@@ -57,7 +53,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
@@ -67,7 +62,7 @@ void main() {
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
     expect(await androidDevices.getDiagnostics(), isEmpty);
-    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
@@ -76,7 +71,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
@@ -93,7 +87,7 @@ void main() {
       const FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
-      )
+      ),
     ]);
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: FakeAndroidSdk(),
@@ -118,7 +112,6 @@ void main() {
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
@@ -143,7 +136,7 @@ List of devices attached
 05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
 
   ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -172,7 +165,7 @@ localhost:36790        device
 emulator-5612          host features:shell_2
 
   ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -200,7 +193,7 @@ List of devices attached
 ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
 
 ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -226,7 +219,7 @@ It appears you do not have 'Android SDK Platform-tools' installed.
 Use the 'android' tool to install them:
   android update sdk --no-ui --filter 'platform-tools'
 ''',
-        )
+        ),
       ]),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
@@ -243,5 +236,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   FakeAndroidSdk([this.adbPath = 'adb']);
 
   @override
-  final String adbPath;
+  final String? adbPath;
 }

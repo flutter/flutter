@@ -14,7 +14,7 @@ import 'base/utils.dart';
 import 'plugins.dart';
 
 const Set<String> _kValidPluginPlatforms = <String>{
-  'android', 'ios', 'web', 'windows', 'linux', 'macos'
+  'android', 'ios', 'web', 'windows', 'linux', 'macos',
 };
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
@@ -68,6 +68,8 @@ class FlutterManifest {
 
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, Object?> _flutterDescriptor = <String, Object?>{};
+
+  Map<String, Object?> get flutterDescriptor => _flutterDescriptor;
 
   /// True if the `pubspec.yaml` file does not exist.
   bool get isEmpty => _descriptor.isEmpty;
@@ -368,6 +370,33 @@ class FlutterManifest {
     return fonts;
   }
 
+
+  late final List<Uri> shaders = _extractShaders();
+
+  List<Uri> _extractShaders() {
+    if (!_flutterDescriptor.containsKey('shaders')) {
+      return <Uri>[];
+    }
+
+    final List<Object?>? shaders = _flutterDescriptor['shaders'] as List<Object?>?;
+    if (shaders == null) {
+      return const <Uri>[];
+    }
+    final List<Uri> results = <Uri>[];
+    for (final Object? shader in shaders) {
+      if (shader is! String || shader == null || shader == '') {
+        _logger.printError('Shader manifest contains a null or empty uri.');
+        continue;
+      }
+      try {
+        results.add(Uri(pathSegments: shader.split('/')));
+      } on FormatException {
+        _logger.printError('Shader manifest contains invalid uri: $shader.');
+      }
+    }
+    return results;
+  }
+
   /// Whether a synthetic flutter_gen package should be generated.
   ///
   /// This can be provided to the [Pub] interface to inject a new entry
@@ -496,7 +525,17 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'assets':
         if (yamlValue is! YamlList) {
-
+          errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue[0] is! String) {
+          errors.add(
+            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
+        }
+        break;
+      case 'shaders':
+        if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
         } else if (yamlValue.isEmpty) {
           break;
@@ -636,7 +675,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
-    for (final Object? fontMapList in fontMap['fonts']) {
+    for (final Object? fontMapList in fontMap['fonts'] as List<Object?>) {
       if (fontMapList is! YamlMap) {
         errors.add('Expected "fonts" to be a list of maps.');
         continue;

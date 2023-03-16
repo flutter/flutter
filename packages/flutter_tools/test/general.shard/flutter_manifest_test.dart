@@ -65,7 +65,7 @@ dependencies:
     expect(flutterManifest.assets, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest knows if material design is used', () async {
+  testWithoutContext('FlutterManifest knows if Material Design is used', () async {
     const String manifest = '''
 name: test
 dependencies:
@@ -1066,11 +1066,11 @@ flutter:
 
     expect(flutterManifest.isPlugin, true);
     final Map<String, dynamic> validSupportedPlatforms = flutterManifest.validSupportedPlatforms!;
-    expect(validSupportedPlatforms['ios'],
-                              <String, dynamic>{'pluginClass': 'SomeClass'});
-    expect(validSupportedPlatforms['android'],
-                              <String, dynamic>{'pluginClass': 'SomeClass',
-                                                'package': 'com.example'});
+    expect(validSupportedPlatforms['ios'], <String, dynamic>{'pluginClass': 'SomeClass'});
+    expect(validSupportedPlatforms['android'], <String, dynamic>{
+      'pluginClass': 'SomeClass',
+      'package': 'com.example',
+    });
   });
 
   testWithoutContext('FlutterManifest validates a platform section that is a list '

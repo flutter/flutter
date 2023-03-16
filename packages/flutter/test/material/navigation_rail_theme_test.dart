@@ -40,6 +40,10 @@ void main() {
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
     expect(_labelType(tester), NavigationRailLabelType.none);
     expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, ThemeData().colorScheme.secondaryContainer);
+    expect(_indicatorDecoration(tester)?.shape, const StadiumBorder());
+    final InkResponse inkResponse = tester.allWidgets.firstWhere((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell') as InkResponse;
+    expect(inkResponse.customBorder, const StadiumBorder());
   });
 
   testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
@@ -87,6 +91,7 @@ void main() {
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
     const bool useIndicator = true;
     const Color indicatorColor = Color(0x00000004);
+    const ShapeBorder indicatorShape = RoundedRectangleBorder();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -111,6 +116,7 @@ void main() {
               labelType: labelType,
               useIndicator: useIndicator,
               indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -135,6 +141,7 @@ void main() {
     expect(_labelType(tester), labelType);
     expect(find.byType(NavigationIndicator), findsWidgets);
     expect(_indicatorDecoration(tester)?.color, indicatorColor);
+    expect(_indicatorDecoration(tester)?.shape, indicatorShape);
   });
 
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -245,6 +252,7 @@ void main() {
       labelType: NavigationRailLabelType.selected,
       useIndicator: true,
       indicatorColor: Color(0x00000096),
+      indicatorShape: CircleBorder(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -267,6 +275,7 @@ void main() {
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
     expect(description[8], 'useIndicator: true');
     expect(description[9], 'indicatorColor: Color(0x00000096)');
+    expect(description[10], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
   });
 }
 
@@ -363,27 +372,27 @@ Align _destinationsAlign(WidgetTester tester) {
 }
 
 NavigationRailLabelType _labelType(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
-    return _labelOpacity(tester, 'Abc') == 1 ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
+  if (_visibilityAboveLabel('Abc').evaluate().isNotEmpty && _visibilityAboveLabel('Def').evaluate().isNotEmpty) {
+    return _labelVisibility(tester, 'Abc') ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
   } else {
     return NavigationRailLabelType.all;
   }
 }
 
-Finder _opacityAboveLabel(String text) {
+Finder _visibilityAboveLabel(String text) {
   return find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   );
 }
 
 // Only valid when labelType != all.
-double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+bool _labelVisibility(WidgetTester tester, String text) {
+  final Visibility visibilityWidget = tester.widget<Visibility>(
     find.ancestor(
       of: find.text(text),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     ),
   );
-  return opacityWidget.opacity;
+  return visibilityWidget.visible;
 }

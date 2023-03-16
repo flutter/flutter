@@ -8,9 +8,11 @@ import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
+import 'context.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
+// TODO(fujino): This should be direct injected, rather than mutable global state.
 @visibleForTesting
 Future<dds.DartDevelopmentService> Function(
   Uri remoteVmServiceUri, {
@@ -18,6 +20,7 @@ Future<dds.DartDevelopmentService> Function(
   bool ipv6,
   Uri? serviceUri,
   List<String> cachedUserTags,
+  dds.UriConverter? uriConverter,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -56,6 +59,7 @@ class DartDevelopmentService {
           ipv6: ipv6 ?? false,
           // Enables caching of CPU samples collected during application startup.
           cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const <String>[],
+          uriConverter: context.get<dds.UriConverter>(),
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {

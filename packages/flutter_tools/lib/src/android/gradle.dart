@@ -268,6 +268,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _gradleUtils.getExecutable(project),
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -463,41 +465,39 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
       return;
     }
-    // Gradle produced an APK.
+    // Gradle produced APKs.
     final Iterable<String> apkFilesPaths = project.isModule
         ? findApkFilesModule(project, androidBuildInfo, _logger, _usage)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
-    final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
-    if (!apkFile.existsSync()) {
-      _exitWithExpectedFileNotFound(
-        project: project,
-        fileExtension: '.apk',
-        logger: _logger,
-        usage: _usage,
+
+    // Generate sha1 for every generated APKs.
+    for (final File apkFile in apkFilesPaths.map(apkDirectory.childFile)) {
+      if (!apkFile.existsSync()) {
+        _exitWithExpectedFileNotFound(
+          project: project,
+          fileExtension: '.apk',
+          logger: _logger,
+          usage: _usage,
+        );
+      }
+
+      final String filename = apkFile.basename;
+      _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
+      final File apkShaFile = apkDirectory.childFile('$filename.sha1');
+      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsMB(apkFile.lengthSync())})';
+      _logger.printStatus(
+        '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
+        color: TerminalColor.green,
       );
-    }
 
-    // Copy the first APK to app.apk, so `flutter run` can find it.
-    // TODO(egarciad): Handle multiple APKs.
-    apkFile.copySync(apkDirectory
-        .childFile('app.apk')
-        .path);
-    _logger.printTrace('calculateSha: $apkDirectory/app.apk');
-
-    final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
-    apkShaFile.writeAsStringSync(_calculateSha(apkFile));
-
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(apkFile.lengthSync())})';
-    _logger.printStatus(
-      '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-
-    if (buildInfo.codeSizeDirectory != null) {
-      await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+      if (buildInfo.codeSizeDirectory != null) {
+        await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+      }
     }
   }
 
@@ -587,9 +587,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
       '-Pis-plugin=${manifest.isPlugin}',
-      '-PbuildNumber=$buildNumber'
+      '-PbuildNumber=$buildNumber',
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -847,15 +849,15 @@ Iterable<String> listApkPaths(
         <String>[
           'app',
           getNameForAndroidArch(androidArch),
-          ...apkPartialName
-        ].join('-')
+          ...apkPartialName,
+        ].join('-'),
     ];
   }
   return <String>[
     <String>[
       'app',
       ...apkPartialName,
-    ].join('-')
+    ].join('-'),
   ];
 }
 
@@ -954,7 +956,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   XmlDocument document;
   try {
     document = XmlDocument.parse(pomFile.readAsStringSync());
-  } on XmlParserException {
+  } on XmlException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );

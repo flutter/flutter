@@ -7,9 +7,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/running_processes.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -18,7 +20,11 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/in
 const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
 const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
 
-TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? environment}) {
+TaskFunction createHotModeTest({
+  String? deviceIdOverride,
+  Map<String, String>? environment,
+  bool checkAppRunningOnLocalDevice = false,
+}) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
     flutterDirectory.path, 'packages/flutter/lib/src/widgets/framework.dart',
@@ -33,7 +39,15 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride!, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
+      '--hot',
+      '-d',
+      deviceIdOverride!,
+      '--benchmark',
+      '--resident',
+      '--no-android-gradle-daemon',
+      '--no-publish-port',
+      '--verbose',
+      '--uninstall-first',
     ];
     int hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;
@@ -88,7 +102,7 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
             }
           });
 
-          largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+          largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) async {
             if (!line.contains('Reloaded ')) {
               return;
             }
@@ -100,6 +114,9 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
               process.stdin.writeln('r');
               hotReloadCount += 1;
             } else {
+              if (checkAppRunningOnLocalDevice) {
+                await _checkAppRunning(true);
+              }
               process.stdin.writeln('q');
             }
           });
@@ -142,6 +159,9 @@ TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? e
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
           }
         });
+        if (checkAppRunningOnLocalDevice) {
+          await _checkAppRunning(false);
+        }
       } finally {
         flutterFrameworkSource.writeAsStringSync(oldContents);
       }
@@ -248,4 +268,24 @@ Future<Map<String, dynamic>> captureReloadData(
   final Map<String, dynamic> result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
+}
+
+Future<void> _checkAppRunning(bool shouldBeRunning) async {
+  late Set<RunningProcessInfo> galleryProcesses;
+  for (int i = 0; i < 10; i++) {
+    final String exe = Platform.isWindows ? '.exe' : '';
+    galleryProcesses = await getRunningProcesses(
+      processName: 'Flutter Gallery$exe',
+      processManager: const LocalProcessManager(),
+    );
+
+    if (galleryProcesses.isNotEmpty == shouldBeRunning) {
+      return;
+    }
+
+    // Give the app time to shut down.
+    sleep(const Duration(seconds: 1));
+  }
+  print(galleryProcesses.join('\n'));
+  throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
 }

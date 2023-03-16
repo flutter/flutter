@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for BottomAppBar
+/// Flutter code sample for [BottomAppBar].
 
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ void main() {
 }
 
 class BottomAppBarDemo extends StatefulWidget {
-  const BottomAppBarDemo({Key? key}) : super(key: key);
+  const BottomAppBarDemo({super.key});
 
   @override
   State createState() => _BottomAppBarDemoState();

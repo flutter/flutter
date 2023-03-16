@@ -337,6 +337,26 @@ void main() {
       );
     });
 
+    testWidgets('currentDate is highlighted even if it is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(calendarDatePicker(
+        firstDate: DateTime(2016, 1, 3),
+        lastDate: DateTime(2016, 1, 31),
+        currentDate: DateTime(2016, 1, 2), // not between first and last
+        initialDate: DateTime(2016, 1, 5),
+      ));
+      const Color disabledColor = Color(0x61000000); // default disabled color
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with a circle outline.
+        paints
+          ..circle(
+            color: disabledColor,
+            style: PaintingStyle.stroke,
+            strokeWidth: 1.0,
+          ),
+      );
+    });
+
     testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.may, 10),
@@ -649,7 +669,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
-          label: 'Previous month',
+          tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -657,7 +677,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
-          label: 'Next month',
+          tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,

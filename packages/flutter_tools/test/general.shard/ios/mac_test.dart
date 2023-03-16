@@ -10,8 +10,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -77,7 +79,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.usb,
         ), throwsA(anything));
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
@@ -100,7 +102,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.usb,
         );
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
@@ -123,7 +125,7 @@ void main() {
           '1234',
           IOSDeviceConnectionInterface.network,
         );
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
   });
@@ -166,7 +168,11 @@ void main() {
       ));
     });
 
-    testWithoutContext('No provisioning profile shows message', () async {
+    testWithoutContext('fallback to stdout: No provisioning profile shows message', () async {
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+        'DEVELOPMENT_TEAM': 'a team',
+      };
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
@@ -194,7 +200,7 @@ Xcode's output:
     === CLEAN TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
 
     Check dependencies
-    [BCEROR]No profiles for 'com.example.test' were found:  Xcode couldn't find a provisioning profile matching 'com.example.test'.
+    [BCEROR]"Runner" requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor.
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
@@ -228,14 +234,14 @@ Error launching application on iPhone.''',
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
           environmentType: EnvironmentType.physical,
-          buildSettings: buildSettings,
+          buildSettings: buildSettingsWithDevTeam,
         ),
       );
 
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
-        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
+        contains(noProvisioningProfileInstruction),
       );
     });
 
@@ -260,49 +266,8 @@ Xcode's output:
 ↳
     blah
 
-    === CLEAN TARGET url_launcher OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === CLEAN TARGET Pods-Runner OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === CLEAN TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
-
     Check dependencies
     [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-
-    blah
-
-    ** CLEAN SUCCEEDED **
-
-    === BUILD TARGET url_launcher OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === BUILD TARGET Pods-Runner OF PROJECT Pods WITH CONFIGURATION Release ===
-
-    Check dependencies
-
-    blah
-
-    === BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
-
-    Check dependencies
-    Signing for "Runner" requires a development team. Select a development team in the project editor.
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
-    Code signing is required for product type 'Application' in SDK 'iOS 10.3'
 
 Could not build the precompiled application for the device.''',
         xcodeBuildExecution: XcodeBuildExecution(
@@ -320,78 +285,45 @@ Could not build the precompiled application for the device.''',
       );
     });
 
-    testWithoutContext('embedded and linked framework iOS mismatch shows message', () async {
+    testWithoutContext('does not show no development team message when other Xcode issues detected', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
-Launching lib/main.dart on iPhone in debug mode...
-Automatically signing iOS for device deployment using specified development team in Xcode project: blah
-Xcode build done. 5.7s
+Running "flutter pub get" in flutter_gallery...  0.6s
+Launching lib/main.dart on x in release mode...
+Running pod install...                                1.2s
+Running Xcode build...                                1.4s
 Failed to build iOS app
 Error output from Xcode build:
 ↳
-** BUILD FAILED **
+    ** BUILD FAILED **
+
+
+    The following build commands failed:
+    	Check dependencies
+    (1 failure)
 Xcode's output:
 ↳
-note: Using new build system
-note: Building targets in parallel
-note: Planning build
-note: Constructing build description
-error: Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS. (in target 'Runner' from project 'Runner')
-Could not build the precompiled application for the device.
+    blah
 
-Error launching application on iPhone.
-Exited (sigterm)''',
+    Check dependencies
+    [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
+
+Could not build the precompiled application for the device.''',
         xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
           environmentType: EnvironmentType.physical,
           buildSettings: buildSettings,
         ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: 'Target aot_assembly_release failed', subType: 'Error'),
+        ])
       );
 
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
-      expect(
-        logger.errorText,
-        contains('Your Xcode project requires migration.'),
-      );
-    });
-
-    testWithoutContext('embedded and linked framework iOS simulator mismatch shows message', () async {
-      final XcodeBuildResult buildResult = XcodeBuildResult(
-        success: false,
-        stdout: '''
-Launching lib/main.dart on iPhone in debug mode...
-Automatically signing iOS for device deployment using specified development team in Xcode project: blah
-Xcode build done. 5.7s
-Failed to build iOS app
-Error output from Xcode build:
-↳
-** BUILD FAILED **
-Xcode's output:
-↳
-note: Using new build system
-note: Building targets in parallel
-note: Planning build
-note: Constructing build description
-error: Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator. (in target 'Runner' from project 'Runner')
-Could not build the precompiled application for the device.
-
-Error launching application on iPhone.
-Exited (sigterm)''',
-        xcodeBuildExecution: XcodeBuildExecution(
-          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
-          appDirectory: '/blah/blah',
-          environmentType: EnvironmentType.physical,
-          buildSettings: buildSettings,
-        ),
-      );
-
-      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
-      expect(
-        logger.errorText,
-        contains('Your Xcode project requires migration.'),
-      );
+      expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
+      expect(logger.errorText, isNot(contains('Building a deployable iOS app requires a selected Development Team')));
     });
   });
 
@@ -457,7 +389,7 @@ Exited (sigterm)''',
           '-d',
           'com.apple.FinderInfo',
           projectDirectory.path,
-        ])
+        ]),
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
@@ -466,14 +398,16 @@ Exited (sigterm)''',
 
     testWithoutContext('ignores errors', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'xattr',
-          '-r',
-          '-d',
-          'com.apple.FinderInfo',
-          projectDirectory.path,
-        ], exitCode: 1,
-        )
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            projectDirectory.path,
+          ],
+          exitCode: 1,
+        ),
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);

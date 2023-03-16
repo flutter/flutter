@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.alternativeFractions
+/// Flutter code sample for [FontFeature.FontFeature.alternativeFractions].
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 void main() => runApp(const ExampleApp());
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({Key? key}) : super(key: key);
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +22,12 @@ class ExampleApp extends StatelessWidget {
 }
 
 class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // The Ubuntu Mono font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Ubuntu Mono font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'Fractions: 1/2 2/3 3/4 4/5',
       style: TextStyle(

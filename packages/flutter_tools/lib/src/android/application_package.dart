@@ -97,23 +97,38 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required ProcessManager processManager,
     required UserMessages userMessages,
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    BuildInfo? buildInfo,
   }) async {
-    File apkFile;
+    final File apkFile;
+    final String filename;
+    if (buildInfo == null) {
+      filename = 'app.apk';
+    } else if (buildInfo.flavor == null) {
+      filename = 'app-${buildInfo.mode.name}.apk';
+    } else {
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.name}.apk';
+    }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
+      Directory apkDirectory = getApkDirectory(androidProject.parent);
+      if (androidProject.parent.isModule) {
+        // Module builds output the apk in a subdirectory that corresponds
+        // to the buildmode of the apk.
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.name);
+      }
+      apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
         return AndroidApk.fromApk(
           apkFile,
-          androidSdk: androidSdk,
+          androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
@@ -124,7 +139,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
     }
 
     final File manifest = androidProject.appManifestFile;
@@ -139,7 +154,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     XmlDocument document;
     try {
       document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+    } on XmlException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -148,7 +163,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');

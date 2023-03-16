@@ -16,19 +16,19 @@ void main() {
     body: (WidgetController controller) async {
       final Finder nestedScroll = find.byKey(const ValueKey<String>('tabbar_view'));
       expect(nestedScroll, findsOneWidget);
-      Future<void> _scrollOnce(double offset) async {
+      Future<void> scrollOnce(double offset) async {
         await controller.timedDrag(
           nestedScroll,
-          Offset(-offset, 0.0),
+          Offset(offset, 0.0),
           const Duration(milliseconds: 300),
         );
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       for (int i = 0; i < 3; i += 1) {
-        await _scrollOnce(-300.0);
-        await _scrollOnce(-300.0);
-        await _scrollOnce(300.0);
-        await _scrollOnce(300.0);
+        await scrollOnce(-300.0);
+        await scrollOnce(-300.0);
+        await scrollOnce(300.0);
+        await scrollOnce(300.0);
       }
     },
   );

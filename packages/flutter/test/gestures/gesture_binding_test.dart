@@ -40,8 +40,9 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
+    if (callback != null) {
       callback?.call(event);
+    }
   }
 }
 
@@ -144,8 +145,9 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = (PointerEvent event) {
       events.add(event);
-      if (event is PointerDownEvent)
+      if (event is PointerDownEvent) {
         binding.cancelPointer(event.pointer);
+      }
     };
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
@@ -334,5 +336,24 @@ void main() {
       expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
     }
+  });
+
+  test('Pointer pan/zoom events', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.panZoomStart),
+        ui.PointerData(change: ui.PointerChange.panZoomUpdate),
+        ui.PointerData(change: ui.PointerChange.panZoomEnd),
+      ],
+    );
+
+    final List<PointerEvent> events = <PointerEvent>[];
+    binding.callback = events.add;
+
+    ui.window.onPointerDataPacket?.call(packet);
+    expect(events.length, 3);
+    expect(events[0], isA<PointerPanZoomStartEvent>());
+    expect(events[1], isA<PointerPanZoomUpdateEvent>());
+    expect(events[2], isA<PointerPanZoomEndEvent>());
   });
 }

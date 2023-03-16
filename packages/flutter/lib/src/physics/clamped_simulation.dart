@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
 
+export 'simulation.dart' show Simulation;
+
 /// A simulation that applies limits to another simulation.
 ///
 /// The limits are only applied to the other simulation's outputs. For example,
@@ -55,10 +57,10 @@ class ClampedSimulation extends Simulation {
   final double dxMax;
 
   @override
-  double x(double time) => simulation.x(time).clamp(xMin, xMax);
+  double x(double time) => clampDouble(simulation.x(time), xMin, xMax);
 
   @override
-  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax);
+  double dx(double time) => clampDouble(simulation.dx(time), dxMin, dxMax);
 
   @override
   bool isDone(double time) => simulation.isDone(time);

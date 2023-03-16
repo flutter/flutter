@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io' show SocketException, WebSocket, HttpClient;
+import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -60,7 +60,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
                 return MapEntry<String, dynamic>(name, result.details);
               }
               return MapEntry<String, Object>(name, result);
-            })
+            }),
           },
         );
       } on MissingPluginException {
@@ -154,8 +154,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
-    if (_instance == null)
+    if (_instance == null) {
       IntegrationTestWidgetsFlutterBinding();
+    }
     return _instance!;
   }
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for DataTable
+/// Flutter code sample for [DataTable].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,28 +26,34 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
       columns: const <DataColumn>[
         DataColumn(
-          label: Text(
-            'Name',
-            style: TextStyle(fontStyle: FontStyle.italic),
+          label: Expanded(
+            child: Text(
+              'Name',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
           ),
         ),
         DataColumn(
-          label: Text(
-            'Age',
-            style: TextStyle(fontStyle: FontStyle.italic),
+          label: Expanded(
+            child: Text(
+              'Age',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
           ),
         ),
         DataColumn(
-          label: Text(
-            'Role',
-            style: TextStyle(fontStyle: FontStyle.italic),
+          label: Expanded(
+            child: Text(
+              'Role',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
           ),
         ),
       ],

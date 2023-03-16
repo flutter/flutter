@@ -2,70 +2,104 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedSlide
+/// Flutter code sample for [AnimatedSlide].
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const AnimatedSlideApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class AnimatedSlideApp extends StatelessWidget {
+  const AnimatedSlideApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
-      ),
+    return const MaterialApp(
+      home: AnimatedSlideExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class AnimatedSlideExample extends StatefulWidget {
+  const AnimatedSlideExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedSlideExample> createState() => _AnimatedSlideExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
   Offset offset = Offset.zero;
-
-  void _slideUp() {
-    setState(() => offset -= const Offset(0, 1));
-  }
-
-  void _slideDown() {
-    setState(() => offset += const Offset(0, 1));
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ElevatedButton(
-          onPressed: _slideUp,
-          child: const Text('Slide up'),
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('AnimatedSlide Sample')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(50.0),
+                      child: AnimatedSlide(
+                        offset: offset,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                        child: const FlutterLogo(size: 50.0),
+                      ),
+                    ),
+                  ),
+                  Column(
+                    children: <Widget>[
+                      Text('Y', style: textTheme.bodyMedium),
+                      Expanded(
+                        child: RotatedBox(
+                          quarterTurns: 1,
+                          child: Slider(
+                            min: -5.0,
+                            max: 5.0,
+                            value: offset.dy,
+                            onChanged: (double value) {
+                              setState(() {
+                                offset = Offset(offset.dx, value);
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text('X', style: textTheme.bodyMedium),
+                Expanded(
+                  child: Slider(
+                    min: -5.0,
+                    max: 5.0,
+                    value: offset.dx,
+                    onChanged: (double value) {
+                      setState(() {
+                        offset = Offset(value, offset.dy);
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 48.0),
+              ],
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: _slideDown,
-          child: const Text('Slide down'),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(50),
-          child: AnimatedSlide(
-            offset: offset,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            child: const FlutterLogo(),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

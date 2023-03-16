@@ -14,7 +14,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ Key? key }) : super(key: key);
+  const NotifyMaterial({ super.key });
   @override
   Widget build(BuildContext context) {
     const LayoutChangedNotification().dispatch(context);
@@ -189,6 +189,58 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Shadow color defaults', (WidgetTester tester) async {
+    Widget buildWithShadow(Color? shadowColor) {
+      return Center(
+        child: SizedBox(
+          height: 100.0,
+          width: 100.0,
+          child: Material(
+            shadowColor: shadowColor,
+            elevation: 10,
+            shape: const CircleBorder(),
+          ),
+        )
+      );
+    }
+
+    // Default M2 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: false,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().shadowColor);
+
+    // Default M3 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
+
+    // Drop shadow can be turned off with a transparent color.
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(Colors.transparent),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, Colors.transparent);
+  });
+
   testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
@@ -303,6 +355,23 @@ void main() {
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
       expect(noTintModel.color, equals(baseColor));
+
+      // With transparent surfaceTintColor, it should not apply an overlay
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            surfaceTintColor: Colors.transparent,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape transparentTintModel = getModel(tester);
+      expect(transparentTintModel.color, equals(baseColor));
 
       // With surfaceTintColor specified, it should not apply an overlay based
       // on the elevation.
@@ -927,4 +996,52 @@ void main() {
       );
     });
   });
+
+  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+    final GlobalKey sizedBoxKey = GlobalKey();
+    final GlobalKey materialKey = GlobalKey();
+    await tester.pumpWidget(Material(
+      key: materialKey,
+      child: Offstage(
+        child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
+      ),
+    ));
+    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!);
+
+    final TrackPaintInkFeature tracker = TrackPaintInkFeature(
+      controller: controller,
+      referenceBox: sizedBoxKey.currentContext!.findRenderObject()! as RenderBox,
+    );
+    controller.addInkFeature(tracker);
+    expect(tracker.paintCount, 0);
+
+    // Force a repaint. Since it's offstage, the ink feature should not get painted.
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    expect(tracker.paintCount, 0);
+
+    await tester.pumpWidget(Material(
+      key: materialKey,
+      child: Offstage(
+        offstage: false,
+        child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
+      ),
+    ));
+    // Gets a paint because the global keys have reused the elements and it is
+    // now onstage.
+    expect(tracker.paintCount, 1);
+
+    // Force a repaint again. This time, it gets repainted because it is onstage.
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    expect(tracker.paintCount, 2);
+  });
+}
+
+class TrackPaintInkFeature extends InkFeature {
+  TrackPaintInkFeature({required super.controller, required super.referenceBox});
+
+  int paintCount = 0;
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {
+    paintCount += 1;
+  }
 }

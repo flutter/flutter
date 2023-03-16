@@ -221,11 +221,6 @@ class _TestElement extends Element {
   _TestElement() : super(const Placeholder());
 
   @override
-  void performRebuild() {
-    // Intentionally left empty.
-  }
-
-  @override
   bool get debugDoingBuild => throw UnimplementedError();
 }
 
@@ -254,8 +249,9 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (style != null)
+    if (style != null) {
       properties.defaultDiagnosticsTreeStyle = style!;
+    }
 
     this.properties.forEach(properties.add);
   }

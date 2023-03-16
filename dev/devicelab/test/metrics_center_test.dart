@@ -82,7 +82,7 @@ void main() {
         'device_type': 'Moto G Play',
         'device_version': 'android-25',
         'host_type': 'linux',
-        'host_version': 'debian-10.11'
+        'host_version': 'debian-10.11',
       };
       final List<MetricPoint> metricPoints = parse(results, tags, 'task abc');
 

@@ -865,6 +865,39 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
+  testWidgets('receives fontFamilyFallback and package from root ThemeData', (WidgetTester tester) async {
+    const String fontFamily = 'fontFamily';
+    const String package = 'package_name';
+    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          package: package,
+          primarySwatch: Colors.blue,
+        ),
+        home: const Scaffold(
+          body: Center(
+            child: Text(
+              'foo',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+    final RichText richText = tester.widget(find.byType(RichText));
+    final InlineSpan text = richText.text;
+    final TextStyle? style = text.style;
+    expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
+    for (int i = 0; i < fontFamilyFallback.length; i++) {
+      final String fallback = fontFamilyFallback[i];
+      expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
+    }
+  });
+
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
@@ -1048,13 +1081,16 @@ void main() {
         );
 
       expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawParagraph)
+        if (method != #drawParagraph) {
           return false;
+        }
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width)
+        if (paragraph.longestLine > paragraph.width) {
           throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        if (paragraph.width >= 400)
+        }
+        if (paragraph.width >= 400) {
           throw 'paragraph.width (${paragraph.width}) >= 400';
+        }
         return true;
       }));
     },
@@ -1067,6 +1103,7 @@ void main() {
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
     expect(paragraph.getBoxesForRange(2, 2), isEmpty);
+    paragraph.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/65818

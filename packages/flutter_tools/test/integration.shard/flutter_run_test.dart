@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
@@ -14,9 +12,9 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final BasicProject project = BasicProject();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');

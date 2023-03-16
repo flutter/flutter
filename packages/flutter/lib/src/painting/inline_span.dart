@@ -12,6 +12,9 @@ import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
+// Examples can assume:
+// late InlineSpan myInlineSpan;
+
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
 class Accumulator {
@@ -65,7 +68,7 @@ class InlineSpanSemanticsInformation {
   /// The text info for a [PlaceholderSpan].
   static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
 
-  /// The text value, if any.  For [PlaceholderSpan]s, this will be the unicode
+  /// The text value, if any. For [PlaceholderSpan]s, this will be the unicode
   /// placeholder value.
   final String text;
 
@@ -277,7 +280,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Walks the [InlineSpan] tree and accumulates a list of
   /// [InlineSpanSemanticsInformation] objects.
   ///
-  /// This method should not be directly called.  Use
+  /// This method should not be directly called. Use
   /// [getSemanticsInformation] instead.
   ///
   /// [PlaceholderSpan]s in the tree will be represented with a
@@ -308,8 +311,9 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Returns null if the `index` is out of bounds.
   int? codeUnitAt(int index) {
-    if (index < 0)
+    if (index < 0) {
       return null;
+    }
     final Accumulator offset = Accumulator();
     int? result;
     visitChildren((InlineSpan span) {
@@ -353,10 +357,12 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is InlineSpan
         && other.style == style;
   }

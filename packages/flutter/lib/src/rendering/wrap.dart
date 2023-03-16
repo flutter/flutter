@@ -150,8 +150,9 @@ class RenderWrap extends RenderBox
   Axis _direction;
   set direction (Axis value) {
     assert(value != null);
-    if (_direction == value)
+    if (_direction == value) {
       return;
+    }
     _direction = value;
     markNeedsLayout();
   }
@@ -173,8 +174,9 @@ class RenderWrap extends RenderBox
   WrapAlignment _alignment;
   set alignment (WrapAlignment value) {
     assert(value != null);
-    if (_alignment == value)
+    if (_alignment == value) {
       return;
+    }
     _alignment = value;
     markNeedsLayout();
   }
@@ -194,8 +196,9 @@ class RenderWrap extends RenderBox
   double _spacing;
   set spacing (double value) {
     assert(value != null);
-    if (_spacing == value)
+    if (_spacing == value) {
       return;
+    }
     _spacing = value;
     markNeedsLayout();
   }
@@ -218,8 +221,9 @@ class RenderWrap extends RenderBox
   WrapAlignment _runAlignment;
   set runAlignment (WrapAlignment value) {
     assert(value != null);
-    if (_runAlignment == value)
+    if (_runAlignment == value) {
       return;
+    }
     _runAlignment = value;
     markNeedsLayout();
   }
@@ -238,8 +242,9 @@ class RenderWrap extends RenderBox
   double _runSpacing;
   set runSpacing (double value) {
     assert(value != null);
-    if (_runSpacing == value)
+    if (_runSpacing == value) {
       return;
+    }
     _runSpacing = value;
     markNeedsLayout();
   }
@@ -263,8 +268,9 @@ class RenderWrap extends RenderBox
   WrapCrossAlignment _crossAxisAlignment;
   set crossAxisAlignment (WrapCrossAlignment value) {
     assert(value != null);
-    if (_crossAxisAlignment == value)
+    if (_crossAxisAlignment == value) {
       return;
+    }
     _crossAxisAlignment = value;
     markNeedsLayout();
   }
@@ -397,8 +403,9 @@ class RenderWrap extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! WrapParentData)
+    if (child.parentData is! WrapParentData) {
       child.parentData = WrapParentData();
+    }
   }
 
   @override
@@ -550,8 +557,9 @@ class RenderWrap extends RenderBox
       }
       runMainAxisExtent += childMainAxisExtent;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      if (childCount > 0)
+      if (childCount > 0) {
         runMainAxisExtent += spacing;
+      }
       childCount += 1;
       child = childAfter(child);
     }
@@ -584,18 +592,22 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         mainAxisLimit = constraints.maxWidth;
-        if (textDirection == TextDirection.rtl)
+        if (textDirection == TextDirection.rtl) {
           flipMainAxis = true;
-        if (verticalDirection == VerticalDirection.up)
+        }
+        if (verticalDirection == VerticalDirection.up) {
           flipCrossAxis = true;
+        }
         break;
       case Axis.vertical:
         childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
-        if (verticalDirection == VerticalDirection.up)
+        if (verticalDirection == VerticalDirection.up) {
           flipMainAxis = true;
-        if (textDirection == TextDirection.rtl)
+        }
+        if (textDirection == TextDirection.rtl) {
           flipCrossAxis = true;
+        }
         break;
     }
     assert(childConstraints != null);
@@ -615,16 +627,18 @@ class RenderWrap extends RenderBox
       if (childCount > 0 && runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
-        if (runMetrics.isNotEmpty)
+        if (runMetrics.isNotEmpty) {
           crossAxisExtent += runSpacing;
+        }
         runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         childCount = 0;
       }
       runMainAxisExtent += childMainAxisExtent;
-      if (childCount > 0)
+      if (childCount > 0) {
         runMainAxisExtent += spacing;
+      }
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
       final WrapParentData childParentData = child.parentData! as WrapParentData;
@@ -634,8 +648,9 @@ class RenderWrap extends RenderBox
     if (childCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
-      if (runMetrics.isNotEmpty)
+      if (runMetrics.isNotEmpty) {
         crossAxisExtent += runSpacing;
+      }
       runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
     }
 
@@ -724,30 +739,35 @@ class RenderWrap extends RenderBox
       childBetweenSpace += spacing;
       double childMainPosition = flipMainAxis ? containerMainAxisExtent - childLeadingSpace : childLeadingSpace;
 
-      if (flipCrossAxis)
+      if (flipCrossAxis) {
         crossAxisOffset -= runCrossAxisExtent;
+      }
 
       while (child != null) {
         final WrapParentData childParentData = child.parentData! as WrapParentData;
-        if (childParentData._runIndex != i)
+        if (childParentData._runIndex != i) {
           break;
+        }
         final double childMainAxisExtent = _getMainAxisExtent(child.size);
         final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
         final double childCrossAxisOffset = _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
-        if (flipMainAxis)
+        if (flipMainAxis) {
           childMainPosition -= childMainAxisExtent;
+        }
         childParentData.offset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
-        if (flipMainAxis)
+        if (flipMainAxis) {
           childMainPosition -= childBetweenSpace;
-        else
+        } else {
           childMainPosition += childMainAxisExtent + childBetweenSpace;
+        }
         child = childParentData.nextSibling;
       }
 
-      if (flipCrossAxis)
+      if (flipCrossAxis) {
         crossAxisOffset -= runBetweenSpace;
-      else
+      } else {
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
+      }
     }
   }
 

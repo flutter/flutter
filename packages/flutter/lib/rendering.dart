@@ -22,11 +22,11 @@
 library rendering;
 
 export 'package:flutter/foundation.dart' show
-  VoidCallback,
+  DiagnosticLevel,
   ValueChanged,
   ValueGetter,
   ValueSetter,
-  DiagnosticLevel;
+  VoidCallback;
 export 'package:flutter/semantics.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -54,6 +54,8 @@ export 'src/rendering/platform_view.dart';
 export 'src/rendering/proxy_box.dart';
 export 'src/rendering/proxy_sliver.dart';
 export 'src/rendering/rotated_box.dart';
+export 'src/rendering/selection.dart';
+export 'src/rendering/service_extensions.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
 export 'src/rendering/sliver_fill.dart';

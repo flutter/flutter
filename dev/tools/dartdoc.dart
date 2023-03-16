@@ -16,7 +16,6 @@ import 'dartdoc_checker.dart';
 
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
-const String kSnippetsRoot = 'dev/snippets';
 
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
@@ -43,13 +42,15 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools')
+  if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
+  }
 
   final ProcessResult flutter = Process.runSync('flutter', <String>[]);
   final File versionFile = File('version');
-  if (flutter.exitCode != 0 || !versionFile.existsSync())
+  if (flutter.exitCode != 0 || !versionFile.existsSync()) {
     throw Exception('Failed to determine Flutter version.');
+  }
   final String version = versionFile.readAsStringSync();
 
   // Create the pubspec.yaml file.
@@ -103,8 +104,9 @@ Future<void> main(List<String> arguments) async {
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.done;
-  if (code != 0)
+  if (code != 0) {
     exit(code);
+  }
 
   createFooter('$kDocsRoot/lib/', version);
   copyAssets();
@@ -237,8 +239,9 @@ Future<void> main(List<String> arguments) async {
   );
   final int exitCode = await process.done;
 
-  if (exitCode != 0)
+  if (exitCode != 0) {
     exit(exitCode);
+  }
 
   sanityCheckDocs();
   checkForUnresolvedDirectives('$kPublishRoot/api');
@@ -252,7 +255,7 @@ ArgParser _createArgsParser() {
       help: 'Show command help.');
   parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
-          'filter out some known false positives (off).  Shut this off '
+          'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
       help: 'Run dartdoc in checked mode.');
@@ -280,8 +283,9 @@ String getBranchName({
     return luciBranch.trim();
   }
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0)
+  if (gitResult.exitCode != 0) {
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  }
   final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
       (gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
@@ -291,8 +295,9 @@ String gitRevision() {
   const int kGitRevisionLength = 10;
 
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  if (gitResult.exitCode != 0)
+  if (gitResult.exitCode != 0) {
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
+  }
   final String gitRevision = (gitResult.stdout as String).trim();
 
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
@@ -339,11 +344,13 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 ///
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
-  if (!srcDir.existsSync())
+  if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+  }
 
-  if (!destDir.existsSync())
+  if (!destDir.existsSync()) {
     destDir.createSync(recursive: true);
+  }
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = path.join(destDir.path, path.basename(entity.path));
@@ -381,26 +388,22 @@ void cleanOutSnippets() {
   }
 }
 
-void _sanityCheckExample(File file, RegExp regExp) {
+void _sanityCheckExample(String fileString, String regExpString) {
+  final File file = File(fileString);
   if (file.existsSync()) {
-    final List<String> contents = file.readAsLinesSync();
-    bool found = false;
-    for (final String line in contents) {
-      if (regExp.matchAsPrefix(line) != null) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
+    final RegExp regExp = RegExp(regExpString, dotAll: true);
+    final String contents = file.readAsStringSync();
+    if (!regExp.hasMatch(contents)) {
+      throw Exception("Missing example code matching '$regExpString' in ${file.path}.");
     }
   } else {
-    throw Exception("Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
+    throw Exception(
+        "Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
   }
 }
 
 /// Runs a sanity check by running a test.
-void sanityCheckDocs() {
+void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
   final List<String> canaries = <String>[
     '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
@@ -411,27 +414,49 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/material/Material-class.html',
     '$kPublishRoot/api/material/Tooltip-class.html',
     '$kPublishRoot/api/widgets/Widget-class.html',
+    '$kPublishRoot/api/widgets/Listener-class.html',
   ];
   for (final String canary in canaries) {
-    if (!File(canary).existsSync())
+    if (!File(canary).existsSync()) {
       throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+    }
   }
   // Make sure at least one example of each kind includes source code.
 
   // Check a "sample" example, any one will do.
-  final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
-  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
-  _sanityCheckExample(sampleExample, sampleRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/showGeneralDialog.html',
+    r'\s*<pre\s+id="longSnippet1".*<code\s+class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;',
+  );
 
   // Check a "snippet" example, any one will do.
-  final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
-  _sanityCheckExample(snippetExample, snippetRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/ModalRoute/barrierColor.html',
+    r'\s*<pre.*id="sample-code">.*Color\s+get\s+barrierColor.*</pre>',
+  );
 
-  // Check a "dartpad" example, any one will do.
-  final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
-  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
-  _sanityCheckExample(dartpadExample, dartpadRegExp);
+  // Check a "dartpad" example, any one will do, and check for the correct URL
+  // arguments.
+  // Just use "master" for any branch other than the LUCH_BRANCH.
+  final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
+  final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+  final List<String> argumentRegExps = <String>[
+    r'split=\d+',
+    r'run=true',
+    r'null_safety=true',
+    r'sample_id=widgets\.Listener\.\d+',
+    'sample_channel=$expectedBranch',
+    'channel=$expectedBranch',
+  ];
+  for (final String argumentRegExp in argumentRegExps) {
+    _sanityCheckExample(
+      '$kPublishRoot/api/widgets/Listener-class.html',
+      r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
+      r'https:\/\/dartpad.dev\/embed-flutter.html\?.*?\b'
+      '$argumentRegExp'
+      r'\b.*">\s*<\/iframe>',
+    );
+  }
 }
 
 /// Creates a custom index.html because we try to maintain old
@@ -524,8 +549,9 @@ List<Directory> findPackages() {
   return Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {
-      if (entity is! Directory)
+      if (entity is! Directory) {
         return false;
+      }
       final File pubspec = File('${entity.path}/pubspec.yaml');
       if (!pubspec.existsSync()) {
         print("Unexpected package '${entity.path}' found in packages directory");
@@ -561,8 +587,9 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
     .listen((String line) {
-      if (!filter.any((Pattern pattern) => line.contains(pattern)))
+      if (!filter.any((Pattern pattern) => line.contains(pattern))) {
         print('$prefix$line'.trim());
+      }
     });
 }
 

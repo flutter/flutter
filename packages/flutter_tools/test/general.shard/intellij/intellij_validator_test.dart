@@ -22,7 +22,7 @@ final Platform macPlatform = FakePlatform(
 );
 final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{
-    'HOME': '/foo/bar'
+    'HOME': '/foo/bar',
   },
 );
 final Platform windowsPlatform = FakePlatform(
@@ -30,7 +30,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{
     'USERPROFILE': r'C:\Users\foo',
     'APPDATA': r'C:\Users\foo\AppData\Roaming',
-    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local'
+    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local',
   },
 );
 
@@ -49,7 +49,7 @@ void main() {
       ValidationMessage.error('Flutter plugin version 0.1.3 - the recommended minimum version is 16.0.0'),
       ValidationMessage('Dart plugin version 162.2485'),
       ValidationMessage('For information about installing plugins, see\n'
-          'https://flutter.dev/intellij-setup/#installing-the-plugins')
+          'https://flutter.dev/intellij-setup/#installing-the-plugins'),
     ]);
   });
 

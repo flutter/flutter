@@ -10,7 +10,7 @@ const Offset _kRowOffset = Offset(0.0, -50.0);
 void main() {
   testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.DatePickerApp(),
     );
     // Open the date picker.
     await tester.tap(find.text('10-26-2016'));

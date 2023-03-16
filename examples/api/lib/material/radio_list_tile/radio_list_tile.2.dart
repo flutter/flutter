@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RadioListTile
+/// Flutter code sample for [RadioListTile].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -27,13 +27,13 @@ class MyApp extends StatelessWidget {
 
 class LabeledRadio extends StatelessWidget {
   const LabeledRadio({
-    Key? key,
+    super.key,
     required this.label,
     required this.padding,
     required this.groupValue,
     required this.value,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   final String label;
   final EdgeInsets padding;
@@ -69,7 +69,7 @@ class LabeledRadio extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

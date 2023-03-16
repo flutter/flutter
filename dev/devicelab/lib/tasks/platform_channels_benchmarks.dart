@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Process, Directory;
+import 'dart:io' show Directory, Process;
 
 import 'package:path/path.dart' as path;
 
@@ -29,7 +29,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
         'ios,android',
         '--no-overwrite',
         '-v',
-        '.'
+        '.',
       ];
       print('\nExecuting: $flutterExe $createArgs $appDir');
       await utils.eval(flutterExe, createArgs);

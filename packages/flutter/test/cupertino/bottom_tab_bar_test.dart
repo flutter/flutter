@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -318,7 +316,7 @@ Future<void> main() async {
 
     // Verify height with bottom padding.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
@@ -361,7 +359,7 @@ Future<void> main() async {
     // Verify height with bottom padding.
     const double bottomPadding = 40.0;
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: bottomPadding)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
@@ -369,6 +367,60 @@ Future<void> main() async {
         },
       ),
     ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+  });
+
+  testWidgets('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
+    const double tabBarHeight = 56.0;
+    final CupertinoTabBar tabBar = CupertinoTabBar(
+      height: tabBarHeight,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Aka',
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Shiro',
+        ),
+      ],
+    );
+
+    const double bottomPadding = 34.0;
+
+    // Test the height is correct when keyboard not showing.
+    // So viewInset should be 0.0.
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        viewPadding: EdgeInsets.only(bottom: bottomPadding),
+      ),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+
+    // Now show keyboard, and test the bar height will not change.
+    await pumpWidgetWithBoilerplate(tester,
+      MediaQuery(
+        data: const MediaQueryData(
+          viewPadding: EdgeInsets.only(bottom: bottomPadding),
+          viewInsets: EdgeInsets.only(bottom: 336.0),
+        ),
+        child:  CupertinoTabScaffold(
+          tabBar: tabBar,
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // Expect the bar height should not change.
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
@@ -600,7 +652,6 @@ Future<void> main() async {
 
     final Offset tabItem = tester.getCenter(find.text('Tab 1'));
     await gesture.moveTo(tabItem);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),

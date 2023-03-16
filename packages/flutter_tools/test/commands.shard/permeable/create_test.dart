@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -59,12 +58,13 @@ const String samplesIndexJson = '''
 ]''';
 
 void main() {
-  Directory tempDir;
-  Directory projectDir;
-  FakeFlutterVersion fakeFlutterVersion;
-  LoggingProcessManager loggingProcessManager;
-  FakeProcessManager fakeProcessManager;
-  BufferLogger logger;
+  late Directory tempDir;
+  late Directory projectDir;
+  late FakeFlutterVersion fakeFlutterVersion;
+  late LoggingProcessManager loggingProcessManager;
+  late FakeProcessManager fakeProcessManager;
+  late BufferLogger logger;
+  late FakeStdio mockStdio;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -81,6 +81,7 @@ void main() {
       channel: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
+    mockStdio = FakeStdio();
   });
 
   tearDown(() {
@@ -113,6 +114,37 @@ void main() {
     expect(Uuid.isValidUUID(fromString: identifier), isTrue);
   });
 
+  testUsingContext('tool exits on Windows if given a drive letter without a path', () async {
+    // Must use LocalFileSystem as it is dependent on dart:io handling of
+    // Windows paths, which the MemoryFileSystem does not implement
+    final Directory workingDir = globals.fs.directory(r'X:\path\to\working\dir');
+    // Must use [io.IOOverrides] as directory.absolute depends on Directory.current
+    // from dart:io.
+    await io.IOOverrides.runZoned<Future<void>>(
+      () async {
+        // Verify IOOverrides is working
+        expect(io.Directory.current, workingDir);
+        final CreateCommand command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        const String driveName = 'X:';
+        await expectToolExitLater(
+          runner.run(<String>[
+            'create',
+            '--project-name',
+            'test_app',
+            '--offline',
+            driveName,
+          ]),
+          contains('You attempted to create a flutter project at the path "$driveName"'),
+        );
+      },
+      getCurrentDirectory: () => workingDir,
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+  }, skip: !io.Platform.isWindows // [intended] relies on Windows file system
+  );
+
   // Verify that we create a default project ('app') that is
   // well-formed.
   testUsingContext('can create a default project', () async {
@@ -127,19 +159,28 @@ void main() {
         'ios/Flutter/AppFrameworkInfo.plist',
         'ios/Runner/AppDelegate.m',
         'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
+        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
         'lib/main.dart',
       ],
     );
+    expect(logger.statusText, contains('In order to run your application, type:'));
+    // check that we're telling them about documentation
+    expect(logger.statusText, contains('https://docs.flutter.dev/'));
+    expect(logger.statusText, contains('https://api.flutter.dev/'));
+    // check that the tests run clean
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
-      logger: globals.logger,
+      logger: logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
+    Logger: () => logger,
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
@@ -179,13 +220,14 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -205,13 +247,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -222,8 +265,6 @@ void main() {
       '.android/app/',
       '.gitignore',
       '.ios/Flutter',
-      '.ios/Flutter/flutter_project.podspec',
-      '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
       'analysis_options.yaml',
       'lib/main.dart',
@@ -236,13 +277,14 @@ void main() {
     ]);
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -261,13 +303,14 @@ void main() {
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -286,13 +329,14 @@ void main() {
     expect(exec.exitCode, 2);
     expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
     ...noColorTerminalOverride,
   });
@@ -319,13 +363,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -351,13 +396,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -378,13 +424,14 @@ void main() {
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',]
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -416,13 +463,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -445,13 +493,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -483,13 +532,14 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -513,13 +563,14 @@ void main() {
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -537,21 +588,22 @@ void main() {
     // Expect the dependency on flutter_web_plugins exists
     expect(pubspec.dependencies, contains('flutter_web_plugins'));
     // The platform is correctly registered
-    final YamlMap web = ((pubspec.flutter['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
+    final YamlMap web = ((pubspec.flutter!['plugin'] as YamlMap)['platforms'] as YamlMap)['web'] as YamlMap;
     expect(web['pluginClass'], 'FlutterProjectWeb');
     expect(web['fileName'], 'flutter_project_web.dart');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
-    Logger: ()=>logger,
+    Logger: () => logger,
   });
 
   testUsingContext('plugin example app depends on plugin', () async {
@@ -567,16 +619,17 @@ void main() {
     final String pluginName = projectDir.basename;
     expect(pubspec.dependencies, contains(pluginName));
     expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
-    final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
+    final PathDependency pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
     expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -591,9 +644,7 @@ void main() {
         'example/ios/Runner/AppDelegate.swift',
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
-        'ios/Classes/SwiftFlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.swift',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -602,6 +653,8 @@ void main() {
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
       ],
     );
   });
@@ -677,7 +730,7 @@ void main() {
       '.android/settings.gradle',
       '.gitignore',
       '.metadata',
-      '.packages',
+      '.dart_tool/package_config.json',
       'analysis_options.yaml',
       'lib/main.dart',
       'pubspec.lock',
@@ -691,13 +744,14 @@ void main() {
       '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -756,7 +810,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });
@@ -811,7 +865,6 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });
@@ -830,40 +883,12 @@ void main() {
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('winuwp'), isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('example').childDirectory('winuwp'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
-  });
-
-  testUsingContext('app supports Windows UWP if requested', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>[
-      'create',
-      '--no-pub',
-      '--platform=winuwp',
-      projectDir.path,
-    ]);
-
-    expect(projectDir.childDirectory('linux'), isNot(exists));
-    expect(projectDir.childDirectory('android'), isNot(exists));
-    expect(projectDir.childDirectory('ios'), isNot(exists));
-    expect(projectDir.childDirectory('windows'), isNot(exists));
-    expect(projectDir.childDirectory('macos'), isNot(exists));
-    expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('winuwp'), exists);
-    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
-    Logger: () => logger,
   });
 
   testUsingContext('app supports Linux if requested', () async {
@@ -885,7 +910,6 @@ void main() {
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
-    expect(projectDir.childDirectory('winuwp'), isNot(exists));
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -1064,7 +1088,7 @@ void main() {
         projectDir.childDirectory('example').childDirectory('web'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'windows'
+      'windows',
     ], pluginClass: 'FlutterProjectPluginCApi',
     unexpectedPlatforms: <String>['some_platform']);
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
@@ -1156,7 +1180,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1177,6 +1201,7 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
     expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    expect(xcodeConfig, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
     // Avoid legacy build locations to support Swift Package Manager.
     expect(xcodeConfig, isNot(contains('SYMROOT')));
 
@@ -1191,13 +1216,6 @@ void main() {
     expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     // Do not override host app build settings.
     expect(buildPhaseScript, isNot(contains('SYMROOT')));
-
-    // Generated podspec
-    final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
-    expectExists(podspecPath);
-    final File podspecFile = globals.fs.file(globals.fs.path.join(projectDir.path, podspecPath));
-    final String podspec = podspecFile.readAsStringSync();
-    expect(podspec, contains('Flutter module - flutter_project'));
 
     // App identification
     final String xcodeProjectPath = globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
@@ -1259,7 +1277,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1279,6 +1297,7 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
+    expect(xcodeConfig, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
     // Xcode project
     final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
@@ -1345,7 +1364,7 @@ void main() {
         command: const <String>['openssl', 'x509', '-subject'],
         stdin: IOSink(controller.sink),
         stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
-      )
+      ),
     ]);
 
     controller.stream.listen((List<int> chunk) {
@@ -1381,6 +1400,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1398,6 +1419,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1415,16 +1438,19 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1441,16 +1467,19 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1467,6 +1496,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1484,6 +1515,8 @@ void main() {
     expect(plistFile, exists);
     final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
     expect(disabled, isTrue);
+    final bool indirectInput = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIApplicationSupportsIndirectInputEvents');
+    expect(indirectInput, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
@@ -1697,13 +1730,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1721,13 +1755,14 @@ void main() {
       'com.bar.foo.flutterProject',
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1780,7 +1815,7 @@ void main() {
         '--org', 'com.bar.foo',
         '-i', 'objc',
         '-a', 'java',
-        '--platforms', 'ios,android'
+        '--platforms', 'ios,android',
       ],
       <String>[],
     );
@@ -1871,13 +1906,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -1891,27 +1927,53 @@ void main() {
 
       // Run pub online first in order to populate the pub cache.
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+      final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+      )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]dart')));
-      expect(loggingProcessManager.commands.first, contains('--offline'));
+      expect(loggingProcessManager.commands, contains(predicate(
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+      )));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     },
   );
+
+  testUsingContext('can create an empty application project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[
+        'lib/main.dart',
+        'flutter_project.iml',
+        'android/app/src/main/AndroidManifest.xml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+      ],
+      unexpectedPaths: <String>['test'],
+    );
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains("Text('Hello World!')"));
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      isNot(contains('int _counter')));
+    expect(projectDir.childFile('analysis_options.yaml').readAsStringSync(),
+      isNot(contains('#')));
+    expect(projectDir.childFile('README.md').readAsStringSync(),
+      isNot(contains('Getting Started')));
+  });
 
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
@@ -1934,7 +1996,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() {}')),
-          )
+          ),
         ]);
       };
     },
@@ -1957,7 +2019,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
-          )
+          ),
         ]);
       };
     },
@@ -1984,7 +2046,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
             response: FakeResponse(body: utf8.encode(samplesIndexJson)),
-          )
+          ),
         ]);
       };
     },
@@ -2012,7 +2074,7 @@ void main() {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
-          )
+          ),
         ]);
       };
     },
@@ -2037,7 +2099,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
             response: const FakeResponse(statusCode: HttpStatus.notFound),
-          )
+          ),
         ]);
       };
     },
@@ -2071,7 +2133,7 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: <String>[
-      'some_platform'
+      'some_platform',
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>[ 'ios', 'android', 'web', 'linux', 'windows', 'macos']);
   }, overrides: <Type, Generator>{
@@ -2157,7 +2219,7 @@ void main() {
     expect(
         projectDir.childDirectory('example').childDirectory('android'), exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'android'
+      'android',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');
@@ -2178,7 +2240,7 @@ void main() {
         projectDir.childDirectory('lib').childFile('flutter_project_web.dart'),
         exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'web'
+      'web',
     ], pluginClass: 'FlutterProjectWeb',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project',
@@ -2204,7 +2266,7 @@ void main() {
         projectDir.childDirectory('lib').childFile('flutter_project_web.dart'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'some_platform'
+      'some_platform',
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>['web']);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
@@ -2340,7 +2402,7 @@ void main() {
     expect(projectDir.childDirectory('ios'), exists);
     expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'ios', 'android'
+      'ios', 'android',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');
@@ -2539,9 +2601,9 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint> env = pubspec.environment;
-    expect(env['flutter'].allows(Version(2, 5, 0)), true);
-    expect(env['flutter'].allows(Version(2, 4, 9)), false);
+    final Map<String, VersionConstraint?> env = pubspec.environment!;
+    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
+    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -2733,6 +2795,22 @@ void main() {
     Logger: ()=> logger,
   });
 
+  testUsingContext('created FFI plugin supports no platforms should print `no platforms` message', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: ()=> logger,
+  });
+
   testUsingContext('created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.', () async {
     Cache.flutterRoot = '../..';
 
@@ -2839,13 +2917,14 @@ void main() {
       expectedFailures: expectedFailures,
     );
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
       platform: globals.platform,
+      stdio: mockStdio,
     ),
   });
 
@@ -3059,7 +3138,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir,
   );
@@ -3072,19 +3151,36 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
-    final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
-    final List<String> lineComponents = line.trim().split(analyzerSeparator);
-    final String lintName = lineComponents.removeLast();
-    final String location = lineComponents.removeLast();
-    return '$location: $lintName';
+    try {
+      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+      final List<String> lineComponents = line.trim().split(analyzerSeparator);
+      final String lintName = lineComponents.removeLast();
+      final String location = lineComponents.removeLast();
+      return '$location: $lintName';
+    } on RangeError catch (err) {
+      throw RangeError('Received "$err" while trying to parse: "$line".');
+    }
   }
-  final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
-      .where((String line) {
-        return line.trim().isNotEmpty &&
-            !line.startsWith('Analyzing') &&
-            !line.contains('flutter pub get');
-      }).map(lineParser).toList();
-  expect(errors, unorderedEquals(expectedFailures));
+  final String stdout = exec.stdout.toString();
+  final List<String> errors = <String>[];
+  try {
+    bool analyzeLineFound = false;
+    const LineSplitter().convert(stdout).forEach((String line) {
+      // Conditional to filter out any stdout from `pub get`
+      if (!analyzeLineFound && line.startsWith('Analyzing')) {
+        analyzeLineFound = true;
+        return;
+      }
+
+      if (analyzeLineFound && line.trim().isNotEmpty) {
+        errors.add(lineParser(line.trim()));
+      }
+    });
+  } on Exception catch (err) {
+    fail('$err\n\nComplete STDOUT was:\n\n$stdout');
+  }
+  expect(errors, unorderedEquals(expectedFailures),
+      reason: 'Failed with stdout:\n\n$stdout');
 }
 
 Future<void> _getPackages(Directory workingDir) async {
@@ -3099,7 +3195,7 @@ Future<void> _getPackages(Directory workingDir) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -3109,7 +3205,7 @@ Future<void> _getPackages(Directory workingDir) async {
   );
 }
 
-Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
+Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3128,7 +3224,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
     args,
     workingDirectory: workingDir.path,
   );
@@ -3146,8 +3242,8 @@ class LoggingProcessManager extends LocalProcessManager {
   @override
   Future<Process> start(
     List<Object> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
@@ -3168,14 +3264,14 @@ class LoggingProcessManager extends LocalProcessManager {
   }
 }
 
-String _getStringValueFromPlist({File plistFile, String key}) {
+String _getStringValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }
 
-bool _getBooleanValueFromPlist({File plistFile, String key}) {
+bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);

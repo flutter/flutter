@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Curve2D
+/// Flutter code sample for [Curve2D].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -43,12 +43,12 @@ final CatmullRomSpline path = CatmullRomSpline(
 
 class FollowCurve2D extends StatefulWidget {
   const FollowCurve2D({
-    Key? key,
+    super.key,
     required this.path,
     this.curve = Curves.easeInOut,
     required this.child,
     this.duration = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
 
   final Curve2D path;
   final Curve curve;
@@ -71,7 +71,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
     super.initState();
     controller = AnimationController(duration: widget.duration, vsync: this);
     animation = CurvedAnimation(parent: controller, curve: widget.curve);
-    // Have the controller repeat indefinitely.  If you want it to "bounce" back
+    // Have the controller repeat indefinitely. If you want it to "bounce" back
     // and forth, set the reverse parameter to true.
     controller.repeat();
     controller.addListener(() => setState(() {}));
@@ -97,7 +97,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class MyStatelessWidget extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: Colors.yellow,
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6!,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: const Text('B'), // Buzz, buzz!
           ),
         ),

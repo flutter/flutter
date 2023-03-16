@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
@@ -24,11 +22,11 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_vm_services.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  Cache fakeCache;
-  BufferLogger logger;
-  String ideviceSyslogPath;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late Cache fakeCache;
+  late BufferLogger logger;
+  late String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -231,7 +229,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
-        'Message from debugger'
+        'Message from debugger',
       ]);
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
@@ -328,8 +326,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      Object exception;
-      StackTrace trace;
+      Object? exception;
+      StackTrace? trace;
       await asyncGuard(
           () async {
             await logReader.linesController.close();

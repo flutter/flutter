@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
-  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+  Future<void> checkNonLinearAnimation(WidgetTester tester) async {
     final Offset firstPosition = tester.getCenter(find.text('BottomSheet'));
     await tester.pump(const Duration(milliseconds: 30));
     final Offset secondPosition = tester.getCenter(find.text('BottomSheet'));
@@ -218,7 +218,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
@@ -323,7 +322,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-      isDismissible: true,
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
@@ -360,13 +358,13 @@ void main() {
     );
     await tester.pump();
 
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle();
 
     // Tap above the bottom sheet to dismiss it.
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
   });
@@ -498,7 +496,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
@@ -531,7 +528,6 @@ void main() {
     showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
-      enableDrag: true,
       builder: (BuildContext context) {
         numBuilderCalls++;
         return const Text('BottomSheet');
@@ -685,6 +681,69 @@ void main() {
     );
   });
 
+  testWidgets('modal BottomSheet can insert a SafeArea', (WidgetTester tester) async {
+    late BuildContext outerContext;
+    late BuildContext innerContext;
+
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(50.0),
+            size: Size(400.0, 600.0),
+          ),
+          child: Navigator(
+            onGenerateRoute: (_) {
+              return PageRouteBuilder<void>(
+                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                  outerContext = context;
+                  return Container();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Without a SafeArea (useSafeArea is false by default)
+    showModalBottomSheet<void>(
+      context: outerContext,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Top padding is consumed and there is no SafeArea
+    expect(MediaQuery.of(innerContext).padding.top, 0);
+    expect(find.byType(SafeArea), findsNothing);
+
+    // With a SafeArea
+    showModalBottomSheet<void>(
+      context: outerContext,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Top padding is consumed and there is a SafeArea
+    expect(MediaQuery.of(innerContext).padding.top, 0);
+    expect(find.byType(SafeArea), findsOneWidget);
+  });
+
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -774,6 +833,45 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
+  testWidgets('BottomSheet uses fallback values in maretial3',
+      (WidgetTester tester) async {
+    const Color surfaceColor = Colors.pink;
+    const Color surfaceTintColor = Colors.blue;
+    const ShapeBorder defaultShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+      top: Radius.circular(28.0),
+    ));
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(
+          surface: surfaceColor,
+          surfaceTint: surfaceTintColor,
+        ),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      ),
+    ));
+
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, surfaceColor);
+    expect(material.surfaceTintColor, surfaceTintColor);
+    expect(material.elevation, 1.0);
+    expect(material.shape, defaultShape);
+  });
+
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -820,7 +918,6 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                      actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
                       children: <TestSemantics>[
                         TestSemantics(
                           label: 'BottomSheet',
@@ -1302,6 +1399,35 @@ void main() {
     expect(find.text('BottomSheet 2'), findsOneWidget);
     });
 
+  testWidgets('ModalBottomSheetRoute shows BottomSheet correctly', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsNothing);
+
+    // Bring up bottom sheet.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        isScrollControlled: false,
+        builder: (BuildContext context) => Container(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsOneWidget);
+  });
+
   group('Modal BottomSheet avoids overlapping display features', () {
     testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1657,7 +1783,7 @@ void main() {
 }
 
 class _TestPage extends StatelessWidget {
-  const _TestPage({Key? key, this.useRootNavigator}) : super(key: key);
+  const _TestPage({this.useRootNavigator});
 
   final bool? useRootNavigator;
 

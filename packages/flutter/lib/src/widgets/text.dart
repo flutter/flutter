@@ -4,15 +4,18 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'default_selection_style.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
+import 'selection_container.dart';
 
 // Examples can assume:
 // late String _name;
+// late BuildContext context;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -37,7 +40,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
-    Key? key,
+    super.key,
     required this.style,
     this.textAlign,
     this.softWrap = true,
@@ -45,14 +48,13 @@ class DefaultTextStyle extends InheritedTheme {
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
-    required Widget child,
+    required super.child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
-       assert(textWidthBasis != null),
-       super(key: key, child: child);
+       assert(textWidthBasis != null);
 
   /// A const-constructable default text style that provides fallback values.
   ///
@@ -60,7 +62,7 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback({ Key? key })
+  const DefaultTextStyle.fallback({ super.key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
@@ -68,7 +70,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
       textHeightBehavior = null,
-      super(key: key, child: const _NullWidget());
+      super(child: const _NullWidget());
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -234,27 +236,74 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   ///
   /// The [textHeightBehavior] and [child] arguments are required and must not be null.
   const DefaultTextHeightBehavior({
-    Key? key,
+    super.key,
     required this.textHeightBehavior,
-    required Widget child,
+    required super.child,
   }) :  assert(textHeightBehavior != null),
-        assert(child != null),
-        super(key: key, child: child);
+        assert(child != null);
 
   /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context, or null if none is found.
   ///
   /// If no such instance exists, this method will return `null`.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context], if there is one.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// TextHeightBehavior? defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
   /// ```
-  static TextHeightBehavior? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but asserts if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
+  }
+
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context.
+  ///
+  /// If no such instance exists, this method will assert in debug mode, and
+  /// throw an exception in release mode.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but returns null if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior of(BuildContext context) {
+    final TextHeightBehavior? behavior = maybeOf(context);
+    assert(() {
+      if (behavior == null) {
+        throw FlutterError(
+          'DefaultTextHeightBehavior.of() was called with a context that does not contain a '
+          'DefaultTextHeightBehavior widget.\n'
+          'No DefaultTextHeightBehavior widget ancestor could be found starting from the '
+          'context that was passed to DefaultTextHeightBehavior.of(). This can happen '
+          'because you are using a widget that looks for a DefaultTextHeightBehavior '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return behavior!;
   }
 
   @override
@@ -336,7 +385,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
 /// with a [GestureDetector.onTap] handler.
 ///
-/// In a material design application, consider using a [TextButton] instead, or
+/// In a Material Design application, consider using a [TextButton] instead, or
 /// if that isn't appropriate, at least using an [InkWell] instead of
 /// [GestureDetector].
 ///
@@ -344,10 +393,25 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// [TapGestureRecognizer] as the [TextSpan.recognizer] of the relevant part of
 /// the text.
 ///
+/// ## Selection
+///
+/// [Text] is not selectable by default. To make a [Text] selectable, one can
+/// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree
+/// under [SelectionArea] from selection, once can also wrap that part of the
+/// subtree with [SelectionContainer.disabled].
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to disable selection for a Text under a
+/// SelectionArea.
+///
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RichText], which gives you more control over the text styles.
 ///  * [DefaultTextStyle], which sets default styles for [Text] widgets.
+///  * [SelectableRegion], which provides an overview of the selection system.
 class Text extends StatelessWidget {
   /// Creates a text widget.
   ///
@@ -357,11 +421,12 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those
+  /// that follow, will not be rendered. Otherwise, it will be shown with the
+  /// given overflow option.
   const Text(
     String this.data, {
-    Key? key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -374,12 +439,12 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.selectionColor,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
        ),
-       textSpan = null,
-       super(key: key);
+       textSpan = null;
 
   /// Creates a text widget with a [InlineSpan].
   ///
@@ -393,7 +458,7 @@ class Text extends StatelessWidget {
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
     InlineSpan this.textSpan, {
-    Key? key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -406,12 +471,12 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.selectionColor,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
        ),
-       data = null,
-       super(key: key);
+       data = null;
 
   /// The text to display.
   ///
@@ -505,7 +570,7 @@ class Text extends StatelessWidget {
   /// text value:
   ///
   /// ```dart
-  /// Text(r'$$', semanticsLabel: 'Double dollars')
+  /// const Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
   /// {@endtemplate}
   final String? semanticsLabel;
@@ -516,14 +581,27 @@ class Text extends StatelessWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// The color to use when painting the selection.
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null
+  /// in the [BuildContext] of the [Text] widget.
+  ///
+  /// If null, the ambient [DefaultSelectionStyle] is used (if any); failing
+  /// that, the selection color defaults to [DefaultSelectionStyle.defaultColor]
+  /// (semi-transparent grey).
+  final Color? selectionColor;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
-    if (style == null || style!.inherit)
+    if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
-    if (MediaQuery.boldTextOverride(context))
+    }
+    if (MediaQuery.boldTextOverride(context)) {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
@@ -534,13 +612,21 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+      selectionRegistrar: registrar,
+      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
         children: textSpan != null ? <InlineSpan>[textSpan!] : null,
       ),
     );
+    if (registrar != null) {
+      result = MouseRegion(
+        cursor: SystemMouseCursors.text,
+        child: result,
+      );
+    }
     if (semanticsLabel != null) {
       result = Semantics(
         textDirection: textDirection,

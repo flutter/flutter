@@ -56,9 +56,11 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -113,6 +115,13 @@ void main() {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
     });
+  });
+
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Select range'), findsOneWidget);
+    }, useMaterial3: true);
   });
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
@@ -796,7 +805,7 @@ void main() {
 
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
-      void _testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
+      void testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
         final dynamic/*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
         // ignore: avoid_dynamic_calls
         final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
@@ -851,10 +860,10 @@ void main() {
       );
 
       // Test the start date text field
-      _testInputDecorator(tester.widget(borderContainers.first), border, Colors.transparent);
+      testInputDecorator(tester.widget(borderContainers.first), border, Colors.transparent);
 
       // Test the end date text field
-      _testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
+      testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
     });
   });
 
@@ -1080,9 +1089,8 @@ void main() {
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
   const _RestorableDateRangePickerDialogTestWidget({
-    Key? key,
     this.datePickerEntryMode = DatePickerEntryMode.calendar,
-  }) : super(key: key);
+  });
 
   final DatePickerEntryMode datePickerEntryMode;
 

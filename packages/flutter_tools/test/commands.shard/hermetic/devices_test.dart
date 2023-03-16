@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -24,7 +22,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    Cache cache;
+    late Cache cache;
 
     setUp(() {
       cache = Cache.test(processManager: FakeProcessManager.any());
@@ -52,7 +50,7 @@ void main() {
 
     testUsingContext("get devices' platform types", () async {
       final List<String> platformTypes = Device.devicesPlatformTypes(
-        await globals.deviceManager.getAllConnectedDevices(),
+        await globals.deviceManager!.getAllConnectedDevices(),
       );
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
@@ -82,8 +80,8 @@ void main() {
               'fastStart': false,
               'flutterExit': true,
               'hardwareRendering': true,
-              'startPaused': true
-            }
+              'startPaused': true,
+            },
           },
           <String,Object>{
             'name': 'webby',
@@ -99,10 +97,10 @@ void main() {
               'fastStart': false,
               'flutterExit': true,
               'hardwareRendering': true,
-              'startPaused': true
-            }
-          }
-        ]
+              'startPaused': true,
+            },
+          },
+        ],
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
@@ -133,14 +131,14 @@ webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulato
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager();
+  _FakeDeviceManager() : super(logger: testLogger);
 
   @override
   Future<List<Device>> getAllConnectedDevices() =>
     Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override
@@ -153,11 +151,13 @@ class _FakeDeviceManager extends DeviceManager {
 }
 
 class NoDevicesManager extends DeviceManager {
+  NoDevicesManager() : super(logger: testLogger);
+
   @override
   Future<List<Device>> getAllConnectedDevices() async => <Device>[];
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) =>
     getAllConnectedDevices();
 
   @override

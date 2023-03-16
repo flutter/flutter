@@ -193,7 +193,7 @@ void main() {
 }
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({ super.debugOwner });
 
   @override
   String get debugDescription => 'debugDescription content';
@@ -233,12 +233,9 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
     this.resolution, {
     this.onAcceptGesture,
     this.onRejectGesture,
-    double? preAcceptSlopTolerance,
-    double? postAcceptSlopTolerance,
-  }) : super(
-    preAcceptSlopTolerance: preAcceptSlopTolerance,
-    postAcceptSlopTolerance: postAcceptSlopTolerance,
-  );
+    super.preAcceptSlopTolerance,
+    super.postAcceptSlopTolerance,
+  });
 
   final GestureDisposition resolution;
   final VoidCallback? onAcceptGesture;

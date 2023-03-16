@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import '../convert.dart';
 import 'common.dart';
 import 'io.dart';
-import 'terminal.dart' show Terminal, TerminalColor, OutputPreferences;
+import 'terminal.dart' show OutputPreferences, Terminal, TerminalColor;
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
@@ -722,6 +722,7 @@ class WindowsStdoutLogger extends StdoutLogger {
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
                .replaceAll('💪', '')
+               .replaceAll('⚠️', '!')
                .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
@@ -732,16 +733,20 @@ class BufferLogger extends Logger {
     required this.terminal,
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    bool verbose = false,
   }) : _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _verbose = verbose;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal? terminal,
     OutputPreferences? outputPreferences,
+    bool verbose = false,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _stopwatchFactory = const StopwatchFactory();
+       _stopwatchFactory = const StopwatchFactory(),
+       _verbose = verbose;
 
   @override
   final OutputPreferences _outputPreferences;
@@ -751,8 +756,10 @@ class BufferLogger extends Logger {
 
   final StopwatchFactory _stopwatchFactory;
 
+  final bool _verbose;
+
   @override
-  bool get isVerbose => false;
+  bool get isVerbose => _verbose;
 
   @override
   bool get supportsColor => terminal.supportsColor;
@@ -783,8 +790,14 @@ class BufferLogger extends Logger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
+    final StringBuffer errorMessage = StringBuffer();
+    errorMessage.write(message);
+    if (stackTrace != null) {
+      errorMessage.writeln();
+      errorMessage.write(stackTrace);
+    }
     _error.writeln(terminal.color(
-      wrapText(message,
+      wrapText(errorMessage.toString(),
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -895,7 +908,7 @@ class BufferLogger extends Logger {
   void sendEvent(String name, [Map<String, dynamic>? args]) {
     _events.write(json.encode(<String, Object?>{
       'name': name,
-      'args': args
+      'args': args,
     }));
   }
 }
@@ -1192,7 +1205,7 @@ class SilentStatus extends Status {
 
 const int _kTimePadding = 8; // should fit "99,999ms"
 
-/// Constructor writes [message] to [stdout].  On [cancel] or [stop], will call
+/// Constructor writes [message] to [stdout]. On [cancel] or [stop], will call
 /// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
   SummaryStatus({

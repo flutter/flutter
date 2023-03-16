@@ -102,7 +102,7 @@ void main() {
           within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
         );
       }
-      // output.add(new HSVColor.fromAHSV(1.0, 0.0, 1.0, value).toColor());
+      // output.add(HSVColor.fromAHSV(1.0, 0.0, 1.0, value).toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff000000),
@@ -424,6 +424,31 @@ void main() {
     expect(greens1.hashCode, greens2.hashCode);
     expect(greens1['2259 C'], const Color(0xFF027223));
     expect(greens1.value, 0xFF027223);
+  });
+
+  test('ColorSwatch.lerp', () {
+    const ColorSwatch<int> swatchA = ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)});
+    const ColorSwatch<int> swatchB = ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)});
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 0.0),
+      const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 0.5),
+      const ColorSwatch<int>(0x7F7F7F7F, <int, Color>{1: Color(0x7F7F7F7F)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 1.0),
+      const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, -0.1),
+      const ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)}),
+    );
+    expect(
+      ColorSwatch.lerp(swatchA, swatchB, 1.1),
+      const ColorSwatch<int>(0xFFFFFFFF, <int, Color>{1: Color(0xFFFFFFFF)}),
+    );
   });
 
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {

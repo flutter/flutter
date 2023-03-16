@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ThemeExtension
+/// Flutter code sample for [ThemeExtension].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -26,7 +26,7 @@ class MyColors extends ThemeExtension<MyColors> {
   }
 
   @override
-  MyColors lerp(ThemeExtension<MyColors>? other, double t) {
+  MyColors lerp(MyColors? other, double t) {
     if (other is! MyColors) {
       return this;
     }
@@ -48,7 +48,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -94,10 +94,10 @@ class _MyAppState extends State<MyApp> {
 
 class Home extends StatelessWidget {
   const Home({
-    Key? key,
+    super.key,
     required this.isLightTheme,
     required this.toggleTheme,
-  }) : super(key: key);
+  });
 
   final bool isLightTheme;
   final void Function() toggleTheme;

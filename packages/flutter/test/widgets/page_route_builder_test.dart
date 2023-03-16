@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestPage extends StatelessWidget {
-  const TestPage({Key? key}) : super(key: key);
+  const TestPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class TestPage extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ModalPage extends StatelessWidget {
-  const ModalPage({Key? key}) : super(key: key);
+  const ModalPage({super.key});
 
   @override
   Widget build(BuildContext context) {

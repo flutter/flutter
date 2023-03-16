@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io';
 
@@ -81,18 +79,18 @@ class Testbed {
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({FutureOr<void> Function() setup, Map<Type, Generator> overrides})
+  Testbed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
       : _setup = setup,
         _overrides = overrides;
 
-  final FutureOr<void> Function() _setup;
-  final Map<Type, Generator> _overrides;
+  final FutureOr<void> Function()? _setup;
+  final Map<Type, Generator>? _overrides;
 
   /// Runs `test` within a tool zone.
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  Future<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
+  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -104,13 +102,13 @@ class Testbed {
       throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
     }
     // Cache the original flutter root to restore after the test case.
-    final String originalFlutterRoot = Cache.flutterRoot;
+    final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
     final Map<Timer, StackTrace> timers = <Timer, StackTrace>{};
 
     return HttpOverrides.runZoned(() {
-      return runInContext<T>(() {
-        return context.run<T>(
+      return runInContext<T?>(() {
+        return context.run<T?>(
           name: 'testbed',
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
@@ -128,7 +126,7 @@ class Testbed {
           body: () async {
             Cache.flutterRoot = '';
             if (_setup != null) {
-              await _setup();
+              await _setup?.call();
             }
             await test();
             Cache.flutterRoot = originalFlutterRoot;
@@ -140,6 +138,6 @@ class Testbed {
             return null;
           });
       });
-    }, createHttpClient: (SecurityContext c) => FakeHttpClient.any());
+    }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
   }
 }

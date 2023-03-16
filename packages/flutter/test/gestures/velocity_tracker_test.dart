@@ -39,8 +39,9 @@ void main() {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
-      if (event is PointerDownEvent || event is PointerMoveEvent)
+      if (event is PointerDownEvent || event is PointerMoveEvent) {
         tracker.addPosition(event.timeStamp, event.position);
+      }
       if (event is PointerUpEvent) {
         _checkVelocity(tracker.getVelocity(), expected[i]);
         i += 1;
@@ -64,8 +65,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/7510
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
-      if (event is PointerDownEvent || event is PointerMoveEvent)
+      if (event is PointerDownEvent || event is PointerMoveEvent) {
         tracker.addPosition(event.timeStamp, event.position);
+      }
       if (event is PointerUpEvent) {
         _checkVelocity(tracker.getVelocity(), const Offset(649.5, 3890.3));
       }

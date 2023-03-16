@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
+import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -38,6 +38,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('foreground', textStyle.foreground),
     _propertyToString('shadows', textStyle.shadows),
     _propertyToString('fontFeatures', textStyle.fontFeatures),
+    _propertyToString('fontVariations', textStyle.fontVariations),
   ];
 
   static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
@@ -50,8 +51,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     final String description = item.toString();
     const String prefix = 'TextStyle(';
     const String suffix = ')';
-    if (!description.startsWith(prefix) || !description.endsWith(suffix))
+    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
       return false;
+    }
 
     final String propertyDescription = description.substring(
       prefix.length,
@@ -300,6 +302,37 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
+
+    // Ensure that package prefix is not duplicated after copying.
+    final TextStyle s11 = s8.copyWith();
+    expect(s11.fontFamilyFallback![0], 'packages/p/test');
+    expect(s11.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s11.fontFamilyFallback!.length, 2);
+    expect(s8, s11);
+
+    // Ensure that package prefix is not duplicated after applying.
+    final TextStyle s12 = s8.apply();
+    expect(s12.fontFamilyFallback![0], 'packages/p/test');
+    expect(s12.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s12.fontFamilyFallback!.length, 2);
+    expect(s8, s12);
+  });
+
+  test('TextStyle package font merge', () {
+    const TextStyle s1 = TextStyle(package: 'p', fontFamily: 'font1', fontFamilyFallback: <String>['fallback1']);
+    const TextStyle s2 = TextStyle(package: 'p', fontFamily: 'font2', fontFamilyFallback: <String>['fallback2']);
+
+    final TextStyle emptyMerge = const TextStyle().merge(s1);
+    expect(emptyMerge.fontFamily, 'packages/p/font1');
+    expect(emptyMerge.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0)!;
+    expect(lerp1.fontFamily, 'packages/p/font1');
+    expect(lerp1.fontFamilyFallback, <String>['packages/p/fallback1']);
+
+    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0)!;
+    expect(lerp2.fontFamily, 'packages/p/font2');
+    expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
   });
 
   test('TextStyle font family fallback', () {
@@ -354,8 +387,18 @@ void main() {
   });
 
   test('TextStyle.hashCode', () {
-    const TextStyle a = TextStyle(fontFamilyFallback: <String>['Roboto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
-    const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
+    const TextStyle a = TextStyle(
+        fontFamilyFallback: <String>['Roboto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
+    const TextStyle b = TextStyle(
+        fontFamilyFallback: <String>['Noto'],
+        shadows: <ui.Shadow>[ui.Shadow()],
+        fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
+        fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
+    );
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
 
@@ -476,6 +519,7 @@ void main() {
       shadows: <ui.Shadow>[],
       fontStyle: FontStyle.normal,
       fontFeatures: <ui.FontFeature>[],
+      fontVariations: <ui.FontVariation>[],
       textBaseline: TextBaseline.alphabetic,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -487,6 +531,8 @@ void main() {
     expect(style.apply(locale: const Locale.fromSubtags(languageCode: 'es')).locale, const Locale.fromSubtags(languageCode: 'es'));
     expect(style.apply().fontFeatures, const <ui.FontFeature>[]);
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
+    expect(style.apply().fontVariations, const <ui.FontVariation>[]);
+    expect(style.apply(fontVariations: const <ui.FontVariation>[ui.FontVariation('test', 100.0)]).fontVariations, const <ui.FontVariation>[ui.FontVariation('test', 100.0)]);
     expect(style.apply().textBaseline, TextBaseline.alphabetic);
     expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
     expect(style.apply().leadingDistribution, TextLeadingDistribution.even);
@@ -508,4 +554,31 @@ void main() {
     expect(const TextStyle().apply(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
     expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
   });
+
+  test('Throws when lerping between inherit:true and inherit:false with unspecified fields', () {
+    const TextStyle fromStyle = TextStyle();
+    const TextStyle toStyle = TextStyle(inherit: false);
+    expect(
+      () => TextStyle.lerp(fromStyle, toStyle, 0.5),
+      throwsFlutterError,
+    );
+    expect(TextStyle.lerp(fromStyle, fromStyle, 0.5), fromStyle);
+  });
+
+  test('Does not throw when lerping between inherit:true and inherit:false but fully specified styles', () {
+    const TextStyle fromStyle = TextStyle();
+    const TextStyle toStyle = TextStyle(
+      inherit: false,
+      color: Color(0x87654321),
+      backgroundColor: Color(0x12345678),
+      fontSize: 20,
+      letterSpacing: 1,
+      wordSpacing: 1,
+      height: 20,
+      decorationColor: Color(0x11111111),
+      decorationThickness: 5,
+    );
+    expect(TextStyle.lerp(fromStyle, toStyle, 1), toStyle);
+  });
+
 }

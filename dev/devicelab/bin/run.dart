@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
-import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -63,15 +62,8 @@ Future<void> main(List<String> rawArgs) async {
   /// Path to write test results to.
   final String? resultsPath = args['results-file'] as String?;
 
-  if (!args.wasParsed('task')) {
-    if (args.wasParsed('stage') || args.wasParsed('all')) {
-      addTasks(
-        tasks: loadTaskManifest().tasks,
-        args: args,
-        taskNames: taskNames,
-      );
-    }
-  }
+  /// Use an emulator for this test if it is an android test.
+  final bool useEmulator = (args['use-emulator'] as bool?) ?? false;
 
   if (args.wasParsed('list')) {
     for (int i = 0; i < taskNames.length; i++) {
@@ -118,6 +110,7 @@ Future<void> main(List<String> rawArgs) async {
       gitBranch: gitBranch,
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
+      useEmulator: useEmulator,
     );
   }
 }
@@ -209,29 +202,6 @@ File _uniqueFile(String filenameTemplate) {
   return file;
 }
 
-void addTasks({
-  required List<ManifestTask> tasks,
-  required ArgResults args,
-  required List<String> taskNames,
-}) {
-  if (args.wasParsed('continue-from')) {
-    final int index = tasks.indexWhere((ManifestTask task) => task.name == args['continue-from']);
-    if (index == -1) {
-      throw Exception('Invalid task name "${args['continue-from']}"');
-    }
-    tasks.removeRange(0, index);
-  }
-  // Only start skipping if user specified a task to continue from
-  final String stage = args['stage'] as String;
-  for (final ManifestTask task in tasks) {
-    final bool isQualifyingStage = stage == null || task.stage == stage;
-    final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
-    if (isQualifyingHost && isQualifyingStage) {
-      taskNames.add(task.name);
-    }
-  }
-}
-
 ArgParser createArgParser(List<String> taskNames) {
   return ArgParser()
     ..addMultiOption(
@@ -294,16 +264,6 @@ ArgParser createArgParser(List<String> taskNames) {
             'number if the name already exists.',
     )
     ..addFlag(
-      'all',
-      abbr: 'a',
-      help: 'Runs all tasks defined in manifest.yaml in alphabetical order.',
-    )
-    ..addOption(
-      'continue-from',
-      abbr: 'c',
-      help: 'With --all or --stage, continue from the given test.',
-    )
-    ..addFlag(
       'exit',
       defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
@@ -352,12 +312,6 @@ ArgParser createArgParser(List<String> taskNames) {
       'service-account-token-file',
       help: '[Flutter infrastructure] Authentication for uploading results.',
     )
-    ..addOption(
-      'stage',
-      abbr: 's',
-      help: 'Name of the stage. Runs all tasks for that stage. The tasks and\n'
-            'their stages are read from manifest.yaml.',
-    )
     ..addFlag(
       'silent',
       help: 'Reduce verbosity slightly.',
@@ -368,6 +322,11 @@ ArgParser createArgParser(List<String> taskNames) {
       help: 'Whether to send a SIGKILL signal to any Dart processes that are still '
             'running when a task is completed. If any Dart processes are terminated '
             'in this way, the test is considered to have failed.',
+    )
+    ..addFlag(
+      'use-emulator',
+      help: 'If this is an android test, use an emulator to run the test instead of '
+            'a physical device.'
     )
     ..addMultiOption(
       'test',

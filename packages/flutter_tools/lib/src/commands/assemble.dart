@@ -79,10 +79,6 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugBundleWindowsAssets(),
   const ProfileBundleWindowsAssets(),
   const ReleaseBundleWindowsAssets(),
-  // Windows UWP targets
-  const DebugBundleWindowsAssetsUwp(),
-  const ProfileBundleWindowsAssetsUwp(),
-  const ReleaseBundleWindowsAssetsUwp(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -183,12 +179,12 @@ class AssembleCommand extends FlutterCommand {
     final String name = argumentResults.rest.first;
     final Map<String, Target> targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets)
-        target.name: target
+        target.name: target,
     };
     final List<Target> results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName))
-          targetMap[targetName]!
+          targetMap[targetName]!,
     ];
     if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
@@ -219,7 +215,7 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
-    String? output = stringArg('output');
+    String? output = stringArgDeprecated('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -242,6 +238,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       engineVersion: artifacts.isLocalEngine
         ? null
@@ -266,9 +263,29 @@ class AssembleCommand extends FlutterCommand {
     if (argumentResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
+
+    List<String> dartDefines = <String>[];
     if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argumentResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+      dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
     }
+    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
+      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
+      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
+        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
+        try {
+          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
+            dartDefines.add('$key=$value');
+          });
+        } on FormatException catch (err) {
+          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
+              'please fix first! format err:\n$err');
+        }
+      }
+    }
+    if(dartDefines.isNotEmpty){
+      results[kDartDefines] = dartDefines.join(',');
+    }
+
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
@@ -322,7 +339,7 @@ class AssembleCommand extends FlutterCommand {
       environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argumentResults.wasParsed('resource-pool-size')
-          ? int.tryParse(stringArg('resource-pool-size')!)
+          ? int.tryParse(stringArgDeprecated('resource-pool-size')!)
           : null,
         ),
       );
@@ -330,7 +347,7 @@ class AssembleCommand extends FlutterCommand {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         if (measurement.fatal || globals.logger.isVerbose) {
           globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.stackTrace
+            stackTrace: globals.logger.isVerbose ? measurement.stackTrace : null,
           );
         }
       }
@@ -339,17 +356,17 @@ class AssembleCommand extends FlutterCommand {
     globals.printTrace('build succeeded.');
 
     if (argumentResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArg('build-inputs')!);
+      writeListIfChanged(result.inputFiles, stringArgDeprecated('build-inputs')!);
     }
     if (argumentResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArg('build-outputs')!);
+      writeListIfChanged(result.outputFiles, stringArgDeprecated('build-outputs')!);
     }
     if (argumentResults.wasParsed('performance-measurement-file')) {
       final File outFile = globals.fs.file(argumentResults['performance-measurement-file']);
       writePerformanceData(result.performance.values, outFile);
     }
     if (argumentResults.wasParsed('depfile')) {
-      final File depfileFile = globals.fs.file(stringArg('depfile'));
+      final File depfileFile = globals.fs.file(stringArgDeprecated('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
@@ -390,8 +407,8 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
           'skipped': measurement.skipped,
           'succeeded': measurement.succeeded,
           'elapsedMilliseconds': measurement.elapsedMilliseconds,
-        }
-    ]
+        },
+    ],
   };
   if (!outFile.parent.existsSync()) {
     outFile.parent.createSync(recursive: true);

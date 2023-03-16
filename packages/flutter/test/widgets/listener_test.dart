@@ -66,7 +66,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Listener)));
 
     expect(log, equals(<String>[
@@ -183,7 +182,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset center = tester.getCenter(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -261,7 +259,6 @@ void main() {
       final Offset center = tester.getCenter(find.byKey(key));
       final Offset topLeft = tester.getTopLeft(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -338,7 +335,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 

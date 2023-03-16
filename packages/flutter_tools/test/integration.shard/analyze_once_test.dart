@@ -36,7 +36,7 @@ void main() {
     expect(result.stderr, contains(exitMessageContains));
   }
 
-  void _createDotPackages(String projectPath, [bool nullSafe = false]) {
+  void createDotPackages(String projectPath, [bool nullSafe = false]) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
@@ -84,7 +84,7 @@ void main() {
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
         ..createSync(recursive: true)
         ..writeAsStringSync(pubspecYamlSrc);
-    _createDotPackages(projectPath);
+    createDotPackages(projectPath);
     libMain = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
         ..createSync(recursive: true)
         ..writeAsStringSync(mainDartSrc);
@@ -119,7 +119,7 @@ void main() {
           'Analyzing error.dart',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1
@@ -133,7 +133,7 @@ void main() {
           'Analyzing 2 items',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1
@@ -160,7 +160,7 @@ void main() {
   testWithoutContext('file not found', () async {
     await runCommand(
         arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
-        exitMessageContains: "not_found.abc' does not exist",
+        exitMessageContains: "not_found.abc', however it does not exist on disk",
         exitCode: 1
     );
   });
@@ -192,10 +192,10 @@ void main() {
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
         'Analyzing',
-        'info $analyzerSeparator Avoid empty else statements',
-        'info $analyzerSeparator Avoid empty statements',
-        "info $analyzerSeparator The declaration '_incrementCounter' isn't",
-        "warning $analyzerSeparator The parameter 'onPressed' is required",
+        'avoid_empty_else',
+        'empty_statements',
+        'unused_element',
+        'missing_required_param',
       ],
       exitMessageContains: '4 issues found.',
       exitCode: 1,
@@ -339,7 +339,7 @@ int analyze() {}
     );
   });
 
-  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
+  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
 int analyze() {}
 ''';
@@ -354,6 +354,30 @@ analyzer:
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
     await runCommand(
       arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+      statusTextContains: <String>[
+        'warning',
+        'missing_return',
+      ],
+      exitMessageContains: '1 issue found.',
+    );
+  });
+
+
+  testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+    const String warningSourceCode = '''
+int analyze() {}
+''';
+
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: warning
+  ''');
+
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', '--fatal-warnings'],
       statusTextContains: <String>[
         'warning',
         'missing_return',
@@ -423,7 +447,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
-  const SamplePage({ Key? key }) : super(key: key);
+  const SamplePage({ super.key });
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -43,7 +43,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({ Key? key, required this.callback }) : super(key: key);
+  const SampleForm({ super.key, required this.callback });
 
   final WillPopCallback callback;
 
@@ -67,9 +67,9 @@ class SampleForm extends StatelessWidget {
 // Expose the protected hasScopedWillPopCallback getter
 class _TestPageRoute<T> extends MaterialPageRoute<T> {
   _TestPageRoute({
-    RouteSettings? settings,
-    required WidgetBuilder builder,
-  }) : super(builder: builder, maintainState: true, settings: settings);
+    super.settings,
+    required super.builder,
+  }) : super(maintainState: true);
 
   bool get hasCallback => super.hasScopedWillPopCallback;
 }
@@ -410,10 +410,10 @@ void main() {
             child: const Text('anchor'),
           );
         },
-      )
+      ),
     ];
 
-    Widget _buildNavigator(Key? key, List<Page<dynamic>> pages) {
+    Widget buildNavigator(Key? key, List<Page<dynamic>> pages) {
       return Navigator(
         key: key,
         pages: pages,
@@ -430,9 +430,9 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               contentsSetState = setState;
               if (moveToAnotherNavigator) {
-                return _buildNavigator(const ValueKey<int>(1), pages);
+                return buildNavigator(const ValueKey<int>(1), pages);
               }
-              return _buildNavigator(const ValueKey<int>(2), pages);
+              return buildNavigator(const ValueKey<int>(2), pages);
             },
           ),
         ),

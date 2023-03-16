@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// bool _giveVerse = false;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -26,6 +29,13 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoSwitch]. When the thumb slides to
+/// the other side of the track, the switch is toggled between on/off.
+///
+/// ** See code in examples/api/lib/cupertino/switch/cupertino_switch.0.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
@@ -48,7 +58,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * [Switch], the material design equivalent.
+///  * [Switch], the Material Design equivalent.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
@@ -56,7 +66,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// The [value] parameter must not be null.
   /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
   const CupertinoSwitch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -64,8 +74,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// Whether this switch is on or off.
   ///
@@ -200,8 +209,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     super.didUpdateWidget(oldWidget);
     _drag.dragStartBehavior = widget.dragStartBehavior;
 
-    if (needsPositionAnimation || oldWidget.value != widget.value)
+    if (needsPositionAnimation || oldWidget.value != widget.value) {
       _resumePositionAnimation(isLinear: needsPositionAnimation);
+    }
   }
 
   // `isLinear` must be true if the position animation is trying to move the
@@ -215,15 +225,17 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     position
       ..curve = isLinear ? Curves.linear : Curves.ease
       ..reverseCurve = isLinear ? Curves.linear : Curves.ease.flipped;
-    if (widget.value)
+    if (widget.value) {
       _positionController.forward();
-    else
+    } else {
       _positionController.reverse();
+    }
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       needsPositionAnimation = false;
+    }
       _reactionController.forward();
   }
 
@@ -242,8 +254,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleTapCancel() {
-    if (isInteractive)
+    if (isInteractive) {
       _reactionController.reverse();
+    }
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -275,8 +288,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.
-    if (position.value >= 0.5 != widget.value)
+    if (position.value >= 0.5 != widget.value) {
       widget.onChanged!(!widget.value);
+    }
     _reactionController.reverse();
   }
 
@@ -296,8 +310,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    if (needsPositionAnimation)
+    if (needsPositionAnimation) {
       _resumePositionAnimation();
+    }
     return MouseRegion(
       cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: Opacity(
@@ -331,7 +346,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
 class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSwitchRenderObjectWidget({
-    Key? key,
     required this.value,
     required this.activeColor,
     required this.trackColor,
@@ -339,7 +353,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChanged,
     required this.textDirection,
     required this.state,
-  }) : super(key: key);
+  });
 
   final bool value;
   final Color activeColor;
@@ -364,6 +378,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
+    assert(renderObject._state == state);
     renderObject
       ..value = value
       ..activeColor = activeColor
@@ -418,8 +433,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool _value;
   set value(bool value) {
     assert(value != null);
-    if (value == _value)
+    if (value == _value) {
       return;
+    }
     _value = value;
     markNeedsSemanticsUpdate();
   }
@@ -428,8 +444,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _activeColor;
   set activeColor(Color value) {
     assert(value != null);
-    if (value == _activeColor)
+    if (value == _activeColor) {
       return;
+    }
     _activeColor = value;
     markNeedsPaint();
   }
@@ -438,8 +455,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _trackColor;
   set trackColor(Color value) {
     assert(value != null);
-    if (value == _trackColor)
+    if (value == _trackColor) {
       return;
+    }
     _trackColor = value;
     markNeedsPaint();
   }
@@ -448,8 +466,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
     assert(value != null);
-    if (value == thumbColor)
+    if (value == thumbColor) {
       return;
+    }
     _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
     markNeedsPaint();
   }
@@ -457,8 +476,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   ValueChanged<bool>? get onChanged => _onChanged;
   ValueChanged<bool>? _onChanged;
   set onChanged(ValueChanged<bool>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
@@ -471,8 +491,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsPaint();
   }
@@ -495,8 +516,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (isInteractive)
+    if (isInteractive) {
       config.onTap = _state._handleTap;
+    }
 
     config.isEnabled = isInteractive;
     config.isToggled = _value;

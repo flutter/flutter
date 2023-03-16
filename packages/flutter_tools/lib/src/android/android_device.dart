@@ -7,10 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/common.dart' show throwToolExit, unawaited;
+import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,8 +20,8 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-
 import 'android.dart';
+import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
@@ -227,7 +225,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
         throw UnsupportedError('Invalid target platform for Android');
     }
@@ -315,7 +312,7 @@ class AndroidDevice extends Device {
     try {
       // If the server is automatically restarted, then we get irrelevant
       // output lines like this, which we want to ignore:
-      //   adb server is out of date.  killing..
+      //   adb server is out of date. killing..
       //   * daemon started successfully *
       await _processUtils.run(
         <String>[adbPath, 'start-server'],
@@ -381,7 +378,7 @@ class AndroidDevice extends Device {
         'packages',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.id
+        app.id,
       ]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } on Exception catch (error) {
@@ -448,7 +445,7 @@ class AndroidDevice extends Device {
         '-r',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.applicationPackage.path
+        app.applicationPackage.path,
       ]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -495,7 +492,8 @@ class AndroidDevice extends Device {
           'uninstall',
           if (userIdentifier != null)
             ...<String>['--user', userIdentifier],
-          app.id]),
+          app.id,
+        ]),
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
@@ -565,7 +563,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
@@ -626,9 +623,11 @@ class AndroidDevice extends Device {
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
+      '-a', 'android.intent.action.MAIN',
+      '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-dart-profiling', 'true',
+      if (debuggingOptions.enableDartProfiling)
+        ...<String>['--ez', 'enable-dart-profiling', 'true'],
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)
@@ -653,6 +652,8 @@ class AndroidDevice extends Device {
       ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache)
         ...<String>['--ez', 'purge-persistent-cache', 'true'],
+      if (debuggingOptions.enableImpeller)
+        ...<String>['--ez', 'enable-impeller', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -720,7 +721,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk app, {
+    AndroidApk? app, {
     String? userIdentifier,
   }) {
     if (app == null) {
@@ -807,7 +808,7 @@ class AndroidDevice extends Device {
     RunResult output;
     try {
       output = await runAdbCheckedAsync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
       ]);
     } on Exception catch (error) {
       _logger.printError('Failed to extract the most recent timestamp from the Android log: $error.');

@@ -7,6 +7,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'material_state.dart';
+
 /// Defines default property values for descendant [FloatingActionButton]
 /// widgets.
 ///
@@ -51,6 +53,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     this.extendedIconLabelSpacing,
     this.extendedPadding,
     this.extendedTextStyle,
+    this.mouseCursor,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
@@ -129,6 +132,11 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// The text style for an extended [FloatingActionButton]'s label.
   final TextStyle? extendedTextStyle;
 
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  ///
+  /// If specified, overrides the default value of [FloatingActionButton.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
@@ -152,6 +160,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     double? extendedIconLabelSpacing,
     EdgeInsetsGeometry? extendedPadding,
     TextStyle? extendedTextStyle,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -174,6 +183,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedIconLabelSpacing: extendedIconLabelSpacing ?? this.extendedIconLabelSpacing,
       extendedPadding: extendedPadding ?? this.extendedPadding,
       extendedTextStyle: extendedTextStyle ?? this.extendedTextStyle,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -184,8 +194,9 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static FloatingActionButtonThemeData? lerp(FloatingActionButtonThemeData? a, FloatingActionButtonThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return FloatingActionButtonThemeData(
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -207,6 +218,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedIconLabelSpacing: lerpDouble(a?.extendedIconLabelSpacing, b?.extendedIconLabelSpacing, t),
       extendedPadding: EdgeInsetsGeometry.lerp(a?.extendedPadding, b?.extendedPadding, t),
       extendedTextStyle: TextStyle.lerp(a?.extendedTextStyle, b?.extendedTextStyle, t),
+      mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
     );
   }
 
@@ -231,15 +243,20 @@ class FloatingActionButtonThemeData with Diagnosticable {
     extendedSizeConstraints,
     extendedIconLabelSpacing,
     extendedPadding,
-    extendedTextStyle,
+    Object.hash(
+      extendedTextStyle,
+      mouseCursor,
+    ),
   );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FloatingActionButtonThemeData
         && other.foregroundColor == foregroundColor
         && other.backgroundColor == backgroundColor
@@ -260,7 +277,8 @@ class FloatingActionButtonThemeData with Diagnosticable {
         && other.extendedSizeConstraints == extendedSizeConstraints
         && other.extendedIconLabelSpacing == extendedIconLabelSpacing
         && other.extendedPadding == extendedPadding
-        && other.extendedTextStyle == extendedTextStyle;
+        && other.extendedTextStyle == extendedTextStyle
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -287,5 +305,6 @@ class FloatingActionButtonThemeData with Diagnosticable {
     properties.add(DoubleProperty('extendedIconLabelSpacing', extendedIconLabelSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('extendedPadding', extendedPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('extendedTextStyle', extendedTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }

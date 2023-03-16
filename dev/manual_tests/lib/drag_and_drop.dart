@@ -96,11 +96,12 @@ class ExampleDragSource extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double size = kDotSize;
-    if (heavy)
+    if (heavy) {
       size *= kHeavyMultiplier;
+    }
 
     final Widget contents = DefaultTextStyle(
-      style: Theme.of(context).textTheme.bodyText2!,
+      style: Theme.of(context).textTheme.bodyMedium!,
       textAlign: TextAlign.center,
       child: Dot(
         color: color,
@@ -166,8 +167,9 @@ class DashOutlineCirclePainter extends CustomPainter {
       ..strokeWidth = radius / 10.0;
     final Path path = Path();
     final Rect box = Offset.zero & size;
-    for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta)
+    for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta) {
       path.addArc(box, theta + startOffset, segmentArc);
+    }
     canvas.drawPath(path, paint);
   }
 
@@ -188,7 +190,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget ball = DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.bodyText2!,
+      style: Theme.of(context).primaryTextTheme.bodyMedium!,
       textAlign: TextAlign.center,
       child: Dot(
         key: kBallKey,
