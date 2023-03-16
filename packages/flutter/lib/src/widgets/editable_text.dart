@@ -2415,22 +2415,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
       // a native spell checker must be supported.
-      assert(() { 
+      assert(() {
         if (!spellCheckServiceIsConfigured) {
-          FlutterError.reportError( 
-            FlutterErrorDetails( 
-              exception: FlutterError( 
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
                 'Spell check was enabled with spellCheckConfiguration, but the '
                 'current platform does not have a supported spell check '
                 'service, and none was provided.',
-              ), 
-              library: 'widget library', 
+              ),
+              library: 'widget library',
               stack: StackTrace.current, 
-            ), 
-          ); 
-        } 
-        return true; 
-      }()); 
+            ),
+          );
+        }
+        return true;
+      }());
       return const SpellCheckConfiguration.disabled();
     }
 
