@@ -12,6 +12,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterApplication.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
@@ -718,10 +719,19 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
       .andDo((^(NSInvocation* invocation) {
         [invocation retainArguments];
         FlutterBinaryReply callback;
+        NSData* returnedMessage;
         [invocation getArgument:&callback atIndex:4];
-        NSDictionary* responseDict = @{@"response" : nextResponse};
-        NSData* returnedMessage =
-            [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:responseDict];
+        if ([nextResponse isEqualToString:@"error"]) {
+          FlutterError* errorResponse = [FlutterError errorWithCode:@"Error"
+                                                            message:@"Failed"
+                                                            details:@"Details"];
+          returnedMessage =
+              [[FlutterJSONMethodCodec sharedInstance] encodeErrorEnvelope:errorResponse];
+        } else {
+          NSDictionary* responseDict = @{@"response" : nextResponse};
+          returnedMessage =
+              [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:responseDict];
+        }
         callback(returnedMessage);
       }));
   __block NSString* calledAfterTerminate = @"";
@@ -734,16 +744,26 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
                                         arguments:@{@"type" : @"cancelable"}];
 
   triedToTerminate = FALSE;
+  calledAfterTerminate = @"";
   nextResponse = @"exit";
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
   EXPECT_STREQ([calledAfterTerminate UTF8String], "exit");
   EXPECT_TRUE(triedToTerminate);
 
   triedToTerminate = FALSE;
+  calledAfterTerminate = @"";
   nextResponse = @"cancel";
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
   EXPECT_STREQ([calledAfterTerminate UTF8String], "cancel");
   EXPECT_FALSE(triedToTerminate);
+
+  // Check that it doesn't crash on error.
+  triedToTerminate = FALSE;
+  calledAfterTerminate = @"";
+  nextResponse = @"error";
+  [engineMock handleMethodCall:methodExitApplication result:appExitResult];
+  EXPECT_STREQ([calledAfterTerminate UTF8String], "");
+  EXPECT_TRUE(triedToTerminate);
 }
 
 }  // namespace flutter::testing
