@@ -255,10 +255,13 @@ class _BottomSheetState extends State<BottomSheet> {
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
   bool _isHoveringDragHandle = false;
-  bool _isDragging = false;
+
+  Set<MaterialState> dragHandleMaterialState = <MaterialState>{};
 
   void _handleDragStart(DragStartDetails details) {
-    _isDragging = true;
+    setState(() {
+      dragHandleMaterialState.add(MaterialState.dragged);
+    });
     widget.onDragStart?.call(details);
   }
 
@@ -283,7 +286,9 @@ class _BottomSheetState extends State<BottomSheet> {
     if (_dismissUnderway) {
       return;
     }
-    _isDragging = false;
+    setState(() {
+      dragHandleMaterialState.remove(MaterialState.dragged);
+    });
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
@@ -320,18 +325,16 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragHandleHover(bool hovering) {
-    if (hovering != _isHoveringDragHandle) {
+    if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
       setState(() {
-        _isHoveringDragHandle = hovering;
+        if(hovering){
+          dragHandleMaterialState.add(MaterialState.hovered);
+        }
+        else{
+          dragHandleMaterialState.remove(MaterialState.hovered);
+        }
       });
     }
-  }
-
-  Set<MaterialState> get dragHandleMaterialState {
-    return <MaterialState>{
-      if (_isHoveringDragHandle) MaterialState.hovered,
-      if (_isDragging) MaterialState.focused,
-    };
   }
 
   @override
