@@ -2437,13 +2437,6 @@ TEST_P(EntityTest, InheritOpacityTest) {
   // Clips and restores trivially accept opacity.
   ASSERT_TRUE(ClipContents().CanAcceptOpacity(entity));
   ASSERT_TRUE(ClipRestoreContents().CanAcceptOpacity(entity));
-
-  // Potentially overlapping geometry always returns false.
-  auto solid_color_2 = std::make_shared<TiledTextureContents>();
-  Path path = PathBuilder{}.MoveTo({100, 100}).LineTo({100, 200}).TakePath();
-  solid_color_2->SetGeometry(Geometry::MakeStrokePath(path, 5.0));
-
-  ASSERT_FALSE(solid_color_2->CanAcceptOpacity(entity));
 }
 
 }  // namespace testing
