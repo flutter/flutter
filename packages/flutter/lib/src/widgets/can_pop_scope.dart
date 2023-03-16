@@ -76,15 +76,6 @@ class _CanPopScopeState extends State<CanPopScope> {
     super.didChangeDependencies();
     _route = ModalRoute.of(context);
     _route?.registerCanPopScope(widget);
-    /*
-    if (widget.onWillPop != null) {
-      _route?.removeScopedWillPopCallback(widget.onWillPop!);
-    }
-    _route = ModalRoute.of(context);
-    if (widget.onWillPop != null) {
-      _route?.addScopedWillPopCallback(widget.onWillPop!);
-    }
-    */
   }
 
   @override
@@ -93,26 +84,11 @@ class _CanPopScopeState extends State<CanPopScope> {
     _route = ModalRoute.of(context);
     _route?.unregisterCanPopScope(oldWidget);
     _route?.registerCanPopScope(widget);
-    /*
-    if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
-      if (oldWidget.onWillPop != null) {
-        _route!.removeScopedWillPopCallback(oldWidget.onWillPop!);
-      }
-      if (widget.onWillPop != null) {
-        _route!.addScopedWillPopCallback(widget.onWillPop!);
-      }
-    }
-    */
   }
 
   @override
   void dispose() {
     _route?.unregisterCanPopScope(widget);
-    /*
-    if (widget.onWillPop != null) {
-      _route?.removeScopedWillPopCallback(widget.onWillPop!);
-    }
-    */
     super.dispose();
   }
 

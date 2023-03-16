@@ -1656,18 +1656,27 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _willPopCallbacks.remove(callback);
   }
 
-  // TODO(justinmc): Really though what should I be registering here...
+  /// Registers the existence of a CanPopScope widget in the route.
+  ///
+  /// CanPopScope widgets registered in this way will have their
+  /// [CanPopScope.onPop] callbacks called when a route is popped, and they will
+  /// also be able to block pop operations with [CanPopScope.popEnabled].
+  ///
+  /// See also:
+  ///
+  /// [unregisterCanPopScope], which performs the opposite operation.
   void registerCanPopScope(CanPopScope widget) {
     _canPopScopes.add(widget);
-    updateSystemNavigator();
+    _updateSystemNavigator();
   }
 
   void unregisterCanPopScope(CanPopScope widget) {
     _canPopScopes.remove(widget);
-    updateSystemNavigator();
+    _updateSystemNavigator();
   }
 
-  void updateSystemNavigator() {
+  // Tells the SystemNavigator whether or not a system pop should have effect.
+  void _updateSystemNavigator() {
     final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
 
     // If pop is disabled here then it's disabled for the entire app, and the
