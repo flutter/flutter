@@ -1040,6 +1040,7 @@ class Colors {
       700: Color(0xFF0097A7),
       800: Color(0xFF00838F),
       900: Color(0xFF006064),
+      
     },
   );
   static const int _cyanPrimaryValue = 0xFF00BCD4;
