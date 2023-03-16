@@ -362,40 +362,40 @@ class _BottomSheetState extends State<BottomSheet> {
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: !showDragHandle
-            ? widget.builder(context)
-            : Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  // If the whole bottom sheet is draggable, no need to add
-                  // GestureDetector on the drag handle.
-                  if (widget.enableDrag)
-                    _DragHandle(
+          ? widget.builder(context)
+          : Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                // If the whole bottom sheet is draggable, no need to add
+                // GestureDetector on the drag handle.
+                if (widget.enableDrag)
+                  _DragHandle(
+                    onSemanticsTap: widget.onClosing,
+                    handleHover: _handleDragHandleHover,
+                    materialState: dragHandleMaterialState,
+                    dragHandleColor: widget.dragHandleColor,
+                    dragHandleSize: widget.dragHandleSize,
+                  )
+                else
+                  GestureDetector(
+                    onVerticalDragStart: _handleDragStart,
+                    onVerticalDragUpdate: _handleDragUpdate,
+                    onVerticalDragEnd: _handleDragEnd,
+                    excludeFromSemantics: true,
+                    child: _DragHandle(
                       onSemanticsTap: widget.onClosing,
                       handleHover: _handleDragHandleHover,
                       materialState: dragHandleMaterialState,
                       dragHandleColor: widget.dragHandleColor,
-                      dragHandleSize: widget.dragHandleSize,
-                    )
-                  else
-                    GestureDetector(
-                      onVerticalDragStart: _handleDragStart,
-                      onVerticalDragUpdate: _handleDragUpdate,
-                      onVerticalDragEnd: _handleDragEnd,
-                      excludeFromSemantics: true,
-                      child: _DragHandle(
-                        onSemanticsTap: widget.onClosing,
-                        handleHover: _handleDragHandleHover,
-                        materialState: dragHandleMaterialState,
-                        dragHandleColor: widget.dragHandleColor,
-                      dragHandleSize: widget.dragHandleSize,
-                      ),
+                    dragHandleSize: widget.dragHandleSize,
                     ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                    child: widget.builder(context),
                   ),
-                ],
-              ),
+                Padding(
+                  padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                  child: widget.builder(context),
+                ),
+              ],
+            ),
       ),
     );
 
