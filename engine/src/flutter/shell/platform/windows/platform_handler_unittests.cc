@@ -37,6 +37,8 @@ static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
     "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/madeupcontenttype\"}";
 static constexpr char kClipboardSetDataMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
+static constexpr char kClipboardSetDataNullTextMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":null}}";
 static constexpr char kClipboardSetDataUnknownTypeMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"madeuptype\":\"hello\"}}";
 static constexpr char kSystemSoundTypeAlertMessage[] =
@@ -366,6 +368,19 @@ TEST_F(PlatformHandlerTest, ClipboardSetData) {
       SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
 
   EXPECT_EQ(result, "[null]");
+}
+
+// Regression test for: https://github.com/flutter/flutter/issues/121976
+TEST_F(PlatformHandlerTest, ClipboardSetDataTextMustBeString) {
+  use_engine_with_view();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardSetDataNullTextMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetDataUnknownType) {

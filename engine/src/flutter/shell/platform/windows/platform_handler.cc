@@ -369,6 +369,10 @@ void PlatformHandler::HandleMethodCall(
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
+    if (!itr->value.IsString()) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
     SetPlainText(itr->value.GetString(), std::move(result));
   } else if (method.compare(kPlaySoundMethod) == 0) {
     // Only one string argument is expected.
