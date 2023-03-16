@@ -112,9 +112,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// to test [SchedulerPhase.postFrameCallbacks].
   void pumpCompleteFrame() {
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
       TestRenderingFlutterBinding.instance.handleBeginFrame(null);
       TestRenderingFlutterBinding.instance.handleDrawFrame();
@@ -139,9 +137,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
       pipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) {

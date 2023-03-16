@@ -14,6 +14,7 @@ import 'event_simulation.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
+import 'window.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
 /// smaller moves.
@@ -132,12 +133,12 @@ class SemanticsController {
   /// See also:
   ///
   /// * [containsSemantics] and [matchesSemantics], which can be used to match
-  ///   against a single node in the traversal
+  ///   against a single node in the traversal.
   /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
   ///   match the order allowing extra nodes before after and between matching
-  ///   parts of the traversal
+  ///   parts of the traversal.
   /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
-  ///   match the order of the traversal
+  ///   match the order of the traversal.
   Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end}) {
     TestAsyncUtils.guardSync();
     final List<SemanticsNode> traversal = <SemanticsNode>[];
@@ -234,6 +235,37 @@ abstract class WidgetController {
   /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
 
+  /// The [TestPlatformDispatcher] that is being used in this test.
+  ///
+  /// This will be injected into the framework such that calls to
+  /// [WidgetsBinding.platformDispatcher] will use this. This allows
+  /// users to change platform specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [TestFlutterView] which allows changing view specific properties
+  ///     for testing
+  ///   * [view] and [viewOf] which are used to find
+  ///     [TestFlutterView]s from the widget tree
+  TestPlatformDispatcher get platformDispatcher => binding.platformDispatcher as TestPlatformDispatcher;
+
+  /// The [TestFlutterView] provided by default when testing with
+  /// [WidgetTester.pumpWidget].
+  ///
+  /// If the test requires multiple views, it will need to use [viewOf] instead
+  /// to ensure that the view related to the widget being evaluated is the one
+  /// that gets updated.
+  ///
+  /// See also:
+  ///
+  ///   * [viewOf], which can find a [TestFlutterView] related to a given finder.
+  ///     This is how to modify view properties for testing when dealing with
+  ///     multiple views.
+  TestFlutterView get view {
+    assert(platformDispatcher.views.length == 1, 'When testing with multiple views, use `viewOf` instead.');
+    return platformDispatcher.views.single;
+  }
+
   /// Provides access to a [SemanticsController] for testing anything related to
   /// the [Semantics] tree.
   ///
@@ -256,6 +288,26 @@ abstract class WidgetController {
 
   // TODO(ianh): verify that the return values are of type T and throw
   // a good message otherwise, in all the generic methods below
+
+  /// Finds the [TestFlutterView] that is the closest ancestor of the widget
+  /// found by [finder].
+  ///
+  /// [TestFlutterView] can be used to modify view specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [view] which returns the [TestFlutterView] used when only a single
+  ///     view is being used.
+  TestFlutterView viewOf(Finder finder) {
+    final View view = firstWidget<View>(
+      find.ancestor(
+        of: finder,
+        matching: find.byType(View),
+      )
+    );
+
+    return view.view as TestFlutterView;
+  }
 
   /// Checks if `finder` exists in the tree.
   bool any(Finder finder) {
@@ -784,8 +836,10 @@ abstract class WidgetController {
   ///
   /// The [WidgetTester] subclass implements this by deferring to the [binding].
   ///
-  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
-  /// be appropriate to return in the implementation of this method.
+  /// See also:
+  ///
+  ///  * [SchedulerBinding.endOfFrame], which returns a future that could be
+  ///    appropriate to return in the implementation of this method.
   Future<void> pump([Duration duration]);
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -1110,8 +1164,9 @@ abstract class WidgetController {
   ///
   /// See also:
   ///  * [WidgetController.drag], a method to simulate a drag.
-  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
-  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given
+  ///    widget in a given duration. It sends move events at a given frequency and
+  ///    it is useful when there are listeners involved.
   ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
@@ -1313,8 +1368,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1359,8 +1413,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1433,7 +1486,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1639,12 +1692,12 @@ class LiveWidgetController extends WidgetController {
       for (final PointerEventRecord record in records) {
         final DateTime now = clock.now();
         startTime ??= now;
-        // So that the first event is promised to receive a zero timeDiff
+        // So that the first event is promised to receive a zero timeDiff.
         final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
           // This happens when something (e.g. GC) takes a long time during the
           // processing of the events.
-          // Flush all past events
+          // Flush all past events.
           handleTimeStampDiff.add(-timeDiff);
           record.events.forEach(binding.handlePointerEvent);
         } else {
