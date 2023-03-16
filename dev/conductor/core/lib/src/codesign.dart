@@ -170,6 +170,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
+      'dart-sdk/bin/utils/wasm-opt',
     ]
         .map((String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))
