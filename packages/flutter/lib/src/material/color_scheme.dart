@@ -269,8 +269,8 @@ class ColorScheme with Diagnosticable {
   ///    Material 3 Color system specification.
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
   ///    used to generate the base color and tonal palettes needed for the scheme.
-  static Future<ColorScheme> fromImage({
-    required Image image,
+  static Future<ColorScheme> fromImageProvider({
+    required ImageProvider provider,
     Brightness brightness = Brightness.light,
     Color? primary,
     Color? onPrimary,
@@ -303,15 +303,28 @@ class ColorScheme with Diagnosticable {
     Color? scrim,
     Color? surfaceTint,
   }) async {
-    final Iterable<int> bytesList = await getImageBytes(image);
-    final quantizerResult = await QuantizerCelebi().quantize(bytesList, 128);
-    final scored = Score.score(quantizerResult.colorToCount, filter: false /* allows grayscale for content color */);
 
-    final Color baseColor = Color(scored.first);
-    print('New base color: $baseColor');
+    final quantizerResult = await createExtractResultFromImageProvider(provider);
+    //final scored = Score.score(quantizerResult.colorToCount, filter: false);
+    // final scored = Score.score(quantizerResult.colorToCount, filter: false /* allows grayscale for content color */);
+print('>>');
+print('>> working version');
+print('pre argb ${quantizerResult.colorToCount}');
+    final colorToCount = quantizerResult.colorToCount
+        .map((key, value) => MapEntry(getArgbFromAbgr(key), value));
+        print('post rgb $colorToCount');
+    final displayColorCount = 4;
+    final displayColors = Score.score(colorToCount, desired: displayColorCount)
+        .take(displayColorCount)
+        .map((e) => Color(e))
+        .toList();
+    var baseColor = displayColors.first;
+    print('base Color $baseColor');
+
+    _createExtractFromImageProvider(provider, () {});
+
 
     final Scheme scheme;
-
     switch (brightness) {
       case Brightness.light:
         scheme = Scheme.light(baseColor.value);
@@ -356,25 +369,231 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-static Future<Iterable<int>> getImageBytes(Image input) async {
-    ImageStream stream = input.image.resolve(const ImageConfiguration(size: Size(112, 112)));
-  final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    Timer? loadFailureTimeout;
+//   static ByteData imageProviderToRgbaBytes(
+//     ImageProvider imageProvider) {
+//   final stream = imageProvider.resolve(const ImageConfiguration(size: null));
+
+//   late ImageStreamListener listener;
+//   listener = ImageStreamListener((frame, sync) async {
+//     stream.removeListener(listener);
+//     final image = frame.image;
+//     final bytes =
+//         await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+//     return bytes!;
+//   }, onError: (_, __) {
+//     stream.removeListener(listener);
+//     throw ('error rendering img to png');
+//   });
+//   stream.addListener(listener);
+// }
+
+// first pass - don't delete
+//
+// static Future<Iterable<int>> getImageBytes(Image input) async {
+//     ImageStream stream = input.image.resolve(const ImageConfiguration(size: Size(112, 112)));
+//   final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+//     Timer? loadFailureTimeout;
+//     late ImageStreamListener listener;
+//     listener = ImageStreamListener((ImageInfo info, sync) async {
+//       stream.removeListener(listener);
+//       imageCompleter.complete(info.image);
+//     });
+//     stream.addListener(listener);
+//     final ui.Image image = await imageCompleter.future;
+
+//     final inputPixels = (await image.toByteData())!
+//       .buffer
+//       .asUint32List()
+//     //  .map((e) => getArgbFromAbgr(e))
+//       .toList();
+//       stream.removeListener(listener);
+//       return inputPixels;
+//   }
+
+ static void _imageProviderToScaled(ImageProvider imageProvider, double maxDimension,
+      Function(ui.Image?, ui.Image?) onComplete) {
+    final stream = imageProvider
+        .resolve(ImageConfiguration(size: Size(maxDimension, maxDimension)));
     late ImageStreamListener listener;
-    listener = ImageStreamListener((ImageInfo info, sync) async {
+    listener = ImageStreamListener((frame, sync) async {
       stream.removeListener(listener);
-      imageCompleter.complete(info.image);
+      final image = frame.image;
+      final originalBytes = await image.toByteData();
+      final stopwatch = Stopwatch()..start();
+      final bytesSet = <int>{};
+      for (final byte in originalBytes!.buffer.asInt8List()) {
+        bytesSet.add(byte);
+      }
+
+      final width = image.width;
+      final height = image.height;
+      var paintWidth = width.toDouble();
+      var paintHeight = height.toDouble();
+      final rescale = width > maxDimension || height > maxDimension;
+      if (rescale) {
+        paintWidth =
+            (width > height) ? maxDimension : (maxDimension / height) * width;
+        paintHeight =
+            (height > width) ? maxDimension : (maxDimension / width) * height;
+      }
+
+      final pictureRecorder = ui.PictureRecorder();
+      final canvas = Canvas(pictureRecorder);
+      paintImage(
+          canvas: canvas,
+          rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
+          image: image,
+          filterQuality: FilterQuality.none);
+      final picture = pictureRecorder.endRecording();
+      final scaledImage =
+          await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
+      onComplete(image, scaledImage);
+    }, onError: (_, __) {
+      stream.removeListener(listener);
+      onComplete(null, null);
+      throw ('error scaling image');
     });
     stream.addListener(listener);
-    final ui.Image image = await imageCompleter.future;
-
-    final inputPixels = (await image.toByteData())!
-      .buffer
-      .asUint32List()
-      .toList();
-      stream.removeListener(listener);
-      return inputPixels;
   }
+
+ static void _createExtractFromImageProvider(
+      ImageProvider provider, Function() onComplete) {
+    final sw = Stopwatch()..start();
+    _imageProviderToScaled(provider, 112.0, (original, image) async {
+      if (image == null) {
+        throw 'image was null';
+      }
+      sw.reset();
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+      sw.reset();
+      final quantizerResult = await QuantizerCelebi().quantize(
+          bytes!.buffer.asUint32List(), 128,
+          returnInputPixelToClusterPixel: true);
+      print('>> correct results');
+      print('correct pre Argb ${quantizerResult.colorToCount}');
+
+      sw.reset();
+      final clusterPixels = bytes!.buffer.asUint32List().map((e) {
+        final dictResult = quantizerResult.inputPixelToClusterPixel[e];
+        return dictResult ?? Colors.red.value;
+      }).toList(growable: false);
+
+
+      sw.reset();
+
+// important bit below
+      // ui.decodeImageFromPixels(
+      //     Uint32List.fromList(clusterPixels).buffer.asUint8List(),
+      //     image.width,
+      //     image.height,
+      //     ui.PixelFormat.rgba8888, (clustered) {
+      //       print('new quantizer count: ${quantizerResult.colorToCount}');
+
+      final colorToCount = quantizerResult.colorToCount
+        .map((key, value) => MapEntry(getArgbFromAbgr(key), value));
+      print('correct post Argb $colorToCount');
+    final displayColorCount = 4;
+    final displayColors = Score.score(colorToCount, desired: displayColorCount)
+        .take(displayColorCount)
+        .map((e) => Color(e))
+        .toList();
+        // setState(() {
+        //   final extractResult = ExtractResult(
+        //     image: provider,
+        //     original: original,
+        //     scaled: image,
+        //     clustered: clustered,
+        //     quantizerResult: quantizerResult,
+        //     lightDarkResult: lightDarkResult,
+        //   );
+        //   _extracts.insert(0, extractResult);
+        // });
+        print('correct base color: ${displayColors[0]}');
+              print('>>');
+
+        onComplete();
+     // });
+    });
+  }
+
+static Future<QuantizerResult> createExtractResultFromImageProvider(
+    ImageProvider provider) async {
+  final sw = Stopwatch()..start();
+
+// PREVIOUS
+   final ui.Image image = await imageProviderToScaled(provider, 112.0);
+  //   final bytesList = (await scaled.toByteData())!.buffer.asUint32List();
+  //   final quantizerResult = await QuantizerCelebi().quantize(bytesList, 128);
+
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      final quantizerResult = await QuantizerCelebi().quantize(
+          bytes!.buffer.asUint32List(), 128,
+          returnInputPixelToClusterPixel: true);
+
+
+    sw.reset();
+    // final fixedResult = await QuantizerResult(quantizerResult.colorToCount
+    //     .map((key, value) => MapEntry(getArgbFromAbgr(key), value)));
+
+    return quantizerResult;
+}
+
+static int getArgbFromAbgr(int abgr) {
+  const exceptRMask = 0xFF00FFFF;
+  const onlyRMask = ~exceptRMask;
+  const exceptBMask = 0xFFFFFF00;
+  const onlyBMask = ~exceptBMask;
+  var r = (abgr & onlyRMask) >> 16;
+  var b = abgr & onlyBMask;
+  return (abgr & exceptRMask & exceptBMask) | (b << 16) | r;
+}
+
+
+
+static Future<ui.Image> imageProviderToScaled(ImageProvider imageProvider, double maxDimension,
+   ) async {
+  final stream = imageProvider
+      .resolve(ImageConfiguration(size: Size(maxDimension, maxDimension)));
+final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+  late ImageStreamListener listener;
+  late ui.Image scaledImage;
+  listener = ImageStreamListener((ImageInfo info, sync) async {
+    stream.removeListener(listener);
+    ui.Image image = info.image;
+    final width = image.width;
+    final height = image.height;
+    var paintWidth = width.toDouble();
+    var paintHeight = height.toDouble();
+    final rescale = width > maxDimension || height > maxDimension;
+    if (rescale) {
+      paintWidth =
+          (width > height) ? maxDimension : (maxDimension / height) * width;
+      paintHeight =
+          (height > width) ? maxDimension : (maxDimension / width) * height;
+    }
+
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
+        image: image,
+        filterQuality: FilterQuality.none);
+    final picture = pictureRecorder.endRecording();
+    scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
+    imageCompleter.complete(info.image);
+  }, onError: (_, __) {
+    stream.removeListener(listener);
+    throw ('error rendering img to png');
+  });
+  stream.addListener(listener);
+  await imageCompleter.future;
+  return scaledImage;
+}
+
+
+
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).

@@ -14,38 +14,30 @@ void main() => runApp(DynamicColorExample());
 class DynamicColorExample extends StatefulWidget {
   DynamicColorExample({super.key});
 
-  final List<Image> images = [
-    Image.asset(
-      'assets/yellow.png',
-      height: 150,
+  final List<ImageProvider> images = [
+    AssetImage(
+      'assets/yellow.png'
     ),
-    Image.asset(
+    AssetImage(
       'assets/yellow_transparent.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/yellow_full.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/squares.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/material_3_base.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/rugby_japan.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/football_leeds.png',
-      height: 150,
     ),
-    Image.asset(
+    AssetImage(
       'assets/rugby_england.png',
-      height: 150,
     ),
   ];
 
@@ -65,12 +57,12 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     isLight = true;
   }
 
-  Future<void> _updateImage(Image image) async {
+  Future<void> _updateImage(ImageProvider provider) async {
     // TODO add fail handling.
-    final ColorScheme newColorScheme = await ColorScheme.fromImage(
-        image: image, brightness: isLight ? Brightness.light : Brightness.dark);
+    final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
+        provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
     setState(() {
-      selectedImage = widget.images.indexOf(image) ?? widget.images.length + 1;
+      selectedImage = widget.images.indexOf(provider) ?? widget.images.length + 1;
       currentColorScheme = newColorScheme;
     });
   }
@@ -197,7 +189,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                                       : null,
                               child: Padding(
                                 padding: EdgeInsets.all(10.0),
-                                child: image,
+                                child: Image.new(image: image, height: 150),
                               ),
                             )))
                         .toList(),
