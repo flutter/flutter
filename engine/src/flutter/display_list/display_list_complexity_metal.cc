@@ -128,7 +128,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawRect(
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // No real difference for AA with filled styles.
     unsigned int area = rect.width() * rect.height();
 
@@ -170,7 +170,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawOval(
 
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // With filled styles, there is no significant AA penalty.
     // m = 1/16000
     // c = 0
@@ -204,7 +204,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawCircle(
 
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     // We can ignore pi here.
     unsigned int area = radius * radius;
     // m = 1/1300
@@ -244,7 +244,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawRRect(
   //
   // Expensive: All filled style, symmetric w/AA.
   bool expensive =
-      (DrawStyle() == DlDrawStyle::kFill) ||
+      (Style() == SkPaint::Style::kFill_Style) ||
       ((rrect.getType() == SkRRect::Type::kSimple_Type) && IsAntiAliased());
 
   unsigned int complexity;
@@ -292,7 +292,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDRRect(
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kFill) {
+  if (Style() == SkPaint::Style::kFill_Style) {
     unsigned int area = outer.width() * outer.height();
     if (outer.getType() == SkRRect::Type::kComplex_Type) {
       // m = 1/1000
@@ -374,7 +374,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawArc(
   //
   // There is also a kStrokeAndFill_Style that Skia exposes, but we do not
   // currently use it anywhere in Flutter.
-  if (DrawStyle() == DlDrawStyle::kStroke) {
+  if (Style() == SkPaint::Style::kStroke_Style) {
     if (IsAntiAliased()) {
       // m = 1/8500
       // c = 16
@@ -493,7 +493,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
     const SkISize& size,
     bool texture_backed,
     bool render_with_attributes,
-    bool enforce_src_edges) {
+    SkCanvas::SrcRectConstraint constraint) {
   if (IsComplex()) {
     return;
   }
@@ -512,12 +512,16 @@ void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
     // m = 1/23000
     // c = 2.3
     complexity = (area + 52900) * 2 / 115;
-    if (render_with_attributes && enforce_src_edges && IsAntiAliased()) {
+    if (render_with_attributes &&
+        constraint == SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint &&
+        IsAntiAliased()) {
       // There's about a 30% performance penalty from the baseline.
       complexity *= 1.3f;
     }
   } else {
-    if (render_with_attributes && enforce_src_edges && IsAntiAliased()) {
+    if (render_with_attributes &&
+        constraint == SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint &&
+        IsAntiAliased()) {
       // m = 1/12200
       // c = 2.75
       complexity = (area + 33550) * 2 / 61;
@@ -552,15 +556,11 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawImageNine(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
-    const sk_sp<DisplayList> display_list,
-    SkScalar opacity) {
+    const sk_sp<DisplayList> display_list) {
   if (IsComplex()) {
     return;
   }
   MetalHelper helper(Ceiling() - CurrentComplexityScore());
-  if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
-    helper.saveLayer(nullptr, SaveLayerOptions::kWithAttributes, nullptr);
-  }
   display_list->Dispatch(helper);
   AccumulateComplexity(helper.ComplexityScore());
 }

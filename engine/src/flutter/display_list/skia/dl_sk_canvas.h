@@ -114,13 +114,12 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                  const SkPoint point,
                  DlImageSampling sampling,
                  const DlPaint* paint = nullptr) override;
-  void DrawImageRect(
-      const sk_sp<DlImage>& image,
-      const SkRect& src,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      const DlPaint* paint = nullptr,
-      SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
+  void DrawImageRect(const sk_sp<DlImage>& image,
+                     const SkRect& src,
+                     const SkRect& dst,
+                     DlImageSampling sampling,
+                     const DlPaint* paint = nullptr,
+                     bool enforce_src_edges = false) override;
   void DrawImageNine(const sk_sp<DlImage>& image,
                      const SkIRect& center,
                      const SkRect& dst,
@@ -136,7 +135,7 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                  const SkRect* cullRect,
                  const DlPaint* paint = nullptr) override;
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
-                       SkScalar opacity = SK_Scalar1) override;
+                       SkScalar opacity) override;
   void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,
                     SkScalar y,

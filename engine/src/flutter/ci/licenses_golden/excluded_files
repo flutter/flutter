@@ -29,10 +29,12 @@
 ../../../flutter/build
 ../../../flutter/ci
 ../../../flutter/common/README.md
+../../../flutter/display_list/display_list_canvas_unittests.cc
 ../../../flutter/display_list/display_list_color_filter_unittests.cc
 ../../../flutter/display_list/display_list_color_source_unittests.cc
 ../../../flutter/display_list/display_list_color_unittests.cc
 ../../../flutter/display_list/display_list_complexity_unittests.cc
+../../../flutter/display_list/display_list_enum_unittests.cc
 ../../../flutter/display_list/display_list_image_filter_unittests.cc
 ../../../flutter/display_list/display_list_mask_filter_unittests.cc
 ../../../flutter/display_list/display_list_matrix_clip_tracker_unittests.cc
@@ -40,10 +42,8 @@
 ../../../flutter/display_list/display_list_path_effect_unittests.cc
 ../../../flutter/display_list/display_list_rtree_unittests.cc
 ../../../flutter/display_list/display_list_unittests.cc
+../../../flutter/display_list/display_list_utils_unittests.cc
 ../../../flutter/display_list/display_list_vertices_unittests.cc
-../../../flutter/display_list/dl_rendering_unittests.cc
-../../../flutter/display_list/skia/dl_sk_conversions_unittests.cc
-../../../flutter/display_list/skia/dl_sk_utils_unittests.cc
 ../../../flutter/display_list/testing
 ../../../flutter/docs
 ../../../flutter/examples
