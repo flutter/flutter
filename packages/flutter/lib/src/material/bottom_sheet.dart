@@ -127,12 +127,12 @@ class BottomSheet extends StatefulWidget {
   ///
   /// The drag handle appears at the top of the bottom sheet. The default color is
   /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized
-  /// using dragHandleColor. The default size is Size(32,4) and can be customized
+  /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
-  /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
-  /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
-  /// defaults to false.
+  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If 
+  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and 
+  /// otherwise defaults to false.
   final bool? showDragHandle;
 
   /// The bottom sheet drag handle's color.
@@ -265,7 +265,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(
       (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
-      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
+      "'BottomSheet.animationController' cannot be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway) {
@@ -277,7 +277,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragEnd(DragEndDetails details) {
     assert(
       (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
-      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
+      "'BottomSheet.animationController' cannot be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway) {
@@ -370,6 +370,8 @@ class _BottomSheetState extends State<BottomSheet> {
                       onSemanticsTap: widget.onClosing,
                       handleHover: _handleDragHandleHover,
                       materialState: dragHandleMaterialState,
+                      dragHandleColor: widget.dragHandleColor,
+                      dragHandleSize: widget.dragHandleSize,
                     )
                   else
                     GestureDetector(
@@ -381,11 +383,12 @@ class _BottomSheetState extends State<BottomSheet> {
                         onSemanticsTap: widget.onClosing,
                         handleHover: _handleDragHandleHover,
                         materialState: dragHandleMaterialState,
+                        dragHandleColor: widget.dragHandleColor,
+                      dragHandleSize: widget.dragHandleSize,
                       ),
                     ),
                   Padding(
-                    padding:
-                        const EdgeInsets.only(top: kMinInteractiveDimension),
+                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
                     child: widget.builder(context),
                   ),
                 ],
@@ -426,17 +429,21 @@ class _DragHandle extends StatelessWidget {
     required this.onSemanticsTap,
     required this.handleHover,
     required this.materialState,
+    this.dragHandleColor,
+    this.dragHandleSize,
   });
 
   final VoidCallback? onSemanticsTap;
   final Function(bool) handleHover;
   final Set<MaterialState> materialState;
+  final Color? dragHandleColor;
+  final Size? dragHandleSize;
 
   @override
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
-    final Size dragHandleSize = bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
+    final Size handleSize = dragHandleSize ?? bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
 
     return MouseRegion(
       onEnter: (PointerEnterEvent event) => handleHover(true),
@@ -450,11 +457,13 @@ class _DragHandle extends StatelessWidget {
           width: kMinInteractiveDimension,
           child: Center(
             child: Container(
-              height: dragHandleSize.height,
-              width: dragHandleSize.width,
+              height: handleSize.height,
+              width: handleSize.width,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(dragHandleSize.height/2),
-                color: MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState) ?? m3Defaults.dragHandleColor!,
+                borderRadius: BorderRadius.circular(handleSize.height/2),
+                color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
+                  ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
+                  ?? m3Defaults.dragHandleColor,              
               ),
             ),
           ),
@@ -916,12 +925,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// The drag handle appears at the top of the bottom sheet. The default color is
   /// [ColorScheme.onSurfaceVariant] with an opacity of 0.4 and can be customized
-  /// using dragHandleColor. The default size is Size(32,4) and can be customized
+  /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
-  /// Defaults to [BottomSheetThemeData.showDragHandle]. If that is also null,
-  /// defaults to true when [ThemeData.useMaterial3] is true, and otherwise
-  /// defaults to false.
+  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If 
+  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and 
+  /// otherwise defaults to false.
   final bool? showDragHandle;
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -1312,19 +1321,19 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get shadowColor => Colors.transparent;
+  Color get shadowColor => Colors.transparent;
 
   @override
-  Color? get dragHandleColor => Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4);
+  Color get dragHandleColor => Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4);
 
   @override
-  Size? get dragHandleSize => const Size(32, 4);
+  Size get dragHandleSize => const Size(32, 4);
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet
