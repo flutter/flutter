@@ -1335,9 +1335,7 @@ class SelectionOverlay {
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
-  /// {@template flutter.widgets.SelectionOverlay.rebuildHandles}
   /// Rebuilds the selection handles if they are present.
-  /// {@endtemplate}
   void rebuildHandles() {
     if (_handles == null) {
       return;
@@ -1371,7 +1369,9 @@ class SelectionOverlay {
     }
   }
 
+  /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
+  /// {@endtemplate}
   void showToolbar({
     BuildContext? context,
     WidgetBuilder? contextMenuBuilder,
