@@ -2015,4 +2015,41 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 25));
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0x8000ff00)));
   });
+
+  testWidgets('InkWell secondary tap test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onSecondaryTap: () {
+              log.add('secondary-tap');
+            },
+            onSecondaryTapDown: (TapDownDetails details) {
+              log.add('secondary-tap-down');
+            },
+            onSecondaryTapUp: (TapUpDetails details) {
+              log.add('secondary-tap-up');
+            },
+            onSecondaryTapCancel: () {
+              log.add('secondary-tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1, buttons: kSecondaryButton);
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-up', 'secondary-tap']));
+    log.clear();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)), pointer: 2, buttons: kSecondaryButton);
+    await gesture.moveTo(const Offset(100, 100));
+    await gesture.up();
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-cancel']));
+  });
 }
