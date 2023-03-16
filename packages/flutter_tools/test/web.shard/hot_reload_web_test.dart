@@ -45,6 +45,20 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     await flutter.hotRestart();
   });
 
+  testWithoutContext('$testName: hot restart works without error after delay', () async {
+    flutter.stdout.listen(printOnFailure);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    await flutter.hotRestart();
+  });
+
+  testWithoutContext('$testName: multiple hot restarts work without error', () async {
+    flutter.stdout.listen(printOnFailure);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    await Future.wait(<Future<void>>[ flutter.hotRestart(), flutter.hotRestart()]);
+  });
+
   testWithoutContext('$testName: newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
