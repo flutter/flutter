@@ -353,7 +353,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
     Widget? dragHandle;
     if(showDragHandle){
-      dragHandle= _DragHandle(
+      dragHandle = _DragHandle(
         onSemanticsTap: widget.onClosing,
         handleHover: _handleDragHandleHover,
         materialState: dragHandleMaterialState,
