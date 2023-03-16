@@ -778,6 +778,8 @@ void main() {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
 
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
+
     processManager.addCommand(FakeCommand(
       command: <String>[
         'bin/cache/dart-sdk/bin/dartaotruntime',
@@ -796,6 +798,7 @@ void main() {
         'bin/cache',
         '--libraries-spec',
         'bin/cache/flutter_web_sdk/libraries.json',
+        '--depfile=${depFile.absolute.path}',
 
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
