@@ -343,6 +343,7 @@ targets:
       - bin/
       - .ci.yaml
 
+  # New target: https://github.com/flutter/flutter/pull/115511
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
     bringup: true

@@ -29,7 +29,8 @@ Future<void> main() async {
     await runProjectTest((FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
-        final File build = File(path.join(flutterProject.rootPath, 'android', 'app', 'build.gradle'));
+        final File build = File(path.join(
+	    flutterProject.rootPath, 'android', 'app', 'build.gradle'));
         build.writeAsStringSync(
           '''
 task printEngineMavenUrl() {
@@ -59,17 +60,19 @@ task printEngineMavenUrl() {
         }
 
         section('Checking overridden maven URL');
-        gradleOutput = await eval(gradlewExecutable, <String>[
-          'printEngineMavenUrl',
-          '-q'
-        ], environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
-        });
+        gradleOutput = await eval(
+	    gradlewExecutable,
+	    <String>['printEngineMavenUrl','-q'],
+	    environment: <String, String>{
+              'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
+            }
+	);
         outputLines = splitter.convert(gradleOutput);
         mavenUrl = outputLines.last;
 
         if (mavenUrl != 'https://my.special.proxy/download.flutter.io') {
-          throw TaskResult.failure('Expected overridden Android engine maven '
+          throw TaskResult.failure(
+	      'Expected overridden Android engine maven '
               'dependency URL to resolve to proxy location '
               'https://my.special.proxy/download.flutter.io. Got '
               '$mavenUrl instead');
