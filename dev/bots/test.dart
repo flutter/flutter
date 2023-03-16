@@ -1224,7 +1224,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
     () => _runWebDebugTest('test/test.dart'),
-    () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/null_safe_main.dart'),
     () => _runWebDebugTest('lib/web_define_loading.dart',
       additionalArguments: <String>[
         '--dart-define=test.valueA=Example,A',
@@ -1669,7 +1669,6 @@ Future<void> _runWebReleaseTest(String target, {
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
 Future<void> _runWebDebugTest(String target, {
-  bool enableNullSafety = false,
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
@@ -1683,10 +1682,6 @@ Future<void> _runWebDebugTest(String target, {
     <String>[
       'run',
       '--debug',
-      if (enableNullSafety)
-        ...<String>[
-          '--null-assertions',
-        ],
       '-d',
       'chrome',
       '--web-run-headless',
