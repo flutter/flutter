@@ -4655,7 +4655,7 @@ targets:
       task_name: flutter_tool_startup__macos
 
   - name: Linux flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4669,7 +4669,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Mac flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4685,7 +4685,7 @@ targets:
       cpu: "x86"
 
   - name: Mac_arm64 flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4701,7 +4701,7 @@ targets:
       cpu: "arm64"
 
   - name: Windows flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
