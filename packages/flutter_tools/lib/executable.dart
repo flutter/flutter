@@ -199,7 +199,7 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
+  FormatCommand(),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

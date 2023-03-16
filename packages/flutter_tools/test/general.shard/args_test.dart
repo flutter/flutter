@@ -23,7 +23,7 @@ void main() {
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
     for (final Command<void> command in runner.commands.values) {
-      if(command.name == 'analyze') {
+      if (command.name == 'analyze') {
         final AnalyzeCommand analyze = command as AnalyzeCommand;
         expect(analyze.allProjectValidators().length, 2);
       }
