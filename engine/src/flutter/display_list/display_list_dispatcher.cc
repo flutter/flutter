@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/display_list_dispatcher.h"
 
 namespace flutter {
 
-// Just exists to ensure that the header can be cleanly imported.
+//
 
 }  // namespace flutter

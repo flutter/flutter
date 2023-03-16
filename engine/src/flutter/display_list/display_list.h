@@ -18,36 +18,41 @@
 //
 // This file contains the definitions for:
 // DisplayList: the base class that holds the information about the
-//              sequence of operations and can dispatch them to a DlOpReceiver
-// DlOpReceiver: a pure virtual interface which can be implemented to field
-//               the requests for purposes such as sending them to an SkCanvas
-//               or detecting various rendering optimization scenarios
-// DisplayListBuilder: a class for constructing a DisplayList from DlCanvas
-//                     method calls and which can act as a DlOpReceiver as well
+//              sequence of operations and can dispatch them to a Dispatcher
+// Dispatcher: a pure virtual interface which can be implemented to field
+//             the requests for purposes such as sending them to an SkCanvas
+//             or detecting various rendering optimization scenarios
+// DisplayListBuilder: a class for constructing a DisplayList from the same
+//                     calls defined in the Dispatcher
 //
 // Other files include various class definitions for dealing with display
 // lists, such as:
-// skia/dl_sk_*.h: classes to interact between SkCanvas and DisplayList
-//                 (SkCanvas->DisplayList adapter and vice versa)
+// display_list_canvas.h: classes to interact between SkCanvas and DisplayList
+//                        (SkCanvas->DisplayList adapter and vice versa)
 //
 // display_list_utils.h: various utility classes to ease implementing
-//                       a DlOpReceiver, including NOP implementations of
+//                       a Dispatcher, including NOP implementations of
 //                       the attribute, clip, and transform methods,
 //                       classes to track attributes, clips, and transforms
 //                       and a class to compute the bounds of a DisplayList
-//                       Any class implementing DlOpReceiver can inherit from
+//                       Any class implementing Dispatcher can inherit from
 //                       these utility classes to simplify its creation
 //
 // The Flutter DisplayList mechanism is used in a similar manner to the Skia
-// SkPicture mechanism.
+// SkPicture mechanism. The primary means of communication into and out
+// of the DisplayList is through the Dispatcher virtual class which
+// provides a nearly 1:1 translation between the records of the DisplayList
+// to method calls.
 //
-// A DisplayList must be created using a DisplayListBuilder using its stateless
-// methods inherited from DlCanvas.
+// A DisplayList must be created using a DisplayListBuilder using either its
+// stateful methods inherited from Dispatcher, or from its stateless methods
+// inherited from DlCanvas.
 //
-// A DisplayList can be read back by implementing the DlOpReceiver virtual
+// A DisplayList can be read back by implementing the Dispatcher virtual
 // methods (with help from some of the classes in the utils file) and
-// passing an instance to the Dispatch() method, or it can be rendered
-// to Skia using a DlSkCanvasDispatcher.
+// passing an instance to the dispatch() method, or it can be rendered
+// to Skia using a DisplayListCanvasDispatcher or simply by passing an
+// SkCanvas pointer to its renderTo() method.
 //
 // The mechanism is inspired by the SkLiteDL class that is not directly
 // supported by Skia, but has been recommended as a basis for custom
@@ -150,7 +155,7 @@ enum class DisplayListOpType {
 };
 #undef DL_OP_TO_ENUM_VALUE
 
-class DlOpReceiver;
+class Dispatcher;
 class DisplayListBuilder;
 
 class SaveLayerOptions {
@@ -226,7 +231,7 @@ class DisplayListStorage {
 class Culler;
 
 // The base class that contains a sequence of rendering operations
-// for dispatch to a DlOpReceiver. These objects must be instantiated
+// for dispatch to a Dispatcher. These objects must be instantiated
 // through an instance of DisplayListBuilder::build().
 class DisplayList : public SkRefCnt {
  public:
@@ -234,8 +239,12 @@ class DisplayList : public SkRefCnt {
 
   ~DisplayList();
 
-  void Dispatch(DlOpReceiver& ctx) const;
-  void Dispatch(DlOpReceiver& ctx, const SkRect& cull_rect) const;
+  void Dispatch(Dispatcher& ctx) const;
+  void Dispatch(Dispatcher& ctx, const SkRect& cull_rect) const;
+
+  void RenderTo(DisplayListBuilder* builder) const;
+
+  void RenderTo(SkCanvas* canvas, SkScalar opacity = SK_Scalar1) const;
 
   // From historical behavior, SkPicture always included nested bytes,
   // but nested ops are only included if requested. The defaults used
@@ -291,7 +300,7 @@ class DisplayList : public SkRefCnt {
   const bool can_apply_group_opacity_;
   const sk_sp<const DlRTree> rtree_;
 
-  void Dispatch(DlOpReceiver& ctx,
+  void Dispatch(Dispatcher& ctx,
                 uint8_t* ptr,
                 uint8_t* end,
                 Culler& culler) const;
