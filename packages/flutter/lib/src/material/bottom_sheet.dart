@@ -130,8 +130,8 @@ class BottomSheet extends StatefulWidget {
   /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
-  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If 
-  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and 
+  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
+  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and
   /// otherwise defaults to false.
   final bool? showDragHandle;
 
@@ -466,7 +466,7 @@ class _DragHandle extends StatelessWidget {
                 borderRadius: BorderRadius.circular(handleSize.height/2),
                 color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
                   ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
-                  ?? m3Defaults.dragHandleColor,              
+                  ?? m3Defaults.dragHandleColor,
               ),
             ),
           ),
@@ -931,8 +931,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
-  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If 
-  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and 
+  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
+  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and
   /// otherwise defaults to false.
   final bool? showDragHandle;
 
