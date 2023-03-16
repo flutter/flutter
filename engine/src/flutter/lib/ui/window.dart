@@ -817,7 +817,7 @@ class AccessibilityFeatures {
 
   /// The platform is requesting that text be rendered at a bold font weight.
   ///
-  /// Only supported on iOS.
+  /// Only supported on iOS and Android API 31+.
   bool get boldText => _kBoldTextIndex & _index != 0;
 
   /// The platform is requesting that certain animations be simplified and
