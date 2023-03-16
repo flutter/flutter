@@ -274,4 +274,30 @@ TEST(EventChannelTest, HandlerOutlivesEventChannel) {
   EXPECT_EQ(on_cancel_called, true);
 }
 
+TEST(EventChannelTest, StreamHandlerErrorPassByValue) {
+  std::unique_ptr<StreamHandlerError<>> error = nullptr;
+
+  {
+    std::string code = "Code";
+    std::string msg = "Message";
+    std::unique_ptr<EncodableValue> details =
+        std::make_unique<EncodableValue>("Details");
+    error =
+        std::make_unique<StreamHandlerError<>>(code, msg, std::move(details));
+  }
+
+  ASSERT_NE(error.get(), nullptr);
+  EXPECT_EQ(error->error_code, "Code");
+  EXPECT_EQ(error->error_message, "Message");
+  EXPECT_EQ(std::get<std::string>(*error->error_details), "Details");
+}
+
+TEST(EventChannelTest, StreamHandlerErrorNullptr) {
+  std::unique_ptr<StreamHandlerError<>> error =
+      std::make_unique<StreamHandlerError<>>("Code", "Message", nullptr);
+
+  ASSERT_NE(error.get(), nullptr);
+  EXPECT_FALSE(error->error_details);
+}
+
 }  // namespace flutter

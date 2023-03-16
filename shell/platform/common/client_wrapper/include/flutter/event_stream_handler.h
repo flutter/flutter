@@ -5,6 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_COMMON_CLIENT_WRAPPER_INCLUDE_FLUTTER_EVENT_STREAM_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_COMMON_CLIENT_WRAPPER_INCLUDE_FLUTTER_EVENT_STREAM_HANDLER_H_
 
+#include <memory>
+#include <string>
+
 #include "event_sink.h"
 
 namespace flutter {
@@ -13,16 +16,16 @@ class EncodableValue;
 
 template <typename T = EncodableValue>
 struct StreamHandlerError {
-  const std::string& error_code;
-  const std::string& error_message;
-  const T* error_details;
+  const std::string error_code;
+  const std::string error_message;
+  const std::unique_ptr<T> error_details;
 
-  StreamHandlerError(const std::string& error_code,
-                     const std::string& error_message,
-                     const T* error_details)
+  StreamHandlerError(const std::string error_code,
+                     const std::string error_message,
+                     std::unique_ptr<T>&& error_details)
       : error_code(error_code),
         error_message(error_message),
-        error_details(error_details) {}
+        error_details(std::move(error_details)) {}
 };
 
 // Handler for stream setup and teardown requests.
