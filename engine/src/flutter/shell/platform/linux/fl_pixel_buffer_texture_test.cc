@@ -68,10 +68,9 @@ static FlTestPixelBufferTexture* fl_test_pixel_buffer_texture_new() {
 
 // Test that getting the texture ID works.
 TEST(FlPixelBufferTextureTest, TextureID) {
-  // Texture ID is not assigned until the pixel buffer is copied once.
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_pixel_buffer_texture_new());
-  EXPECT_EQ(fl_texture_get_texture_id(texture),
-            reinterpret_cast<int64_t>(texture));
+  fl_texture_set_id(texture, 42);
+  EXPECT_EQ(fl_texture_get_id(texture), static_cast<int64_t>(42));
 }
 
 // Test that populating an OpenGL texture works.

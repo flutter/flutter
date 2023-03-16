@@ -25,6 +25,9 @@ struct _FlTextureRegistrarImpl {
   // Weak reference to the engine this texture registrar is created for.
   FlEngine* engine;
 
+  // ID to assign to the next new texture.
+  int64_t next_id;
+
   // Internal record for registered textures.
   //
   // It is a map from Flutter texture ID to #FlTexture instance created by
@@ -83,16 +86,19 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
   FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
 
   if (FL_IS_TEXTURE_GL(texture) || FL_IS_PIXEL_BUFFER_TEXTURE(texture)) {
-    g_hash_table_insert(self->textures,
-                        GINT_TO_POINTER(fl_texture_get_texture_id(texture)),
-                        g_object_ref(texture));
-
     if (self->engine == nullptr) {
       return FALSE;
     }
 
-    return fl_engine_register_external_texture(
-        self->engine, fl_texture_get_texture_id(texture));
+    int64_t id = self->next_id++;
+    if (fl_engine_register_external_texture(self->engine, id)) {
+      fl_texture_set_id(texture, id);
+      g_hash_table_insert(self->textures, GINT_TO_POINTER(id),
+                          g_object_ref(texture));
+      return TRUE;
+    } else {
+      return FALSE;
+    }
   } else {
     // We currently only support #FlTextureGL and #FlPixelBufferTexture.
     return FALSE;
@@ -114,33 +120,27 @@ static gboolean mark_texture_frame_available(FlTextureRegistrar* registrar,
     return FALSE;
   }
 
-  if (lookup_texture(registrar, fl_texture_get_texture_id(texture)) ==
-      nullptr) {
-    g_warning("Unregistered texture %p", texture);
-    return FALSE;
-  }
-
-  return fl_engine_mark_texture_frame_available(
-      self->engine, fl_texture_get_texture_id(texture));
+  return fl_engine_mark_texture_frame_available(self->engine,
+                                                fl_texture_get_id(texture));
 }
 
 static gboolean unregister_texture(FlTextureRegistrar* registrar,
                                    FlTexture* texture) {
   FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
 
-  if (!g_hash_table_remove(
-          self->textures,
-          GINT_TO_POINTER(fl_texture_get_texture_id(texture)))) {
-    g_warning("Unregistering a non-existent texture %p", texture);
-    return FALSE;
-  }
-
   if (self->engine == nullptr) {
     return FALSE;
   }
 
-  return fl_engine_unregister_external_texture(
-      self->engine, fl_texture_get_texture_id(texture));
+  gboolean result = fl_engine_unregister_external_texture(
+      self->engine, fl_texture_get_id(texture));
+
+  if (!g_hash_table_remove(self->textures,
+                           GINT_TO_POINTER(fl_texture_get_id(texture)))) {
+    g_warning("Unregistering a non-existent texture %p", texture);
+  }
+
+  return result;
 }
 
 static void fl_texture_registrar_impl_iface_init(
@@ -152,6 +152,7 @@ static void fl_texture_registrar_impl_iface_init(
 }
 
 static void fl_texture_registrar_impl_init(FlTextureRegistrarImpl* self) {
+  self->next_id = 1;
   self->textures = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                                          g_object_unref);
 }

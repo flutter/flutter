@@ -9,16 +9,42 @@
 #include <gmodule.h>
 #include <cstdio>
 
+typedef struct {
+  int64_t id;
+} FlTextureGLPrivate;
+
+static void fl_texture_gl_texture_iface_init(FlTextureInterface* iface);
+
 // Added here to stop the compiler from optimising this function away.
 G_MODULE_EXPORT GType fl_texture_gl_get_type();
-
-static void fl_texture_gl_texture_iface_init(FlTextureInterface* iface) {}
 
 G_DEFINE_TYPE_WITH_CODE(FlTextureGL,
                         fl_texture_gl,
                         G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE(fl_texture_get_type(),
-                                              fl_texture_gl_texture_iface_init))
+                                              fl_texture_gl_texture_iface_init);
+                        G_ADD_PRIVATE(FlTextureGL))
+
+// Implements FlTexture::set_id
+static void fl_texture_gl_set_id(FlTexture* texture, int64_t id) {
+  FlTextureGL* self = FL_TEXTURE_GL(texture);
+  FlTextureGLPrivate* priv = reinterpret_cast<FlTextureGLPrivate*>(
+      fl_texture_gl_get_instance_private(self));
+  priv->id = id;
+}
+
+// Implements FlTexture::set_id
+static int64_t fl_texture_gl_get_id(FlTexture* texture) {
+  FlTextureGL* self = FL_TEXTURE_GL(texture);
+  FlTextureGLPrivate* priv = reinterpret_cast<FlTextureGLPrivate*>(
+      fl_texture_gl_get_instance_private(self));
+  return priv->id;
+}
+
+static void fl_texture_gl_texture_iface_init(FlTextureInterface* iface) {
+  iface->set_id = fl_texture_gl_set_id;
+  iface->get_id = fl_texture_gl_get_id;
+}
 
 static void fl_texture_gl_class_init(FlTextureGLClass* klass) {}
 

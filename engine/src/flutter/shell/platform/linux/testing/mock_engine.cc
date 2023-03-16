@@ -505,6 +505,10 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
 FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
+  auto val = engine->textures.find(texture_identifier);
+  if (val == std::end(engine->textures)) {
+    return kInvalidArguments;
+  }
   engine->textures.erase(texture_identifier);
   return kSuccess;
 }

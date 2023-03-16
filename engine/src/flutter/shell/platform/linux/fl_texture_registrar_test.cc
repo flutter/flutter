@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_registrar.h"
-#include "flutter/shell/platform/linux/fl_texture_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_pixel_buffer_texture.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_gl.h"
@@ -74,10 +73,6 @@ TEST(FlTextureRegistrarTest, MockRegistrar) {
   EXPECT_TRUE(fl_texture_registrar_register_texture(
       FL_TEXTURE_REGISTRAR(registrar), texture));
   EXPECT_EQ(fl_mock_texture_registrar_get_texture(registrar), texture);
-  EXPECT_EQ(
-      fl_texture_registrar_lookup_texture(FL_TEXTURE_REGISTRAR(registrar),
-                                          fl_texture_get_texture_id(texture)),
-      texture);
   EXPECT_TRUE(fl_texture_registrar_mark_texture_frame_available(
       FL_TEXTURE_REGISTRAR(registrar), texture));
   EXPECT_TRUE(fl_mock_texture_registrar_get_frame_available(registrar));

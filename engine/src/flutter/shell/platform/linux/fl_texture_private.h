@@ -11,14 +11,13 @@
 G_BEGIN_DECLS
 
 /**
- * fl_texture_get_texture_id:
+ * fl_texture_set_id:
  * @texture: an #FlTexture.
+ * @id: a texture ID.
  *
- * Retrieves the unique id of this texture.
- *
- * Returns: the unique id of this texture.
+ * Set the ID for a texture.
  */
-int64_t fl_texture_get_texture_id(FlTexture* texture);
+void fl_texture_set_id(FlTexture* texture, int64_t id);
 
 G_END_DECLS
 

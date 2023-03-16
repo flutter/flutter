@@ -10,13 +10,14 @@
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 
 typedef struct {
+  int64_t id;
   GLuint texture_id;
 } FlPixelBufferTexturePrivate;
 
+static void fl_pixel_buffer_texture_iface_init(FlTextureInterface* iface);
+
 // Added here to stop the compiler from optimising this function away.
 G_MODULE_EXPORT GType fl_pixel_buffer_texture_get_type();
-
-static void fl_pixel_buffer_texture_iface_init(FlTextureInterface* iface) {}
 
 G_DEFINE_TYPE_WITH_CODE(
     FlPixelBufferTexture,
@@ -25,6 +26,29 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_texture_get_type(),
                           fl_pixel_buffer_texture_iface_init);
     G_ADD_PRIVATE(FlPixelBufferTexture))
+
+// Implements FlTexture::set_id
+static void fl_pixel_buffer_texture_set_id(FlTexture* texture, int64_t id) {
+  FlPixelBufferTexture* self = FL_PIXEL_BUFFER_TEXTURE(texture);
+  FlPixelBufferTexturePrivate* priv =
+      reinterpret_cast<FlPixelBufferTexturePrivate*>(
+          fl_pixel_buffer_texture_get_instance_private(self));
+  priv->id = id;
+}
+
+// Implements FlTexture::set_id
+static int64_t fl_pixel_buffer_texture_get_id(FlTexture* texture) {
+  FlPixelBufferTexture* self = FL_PIXEL_BUFFER_TEXTURE(texture);
+  FlPixelBufferTexturePrivate* priv =
+      reinterpret_cast<FlPixelBufferTexturePrivate*>(
+          fl_pixel_buffer_texture_get_instance_private(self));
+  return priv->id;
+}
+
+static void fl_pixel_buffer_texture_iface_init(FlTextureInterface* iface) {
+  iface->set_id = fl_pixel_buffer_texture_set_id;
+  iface->get_id = fl_pixel_buffer_texture_get_id;
+}
 
 static void fl_pixel_buffer_texture_dispose(GObject* object) {
   FlPixelBufferTexture* self = FL_PIXEL_BUFFER_TEXTURE(object);

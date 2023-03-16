@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/testing/mock_texture_registrar.h"
-#include "flutter/shell/platform/linux/fl_texture_private.h"
 
 struct _FlMockTextureRegistrar {
   GObject parent_instance;
@@ -35,7 +34,7 @@ static FlTexture* lookup_texture(FlTextureRegistrar* registrar,
                                  int64_t texture_id) {
   FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
   if (self->texture != nullptr &&
-      fl_texture_get_texture_id(self->texture) == texture_id) {
+      fl_texture_get_id(self->texture) == texture_id) {
     return self->texture;
   }
   return nullptr;
@@ -44,8 +43,7 @@ static FlTexture* lookup_texture(FlTextureRegistrar* registrar,
 static gboolean mark_texture_frame_available(FlTextureRegistrar* registrar,
                                              FlTexture* texture) {
   FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
-  if (lookup_texture(registrar, fl_texture_get_texture_id(texture)) ==
-      nullptr) {
+  if (lookup_texture(registrar, fl_texture_get_id(texture)) == nullptr) {
     return FALSE;
   }
   self->frame_available = TRUE;
