@@ -215,9 +215,23 @@ constexpr char kTextPlainFormat[] = "text/plain";
       [_engine sendOnChannel:kFlutterPlatformChannel
                      message:[codec encodeMethodCall:methodCall]
                  binaryReply:^(NSData* _Nullable reply) {
-                   NSDictionary* replyArgs = [codec decodeEnvelope:reply];
+                   NSAssert(_terminator, @"terminator shouldn't be nil");
+                   id decoded_reply = [codec decodeEnvelope:reply];
+                   if ([decoded_reply isKindOfClass:[FlutterError class]]) {
+                     FlutterError* error = (FlutterError*)decoded_reply;
+                     NSLog(@"Method call returned error[%@]: %@ %@", [error code], [error message],
+                           [error details]);
+                     _terminator(sender);
+                     return;
+                   }
+                   if (![decoded_reply isKindOfClass:[NSDictionary class]]) {
+                     NSLog(@"Call to System.requestAppExit returned an unexpected object: %@",
+                           decoded_reply);
+                     _terminator(sender);
+                     return;
+                   }
+                   NSDictionary* replyArgs = (NSDictionary*)decoded_reply;
                    if ([replyArgs[@"response"] isEqual:@"exit"]) {
-                     NSAssert(_terminator, @"terminator shouldn't be nil");
                      _terminator(sender);
                    }
                    if (result != nil) {
