@@ -1,4 +1,4 @@
-Signature: adbf5f8accd03d4cd3ff95cf74b06af6
+Signature: 7de9a1ed4c3cea181ebcdedaacf78351
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -2889,7 +2889,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/fuchsia_view.
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_connection.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_controller.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/pointer_injector.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -3055,7 +3054,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/fuchsia_view.da
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_connection.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_view_controller.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/pointer_injector.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart
