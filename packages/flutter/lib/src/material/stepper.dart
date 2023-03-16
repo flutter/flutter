@@ -315,7 +315,7 @@ class Stepper extends StatefulWidget {
   ///  * [MaterialState.selected].
   ///  * [MaterialState.disabled].
   ///
-  /// If not set then the widget will use default colors, primary for selected state 
+  /// If not set then the widget will use default colors, primary for selected state
   /// and grey.shade400 for disabled state.
   final MaterialStateProperty<Color>? connectorColor;
 
@@ -710,8 +710,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               child: SizedBox(
                 width: widget.connectorThickness,
                 child: Container(
-                  color: _connectorColor(widget.steps[index].isActive) 
-                  ,
+                  color: _connectorColor(widget.steps[index].isActive),
                 ),
               ),
             ),

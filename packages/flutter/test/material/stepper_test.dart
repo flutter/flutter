@@ -1264,7 +1264,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     const Color selectedColor = Colors.black;
     const Color disabledColor = Colors.white;
     int index = 0;
-    
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1273,7 +1273,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Stepper(
-                  type: StepperType.horizontal, 
+                  type: StepperType.horizontal,
                   connectorColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) =>
                   states.contains(MaterialState.selected)
                     ? selectedColor
@@ -1326,7 +1326,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     expect(circleColor('1'), selectedColor);
     expect(circleColor('2'), selectedColor);
-    
+
     expect(lineColor('line0'), selectedColor);
   });
 
