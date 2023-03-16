@@ -39,6 +39,11 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
   final List<FinderExtension>? finders;
   final List<CommandExtension>? commands;
 
+  // Because you can't really control which zone a driver test uses,
+  // we override the test for zones here.
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
