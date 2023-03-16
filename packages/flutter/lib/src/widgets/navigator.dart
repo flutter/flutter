@@ -4599,8 +4599,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _cancelActivePointers();
     // TODO(justinmc): Also should probably set this on app start, because it
     // will otherwise carry over during shift+r restart.
-    // TODO(justinmc): This also doesn't consider nested navigators.
-    SystemNavigator.updateNavigationStackStatus(canPop());
+    // If this is the root NavigatorState, then update the SystemNavigator with
+    // its status.
+    if (context.findAncestorStateOfType<NavigatorState>() == null) {
+      SystemNavigator.updateNavigationStackStatus(canPop());
+    }
   }
 
   /// Replace the current route of the navigator by pushing the given route and
