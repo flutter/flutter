@@ -14869,6 +14869,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         )
       );
 
+      expect(tester.takeException(), isA<AssertionError>());
       final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
