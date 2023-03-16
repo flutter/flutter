@@ -54,6 +54,7 @@ void main() {
       'web_wasm',
     ));
     for (final String filename in const <String>[
+      'dart2wasm.d',
       'flutter.js',
       'flutter_service_worker.js',
       'index.html',
