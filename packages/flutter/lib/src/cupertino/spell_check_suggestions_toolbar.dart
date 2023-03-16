@@ -74,6 +74,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
+          if (!editableTextState.mounted) {
+            return;
+          }
           _replaceText(
             editableTextState,
             suggestion,
@@ -98,7 +101,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     editableTextState.userUpdateTextEditingValue(newValue,SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (editableTextState.mounted) {
         editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
       }

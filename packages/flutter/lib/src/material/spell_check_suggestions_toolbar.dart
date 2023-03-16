@@ -81,6 +81,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     for (final String suggestion in spanAtCursorIndex.suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
+          if (!editableTextState.mounted) {
+            return;
+          }
           _replaceText(
             editableTextState,
             suggestion,
@@ -95,6 +98,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
+          if (!editableTextState.mounted) {
+            return;
+          }
           _replaceText(
             editableTextState,
             '',
@@ -119,7 +125,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     editableTextState.userUpdateTextEditingValue(newValue,  SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (editableTextState.mounted) {
         editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
       }
