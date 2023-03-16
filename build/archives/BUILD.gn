@@ -170,6 +170,7 @@ generated_file("dart_sdk_entitlement_config") {
     "dart-sdk/bin/dart",
     "dart-sdk/bin/dartaotruntime",
     "dart-sdk/bin/utils/gen_snapshot",
+    "dart-sdk/bin/utils/wasm-opt",
   ]
 
   deps = []
