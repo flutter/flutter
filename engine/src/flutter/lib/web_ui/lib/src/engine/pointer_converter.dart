@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(goderbauer): Remove next line when compiler bug is fixed: https://github.com/flutter/flutter/issues/122724
-// @dart = 2.19
-
 import 'package:ui/ui.dart' as ui;
 
 const bool _debugLogPointerConverter = false;
