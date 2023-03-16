@@ -14,7 +14,8 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Linux"
+                "os=Linux",
+		"cores=32"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -23,7 +24,8 @@
             "gn": [
                 "--build-canvaskit",
                 "--web",
-                "--runtime-mode=release"
+                "--runtime-mode=release",
+		"--no-goma"
             ],
             "name": "wasm_release",
             "ninja": {
