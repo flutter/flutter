@@ -13011,6 +13011,58 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
+    // Regression test for https://github.com/flutter/flutter/issues/120194.
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion without waiting for the throttling delay.
+      await sendUndo(tester);
+      expect(controller.value.selection.isValid, true);
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and do not wait for throttling delay before calling undo.
+      focusNode.requestFocus();
+      await tester.pump();
+      await sendUndo(tester);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion.
+      await sendUndo(tester);
+
+      // Initial text should have been recorded and restored.
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final FocusNode focusNode = FocusNode();
