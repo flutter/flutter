@@ -39,11 +39,7 @@ class CallbackHandle {
 ///
 ///  * [IsolateNameServer], which provides utilities for dealing with
 ///    [Isolate]s.
-class PluginUtilities {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  PluginUtilities._();
-
+abstract final class PluginUtilities {
   static final Map<Function, CallbackHandle?> _forwardCache =
       <Function, CallbackHandle?>{};
   static final Map<CallbackHandle, Function?> _backwardCache =

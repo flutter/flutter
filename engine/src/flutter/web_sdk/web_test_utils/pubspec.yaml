@@ -5,7 +5,7 @@ environment:
   sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
-  collection: 1.15.0
+  collection: 1.17.0
   crypto: 3.0.1
   image: 3.0.1
   js: 0.6.4
