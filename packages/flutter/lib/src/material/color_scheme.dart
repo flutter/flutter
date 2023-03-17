@@ -601,7 +601,7 @@ class ColorScheme with Diagnosticable {
 
     // Score colors for color scheme suitability.
     final List<int> scoredResults = Score.score(colorToCount, desired: 1);
-    final Color baseColor = Color(scoredResults.first);
+    final ui.Color baseColor = Color(scoredResults.first);
 
     final Scheme scheme;
     switch (brightness) {
