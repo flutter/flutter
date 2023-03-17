@@ -73,6 +73,7 @@ class BottomAppBar extends StatefulWidget {
     this.child,
     this.padding,
     this.surfaceTintColor,
+    this.shadowColor,
     this.height,
   }) : assert(elevation == null || elevation >= 0.0);
 
@@ -136,6 +137,18 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
   final Color? surfaceTintColor;
+
+  /// The color of the shadow below the app bar.
+  ///
+  /// If this property is null, then [BottomAppBarTheme.shadowColor] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that is also null, the default value
+  /// is fully opaque black for Material 2, and transparent for Material 3.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], which defines the size of the shadow below the app bar.
+  ///  * [shape], which defines the shape of the app bar and its shadow.
+  final Color? shadowColor;
 
   /// The double value used to indicate the height of the [BottomAppBar].
   ///
