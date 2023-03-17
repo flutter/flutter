@@ -19,7 +19,8 @@ out vec4 frag_color;
 void main() {
   vec4 value = texture(glyph_atlas_sampler, v_uv);
   if (v_has_color != 1.0) {
-    value = value.aaaa;
+    frag_color = value.aaaa * frag_info.text_color;
+  } else {
+    frag_color = value * frag_info.text_color.a;
   }
-  frag_color = value * frag_info.text_color;
 }
