@@ -19,11 +19,7 @@ part of dart.ui;
 /// communication or multiple-message communication is necessary, it is
 /// recommended to establish a separate communication channel in that first
 /// message (e.g. by passing a dedicated [SendPort]).
-class IsolateNameServer {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  IsolateNameServer._();
-
+abstract final class IsolateNameServer {
   /// Looks up the [SendPort] associated with a given name.
   ///
   /// Returns null if the name does not exist. To register the name in the first

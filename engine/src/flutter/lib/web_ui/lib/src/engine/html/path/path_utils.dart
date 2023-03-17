@@ -26,11 +26,7 @@ class SPathVerb {
   static const int kClose = 5; // 0 points
 }
 
-abstract class SPath {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SPath._();
-
+abstract final class SPath {
   static const int kMoveVerb = SPathVerb.kMove;
   static const int kLineVerb = SPathVerb.kLine;
   static const int kQuadVerb = SPathVerb.kQuad;

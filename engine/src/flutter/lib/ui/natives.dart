@@ -6,11 +6,7 @@ part of dart.ui;
 // ignore_for_file: avoid_classes_with_only_static_members
 
 /// Helper functions for Dart Plugin Registrants.
-class DartPluginRegistrant {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  DartPluginRegistrant._();
-
+abstract final class DartPluginRegistrant {
   static bool _wasInitialized = false;
 
   /// Makes sure the that the Dart Plugin Registrant has been called for this

@@ -173,11 +173,7 @@ class CallbackHandle {
 }
 
 // TODO(dit): see https://github.com/flutter/flutter/issues/33615.
-class PluginUtilities {
-  // This class is only a namespace, and should not be instantiated or
-  // extended directly.
-  factory PluginUtilities._() => throw UnsupportedError('Namespace');
-
+abstract final class PluginUtilities {
   static CallbackHandle? getCallbackHandle(Function callback) {
     throw UnimplementedError();
   }
@@ -187,11 +183,7 @@ class PluginUtilities {
   }
 }
 
-class IsolateNameServer {
-  // This class is only a namespace, and should not be instantiated or
-  // extended directly.
-  factory IsolateNameServer._() => throw UnsupportedError('Namespace');
-
+abstract final class IsolateNameServer {
   static dynamic lookupPortByName(String name) {
     throw UnimplementedError();
   }

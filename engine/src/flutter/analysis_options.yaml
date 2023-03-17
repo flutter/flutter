@@ -31,7 +31,7 @@ linter:
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
     # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
-    - avoid_classes_with_only_static_members
+    # - avoid_classes_with_only_static_members # we do this commonly
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
     - avoid_empty_else
