@@ -488,4 +488,14 @@ abstract final class SystemChannels {
     'flutter/contextmenu',
     JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for retrieving keyboard pressed keys from the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `getKeyboardState`: Obtains keyboard pressed keys from the engine.
+  static const MethodChannel keyboard = OptionalMethodChannel(
+    'flutter/keyboard',
+  );
 }
