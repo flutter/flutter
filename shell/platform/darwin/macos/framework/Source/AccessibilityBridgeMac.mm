@@ -187,9 +187,7 @@ AccessibilityBridgeMac::MacOSEventsFromAXEvent(ui::AXEventGenerator::Event event
       if (ax_node.data().HasState(ax::mojom::State::kEditable)) {
         events.push_back({
             .name = NSAccessibilityValueChangedNotification,
-            .target = GetFlutterPlatformNodeDelegateFromID(AccessibilityBridge::kRootNodeId)
-                          .lock()
-                          ->GetNativeViewAccessible(),
+            .target = RootDelegate()->GetNativeViewAccessible(),
             .user_info = nil,
         });
       }
