@@ -645,7 +645,7 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
     static auto display_list = builder.Build();
     RUN_TESTS2(builder.drawDisplayList(display_list);, false);
   }
-  RUN_TESTS(builder.drawTextBlob(TestBlob1, 0, 0););
+  RUN_TESTS2(builder.drawTextBlob(TestBlob1, 0, 0);, false);
   RUN_TESTS2(builder.drawShadow(kTestPath1, SK_ColorBLACK, 1.0, false, 1.0);
              , false);
 
