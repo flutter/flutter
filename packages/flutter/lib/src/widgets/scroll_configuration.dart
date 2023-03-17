@@ -11,6 +11,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
@@ -162,6 +163,7 @@ class ScrollBehavior {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        assert(details.controller != null);
         return RawScrollbar(
           controller: details.controller,
           child: child,

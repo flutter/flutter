@@ -1098,7 +1098,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(tester.binding.window);
+    final MediaQueryData windowData = MediaQueryData.fromWindow(tester.view);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(

@@ -17,6 +17,7 @@ import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
+import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
@@ -57,6 +58,7 @@ Future<void> buildMacOS({
     XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
     XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
+    FlutterApplicationMigration(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
