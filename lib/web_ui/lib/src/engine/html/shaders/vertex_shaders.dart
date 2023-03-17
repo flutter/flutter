@@ -10,11 +10,7 @@ import '../../browser_detection.dart';
 import 'shader_builder.dart';
 
 /// Provides common shaders used for gradients and drawVertices APIs.
-abstract class VertexShaders {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  VertexShaders._();
-
+abstract final class VertexShaders {
   static final Uint16List vertexIndicesForRect =
       Uint16List.fromList(<int>[0, 1, 2, 2, 3, 0]);
 
@@ -73,11 +69,7 @@ abstract class VertexShaders {
   }
 }
 
-abstract class FragmentShaders {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  FragmentShaders._();
-
+abstract final class FragmentShaders {
   static String writeTextureFragmentShader(
       bool isWebGl2, ui.TileMode? tileModeX, ui.TileMode? tileModeY) {
     final ShaderBuilder builder = ShaderBuilder.fragment(webGLVersion);

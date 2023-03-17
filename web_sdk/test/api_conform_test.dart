@@ -10,6 +10,7 @@ import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 // Ignore members defined on Object.
 const Set<String> _kObjectMembers = <String>{
@@ -19,7 +20,10 @@ const Set<String> _kObjectMembers = <String>{
 };
 
 CompilationUnit _parseAndCheckDart(String path) {
-  final FeatureSet analyzerFeatures = FeatureSet.latestLanguageVersion();
+  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags2(
+    flags: <String>['class-modifiers', 'sealed-class', 'records', 'patterns'],
+    sdkLanguageVersion: Version.parse('3.0.0-0'),
+  );
   if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
     throw Exception('non-nullable feature is disabled.');
   }
@@ -120,20 +124,20 @@ void main() {
               uiConstructor.parameters.parameters[i];
           final FormalParameter webParam =
               webConstructor.parameters.parameters[i];
-          if (webParam.identifier!.name != uiParam.identifier!.name) {
+          if (webParam.name!.lexeme != uiParam.name!.lexeme) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                ' ${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
+                ' ${uiParam.name!.lexeme} has a different name in lib/web_ui/ui.dart.');
           }
           if (uiParam.isPositional != webParam.isPositional) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
+                '${uiParam.name!.lexeme} is positional, but not in lib/web_ui/ui.dart.');
           }
           if (uiParam.isNamed != webParam.isNamed) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
+                '${uiParam.name!.lexeme} is named, but not in lib/web_ui/ui.dart.');
           }
         }
       }
@@ -170,20 +174,20 @@ void main() {
           i++) {
         final FormalParameter uiParam = uiMethod.parameters!.parameters[i];
         final FormalParameter webParam = webMethod.parameters!.parameters[i];
-        if (webParam.identifier!.name != uiParam.identifier!.name) {
+        if (webParam.name!.lexeme != uiParam.name!.lexeme) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              ' ${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
+              ' ${uiParam.name!.lexeme} has a different name in lib/web_ui/ui.dart.');
         }
         if (uiParam.isPositional != webParam.isPositional) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
+              '${uiParam.name!.lexeme} is positional, but not in lib/web_ui/ui.dart.');
         }
         if (uiParam.isNamed != webParam.isNamed) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
+              '${uiParam.name!.lexeme} is named, but not in lib/web_ui/ui.dart.');
         }
         // check nullability
         if (uiParam is SimpleFormalParameter &&
@@ -193,7 +197,7 @@ void main() {
           if (isUiNullable != isWebNullable) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$methodName parameter $i '
-                '${uiParam.identifier} has a different nullability than in lib/web_ui/ui.dart.');
+                '${uiParam.name} has a different nullability than in lib/web_ui/ui.dart.');
           }
         }
       }
@@ -247,28 +251,28 @@ void main() {
       final SimpleFormalParameter webParam =
           (webTypeDef.type as GenericFunctionType).parameters.parameters[i]
               as SimpleFormalParameter;
-      if (webParam.identifier == null) {
+      if (webParam.name == null) {
         failed = true;
         print('Warning: lib/web_ui/ui.dart $typeDefName parameter $i should have name.');
       }
-      if (uiParam.identifier == null) {
+      if (uiParam.name == null) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i should have name.');
       }
-      if (webParam.identifier?.name != uiParam.identifier?.name) {
+      if (webParam.name?.lexeme != uiParam.name?.lexeme) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
-            '${uiParam.identifier!.name} has a different name in lib/web_ui/ui.dart.');
+            '${uiParam.name!.lexeme} has a different name in lib/web_ui/ui.dart.');
       }
       if (uiParam.isPositional != webParam.isPositional) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
-            '${uiParam.identifier!.name} is positional, but not in lib/web_ui/ui.dart.');
+            '${uiParam.name!.lexeme} is positional, but not in lib/web_ui/ui.dart.');
       }
       if (uiParam.isNamed != webParam.isNamed) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
-            '${uiParam.identifier!.name} is named, but not in lib/web_ui/ui.dart.');
+            '${uiParam.name!.lexeme}} is named, but not in lib/web_ui/ui.dart.');
       }
 
       final bool isUiNullable = uiParam.type?.question != null;
@@ -276,7 +280,7 @@ void main() {
       if (isUiNullable != isWebNullable) {
         failed = true;
         print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
-            '${uiParam.identifier} has a different nullability than in lib/web_ui/ui.dart.');
+            '${uiParam.name} has a different nullability than in lib/web_ui/ui.dart.');
       }
     }
 
@@ -315,10 +319,10 @@ void _collectPublicClasses(CompilationUnit unit,
         continue;
       }
       final ClassDeclaration classDeclaration = member;
-      if (classDeclaration.name.name.startsWith('_')) {
+      if (classDeclaration.name.lexeme.startsWith('_')) {
         continue;
       }
-      destination[classDeclaration.name.name] = classDeclaration;
+      destination[classDeclaration.name.lexeme] = classDeclaration;
     }
   }
 }
@@ -329,7 +333,7 @@ void _collectPublicConstructors(ClassDeclaration classDeclaration,
     if (member is! ConstructorDeclaration) {
       continue;
     }
-    final String? methodName = member.name?.name;
+    final String? methodName = member.name?.lexeme;
     if (methodName == null) {
       destination['Unnamed Constructor'] = member;
       continue;
@@ -347,10 +351,10 @@ void _collectPublicMethods(ClassDeclaration classDeclaration,
     if (member is! MethodDeclaration) {
       continue;
     }
-    if (member.name.name.startsWith('_')) {
+    if (member.name.lexeme.startsWith('_')) {
       continue;
     }
-    destination[member.name.name] = member;
+    destination[member.name.lexeme] = member;
   }
 }
 
@@ -369,10 +373,10 @@ void _collectPublicTypeDefs(CompilationUnit unit,
         continue;
       }
       final GenericTypeAlias typeDeclaration = member;
-      if (typeDeclaration.name.name.startsWith('_')) {
+      if (typeDeclaration.name.lexeme.startsWith('_')) {
         continue;
       }
-      destination[typeDeclaration.name.name] = typeDeclaration;
+      destination[typeDeclaration.name.lexeme] = typeDeclaration;
     }
   }
 }
