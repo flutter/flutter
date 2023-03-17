@@ -48,6 +48,9 @@ class TestBindingBase implements BindingBase {
   void initInstances() {}
 
   @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
+  @override
   void initServiceExtensions() {}
 
   @override
