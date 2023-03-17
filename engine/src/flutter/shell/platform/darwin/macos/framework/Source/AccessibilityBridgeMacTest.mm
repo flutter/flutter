@@ -58,7 +58,7 @@ FlutterViewController* CreateTestViewController() {
 }
 }  // namespace
 
-TEST(AccessibilityBridgeMacTest, sendsAccessibilityCreateNotificationToWindowOfFlutterView) {
+TEST(AccessibilityBridgeMacTest, SendsAccessibilityCreateNotificationToWindowOfFlutterView) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
@@ -112,7 +112,84 @@ TEST(AccessibilityBridgeMacTest, sendsAccessibilityCreateNotificationToWindowOfF
   [engine shutDownEngine];
 }
 
-TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenHeadless) {
+// Flutter used to assume that the accessibility root had ID 0.
+// In a multi-view world, each view has its own accessibility root
+// with a globally unique node ID.
+//
+//        node1
+//          |
+//        node2
+TEST(AccessibilityBridgeMacTest, NonZeroRootNodeId) {
+  FlutterViewController* viewController = CreateTestViewController();
+  FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
+
+  NSWindow* expectedTarget = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                         styleMask:NSBorderlessWindowMask
+                                                           backing:NSBackingStoreBuffered
+                                                             defer:NO];
+  expectedTarget.contentView = viewController.view;
+  // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
+  // can query semantics information from.
+  engine.semanticsEnabled = YES;
+  auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
+      viewController.accessibilityBridge.lock());
+
+  FlutterSemanticsNode node1;
+  std::vector<int32_t> node1_children{2};
+  node1.id = 1;
+  node1.flags = static_cast<FlutterSemanticsFlag>(0);
+  node1.actions = static_cast<FlutterSemanticsAction>(0);
+  node1.text_selection_base = -1;
+  node1.text_selection_extent = -1;
+  node1.label = "node1";
+  node1.hint = "";
+  node1.value = "";
+  node1.increased_value = "";
+  node1.decreased_value = "";
+  node1.tooltip = "";
+  node1.child_count = node1_children.size();
+  node1.children_in_traversal_order = node1_children.data();
+  node1.children_in_hit_test_order = node1_children.data();
+  node1.custom_accessibility_actions_count = 0;
+
+  FlutterSemanticsNode node2;
+  node2.id = 2;
+  node2.flags = static_cast<FlutterSemanticsFlag>(0);
+  node2.actions = static_cast<FlutterSemanticsAction>(0);
+  node2.text_selection_base = -1;
+  node2.text_selection_extent = -1;
+  node2.label = "node2";
+  node2.hint = "";
+  node2.value = "";
+  node2.increased_value = "";
+  node2.decreased_value = "";
+  node2.tooltip = "";
+  node2.child_count = 0;
+  node2.custom_accessibility_actions_count = 0;
+
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->CommitUpdates();
+
+  // Look up the root node delegate.
+  auto root_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  ASSERT_TRUE(root_delegate);
+  ASSERT_EQ(root_delegate->GetChildCount(), 1);
+
+  // Look up the child node delegate.
+  auto child_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+  ASSERT_TRUE(child_delegate);
+  ASSERT_EQ(child_delegate->GetChildCount(), 0);
+
+  // Ensure a node with ID 0 does not exist.
+  auto invalid_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_FALSE(invalid_delegate);
+
+  [engine shutDownEngine];
+}
+
+TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenHeadless) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
@@ -158,7 +235,7 @@ TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenH
   [engine shutDownEngine];
 }
 
-TEST(AccessibilityBridgeMacTest, doesNotSendAccessibilityCreateNotificationWhenNoWindow) {
+TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenNoWindow) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
