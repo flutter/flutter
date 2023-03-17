@@ -116,8 +116,9 @@ class CupertinoCheckbox extends StatefulWidget {
   /// Defaults to [CupertinoColors.activeBlue].
   final Color? activeColor;
 
-  /// The color used if the checkbox is inactive. By default,
-  /// [CupertinoColors.inactiveGray] is used.
+  /// The color used if the checkbox is inactive.
+  /// 
+  /// By default, [CupertinoColors.inactiveGray] is used.
   final Color? inactiveColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -125,7 +126,7 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If null, then the value of [CupertinoColors.white] is used.
   final Color? checkColor;
 
-  /// If true the checkbox's [value] can be true, false, or null.
+  /// If true, the checkbox's [value] can be true, false, or null.
   ///
   /// [CupertinoCheckbox] displays a dash when its value is null.
   ///
@@ -134,7 +135,8 @@ class CupertinoCheckbox extends StatefulWidget {
   /// value is true, and to false if value is null (i.e. it cycles through false
   /// => true => null => false when tapped).
   ///
-  /// If tristate is false (the default), [value] is asseted to not be null.
+  /// If tristate is false (the default), [value] must not be null, and
+  /// [onChanged] will only toggle between true and false.
   final bool tristate;
 
   /// The color for the checkbox's border shadow when it has the input focus.
@@ -335,7 +337,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawCheck(Canvas canvas, Offset origin, Paint paint) {
     final Path path = Path();
-    // The ratios for the offsets below where found from looking at the checkbox
+    // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
     // edge was measured, then devided by the total width.
     const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);

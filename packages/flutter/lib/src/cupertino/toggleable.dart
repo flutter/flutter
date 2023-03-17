@@ -6,24 +6,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A mixin for [StatefulWidget]s that implement iOS-themed toggleable
-/// controls (e.g.[Checkbox]es).
+/// A mixin for [StatefulWidget]s that implements iOS-themed toggleable
+/// controls (e.g.[CupertinoCheckbox]es).
 ///
-/// The mixin implements the logic for toggling the control when tapped.
+/// This mixin implements the logic for toggling the control when tapped.
 /// It does not have any opinion about the visual representation of the
 /// toggleable widget. The visuals are defined by a [CustomPainter] passed to
 /// the [buildToggleable]. [State] objects using this mixin should call that
 /// method from their [build] method.
 ///
-/// This mixin is used to implement the Cupertino components for [Checkbox]
-/// controls.
+/// This mixin is used to implement the Cupertino components for
+/// [CupertinoCheckbox] controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
 
-  /// Whether [value] of this control can be changed by user interaction.
+  /// Whether the [value] of this control can be changed by user interaction.
   ///
   /// The control is considered interactive if the [onChanged] callback is
-  /// non-null. If the callback is null, then the control is disabled, and
+  /// non-null. If the callback is null, then the control is disabled and
   /// non-interactive. A disabled checkbox, for example, is displayed using a
   /// grey color and its value cannot be changed.
   bool get isInteractive => onChanged != null;
@@ -35,13 +35,14 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// The control is considered interactive (see [isInteractive]) if this
   /// callback is non-null. If the callback is null, then the control is
-  /// disabled, and non-interactive. A disabled checkbox, for example, is
+  /// disabled and non-interactive. A disabled checkbox, for example, is
   /// displayed using a grey color and its value cannot be changed.
   ValueChanged<bool?>? get onChanged;
 
-  /// False if this control is "inactive" (not checked, off, or unselected).
+  /// The [value] accessor returns false if this control is "inactive" (not
+  /// checked, off, or unselected).
   ///
-  /// If value is true then the control "active" (checked, on, or selected). If
+  /// If [value] is true then the control "active" (checked, on, or selected). If
   /// tristate is true and value is null, then the control is considered to be
   /// in its third or "indeterminate" state..
   bool? get value;
@@ -52,11 +53,6 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// When [tristate] is true and [value] is null, then the control is
   /// considered to be in its third or "indeterminate" state.
   bool get tristate;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   /// The most recent [Offset] at which a pointer touched the Toggleable.
   ///
@@ -153,8 +149,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// a Toggleable.
 ///
 /// Subclasses must implement the [paint] method to draw the actual visuals of
-/// the Toggleable. In their [paint] method subclasses may call
-/// [paintRadialReaction] to draw a radial ink reaction for this control.
+/// the Toggleable.
 abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
   /// The color that should be used in the active state (i.e., when
   /// [ToggleableStateMixin.value] is true).
