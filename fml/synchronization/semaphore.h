@@ -67,7 +67,7 @@ class Semaphore {
   ///             Which makes doing the validity check before this call doubly
   ///             important.
   ///
-  /// @return     If the count could be decrement.
+  /// @return     If the count could be decremented.
   ///
   [[nodiscard]] bool TryWait();
 

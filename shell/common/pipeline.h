@@ -35,7 +35,29 @@ enum class PipelineConsumeResult {
 size_t GetNextPipelineTraceID();
 
 /// A thread-safe queue of resources for a single consumer and a single
-/// producer.
+/// producer, with a maximum queue depth.
+///
+/// Pipelines support two key operations: produce and consume.
+///
+/// The consumer calls |Consume| to wait for a resource to be produced and
+/// consume it when ready.
+///
+/// The producer calls |Produce| to generate a `ProducerContinuation` which
+/// provides a means to enqueue a resource in the pipeline, if the pipeline is
+/// below its maximum depth. When the resource has been prepared, the producer
+/// calls `Complete` on the continuation, which enqueues the resource and
+/// signals the waiting consumer.
+///
+/// Pipelines generate the following tracing information:
+/// * PipelineItem: async flow tracking time taken from the time a producer
+///   calls |Produce| to the time a consumer consumes calls |Consume|.
+/// * PipelineProduce: async flow tracking time taken from the time a producer
+///   calls |Produce| to the time they complete the `ProducerContinuation` with
+///   a resource.
+/// * Pipeline Depth: counter of inflight resource producers.
+///
+/// The primary use of this class is as the frame pipeline used in Flutter's
+/// animator/rasterizer.
 template <class R>
 class Pipeline {
  public:
@@ -70,6 +92,7 @@ class Pipeline {
       }
     }
 
+    /// Completes the continuation with the specified resource.
     [[nodiscard]] PipelineProduceResult Complete(ResourcePtr resource) {
       PipelineProduceResult result;
       if (continuation_) {
@@ -108,6 +131,11 @@ class Pipeline {
 
   bool IsValid() const { return empty_.IsValid() && available_.IsValid(); }
 
+  /// Creates a `ProducerContinuation` that a producer can use to add a
+  /// resource to the queue.
+  ///
+  /// If the queue is already at its maximum depth, the `ProducerContinuation`
+  /// is returned with success = false.
   ProducerContinuation Produce() {
     if (!empty_.TryWait()) {
       return {};
@@ -124,10 +152,11 @@ class Pipeline {
         GetNextPipelineTraceID()};         // trace id
   }
 
-  // Create a `ProducerContinuation` that will only push the task if the queue
-  // is empty.
-  // Prefer using |Produce|. ProducerContinuation returned by this method
-  // doesn't guarantee that the frame will be rendered.
+  /// Creates a `ProducerContinuation` that will only push the task if the
+  /// queue is empty.
+  ///
+  /// Prefer using |Produce|. ProducerContinuation returned by this method
+  /// doesn't guarantee that the frame will be rendered.
   ProducerContinuation ProduceIfEmpty() {
     if (!empty_.TryWait()) {
       return {};
@@ -186,6 +215,8 @@ class Pipeline {
   std::mutex queue_mutex_;
   std::deque<std::pair<ResourcePtr, size_t>> queue_;
 
+  /// Commits a produced resource to the queue and signals the consumer that a
+  /// resource is available.
   PipelineProduceResult ProducerCommit(ResourcePtr resource, size_t trace_id) {
     bool is_first_item = false;
     {
