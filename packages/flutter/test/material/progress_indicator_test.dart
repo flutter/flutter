@@ -434,7 +434,7 @@ void main() {
   });
 
   testWidgets('CircularProgressIndicator stroke width', (WidgetTester tester) async {
-    await tester.pumpWidget(const CircularProgressIndicator());
+    await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
 
@@ -445,16 +445,34 @@ void main() {
 
   testWidgets('CircularProgressIndicator stroke cap', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
-
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
-    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round,));
+    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: false));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
+    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: true));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
 
-    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.butt,));
+    // With ProgressIndicatorTheme
+    await tester.pumpWidget(Theme(
+      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        preferRoundIndicator: true,
+      )),
+      child: const CircularProgressIndicator(),
+    ));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
 
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.butt));
+    // With ProgressIndicatorTheme, CircularProgressIndicator takes precedence.
+    await tester.pumpWidget(Theme(
+      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        preferRoundIndicator: false,
+      )),
+      child: const CircularProgressIndicator(preferRoundIndicator: true),
+    ));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+
+    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: true));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
@@ -585,16 +603,31 @@ void main() {
 
   testWidgets('RefreshProgressIndicator stroke cap', (WidgetTester tester) async {
     await tester.pumpWidget(const RefreshProgressIndicator());
-
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
-    await tester.pumpWidget(const RefreshProgressIndicator(strokeCap: StrokeCap.round,));
+    await tester.pumpWidget(const RefreshProgressIndicator(preferRoundIndicator: false));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
+    // With ProgressIndicatorTheme
+    await tester.pumpWidget(Theme(
+      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        preferRoundIndicator: true,
+      )),
+      child: const RefreshProgressIndicator(),
+    ));
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
 
-    await tester.pumpWidget(const RefreshProgressIndicator(strokeCap: StrokeCap.butt,));
+    // With ProgressIndicatorTheme, RefreshProgressIndicator takes precedence.
+    await tester.pumpWidget(Theme(
+      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
+        preferRoundIndicator: false,
+      )),
+      child: const RefreshProgressIndicator(preferRoundIndicator: true),
+    ));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
 
-    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.butt));
+    await tester.pumpWidget(const RefreshProgressIndicator(preferRoundIndicator: true));
+    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {

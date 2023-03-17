@@ -942,7 +942,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     if (shader != null && !shader!.matches(paintArgument.shader, <dynamic, dynamic>{})) {
       throw 'It called $methodName with a paint whose shader, ${paintArgument.shader}, was not exactly the expected shader ($shader).';
     }
-    if(strokeCap != null && paintArgument.strokeCap != strokeCap) {
+    if (strokeCap != null && paintArgument.strokeCap != strokeCap) {
       throw 'It called $methodName with a paint whose strokeCap, ${paintArgument.strokeCap}, was not exactly the expected strokeCap ($strokeCap).';
     }
   }
