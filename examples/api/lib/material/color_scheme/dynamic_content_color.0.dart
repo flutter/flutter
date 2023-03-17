@@ -2,43 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ColorScheme] with content-based dynamic color.
+// Flutter code sample for [ColorScheme.fromImageProvider] with content-based dynamic color.
 
 import 'package:flutter/material.dart';
 
 const Widget divider = SizedBox(height: 10);
 const double narrowScreenWidthThreshold = 400;
+const double imageSize = 150;
 
 void main() => runApp(DynamicColorExample());
 
 class DynamicColorExample extends StatefulWidget {
   DynamicColorExample({super.key});
 
-  final List<ImageProvider> images = [
-    AssetImage(
-      'assets/yellow.png'
-    ),
-    AssetImage(
-      'assets/yellow_transparent.png',
-    ),
-    AssetImage(
-      'assets/yellow_full.png',
-    ),
-    AssetImage(
-      'assets/squares.png',
-    ),
-    AssetImage(
-      'assets/material_3_base.png',
-    ),
-    AssetImage(
-      'assets/rugby_japan.png',
-    ),
-    AssetImage(
-      'assets/football_leeds.png',
-    ),
-    AssetImage(
-      'assets/rugby_england.png',
-    ),
+  final List<ImageProvider> images = <AssetImage>[
+    const AssetImage('assets/color_scheme_1.png'),
+    const AssetImage('assets/color_scheme_2.png'),
+    const AssetImage('assets/color_scheme_3.png'),
+    const AssetImage('assets/color_scheme_4.png'),
+    const AssetImage('assets/color_scheme_5.png'),
+    const AssetImage('assets/color_scheme_6.png'),
   ];
 
   @override
@@ -46,94 +29,49 @@ class DynamicColorExample extends StatefulWidget {
 }
 
 class _DynamicColorExampleState extends State<DynamicColorExample> {
-  final TextEditingController _textFieldController = TextEditingController();
   late ColorScheme currentColorScheme;
+  String currentHyperlinkImage = '';
   late int selectedImage;
   late bool isLight;
+  late bool isLoading;
+
   @override
   void initState() {
-    currentColorScheme = ColorScheme.light();
-    selectedImage = 4;
+    super.initState();
+    selectedImage = 0;
     isLight = true;
-  }
-
-  Future<void> _updateImage(ImageProvider provider) async {
-    // TODO add fail handling.
-    final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
-        provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
-    setState(() {
-      selectedImage = widget.images.indexOf(provider) ?? widget.images.length + 1;
-      currentColorScheme = newColorScheme;
+    isLoading = true;
+    currentColorScheme = const ColorScheme.light();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateImage(widget.images[selectedImage]);
+      isLoading = false;
     });
   }
-
-  // Image uploader
-
-  // Future<void> networkAssetDialog(BuildContext context) async {
-  //   late String input = 'url';
-  //   showDialog<String>(
-  //     context: context,
-  //     builder: (BuildContext context) => AlertDialog(
-  //       title: const Text('Image URL'),
-  //       content: TextField(
-  //         onChanged: (value) {
-  //           input = value;
-  //         },
-  //         controller: _textFieldController,
-  //         decoration: InputDecoration(hintText: input),
-  //       ),
-  //       actions: <Widget>[
-  //         TextButton(
-  //           onPressed: () {
-  //             Navigator.pop(context, 'Cancel');
-  //           },
-  //           child: const Text('Cancel'),
-  //         ),
-  //         TextButton(
-  //           child: const Text('Submit'),
-  //           onPressed: () async {
-  //             print('input: $input');
-  //             try {
-  //               // https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png
-  //               final newColorScheme =
-  //                   await ColorScheme.fromImage(image: Image.network(input));
-  //               setState(() {
-  //                 currentColorScheme = newColorScheme;
-  //                 Navigator.pop(context, 'Submit');
-  //               });
-  //             } on Exception catch (exception) {
-  //               print('image load failed');
-  //               input = 'not a valid url';
-  //             }
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = currentColorScheme;
-    final Color selectedColor = colorScheme.primary;
+    final Color selectedColor = currentColorScheme.primary;
 
     final ThemeData lightTheme = ThemeData(
       colorSchemeSeed: selectedColor,
       brightness: Brightness.light,
-      useMaterial3: true,
+      useMaterial3: false,
     );
     final ThemeData darkTheme = ThemeData(
       colorSchemeSeed: selectedColor,
       brightness: Brightness.dark,
-      useMaterial3: true,
+      useMaterial3: false,
     );
 
-    Widget schemeLabel(String brightness) {
+    Widget schemeLabel(String brightness, ColorScheme colorScheme) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 15),
         child: Text(
           brightness,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSecondaryContainer),
         ),
       );
     }
@@ -141,9 +79,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     Widget schemeView(ThemeData theme) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: ColorSchemeView(
-          colorScheme: theme.colorScheme,
-        ),
+        child: ColorSchemeView(colorScheme: theme.colorScheme),
       );
     }
 
@@ -157,8 +93,8 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
             title: const Text('Content Based Dynamic Color'),
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
-            actions: [
-              Icon(Icons.light_mode),
+            actions: <Widget>[
+              const Icon(Icons.light_mode),
               Switch(
                   activeColor: colorScheme.primary,
                   activeTrackColor: colorScheme.surface,
@@ -173,94 +109,143 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
             ],
           ),
           body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    ...widget.images
-                        .map((image) => GestureDetector(
-                            onTap: () => _updateImage(image),
-                            child: Card(
-                              color:
-                                  widget.images.indexOf(image) == selectedImage
-                                      ? colorScheme.surfaceVariant
-                                      : null,
-                              child: Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Image.new(image: image, height: 150),
-                              ),
-                            )))
-                        .toList(),
-                  ],
-                ),
-                // Image upload tile
-                // GestureDetector(
-                //   onTap: () => networkAssetDialog(context),
-                //   child: Card(
-                //     child: Padding(
-                //         padding: EdgeInsets.all(10.0),
-                //         child: Container(
-                //             height: 150,
-                //             child: Icon(Icons.link, size: 96.0))),
-                //   ),
-                // ),
-
-                Expanded(
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    if (constraints.maxWidth < narrowScreenWidthThreshold) {
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            divider,
-                            schemeLabel('Light ColorScheme'),
-                            schemeView(lightTheme),
-                            divider,
-                            divider,
-                            schemeLabel('Dark ColorScheme'),
-                            schemeView(darkTheme),
-                          ],
+            child: isLoading
+                ? const CircularProgressIndicator()
+                : ColoredBox(
+                    color: colorScheme.secondaryContainer,
+                    child: Column(
+                      children: <Widget>[
+                        divider,
+                        _imagesRow(
+                          context,
+                          widget.images,
+                          colorScheme,
                         ),
-                      );
-                    } else {
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
+                        divider,
+                        Expanded(
+                          child: ColoredBox(
+                            color: colorScheme.background,
+                            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                              if (constraints.maxWidth < narrowScreenWidthThreshold) {
+                                return SingleChildScrollView(
+                                  child: Column(
+                                    children: <Widget>[
+                                      divider,
+                                      schemeLabel('Light ColorScheme', colorScheme),
+                                      schemeView(lightTheme),
+                                      divider,
+                                      divider,
+                                      schemeLabel('Dark ColorScheme', colorScheme),
+                                      schemeView(darkTheme),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 5),
                                     child: Column(
-                                      children: [
-                                        schemeLabel('Light ColorScheme'),
-                                        schemeView(lightTheme),
+                                      children: <Widget>[
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: Column(
+                                                children: <Widget>[
+                                                  schemeLabel(
+                                                      'Light ColorScheme',
+                                                      colorScheme),
+                                                  schemeView(lightTheme),
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Column(
+                                                children: <Widget>[
+                                                  schemeLabel(
+                                                      'Dark ColorScheme',
+                                                      colorScheme),
+                                                  schemeView(darkTheme),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        schemeLabel('Dark ColorScheme'),
-                                        schemeView(darkTheme),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                );
+                              }
+                            }),
                           ),
                         ),
-                      );
-                    }
-                  }),
-                ),
-              ],
-            ),
+                      ],
+                    ),
+                  ),
           ),
         ),
       ),
+    );
+  }
+
+
+  Future<void> _updateImage(ImageProvider provider) async {
+    final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
+        provider: provider,
+        brightness: isLight ? Brightness.light : Brightness.dark);
+    setState(() {
+      selectedImage = widget.images.indexOf(provider);
+      currentColorScheme = newColorScheme;
+    });
+  }
+
+  // For small screens, have two rows of image selection. For wide screens,
+  // fit them onto one row.
+  Widget _imagesRow(BuildContext context, List<ImageProvider> images, ColorScheme colorScheme) {
+    final double windowHeight = MediaQuery.of(context).size.height;
+    final double windowWidth = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        if (constraints.maxWidth > 800) {
+          return _adaptiveLayoutImagesRow(images, colorScheme, windowHeight);
+        } else {
+          return Column(children: <Widget>[
+            _adaptiveLayoutImagesRow(images.sublist(0, 3), colorScheme, windowWidth),
+            _adaptiveLayoutImagesRow(images.sublist(3), colorScheme, windowWidth),
+          ]);
+        }
+      }),
+    );
+  }
+
+  Widget _adaptiveLayoutImagesRow(List<ImageProvider> images, ColorScheme colorScheme, double windowWidth) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: images
+          .map(
+            (ImageProvider image) => Flexible(
+              flex: (images.length / 3).floor(),
+              child: GestureDetector(
+                onTap: () => _updateImage(image),
+                child: Card(
+                  color: widget.images.indexOf(image) == selectedImage
+                      ? colorScheme.primaryContainer
+                      : colorScheme.background,
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: windowWidth * .25),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image(image: image),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -273,143 +258,62 @@ class ColorSchemeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        ColorGroup(children: [
-          ColorChip(
-            label: 'primary',
-            color: colorScheme.primary,
-            onColor: colorScheme.onPrimary,
-          ),
-          ColorChip(
-              label: 'onPrimary',
-              color: colorScheme.onPrimary,
-              onColor: colorScheme.primary),
-          ColorChip(
-            label: 'primaryContainer',
-            color: colorScheme.primaryContainer,
-            onColor: colorScheme.onPrimaryContainer,
-          ),
-          ColorChip(
-            label: 'onPrimaryContainer',
-            color: colorScheme.onPrimaryContainer,
-            onColor: colorScheme.primaryContainer,
-          ),
+      children: <Widget>[
+        ColorGroup(children: <ColorChip>[
+          ColorChip(label: 'primary', color: colorScheme.primary, onColor: colorScheme.onPrimary),
+          ColorChip(label: 'onPrimary', color: colorScheme.onPrimary, onColor: colorScheme.primary),
+          ColorChip(label: 'primaryContainer', color: colorScheme.primaryContainer, onColor: colorScheme.onPrimaryContainer),
+          ColorChip(label: 'onPrimaryContainer', color: colorScheme.onPrimaryContainer, onColor: colorScheme.primaryContainer),
         ]),
         divider,
-        ColorGroup(children: [
-          ColorChip(
-            label: 'secondary',
-            color: colorScheme.secondary,
-            onColor: colorScheme.onSecondary,
-          ),
-          ColorChip(
-            label: 'onSecondary',
-            color: colorScheme.onSecondary,
-            onColor: colorScheme.secondary,
-          ),
-          ColorChip(
-            label: 'secondaryContainer',
-            color: colorScheme.secondaryContainer,
-            onColor: colorScheme.onSecondaryContainer,
-          ),
-          ColorChip(
-              label: 'onSecondaryContainer',
-              color: colorScheme.onSecondaryContainer,
-              onColor: colorScheme.secondaryContainer),
+        ColorGroup(children: <ColorChip>[
+          ColorChip(label: 'secondary', color: colorScheme.secondary, onColor: colorScheme.onSecondary),
+          ColorChip(label: 'onSecondary', color: colorScheme.onSecondary, onColor: colorScheme.secondary),
+          ColorChip(label: 'secondaryContainer', color: colorScheme.secondaryContainer, onColor: colorScheme.onSecondaryContainer),
+          ColorChip(label: 'onSecondaryContainer', color: colorScheme.onSecondaryContainer, onColor: colorScheme.secondaryContainer),
         ]),
         divider,
         ColorGroup(
-          children: [
-            ColorChip(
-                label: 'tertiary',
-                color: colorScheme.tertiary,
-                onColor: colorScheme.onTertiary),
-            ColorChip(
-                label: 'onTertiary',
-                color: colorScheme.onTertiary,
-                onColor: colorScheme.tertiary),
-            ColorChip(
-                label: 'tertiaryContainer',
-                color: colorScheme.tertiaryContainer,
-                onColor: colorScheme.onTertiaryContainer),
-            ColorChip(
-                label: 'onTertiaryContainer',
-                color: colorScheme.onTertiaryContainer,
-                onColor: colorScheme.tertiaryContainer),
+          children: <ColorChip>[
+            ColorChip(label: 'tertiary', color: colorScheme.tertiary, onColor: colorScheme.onTertiary),
+            ColorChip(label: 'onTertiary', color: colorScheme.onTertiary, onColor: colorScheme.tertiary),
+            ColorChip(label: 'tertiaryContainer', color: colorScheme.tertiaryContainer, onColor: colorScheme.onTertiaryContainer),
+            ColorChip(label: 'onTertiaryContainer', color: colorScheme.onTertiaryContainer, onColor: colorScheme.tertiaryContainer),
           ],
         ),
         divider,
         ColorGroup(
-          children: [
-            ColorChip(
-                label: 'error',
-                color: colorScheme.error,
-                onColor: colorScheme.onError),
-            ColorChip(
-                label: 'onError',
-                color: colorScheme.onError,
-                onColor: colorScheme.error),
-            ColorChip(
-                label: 'errorContainer',
-                color: colorScheme.errorContainer,
-                onColor: colorScheme.onErrorContainer),
-            ColorChip(
-                label: 'onErrorContainer',
-                color: colorScheme.onErrorContainer,
-                onColor: colorScheme.errorContainer),
+          children: <ColorChip>[
+            ColorChip(label: 'error', color: colorScheme.error, onColor: colorScheme.onError),
+            ColorChip(label: 'onError', color: colorScheme.onError, onColor: colorScheme.error),
+            ColorChip(label: 'errorContainer', color: colorScheme.errorContainer, onColor: colorScheme.onErrorContainer),
+            ColorChip(label: 'onErrorContainer', color: colorScheme.onErrorContainer, onColor: colorScheme.errorContainer),
           ],
         ),
         divider,
         ColorGroup(
-          children: [
-            ColorChip(
-                label: 'background',
-                color: colorScheme.background,
-                onColor: colorScheme.onBackground),
-            ColorChip(
-                label: 'onBackground',
-                color: colorScheme.onBackground,
-                onColor: colorScheme.background),
+          children: <ColorChip>[
+            ColorChip(label: 'background', color: colorScheme.background, onColor: colorScheme.onBackground),
+            ColorChip(label: 'onBackground', color: colorScheme.onBackground, onColor: colorScheme.background),
           ],
         ),
         divider,
         ColorGroup(
-          children: [
-            ColorChip(
-                label: 'surface',
-                color: colorScheme.surface,
-                onColor: colorScheme.onSurface),
-            ColorChip(
-                label: 'onSurface',
-                color: colorScheme.onSurface,
-                onColor: colorScheme.surface),
-            ColorChip(
-                label: 'surfaceVariant',
-                color: colorScheme.surfaceVariant,
-                onColor: colorScheme.onSurfaceVariant),
-            ColorChip(
-                label: 'onSurfaceVariant',
-                color: colorScheme.onSurfaceVariant,
-                onColor: colorScheme.surfaceVariant),
+          children: <ColorChip>[
+            ColorChip(label: 'surface', color: colorScheme.surface, onColor: colorScheme.onSurface),
+            ColorChip(label: 'onSurface', color: colorScheme.onSurface, onColor: colorScheme.surface),
+            ColorChip(label: 'surfaceVariant', color: colorScheme.surfaceVariant, onColor: colorScheme.onSurfaceVariant),
+            ColorChip(label: 'onSurfaceVariant', color: colorScheme.onSurfaceVariant, onColor: colorScheme.surfaceVariant),
           ],
         ),
         divider,
         ColorGroup(
-          children: [
+          children: <ColorChip>[
             ColorChip(label: 'outline', color: colorScheme.outline),
             ColorChip(label: 'shadow', color: colorScheme.shadow),
-            ColorChip(
-                label: 'inverseSurface',
-                color: colorScheme.inverseSurface,
-                onColor: colorScheme.onInverseSurface),
-            ColorChip(
-                label: 'onInverseSurface',
-                color: colorScheme.onInverseSurface,
-                onColor: colorScheme.inverseSurface),
-            ColorChip(
-                label: 'inversePrimary',
-                color: colorScheme.inversePrimary,
-                onColor: colorScheme.primary),
+            ColorChip(label: 'inverseSurface', color: colorScheme.inverseSurface,  onColor: colorScheme.onInverseSurface),
+            ColorChip(label: 'onInverseSurface', color: colorScheme.onInverseSurface, onColor: colorScheme.inverseSurface),
+            ColorChip(label: 'inversePrimary', color: colorScheme.inversePrimary, onColor: colorScheme.primary),
           ],
         ),
       ],
@@ -425,12 +329,7 @@ class ColorGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: children,
-        ),
-      ),
+      child: Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
     );
   }
 }
@@ -460,16 +359,11 @@ class ColorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color labelColor = onColor ?? contrastColor(color);
-
     return ColoredBox(
       color: color,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(child: Text(label, style: TextStyle(color: labelColor))),
-          ],
-        ),
+        child: Expanded(child: Text(label, style: TextStyle(color: labelColor))),
       ),
     );
   }
