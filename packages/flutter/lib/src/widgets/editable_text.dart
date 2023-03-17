@@ -4510,7 +4510,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
               },
               shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
-                if (newValue == TextEditingValue.empty) {
+                if (!newValue.selection.isValid) {
                   return false;
                 }
 
