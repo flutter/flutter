@@ -627,7 +627,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_wuffs'] = True
   gn_args['skia_use_zlib'] = True
   gn_args['skia_gl_standard'] = 'webgl'
-  gn_args['skia_enable_gpu'] = True
+  gn_args['skia_enable_ganesh'] = True
   gn_args['skia_enable_sksl_tracing'] = False
   gn_args['icu_use_data_file'] = False
   gn_args['skia_use_freetype'] = True
