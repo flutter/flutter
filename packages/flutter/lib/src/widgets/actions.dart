@@ -25,7 +25,7 @@ import 'shortcuts.dart';
 /// previous inherited widget, the search must therefore start from the parent;
 /// this is what [_getParent] is used for.
 ///
-/// [_getParent] is O(1), because it always return false at the first ancestor.
+/// [_getParent] is O(1), because it always stops at the first ancestor.
 BuildContext _getParent(BuildContext context) {
   late final BuildContext parent;
   context.visitAncestorElements((Element ancestor) {

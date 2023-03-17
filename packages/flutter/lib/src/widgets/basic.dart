@@ -252,7 +252,12 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] or a [FadeTransition] instead.
+/// one of these alternative widgets instead:
+///
+///  * [AnimatedOpacity], which uses an animation internally to efficiently
+///    animate opacity.
+///  * [FadeTransition], which uses a provided animation to efficiently animate
+///    opacity.
 ///
 /// ## Transparent image
 ///
@@ -294,12 +299,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
-///  * [AnimatedOpacity], which uses an animation internally to efficiently
-///    animate opacity.
-///  * [FadeTransition], which uses a provided animation to efficiently animate
-///    opacity.
-///  * [Image], which can directly provide a partially transparent image with
-///    much less performance hit.
+///  * [SliverOpacity], the sliver version of this widget.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
@@ -1924,9 +1924,10 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [EdgeInsets], the class that is used to describe the padding dimensions.
 ///  * [AnimatedPadding], which animates changes in [padding] over a given
 ///    duration.
-///  * [EdgeInsets], the class that is used to describe the padding dimensions.
+///  * [SliverPadding], the sliver equivalent of this widget.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
@@ -3220,6 +3221,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
+///  * [SliverOffstage], the sliver version of this widget.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
@@ -3551,6 +3553,8 @@ class Baseline extends SingleChildRenderObjectWidget {
 /// is a basic sliver that creates a bridge back to one of the usual box-based
 /// widgets.
 ///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
 /// Rather than using multiple [SliverToBoxAdapter] widgets to display multiple
 /// box widgets in a [CustomScrollView], consider using [SliverList],
 /// [SliverFixedExtentList], [SliverPrototypeExtentList], or [SliverGrid],
@@ -3589,6 +3593,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [CustomScrollView], which displays a scrollable list of slivers.
+///  * [Padding], the box version of this widget.
 class SliverPadding extends SingleChildRenderObjectWidget {
   /// Creates a sliver that applies padding on each side of another sliver.
   ///
@@ -6660,6 +6665,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
 ///    events but is itself visible to hit testing.
+///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///

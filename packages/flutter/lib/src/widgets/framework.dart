@@ -4681,11 +4681,23 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// ## When rebuilds happen
   ///
-  /// ### Marking an element dirty
+  /// ### Terminology
   ///
   /// [Widget]s represent the configuration of [Element]s. Each [Element] has a
-  /// widget, specified in [Element.widget]. The term widget is often used
-  /// when strictly speaking Element would be more correct.
+  /// widget, specified in [Element.widget]. The term "widget" is often used
+  /// when strictly speaking "element" would be more correct.
+  ///
+  /// While an [Element] has a current [Widget], over time, that widget may be
+  /// replaced by others. For example, the element backing a [ColoredBox] may
+  /// first have as its widget a [ColoredBox] whose [ColoredBox.color] is blue,
+  /// then later be given a new [ColoredBox] whose color is green.
+  ///
+  /// At any particular time, multiple [Element]s in the same tree may have the
+  /// same [Widget]. For example, the same [ColoredBox] with the green color may
+  /// be used in multiple places in the widget tree at the same time, each being
+  /// backed by a different [Element].
+  ///
+  /// ### Marking an element dirty
   ///
   /// An [Element] can be marked dirty between frames. This can happen for various
   /// reasons, including the following:
@@ -4696,7 +4708,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// * When an [InheritedWidget] changes, descendants that have previously
   ///   subscribed to it will be marked dirty.
   ///
-  /// * During a hot reload, every element is marked dirty.
+  /// * During a hot reload, every element is marked dirty (using [Element.reassemble]).
   ///
   /// ### Rebuilding
   ///
@@ -4706,14 +4718,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// rebuilds by using its widget's state's [State.build] method. A
   /// [RenderObjectElement] rebuilds by updating its [RenderObject].
   ///
-  /// In almost all cases, the end result of rebuilding is a single child widget
+  /// In many cases, the end result of rebuilding is a single child widget
   /// or (for [MultiChildRenderObjectElement]s) a list of children widgets.
   ///
   /// These child widgets are used to update the [widget] property of the
   /// element's child (or children) elements. The new [Widget] is considered to
   /// correspond to an existing [Element] if it has the same [Type] and [Key].
   /// (In the case of [MultiChildRenderObjectElement]s, some effort is put into
-  /// tracking widgets even when they change order.)
+  /// tracking widgets even when they change order; see
+  /// [RenderObjectElement.updateChildren].)
   ///
   /// If there was no corresponding previous child, this results in a new
   /// [Element] being created (using [Widget.createElement]); that element is
@@ -4726,12 +4739,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The most common case, however, is that there was a corresponding previous
   /// child. This is handled by asking the child [Element] to update itself
-  /// using the new child [Widget]. This corresponds to [State.didUpdateWidget]
-  /// for [StatefulElement]s.
+  /// using the new child [Widget]. In the case of [StatefulElement]s, this
+  /// is what triggers [State.didUpdateWidget].
   ///
   /// ### Not rebuilding
   ///
-  /// When an [Element] is told to update itself with a new [Widget], the old
+  /// Before an [Element] is told to update itself with a new [Widget], the old
   /// and new objects are compared using `operator ==`.
   ///
   /// In general, this is equivalent to doing a comparison using [identical] to

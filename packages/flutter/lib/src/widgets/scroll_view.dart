@@ -53,6 +53,8 @@ enum ScrollViewKeyboardDismissBehavior {
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
 /// the viewport and deferring to its subclass to create the slivers.
 ///
+/// To learn more about slivers, see [CustomScrollView.slivers].
+///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
 ///
@@ -345,6 +347,8 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Subclasses should override this method to build the slivers for the inside
   /// of the viewport.
+  ///
+  /// To learn more about slivers, see [CustomScrollView.slivers].
   @protected
   List<Widget> buildSlivers(BuildContext context);
 
@@ -461,7 +465,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
-/// A [ScrollView] that creates custom scroll effects using slivers.
+/// A [ScrollView] that creates custom scroll effects using [slivers].
 ///
 /// A [CustomScrollView] lets you supply [slivers] directly to create various
 /// scrolling effects, such as lists, grids, and expanding headers. For example,
@@ -615,6 +619,8 @@ class CustomScrollView extends ScrollView {
   ///
   /// ## What is a sliver?
   ///
+  /// > _**sliver** (noun): a small, thin piece of something._
+  ///
   /// A _sliver_ is a widget backed by a [RenderSliver] subclass, i.e. one that
   /// implements the constraint/geometry protocol that uses [SliverConstraints]
   /// and [SliverGeometry].
@@ -669,6 +675,15 @@ class CustomScrollView extends ScrollView {
   /// * [SliverSafeArea], a sliver version of [SafeArea].
   /// * [SliverVisibility], a sliver version of [Visibility].
   ///
+  /// ## Benefits of slivers over boxes
+  ///
+  /// The sliver protocol ([SliverConstraints] and [SliverGeometry]) enables
+  /// _scroll effects_, such as floating app bars, widgets that expand and
+  /// shrink during scroll, section headers that are pinned only while the
+  /// section's children are visible, etc.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
+  ///
   /// ## Mixing slivers and boxes
   ///
   /// In general, slivers always wrap box widgets to actually render anything
@@ -676,23 +691,26 @@ class CustomScrollView extends ScrollView {
   /// the sliver part of the equation is mostly about how these boxes should
   /// be laid out in a viewport (i.e. when scrolling).
   ///
-  /// The main motivation for using slivers rather than, for example, merely
-  /// collecting all the boxes into a [Column] in a [SingleChildScrollView], is
-  /// performance: slivers such as [SliverList] and [SliverGrid] are _lazy_,
-  /// meaning they only build and lay out the widgets that are actually visible
-  /// on the screen. This is something that is generally not possible using a
-  /// purely box-based approach.
-  ///
   /// Typically, the simplest way to combine boxes into a sliver environment is
   /// to use a [SliverList] (maybe using a [ListView, which is a convenient
   /// combination of a [CustomScrollView] and a [SliverList]). In rare cases,
   /// e.g. if a single [Divider] widget is needed between two [SliverGrid]s,
   /// a [SliverToBoxAdapter] can be used to wrap the box widgets.
   ///
-  /// It is generally not advisable to wrap many boxes with [SliverToBoxAdapter]
-  /// in a [CustomScrollView], as [SliverToBoxAdapter] defeats the purpose of
-  /// slivers: it eagerly builds its child subtree even when not visible on the
-  /// screen, unlike [SliverList], which is lazy.
+  /// ## Performance considerations
+  ///
+  /// Because the purpose of scroll views is to, well, scroll, it is common
+  /// for scroll views to contain more contents than are rendered on the screen
+  /// at any particular time.
+  ///
+  /// To improve the performance of scroll views, the content can be rendered in
+  /// _lazy_ widgets, notably [SliverList] and [SliverGrid] (and their variants,
+  /// such as [SliverFixedExtentList] and [SliverAnimatedGrid]). These widgets
+  /// ensure that only the portion of their child lists that are actually
+  /// visible get built, laid out, and painted.
+  ///
+  /// The [ListView] and [GridView] widgets provide a convenient way to combine
+  /// a [CustomScrollView] and a [SliverList] or [SliverGrid] (respectively).
   final List<Widget> slivers;
 
   @override

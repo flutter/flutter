@@ -296,7 +296,7 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// image at the specified size, instead of the image's natural size.
 ///
 /// This can significantly reduce the memory usage. For example, a 4K image that
-/// will be rendered at only 384×216 pixels (one tenth the horizontal and
+/// will be rendered at only 384×216 pixels (one-tenth the horizontal and
 /// vertical dimensions) would only use 330KB if those dimensions are specified
 /// using the `cacheWidth` and `cacheHeight` parameters, a 100-fold reduction in
 /// memory usage.
@@ -433,7 +433,7 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If `cacheWidth` or `cacheHeight` are provided, it indicates to the
+  /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
   /// engine that the image must be decoded at the specified size. The image
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
@@ -510,7 +510,7 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If `cacheWidth` or `cacheHeight` are provided, it indicates to the
+  /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
   /// engine that the image must be decoded at the specified size. The image
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
@@ -668,7 +668,7 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If `cacheWidth` or `cacheHeight` are provided, it indicates to the
+  /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
   /// engine that the image must be decoded at the specified size. The image
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended

@@ -516,6 +516,7 @@ class SizeTransition extends AnimatedWidget {
 ///  * [Opacity], which does not animate changes in opacity.
 ///  * [AnimatedOpacity], which animates changes in opacity without taking an
 ///    explicit [Animation] argument.
+///  * [SliverFadeTransition], the sliver version of this widget.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -586,6 +587,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [SliverOpacity], which does not animate changes in opacity.
+///  * [FadeTransition], the box version of this widget.
 class SliverFadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///

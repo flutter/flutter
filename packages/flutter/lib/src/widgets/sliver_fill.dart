@@ -10,6 +10,8 @@ import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.
 ///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
 /// axis.
@@ -162,6 +164,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
 /// A sliver that contains a single box child that fills the remaining space in
 /// the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
 /// cross axis. The extent of the sliver and its child's size in the main axis
