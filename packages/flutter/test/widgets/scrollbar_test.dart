@@ -2038,7 +2038,9 @@ void main() {
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
   });
 
-  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+  testWidgets('The bar can show or hide when the view size change', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     Widget buildFrame() {
       return Directionality(
@@ -2061,21 +2063,19 @@ void main() {
         ),
       );
     }
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    tester.view.physicalSize = const Size(800.0, 600.0);
+    tester.view.devicePixelRatio = 1;
 
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
 
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
+    tester.view.physicalSize = const Size(800.0, 599.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
 
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.view.physicalSize = const Size(800.0, 600.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
