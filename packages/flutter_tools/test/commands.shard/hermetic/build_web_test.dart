@@ -112,7 +112,7 @@ void main() {
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--no-gstatic-canvaskit', '--dart-define=foo=a', '--dart2js-optimization=O3']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--no-web-resources-cdn', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
 
@@ -164,7 +164,7 @@ void main() {
       'build',
       'web',
       '--no-pub',
-      '--no-gstatic-canvaskit',
+      '--no-web-resources-cdn',
       '--output=$newBuildDir'
     ]);
 

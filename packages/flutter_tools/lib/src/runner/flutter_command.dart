@@ -125,7 +125,7 @@ class FlutterOptions {
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
-  static const String kGstaticCanvasKitFlag = 'gstatic-canvaskit';
+  static const String kWebResourcesCdnFlag = 'web-resources-cdn';
 }
 
 /// flutter command categories for usage.
@@ -669,11 +669,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesGstaticCanvasKitFlag() {
+  void usesWebResourcesCdnFlag() {
     argParser.addFlag(
-      FlutterOptions.kGstaticCanvasKitFlag,
+      FlutterOptions.kWebResourcesCdnFlag,
       defaultsTo: true,
-      help: 'Uses the CanvasKit WASM file hosted on gstatic.',
+      help: 'Use Web static resources hosted on a CDN.',
     );
   }
 
