@@ -1374,7 +1374,7 @@ class AnonymousSpinnerStatus extends Status {
       }
       final SlowWarningCallback? callback = slowWarningCallback;
       final TerminalColor? color = warningColor;
-      if (_slowWarning == '' && callback != null) {
+      if (_slowWarning.isEmpty && callback != null) {
         if (color != null) {
           _slowWarning = _terminal.color(callback(), color);
         } else {

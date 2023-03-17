@@ -522,16 +522,16 @@ abstract class DeviceDiscovery {
     DeviceDiscoveryFilter? filter,
     bool waitForDeviceToConnect = false,
   }) async {
-    final List<Device> foundDevices = await devices(
-      filter: filter,
-    ).then(
-      (List<Device> devices) => devices,
-      onError: (Object error, StackTrace stackTrace) {
-        // Fail quietly so other discoverers can find matches, even if this one fails.
-        logger.printTrace('Ignored error discovering $deviceId: $error');
-        return <Device>[];
-      },
-    );
+    List<Device>? foundDevices;
+    try {
+      foundDevices = await devices(
+        filter: filter,
+      );
+    } catch(error) { // ignore: avoid_catches_without_on_clauses
+      // Fail quietly so other discovers can find matches, even if this one fails.
+      logger.printTrace('Ignored error discovering $deviceId: $error');
+      foundDevices = const <Device>[];
+    }
 
     final List<Device> prefixMatches = <Device>[];
     for (final Device device in foundDevices) {

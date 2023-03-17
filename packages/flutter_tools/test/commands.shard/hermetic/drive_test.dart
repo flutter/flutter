@@ -544,6 +544,9 @@ class ScreenshotDevice extends Fake implements Device {
   bool supportsScreenshot = true;
 
   @override
+  bool get isConnected => true;
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
       String? mainPath,

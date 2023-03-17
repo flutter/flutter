@@ -173,15 +173,16 @@ class IOSDevices extends PollingDeviceDiscovery {
       filterToUse = filter;
     }
 
-    final List<Device> foundDevices = await devices(
-      filter: filterToUse,
-    ).then(
-      (List<Device> devices) => devices,
-      onError: (Object error, StackTrace stackTrace) {
-        logger.printTrace('Ignored error discovering $deviceId: $error');
-        return <Device>[];
-      },
-    );
+    List<Device>? foundDevices;
+    try {
+      foundDevices = await devices(
+        filter: filterToUse,
+      );
+    } catch(error) { // ignore: avoid_catches_without_on_clauses
+      // Fail quietly so other discovers can find matches, even if this one fails.
+      logger.printTrace('Ignored error discovering $deviceId: $error');
+      foundDevices = const <Device>[];
+    }
 
     final List<Device> prefixMatches = <Device>[];
     IOSDevice? exactMatchDevice;

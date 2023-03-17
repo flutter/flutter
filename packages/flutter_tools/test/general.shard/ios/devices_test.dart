@@ -680,6 +680,27 @@ void main() {
       );
     });
 
+    testWithoutContext('fails quietly when errors', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: FakePlatform(),
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices
+        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
+
+      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
+        '00008027-00192736010F802E',
+        logger,
+      );
+
+      expect(result.devices, <Device>[]);
+      expect(result.isExactMatch, isFalse);
+      expect(logger.traceText.contains('Ignored error discovering'), isTrue);
+    });
+
     testWithoutContext('find exact match', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
