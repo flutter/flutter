@@ -1621,19 +1621,10 @@ namespace flutter {
 std::vector<sk_sp<SkTypeface>> GetTestFontData() {
   std::vector<sk_sp<SkTypeface>> typefaces;
 #if EMBED_TEST_FONT_DATA
-  const bool defaultsToAhem =
-      std::getenv("FLUTTER_ROOT") && !std::getenv("USE_FLUTTER_TEST_FONT");
-  if (defaultsToAhem) {
-    typefaces.push_back(SkTypeface::MakeFromStream(
-        SkMemoryStream::MakeDirect(kAhemFont, kAhemFontLength)));
-    typefaces.push_back(SkTypeface::MakeFromStream(
-        SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
-  } else {
-    typefaces.push_back(SkTypeface::MakeFromStream(
-        SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
-    typefaces.push_back(SkTypeface::MakeFromStream(
-        SkMemoryStream::MakeDirect(kAhemFont, kAhemFontLength)));
-  }
+  typefaces.push_back(SkTypeface::MakeFromStream(
+      SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
+  typefaces.push_back(SkTypeface::MakeFromStream(
+      SkMemoryStream::MakeDirect(kAhemFont, kAhemFontLength)));
   typefaces.push_back(SkTypeface::MakeFromStream(
       SkMemoryStream::MakeDirect(kCoughFont, kCoughFontLength)));
 #endif  // EMBED_TEST_FONT_DATA
@@ -1643,13 +1634,7 @@ std::vector<sk_sp<SkTypeface>> GetTestFontData() {
 std::vector<std::string> GetTestFontFamilyNames() {
   std::vector<std::string> names;
 #if EMBED_TEST_FONT_DATA
-  const bool defaultsToAhem =
-      std::getenv("FLUTTER_ROOT") && !std::getenv("USE_FLUTTER_TEST_FONT");
-  if (defaultsToAhem) {
-    names = {"Ahem", "FlutterTest", "Cough"};
-  } else {
-    names = {"FlutterTest", "Ahem", "Cough"};
-  }
+  names = {"FlutterTest", "Ahem", "Cough"};
 #endif  // EMBED_TEST_FONT_DATA
   return names;
 }
