@@ -9,6 +9,6 @@ dependencies:
   path: 1.8.2
 
 dev_dependencies:
-  analyzer: 5.7.1
+  analyzer: 5.8.0
   test: 1.22.1
   pub_semver: 2.1.3
