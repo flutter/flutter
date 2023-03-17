@@ -225,7 +225,7 @@ class TestCase {
     for (final File test in tests) {
       final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
       final ProcessRunnerResult result = await runner.runProcess(
-        <String>[flutter, 'test', testPath],
+        <String>[flutter, 'test', '--enable-experiment=non-nullable', '--no-sound-null-safety', '--null-assertions', testPath],
         failOk: true,
       );
       if (result.exitCode != 0) {

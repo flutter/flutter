@@ -274,6 +274,8 @@ class ResidentWebRunner extends ResidentRunner {
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device!.devFS!.create();
@@ -601,6 +603,16 @@ class ResidentWebRunner extends ResidentRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
+      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+        _logger.printStatus('');
+        _logger.printStatus(
+          'Running without sound null safety ⚠️',
+          emphasis: true,
+        );
+        _logger.printStatus(
+          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
+        );
+      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
