@@ -25,6 +25,7 @@ String generateServiceWorker(
   Map<String, String> resources,
   List<String> coreBundle, {
   required ServiceWorkerStrategy serviceWorkerStrategy,
+  required String baseHref,
 }) {
   if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
     return '';
@@ -38,6 +39,7 @@ String generateServiceWorker(
   return globals.localFileSystem
       .file(flutterServiceWorkerJsPath)
       .readAsStringSync()
+      .replaceAll(r'$$BASE_HREF', '"$baseHref"'),
       .replaceAll(
         r'$$RESOURCES_MAP',
         '{${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}}',

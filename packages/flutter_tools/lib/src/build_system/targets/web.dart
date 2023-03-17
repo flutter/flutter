@@ -392,6 +392,8 @@ class WebReleaseBundle extends Target {
     'flutter_assets.d',
     'web_resources.d',
   ];
+  
+  String get baseHref => environment.defines[kBaseHref] ?? '/';
 
   bool shouldCopy(String name) =>
       // Do not copy the deps file.
@@ -456,7 +458,7 @@ class WebReleaseBundle extends Target {
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
         indexHtml.applySubstitutions(
-          baseHref: environment.defines[kBaseHref] ?? '/',
+          baseHref: baseHref,
           serviceWorkerVersion: Random().nextInt(4294967296).toString(),
         );
         outputFile.writeAsStringSync(indexHtml.content);
@@ -624,6 +626,7 @@ class WebServiceWorker extends Target {
           'assets/FontManifest.json',
       ],
       serviceWorkerStrategy: serviceWorkerStrategy,
+      baseHref: baseHref,
     );
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);

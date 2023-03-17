@@ -3,6 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
+const BASE_HREF = $$BASE_HREF;
 const RESOURCES = $$RESOURCES_MAP;
 // The application shell files that are downloaded before a service worker can
 // start.
