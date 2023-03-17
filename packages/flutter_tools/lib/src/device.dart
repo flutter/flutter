@@ -453,14 +453,6 @@ class DeviceDiscoveryFilter {
   }
 }
 
-/// A class to hold results for when getting a device by id/name.
-class DeviceDiscoveryMatchByIdResult {
-  DeviceDiscoveryMatchByIdResult(this.devices, {this.isExactMatch = false});
-
-  final List<Device> devices;
-  final bool isExactMatch;
-}
-
 /// An abstract class to discover and enumerate a specific type of devices.
 abstract class DeviceDiscovery {
   bool get supportsPlatform;

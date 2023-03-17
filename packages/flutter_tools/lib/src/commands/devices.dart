@@ -194,8 +194,8 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
 
   @override
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
-    // When a user defines the timeout use the super function that does not do
-    // longer wireless device discovery and does not wait for devices to connect.
+    // When a user defines the timeout, use the super function that does not do
+    // longer wireless device discovery.
     if (deviceDiscoveryTimeout != null) {
       return super.findAndOutputAllTargetDevices(machine: machine);
     }
