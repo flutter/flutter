@@ -6,9 +6,49 @@ environment:
 
 dependencies:
   args: 2.3.1
-  path: 1.8.2
+  path: any # see dependency_overrides
 
 dev_dependencies:
-  analyzer: 5.8.0
+  # Using the bundled analyzer (see dependency_overrides) to always be
+  # up-to-date instead of a version from pub, which may not have the latest
+  # language features enabled.
+  analyzer: any
   test: 1.22.1
-  pub_semver: 2.1.3
+
+dependency_overrides: # Must include all transitive dependencies from the "any" packages above.
+  _fe_analyzer_shared:
+    path: ../../third_party/dart/pkg/_fe_analyzer_shared
+  analyzer:
+    path: ../../third_party/dart/pkg/analyzer
+  async:
+    path: ../../third_party/dart/third_party/pkg/async
+  collection:
+    path: ../../third_party/dart/third_party/pkg/collection
+  convert:
+    path: ../../third_party/dart/third_party/pkg/convert
+  crypto:
+    path: ../../third_party/dart/third_party/pkg/crypto
+  file:
+    path: ../../third_party/pkg/file/packages/file
+  glob:
+    path: ../../third_party/dart/third_party/pkg/glob
+  meta:
+    path: ../../third_party/dart/pkg/meta
+  package_config:
+    path: ../../third_party/dart/third_party/pkg/package_config
+  path:
+    path: ../../third_party/dart/third_party/pkg/path
+  pub_semver:
+    path: ../../third_party/dart/third_party/pkg/pub_semver
+  source_span:
+    path: ../../third_party/dart/third_party/pkg/source_span
+  string_scanner:
+    path: ../../third_party/dart/third_party/pkg/string_scanner
+  term_glyph:
+    path: ../../third_party/dart/third_party/pkg/term_glyph
+  typed_data:
+    path: ../../third_party/dart/third_party/pkg/typed_data
+  watcher:
+    path: ../../third_party/dart/third_party/pkg/watcher
+  yaml:
+    path: ../../third_party/dart/third_party/pkg/yaml
