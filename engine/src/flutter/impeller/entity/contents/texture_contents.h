@@ -77,7 +77,7 @@ class TextureContents final : public Contents {
   std::string label_;
 
   Path path_;
-  bool is_rect_ = false;
+  std::optional<Rect> rect_;
   bool stencil_enabled_ = true;
 
   std::shared_ptr<Texture> texture_;
