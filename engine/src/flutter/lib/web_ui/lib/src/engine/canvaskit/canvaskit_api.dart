@@ -29,6 +29,7 @@ import 'renderer.dart';
 late CanvasKit canvasKit;
 
 // TODO(mdebbar): Turn this on when CanvasKit Chromium is ready.
+// Set it to `browserSupportsCanvasKitChromium`.
 // https://github.com/flutter/flutter/issues/122329
 const bool _enableCanvasKitChromiumInAutoMode = false;
 

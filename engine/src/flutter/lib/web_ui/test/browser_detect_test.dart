@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:js/js.dart';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/safe_browser_api.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -152,4 +155,50 @@ void testMain() {
       );
     });
   });
+
+  group('browserSupportsCanvasKitChromium', () {
+    late dynamic oldV8BreakIterator = v8BreakIterator;
+    setUp(() {
+      oldV8BreakIterator = v8BreakIterator;
+    });
+    tearDown(() {
+      v8BreakIterator = oldV8BreakIterator;
+      debugResetBrowserSupportsImageDecoder();
+    });
+
+    test('Detect browsers that support CanvasKit Chromium', () {
+      v8BreakIterator = Object(); // Any non-null value.
+      browserSupportsImageDecoder = true;
+
+      expect(browserSupportsCanvaskitChromium, isTrue);
+    });
+
+    test('Detect browsers that do not support image codecs', () {
+      v8BreakIterator = Object(); // Any non-null value.
+      browserSupportsImageDecoder = false;
+
+      expect(browserSupportsCanvaskitChromium, isFalse);
+    });
+
+    test('Detect browsers that do not support v8BreakIterator', () {
+      v8BreakIterator = null;
+      browserSupportsImageDecoder = true;
+
+      expect(browserSupportsCanvaskitChromium, isFalse);
+    });
+
+    test('Detect browsers that support neither', () {
+      v8BreakIterator = null;
+      browserSupportsImageDecoder = false;
+
+      expect(browserSupportsCanvaskitChromium, isFalse);
+    });
+  });
 }
+
+
+@JS('window.Intl.v8BreakIterator')
+external dynamic get v8BreakIterator;
+
+@JS('window.Intl.v8BreakIterator')
+external set v8BreakIterator(dynamic x);

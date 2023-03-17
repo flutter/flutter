@@ -7,8 +7,14 @@ import("//build/toolchain/wasm.gni")
 # This toolchain is only to be used by the canvaskit target below.
 wasm_toolchain("canvaskit") {
   extra_toolchain_args = {
+    # Include ICU data.
     skia_use_icu = true
     skia_use_client_icu = false
+
+    # Include image codecs.
+    skia_use_libjpeg_turbo_decode = true
+    skia_use_libpng_decode = true
+    skia_use_libwebp_decode = true
   }
 }
 
@@ -20,9 +26,16 @@ group("canvaskit_group") {
 # This toolchain is only to be used by canvaskit_chromium_group below.
 wasm_toolchain("canvaskit_chromium") {
   extra_toolchain_args = {
+    # In Chromium browsers, we can use the browser's APIs to get the necessary
+    # ICU data.
     skia_use_icu = false
     skia_use_client_icu = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    # In Chromium browsers, we can use the browser's built-in codecs.
+    skia_use_libjpeg_turbo_decode = false
+    skia_use_libpng_decode = false
+    skia_use_libwebp_decode = false
   }
 }
 
