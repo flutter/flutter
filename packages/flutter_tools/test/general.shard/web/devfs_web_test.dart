@@ -65,6 +65,7 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        NullSafetyMode.unsound,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
@@ -289,6 +290,7 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      NullSafetyMode.unsound,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -307,6 +309,7 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      NullSafetyMode.unsound,
     );
 
     // Defaults to "/" when there's no base element.
@@ -327,6 +330,7 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        NullSafetyMode.unsound,
       ),
       throwsToolExit(),
     );
@@ -346,6 +350,7 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        NullSafetyMode.unsound,
       ),
       throwsToolExit(),
     );
@@ -661,11 +666,13 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
+      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        nullSafetyMode: NullSafetyMode.unsound,
       ),
       enableDwds: false,
       enableDds: false,
@@ -673,6 +680,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -680,13 +688,13 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -771,6 +779,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
+      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -783,6 +792,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -878,6 +888,7 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
+        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -890,6 +901,7 @@ void main() {
         testMode: true,
         expressionCompiler: null,
         chromiumLauncher: null,
+        nullSafetyMode: NullSafetyMode.sound,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -945,7 +957,9 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullAssertions: true,
       nativeNullAssertions: true,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -971,6 +985,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
+      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -986,6 +1001,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1012,6 +1028,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
+      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -1027,6 +1044,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1056,6 +1074,7 @@ void main() {
       false,
       Uri.base,
       null,
+      NullSafetyMode.unsound,
       testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1089,6 +1108,7 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
+      NullSafetyMode.sound,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1118,6 +1138,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
+      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
@@ -1126,6 +1147,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
