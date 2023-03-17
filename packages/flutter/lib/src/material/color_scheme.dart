@@ -141,7 +141,6 @@ class ColorScheme with Diagnosticable {
         _secondaryVariant = secondaryVariant,
         _surfaceTint = surfaceTint;
 
-
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
   /// Using the seedColor as a starting point, a set of tonal palettes are
@@ -535,7 +534,6 @@ class ColorScheme with Diagnosticable {
       brightness: brightness,
     );
   }
-
 
   /// Generate a [ColorScheme] derived from the given `imageProvider`.
   ///

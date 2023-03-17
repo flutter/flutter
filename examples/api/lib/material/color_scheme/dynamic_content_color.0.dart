@@ -125,17 +125,21 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                         Expanded(
                           child: ColoredBox(
                             color: colorScheme.background,
-                            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-                              if (constraints.maxWidth < narrowScreenWidthThreshold) {
+                            child: LayoutBuilder(builder: (BuildContext context,
+                                BoxConstraints constraints) {
+                              if (constraints.maxWidth <
+                                  narrowScreenWidthThreshold) {
                                 return SingleChildScrollView(
                                   child: Column(
                                     children: <Widget>[
                                       divider,
-                                      schemeLabel('Light ColorScheme', colorScheme),
+                                      schemeLabel(
+                                          'Light ColorScheme', colorScheme),
                                       schemeView(lightTheme),
                                       divider,
                                       divider,
-                                      schemeLabel('Dark ColorScheme', colorScheme),
+                                      schemeLabel(
+                                          'Dark ColorScheme', colorScheme),
                                       schemeView(darkTheme),
                                     ],
                                   ),
@@ -187,7 +191,6 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     );
   }
 
-
   Future<void> _updateImage(ImageProvider provider) async {
     final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
         provider: provider,
@@ -200,25 +203,30 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
   // For small screens, have two rows of image selection. For wide screens,
   // fit them onto one row.
-  Widget _imagesRow(BuildContext context, List<ImageProvider> images, ColorScheme colorScheme) {
+  Widget _imagesRow(BuildContext context, List<ImageProvider> images,
+      ColorScheme colorScheme) {
     final double windowHeight = MediaQuery.of(context).size.height;
     final double windowWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
         if (constraints.maxWidth > 800) {
           return _adaptiveLayoutImagesRow(images, colorScheme, windowHeight);
         } else {
           return Column(children: <Widget>[
-            _adaptiveLayoutImagesRow(images.sublist(0, 3), colorScheme, windowWidth),
-            _adaptiveLayoutImagesRow(images.sublist(3), colorScheme, windowWidth),
+            _adaptiveLayoutImagesRow(
+                images.sublist(0, 3), colorScheme, windowWidth),
+            _adaptiveLayoutImagesRow(
+                images.sublist(3), colorScheme, windowWidth),
           ]);
         }
       }),
     );
   }
 
-  Widget _adaptiveLayoutImagesRow(List<ImageProvider> images, ColorScheme colorScheme, double windowWidth) {
+  Widget _adaptiveLayoutImagesRow(
+      List<ImageProvider> images, ColorScheme colorScheme, double windowWidth) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: images
@@ -260,50 +268,116 @@ class ColorSchemeView extends StatelessWidget {
     return Column(
       children: <Widget>[
         ColorGroup(children: <ColorChip>[
-          ColorChip(label: 'primary', color: colorScheme.primary, onColor: colorScheme.onPrimary),
-          ColorChip(label: 'onPrimary', color: colorScheme.onPrimary, onColor: colorScheme.primary),
-          ColorChip(label: 'primaryContainer', color: colorScheme.primaryContainer, onColor: colorScheme.onPrimaryContainer),
-          ColorChip(label: 'onPrimaryContainer', color: colorScheme.onPrimaryContainer, onColor: colorScheme.primaryContainer),
+          ColorChip(
+              label: 'primary',
+              color: colorScheme.primary,
+              onColor: colorScheme.onPrimary),
+          ColorChip(
+              label: 'onPrimary',
+              color: colorScheme.onPrimary,
+              onColor: colorScheme.primary),
+          ColorChip(
+              label: 'primaryContainer',
+              color: colorScheme.primaryContainer,
+              onColor: colorScheme.onPrimaryContainer),
+          ColorChip(
+              label: 'onPrimaryContainer',
+              color: colorScheme.onPrimaryContainer,
+              onColor: colorScheme.primaryContainer),
         ]),
         divider,
         ColorGroup(children: <ColorChip>[
-          ColorChip(label: 'secondary', color: colorScheme.secondary, onColor: colorScheme.onSecondary),
-          ColorChip(label: 'onSecondary', color: colorScheme.onSecondary, onColor: colorScheme.secondary),
-          ColorChip(label: 'secondaryContainer', color: colorScheme.secondaryContainer, onColor: colorScheme.onSecondaryContainer),
-          ColorChip(label: 'onSecondaryContainer', color: colorScheme.onSecondaryContainer, onColor: colorScheme.secondaryContainer),
+          ColorChip(
+              label: 'secondary',
+              color: colorScheme.secondary,
+              onColor: colorScheme.onSecondary),
+          ColorChip(
+              label: 'onSecondary',
+              color: colorScheme.onSecondary,
+              onColor: colorScheme.secondary),
+          ColorChip(
+              label: 'secondaryContainer',
+              color: colorScheme.secondaryContainer,
+              onColor: colorScheme.onSecondaryContainer),
+          ColorChip(
+              label: 'onSecondaryContainer',
+              color: colorScheme.onSecondaryContainer,
+              onColor: colorScheme.secondaryContainer),
         ]),
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(label: 'tertiary', color: colorScheme.tertiary, onColor: colorScheme.onTertiary),
-            ColorChip(label: 'onTertiary', color: colorScheme.onTertiary, onColor: colorScheme.tertiary),
-            ColorChip(label: 'tertiaryContainer', color: colorScheme.tertiaryContainer, onColor: colorScheme.onTertiaryContainer),
-            ColorChip(label: 'onTertiaryContainer', color: colorScheme.onTertiaryContainer, onColor: colorScheme.tertiaryContainer),
+            ColorChip(
+                label: 'tertiary',
+                color: colorScheme.tertiary,
+                onColor: colorScheme.onTertiary),
+            ColorChip(
+                label: 'onTertiary',
+                color: colorScheme.onTertiary,
+                onColor: colorScheme.tertiary),
+            ColorChip(
+                label: 'tertiaryContainer',
+                color: colorScheme.tertiaryContainer,
+                onColor: colorScheme.onTertiaryContainer),
+            ColorChip(
+                label: 'onTertiaryContainer',
+                color: colorScheme.onTertiaryContainer,
+                onColor: colorScheme.tertiaryContainer),
           ],
         ),
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(label: 'error', color: colorScheme.error, onColor: colorScheme.onError),
-            ColorChip(label: 'onError', color: colorScheme.onError, onColor: colorScheme.error),
-            ColorChip(label: 'errorContainer', color: colorScheme.errorContainer, onColor: colorScheme.onErrorContainer),
-            ColorChip(label: 'onErrorContainer', color: colorScheme.onErrorContainer, onColor: colorScheme.errorContainer),
+            ColorChip(
+                label: 'error',
+                color: colorScheme.error,
+                onColor: colorScheme.onError),
+            ColorChip(
+                label: 'onError',
+                color: colorScheme.onError,
+                onColor: colorScheme.error),
+            ColorChip(
+                label: 'errorContainer',
+                color: colorScheme.errorContainer,
+                onColor: colorScheme.onErrorContainer),
+            ColorChip(
+                label: 'onErrorContainer',
+                color: colorScheme.onErrorContainer,
+                onColor: colorScheme.errorContainer),
           ],
         ),
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(label: 'background', color: colorScheme.background, onColor: colorScheme.onBackground),
-            ColorChip(label: 'onBackground', color: colorScheme.onBackground, onColor: colorScheme.background),
+            ColorChip(
+                label: 'background',
+                color: colorScheme.background,
+                onColor: colorScheme.onBackground),
+            ColorChip(
+                label: 'onBackground',
+                color: colorScheme.onBackground,
+                onColor: colorScheme.background),
           ],
         ),
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(label: 'surface', color: colorScheme.surface, onColor: colorScheme.onSurface),
-            ColorChip(label: 'onSurface', color: colorScheme.onSurface, onColor: colorScheme.surface),
-            ColorChip(label: 'surfaceVariant', color: colorScheme.surfaceVariant, onColor: colorScheme.onSurfaceVariant),
-            ColorChip(label: 'onSurfaceVariant', color: colorScheme.onSurfaceVariant, onColor: colorScheme.surfaceVariant),
+            ColorChip(
+                label: 'surface',
+                color: colorScheme.surface,
+                onColor: colorScheme.onSurface),
+            ColorChip(
+                label: 'onSurface',
+                color: colorScheme.onSurface,
+                onColor: colorScheme.surface),
+            ColorChip(
+                label: 'surfaceVariant',
+                color: colorScheme.surfaceVariant,
+                onColor: colorScheme.onSurfaceVariant),
+            ColorChip(
+                label: 'onSurfaceVariant',
+                color: colorScheme.onSurfaceVariant,
+                onColor: colorScheme.surfaceVariant),
           ],
         ),
         divider,
@@ -311,9 +385,18 @@ class ColorSchemeView extends StatelessWidget {
           children: <ColorChip>[
             ColorChip(label: 'outline', color: colorScheme.outline),
             ColorChip(label: 'shadow', color: colorScheme.shadow),
-            ColorChip(label: 'inverseSurface', color: colorScheme.inverseSurface,  onColor: colorScheme.onInverseSurface),
-            ColorChip(label: 'onInverseSurface', color: colorScheme.onInverseSurface, onColor: colorScheme.inverseSurface),
-            ColorChip(label: 'inversePrimary', color: colorScheme.inversePrimary, onColor: colorScheme.primary),
+            ColorChip(
+                label: 'inverseSurface',
+                color: colorScheme.inverseSurface,
+                onColor: colorScheme.onInverseSurface),
+            ColorChip(
+                label: 'onInverseSurface',
+                color: colorScheme.onInverseSurface,
+                onColor: colorScheme.inverseSurface),
+            ColorChip(
+                label: 'inversePrimary',
+                color: colorScheme.inversePrimary,
+                onColor: colorScheme.primary),
           ],
         ),
       ],
@@ -329,7 +412,8 @@ class ColorGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
+      child:
+          Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
     );
   }
 }
@@ -363,7 +447,11 @@ class ColorChip extends StatelessWidget {
       color: color,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Expanded(child: Text(label, style: TextStyle(color: labelColor))),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: TextStyle(color: labelColor))),
+          ],
+        ),
       ),
     );
   }
