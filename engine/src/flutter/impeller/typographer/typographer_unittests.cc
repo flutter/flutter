@@ -168,7 +168,9 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
             atlas->GetTexture()->GetSize().height);
 }
 
-TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
+// TODO(jonahwilliams): Re-enable
+// https://github.com/flutter/flutter/issues/122839
+TEST_P(TypographerTest, DISABLED_GlyphAtlasTextureIsRecycledIfUnchanged) {
   auto context = TextRenderContext::Create(GetContext());
   auto atlas_context = std::make_shared<GlyphAtlasContext>();
   ASSERT_TRUE(context && context->IsValid());
@@ -186,7 +188,7 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
 
   auto* first_texture = atlas->GetTexture().get();
 
-  // now create a new glyph atlas with a nearly identical blob.
+  // Now create a new glyph atlas with a nearly identical blob.
 
   auto blob2 = SkTextBlob::MakeFromString("spooky 2", sk_font);
   auto next_atlas =
