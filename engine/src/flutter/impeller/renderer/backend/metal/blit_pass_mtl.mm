@@ -134,15 +134,4 @@ bool BlitPassMTL::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   return true;
 }
 
-// |BlitPass|
-bool BlitPassMTL::OnOptimizeForGPUAccess(std::shared_ptr<Texture> texture,
-                                         std::string label) {
-  auto command = std::make_unique<BlitOptimizeGPUAccessCommandMTL>();
-  command->label = label;
-  command->texture = std::move(texture);
-
-  commands_.emplace_back(std::move(command));
-  return true;
-}
-
 }  // namespace impeller
