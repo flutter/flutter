@@ -2290,11 +2290,6 @@ class TestDeviceManager extends DeviceManager {
     ];
   }
 
-  @override
-  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
-    return iosDiscoverer.waitForDeviceToConnect(device, logger);
-  }
-
   void setDeviceToWaitFor(
     IOSDevice device,
     DeviceConnectionInterface connectionInterface,

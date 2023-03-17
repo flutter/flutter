@@ -147,17 +147,9 @@ class IOSDevices extends PollingDeviceDiscovery {
     IOSDevice device,
     Logger logger,
   ) async {
-    logger.printStatus('Waiting for ${device.name} to connect...');
-    final Status waitingStatus = logger.startSpinner(
-      timeout: const Duration(seconds: 30),
-      warningColor: TerminalColor.red,
-      slowWarningCallback: () {
-        return 'The device was unable to connect after 30 seconds. Ensure the device is paired and unlocked.';
-      },
-    );
     final XCDeviceEventNotification? eventDetails =
         await xcdevice.waitForDeviceToConnect(device.id);
-    waitingStatus.stop();
+
     if (eventDetails != null) {
       device.isConnected = true;
       device.connectionInterface = eventDetails.eventInterface.connectionInterface;

@@ -278,11 +278,6 @@ class FakeDeviceManager implements DeviceManager {
     }
     return attachedDevices + wirelessDevices;
   }
-
-  @override
-  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
-    return device;
-  }
 }
 
 class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {

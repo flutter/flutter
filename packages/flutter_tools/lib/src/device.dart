@@ -104,7 +104,7 @@ abstract class DeviceManager {
   }
 
   /// A minimum duration to use when discovering wireless iOS devices.
-  static const Duration minimumTargetDeviceWirelessDiscoveryTimeout = Duration(
+  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(
     seconds: 5,
   );
 
@@ -180,15 +180,6 @@ abstract class DeviceManager {
       return <Device>[await exactMatchCompleter.future];
     }
     return prefixMatches;
-  }
-
-  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
-    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-      if (discoverer is IOSDevices) {
-        return discoverer.waitForDeviceToConnect(device, _logger);
-      }
-    }
-    return null;
   }
 
   /// Returns a list of devices filtered by the user-specified device

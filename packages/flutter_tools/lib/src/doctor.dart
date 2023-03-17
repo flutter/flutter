@@ -689,7 +689,7 @@ class DeviceValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<Device> devices = await _deviceManager.refreshAllDevices(
-      timeout: DeviceManager.minimumTargetDeviceWirelessDiscoveryTimeout,
+      timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {

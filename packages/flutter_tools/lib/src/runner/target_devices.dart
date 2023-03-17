@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -358,7 +359,7 @@ class MacOSTargetDevices extends TargetDevices {
     Duration? deviceDiscoveryTimeout,
   }) {
     _wirelessDevicesRefresh ??= _deviceManager.refreshWirelesslyConnectedDevices(
-      timeout: DeviceManager.minimumTargetDeviceWirelessDiscoveryTimeout,
+      timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );
     return;
   }
@@ -376,6 +377,25 @@ class MacOSTargetDevices extends TargetDevices {
         ),
       );
     }();
+  }
+
+  Future<Device?> _waitForIOSDeviceToConnect(IOSDevice device) async {
+    for (final DeviceDiscovery discoverer in _deviceManager.deviceDiscoverers) {
+      if (discoverer is IOSDevices) {
+        _logger.printStatus('Waiting for ${device.name} to connect...');
+        final Status waitingStatus = _logger.startSpinner(
+          timeout: const Duration(seconds: 30),
+          warningColor: TerminalColor.red,
+          slowWarningCallback: () {
+            return 'The device was unable to connect after 30 seconds. Ensure the device is paired and unlocked.';
+          },
+        );
+        final Device? connectedDevice = await discoverer.waitForDeviceToConnect(device, _logger);
+        waitingStatus.stop();
+        return connectedDevice;
+      }
+    }
+    return null;
   }
 
   /// Find and return all target [Device]s based upon criteria entered by the
@@ -435,7 +455,7 @@ class MacOSTargetDevices extends TargetDevices {
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
-          matchedDevice = await _deviceManager.waitForWirelessIOSDeviceToConnect(matchedDevice);
+          matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
         }
         if (matchedDevice != null && matchedDevice.isConnected) {
           return <Device>[matchedDevice];

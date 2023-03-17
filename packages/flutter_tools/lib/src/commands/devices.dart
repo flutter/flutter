@@ -203,7 +203,7 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
     if (machine) {
       final List<Device> devices = await globals.deviceManager?.refreshAllDevices(
         filter: DeviceDiscoveryFilter(),
-        timeout: DeviceManager.minimumTargetDeviceWirelessDiscoveryTimeout,
+        timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
       ) ?? <Device>[];
       await printDevicesAsJson(devices);
       return;
@@ -213,7 +213,7 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
       filter: DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.wireless,
       ),
-      timeout: DeviceManager.minimumTargetDeviceWirelessDiscoveryTimeout,
+      timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );
 
     List<Device> attachedDevices = <Device>[];
