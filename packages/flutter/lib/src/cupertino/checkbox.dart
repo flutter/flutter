@@ -117,7 +117,7 @@ class CupertinoCheckbox extends StatefulWidget {
   final Color? activeColor;
 
   /// The color used if the checkbox is inactive.
-  /// 
+  ///
   /// By default, [CupertinoColors.inactiveGray] is used.
   final Color? inactiveColor;
 
