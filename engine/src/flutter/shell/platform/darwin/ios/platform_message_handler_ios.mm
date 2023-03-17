@@ -46,50 +46,52 @@ PlatformMessageHandlerIos::PlatformMessageHandlerIos(
 
 void PlatformMessageHandlerIos::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   // This can be called from any isolate's thread.
-  fml::RefPtr<flutter::PlatformMessageResponse> completer = message->response();
-  HandlerInfo handler_info;
-  {
-    // TODO(gaaclarke): This mutex is a bottleneck for multiple isolates sending
-    // messages at the same time. This could be potentially changed to a
-    // read-write lock.
-    std::lock_guard lock(message_handlers_mutex_);
-    auto it = message_handlers_.find(message->channel());
-    if (it != message_handlers_.end()) {
-      handler_info = it->second;
+  @autoreleasepool {
+    fml::RefPtr<flutter::PlatformMessageResponse> completer = message->response();
+    HandlerInfo handler_info;
+    {
+      // TODO(gaaclarke): This mutex is a bottleneck for multiple isolates sending
+      // messages at the same time. This could be potentially changed to a
+      // read-write lock.
+      std::lock_guard lock(message_handlers_mutex_);
+      auto it = message_handlers_.find(message->channel());
+      if (it != message_handlers_.end()) {
+        handler_info = it->second;
+      }
     }
-  }
-  if (handler_info.handler) {
-    FlutterBinaryMessageHandler handler = handler_info.handler;
-    NSData* data = nil;
-    if (message->hasData()) {
-      data = ConvertMappingToNSData(message->releaseData());
-    }
+    if (handler_info.handler) {
+      FlutterBinaryMessageHandler handler = handler_info.handler;
+      NSData* data = nil;
+      if (message->hasData()) {
+        data = ConvertMappingToNSData(message->releaseData());
+      }
 
-    uint64_t platform_message_id = platform_message_counter++;
-    TRACE_EVENT_ASYNC_BEGIN1("flutter", "PlatformChannel ScheduleHandler", platform_message_id,
-                             "channel", message->channel().c_str());
-    dispatch_block_t run_handler = ^{
-      handler(data, ^(NSData* reply) {
-        TRACE_EVENT_ASYNC_END0("flutter", "PlatformChannel ScheduleHandler", platform_message_id);
-        // Called from any thread.
-        if (completer) {
-          if (reply) {
-            completer->Complete(ConvertNSDataToMappingPtr(reply));
-          } else {
-            completer->CompleteEmpty();
+      uint64_t platform_message_id = platform_message_counter++;
+      TRACE_EVENT_ASYNC_BEGIN1("flutter", "PlatformChannel ScheduleHandler", platform_message_id,
+                               "channel", message->channel().c_str());
+      dispatch_block_t run_handler = ^{
+        handler(data, ^(NSData* reply) {
+          TRACE_EVENT_ASYNC_END0("flutter", "PlatformChannel ScheduleHandler", platform_message_id);
+          // Called from any thread.
+          if (completer) {
+            if (reply) {
+              completer->Complete(ConvertNSDataToMappingPtr(reply));
+            } else {
+              completer->CompleteEmpty();
+            }
           }
-        }
-      });
-    };
+        });
+      };
 
-    if (handler_info.task_queue.get()) {
-      [handler_info.task_queue.get() dispatch:run_handler];
+      if (handler_info.task_queue.get()) {
+        [handler_info.task_queue.get() dispatch:run_handler];
+      } else {
+        dispatch_async(dispatch_get_main_queue(), run_handler);
+      }
     } else {
-      dispatch_async(dispatch_get_main_queue(), run_handler);
-    }
-  } else {
-    if (completer) {
-      completer->CompleteEmpty();
+      if (completer) {
+        completer->CompleteEmpty();
+      }
     }
   }
 }
