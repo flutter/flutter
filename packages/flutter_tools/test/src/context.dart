@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -219,9 +220,16 @@ class FakeDeviceManager implements DeviceManager {
   }) async => filteredDevices(filter);
 
   @override
+  Future<List<Device>> refreshWirelesslyConnectedDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
   Future<List<Device>> getDevicesById(
     String deviceId, {
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) async {
     return filteredDevices(filter).where((Device device) {
       return device.id == deviceId || device.id.startsWith(deviceId);
@@ -231,6 +239,7 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getDevices({
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId!, filter: filter)
@@ -268,6 +277,11 @@ class FakeDeviceManager implements DeviceManager {
       return wirelessDevices;
     }
     return attachedDevices + wirelessDevices;
+  }
+
+  @override
+  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
+    return device;
   }
 }
 

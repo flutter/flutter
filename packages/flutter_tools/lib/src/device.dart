@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/devices.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -102,6 +103,11 @@ abstract class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// A minimum duration to use when discovering wireless iOS devices.
+  static const Duration minimumTargetDeviceWirelessDiscoveryTimeout = Duration(
+    seconds: 5,
+  );
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -176,6 +182,15 @@ abstract class DeviceManager {
     return prefixMatches;
   }
 
+  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      if (discoverer is IOSDevices) {
+        return discoverer.waitForDeviceToConnect(device, _logger);
+      }
+    }
+    return null;
+  }
+
   /// Returns a list of devices filtered by the user-specified device
   /// id/name (if applicable) and [filter].
   ///
@@ -226,6 +241,27 @@ abstract class DeviceManager {
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer.discoverDevices(filter: filter, timeout: timeout),
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Returns a list of devices filtered by [filter]. Discards existing cache
+  /// of discoverers that support wireless devices.
+  ///
+  /// If [filter] is not provided, a default filter that requires devices to be
+  /// connected will be used.
+  ///
+  /// Search for devices to populate the cache for no longer than [timeout].
+  Future<List<Device>> refreshWirelesslyConnectedDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    filter ??= DeviceDiscoveryFilter();
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        if (discoverer.supportsWirelessDevices)
+          discoverer.discoverDevices(filter: filter, timeout: timeout),
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
@@ -426,6 +462,14 @@ class DeviceDiscoveryFilter {
   }
 }
 
+/// A class to hold results for when getting a device by id/name.
+class DeviceDiscoveryMatchByIdResult {
+  DeviceDiscoveryMatchByIdResult(this.devices, {this.isExactMatch = false});
+
+  final List<Device> devices;
+  final bool isExactMatch;
+}
+
 /// An abstract class to discover and enumerate a specific type of devices.
 abstract class DeviceDiscovery {
   bool get supportsPlatform;
@@ -433,6 +477,8 @@ abstract class DeviceDiscovery {
   /// Whether this device discovery is capable of listing any devices given the
   /// current environment configuration.
   bool get canListAnything;
+
+  bool get supportsWirelessDevices => false;
 
   /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
@@ -504,6 +550,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) {
     return _populateDevices(filter: filter);
@@ -512,6 +560,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Empty the cache and repopulate it before getting devices from cache filtered by [filter].
   ///
   /// Search for devices to populate the cache for no longer than [timeout].
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> discoverDevices({
     Duration? timeout,
