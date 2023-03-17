@@ -1215,7 +1215,8 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     if (argParser.options.containsKey(FlutterOptions.kGstaticCanvasKitFlag)) {
-      if (boolArg(FlutterOptions.kGstaticCanvasKitFlag)) {
+      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
+      if (boolArg(FlutterOptions.kGstaticCanvasKitFlag) && !hasLocalWebSdk) {
         if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
           dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
         }
