@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:js_interop';
 
 import 'package:ui/src/engine/assets.dart';
 import 'package:ui/src/engine/browser_detection.dart';
@@ -174,7 +175,7 @@ Future<void> initializeEngineServices({
     // fires.
     if (!waitingForAnimation) {
       waitingForAnimation = true;
-      domWindow.requestAnimationFrame(allowInterop((num highResTime) {
+      domWindow.requestAnimationFrame((JSNumber highResTime) {
         frameTimingsOnVsync();
 
         // Reset immediately, because `frameHandler` can schedule more frames.
@@ -185,7 +186,7 @@ Future<void> initializeEngineServices({
         // milliseconds as a double value, with sub-millisecond information
         // hidden in the fraction. So we first multiply it by 1000 to uncover
         // microsecond precision, and only then convert to `int`.
-        final int highResTimeMicroseconds = (1000 * highResTime).toInt();
+        final int highResTimeMicroseconds = (1000 * highResTime.toDart).toInt();
 
         // In Flutter terminology "building a frame" consists of "beginning
         // frame" and "drawing frame".
@@ -206,7 +207,7 @@ Future<void> initializeEngineServices({
           //                implement it properly.
           EnginePlatformDispatcher.instance.invokeOnDrawFrame();
         }
-      }));
+      });
     }
   };
 

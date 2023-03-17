@@ -5,6 +5,7 @@
 @TestOn('chrome || firefox')
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
@@ -500,12 +501,12 @@ void testMain() {
 
       // Watches DOM mutations and counts deletions and additions to the child
       // list of the `<flt-scene>` element.
-      final DomMutationObserver observer = createDomMutationObserver(allowInterop((List<dynamic> mutations, _) {
-        for (final DomMutationRecord record in mutations.cast<DomMutationRecord>()) {
+      final DomMutationObserver observer = createDomMutationObserver((JSArray mutations, _) {
+        for (final DomMutationRecord record in mutations.toDart.cast<DomMutationRecord>()) {
           actualDeletions.addAll(record.removedNodes!);
           actualAdditions.addAll(record.addedNodes!);
         }
-      }));
+      });
       observer.observe(
           SurfaceSceneBuilder.debugLastFrameScene!.rootElement!, childList: true);
 

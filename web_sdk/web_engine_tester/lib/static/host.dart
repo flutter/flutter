@@ -9,6 +9,7 @@ library test.host;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:js/js.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -22,7 +23,7 @@ import 'package:ui/src/engine/dom.dart';
 class _TestRunner {}
 
 extension _TestRunnerExtension on _TestRunner {
-  external void waitUntilDone();
+  external JSVoid waitUntilDone();
 }
 
 /// Returns the current content shell runner, or `null` if none exists.
@@ -37,19 +38,19 @@ external _TestRunner? get testRunner; // ignore: library_private_types_in_public
 @anonymous
 @staticInterop
 class _JSApi {
-  external factory _JSApi({void Function() resume, void Function() restartCurrent});
+  external factory _JSApi({JSFunction resume, JSFunction restartCurrent});
 }
 
 extension _JSApiExtension on _JSApi {
   /// Causes the test runner to resume running, as though the user had clicked
   /// the "play" button.
   // ignore: unused_element
-  external Function get resume;
+  external JSFunction get resume;
 
   /// Causes the test runner to restart the current test once it finishes
   /// running.
   // ignore: unused_element
-  external Function get restartCurrent;
+  external JSFunction get restartCurrent;
 }
 
 /// Sets the top-level `dartTest` object so that it's visible to JS.
@@ -159,15 +160,15 @@ void main() {
       Timer.periodic(const Duration(seconds: 1),
           (_) => serverChannel.sink.add(<String, String>{'command': 'ping'}));
 
-      _jsApi = _JSApi(resume: allowInterop(() {
+      _jsApi = _JSApi(resume: () {
         if (!domDocument.body!.classList.contains('paused')) {
           return;
         }
         domDocument.body!.classList.remove('paused');
         serverChannel.sink.add(<String, String>{'command': 'resume'});
-      }), restartCurrent: allowInterop(() {
+      }.toJS, restartCurrent: () {
         serverChannel.sink.add(<String, String>{'command': 'restart'});
-      }));
+      }.toJS);
     },
     (dynamic error, StackTrace stackTrace) {
       print('$error\n${Trace.from(stackTrace).terse}'); // ignore: avoid_print
