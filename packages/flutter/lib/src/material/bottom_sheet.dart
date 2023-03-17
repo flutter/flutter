@@ -132,8 +132,7 @@ class BottomSheet extends StatefulWidget {
   /// with [dragHandleSize].
   ///
   /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
-  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and
-  /// otherwise defaults to false.
+  /// that is also null, defaults to false.
   final bool? showDragHandle;
 
   /// The bottom sheet drag handle's color.
@@ -348,7 +347,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? defaults.elevation ?? 0;
     final ShapeBorder? shape = widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
-    final bool showDragHandle = widget.showDragHandle ?? (widget.enableDrag && (bottomSheetTheme.showDragHandle ?? useMaterial3));
+    final bool showDragHandle = widget.showDragHandle ?? (widget.enableDrag && (bottomSheetTheme.showDragHandle ?? false));
 
     Widget? dragHandle;
     if (showDragHandle){
@@ -930,8 +929,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// with dragHandleSize.
   ///
   /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
-  /// that is also null, defaults to true when [ThemeData.useMaterial3] is true, and
-  /// otherwise defaults to false.
+  /// that is also null, defaults to false.
   final bool? showDragHandle;
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -1033,7 +1031,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             constraints: constraints,
             isScrollControlled: isScrollControlled,
             enableDrag: enableDrag,
-            showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? Theme.of(context).useMaterial3)),
+            showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? false)),
           );
         },
       ),
