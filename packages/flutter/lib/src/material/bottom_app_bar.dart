@@ -199,24 +199,45 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: widget.child,
     );
 
-    child = Material(
-      key: materialKey,
-      type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
-      elevation: elevation,
-      color: isMaterial3 ? effectiveColor : null,
-      surfaceTintColor: surfaceTintColor,
-      shadowColor: shadowColor,
-      child: SafeArea(child: child),
-    );
+    if (isMaterial3) {
+      child = Material(
+        key: materialKey,
+        type: MaterialType.canvas,
+        elevation: elevation,
+        color: effectiveColor,
+        surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
+        child: SafeArea(child: child),
+      );
 
-    child = PhysicalShape(
-      clipper: clipper,
-      elevation: elevation,
-      shadowColor: shadowColor,
-      color: effectiveColor,
-      clipBehavior: widget.clipBehavior,
-      child: child,
-     );
+      child = PhysicalShape(
+        clipper: clipper,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        color: effectiveColor,
+        clipBehavior: widget.clipBehavior,
+        child: child,
+      );
+    } else {
+      child = Material(
+        key: materialKey,
+        type: MaterialType.transparency,
+        elevation: elevation,
+        color: null,
+        surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
+        child: SafeArea(child: child),
+      );
+
+      child = PhysicalShape(
+        clipper: clipper,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        color: effectiveColor,
+        clipBehavior: widget.clipBehavior,
+        child: child,
+      );
+    }
 
     return SizedBox(height: height, child: child);
   }
