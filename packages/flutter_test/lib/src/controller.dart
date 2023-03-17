@@ -133,12 +133,12 @@ class SemanticsController {
   /// See also:
   ///
   /// * [containsSemantics] and [matchesSemantics], which can be used to match
-  ///   against a single node in the traversal
+  ///   against a single node in the traversal.
   /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
   ///   match the order allowing extra nodes before after and between matching
-  ///   parts of the traversal
+  ///   parts of the traversal.
   /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
-  ///   match the order of the traversal
+  ///   match the order of the traversal.
   Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end}) {
     TestAsyncUtils.guardSync();
     final List<SemanticsNode> traversal = <SemanticsNode>[];
@@ -836,8 +836,10 @@ abstract class WidgetController {
   ///
   /// The [WidgetTester] subclass implements this by deferring to the [binding].
   ///
-  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
-  /// be appropriate to return in the implementation of this method.
+  /// See also:
+  ///
+  ///  * [SchedulerBinding.endOfFrame], which returns a future that could be
+  ///    appropriate to return in the implementation of this method.
   Future<void> pump([Duration duration]);
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -1162,8 +1164,9 @@ abstract class WidgetController {
   ///
   /// See also:
   ///  * [WidgetController.drag], a method to simulate a drag.
-  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
-  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given
+  ///    widget in a given duration. It sends move events at a given frequency and
+  ///    it is useful when there are listeners involved.
   ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
@@ -1365,8 +1368,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1411,8 +1413,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1485,7 +1486,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1691,12 +1692,12 @@ class LiveWidgetController extends WidgetController {
       for (final PointerEventRecord record in records) {
         final DateTime now = clock.now();
         startTime ??= now;
-        // So that the first event is promised to receive a zero timeDiff
+        // So that the first event is promised to receive a zero timeDiff.
         final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
           // This happens when something (e.g. GC) takes a long time during the
           // processing of the events.
-          // Flush all past events
+          // Flush all past events.
           handleTimeStampDiff.add(-timeDiff);
           record.events.forEach(binding.handlePointerEvent);
         } else {

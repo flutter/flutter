@@ -36,7 +36,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -50,7 +50,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'));
@@ -65,7 +65,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -79,7 +79,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'bogus']),
           throwsToolExit(message: 'Prebuilt binary bogus does not exist'));
@@ -94,7 +94,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
       fileSystem.file('binary').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'binary']);
@@ -111,7 +111,7 @@ void main() {
       command.applicationPackages = fakeAppFactory;
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
       expect(fakeAppFactory.buildInfo, isNotNull);
@@ -183,4 +183,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   String get name => 'Android';
+
+  @override
+  bool get ephemeral => true;
 }

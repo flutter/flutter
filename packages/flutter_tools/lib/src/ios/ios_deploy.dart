@@ -15,8 +15,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../device.dart';
 import 'code_signing.dart';
-import 'iproxy.dart';
 
 // Error message patterns from ios-deploy output
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
@@ -88,7 +88,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String>launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
@@ -102,7 +102,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -126,7 +126,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
     required bool uninstallFirst,
   }) {
@@ -149,7 +149,7 @@ class IOSDeploy {
       if (uninstallFirst)
         '--uninstall',
       '--debug',
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -171,7 +171,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     required bool uninstallFirst,
     Directory? appDeltaDirectory,
   }) async {
@@ -186,7 +186,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (uninstallFirst)
         '--uninstall',
