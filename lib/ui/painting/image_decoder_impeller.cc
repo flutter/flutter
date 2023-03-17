@@ -286,7 +286,6 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTexture(
     }
     blit_pass->SetLabel("Mipmap Blit Pass");
     blit_pass->GenerateMipmap(texture);
-    blit_pass->OptimizeForGPUAccess(texture);
 
     blit_pass->EncodeCommands(context->GetResourceAllocator());
     if (!command_buffer->SubmitCommands()) {
