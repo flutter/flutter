@@ -409,7 +409,8 @@ void main() {
 
     expect(scheme.primaryVariant, const Color(0xff4040f3));
     expect(scheme.secondaryVariant, const Color(0xff5d5c72));
-  });
+  }, skip: isBrowser, // [intended] uses dart:typed_data.
+);
 
   test('can generate a dark scheme from an imageProvider', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
@@ -448,7 +449,8 @@ void main() {
     expect(scheme.primaryVariant, const Color(0xffc0c1ff));
     expect(scheme.secondaryVariant, const Color(0xffc6c4dd));
     expect(scheme.surfaceTint, const Color(0xffc0c1ff));
-  });
+    }, skip: isBrowser, // [intended] uses dart:isolate and io.
+  );
 
   testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
