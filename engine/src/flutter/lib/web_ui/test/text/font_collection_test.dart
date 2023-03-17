@@ -34,9 +34,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'Ahem');
@@ -51,9 +51,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'Ahem ahem ahem');
@@ -70,9 +70,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'AhEm');
@@ -89,9 +89,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -114,9 +114,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -139,9 +139,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
@@ -165,9 +165,9 @@ void testMain() {
         await fontManager.downloadAllFonts();
         fontManager.registerDownloadedFonts();
         domDocument.fonts!
-            .forEach(allowInterop((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
-        }));
+        });
 
         if (browserEngine != BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));

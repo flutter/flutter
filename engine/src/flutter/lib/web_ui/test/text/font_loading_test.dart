@@ -81,7 +81,7 @@ Future<void> testMain() async {
       final ByteBuffer response = await httpFetchByteBuffer(testFontUrl);
       await ui.loadFontFromList(response.asUint8List(), fontFamily: 'Blehm');
       final Completer<void> completer = Completer<void>();
-      domWindow.requestAnimationFrame(allowInterop((_) { completer.complete();}) );
+      domWindow.requestAnimationFrame((_) { completer.complete();});
       await completer.future;
       window.onPlatformMessage = oldHandler;
       expect(actualName, 'flutter/system');
@@ -94,11 +94,11 @@ Future<void> testMain() async {
 
 bool _containsFontFamily(String family) {
   bool found = false;
-  domDocument.fonts!.forEach(allowInterop((DomFontFace fontFace,
+  domDocument.fonts!.forEach((DomFontFace fontFace,
       DomFontFace fontFaceAgain, DomFontFaceSet fontFaceSet) {
     if (fontFace.family == family) {
       found = true;
     }
-  }));
+  });
   return found;
 }

@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'dom.dart';
 import 'platform_dispatcher.dart';
-import 'safe_browser_api.dart';
 import 'services.dart';
 
 final ByteData? _fontChangeMessage =
@@ -23,13 +22,13 @@ FutureOr<void> sendFontChangeMessage() async {
   if (!_fontChangeScheduled) {
     _fontChangeScheduled = true;
     // Batch updates into next animationframe.
-    domWindow.requestAnimationFrame(allowInterop((num _) {
+    domWindow.requestAnimationFrame((_) {
       _fontChangeScheduled = false;
       EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
         'flutter/system',
         _fontChangeMessage,
         (_) {},
       );
-    }));
+    });
   }
 }
