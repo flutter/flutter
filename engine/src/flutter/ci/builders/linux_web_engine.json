@@ -41,16 +41,6 @@
                 ],
                 "tasks": [
                     {
-                        "name": "compile web_tests",
-                        "parameters": [
-                            "run",
-                            "compile_tests"
-                        ],
-                        "scripts": [
-                            "flutter/lib/web_ui/dev/felt"
-                        ]
-                    },
-                    {
                         "name": "check licenses",
                         "parameters": [
                             "check-licenses"
@@ -71,7 +61,33 @@
                 ]
             },
             "tests": []
+        },
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "name": "web_tests",
+            "generators": {
+                "tasks": [
+                    {
+                        "name": "compile web_tests",
+                        "parameters": [
+                            "run",
+                            "compile_tests"
+                        ],
+                        "scripts": [
+                            "flutter/lib/web_ui/dev/felt"
+                        ]
+                    }
+                ]
+            }
         }
+
     ],
     "tests": []
 }
