@@ -79,31 +79,71 @@ class DevicesCommandOutput {
 
   final Duration? deviceDiscoveryTimeout;
 
+  Future<List<Device>> _getAttachedDevices(DeviceManager deviceManager) async {
+    return deviceManager.getAllDevices(
+      filter: DeviceDiscoveryFilter(
+        deviceConnectionInterface: DeviceConnectionInterface.attached,
+      ),
+    );
+  }
+
+  Future<List<Device>> _getWirelessDevices(DeviceManager deviceManager) async {
+    return deviceManager.getAllDevices(
+      filter: DeviceDiscoveryFilter(
+        deviceConnectionInterface: DeviceConnectionInterface.wireless,
+      ),
+    );
+  }
+
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
-    final List<Device> devices = await globals.deviceManager?.refreshAllDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
+    List<Device> attachedDevices = <Device>[];
+    List<Device> wirelessDevices = <Device>[];
+    final DeviceManager? deviceManager = globals.deviceManager;
+    if (deviceManager != null) {
+      // Refresh the cache and then get the attached and wireless devices from
+      // the cache.
+      await deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
+      attachedDevices = await _getAttachedDevices(deviceManager);
+      wirelessDevices = await _getWirelessDevices(deviceManager);
+    }
+    final List<Device> allDevices = attachedDevices + wirelessDevices;
 
     if (machine) {
-      await printDevicesAsJson(devices);
-    } else {
-      if (devices.isEmpty) {
-        final StringBuffer status = StringBuffer('No devices detected.');
-        status.writeln();
-        status.writeln();
-        status.writeln('Run "flutter emulators" to list and start any available device emulators.');
-        status.writeln();
-        status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
-        if (deviceDiscoveryTimeout == null) {
-          status.write('You may also try increasing the time to wait for connected devices with the --${FlutterOptions.kDeviceTimeout} flag. ');
-        }
-        status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
-
-        globals.printStatus(status.toString());
-      } else {
-        globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
-        await Device.printDevices(devices, globals.logger);
-      }
-      await _printDiagnostics();
+      await printDevicesAsJson(allDevices);
+      return;
     }
+
+    if (allDevices.isEmpty) {
+      _printNoDevicesDetected();
+    } else {
+      if (attachedDevices.isNotEmpty) {
+        globals.printStatus('${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
+        await Device.printDevices(attachedDevices, globals.logger);
+      }
+      if (wirelessDevices.isNotEmpty) {
+        if (attachedDevices.isNotEmpty) {
+          globals.printStatus('');
+        }
+        globals.printStatus('${wirelessDevices.length} wirelessly connected ${pluralize('device', wirelessDevices.length)}:\n');
+        await Device.printDevices(wirelessDevices, globals.logger);
+      }
+    }
+    await _printDiagnostics();
+  }
+
+  void _printNoDevicesDetected() {
+    final StringBuffer status = StringBuffer('No devices detected.');
+    status.writeln();
+    status.writeln();
+    status.writeln('Run "flutter emulators" to list and start any available device emulators.');
+    status.writeln();
+    status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
+    if (deviceDiscoveryTimeout == null) {
+      status.write('You may also try increasing the time to wait for connected devices with the --${FlutterOptions.kDeviceTimeout} flag. ');
+    }
+    status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
+
+    globals.printStatus(status.toString());
   }
 
   Future<void> _printDiagnostics() async {

@@ -45,7 +45,7 @@ void main() {
       expect(identical(view.debugLayer, firstLayer), false);
     });
 
-    test('does not replace the root layer unnecessarily when window resize', () {
+    test('does not replace the root layer unnecessarily when view resizes', () {
       final RenderView view = RenderView(
         configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
         window: RendererBinding.instance.platformDispatcher.views.single,
