@@ -37,7 +37,6 @@ const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBr
   darkColor: Color(0xFF808080),
 );
 
-// TODO(justinmc): Get a real reference image here update the version number.
 // These values were eyeballed from a screenshot of iOS 16.3.1, as light mode
 // didn't appear in the Apple design resources assets linked above.
 final BoxDecoration _kToolbarShadow = BoxDecoration(
