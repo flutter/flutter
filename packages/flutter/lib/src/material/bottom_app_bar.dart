@@ -202,7 +202,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
     if (isMaterial3) {
       child = Material(
         key: materialKey,
-        type: MaterialType.canvas,
         elevation: elevation,
         color: effectiveColor,
         surfaceTintColor: surfaceTintColor,
@@ -223,7 +222,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
         key: materialKey,
         type: MaterialType.transparency,
         elevation: elevation,
-        color: null,
         surfaceTintColor: surfaceTintColor,
         shadowColor: shadowColor,
         child: SafeArea(child: child),
