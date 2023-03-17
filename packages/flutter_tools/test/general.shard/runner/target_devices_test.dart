@@ -882,7 +882,6 @@ target-device-6 (mobile) • xxx • android • Android 10
     final FakeIOSDevice exactMatchAttachedIOSDevice = FakeIOSDevice(deviceName: 'target-device');
     final FakeIOSDevice exactMatchAttachedUnsupportedIOSDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupported: false);
     final FakeIOSDevice exactMatchUnsupportedByProjectDevice = FakeIOSDevice(deviceName: 'target-device', deviceSupportForProject: false);
-    final FakeIOSDevice exactMatchDisconnectedWirelessIOSDevice = FakeIOSDevice.notConnectedWireless(deviceName: 'target-device');
 
     setUp(() {
       platform = FakePlatform(operatingSystem: 'macos');

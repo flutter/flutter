@@ -166,7 +166,6 @@ class IOSDevices extends PollingDeviceDiscovery {
     return null;
   }
 
-  @override
   void cancelWaitForDeviceToConnect() {
     xcdevice.cancelWaitForDeviceToConnect();
   }
@@ -242,7 +241,7 @@ class IOSDevice extends Device {
 
   @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
-  /// may not be accurate. Sometimes if it doesn't not have long enough time
+  /// may not be accurate. Sometimes if it doesn't have a long enough time
   /// to connect, wireless devices will have an interface of `usb`/`attached`.
   /// This may change after waiting for the device to connect in
   /// `waitForDeviceToConnect`.

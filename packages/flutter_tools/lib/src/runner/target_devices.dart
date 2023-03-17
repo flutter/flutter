@@ -385,9 +385,9 @@ class MacOSTargetDevices extends TargetDevices {
   ///
   /// When the user has specified a device id/name, attempt to find an exact or
   /// partial match. If an exact match or a single partial match is found and
-  /// the device is connected, return it immediately. If an exact match is
-  /// found but the device is not connected, wait for it to connect
-  /// (iOS physical devices only).
+  /// the device is connected, return it immediately. If an exact match or a
+  /// single partial match is found and the device is not connected and it's
+  /// an iOS device, wait for it to connect.
   ///
   /// When multiple devices are found and there is a terminal attached to
   /// stdin, allow the user to select which device to use. When a terminal
@@ -406,7 +406,7 @@ class MacOSTargetDevices extends TargetDevices {
       return null;
     }
 
-    // When a user defines the timeout use the super function that does not do
+    // When a user defines the timeout, use the super function that does not do
     // longer wireless device discovery and does not wait for devices to connect.
     if (deviceDiscoveryTimeout != null) {
       return super.findAllTargetDevices(

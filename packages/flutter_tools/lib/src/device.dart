@@ -204,10 +204,7 @@ abstract class DeviceManager {
     if (id == null) {
       return getAllDevices(filter: filter);
     }
-    return getDevicesById(
-      id,
-      filter: filter,
-    );
+    return getDevicesById(id, filter: filter);
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
@@ -504,56 +501,6 @@ abstract class DeviceDiscovery {
   ///
   /// For example, 'windows' or 'linux'.
   List<String> get wellKnownIds;
-
-  bool exactlyMatchesDeviceId(String deviceId, Device device) {
-    final String lowerDeviceId = deviceId.toLowerCase();
-    return device.id.toLowerCase() == lowerDeviceId ||
-        device.name.toLowerCase() == lowerDeviceId;
-  }
-
-  bool startsWithDeviceId(String deviceId, Device device) {
-    final String lowerDeviceId = deviceId.toLowerCase();
-    return device.id.toLowerCase().startsWith(lowerDeviceId) ||
-        device.name.toLowerCase().startsWith(lowerDeviceId);
-  }
-
-  /// Get devices filtered by [filter] that match the given device id/name.
-  ///
-  /// If an exact match is found, return it immediately. Otherwise check all
-  /// devices and return all that begin with the given device id/name.
-  Future<DeviceDiscoveryMatchByIdResult> getDevicesById(
-    String deviceId,
-    Logger logger, {
-    DeviceDiscoveryFilter? filter,
-  }) async {
-    List<Device>? foundDevices;
-    try {
-      foundDevices = await devices(
-        filter: filter,
-      );
-    } catch(error) { // ignore: avoid_catches_without_on_clauses
-      // Fail quietly so other discovers can find matches, even if this one fails.
-      logger.printTrace('Ignored error discovering $deviceId: $error');
-      foundDevices = const <Device>[];
-    }
-
-    final List<Device> prefixMatches = <Device>[];
-    for (final Device device in foundDevices) {
-      if (exactlyMatchesDeviceId(deviceId, device)) {
-        return DeviceDiscoveryMatchByIdResult(
-          <Device>[device],
-          isExactMatch: true,
-        );
-      }
-      if (startsWithDeviceId(deviceId, device)) {
-        prefixMatches.add(device);
-      }
-    }
-
-    return DeviceDiscoveryMatchByIdResult(prefixMatches);
-  }
-
-  void cancelWaitForDeviceToConnect() {}
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
