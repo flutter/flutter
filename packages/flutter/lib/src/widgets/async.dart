@@ -637,12 +637,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
           });
         }
         assert(() {
-          if(FutureBuilder.debugRethrowError) {
+          if (FutureBuilder.debugRethrowError) {
             Future<Object>.error(error, stackTrace);
           }
           return true;
         }());
-
       });
       // An implementation like `SynchronousFuture` may have already called the
       // .then closure. Do not overwrite it in that case.
