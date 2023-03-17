@@ -1019,10 +1019,7 @@ class FlutterVmService {
         onError: (Object? error, StackTrace stackTrace) {
           if (error is vm_service.SentinelException ||
             error == null ||
-            error is vm_service.RPCError &&
-              (error.code == RPCErrorCodes.kServiceDisappeared ||
-                error.code == RPCErrorCodes.kInternalError &&
-                error.message.contains('Sentinel kind: Collected'))) {
+            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
             return null;
           }
           return Future<vm_service.Isolate?>.error(error, stackTrace);
