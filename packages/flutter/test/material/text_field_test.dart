@@ -9210,6 +9210,53 @@ void main() {
     );
 
     testWidgets(
+      'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge and the last two taps are in the same frame',
+      (WidgetTester tester) async {
+        final TextEditingController controller = TextEditingController();
+        final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        );
+
+        await tester.enterText(find.byType(TextField), testValueA);
+        await skipPastScrollingAnimation(tester);
+        expect(controller.value.text, testValueA);
+
+        final Offset firstLinePos = textOffsetToPosition(tester, 6);
+
+        // Tap on text field to gain focus, and set selection to 'is|' on the first line.
+        final TestGesture gesture = await tester.startGesture(firstLinePos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 6);
+
+        // Here we tap twice in the same frame to register a triple tap.
+        await gesture.down(firstLinePos);
+        await gesture.up();
+        expect(controller.selection.baseOffset, isTargetPlatformApple ? 4 : 6);
+        expect(controller.selection.extentOffset, isTargetPlatformApple ? 6 : 7);
+
+        await gesture.down(firstLinePos);
+        await gesture.up();
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 20);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.iOS }),
+    );
+
+    testWidgets(
       'Can triple tap to select a paragraph on mobile platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController();
