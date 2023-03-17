@@ -448,7 +448,7 @@ class ColorChip extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
-          children: [
+          children: <Expanded>[
             Expanded(child: Text(label, style: TextStyle(color: labelColor))),
           ],
         ),
