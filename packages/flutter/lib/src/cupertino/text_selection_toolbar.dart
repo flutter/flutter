@@ -46,7 +46,6 @@ final BoxDecoration _kToolbarShadow = BoxDecoration(
     BoxShadow(
       color: CupertinoColors.black.withOpacity(0.14),
       blurRadius: 16.0,
-      offset: Offset(0, _kToolbarArrowSize.height / 2),
     ),
   ],
 );
