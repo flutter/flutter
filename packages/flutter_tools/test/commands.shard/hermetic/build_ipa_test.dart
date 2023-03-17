@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -197,6 +198,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -216,6 +218,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -235,6 +238,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -242,7 +246,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSArchiveCommand(verboseHelp: false).supported;
+    final bool supported = BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
@@ -259,6 +263,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -287,6 +292,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -313,6 +319,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -341,6 +348,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -388,6 +396,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -436,6 +445,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -484,6 +494,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -531,6 +542,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -556,6 +568,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -604,6 +617,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -626,6 +640,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -682,6 +697,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -715,6 +731,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -745,6 +762,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -776,6 +794,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -809,6 +828,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -837,6 +857,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -888,6 +909,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -941,6 +963,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -990,6 +1013,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1028,6 +1052,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1108,6 +1133,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1186,6 +1212,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1244,6 +1271,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1302,6 +1330,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1360,6 +1389,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1419,6 +1449,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1522,6 +1553,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1601,6 +1633,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
@@ -1678,6 +1711,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
