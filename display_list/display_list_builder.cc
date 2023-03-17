@@ -1124,7 +1124,12 @@ void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar y) {
   Push<DrawTextBlobOp>(0, 1, blob, x, y);
   AccumulateOpBounds(blob->bounds().makeOffset(x, y), kDrawTextBlobFlags);
-  CheckLayerOpacityCompatibility();
+  // There is no way to query if the glyphs of a text blob overlap and
+  // there are no current guarantees from either Skia or Impeller that
+  // they will protect overlapping glyphs from the effects of overdraw
+  // so we must make the conservative assessment that this DL layer is
+  // not compatible with group opacity inheritance.
+  UpdateLayerOpacityCompatibility(false);
 }
 void DisplayListBuilder::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                                       SkScalar x,
