@@ -79,11 +79,6 @@ class TextSelectionToolbar extends StatelessWidget {
   final ToolbarBuilder toolbarBuilder;
 
   /// The size of the text selection handles.
-  ///
-  /// See also:
-  ///
-  ///  * [SpellCheckSuggestionsToolbar], which references this value to calculate
-  ///    the padding between the toolbar and anchor.
   static const double kHandleSize = 22.0;
 
   /// Padding between the toolbar and the anchor.

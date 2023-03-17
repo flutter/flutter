@@ -105,8 +105,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
-  ///    padding from the edges of the viewport.
   ///  * [TextSelectionToolbar], which uses this same value as well.
   static const double kToolbarScreenPadding = 8.0;
 
