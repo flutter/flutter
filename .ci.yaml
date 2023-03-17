@@ -343,6 +343,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux engine_dependency_proxy_test
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target: https://github.com/flutter/flutter/pull/115511
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: engine_dependency_proxy_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux firebase_abstract_method_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
@@ -380,7 +399,7 @@ targets:
       task_name: release_smoke_test
 
   - name: Linux flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     bringup: true
     properties:
@@ -2708,7 +2727,7 @@ targets:
       task_name: flutter_gallery_macos__start_up
 
   - name: Mac flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     bringup: true
     properties:
@@ -2717,7 +2736,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac_arm64 flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     bringup: true
     properties:
@@ -4877,7 +4896,7 @@ targets:
       task_name: windows_chrome_dev_mode
 
   - name: Windows flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     bringup: true
     properties:
@@ -4924,7 +4943,7 @@ targets:
       task_name: flutter_tool_startup__macos
 
   - name: Linux flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4937,7 +4956,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Mac flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4953,7 +4972,7 @@ targets:
 
 
   - name: Mac_arm64 flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4966,7 +4985,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Windows flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
