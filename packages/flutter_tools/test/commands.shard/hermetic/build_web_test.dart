@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -50,7 +49,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -70,7 +68,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -87,7 +84,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -107,7 +103,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -148,7 +143,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -194,7 +188,7 @@ void main() {
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
-    expect(BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+    expect(BuildWebCommand(fileSystem: fileSystem, verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -203,7 +197,7 @@ void main() {
   });
 
   testUsingContext('not hidden if feature flag is enabled', () async {
-    expect(BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+    expect(BuildWebCommand(fileSystem: fileSystem, verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -307,7 +301,6 @@ class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({ required FileSystem fileSystem, bool verboseHelp = false }) :
     webCommand = BuildWebCommand(
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
       verboseHelp: verboseHelp) {
     addSubcommand(webCommand);
   }
