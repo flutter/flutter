@@ -32,6 +32,7 @@ import 'dart:convert' hide Codec;
 import 'dart:developer' as developer;
 import 'dart:js_util' as js_util;
 import 'dart:_js_annotations';
+import 'dart:js_interop' hide JS;
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;

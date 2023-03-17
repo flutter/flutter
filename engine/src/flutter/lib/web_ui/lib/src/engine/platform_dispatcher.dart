@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine/canvaskit/renderer.dart';
@@ -934,17 +935,17 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _addFontSizeObserver() {
     const String styleAttribute = 'style';
 
-    _fontSizeObserver = createDomMutationObserver(allowInterop(
-        (List<dynamic> mutations, DomMutationObserver _) {
-      for (final dynamic mutation in mutations) {
-        final DomMutationRecord record = mutation as DomMutationRecord;
+    _fontSizeObserver = createDomMutationObserver(
+        (JSArray mutations, DomMutationObserver _) {
+      for (final JSAny? mutation in mutations.toDart) {
+        final DomMutationRecord record = mutation! as DomMutationRecord;
         if (record.type == 'attributes' &&
             record.attributeName == styleAttribute) {
           final double newTextScaleFactor = findBrowserTextScaleFactor();
           _updateTextScaleFactor(newTextScaleFactor);
         }
       }
-    }));
+    });
     _fontSizeObserver!.observe(
       domDocument.documentElement!,
       attributes: true,
