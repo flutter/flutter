@@ -151,7 +151,7 @@ class IOSDevice extends Device {
     required FileSystem fileSystem,
     required this.name,
     required this.cpuArchitecture,
-    required this.interfaceType,
+    required this.connectionInterface,
     String? sdkVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
@@ -199,7 +199,8 @@ class IOSDevice extends Device {
 
   final DarwinArch cpuArchitecture;
 
-  final IOSDeviceConnectionInterface interfaceType;
+  @override
+  final DeviceConnectionInterface connectionInterface;
 
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
@@ -256,7 +257,7 @@ class IOSDevice extends Device {
         bundlePath: bundle.path,
         appDeltaDirectory: app.appDeltaDirectory,
         launchArguments: <String>[],
-        interfaceType: interfaceType,
+        interfaceType: connectionInterface,
       );
     } on ProcessException catch (e) {
       _logger.printError(e.message);
@@ -311,7 +312,7 @@ class IOSDevice extends Device {
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
     String? packageId;
-    if (interfaceType == IOSDeviceConnectionInterface.network &&
+    if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
         debuggingOptions.disablePortPublication) {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
@@ -351,7 +352,7 @@ class IOSDevice extends Device {
       route,
       platformArgs,
       ipv6: ipv6,
-      interfaceType: interfaceType,
+      interfaceType: connectionInterface,
     );
     Status startAppStatus = _logger.startProgress(
       'Installing and launching...',
@@ -371,7 +372,7 @@ class IOSDevice extends Device {
             bundlePath: bundle.path,
             appDeltaDirectory: package.appDeltaDirectory,
             launchArguments: launchArguments,
-            interfaceType: interfaceType,
+            interfaceType: connectionInterface,
             uninstallFirst: debuggingOptions.uninstallFirst,
           );
           if (deviceLogReader is IOSDeviceLogReader) {
@@ -381,7 +382,7 @@ class IOSDevice extends Device {
         // Don't port foward if debugging with a network device.
         vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
-          portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,
+          portForwarder: isWirelesslyConnected ? null : portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
@@ -394,7 +395,7 @@ class IOSDevice extends Device {
           bundlePath: bundle.path,
           appDeltaDirectory: package.appDeltaDirectory,
           launchArguments: launchArguments,
-          interfaceType: interfaceType,
+          interfaceType: connectionInterface,
           uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
@@ -414,13 +415,13 @@ class IOSDevice extends Device {
 
       _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
 
-      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 45 : 30;
+      final int defaultTimeout = isWirelesslyConnected ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError('The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
 
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
-        if (interfaceType == IOSDeviceConnectionInterface.network) {
+        if (isWirelesslyConnected) {
           _logger.printError(
             '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
             'This is required for wireless debugging. If you selected "Don\'t Allow", '
@@ -433,7 +434,7 @@ class IOSDevice extends Device {
       });
 
       Uri? localUri;
-      if (interfaceType == IOSDeviceConnectionInterface.network) {
+      if (isWirelesslyConnected) {
         // Wait for Dart VM Service to start up.
         final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
@@ -538,7 +539,7 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, interfaceType);
+    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
   }
 
   @override
