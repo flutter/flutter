@@ -51,9 +51,6 @@ class BlitPassVK final : public BlitPass {
                                     std::string label) override;
 
   // |BlitPass|
-  bool OnOptimizeForGPUAccess(std::shared_ptr<Texture> texture,
-                              std::string label) override;
-  // |BlitPass|
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                std::string label) override;
 

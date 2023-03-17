@@ -50,13 +50,4 @@ struct BlitGenerateMipmapCommandMTL : public BlitGenerateMipmapCommand,
   [[nodiscard]] bool Encode(id<MTLBlitCommandEncoder> encoder) const override;
 };
 
-struct BlitOptimizeGPUAccessCommandMTL : public BlitGenerateMipmapCommand,
-                                         public BlitEncodeMTL {
-  ~BlitOptimizeGPUAccessCommandMTL() override;
-
-  std::string GetLabel() const override;
-
-  [[nodiscard]] bool Encode(id<MTLBlitCommandEncoder> encoder) const override;
-};
-
 }  // namespace impeller

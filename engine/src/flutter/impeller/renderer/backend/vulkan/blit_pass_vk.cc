@@ -88,12 +88,6 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
 }
 
 // |BlitPass|
-bool BlitPassVK::OnOptimizeForGPUAccess(std::shared_ptr<Texture> texture,
-                                        std::string label) {
-  return true;
-}
-
-// |BlitPass|
 bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                          std::string label) {
   auto command = std::make_unique<BlitGenerateMipmapCommandVK>();
