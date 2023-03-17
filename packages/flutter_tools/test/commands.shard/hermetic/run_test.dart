@@ -1129,6 +1129,9 @@ class FakeDevice extends Fake implements Device {
   bool get supportsFastStart => false;
 
   @override
+  bool get ephemeral => true;
+
+  @override
   bool get isConnected => true;
 
   @override

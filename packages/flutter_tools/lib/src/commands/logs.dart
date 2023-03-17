@@ -30,6 +30,9 @@ class LogsCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
+  bool get refreshWirelessDevices => true;
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
