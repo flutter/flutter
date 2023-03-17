@@ -15,10 +15,10 @@ declare_args() {
   impeller_enable_metal = is_mac || is_ios
 
   # Whether the OpenGLES backend is enabled.
-  impeller_enable_opengles = is_mac || is_linux || is_win || is_android
+  impeller_enable_opengles = is_linux || is_win || is_android
 
   # Whether the Vulkan backend is enabled.
-  impeller_enable_vulkan = is_mac || is_linux || is_win || is_android
+  impeller_enable_vulkan = is_linux || is_win || is_android
 
   # Whether to use a prebuilt impellerc.
   # If this is the empty string, impellerc will be built.
@@ -679,6 +679,7 @@ template("impeller_shaders") {
   }
 
   if (impeller_enable_metal) {
+    not_needed(invoker, [ "analyze" ])
     mtl_shaders = "mtl_$target_name"
     _impeller_shaders_metal(mtl_shaders) {
       name = invoker.name

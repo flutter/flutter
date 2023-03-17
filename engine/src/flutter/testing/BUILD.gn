@@ -124,7 +124,7 @@ source_set("fixture_test") {
   }
 }
 
-if (enable_unittests) {
+if (enable_unittests && shell_enable_vulkan) {
   source_set("vulkan") {
     testonly = true
 
@@ -153,7 +153,9 @@ if (enable_unittests) {
       configs += [ "//third_party/swiftshader:swiftshader_config" ]
     }
   }
+}
 
+if (enable_unittests) {
   test_fixtures("testing_fixtures") {
     fixtures = []
   }
@@ -170,13 +172,16 @@ if (enable_unittests) {
       ":testing",
       ":testing_fixtures",
       "//flutter/runtime:libdart",
-      "//flutter/vulkan",
     ]
 
     if (shell_enable_metal) {
       sources += [ "test_metal_surface_unittests.cc" ]
 
       deps += [ ":metal" ]
+    }
+
+    if (shell_enable_vulkan) {
+      deps += [ "//flutter/vulkan" ]
     }
   }
 }
@@ -207,7 +212,7 @@ if (is_mac || is_ios) {
 
       # Skia's Vulkan support is enabled for all platforms (except iOS), and so parts of
       # Skia's graphics context reference Vulkan symbols.
-      if (!is_ios) {
+      if (shell_enable_vulkan) {
         deps += [ "//flutter/vulkan" ]
       }
     }
@@ -217,22 +222,21 @@ if (is_mac || is_ios) {
 }
 
 # We only use SwiftShader on unittests
-use_swiftshader = enable_unittests && !is_fuchsia
+use_swiftshader = enable_unittests && shell_enable_gl
+if (use_swiftshader) {
+  source_set("opengl") {
+    testonly = true
 
-source_set("opengl") {
-  testonly = true
+    sources = [
+      "test_gl_surface.cc",
+      "test_gl_surface.h",
+    ]
 
-  sources = [
-    "test_gl_surface.cc",
-    "test_gl_surface.h",
-  ]
+    deps = [
+      ":skia",
+      "//flutter/fml",
+    ]
 
-  deps = [
-    ":skia",
-    "//flutter/fml",
-  ]
-
-  if (use_swiftshader) {
     configs -= [ "//build/config/clang:extra_warnings" ]
     configs += [
       "//flutter/vulkan:vulkan_config",  # for swiftshader

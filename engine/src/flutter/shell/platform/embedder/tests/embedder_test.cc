@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_software.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
 
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
@@ -12,6 +11,10 @@
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_metal.h"
+#endif
+
+#ifdef SHELL_ENABLE_VULKAN
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
 #endif
 
 namespace flutter {

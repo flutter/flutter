@@ -319,14 +319,11 @@ if (enable_unittests) {
         "$fuchsia_sdk_root/pkg:fidl_cpp",
         "$fuchsia_sdk_root/pkg:sys_cpp",
       ]
-    } else {
-      # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
+    } else if (shell_enable_gl) {
+      # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot
+      # run on fuchsia or when GL is not enabled.
       sources += [ "shell_io_manager_unittests.cc" ]
-
-      # Swiftshader only needed on non-Fuchsia platforms.
-      if (shell_enable_vulkan) {
-        deps += [ "//third_party/swiftshader" ]
-      }
+      deps += [ "//third_party/swiftshader" ]
     }
 
     if (shell_enable_gl) {

@@ -29,7 +29,7 @@ surface_provider_include_software = !is_android && !is_ios
 # But, since benchmarks do not run on Windows and rendertests only
 # runs on SW by default, this restriction currently only limits the
 # ability to manually cross-check OpenGL on Windows for rendertests
-surface_provider_include_gl = !is_fuchsia && !is_ios && !is_win
+surface_provider_include_gl = !is_fuchsia && !is_ios && !is_win && !is_mac
 
 # TODO (https://github.com/flutter/flutter/issues/107357):
 # impeller_enable_vulkan currently requires skia to not use VMA, which in turn
