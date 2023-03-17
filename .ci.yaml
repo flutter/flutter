@@ -343,6 +343,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux engine_dependency_proxy_test
+    recipe: devicelab/devicelab_drone
+    bringup: true # New target: https://github.com/flutter/flutter/pull/115511
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: engine_dependency_proxy_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux firebase_abstract_method_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
