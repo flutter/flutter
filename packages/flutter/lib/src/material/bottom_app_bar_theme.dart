@@ -47,6 +47,10 @@ class BottomAppBarTheme with Diagnosticable {
   final double? elevation;
 
   /// Overrides the default value for [BottomAppBar.shape].
+  ///
+  /// Ignored in [BottomAppBar]s where [ThemeData.useMaterial3] is true;
+  /// the Material 3 spec defines the shape without a notch:
+  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
   final NotchedShape? shape;
 
   /// Overrides the default value for [BottomAppBar.height].

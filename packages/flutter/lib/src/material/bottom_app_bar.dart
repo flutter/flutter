@@ -33,7 +33,8 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows the [BottomAppBar], which can be configured to have a notch using the
+/// This example shows the [BottomAppBar], which (in Material 2)
+/// can be configured to have a notch using the
 /// [BottomAppBar.shape] property. This also includes an optional [FloatingActionButton], which illustrates
 /// the [FloatingActionButtonLocation]s in relation to the [BottomAppBar].
 ///
@@ -51,8 +52,10 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar].
-///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
+///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar]
+///    in Material 2.
+///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for in
+///    Material 2.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
@@ -114,17 +117,29 @@ class BottomAppBar extends StatefulWidget {
   /// If this property is null then [BottomAppBarTheme.shape] of
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
   /// be rectangular with no notch.
+  ///
+  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
+  /// spec defines the shape without a notch:
+  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
   final NotchedShape? shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
+  ///
+  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
+  /// spec defines the shape without a notch:
+  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
   /// notch.
   ///
   /// Not used if [shape] is null.
+  ///
+  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
+  /// spec defines the shape without a notch:
+  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
   final double notchMargin;
 
   /// The color used as an overlay on [color] to indicate elevation.
@@ -174,6 +189,8 @@ class _BottomAppBarState extends State<BottomAppBar> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
+    assert(!isMaterial3 || widget.shape == null); // `shape` not accepted in Material 3
+
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
     final BottomAppBarTheme defaults = isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
 
@@ -207,15 +224,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
         surfaceTintColor: surfaceTintColor,
         shadowColor: shadowColor,
         child: SafeArea(child: child),
-      );
-
-      child = PhysicalShape(
-        clipper: clipper,
-        elevation: elevation,
-        shadowColor: shadowColor,
-        color: effectiveColor,
-        clipBehavior: widget.clipBehavior,
-        child: child,
       );
     } else {
       child = Material(
