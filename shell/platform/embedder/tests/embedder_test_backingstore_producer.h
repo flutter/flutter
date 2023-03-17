@@ -18,7 +18,7 @@
 #endif
 
 #ifdef SHELL_ENABLE_VULKAN
-#include "flutter/testing/test_vulkan_context.h"
+#include "flutter/testing/test_vulkan_context.h"  // nogncheck
 #endif
 
 namespace flutter {

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 declare_args() {
-  shell_enable_gl = !is_fuchsia
+  shell_enable_gl = !is_fuchsia && !is_mac
 
   # The logic for enabling Vulkan and Metal is in tools/gn.
   shell_enable_metal = false

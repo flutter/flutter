@@ -5,6 +5,7 @@
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/shell/config.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("ui") {
@@ -270,7 +271,7 @@ if (enable_unittests) {
     ]
 
     # TODO(https://github.com/flutter/flutter/issues/63837): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
-    if (!is_fuchsia) {
+    if (shell_enable_gl) {
       sources += [ "painting/image_decoder_unittests.cc" ]
 
       deps += [ "//flutter/testing:opengl" ]
