@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -77,7 +77,7 @@ void main() {
         expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         ), throwsA(anything));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -100,7 +100,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -123,7 +123,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.network,
+          DeviceConnectionInterface.wireless,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });

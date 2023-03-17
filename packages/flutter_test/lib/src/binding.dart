@@ -182,17 +182,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
 
   @override
-  TestWindow get window => _window;
-  final TestWindow _window;
+  late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -346,6 +347,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    // This is intialized here because it's needed for the `super.initInstances`
+    // call. It can't be handled as a ctor initializer because it's dependent
+    // on `platformDispatcher`. It can't be handled in the ctor itself because
+    // the base class ctor is called first and calls `initInstances`.
+    window = TestWindow.fromPlatformDispatcher(platformDispatcher: platformDispatcher);
+
     super.initInstances();
     _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
@@ -360,6 +367,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
+  }
+
+  @override
+  bool debugCheckZone(String entryPoint) {
+    // We skip all the zone checks in tests because the test framework makes heavy use
+    // of zones and so the zones never quite match the way the framework expects.
+    return true;
   }
 
   /// Whether there is currently a test executing.
@@ -478,8 +492,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -807,9 +822,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     FlutterError.demangleStackTrace = (StackTrace stack) {
       // package:stack_trace uses ZoneSpecification.errorCallback to add useful
-      // information to stack traces, in this case the Trace and Chain classes
-      // can be present. Because these StackTrace implementations do not follow
-      // the format the framework expects, we covert them to a vm trace here.
+      // information to stack traces, meaning Trace and Chain classes can be
+      // present. Because these StackTrace implementations do not follow the
+      // format the framework expects, we convert them to a vm trace here.
       if (stack is stack_trace.Trace) {
         return stack.vmTrace;
       }
@@ -1723,7 +1738,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      window: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1914,7 +1929,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ViewConfiguration createViewConfiguration() {
     return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      view: window,
+      view: platformDispatcher.implicitView!,
     );
   }
 
