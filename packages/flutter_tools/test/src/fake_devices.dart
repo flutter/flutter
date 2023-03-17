@@ -54,6 +54,31 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       },
     },
   ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless android',
+      'wireless-android',
+      type: PlatformType.android,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    ),
+    <String, Object>{
+      'name': 'wireless android',
+      'id': 'wireless-android',
+      'isSupported': true,
+      'targetPlatform': 'android-arm',
+      'emulator': true,
+      'sdk': 'Test SDK (1.2.3)',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    }
+  ),
 ];
 
 /// Fake device to test `devices` command.
