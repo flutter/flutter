@@ -601,7 +601,7 @@ void main() {
     });
   });
 
-  group('getDevicesById', () {
+  group('waitForDeviceToConnect', () {
     late FakeXcdevice xcdevice;
     late Cache cache;
     late FakeProcessManager fakeProcessManager;
@@ -609,8 +609,6 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late IOSWorkflow iosWorkflow;
-    late IOSDevice usbConnected1;
-    late IOSDevice usbConnected2;
     late IOSDevice notConnected1;
 
     setUp(() {
@@ -633,37 +631,6 @@ void main() {
         processManager: fakeProcessManager,
         logger: logger,
       );
-
-      usbConnected1 = IOSDevice(
-        'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
-        name: 'iPhone',
-        sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
-        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        iosDeploy: iosDeploy,
-        iMobileDevice: iMobileDevice,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
-        connectionInterface: DeviceConnectionInterface.attached,
-        isConnected: true,
-      );
-
-      usbConnected2 = IOSDevice(
-        '00008027-00192736010F802E',
-        name: 'iPad Pro',
-        sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
-        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        iosDeploy: iosDeploy,
-        iMobileDevice: iMobileDevice,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
-        connectionInterface: DeviceConnectionInterface.attached,
-        isConnected: true,
-      );
-
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
@@ -680,28 +647,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fails quietly when errors', () async {
-      final IOSDevices iosDevices = IOSDevices(
-        platform: FakePlatform(),
-        xcdevice: xcdevice,
-        iosWorkflow: iosWorkflow,
-        logger: logger,
-      );
-      xcdevice.isInstalled = true;
-      xcdevice.devices
-        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-        '00008027-00192736010F802E',
-        logger,
-      );
-
-      expect(result.devices, <Device>[]);
-      expect(result.isExactMatch, isFalse);
-      expect(logger.traceText.contains('Ignored error discovering'), isTrue);
-    });
-
-    testWithoutContext('find exact match', () async {
+    testWithoutContext('wait for device to connect via wifi', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -709,19 +655,23 @@ void main() {
         logger: logger,
       );
       xcdevice.isInstalled = true;
-      xcdevice.devices
-        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
 
-      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-        '00008027-00192736010F802E',
-        logger,
+      xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+        XCDeviceEvent.attach,
+        XCDeviceEventInterface.wifi,
+        '00000001-0000000000000000'
       );
 
-      expect(result.devices, <Device>[usbConnected2]);
-      expect(result.isExactMatch, isTrue);
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
+      );
+
+      expect(device?.isConnected, isTrue);
+      expect(device?.connectionInterface, DeviceConnectionInterface.wireless);
     });
 
-    testWithoutContext('find multiple partial matches', () async {
+    testWithoutContext('wait for device to connect via usb', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -729,19 +679,23 @@ void main() {
         logger: logger,
       );
       xcdevice.isInstalled = true;
-      xcdevice.devices
-        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
 
-      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-        'iP',
-        logger,
+      xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+        XCDeviceEvent.attach,
+        XCDeviceEventInterface.usb,
+        '00000001-0000000000000000'
       );
 
-      expect(result.devices, <Device>[usbConnected1, usbConnected2, notConnected1]);
-      expect(result.isExactMatch, isFalse);
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
+      );
+
+      expect(device?.isConnected, isTrue);
+      expect(device?.connectionInterface, DeviceConnectionInterface.attached);
     });
 
-    testWithoutContext('with must be connected filter', () async {
+    testWithoutContext('wait for device returns null', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
@@ -749,214 +703,15 @@ void main() {
         logger: logger,
       );
       xcdevice.isInstalled = true;
-      xcdevice.devices
-        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
 
-      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-        'iP',
-        logger,
-        filter: DeviceDiscoveryFilter(),
+      xcdevice.waitForDeviceEvent = null;
+
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
       );
 
-      expect(result.devices, <Device>[usbConnected1, usbConnected2]);
-      expect(result.isExactMatch, isFalse);
-    });
-
-    testWithoutContext('with connection interface filter', () async {
-      final IOSDevices iosDevices = IOSDevices(
-        platform: macPlatform,
-        xcdevice: xcdevice,
-        iosWorkflow: iosWorkflow,
-        logger: logger,
-      );
-      xcdevice.isInstalled = true;
-      xcdevice.devices
-        .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-      final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-        'iP',
-        logger,
-        filter: DeviceDiscoveryFilter(deviceConnectionInterface: DeviceConnectionInterface.wireless),
-      );
-
-      expect(result.devices, isEmpty);
-    });
-
-    group('and waitForDeviceToConnect', () {
-      testWithoutContext('find exact match that is already connected', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          '00008027-00192736010F802E',
-          logger,
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[usbConnected2]);
-        expect(result.isExactMatch, isTrue);
-      });
-
-      testWithoutContext('find exact match that is not connected', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
-          XCDeviceEvent.attach,
-          XCDeviceEventInterface.wifi,
-          '00000001-0000000000000000'
-        );
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          '00000001-0000000000000000',
-          logger,
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[notConnected1]);
-        expect(result.devices.first.isConnected, true);
-        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
-        expect(result.isExactMatch, isTrue);
-      });
-
-      testWithoutContext('find multiple partial matches', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          'iP',
-          logger,
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[usbConnected1, usbConnected2, notConnected1]);
-        expect(result.isExactMatch, isFalse);
-      });
-
-      testWithoutContext('with must be connected filter', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
-          XCDeviceEvent.attach,
-          XCDeviceEventInterface.wifi,
-          '00000001-0000000000000000'
-        );
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          '00000001-0000000000000000',
-          logger,
-          filter: DeviceDiscoveryFilter(),
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[notConnected1]);
-        expect(result.devices.first.isConnected, true);
-        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
-        expect(result.isExactMatch, isTrue);
-      });
-
-      testWithoutContext('with mismatching connection interface filter', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
-          XCDeviceEvent.attach,
-          XCDeviceEventInterface.wifi,
-          '00000001-0000000000000000'
-        );
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          '00000001-0000000000000000',
-          logger,
-          filter: DeviceDiscoveryFilter(deviceConnectionInterface: DeviceConnectionInterface.attached),
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, isEmpty);
-      });
-
-      testWithoutContext('with matching connection interface filter', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
-          XCDeviceEvent.attach,
-          XCDeviceEventInterface.wifi,
-          '00000001-0000000000000000'
-        );
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          '00000001-0000000000000000',
-          logger,
-          filter: DeviceDiscoveryFilter(deviceConnectionInterface: DeviceConnectionInterface.wireless),
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[notConnected1]);
-        expect(result.devices.first.isConnected, true);
-        expect(result.devices.first.connectionInterface, DeviceConnectionInterface.wireless);
-        expect(result.isExactMatch, isTrue);
-      });
-
-      testWithoutContext('find exact match and partials but wait fails', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: macPlatform,
-          xcdevice: xcdevice,
-          iosWorkflow: iosWorkflow,
-          logger: logger,
-        );
-        xcdevice.isInstalled = true;
-        xcdevice.devices
-          .add(<IOSDevice>[usbConnected1, usbConnected2, notConnected1]);
-
-        xcdevice.waitForDeviceEvent = null;
-        final DeviceDiscoveryMatchByIdResult result = await iosDevices.getDevicesById(
-          'iPad',
-          logger,
-          waitForDeviceToConnect: true,
-        );
-
-        expect(result.devices, <Device>[usbConnected2]);
-      });
+      expect(device, isNull);
     });
   });
 }

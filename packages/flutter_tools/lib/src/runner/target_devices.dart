@@ -10,6 +10,7 @@ import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
 
 const String _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
 const String _connectedDevicesMessage = 'Connected devices:';
@@ -75,15 +76,15 @@ class TargetDevices {
 
   Future<List<Device>> _getDeviceById({
     bool includeDevicesUnsupportedByProject = false,
-    bool waitForDeviceToConnect = false,
+    bool includeDisconnected = false,
   }) async {
     return _deviceManager.getDevices(
       filter: DeviceDiscoveryFilter(
+        excludeDisconnected: !includeDisconnected,
         supportFilter: _deviceManager.deviceSupportFilter(
           includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         ),
       ),
-      waitForDeviceToConnect: waitForDeviceToConnect,
     );
   }
 
@@ -419,20 +420,26 @@ class MacOSTargetDevices extends TargetDevices {
     );
 
     if (_deviceManager.hasSpecifiedDeviceId) {
+      // Get devices matching the specified device regardless of whether they
+      // are currently connected or not.
+      // If there is a single matching connected device, return it immediately.
+      // If the only device found is an iOS device that is not connected yet,
+      // wait for it to connect.
+      // If there are multiple matches, continue on to wait for all attached
+      // and wireless devices to load so the user can select between all
+      // connected matches.
       final List<Device> devices = await _getDeviceById(
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-        waitForDeviceToConnect: true,
+        includeDisconnected: true,
       );
-
-      // Check if the device is connected because the iOS discoverer might
-      // return a partial match where the device is not connected. It returns
-      // not connected devices because if there's a single partial match from a
-      // different discoverer and a partial match of a wireless device that did
-      // not have enough time to connect yet, it should not return here. It
-      // should continue on to wait for the wireless devices to load so the
-      // user can select between all partial matches.
-      if (devices.length == 1 && devices.first.isConnected == true) {
-        return devices;
+      if (devices.length == 1) {
+        Device? matchedDevice = devices.first;
+        if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
+          matchedDevice = await _deviceManager.waitForWirelessIOSDeviceToConnect(matchedDevice);
+        }
+        if (matchedDevice != null && matchedDevice.isConnected) {
+          return <Device>[matchedDevice];
+        }
       }
     }
 

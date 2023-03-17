@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -276,6 +277,11 @@ class FakeDeviceManager implements DeviceManager {
       return wirelessDevices;
     }
     return attachedDevices + wirelessDevices;
+  }
+
+  @override
+  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
+    return device;
   }
 }
 

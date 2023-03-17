@@ -1123,23 +1123,6 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
-
-        testUsingContext('when partially matching disconnected wireless devices', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
-
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(logger.statusText, equals('''
-No devices found yet. Checking for wireless devices...
-
-No supported devices found with name or id matching 'target-device'.
-'''));
-          expect(devices, isNull);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 4);
-          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
-        });
       });
 
       group('with hasSpecifiedAllDevices', () {
@@ -1379,16 +1362,36 @@ Checking for wireless devices...
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
 
-        testUsingContext('when matching wireless device', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, exactMatchDisconnectedWirelessIOSDevice];
-          deviceManager.setDeviceToWaitFor(exactMatchDisconnectedWirelessIOSDevice, DeviceConnectionInterface.wireless);
+        testUsingContext('when exact matching wireless device', () async {
+          final FakeIOSDevice exactMatchWirelessDevice = FakeIOSDevice.notConnectedWireless(deviceName: 'target-device');
+          deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, exactMatchWirelessDevice];
+          deviceManager.setDeviceToWaitFor(exactMatchWirelessDevice, DeviceConnectionInterface.wireless);
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
 Waiting for target-device to connect...
 '''));
-          expect(devices, <Device>[exactMatchDisconnectedWirelessIOSDevice]);
+          expect(devices, <Device>[exactMatchWirelessDevice]);
+          expect(devices?.first.isConnected, true);
+          expect(devices?.first.connectionInterface, DeviceConnectionInterface.wireless);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isTrue);
+        });
+
+        testUsingContext('when partially matching single wireless devices', () async {
+          final FakeIOSDevice partialMatchWirelessDevice = FakeIOSDevice.notConnectedWireless(deviceName: 'target-device-1');
+          deviceManager.iosDiscoverer.deviceList = <Device>[partialMatchWirelessDevice];
+          deviceManager.setDeviceToWaitFor(partialMatchWirelessDevice, DeviceConnectionInterface.wireless);
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+Waiting for target-device-1 to connect...
+'''));
+          expect(devices, <Device>[partialMatchWirelessDevice]);
           expect(devices?.first.isConnected, true);
           expect(devices?.first.connectionInterface, DeviceConnectionInterface.wireless);
           expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -1398,7 +1401,8 @@ Waiting for target-device to connect...
         });
 
         testUsingContext('when exact matching an attached device and partial matching a wireless device', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[exactMatchAttachedIOSDevice, disconnectedWirelessIOSDevice1];
+          deviceManager.iosDiscoverer.deviceList = <Device>[exactMatchAttachedIOSDevice, connectedWirelessIOSDevice1];
+          deviceManager.iosDiscoverer.refreshDeviceList = <Device>[exactMatchAttachedIOSDevice, connectedWirelessIOSDevice1];
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
@@ -2285,6 +2289,11 @@ class TestDeviceManager extends DeviceManager {
       otherDiscoverer,
       iosDiscoverer,
     ];
+  }
+
+  @override
+  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
+    return iosDiscoverer.waitForDeviceToConnect(device, logger);
   }
 
   void setDeviceToWaitFor(

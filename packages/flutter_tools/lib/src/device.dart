@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/devices.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -121,15 +122,20 @@ abstract class DeviceManager {
   ///
   /// If an exact match is found, return it immediately. Otherwise wait for all
   /// discoverers to complete and return any partial matches.
-  ///
-  /// (iOS devices only) If [waitForDeviceToConnect] is true and a single exact match
-  /// is found but the device is not connected, wait for the device to connect.
   Future<List<Device>> getDevicesById(
     String deviceId, {
     DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
   }) async {
     filter ??= DeviceDiscoveryFilter();
+
+    final String lowerDeviceId = deviceId.toLowerCase();
+    bool exactlyMatchesDeviceId(Device device) =>
+        device.id.toLowerCase() == lowerDeviceId ||
+        device.name.toLowerCase() == lowerDeviceId;
+    bool startsWithDeviceId(Device device) =>
+        device.id.toLowerCase().startsWith(lowerDeviceId) ||
+        device.name.toLowerCase().startsWith(lowerDeviceId);
+
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
@@ -144,20 +150,23 @@ abstract class DeviceManager {
     final Completer<Device> exactMatchCompleter = Completer<Device>();
     final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        if (!hasWellKnownId || discoverer.wellKnownIds.contains(deviceId))
-          discoverer.getDevicesById(
-            deviceId,
-            _logger,
-            filter: filter,
-            waitForDeviceToConnect: waitForDeviceToConnect,
-          ).then((DeviceDiscoveryMatchByIdResult matchingDevices) {
-            if (matchingDevices.isExactMatch) {
-              exactMatchCompleter.complete(matchingDevices.devices.first);
-              return null;
-            } else {
-              prefixMatches.addAll(matchingDevices.devices);
+        if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
+          discoverer
+          .devices(filter: filter)
+          .then((List<Device> devices) {
+            for (final Device device in devices) {
+              if (exactlyMatchesDeviceId(device)) {
+                exactMatchCompleter.complete(device);
+                return null;
+              }
+              if (startsWithDeviceId(device)) {
+                prefixMatches.add(device);
+              }
             }
             return null;
+          }, onError: (dynamic error, StackTrace stackTrace) {
+            // Return matches from other discoverers even if one fails.
+            _logger.printTrace('Ignored error discovering $deviceId: $error');
           }),
     ];
 
@@ -167,16 +176,19 @@ abstract class DeviceManager {
       Future.wait<List<Device>?>(futureDevices),
     ]);
 
-    if (waitForDeviceToConnect) {
-      for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-        discoverer.cancelWaitForDeviceToConnect();
-      }
-    }
-
     if (exactMatchCompleter.isCompleted) {
       return <Device>[await exactMatchCompleter.future];
     }
     return prefixMatches;
+  }
+
+  Future<Device?> waitForWirelessIOSDeviceToConnect(IOSDevice device) async {
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      if (discoverer is IOSDevices) {
+        return discoverer.waitForDeviceToConnect(device, _logger);
+      }
+    }
+    return null;
   }
 
   /// Returns a list of devices filtered by the user-specified device
@@ -184,12 +196,8 @@ abstract class DeviceManager {
   ///
   /// If [filter] is not provided, a default filter that requires devices to be
   /// connected will be used.
-  ///
-  /// (iOS devices only) If [waitForDeviceToConnect] is true and an exact match
-  /// is found but the device is not connected, wait for the device to connect.
   Future<List<Device>> getDevices({
     DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
   }) {
     filter ??= DeviceDiscoveryFilter();
     final String? id = specifiedDeviceId;
@@ -199,7 +207,6 @@ abstract class DeviceManager {
     return getDevicesById(
       id,
       filter: filter,
-      waitForDeviceToConnect: waitForDeviceToConnect,
     );
   }
 
@@ -514,13 +521,10 @@ abstract class DeviceDiscovery {
   ///
   /// If an exact match is found, return it immediately. Otherwise check all
   /// devices and return all that begin with the given device id/name.
-  ///
-  /// [waitForDeviceToConnect] is used for iOS device discovery only.
   Future<DeviceDiscoveryMatchByIdResult> getDevicesById(
     String deviceId,
     Logger logger, {
     DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
   }) async {
     List<Device>? foundDevices;
     try {

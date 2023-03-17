@@ -143,109 +143,7 @@ class IOSDevices extends PollingDeviceDiscovery {
     return xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
-  /// Get devices filtered by [filter] that match the given device id/name.
-  ///
-  /// If an exact match is found, return it immediately. Otherwise check all
-  /// devices and return all that begin with the given device id/name.
-  ///
-  /// If [waitForDeviceToConnect] is true and an exact match is found, wait
-  /// for the device to connect.
-  ///
-  /// [waitForDeviceToConnect] only works for iOS devices that have been
-  /// connected via network at least once.
-  @override
-  Future<DeviceDiscoveryMatchByIdResult> getDevicesById(
-    String deviceId,
-    Logger logger, {
-    DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
-  }) async {
-    final DeviceDiscoveryFilter? filterToUse;
-    if (waitForDeviceToConnect) {
-      // If going to wait for device to connect, get devices regardless of if
-      // they are connected or their DeviceConnectionInterface since they
-      // might change after connecting.
-      filterToUse = DeviceDiscoveryFilter(
-        excludeDisconnected: false,
-        supportFilter: filter?.supportFilter,
-      );
-    } else {
-      filterToUse = filter;
-    }
-
-    List<Device>? foundDevices;
-    try {
-      foundDevices = await devices(
-        filter: filterToUse,
-      );
-    } catch(error) { // ignore: avoid_catches_without_on_clauses
-      // Fail quietly so other discovers can find matches, even if this one fails.
-      logger.printTrace('Ignored error discovering $deviceId: $error');
-      foundDevices = const <Device>[];
-    }
-
-    final List<Device> prefixMatches = <Device>[];
-    IOSDevice? exactMatchDevice;
-    for (final Device device in foundDevices) {
-      if (device is! IOSDevice) {
-        continue;
-      }
-      if (exactlyMatchesDeviceId(deviceId, device)) {
-        if (waitForDeviceToConnect) {
-          // Since when waitForDeviceToConnect is true, the original filter is
-          // not used, if device is connected, check if it matches all original
-          // filter requirements. If it does, return it, otherwise continue
-          // checking for other matching devices.
-          // If device is not connected, break here and use this device to
-          // wait for it to connect.
-          if (device.isConnected) {
-            if (filter == null || await filter.matchesRequirements(device)) {
-              return DeviceDiscoveryMatchByIdResult(
-                <Device>[device],
-                isExactMatch: true,
-              );
-            } else {
-              continue;
-            }
-          }
-          exactMatchDevice = device;
-          break;
-        } else {
-          return DeviceDiscoveryMatchByIdResult(
-            <Device>[device],
-            isExactMatch: true,
-          );
-        }
-      }
-      if (startsWithDeviceId(deviceId, device)) {
-        prefixMatches.add(device);
-      }
-    }
-
-    if (waitForDeviceToConnect) {
-      // Only wait to connect if it's an exact match. Don't wait to connect on
-      // a partial match because if there's also partial matches from other
-      // discoverers, it should be up to the user to pick which to use.
-      if (exactMatchDevice != null) {
-        final Device? connectedDevice =
-            await _waitForDeviceToConnect(exactMatchDevice, logger);
-
-        // Only return device if it also matches filter requirements.
-        if (connectedDevice != null &&
-            (filter == null ||
-                await filter.matchesRequirements(connectedDevice))) {
-          return DeviceDiscoveryMatchByIdResult(
-            <Device>[connectedDevice],
-            isExactMatch: true,
-          );
-        }
-      }
-    }
-
-    return DeviceDiscoveryMatchByIdResult(prefixMatches);
-  }
-
-  Future<Device?> _waitForDeviceToConnect(
+  Future<Device?> waitForDeviceToConnect(
     IOSDevice device,
     Logger logger,
   ) async {
@@ -347,7 +245,7 @@ class IOSDevice extends Device {
   /// may not be accurate. Sometimes if it doesn't not have long enough time
   /// to connect, wireless devices will have an interface of `usb`/`attached`.
   /// This may change after waiting for the device to connect in
-  /// `_waitForDeviceToConnect`.
+  /// `waitForDeviceToConnect`.
   DeviceConnectionInterface connectionInterface;
 
   @override

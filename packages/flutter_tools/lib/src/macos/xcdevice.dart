@@ -344,7 +344,7 @@ class XCDevice {
         _logger.printTrace('xcdevice wait --wifi error: $line');
       });
 
-      final Future<void> usbProcessKilled = _usbDeviceWaitProcess!.exitCode.then((int status) {
+      final Future<void> usbProcessExited = _usbDeviceWaitProcess!.exitCode.then((int status) {
         _logger.printTrace('xcdevice wait --usb exited with code $exitCode');
         // Kill other process in case only one was killed.
         _wifiDeviceWaitProcess?.kill();
@@ -352,7 +352,7 @@ class XCDevice {
         unawaited(usbStderrSubscription.cancel());
       });
 
-      final Future<void> wifiProcessKilled = _wifiDeviceWaitProcess!.exitCode.then((int status) {
+      final Future<void> wifiProcessExited = _wifiDeviceWaitProcess!.exitCode.then((int status) {
         _logger.printTrace('xcdevice wait --wifi exited with code $exitCode');
         // Kill other process in case only one was killed.
         _usbDeviceWaitProcess?.kill();
@@ -360,10 +360,10 @@ class XCDevice {
         unawaited(wifiStderrSubscription.cancel());
       });
 
-      final Future<void> allProcessesKilled = Future.wait(
+      final Future<void> allProcessesExited = Future.wait(
           <Future<void>>[
-            usbProcessKilled,
-            wifiProcessKilled,
+            usbProcessExited,
+            wifiProcessExited,
           ]).whenComplete(() async {
         _usbDeviceWaitProcess = null;
         _wifiDeviceWaitProcess = null;
@@ -372,7 +372,7 @@ class XCDevice {
 
       return await Future.any(
         <Future<XCDeviceEventNotification?>>[
-          allProcessesKilled.then((_) => null),
+          allProcessesExited.then((_) => null),
           waitStreamController!.stream.first.whenComplete(() async {
             cancelWaitForDeviceToConnect();
           }),
