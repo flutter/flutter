@@ -83,7 +83,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/
 
 # PUBSPEC CHECKSUM: 9de3
