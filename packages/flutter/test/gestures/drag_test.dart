@@ -569,6 +569,86 @@ void main() {
     expect(primaryVelocity, velocity.pixelsPerSecond.dx);
   });
 
+  /// Drag the pointer at the given velocity, and return the details
+  /// the recognizer passes to onEnd.
+  ///
+  /// This method will mutate `recognizer.onEnd`.
+  DragEndDetails performDragToEnd(GestureTester tester, DragGestureRecognizer recognizer, Offset pointerVelocity) {
+    late DragEndDetails actual;
+    recognizer.onEnd = (DragEndDetails details) {
+      actual = details;
+    };
+    final TestPointer pointer = TestPointer();
+    final PointerDownEvent down = pointer.down(Offset.zero);
+    recognizer.addPointer(down);
+    tester.closeArena(pointer.pointer);
+    tester.route(down);
+    tester.route(pointer.move(pointerVelocity * 0.025, timeStamp: const Duration(milliseconds: 25)));
+    tester.route(pointer.move(pointerVelocity * 0.050, timeStamp: const Duration(milliseconds: 50)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 50)));
+    return actual;
+  }
+
+  testGesture('Clamp max pan velocity in 2D, isotropically', (GestureTester tester) {
+    final PanGestureRecognizer recognizer = PanGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, Offset expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.velocity.pixelsPerSecond, offsetMoreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.primaryVelocity, isNull);
+    }
+
+    checkDrag(const Offset(  400.0,   400.0), const Offset(  400.0,   400.0));
+    checkDrag(const Offset( 2000.0, -2000.0), const Offset( 2000.0, -2000.0));
+    checkDrag(const Offset(-8000.0, -8000.0), const Offset(-5656.9, -5656.9));
+    checkDrag(const Offset(-8000.0,  6000.0), const Offset(-6400.0,  4800.0));
+    checkDrag(const Offset(-9000.0,     0.0), const Offset(-8000.0,     0.0));
+    checkDrag(const Offset(-9000.0, -1000.0), const Offset(-7951.1, - 883.5));
+    checkDrag(const Offset(-1000.0,  9000.0), const Offset(- 883.5,  7951.1));
+    checkDrag(const Offset(    0.0,  9000.0), const Offset(    0.0,  8000.0));
+  });
+
+  testGesture('Clamp max vertical-drag velocity vertically', (GestureTester tester) {
+    final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, 0.0);
+      expect(actual.velocity.pixelsPerSecond.dy, actual.primaryVelocity);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   400.0);
+    checkDrag(const Offset( 3000.0, -2000.0), -2000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0),     0.0);
+    checkDrag(const Offset(-9000.0,  1000.0),  1000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(    0.0, -9000.0), -8000.0);
+  });
+
+  testGesture('Clamp max horizontal-drag velocity horizontally', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer recognizer = HorizontalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, actual.primaryVelocity);
+      expect(actual.velocity.pixelsPerSecond.dy, 0.0);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   500.0);
+    checkDrag(const Offset( 3000.0, -2000.0),  3000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0), -8000.0);
+    checkDrag(const Offset(-9000.0,  1000.0), -8000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -1000.0);
+    checkDrag(const Offset(    0.0, -9000.0),     0.0);
+  });
+
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);

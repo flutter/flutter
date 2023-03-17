@@ -216,14 +216,18 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
+  /// If [primaryVelocity] is non-null, its value must match one of the
+  /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
+  /// must be zero.
+  ///
   /// The [velocity] argument must not be null.
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
   }) : assert(
          primaryVelocity == null
-           || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy,
+           || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
+           || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
        );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
