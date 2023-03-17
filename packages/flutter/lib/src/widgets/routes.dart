@@ -1686,7 +1686,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       return;
     }
     // Otherwise, the navigation stack status depends on the root navigator.
-    if (subtreeContext == null) {
+    // TODO(justinmc): Test this: You should be able to remove a CanPopScope
+    // from the tree (but not its route) and the SystemNavigator should update.
+    if (!isActive || subtreeContext == null || !subtreeContext!.mounted) {
       return;
     }
     final NavigatorState rootNavigatorState = Navigator.of(
