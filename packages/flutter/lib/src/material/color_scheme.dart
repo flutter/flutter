@@ -1006,9 +1006,12 @@ class ColorScheme with Diagnosticable {
   /// color scheme. This allows apps to override specific colors for their
   /// needs.
   ///
-  /// Given the nature of the algorithm, the most dominant colour of the
+  /// Given the nature of the algorithm, the most dominant color of the
   /// `imageProvider` may not wind up as one of the ColorScheme colors.
   ///
+  /// The provided image will be scaled down to a maximum size of 112x112 pixels
+  /// during color extraction. 
+  /// 
   /// See also:
   ///
   ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
@@ -1070,23 +1073,18 @@ class ColorScheme with Diagnosticable {
         break;
     }
 
-    return ColorScheme(
-      primary: primary ?? Color(scheme.primary),
+    return ColorScheme(primary: primary ?? Color(scheme.primary),
       onPrimary: onPrimary ?? Color(scheme.onPrimary),
       primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
-      onPrimaryContainer:
-          onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
       secondary: secondary ?? Color(scheme.secondary),
       onSecondary: onSecondary ?? Color(scheme.onSecondary),
-      secondaryContainer:
-          secondaryContainer ?? Color(scheme.secondaryContainer),
-      onSecondaryContainer:
-          onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
       tertiary: tertiary ?? Color(scheme.tertiary),
       onTertiary: onTertiary ?? Color(scheme.onTertiary),
       tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
-      onTertiaryContainer:
-          onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
       error: error ?? Color(scheme.error),
       onError: onError ?? Color(scheme.onError),
       errorContainer: errorContainer ?? Color(scheme.errorContainer),
@@ -1113,8 +1111,7 @@ class ColorScheme with Diagnosticable {
 
   // Extracts bytes from an [ImageProvider] and returns a [QuantizerResult]
   // containing the most dominant colors.
-  static Future<QuantizerResult> _extractColorsFromImageProvider(
-      ImageProvider imageProvider) async {
+  static Future<QuantizerResult> _extractColorsFromImageProvider(ImageProvider imageProvider) async {
     final ui.Image scaledImage = await _imageProviderToScaled(imageProvider);
     final ByteData? imageBytes = await scaledImage.toByteData();
 
@@ -1127,45 +1124,52 @@ class ColorScheme with Diagnosticable {
   }
 
   // Scale image size down to reduce computation time of color extraction.
-  static Future<ui.Image> _imageProviderToScaled(
-      ImageProvider imageProvider) async {
+  static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
     const double maxDimension = 112.0;
     final ImageStream stream = imageProvider.resolve(
         const ImageConfiguration(size: Size(maxDimension, maxDimension)));
     final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
     late ImageStreamListener listener;
     late ui.Image scaledImage;
+    Timer? loadFailureTimeout;
 
     listener = ImageStreamListener((ImageInfo info, bool sync) async {
+      loadFailureTimeout?.cancel();
       stream.removeListener(listener);
       final ui.Image image = info.image;
       final int width = image.width;
       final int height = image.height;
       double paintWidth = width.toDouble();
       double paintHeight = height.toDouble();
+      assert(width > 0 && height > 0);
+
       final bool rescale = width > maxDimension || height > maxDimension;
       if (rescale) {
-        paintWidth =
-            (width > height) ? maxDimension : (maxDimension / height) * width;
-        paintHeight =
-            (height > width) ? maxDimension : (maxDimension / width) * height;
+        paintWidth = (width > height) ? maxDimension : (maxDimension / height) * width;
+        paintHeight = (height > width) ? maxDimension : (maxDimension / width) * height;
       }
       final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(pictureRecorder);
       paintImage(
-          canvas: canvas,
-          rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
-          image: image,
-          filterQuality: FilterQuality.none);
+        canvas: canvas,
+        rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
+        image: image,
+        filterQuality: FilterQuality.none);
 
       final ui.Picture picture = pictureRecorder.endRecording();
-      scaledImage =
-          await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
+      scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
       imageCompleter.complete(info.image);
-    }, onError: (_, __) {
+    }, onError: (Object exception, StackTrace? stackTrace) {
       stream.removeListener(listener);
-      throw Exception('Failed to render image. Is it an image file?');
+      throw Exception('Failed to render image: $exception');
     });
+
+    loadFailureTimeout = Timer(const Duration(seconds: 5), () {
+      stream.removeListener(listener);
+      imageCompleter.completeError(
+        TimeoutException('Timeout occurred trying to load image'));
+    });
+
     stream.addListener(listener);
     await imageCompleter.future;
     return scaledImage;
