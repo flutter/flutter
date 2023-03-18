@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -624,8 +625,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The [useSafeArea] parameter specifies whether a [SafeArea] is inserted. Defaults to false.
-/// If false, no SafeArea is added and the top padding is consumed using [MediaQuery.removePadding].
+/// The [useSafeArea] parameter specifies whether the sheet will avoid system
+/// intrusions on the top, left, and right. If false, no SafeArea is added
+/// and the top padding is consumed using [MediaQuery.removePadding].
+/// Defaults to false.
 ///
 /// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
 /// [constraints] and [transitionAnimationController]
@@ -783,12 +786,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
-  /// If useSafeArea is true, a [SafeArea] is inserted.
+  /// Whether to avoid system intrusions on the top, left, and right.
   ///
-  /// If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-  /// and isn't exposed to the top padding of the MediaQuery.
+  /// If true, a [SafeArea] is inserted to keep the bottom sheet away from
+  /// system intrusions at the top, left, and right sides of the screen.
   ///
-  /// Default is false.
+  /// If false, the bottom sheet isn't exposed to the top padding of the
+  /// MediaQuery.
+  ///
+  /// In either case, the bottom sheet extends all the way to the bottom of
+  /// the screen, including any system intrusions.
+  ///
+  /// The default is false.
   final bool useSafeArea;
 
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
@@ -871,11 +880,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    // If useSafeArea is true, a SafeArea is inserted.
-    // If useSafeArea is false, the bottom sheet is aligned to the bottom of the page
-    // and isn't exposed to the top padding of the MediaQuery.
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(child: content)
+      ? SafeArea(bottom: false, child: content)
       : MediaQuery.removePadding(
           context: context,
           removeTop: true,
@@ -1140,10 +1146,10 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
-   const _BottomSheetDefaultsM3(this.context)
+  _BottomSheetDefaultsM3(this.context)
     : super(
       elevation: 1.0,
       modalElevation: 1.0,
@@ -1151,12 +1157,13 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
     );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;
