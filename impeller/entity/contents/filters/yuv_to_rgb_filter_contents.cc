@@ -117,9 +117,8 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  return Contents::EntityFromSnapshot(Snapshot{.texture = out_texture},
-                                      entity.GetBlendMode(),
-                                      entity.GetStencilDepth());
+  return Entity::FromSnapshot(Snapshot{.texture = out_texture},
+                              entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
 }  // namespace impeller

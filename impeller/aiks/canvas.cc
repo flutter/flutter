@@ -485,7 +485,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     // the src contents should be. If neither has a value we fall back
     // to using the geometry coverage data.
     Rect src_coverage;
-    auto size = src_contents->ColorSourceSize();
+    auto size = src_contents->GetColorSourceSize();
     if (size.has_value()) {
       src_coverage = Rect::MakeXYWH(0, 0, size->width, size->height);
     } else {

@@ -2389,7 +2389,7 @@ TEST_P(EntityTest, InheritOpacityTest) {
   texture_contents->SetOpacity(0.5);
   ASSERT_TRUE(texture_contents->CanAcceptOpacity(entity));
 
-  texture_contents->InheritOpacity(0.5);
+  texture_contents->SetInheritedOpacity(0.5);
   ASSERT_EQ(texture_contents->GetOpacity(), 0.25);
 
   // Solid color contents can accept opacity if their geometry
@@ -2401,7 +2401,7 @@ TEST_P(EntityTest, InheritOpacityTest) {
 
   ASSERT_TRUE(solid_color->CanAcceptOpacity(entity));
 
-  solid_color->InheritOpacity(0.5);
+  solid_color->SetInheritedOpacity(0.5);
   ASSERT_EQ(solid_color->GetColor().alpha, 0.25);
 
   // Color source contents can accept opacity if their geometry
@@ -2413,7 +2413,7 @@ TEST_P(EntityTest, InheritOpacityTest) {
 
   ASSERT_TRUE(tiled_texture->CanAcceptOpacity(entity));
 
-  tiled_texture->InheritOpacity(0.5);
+  tiled_texture->SetInheritedOpacity(0.5);
   ASSERT_EQ(tiled_texture->GetAlpha(), 0.25);
 
   // Text contents can accept opacity if the text frames do not
@@ -2431,7 +2431,7 @@ TEST_P(EntityTest, InheritOpacityTest) {
 
   ASSERT_TRUE(text_contents->CanAcceptOpacity(entity));
 
-  text_contents->InheritOpacity(0.5);
+  text_contents->SetInheritedOpacity(0.5);
   ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
 
   // Clips and restores trivially accept opacity.

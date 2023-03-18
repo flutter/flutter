@@ -114,7 +114,7 @@ bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
   }
   auto alpha = paint_.color.alpha;
   entity_pass->IterateUntilSubpass([&alpha](Entity& entity) {
-    entity.GetContents()->InheritOpacity(alpha);
+    entity.GetContents()->SetInheritedOpacity(alpha);
     return true;
   });
   return true;

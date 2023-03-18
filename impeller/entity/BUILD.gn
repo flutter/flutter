@@ -128,6 +128,8 @@ impeller_shaders("framebuffer_blend_entity_shaders") {
 
 impeller_component("entity") {
   sources = [
+    "contents/anonymous_contents.cc",
+    "contents/anonymous_contents.h",
     "contents/atlas_contents.cc",
     "contents/atlas_contents.h",
     "contents/clip_contents.cc",

@@ -39,8 +39,8 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
                         transform.Invert() *  //
                         snapshot->transform;
   snapshot->sampler_descriptor = sampler_descriptor_;
-  return Contents::EntityFromSnapshot(snapshot, entity.GetBlendMode(),
-                                      entity.GetStencilDepth());
+  return Entity::FromSnapshot(snapshot, entity.GetBlendMode(),
+                              entity.GetStencilDepth());
 }
 
 std::optional<Rect> MatrixFilterContents::GetFilterCoverage(

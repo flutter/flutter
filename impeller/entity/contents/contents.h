@@ -30,22 +30,24 @@ ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
 
 class Contents {
  public:
-  Contents();
-
-  virtual ~Contents();
-
   struct StencilCoverage {
-    enum class Type { kNone, kAppend, kRestore };
+    enum class Type { kNoChange, kAppend, kRestore };
 
-    Type type = Type::kNone;
+    Type type = Type::kNoChange;
     std::optional<Rect> coverage = std::nullopt;
   };
 
-  /// @brief  Create an entity that renders a given snapshot.
-  static std::optional<Entity> EntityFromSnapshot(
-      const std::optional<Snapshot>& snapshot,
-      BlendMode blend_mode = BlendMode::kSourceOver,
-      uint32_t stencil_depth = 0);
+  using RenderProc = std::function<bool(const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass)>;
+  using CoverageProc = std::function<std::optional<Rect>(const Entity& entity)>;
+
+  static std::shared_ptr<Contents> MakeAnonymous(RenderProc render_proc,
+                                                 CoverageProc coverage_proc);
+
+  Contents();
+
+  virtual ~Contents();
 
   virtual bool Render(const ContentContext& renderer,
                       const Entity& entity,
@@ -77,11 +79,12 @@ class Contents {
 
   /// @brief  Return the color source's intrinsic size, if available.
   ///
-  /// For example, a gradient has a size based on its end and beginning points,
-  /// ignoring any tiling. Solid colors and runtime effects have no size.
-  std::optional<Size> ColorSourceSize() const { return color_source_size_; }
+  ///         For example, a gradient has a size based on its end and beginning
+  ///         points, ignoring any tiling. Solid colors and runtime effects have
+  ///         no size.
+  std::optional<Size> GetColorSourceSize() const;
 
-  void SetColorSourceSize(Size size) { color_source_size_ = size; }
+  void SetColorSourceSize(Size size);
 
   /// @brief Whether or not this contents can accept the opacity peephole
   ///        optimization.
@@ -94,9 +97,9 @@ class Contents {
   virtual bool CanAcceptOpacity(const Entity& entity) const;
 
   /// @brief Inherit the provided opacity.
-  virtual void InheritOpacity(Scalar opacity);
-
- protected:
+  ///
+  ///        Use of this method is invalid if CanAcceptOpacity returns false.
+  virtual void SetInheritedOpacity(Scalar opacity);
 
  private:
   std::optional<Size> color_source_size_;
