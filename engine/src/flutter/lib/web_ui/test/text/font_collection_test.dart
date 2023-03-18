@@ -77,6 +77,27 @@ void testMain() {
         expect(fontFamilyList.length, equals(1));
         expect(fontFamilyList.first, 'AhEm');
       });
+
+      test('Register Asset with descriptor', () async {
+        const String testFontFamily = 'Ahem';
+        final List<String> fontFamilyList = <String>[];
+
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{
+              'weight': 'bold',
+            });
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
+        domDocument.fonts!
+            .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
+          expect(f.weight, 'bold');
+          expect(f2.weight, 'bold');
+          fontFamilyList.add(f.family!);
+        });
+
+        expect(fontFamilyList.length, equals(1));
+        expect(fontFamilyList.first, 'Ahem');
+      });
     });
 
     group('fonts with special characters', () {
