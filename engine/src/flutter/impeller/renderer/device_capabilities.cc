@@ -15,7 +15,8 @@ IDeviceCapabilities::IDeviceCapabilities(bool has_threading_restrictions,
                                          PixelFormat default_color_format,
                                          PixelFormat default_stencil_format,
                                          bool supports_compute,
-                                         bool supports_compute_subgroups)
+                                         bool supports_compute_subgroups,
+                                         bool supports_read_from_resolve)
     : has_threading_restrictions_(has_threading_restrictions),
       supports_offscreen_msaa_(supports_offscreen_msaa),
       supports_ssbo_(supports_ssbo),
@@ -24,7 +25,8 @@ IDeviceCapabilities::IDeviceCapabilities(bool has_threading_restrictions,
       default_color_format_(default_color_format),
       default_stencil_format_(default_stencil_format),
       supports_compute_(supports_compute),
-      supports_compute_subgroups_(supports_compute_subgroups) {}
+      supports_compute_subgroups_(supports_compute_subgroups),
+      supports_read_from_resolve_(supports_read_from_resolve) {}
 
 IDeviceCapabilities::~IDeviceCapabilities() = default;
 
@@ -62,6 +64,10 @@ bool IDeviceCapabilities::SupportsCompute() const {
 
 bool IDeviceCapabilities::SupportsComputeSubgroups() const {
   return supports_compute_subgroups_;
+}
+
+bool IDeviceCapabilities::SupportsReadFromResolve() const {
+  return supports_read_from_resolve_;
 }
 
 DeviceCapabilitiesBuilder::DeviceCapabilitiesBuilder() = default;
@@ -118,6 +124,12 @@ DeviceCapabilitiesBuilder& DeviceCapabilitiesBuilder::SetSupportsCompute(
   return *this;
 }
 
+DeviceCapabilitiesBuilder&
+DeviceCapabilitiesBuilder::SetSupportsReadFromResolve(bool value) {
+  supports_read_from_resolve_ = value;
+  return *this;
+}
+
 std::unique_ptr<IDeviceCapabilities> DeviceCapabilitiesBuilder::Build() {
   FML_CHECK(default_color_format_.has_value())
       << "Default color format not set";
@@ -133,7 +145,8 @@ std::unique_ptr<IDeviceCapabilities> DeviceCapabilitiesBuilder::Build() {
       *default_color_format_,                                   //
       *default_stencil_format_,                                 //
       supports_compute_,                                        //
-      supports_compute_subgroups_                               //
+      supports_compute_subgroups_,                              //
+      supports_read_from_resolve_                               //
   );
   return std::unique_ptr<IDeviceCapabilities>(capabilities);
 }
