@@ -11,6 +11,9 @@ namespace impeller {
 
 class CompressedImageSkia final : public CompressedImage {
  public:
+  static std::shared_ptr<CompressedImage> Create(
+      std::shared_ptr<const fml::Mapping> allocation);
+
   CompressedImageSkia(std::shared_ptr<const fml::Mapping> allocation);
 
   ~CompressedImageSkia() override;

@@ -17,9 +17,6 @@ class ImageSource;
 
 class CompressedImage {
  public:
-  static std::shared_ptr<CompressedImage> Create(
-      std::shared_ptr<const fml::Mapping> allocation);
-
   virtual ~CompressedImage();
 
   [[nodiscard]] virtual DecompressedImage Decode() const = 0;

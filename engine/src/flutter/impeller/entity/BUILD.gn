@@ -217,7 +217,7 @@ impeller_component("entity") {
     ":framebuffer_blend_entity_shaders",
     ":modern_entity_shaders",
     "../archivist",
-    "../image",
+    "../image:image_skia_backend",
     "../renderer",
     "../scene",
     "../typographer",

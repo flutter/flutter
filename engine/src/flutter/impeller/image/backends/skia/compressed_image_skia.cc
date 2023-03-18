@@ -14,6 +14,15 @@
 
 namespace impeller {
 
+std::shared_ptr<CompressedImage> CompressedImageSkia::Create(
+    std::shared_ptr<const fml::Mapping> allocation) {
+  // There is only one backend today.
+  if (!allocation) {
+    return nullptr;
+  }
+  return std::make_shared<CompressedImageSkia>(std::move(allocation));
+}
+
 CompressedImageSkia::CompressedImageSkia(
     std::shared_ptr<const fml::Mapping> allocation)
     : CompressedImage(std::move(allocation)) {}

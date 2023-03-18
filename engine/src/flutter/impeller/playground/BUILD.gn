@@ -45,6 +45,7 @@ impeller_component("playground") {
     "../entity:framebuffer_blend_entity_shaders",
     "../entity:modern_entity_shaders",
     "../fixtures:shader_fixtures",
+    "../image:image_skia_backend",
     "../renderer",
     "../scene/shaders",
     "imgui:imgui_impeller_backend",
