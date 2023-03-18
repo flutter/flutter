@@ -1195,6 +1195,8 @@ ORIGIN: ../../../flutter/impeller/entity/entity_pass.cc + ../../../flutter/LICEN
 ORIGIN: ../../../flutter/impeller/entity/entity_pass.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_pass_delegate.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_pass_delegate.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/entity_pass_target.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/entity_pass_target.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_playground.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_playground.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry.cc + ../../../flutter/LICENSE
@@ -3730,6 +3732,8 @@ FILE: ../../../flutter/impeller/entity/entity_pass.cc
 FILE: ../../../flutter/impeller/entity/entity_pass.h
 FILE: ../../../flutter/impeller/entity/entity_pass_delegate.cc
 FILE: ../../../flutter/impeller/entity/entity_pass_delegate.h
+FILE: ../../../flutter/impeller/entity/entity_pass_target.cc
+FILE: ../../../flutter/impeller/entity/entity_pass_target.h
 FILE: ../../../flutter/impeller/entity/entity_playground.cc
 FILE: ../../../flutter/impeller/entity/entity_playground.h
 FILE: ../../../flutter/impeller/entity/geometry.cc

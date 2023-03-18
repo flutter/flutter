@@ -108,6 +108,7 @@ ContextMTL::ContextMTL(id<MTLDevice> device,
             .SetDefaultColorFormat(PixelFormat::kB8G8R8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
             .SetSupportsCompute(true, supports_subgroups)
+            .SetSupportsReadFromResolve(true)
             .Build();
   }
 

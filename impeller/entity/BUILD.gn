@@ -208,6 +208,8 @@ impeller_component("entity") {
     "entity_pass.h",
     "entity_pass_delegate.cc",
     "entity_pass_delegate.h",
+    "entity_pass_target.cc",
+    "entity_pass_target.h",
     "geometry.cc",
     "geometry.h",
     "inline_pass_context.cc",
