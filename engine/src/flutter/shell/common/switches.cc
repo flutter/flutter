@@ -443,8 +443,12 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_asset_fonts =
       !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
-  settings.enable_impeller =
-      command_line.HasOption(FlagForSwitch(Switch::EnableImpeller));
+  std::string enable_impeller_value;
+  if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableImpeller),
+                                  &enable_impeller_value)) {
+    settings.enable_impeller =
+        enable_impeller_value.empty() || "true" == enable_impeller_value;
+  }
 
   settings.enable_embedder_api =
       command_line.HasOption(FlagForSwitch(Switch::EnableEmbedderAPI));
