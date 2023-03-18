@@ -457,7 +457,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
         element_entity.GetStencilCoverage(stencil_stack.back().coverage);
 
     switch (stencil_coverage.type) {
-      case Contents::StencilCoverage::Type::kNone:
+      case Contents::StencilCoverage::Type::kNoChange:
         break;
       case Contents::StencilCoverage::Type::kAppend: {
         auto op = stencil_stack.back().coverage;
@@ -671,7 +671,7 @@ void EntityPass::SetStencilDepth(size_t stencil_depth) {
 
 void EntityPass::SetBlendMode(BlendMode blend_mode) {
   blend_mode_ = blend_mode;
-  cover_whole_screen_ = Entity::BlendModeShouldCoverWholeScreen(blend_mode);
+  cover_whole_screen_ = Entity::IsBlendModeDestructive(blend_mode);
 }
 
 void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {

@@ -10,11 +10,36 @@
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity_pass.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
+
+std::optional<Entity> Entity::FromSnapshot(
+    const std::optional<Snapshot>& snapshot,
+    BlendMode blend_mode,
+    uint32_t stencil_depth) {
+  if (!snapshot.has_value()) {
+    return std::nullopt;
+  }
+
+  auto texture_rect = Rect::MakeSize(snapshot->texture->GetSize());
+
+  auto contents = TextureContents::MakeRect(texture_rect);
+  contents->SetTexture(snapshot->texture);
+  contents->SetSamplerDescriptor(snapshot->sampler_descriptor);
+  contents->SetSourceRect(texture_rect);
+  contents->SetOpacity(snapshot->opacity);
+
+  Entity entity;
+  entity.SetBlendMode(blend_mode);
+  entity.SetStencilDepth(stencil_depth);
+  entity.SetTransformation(snapshot->transform);
+  entity.SetContents(contents);
+  return entity;
+}
 
 Entity::Entity() = default;
 
@@ -76,7 +101,14 @@ BlendMode Entity::GetBlendMode() const {
   return blend_mode_;
 }
 
-bool Entity::BlendModeShouldCoverWholeScreen(BlendMode blend_mode) {
+/// @brief  Returns true if the blend mode is "destrictive", meaning that even
+///         fully transparent source colors would result in the destination
+///         getting changed.
+///
+///         This is useful for determining if EntityPass textures can be
+///         shrinkwrapped to their Entities' coverage; they can be shrinkwrapped
+///         if all of the contained Entities have non-destructive blends.
+bool Entity::IsBlendModeDestructive(BlendMode blend_mode) {
   switch (blend_mode) {
     case BlendMode::kClear:
     case BlendMode::kSource:

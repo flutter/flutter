@@ -37,7 +37,7 @@ class ColorSourceContents : public Contents {
   bool CanAcceptOpacity(const Entity& entity) const override;
 
   // | Contents|
-  void InheritOpacity(Scalar opacity) override;
+  void SetInheritedOpacity(Scalar opacity) override;
 
   Scalar GetAlpha() const;
 
