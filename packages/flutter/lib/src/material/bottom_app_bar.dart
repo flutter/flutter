@@ -208,7 +208,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
-    final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     Widget child = Padding(
@@ -220,7 +219,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child = Material(
         key: materialKey,
         elevation: elevation,
-        color: effectiveColor,
+        color: color,
         surfaceTintColor: surfaceTintColor,
         shadowColor: shadowColor,
         child: SafeArea(child: child),
@@ -230,7 +229,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
         clipper: clipper,
         elevation: elevation,
         shadowColor: shadowColor,
-        color: effectiveColor,
+        color: ElevationOverlay.applyOverlay(context, color, elevation),
         clipBehavior: widget.clipBehavior,
         child: Material(
           key: materialKey,
