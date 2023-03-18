@@ -554,6 +554,12 @@ def to_gn_args(args):
   if args.enable_impeller_3d:
     gn_args['impeller_enable_3d'] = True
 
+  if args.enable_impeller_vulkan:
+    gn_args['impeller_enable_vulkan'] = True
+
+  if args.enable_impeller_opengles:
+    gn_args['impeller_enable_opengles'] = True
+
   if args.prebuilt_impellerc is not None:
     gn_args['impeller_use_prebuilt_impellerc'] = args.prebuilt_impellerc
 
@@ -976,6 +982,20 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Whether impeller unit tests run in playground mode.'
+  )
+
+  parser.add_argument(
+      '--enable-impeller-vulkan',
+      default=False,
+      action='store_true',
+      help='Enable the Impeller Vulkan backend.'
+  )
+
+  parser.add_argument(
+      '--enable-impeller-opengles',
+      default=False,
+      action='store_true',
+      help='Enable the Impeller OpenGL ES backend.'
   )
 
   parser.add_argument(
