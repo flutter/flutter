@@ -454,11 +454,11 @@ void main() {
 
   test('fromImageProvider() propogates TimeoutException when image cannot be rendered', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-    
+  
     // Corrupt the image's bytelist so it cannot be read.
     final Uint8List corruptImage = blueSquareBytes.sublist(5);
     final ImageProvider image = MemoryImage(corruptImage);
-   
+  
     expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
       isA<Exception>().having((Exception e) => e.toString(),
         'Timeout occurred trying to load image', contains('TimeoutException')),
