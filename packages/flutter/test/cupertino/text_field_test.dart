@@ -393,7 +393,7 @@ void main() {
     await tester.pump();
     EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorOpacityAnimates, true);
-    
+
     // False
 
     await tester.pumpWidget(
