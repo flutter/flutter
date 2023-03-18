@@ -179,15 +179,15 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
-    final bool isPrintPaths = boolArgDeprecated('paths');
-    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
-    final bool isVerifyOnly = boolArgDeprecated('verify-only');
-    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
-    final bool offline = boolArgDeprecated('offline');
+    final bool forceUpgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
+    final bool offline = boolArg('offline');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (boolArgDeprecated('crash')) {
+    if (boolArg('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -442,7 +442,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       context: PubContext.updatePackages,
       project: FlutterProject.fromDirectory(syntheticPackageDir),
       upgrade: doUpgrade,
-      offline: boolArgDeprecated('offline'),
+      offline: boolArg('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
       outputMode: PubOutputMode.none,
     );
@@ -484,15 +484,15 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    if (boolArgDeprecated('transitive-closure')) {
+    if (boolArg('transitive-closure')) {
       tree._dependencyTree.forEach((String from, Set<String> to) {
         globals.printStatus('$from -> $to');
       });
       return true;
     }
 
-    if (boolArgDeprecated('paths')) {
-      showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
+    if (boolArg('paths')) {
+      showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
       return true;
     }
 
@@ -526,7 +526,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     try {
       // int.tryParse will not accept null, but will convert empty string to null
-      final int? maxJobs = int.tryParse(stringArgDeprecated('jobs') ?? '');
+      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
@@ -1440,7 +1440,7 @@ String generateFakePubspec(
   final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <4.0.0'");
+  result.writeln("  sdk: '>=2.12.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {

@@ -5,7 +5,10 @@
 import 'template.dart';
 
 class InputChipTemplate extends TokenTemplate {
-  const InputChipTemplate(super.blockName, super.fileName, super.tokens);
+  const InputChipTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.input-chip';
   static const String variant = '';
@@ -13,7 +16,7 @@ class InputChipTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
-  const _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
+  _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
@@ -23,6 +26,8 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   final BuildContext context;
   final bool isEnabled;
   final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
