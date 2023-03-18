@@ -44,7 +44,6 @@ class ContextMTL final : public Context,
   std::shared_ptr<PipelineLibraryMTL> pipeline_library_;
   std::shared_ptr<SamplerLibrary> sampler_library_;
   std::shared_ptr<AllocatorMTL> resource_allocator_;
-  std::shared_ptr<WorkQueue> work_queue_;
   std::shared_ptr<GPUTracerMTL> gpu_tracer_;
   std::unique_ptr<IDeviceCapabilities> device_capabilities_;
   bool is_valid_ = false;
@@ -70,9 +69,6 @@ class ContextMTL final : public Context,
 
   // |Context|
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
-
-  // |Context|
-  std::shared_ptr<WorkQueue> GetWorkQueue() const override;
 
   // |Context|
   std::shared_ptr<GPUTracer> GetGPUTracer() const override;

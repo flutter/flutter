@@ -25,18 +25,7 @@ impeller_component("base") {
     "validation.h",
     "version.cc",
     "version.h",
-    "work_queue.cc",
-    "work_queue.h",
-    "work_queue_common.cc",
-    "work_queue_common.h",
   ]
-
-  if (is_ios || is_mac) {
-    sources += [
-      "platform/darwin/work_queue_darwin.cc",
-      "platform/darwin/work_queue_darwin.h",
-    ]
-  }
 
   deps = [ "//flutter/fml" ]
 }

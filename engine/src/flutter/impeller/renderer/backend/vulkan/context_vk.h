@@ -68,9 +68,6 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   PixelFormat GetColorAttachmentPixelFormat() const override;
 
   // |Context|
-  std::shared_ptr<WorkQueue> GetWorkQueue() const override;
-
-  // |Context|
   const IDeviceCapabilities& GetDeviceCapabilities() const override;
 
   template <typename T>
@@ -139,7 +136,6 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   vk::Queue compute_queue_ = {};
   vk::Queue transfer_queue_ = {};
   std::shared_ptr<SwapchainVK> swapchain_;
-  std::shared_ptr<WorkQueue> work_queue_;
   std::unique_ptr<IDeviceCapabilities> device_capabilities_;
   vk::UniqueCommandPool graphics_command_pool_;
   vk::UniqueDescriptorPool descriptor_pool_;
