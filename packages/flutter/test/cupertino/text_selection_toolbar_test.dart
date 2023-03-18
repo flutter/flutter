@@ -186,6 +186,7 @@ void main() {
     const double height = _kToolbarHeight;
     const double anchorBelowY = 500.0;
     double anchorAboveY = 0.0;
+    const double paddingAbove = 12.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -193,14 +194,26 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
-              return CupertinoTextSelectionToolbar(
-                anchorAbove: Offset(50.0, anchorAboveY),
-                anchorBelow: const Offset(50.0, anchorBelowY),
-                children: <Widget>[
-                  Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                  Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                  Container(color: const Color(0xff0000ff), width: 50.0, height: height),
-                ],
+              final MediaQueryData data = MediaQuery.of(context);
+              // Add some custom vertical padding to make this test more strict.
+              // By default in the testing environment, _kToolbarContentDistance
+              // and the built-in padding from CupertinoApp can end up canceling
+              // each other out.
+              return MediaQuery(
+                data: data.copyWith(
+                  padding: data.viewPadding.copyWith(
+                    top: paddingAbove,
+                  ),
+                ),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: Offset(50.0, anchorAboveY),
+                  anchorBelow: const Offset(50.0, anchorBelowY),
+                  children: <Widget>[
+                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  ],
+                ),
               );
             },
           ),
@@ -212,10 +225,14 @@ void main() {
     // belowAnchor.
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
+    expect(find.byType(CustomSingleChildLayout), findsOneWidget);
+    final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
+    final TextSelectionToolbarLayoutDelegate delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
+    expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.
     setState(() {
-      anchorAboveY = 50.0;
+      anchorAboveY = 70.0;
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
@@ -223,7 +240,7 @@ void main() {
 
     // When it does fit above aboveAnchor, it positions itself there.
     setState(() {
-      anchorAboveY = 60.0;
+      anchorAboveY = 80.0;
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
