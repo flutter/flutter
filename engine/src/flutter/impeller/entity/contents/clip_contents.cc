@@ -74,7 +74,7 @@ bool ClipContents::CanAcceptOpacity(const Entity& entity) const {
   return true;
 }
 
-void ClipContents::InheritOpacity(Scalar opacity) {}
+void ClipContents::SetInheritedOpacity(Scalar opacity) {}
 
 bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
@@ -176,7 +176,7 @@ bool ClipRestoreContents::CanAcceptOpacity(const Entity& entity) const {
   return true;
 }
 
-void ClipRestoreContents::InheritOpacity(Scalar opacity) {}
+void ClipRestoreContents::SetInheritedOpacity(Scalar opacity) {}
 
 bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  const Entity& entity,

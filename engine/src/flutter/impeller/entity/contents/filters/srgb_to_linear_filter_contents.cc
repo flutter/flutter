@@ -80,7 +80,7 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  return Contents::EntityFromSnapshot(
+  return Entity::FromSnapshot(
       Snapshot{.texture = out_texture,
                .transform = input_snapshot->transform,
                .sampler_descriptor = input_snapshot->sampler_descriptor,

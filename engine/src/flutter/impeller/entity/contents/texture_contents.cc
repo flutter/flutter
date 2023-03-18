@@ -61,7 +61,7 @@ bool TextureContents::CanAcceptOpacity(const Entity& entity) const {
   return true;
 }
 
-void TextureContents::InheritOpacity(Scalar opacity) {
+void TextureContents::SetInheritedOpacity(Scalar opacity) {
   opacity_ = opacity_ * opacity;
 }
 

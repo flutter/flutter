@@ -46,7 +46,7 @@ bool ColorSourceContents::CanAcceptOpacity(const Entity& entity) const {
   return true;
 }
 
-void ColorSourceContents::InheritOpacity(Scalar opacity) {
+void ColorSourceContents::SetInheritedOpacity(Scalar opacity) {
   SetAlpha(GetAlpha() * opacity);
 }
 

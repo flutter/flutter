@@ -71,16 +71,16 @@ static std::optional<Entity> AdvancedBlend(
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
       }
-      return Contents::EntityFromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                          entity.GetStencilDepth());
+      return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+                                  entity.GetStencilDepth());
     }
     auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
     if (!maybe_src_uvs.has_value()) {
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
       }
-      return Contents::EntityFromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                          entity.GetStencilDepth());
+      return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+                                  entity.GetStencilDepth());
     }
     src_uvs = maybe_src_uvs.value();
   }
@@ -156,7 +156,7 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
 
-  return Contents::EntityFromSnapshot(
+  return Entity::FromSnapshot(
       Snapshot{.texture = out_texture,
                .transform = Matrix::MakeTranslation(coverage.origin),
                // Since we absorbed the transform of the inputs and used the
@@ -280,7 +280,7 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;
   }
 
-  return Contents::EntityFromSnapshot(
+  return Entity::FromSnapshot(
       Snapshot{.texture = out_texture,
                .transform = Matrix::MakeTranslation(coverage.origin),
                // Since we absorbed the transform of the inputs and used the

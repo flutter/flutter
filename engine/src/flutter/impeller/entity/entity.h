@@ -49,6 +49,12 @@ class Entity {
     kIntersect,
   };
 
+  /// @brief  Create an entity that can be used to render a given snapshot.
+  static std::optional<Entity> FromSnapshot(
+      const std::optional<Snapshot>& snapshot,
+      BlendMode blend_mode = BlendMode::kSourceOver,
+      uint32_t stencil_depth = 0);
+
   Entity();
 
   ~Entity();
@@ -80,7 +86,7 @@ class Entity {
 
   bool Render(const ContentContext& renderer, RenderPass& parent_pass) const;
 
-  static bool BlendModeShouldCoverWholeScreen(BlendMode blend_mode);
+  static bool IsBlendModeDestructive(BlendMode blend_mode);
 
  private:
   Matrix transformation_;

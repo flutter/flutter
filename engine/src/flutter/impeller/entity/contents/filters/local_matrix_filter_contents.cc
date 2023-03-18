@@ -25,9 +25,8 @@ std::optional<Entity> LocalMatrixFilterContents::RenderFilter(
     const Entity& entity,
     const Matrix& effect_transform,
     const Rect& coverage) const {
-  return Contents::EntityFromSnapshot(inputs[0]->GetSnapshot(renderer, entity),
-                                      entity.GetBlendMode(),
-                                      entity.GetStencilDepth());
+  return Entity::FromSnapshot(inputs[0]->GetSnapshot(renderer, entity),
+                              entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
 }  // namespace impeller

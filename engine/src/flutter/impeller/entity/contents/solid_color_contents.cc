@@ -34,7 +34,7 @@ bool SolidColorContents::CanAcceptOpacity(const Entity& entity) const {
 }
 
 // | Contents|
-void SolidColorContents::InheritOpacity(Scalar opacity) {
+void SolidColorContents::SetInheritedOpacity(Scalar opacity) {
   auto color = color_;
   color_ = color.WithAlpha(color.alpha * opacity);
 }

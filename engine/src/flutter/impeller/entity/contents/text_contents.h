@@ -36,7 +36,7 @@ class TextContents final : public Contents {
 
   bool CanAcceptOpacity(const Entity& entity) const override;
 
-  void InheritOpacity(Scalar opacity) override;
+  void SetInheritedOpacity(Scalar opacity) override;
 
   void SetInverseMatrix(Matrix matrix);
 

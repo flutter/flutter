@@ -128,7 +128,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  return Contents::EntityFromSnapshot(
+  return Entity::FromSnapshot(
       Snapshot{.texture = out_texture,
                .transform = Matrix::MakeTranslation(coverage.origin),
                .opacity = input_snapshot->opacity},
