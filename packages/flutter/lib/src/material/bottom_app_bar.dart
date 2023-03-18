@@ -226,22 +226,20 @@ class _BottomAppBarState extends State<BottomAppBar> {
         child: SafeArea(child: child),
       );
     } else {
-      child = Material(
-        key: materialKey,
-        type: MaterialType.transparency,
-        elevation: elevation,
-        surfaceTintColor: surfaceTintColor,
-        shadowColor: shadowColor,
-        child: SafeArea(child: child),
-      );
-
       child = PhysicalShape(
         clipper: clipper,
         elevation: elevation,
         shadowColor: shadowColor,
         color: effectiveColor,
         clipBehavior: widget.clipBehavior,
-        child: child,
+        child: Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          elevation: elevation,
+          surfaceTintColor: surfaceTintColor,
+          shadowColor: shadowColor,
+          child: SafeArea(child: child),
+        ),
       );
     }
 
