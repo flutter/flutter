@@ -662,11 +662,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
-  /// Whether the cursor will animate from fully transparent to fully opaque
-  /// during each cursor blink.
-  ///
-  /// By default, the cursor opacity will animate on iOS platforms and will not
-  /// animate on Android platforms.
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
   final bool cursorOpacityAnimates;
 
   /// The color to use when painting the cursor.
