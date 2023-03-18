@@ -10,6 +10,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/testing/debugger_detection.h"
+#include "flutter/testing/test_args.h"
 #include "flutter/testing/test_timeout_listener.h"
 #include "gtest/gtest.h"
 
@@ -17,8 +18,8 @@
 #include <asl.h>
 #endif  // FML_OS_IOS
 
-std::optional<fml::TimeDelta> GetTestTimeoutFromArgs(int argc, char** argv) {
-  const auto command_line = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
+std::optional<fml::TimeDelta> GetTestTimeout() {
+  const auto& command_line = flutter::testing::GetArgsForProcess();
 
   std::string timeout_seconds;
   if (!command_line.GetOptionValue("timeout", &timeout_seconds)) {
@@ -37,6 +38,9 @@ std::optional<fml::TimeDelta> GetTestTimeoutFromArgs(int argc, char** argv) {
 
 int main(int argc, char** argv) {
   fml::InstallCrashHandler();
+
+  flutter::testing::SetArgsForProcess(argc, argv);
+
 #ifdef FML_OS_IOS
   asl_log_descriptor(NULL, NULL, ASL_LEVEL_NOTICE, STDOUT_FILENO,
                      ASL_LOG_DESCRIPTOR_WRITE);
@@ -47,7 +51,7 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   // Check if the user has specified a timeout.
-  const auto timeout = GetTestTimeoutFromArgs(argc, argv);
+  const auto timeout = GetTestTimeout();
   if (!timeout.has_value()) {
     FML_LOG(INFO) << "Timeouts disabled via a command line flag.";
     return RUN_ALL_TESTS();
