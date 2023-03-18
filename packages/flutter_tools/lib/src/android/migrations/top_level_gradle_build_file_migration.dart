@@ -10,7 +10,7 @@ const String _eagerCleanTaskDeclaration = '''
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-''' ;
+''';
 
 const String _lazyCleanTaskDeclaration = '''
 tasks.register("clean", Delete) {
@@ -19,8 +19,8 @@ tasks.register("clean", Delete) {
 ''';
 
 /// Migrate the Gradle "clean" task to use modern, lazy declaration style.
-class GradleLazyCleanTaskMigrator extends ProjectMigrator {
-  GradleLazyCleanTaskMigrator(
+class TopLevelGradleBuildFileMigration extends ProjectMigrator {
+  TopLevelGradleBuildFileMigration(
   AndroidProject project,
     super.logger,
   )   : _topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');

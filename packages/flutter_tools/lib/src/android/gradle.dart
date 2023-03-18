@@ -32,7 +32,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
-import 'migrations/gradle_lazy_clean_task_migration.dart';
+import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
 /// The directory where the APK artifact is generated.
@@ -242,7 +242,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
-      GradleLazyCleanTaskMigrator(project.android, _logger),
+      TopLevelGradleBuildFileMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);

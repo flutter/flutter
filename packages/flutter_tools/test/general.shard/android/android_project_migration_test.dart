@@ -4,7 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/migrations/gradle_lazy_clean_task_migration.dart';
+import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -37,7 +37,7 @@ void main() {
       });
 
       testUsingContext('skipped if files are missing', () {
-        final GradleLazyCleanTaskMigrator androidProjectMigration = GradleLazyCleanTaskMigrator(
+        final TopLevelGradleBuildFileMigration androidProjectMigration = TopLevelGradleBuildFileMigration(
           project,
           bufferLogger,
         );
@@ -55,7 +55,7 @@ tasks.register("clean", Delete) {
 }
         ''');
 
-        final GradleLazyCleanTaskMigrator androidProjectMigration = GradleLazyCleanTaskMigrator(
+        final TopLevelGradleBuildFileMigration androidProjectMigration = TopLevelGradleBuildFileMigration(
           project,
           bufferLogger,
         );
@@ -73,7 +73,7 @@ task clean(type: Delete) {
 }
 ''');
 
-        final GradleLazyCleanTaskMigrator androidProjectMigration = GradleLazyCleanTaskMigrator(
+        final TopLevelGradleBuildFileMigration androidProjectMigration = TopLevelGradleBuildFileMigration(
           project,
           bufferLogger,
         );
@@ -92,7 +92,6 @@ tasks.register("clean", Delete) {
   });
 }
 
-// TODO: FakeAndroidProject is already present in test/general.shard/plugins_test.dart – should we use it here?
 class FakeAndroidProject extends Fake implements AndroidProject {
   @override
   Directory hostAppGradleRoot = MemoryFileSystem.test().currentDirectory;
