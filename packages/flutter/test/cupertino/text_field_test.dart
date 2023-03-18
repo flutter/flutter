@@ -381,13 +381,13 @@ void main() {
     },
   );
 
-    testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
+  testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
 
     // True
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: CupertinoTextField(autofocus: true, cursorOpacityAnimates: true),
+        home: CupertinoTextField(autofocus: true),
       ),
     );
     await tester.pump();
