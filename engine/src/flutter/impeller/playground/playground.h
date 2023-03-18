@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
-
 #include "impeller/geometry/point.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
@@ -90,6 +90,9 @@ class Playground {
       std::string asset_name) const = 0;
 
   virtual std::string GetWindowTitle() const = 0;
+
+ protected:
+  virtual bool ShouldKeepRendering() const;
 
  private:
 #if IMPELLER_ENABLE_PLAYGROUND

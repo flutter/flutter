@@ -300,6 +300,10 @@ bool Playground::OpenPlaygroundHere(
       VALIDATION_LOG << "Could not render into the surface.";
       return false;
     }
+
+    if (!ShouldKeepRendering()) {
+      break;
+    }
   }
 
   ::glfwHideWindow(window);
@@ -448,6 +452,10 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
 
 void Playground::SetWindowSize(ISize size) {
   window_size_ = size;
+}
+
+bool Playground::ShouldKeepRendering() const {
+  return true;
 }
 
 }  // namespace impeller

@@ -11,6 +11,8 @@ impeller_component("playground") {
     "playground.h",
     "playground_impl.cc",
     "playground_impl.h",
+    "switches.cc",
+    "switches.h",
     "widgets.cc",
     "widgets.h",
   ]

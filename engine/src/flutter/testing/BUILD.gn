@@ -45,6 +45,8 @@ source_set("testing") {
     "debugger_detection.cc",
     "debugger_detection.h",
     "run_all_unittests.cc",
+    "test_args.cc",
+    "test_args.h",
     "test_timeout_listener.cc",
     "test_timeout_listener.h",
   ]
