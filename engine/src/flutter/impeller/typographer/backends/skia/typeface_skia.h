@@ -28,9 +28,6 @@ class TypefaceSkia final : public Typeface,
   // |Comparable<Typeface>|
   bool IsEqual(const Typeface& other) const override;
 
-  // |Typeface|
-  Rect GetBoundingBox() const override;
-
   const sk_sp<SkTypeface>& GetSkiaTypeface() const;
 
  private:

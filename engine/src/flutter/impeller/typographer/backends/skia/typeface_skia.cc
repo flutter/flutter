@@ -28,17 +28,6 @@ bool TypefaceSkia::IsEqual(const Typeface& other) const {
   return sk_other->typeface_ == typeface_;
 }
 
-Rect TypefaceSkia::GetBoundingBox() const {
-  if (!IsValid()) {
-    return {};
-  }
-
-  const auto bounds = typeface_->getBounds();
-
-  return Rect::MakeLTRB(bounds.left(), bounds.top(), bounds.right(),
-                        bounds.bottom());
-}
-
 const sk_sp<SkTypeface>& TypefaceSkia::GetSkiaTypeface() const {
   return typeface_;
 }
