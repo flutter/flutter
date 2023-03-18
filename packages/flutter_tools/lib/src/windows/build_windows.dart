@@ -94,10 +94,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     status.stop();
   }
 
+  final String? binaryName = getCmakeExecutableName(windowsProject);
   final File appFile = buildDirectory
     .childDirectory('runner')
     .childDirectory(sentenceCase(buildModeName))
-    .childFile('${windowsProject.parent.manifest.appName}.exe');
+    .childFile('$binaryName.exe');
   if (appFile.existsSync()) {
     final String appSize = (buildInfo.mode == BuildMode.debug)
         ? '' // Don't display the size when building a debug variant.
