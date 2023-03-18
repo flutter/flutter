@@ -93,8 +93,6 @@ class MockImpellerContext : public Context {
 
   MOCK_CONST_METHOD0(CreateCommandBuffer, std::shared_ptr<CommandBuffer>());
 
-  MOCK_CONST_METHOD0(GetWorkQueue, std::shared_ptr<WorkQueue>());
-
   MOCK_CONST_METHOD0(GetGPUTracer, std::shared_ptr<GPUTracer>());
 
   MOCK_CONST_METHOD0(GetColorAttachmentPixelFormat, PixelFormat());

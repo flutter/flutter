@@ -54,8 +54,6 @@ class CustomColorAttachmentPixelFormatContext final : public Context {
     return context_->CreateCommandBuffer();
   }
 
-  std::shared_ptr<WorkQueue> GetWorkQueue() const override { return context_->GetWorkQueue(); }
-
   std::shared_ptr<GPUTracer> GetGPUTracer() const override { return context_->GetGPUTracer(); }
 
   PixelFormat GetColorAttachmentPixelFormat() const override {
