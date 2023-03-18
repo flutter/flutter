@@ -1010,8 +1010,8 @@ class ColorScheme with Diagnosticable {
   /// `imageProvider` may not wind up as one of the ColorScheme colors.
   ///
   /// The provided image will be scaled down to a maximum size of 112x112 pixels
-  /// during color extraction. 
-  /// 
+  /// during color extraction.
+  ///
   /// See also:
   ///
   ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
