@@ -235,8 +235,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
         child: Material(
           key: materialKey,
           type: MaterialType.transparency,
-          elevation: elevation,
-          shadowColor: shadowColor,
           child: SafeArea(child: child),
         ),
       );
