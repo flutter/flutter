@@ -45,7 +45,7 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
 void writeBytesFile(String path, List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(content);
+    ..writeAsBytesSync(content, flush: true);
 }
 
 void writePackages(String folder) {
