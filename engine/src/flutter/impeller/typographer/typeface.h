@@ -24,15 +24,6 @@ class Typeface : public Comparable<Typeface> {
 
   virtual bool IsValid() const = 0;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Get the union of the bounding boxes of all glyphs in the
-  ///             typeface. This box is unit-scaled and conservatively large to
-  ///             cover all glyphs.
-  ///
-  /// @return     The conservative unit-scaled bounding box.
-  ///
-  virtual Rect GetBoundingBox() const = 0;
-
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Typeface);
 };
