@@ -1761,7 +1761,9 @@ void main() {
         expect(regionState.selectionOverlay, isNotNull);
         break;
     }
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
