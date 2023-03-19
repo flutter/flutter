@@ -35,6 +35,11 @@ class DlCanvas {
     kPolygon,  //!< draw each pair of overlapping points as a line segment
   };
 
+  enum class SrcRectConstraint {
+    kStrict,
+    kFast,
+  };
+
   virtual ~DlCanvas() = default;
 
   virtual SkISize GetBaseLayerSize() const = 0;
@@ -146,28 +151,29 @@ class DlCanvas {
                          const SkPoint point,
                          DlImageSampling sampling,
                          const DlPaint* paint = nullptr) = 0;
-  virtual void DrawImageRect(const sk_sp<DlImage>& image,
-                             const SkRect& src,
-                             const SkRect& dst,
-                             DlImageSampling sampling,
-                             const DlPaint* paint = nullptr,
-                             bool enforce_src_edges = false) = 0;
-  virtual void DrawImageRect(const sk_sp<DlImage>& image,
-                             const SkIRect& src,
-                             const SkRect& dst,
-                             DlImageSampling sampling,
-                             const DlPaint* paint = nullptr,
-                             bool enforce_src_edges = false) {
-    DrawImageRect(image, SkRect::Make(src), dst, sampling, paint,
-                  enforce_src_edges);
+  virtual void DrawImageRect(
+      const sk_sp<DlImage>& image,
+      const SkRect& src,
+      const SkRect& dst,
+      DlImageSampling sampling,
+      const DlPaint* paint = nullptr,
+      SrcRectConstraint constraint = SrcRectConstraint::kFast) = 0;
+  virtual void DrawImageRect(
+      const sk_sp<DlImage>& image,
+      const SkIRect& src,
+      const SkRect& dst,
+      DlImageSampling sampling,
+      const DlPaint* paint = nullptr,
+      SrcRectConstraint constraint = SrcRectConstraint::kFast) {
+    DrawImageRect(image, SkRect::Make(src), dst, sampling, paint, constraint);
   }
-  virtual void DrawImageRect(const sk_sp<DlImage>& image,
-                             const SkRect& dst,
-                             DlImageSampling sampling,
-                             const DlPaint* paint = nullptr,
-                             bool enforce_src_edges = false) {
-    DrawImageRect(image, image->bounds(), dst, sampling, paint,
-                  enforce_src_edges);
+  virtual void DrawImageRect(
+      const sk_sp<DlImage>& image,
+      const SkRect& dst,
+      DlImageSampling sampling,
+      const DlPaint* paint = nullptr,
+      SrcRectConstraint constraint = SrcRectConstraint::kFast) {
+    DrawImageRect(image, image->bounds(), dst, sampling, paint, constraint);
   }
   virtual void DrawImageNine(const sk_sp<DlImage>& image,
                              const SkIRect& center,
@@ -196,6 +202,14 @@ class DlCanvas {
                           SkScalar dpr) = 0;
 
   virtual void Flush() = 0;
+
+  static constexpr SkScalar kShadowLightHeight = 600;
+  static constexpr SkScalar kShadowLightRadius = 800;
+
+  static SkRect ComputeShadowBounds(const SkPath& path,
+                                    float elevation,
+                                    SkScalar dpr,
+                                    const SkMatrix& ctm);
 };
 
 class DlAutoCanvasRestore {
