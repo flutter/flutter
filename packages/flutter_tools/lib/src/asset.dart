@@ -74,12 +74,15 @@ enum AssetKind {
   font,
   shader,
   model,
+  transformed,
 }
 
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
 
   Map<String, AssetKind> get entryKinds;
+
+  Map<String, AssetTransformer> get transformers;
 
   /// The files that were specified under the deferred components assets sections
   /// in pubspec.
@@ -151,6 +154,9 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
+
+  @override
+  final Map<String, AssetTransformer> transformers = <String, AssetTransformer>{};
 
   @override
   final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
@@ -382,6 +388,9 @@ class ManifestAssetBundle implements AssetBundle {
         assert(variantFile.existsSync());
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
         entryKinds[variant.entryUri.path] ??= variant.assetKind;
+        if (variant.transformer != null) {
+          transformers[variant.entryUri.path] = variant.transformer!;
+        }
       }
     }
     // Save the contents of each deferred component image, image variant, and font
@@ -550,6 +559,7 @@ class ManifestAssetBundle implements AssetBundle {
           entryUri: entryUri,
           package: null,
           assetKind: AssetKind.font,
+          transformer: null,
         ));
       }
     }
@@ -578,6 +588,7 @@ class ManifestAssetBundle implements AssetBundle {
         entryUri: entryUri,
         package: null,
         assetKind: AssetKind.shader,
+        transformer: null,
       ));
     }
 
@@ -793,7 +804,18 @@ class ManifestAssetBundle implements AssetBundle {
     final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
     final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
-    for (final Uri assetUri in flutterManifest.assets) {
+
+    final List<Uri> assets = <Uri>[
+      ...flutterManifest.assets,
+      ...flutterManifest.transformedAssets.keys,
+    ];
+
+    for (final Uri assetUri in assets) {
+      // TODO is this O(1)?
+      final AssetKind assetKind = flutterManifest.transformedAssets.containsKey(assetUri) ? // TODO is this O(1) or O(n)
+            AssetKind.transformed : AssetKind.regular;
+      final AssetTransformer? transformer = flutterManifest.transformedAssets[assetUri];
+
       if (assetUri.path.endsWith('/')) {
         wildcardDirectories.add(assetUri);
         _parseAssetsFromFolder(
@@ -805,6 +827,8 @@ class ManifestAssetBundle implements AssetBundle {
           assetUri,
           packageName: packageName,
           attributedPackage: attributedPackage,
+          assetKind: assetKind,
+          transformer: transformer,
         );
       } else {
         _parseAssetFromFile(
@@ -816,6 +840,8 @@ class ManifestAssetBundle implements AssetBundle {
           assetUri,
           packageName: packageName,
           attributedPackage: attributedPackage,
+          assetKind: assetKind,
+          transformer: transformer,
         );
       }
     }
@@ -879,6 +905,8 @@ class ManifestAssetBundle implements AssetBundle {
     Uri assetUri, {
     String? packageName,
     Package? attributedPackage,
+    AssetKind assetKind = AssetKind.regular,
+    AssetTransformer? transformer,
   }) {
     final String directoryPath = _fileSystem.path.join(
         assetBase, assetUri.toFilePath(windows: _platform.isWindows));
@@ -904,6 +932,7 @@ class ManifestAssetBundle implements AssetBundle {
         uri,
         packageName: packageName,
         attributedPackage: attributedPackage,
+        transformer: transformer,
       );
     }
   }
@@ -919,6 +948,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
+    AssetTransformer? transformer,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -944,6 +974,7 @@ class ManifestAssetBundle implements AssetBundle {
             relativeUri: relativeUri,
             package: attributedPackage,
             assetKind: assetKind,
+            transformer: transformer,
           ),
         );
       }
@@ -959,6 +990,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
+    AssetTransformer? transformer,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -984,6 +1016,7 @@ class ManifestAssetBundle implements AssetBundle {
       relativeUri: assetUri,
       package: attributedPackage,
       assetKind: assetKind,
+      transformer: transformer,
     );
   }
 
@@ -992,6 +1025,7 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig,
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
+    AssetTransformer? transformer,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1005,6 +1039,7 @@ class ManifestAssetBundle implements AssetBundle {
           relativeUri: Uri(pathSegments: assetUri.pathSegments.sublist(2)),
           package: attributedPackage,
           assetKind: assetKind,
+          transformer: transformer,
         );
       }
     }
@@ -1024,6 +1059,7 @@ class _Asset {
     required this.relativeUri,
     required this.entryUri,
     required this.package,
+    required this.transformer,
     this.assetKind = AssetKind.regular,
   });
 
@@ -1040,8 +1076,13 @@ class _Asset {
 
   final AssetKind assetKind;
 
+  // todo document
+  final AssetTransformer? transformer;
+
   File lookupAssetFile(FileSystem fileSystem) {
-    return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
+    return fileSystem.file(
+      fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri))
+    );
   }
 
   /// The delta between what the entryUri is and the relativeUri (e.g.,

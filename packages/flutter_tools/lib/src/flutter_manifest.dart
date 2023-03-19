@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -6,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -311,14 +313,68 @@ class FlutterManifest {
         : fontList.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>().toList();
   }
 
-  late final List<Uri> assets = _computeAssets();
-  List<Uri> _computeAssets() {
+  late final List<Uri> assets = _computeRawAssets();
+
+  List<Uri> _computeRawAssets() {
     final List<Object?>? assets = _flutterDescriptor['assets'] as List<Object?>?;
     if (assets == null) {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
     for (final Object? asset in assets) {
+      if (asset is! String || asset == '') {
+        _logger.printError('Asset manifest contains a null or empty uri.');
+        continue;
+      }
+      try {
+        results.add(Uri(pathSegments: asset.split('/')));
+      } on FormatException {
+        _logger.printError('Asset manifest contains invalid uri: $asset.');
+      }
+    }
+    return results;
+  }
+
+  late final Map<Uri, AssetTransformer> transformedAssets = _computeTransformedAssets();
+
+  Map<Uri, AssetTransformer> _computeTransformedAssets() {
+    String extractPackageNameFromKey(String packageKey) {
+      final Match? match = packageKey.matchAsPrefix(r'package:(.*):');
+      if (match == null) {
+        // TODO make message more useful.
+        throwToolExit('Invalid package key $packageKey');
+      }
+      return match[0]!;
+    }
+
+    final Map<Uri, AssetTransformer>  result = <Uri, AssetTransformer>{};
+
+    final Iterable<String> packageKeys = _flutterDescriptor
+      .keys
+      .where((String key) => key.startsWith('package:'));
+    for (final String packageKey in packageKeys) {
+      final Map<String, Object?> descriptor =
+        (_flutterDescriptor[packageKey]! as YamlMap)
+        .cast<String, Object?>();
+
+      final AssetTransformer transformer = AssetTransformer(
+          package: extractPackageNameFromKey(packageKey),
+          executable: descriptor['executable']! as String,
+          args: (descriptor['args'] as String?) ?? '',
+        );
+
+      final List<Uri> assetUris =
+        _parseAssetMap(descriptor['assets']! as List<Object?>);
+      for (final Uri assetUri in assetUris) {
+        result[assetUri] = transformer;
+      }
+    }
+    return result;
+  }
+
+  List<Uri> _parseAssetMap(List<Object?> assetsEntry) {
+    final List<Uri> results = <Uri>[];
+    for (final Object? asset in assetsEntry) {
       if (asset is! String || asset == '') {
         _logger.printError('Asset manifest contains a null or empty uri.');
         continue;
@@ -463,6 +519,18 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
+class AssetTransformer {
+  // TODO does constructor go first?
+  final String package;
+  final String executable;
+  final String args;
+
+  AssetTransformer({
+    required this.package,
+    required this.executable,
+    required this.args,
+  });
+}
 
 bool _validate(Object? manifest, Logger logger) {
   final List<String> errors = <String>[];

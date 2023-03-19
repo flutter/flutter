@@ -54,7 +54,7 @@ class BuildSystemConfig {
 /// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
-/// later are safe to evaluate before invoking the [buildAction]. For example,
+/// latter are safe to evaluate before invoking the [buildAction]. For example,
 /// a wildcard output pattern requires the outputs to exist before it can
 /// glob files correctly.
 ///

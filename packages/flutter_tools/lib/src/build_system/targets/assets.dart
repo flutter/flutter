@@ -6,10 +6,12 @@ import 'package:pool/pool.dart';
 
 import '../../asset.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../flutter_manifest.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -123,6 +125,16 @@ Future<Depfile> copyAssets(
           bool doCopy = true;
           switch (assetKind) {
             case AssetKind.regular:
+              break;
+            case AssetKind.transformed:
+              doCopy = false;
+              await _transformAsset(
+                content.file.path,
+                file.path,
+                assetBundle.transformers[entry.key]!,
+                fileSystem: environment.fileSystem,
+                logger: environment.logger,
+              );
               break;
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
@@ -329,4 +341,28 @@ class CopyAssets extends Target {
       environment.buildDir.childFile('flutter_assets.d'),
     );
   }
+}
+
+Future<bool> _transformAsset(
+  String asset,
+  String output,
+  AssetTransformer transformer, {
+  required FileSystem fileSystem,
+  required Logger logger,
+}) async {
+  final List<String> arguments = <String>[
+    ...transformer.args.split(r'\w+'),
+    '--input=$asset',
+    '--output=$output',
+  ];
+  final ProcessResult result = await Process.run(
+    'dart run ${transformer.package}:${transformer.executable}', // TODO should executable be required?
+    arguments,
+  );
+  // TODO does this work? also improve this
+  if (result.exitCode != 0) {
+    logger.printError(utf8.decode(result.stderr as List<int>));
+    return false;
+  }
+  return true;
 }
