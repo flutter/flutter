@@ -390,9 +390,9 @@ class _ShapeDecorationPainter extends BoxPainter {
   }
 
   Rect _adjustRectOnOutlinedBorder(Rect rect) {
-    if (_decoration.shape is OutlinedBorder) {
+    if (_decoration.shape is OutlinedBorder && _decoration.color != null) {
       final BorderSide side = (_decoration.shape as OutlinedBorder).side;
-      return (side.color.alpha == 255 && _decoration.color != null) ? rect.deflate(side.strokeInset / 2) : rect;
+      return side.color.alpha == 255 ? rect.deflate(side.strokeInset / 2) : rect;
     }
     return rect;
   }

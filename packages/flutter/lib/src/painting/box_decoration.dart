@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
+import 'borders.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
 import 'colors.dart';
@@ -445,8 +446,37 @@ class _BoxDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null) {
-      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
+      // When border is filled, we can reduce the rect to avoid
+      // visual glitches leaking the color due to clipping.
+      // https://github.com/flutter/flutter/issues/13675
+      final Rect ajustedRect = _adjustRectOnOutlinedBorder(rect, textDirection);
+      _paintBox(canvas, ajustedRect, _getBackgroundPaint(rect, textDirection), textDirection);
     }
+  }
+
+  Rect _adjustRectOnOutlinedBorder(Rect rect, TextDirection? textDirection) {
+    if (_decoration.border == null) {
+      return rect;
+    }
+
+    if (_decoration.border is Border) {
+      final Border border = _decoration.border! as Border;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        border.left.color.alpha == 255 ? border.left.strokeInset : 0,
+        border.top.color.alpha == 255 ? border.top.strokeInset : 0,
+        border.right.color.alpha == 255 ? border.right.strokeInset : 0,
+        border.bottom.color.alpha == 255 ? border.bottom.strokeInset : 0,
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;

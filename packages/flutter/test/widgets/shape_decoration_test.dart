@@ -160,47 +160,52 @@ Future<void> main() async {
     expect(a, equals(b));
   });
 
-  testWidgets('OutlinedBorder (such as CircleBorder) avoids clipping edges when possible', (WidgetTester tester) async {
+  testWidgets('OutlinedBorder avoids clipping edges when possible', (WidgetTester tester) async {
     // Fix https://github.com/flutter/flutter/issues/13675
+    final Key key = UniqueKey();
     Widget buildWidget(Color color) {
-      return SizedBox(
-        width: 145,
-        height: 145,
-        child: Stack(
-          children: <Widget>[
-            for (int i = 0; i < 10; i++)
-              for (int j = 0; j < 10; j++)
+      return Container(
+        width: 80,
+        height: 80,
+        color: Colors.red,
+        key: key,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              for (int i = 0; i < 10; i++)
                 Transform.translate(
-                  offset: Offset(i * 5, j * 5),
+                  offset: Offset(i * 3, i * 3),
                   child: Container(
-                    height: 100,
-                    width: 100,
-                    decoration: const ShapeDecoration(
+                    height: 50,
+                    width: 50,
+                    decoration: ShapeDecoration(
                       color: Colors.black,
                       shape: CircleBorder(
                         side: BorderSide(
-                          color: Colors.white,
-                          width: 15,
+                          color: color,
+                          width: 10,
                         ),
                       ),
                     ),
                   ),
                 ),
-          ],
+            ],
+          ),
         ),
       );
     }
 
     await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
     await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.circle_border.filledBorder.png'),
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.filled.png'),
     );
 
     await tester.pumpWidget(buildWidget(const Color(0xfaffffff)));
     await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.circle_border.leakingBorder.png'),
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.leaking.png'),
     );
   });
 }

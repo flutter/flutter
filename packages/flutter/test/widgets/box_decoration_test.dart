@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
@@ -561,6 +564,51 @@ Future<void> main() async {
           ),
         ),
       ),
+    );
+  });
+
+  testWidgets('Border avoids clipping edges when possible', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    // Fix https://github.com/flutter/flutter/issues/13675
+    Widget buildWidget(BoxBorder border) {
+      return Container(
+        width: 80,
+        height: 80,
+        color: Colors.red,
+        key: key,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              for (int i = 0; i < 10; i++)
+                Transform.translate(
+                  offset: Offset(i * 3, i * 3),
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: Colors.black,
+                      border: border,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(Border.all(color: const Color(0xffffffff), width: 10)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.box_decoration.border.filled.png'),
+    );
+
+    await tester.pumpWidget(buildWidget(Border.all(color: const Color(0xfaffffff), width: 10)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.box_decoration.border.leaking.png'),
     );
   });
 }
