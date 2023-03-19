@@ -176,13 +176,6 @@ DlVertices::DlVertices(DlVertexMode mode,
   FML_DCHECK((index_count_ != 0) == (indices() != nullptr));
 }
 
-sk_sp<SkVertices> DlVertices::skia_object() const {
-  const SkColor* sk_colors = reinterpret_cast<const SkColor*>(colors());
-  return SkVertices::MakeCopy(ToSk(mode_), vertex_count_, vertices(),
-                              texture_coordinates(), sk_colors, index_count_,
-                              indices());
-}
-
 bool DlVertices::operator==(DlVertices const& other) const {
   auto lists_equal = [](auto* a, auto* b, int count) {
     if (a == nullptr || b == nullptr) {

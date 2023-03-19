@@ -5,6 +5,7 @@
 #include "flutter/display_list/display_list_benchmarks.h"
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/display_list_flags.h"
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -76,27 +77,27 @@ void BM_DrawLine(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawLineFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawLineFlags);
 
   size_t length = state.range(0);
 
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   state.counters["DrawCallCount"] = kLinesToDraw;
   for (size_t i = 0; i < kLinesToDraw; i++) {
-    builder.drawLine(SkPoint::Make(i % length, 0),
-                     SkPoint::Make(length - i % length, length));
+    builder.DrawLine(SkPoint::Make(i % length, 0),
+                     SkPoint::Make(length - i % length, length), paint);
   }
 
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -114,15 +115,15 @@ void BM_DrawRect(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawRectFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRectFlags);
 
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   // As rects have SkScalar dimensions, we want to ensure that we also
   // draw rects with non-integer position and size
@@ -131,7 +132,7 @@ void BM_DrawRect(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kRectsToDraw;
   for (size_t i = 0; i < kRectsToDraw; i++) {
-    builder.drawRect(rect);
+    builder.DrawRect(rect, paint);
     rect.offset(offset, offset);
     if (rect.right() > canvas_size) {
       rect.offset(-canvas_size, 0);
@@ -145,7 +146,7 @@ void BM_DrawRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -163,22 +164,22 @@ void BM_DrawOval(benchmark::State& state,
                  unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawOvalFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawOvalFlags);
 
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkRect rect = SkRect::MakeXYWH(0, 0, length * 1.5f, length);
   const SkScalar offset = 0.5f;
 
   state.counters["DrawCallCount"] = kOvalsToDraw;
   for (size_t i = 0; i < kOvalsToDraw; i++) {
-    builder.drawOval(rect);
+    builder.DrawOval(rect, paint);
     rect.offset(offset, offset);
     if (rect.right() > canvas_size) {
       rect.offset(-canvas_size, 0);
@@ -191,7 +192,7 @@ void BM_DrawOval(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -209,15 +210,15 @@ void BM_DrawCircle(benchmark::State& state,
                    unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawCircleFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawCircleFlags);
 
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkScalar radius = length / 2.0f;
   const SkScalar offset = 0.5f;
@@ -226,7 +227,7 @@ void BM_DrawCircle(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kCirclesToDraw;
   for (size_t i = 0; i < kCirclesToDraw; i++) {
-    builder.drawCircle(center, radius);
+    builder.DrawCircle(center, radius, paint);
     center.offset(offset, offset);
     if (center.x() + radius > canvas_size) {
       center.set(radius, center.y());
@@ -239,7 +240,7 @@ void BM_DrawCircle(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -258,15 +259,15 @@ void BM_DrawRRect(benchmark::State& state,
                   SkRRect::Type type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawRRectFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRRectFlags);
 
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkVector radii[4] = {};
   switch (type) {
@@ -304,7 +305,7 @@ void BM_DrawRRect(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kRRectsToDraw;
   for (size_t i = 0; i < kRRectsToDraw; i++) {
-    builder.drawRRect(rrect);
+    builder.DrawRRect(rrect, paint);
     rrect.offset(offset, offset);
     if (rrect.rect().right() > canvas_size) {
       rrect.offset(-canvas_size, 0);
@@ -317,7 +318,7 @@ void BM_DrawRRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -339,15 +340,15 @@ void BM_DrawDRRect(benchmark::State& state,
                    SkRRect::Type type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawDRRectFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
 
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkVector radii[4] = {};
   switch (type) {
@@ -386,7 +387,7 @@ void BM_DrawDRRect(benchmark::State& state,
   state.counters["DrawCallCount"] = kDRRectsToDraw;
   for (size_t i = 0; i < kDRRectsToDraw; i++) {
     rrect.inset(0.1f * length, 0.1f * length, &rrect_2);
-    builder.drawDRRect(rrect, rrect_2);
+    builder.DrawDRRect(rrect, rrect_2, paint);
     rrect.offset(offset, offset);
     if (rrect.rect().right() > canvas_size) {
       rrect.offset(-canvas_size, 0);
@@ -399,7 +400,7 @@ void BM_DrawDRRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -413,8 +414,8 @@ void BM_DrawArc(benchmark::State& state,
                 unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawArcNoCenterFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawArcNoCenterFlags);
 
@@ -422,7 +423,7 @@ void BM_DrawArc(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkScalar starting_angle = 0.0f;
   SkScalar offset = 0.5f;
@@ -436,7 +437,7 @@ void BM_DrawArc(benchmark::State& state,
   state.counters["DrawCallCount"] = kArcSweepSetsToDraw * segment_sweeps.size();
   for (size_t i = 0; i < kArcSweepSetsToDraw; i++) {
     for (SkScalar sweep : segment_sweeps) {
-      builder.drawArc(bounds, starting_angle, sweep, false);
+      builder.DrawArc(bounds, starting_angle, sweep, false, paint);
       starting_angle += sweep + 5.0f;
     }
     bounds.offset(offset, offset);
@@ -452,7 +453,7 @@ void BM_DrawArc(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -629,14 +630,14 @@ void BM_DrawPath(benchmark::State& state,
                  SkPath::Verb type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawPathFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkPath path;
 
@@ -650,12 +651,12 @@ void BM_DrawPath(benchmark::State& state,
   state.counters["VerbCount"] = path.countVerbs();
   state.counters["DrawCallCount"] = 1;
 
-  builder.drawPath(path);
+  builder.DrawPath(path, paint);
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -767,14 +768,14 @@ void BM_DrawVertices(benchmark::State& state,
                      DlVertexMode mode) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawVerticesFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawVerticesFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkPoint center = SkPoint::Make(length / 2.0f, length / 2.0f);
 
@@ -791,7 +792,7 @@ void BM_DrawVertices(benchmark::State& state,
     std::shared_ptr<DlVertices> vertices =
         GetTestVertices(p, radius, 50, mode, vertex_count);
     total_vertex_count += vertex_count;
-    builder.drawVertices(vertices, DlBlendMode::kSrc);
+    builder.DrawVertices(vertices.get(), DlBlendMode::kSrc, paint);
   }
 
   state.counters["VertexCount"] = total_vertex_count;
@@ -801,7 +802,7 @@ void BM_DrawVertices(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -863,26 +864,18 @@ void BM_DrawPoints(benchmark::State& state,
                    DlCanvas::PointMode mode) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  SkPaint paint;
+  DlPaint paint = GetPaintForRun(attributes);
+
   switch (mode) {
     case DlCanvas::PointMode::kPoints:
-      builder.SetAttributesFromPaint(
-          GetPaintForRun(attributes),
-          DisplayListOpFlags::kDrawPointsAsPointsFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPointsFlags);
       break;
     case DlCanvas::PointMode::kLines:
-      builder.SetAttributesFromPaint(
-          GetPaintForRun(attributes),
-          DisplayListOpFlags::kDrawPointsAsLinesFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsLinesFlags);
       break;
     case DlCanvas::PointMode::kPolygon:
-      builder.SetAttributesFromPaint(
-          GetPaintForRun(attributes),
-          DisplayListOpFlags::kDrawPointsAsPolygonFlags);
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPolygonFlags);
       break;
@@ -891,7 +884,7 @@ void BM_DrawPoints(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   size_t point_count = state.range(0);
   state.SetComplexityN(point_count);
@@ -900,12 +893,12 @@ void BM_DrawPoints(benchmark::State& state,
 
   std::vector<SkPoint> points =
       GetTestPoints(point_count, SkISize::Make(length, length));
-  builder.drawPoints(mode, points.size(), points.data());
+  builder.DrawPoints(mode, points.size(), points.data(), paint);
 
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -933,8 +926,8 @@ void BM_DrawImage(benchmark::State& state,
                   bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawImageWithPaintFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawImageWithPaintFlags);
 
@@ -942,7 +935,7 @@ void BM_DrawImage(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   sk_sp<SkImage> image;
   std::shared_ptr<DlSurfaceInstance> offscreen_instance;
@@ -969,7 +962,7 @@ void BM_DrawImage(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImage(DlImage::Make(image), dst, options, true);
+    builder.DrawImage(DlImage::Make(image), dst, options, &paint);
 
     dst.offset(offset, offset);
     if (dst.x() + bitmap_size > canvas_size) {
@@ -983,7 +976,7 @@ void BM_DrawImage(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -993,11 +986,11 @@ void BM_DrawImage(benchmark::State& state,
   surface_provider->Snapshot(filename);
 }
 
-std::string ConstraintToString(SkCanvas::SrcRectConstraint constraint) {
+std::string ConstraintToString(DlCanvas::SrcRectConstraint constraint) {
   switch (constraint) {
-    case SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint:
+    case DlCanvas::SrcRectConstraint::kStrict:
       return "Strict";
-    case SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint:
+    case DlCanvas::SrcRectConstraint::kFast:
       return "Fast";
     default:
       return "Unknown";
@@ -1012,13 +1005,12 @@ void BM_DrawImageRect(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
                       DlImageSampling options,
-                      SkCanvas::SrcRectConstraint constraint,
+                      DlCanvas::SrcRectConstraint constraint,
                       bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(
-      GetPaintForRun(attributes),
-      DisplayListOpFlags::kDrawImageRectWithPaintFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawImageRectWithPaintFlags);
 
@@ -1026,7 +1018,7 @@ void BM_DrawImageRect(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   sk_sp<SkImage> image;
   std::shared_ptr<DlSurfaceInstance> offscreen_instance;
@@ -1056,7 +1048,7 @@ void BM_DrawImageRect(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImageRect(DlImage::Make(image), src, dst, options, true,
+    builder.DrawImageRect(DlImage::Make(image), src, dst, options, &paint,
                           constraint);
     dst.offset(offset, offset);
     if (dst.right() > canvas_size) {
@@ -1070,7 +1062,7 @@ void BM_DrawImageRect(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -1104,9 +1096,8 @@ void BM_DrawImageNine(benchmark::State& state,
                       bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(
-      GetPaintForRun(attributes),
-      DisplayListOpFlags::kDrawImageNineWithPaintFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state,
                      DisplayListOpFlags::kDrawImageNineWithPaintFlags);
 
@@ -1114,7 +1105,7 @@ void BM_DrawImageNine(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkIRect center = SkIRect::MakeXYWH(bitmap_size / 4, bitmap_size / 4,
                                      bitmap_size / 2, bitmap_size / 2);
@@ -1145,7 +1136,7 @@ void BM_DrawImageNine(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImageNine(DlImage::Make(image), center, dst, filter, true);
+    builder.DrawImageNine(DlImage::Make(image), center, dst, filter, &paint);
     dst.offset(offset, offset);
     if (dst.right() > canvas_size) {
       dst.offsetTo(0, dst.y());
@@ -1158,7 +1149,7 @@ void BM_DrawImageNine(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -1181,15 +1172,15 @@ void BM_DrawTextBlob(benchmark::State& state,
                      unsigned attributes) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawTextBlobFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextBlobFlags);
 
   size_t draw_calls = state.range(0);
   size_t canvas_size = kFixedCanvasSize;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   state.counters["DrawCallCount_Varies"] = draw_calls;
   state.counters["GlyphCount"] = draw_calls;
@@ -1198,13 +1189,13 @@ void BM_DrawTextBlob(benchmark::State& state,
   for (size_t i = 0; i < draw_calls; i++) {
     character[0] = 'A' + (i % 26);
     auto blob = SkTextBlob::MakeFromString(character, SkFont());
-    builder.drawTextBlob(blob, 50.0f, 50.0f);
+    builder.DrawTextBlob(blob, 50.0f, 50.0f, paint);
   }
 
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -1228,14 +1219,14 @@ void BM_DrawShadow(benchmark::State& state,
                    SkPath::Verb type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kDrawShadowFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawShadowFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   SkPath path;
 
@@ -1264,12 +1255,12 @@ void BM_DrawShadow(benchmark::State& state,
 
   // We can hardcode dpr to 1.0f as we're varying elevation, and dpr is only
   // ever used in conjunction with elevation.
-  builder.drawShadow(path, SK_ColorBLUE, elevation, transparent_occluder, 1.0f);
+  builder.DrawShadow(path, SK_ColorBLUE, elevation, transparent_occluder, 1.0f);
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 
@@ -1292,14 +1283,14 @@ void BM_SaveLayer(benchmark::State& state,
                   size_t save_depth) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
-  builder.SetAttributesFromPaint(GetPaintForRun(attributes),
-                                 DisplayListOpFlags::kSaveLayerFlags);
+  DlPaint paint = GetPaintForRun(attributes);
+
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kSaveLayerFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface()->sk_surface();
-  auto canvas = surface->getCanvas();
+  auto canvas = DlSkCanvasAdapter(surface->getCanvas());
 
   size_t save_layer_calls = state.range(0);
 
@@ -1311,19 +1302,19 @@ void BM_SaveLayer(benchmark::State& state,
   state.counters["DrawCallCount_Varies"] = save_layer_calls * save_depth;
   for (size_t i = 0; i < save_layer_calls; i++) {
     for (size_t j = 0; j < save_depth; j++) {
-      builder.saveLayer(nullptr, false);
-      builder.drawRect(rect1);
-      builder.drawRect(rect2);
+      builder.SaveLayer(nullptr, nullptr);
+      builder.DrawRect(rect1, paint);
+      builder.DrawRect(rect2, paint);
     }
     for (size_t j = 0; j < save_depth; j++) {
-      builder.restore();
+      builder.Restore();
     }
   }
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    display_list->RenderTo(canvas);
+    canvas.DrawDisplayList(display_list);
     surface->flushAndSubmit(true);
   }
 

@@ -24,8 +24,8 @@ void ImageShader::Create(Dart_Handle wrapper) {
 }
 
 Dart_Handle ImageShader::initWithImage(CanvasImage* image,
-                                       SkTileMode tmx,
-                                       SkTileMode tmy,
+                                       DlTileMode tmx,
+                                       DlTileMode tmy,
                                        int filter_quality_index,
                                        Dart_Handle matrix_handle) {
   if (!image) {
@@ -41,7 +41,7 @@ Dart_Handle ImageShader::initWithImage(CanvasImage* image,
       sampling_is_locked_ ? ImageFilter::SamplingFromIndex(filter_quality_index)
                           : DlImageSampling::kLinear;
   cached_shader_ = UIDartState::CreateGPUObject(sk_make_sp<DlImageColorSource>(
-      image_, ToDl(tmx), ToDl(tmy), sampling, &local_matrix));
+      image_, tmx, tmy, sampling, &local_matrix));
   return Dart_Null();
 }
 

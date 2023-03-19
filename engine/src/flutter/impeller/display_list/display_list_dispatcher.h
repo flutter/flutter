@@ -7,14 +7,14 @@
 #include "display_list/display_list_path_effect.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/display_list_blend_mode.h"
-#include "flutter/display_list/display_list_dispatcher.h"
+#include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/paint.h"
 
 namespace impeller {
 
-class DisplayListDispatcher final : public flutter::Dispatcher {
+class DisplayListDispatcher final : public flutter::DlOpReceiver {
  public:
   DisplayListDispatcher();
 
@@ -22,75 +22,75 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   Picture EndRecordingAsPicture();
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setAntiAlias(bool aa) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setDither(bool dither) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setStyle(flutter::DlDrawStyle style) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setColor(flutter::DlColor color) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setStrokeWidth(SkScalar width) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setStrokeMiter(SkScalar limit) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setStrokeCap(flutter::DlStrokeCap cap) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setStrokeJoin(flutter::DlStrokeJoin join) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setColorSource(const flutter::DlColorSource* source) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setColorFilter(const flutter::DlColorFilter* filter) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setInvertColors(bool invert) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setBlendMode(flutter::DlBlendMode mode) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setPathEffect(const flutter::DlPathEffect* effect) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setMaskFilter(const flutter::DlMaskFilter* filter) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void save() override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void saveLayer(const SkRect* bounds,
                  const flutter::SaveLayerOptions options,
                  const flutter::DlImageFilter* backdrop) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void restore() override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void translate(SkScalar tx, SkScalar ty) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void scale(SkScalar sx, SkScalar sy) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void rotate(SkScalar degrees) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void skew(SkScalar sx, SkScalar sy) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void transform2DAffine(SkScalar mxx,
                          SkScalar mxy,
                          SkScalar mxt,
@@ -98,7 +98,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                          SkScalar myy,
                          SkScalar myt) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void transformFullPerspective(SkScalar mxx,
                                 SkScalar mxy,
                                 SkScalar mxz,
@@ -116,82 +116,82 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                                 SkScalar mwz,
                                 SkScalar mwt) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void transformReset() override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawPaint() override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawRect(const SkRect& rect) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawOval(const SkRect& bounds) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawCircle(const SkPoint& center, SkScalar radius) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawRRect(const SkRRect& rrect) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawDRRect(const SkRRect& outer, const SkRRect& inner) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawPath(const SkPath& path) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawArc(const SkRect& oval_bounds,
                SkScalar start_degrees,
                SkScalar sweep_degrees,
                bool use_center) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawPoints(PointMode mode,
                   uint32_t count,
                   const SkPoint points[]) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawVertices(const flutter::DlVertices* vertices,
                     flutter::DlBlendMode dl_mode) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawImage(const sk_sp<flutter::DlImage> image,
                  const SkPoint point,
                  flutter::DlImageSampling sampling,
                  bool render_with_attributes) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawImageRect(const sk_sp<flutter::DlImage> image,
                      const SkRect& src,
                      const SkRect& dst,
                      flutter::DlImageSampling sampling,
                      bool render_with_attributes,
-                     SkCanvas::SrcRectConstraint constraint) override;
+                     SrcRectConstraint constraint) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawImageNine(const sk_sp<flutter::DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
                      flutter::DlFilterMode filter,
                      bool render_with_attributes) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawAtlas(const sk_sp<flutter::DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
@@ -202,15 +202,16 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                  const SkRect* cull_rect,
                  bool render_with_attributes) override;
 
-  // |flutter::Dispatcher|
-  void drawDisplayList(const sk_sp<flutter::DisplayList> display_list) override;
+  // |flutter::DlOpReceiver|
+  void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
+                       SkScalar opacity) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override;
 
-  // |flutter::Dispatcher|
+  // |flutter::DlOpReceiver|
   void drawShadow(const SkPath& path,
                   const flutter::DlColor color,
                   const SkScalar elevation,
