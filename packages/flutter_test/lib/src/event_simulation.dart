@@ -742,8 +742,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -790,8 +789,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -835,8 +833,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -885,8 +882,7 @@ class KeyEventSimulator {
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
@@ -920,8 +916,7 @@ Future<bool> simulateKeyDownEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -949,8 +944,7 @@ Future<bool> simulateKeyUpEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
