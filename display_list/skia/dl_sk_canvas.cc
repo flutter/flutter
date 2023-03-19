@@ -4,42 +4,11 @@
 
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 
-#include "flutter/display_list/display_list_canvas_dispatcher.h"
+#include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
-
-static sk_sp<SkShader> ToSk(const DlColorSource* source) {
-  return source ? source->skia_object() : nullptr;
-}
-
-static sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
-  return filter ? filter->skia_object() : nullptr;
-}
-
-static sk_sp<SkColorFilter> ToSk(const DlColorFilter* filter) {
-  return filter ? filter->skia_object() : nullptr;
-}
-
-static sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter) {
-  return filter ? filter->skia_object() : nullptr;
-}
-
-static sk_sp<SkPathEffect> ToSk(const DlPathEffect* effect) {
-  return effect ? effect->skia_object() : nullptr;
-}
-
-static SkCanvas::SrcRectConstraint ToSkConstraint(bool enforce_edges) {
-  return enforce_edges ? SkCanvas::kStrict_SrcRectConstraint
-                       : SkCanvas::kFast_SrcRectConstraint;
-}
-
-static SkClipOp ToSk(DlCanvas::ClipOp op) {
-  return static_cast<SkClipOp>(op);
-}
-
-static SkCanvas::PointMode ToSk(DlCanvas::PointMode mode) {
-  return static_cast<SkCanvas::PointMode>(mode);
-}
 
 // clang-format off
 constexpr float kInvertColorMatrix[20] = {
@@ -119,10 +88,11 @@ void DlSkCanvasAdapter::Save() {
 void DlSkCanvasAdapter::SaveLayer(const SkRect* bounds,
                                   const DlPaint* paint,
                                   const DlImageFilter* backdrop) {
-  sk_sp<SkImageFilter> sk_filter = backdrop ? backdrop->skia_object() : nullptr;
+  sk_sp<SkImageFilter> sk_backdrop = ToSk(backdrop);
   SkOptionalPaint sk_paint(paint);
+  TRACE_EVENT0("flutter", "Canvas::saveLayer");
   delegate_->saveLayer(
-      SkCanvas::SaveLayerRec{bounds, sk_paint(), sk_filter.get(), 0});
+      SkCanvas::SaveLayerRec{bounds, sk_paint(), sk_backdrop.get(), 0});
 }
 
 void DlSkCanvasAdapter::Restore() {
@@ -309,7 +279,7 @@ void DlSkCanvasAdapter::DrawPoints(PointMode mode,
 void DlSkCanvasAdapter::DrawVertices(const DlVertices* vertices,
                                      DlBlendMode mode,
                                      const DlPaint& paint) {
-  delegate_->drawVertices(vertices->skia_object(), ToSk(mode), ToSk(paint));
+  delegate_->drawVertices(ToSk(vertices), ToSk(mode), ToSk(paint));
 }
 
 void DlSkCanvasAdapter::DrawImage(const sk_sp<DlImage>& image,
@@ -327,11 +297,11 @@ void DlSkCanvasAdapter::DrawImageRect(const sk_sp<DlImage>& image,
                                       const SkRect& dst,
                                       DlImageSampling sampling,
                                       const DlPaint* paint,
-                                      bool enforce_src_edges) {
+                                      SrcRectConstraint constraint) {
   SkOptionalPaint sk_paint(paint);
   sk_sp<SkImage> sk_image = image->skia_image();
   delegate_->drawImageRect(sk_image.get(), src, dst, ToSk(sampling), sk_paint(),
-                           ToSkConstraint(enforce_src_edges));
+                           ToSk(constraint));
 }
 
 void DlSkCanvasAdapter::DrawImageNine(const sk_sp<DlImage>& image,
@@ -363,7 +333,26 @@ void DlSkCanvasAdapter::DrawAtlas(const sk_sp<DlImage>& atlas,
 
 void DlSkCanvasAdapter::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                         SkScalar opacity) {
-  display_list->RenderTo(delegate_, opacity);
+  const int restore_count = delegate_->getSaveCount();
+
+  // Figure out whether we can apply the opacity during dispatch or
+  // if we need a saveLayer.
+  if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
+    TRACE_EVENT0("flutter", "Canvas::saveLayer");
+    delegate_->saveLayerAlphaf(&display_list->bounds(), opacity);
+    opacity = SK_Scalar1;
+  } else {
+    delegate_->save();
+  }
+
+  DlSkCanvasDispatcher dispatcher(delegate_, opacity);
+  if (display_list->has_rtree()) {
+    display_list->Dispatch(dispatcher, delegate_->getLocalClipBounds());
+  } else {
+    display_list->Dispatch(dispatcher);
+  }
+
+  delegate_->restoreToCount(restore_count);
 }
 
 void DlSkCanvasAdapter::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
@@ -378,8 +367,8 @@ void DlSkCanvasAdapter::DrawShadow(const SkPath& path,
                                    const SkScalar elevation,
                                    bool transparent_occluder,
                                    SkScalar dpr) {
-  DisplayListCanvasDispatcher::DrawShadow(delegate_, path, color, elevation,
-                                          transparent_occluder, dpr);
+  DlSkCanvasDispatcher::DrawShadow(delegate_, path, color, elevation,
+                                   transparent_occluder, dpr);
 }
 
 void DlSkCanvasAdapter::Flush() {
