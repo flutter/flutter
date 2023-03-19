@@ -6,6 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
@@ -177,6 +180,23 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
     multiLine: true,
   );
+
+  @override
+  TaskResult verify(List<String> stdout, List<String> stderr) {
+    final Directory outputDir = const LocalFileSystem()
+      .directory(testDirectory)
+      .childDirectory('build')
+      .childDirectory('windows')
+      .childDirectory('runner')
+      .childDirectory(release ? 'Release' : 'Debug');
+
+    final File engineSymbols = outputDir.childFile('flutter_windows.dll.pdb');
+    if (!engineSymbols.existsSync()) {
+      throw 'Engine symbols file is missing: ${engineSymbols.path}';
+    }
+
+    return super.verify(stdout, stderr);
+  }
 
   @override
   void verifyBuildOutput(List<String> stdout) {
