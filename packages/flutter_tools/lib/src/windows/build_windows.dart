@@ -17,6 +17,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import 'migrations/engine_symbols_migration.dart';
 import 'visual_studio.dart';
 
 // These characters appear to be fine: @%()-+_{}[]`~
@@ -51,6 +52,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
+    EngineSymbolsMigration(windowsProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
