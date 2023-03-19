@@ -30,13 +30,11 @@ const String _managedCmakeReplacement1 =
 
 const String _managedCmakeTrigger2 =
 'set(FLUTTER_LIBRARY \${FLUTTER_LIBRARY} PARENT_SCOPE)\r\n'
-'set(FLUTTER_ICU_DATA_FILE "\${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)\r\n'
-'\r\n';
+'set(FLUTTER_ICU_DATA_FILE "\${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)\r\n';
 const String _managedCmakeReplacement2 =
 'set(FLUTTER_LIBRARY \${FLUTTER_LIBRARY} PARENT_SCOPE)\r\n'
 'set(FLUTTER_SYMBOLS \${FLUTTER_SYMBOLS} PARENT_SCOPE)\r\n'
-'set(FLUTTER_ICU_DATA_FILE "\${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)\r\n'
-'\r\n';
+'set(FLUTTER_ICU_DATA_FILE "\${EPHEMERAL_DIR}/icudtl.dat" PARENT_SCOPE)\r\n';
 
 // The Flutter engine symbols should be copied to the build directory.
 // See https://github.com/flutter/flutter/issues/119363.
