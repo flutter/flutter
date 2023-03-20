@@ -30,7 +30,7 @@ class TopLevelGradleBuildFileMigration extends ProjectMigrator {
   @override
   void migrate() {
     if (!_topLevelGradleBuildFile.existsSync()) {
-      logger.printTrace('Top-level Gradle build file not found, skipping "clean" task migration.');
+      logger.printTrace('Top-level Gradle build file not found, skipping migration of task "clean".');
       return;
     }
 
