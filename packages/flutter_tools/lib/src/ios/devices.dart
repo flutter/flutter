@@ -15,7 +15,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';

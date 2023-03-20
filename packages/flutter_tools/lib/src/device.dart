@@ -17,7 +17,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
-import 'ios/devices.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
