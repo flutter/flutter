@@ -9,9 +9,9 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-class RawContourMeasure extends Opaque {}
+final class RawContourMeasure extends Opaque {}
 
-class RawContourMeasureIter extends Opaque {}
+final class RawContourMeasureIter extends Opaque {}
 
 typedef ContourMeasureHandle = Pointer<RawContourMeasure>;
 typedef ContourMeasureIterHandle = Pointer<RawContourMeasureIter>;

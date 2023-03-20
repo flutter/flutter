@@ -11,7 +11,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-class Stack extends Opaque {}
+final class Stack extends Opaque {}
 typedef StackPointer = Pointer<Stack>;
 
 /// Generic linear memory allocation

@@ -7,7 +7,7 @@ library skwasm_impl;
 
 import 'dart:ffi';
 
-class RawPaint extends Opaque {}
+final class RawPaint extends Opaque {}
 
 typedef PaintHandle = Pointer<RawPaint>;
 

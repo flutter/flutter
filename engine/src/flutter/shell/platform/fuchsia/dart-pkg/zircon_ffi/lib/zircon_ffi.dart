@@ -256,32 +256,32 @@ class ZirconFFIBindings {
           .asFunction<_dart_zircon_dart_dl_initialize>();
 }
 
-class zircon_dart_byte_array_t extends ffi.Struct {
+final class zircon_dart_byte_array_t extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> data;
 
   @ffi.Uint32()
   external int length;
 }
 
-class zircon_dart_handle_t extends ffi.Struct {
+final class zircon_dart_handle_t extends ffi.Struct {
   @ffi.Uint32()
   external int handle;
 }
 
-class zircon_dart_handle_pair_t extends ffi.Struct {
+final class zircon_dart_handle_pair_t extends ffi.Struct {
   external ffi.Pointer<zircon_dart_handle_t> left;
 
   external ffi.Pointer<zircon_dart_handle_t> right;
 }
 
-class zircon_dart_handle_list_t extends ffi.Struct {
+final class zircon_dart_handle_list_t extends ffi.Struct {
   external ffi.Pointer<ffi.Void> data;
 
   @ffi.Uint32()
   external int size;
 }
 
-class _Dart_Handle extends ffi.Opaque {}
+final class _Dart_Handle extends ffi.Opaque {}
 
 typedef _c_zircon_dart_byte_array_create = ffi.Pointer<zircon_dart_byte_array_t>
     Function(

@@ -9,7 +9,7 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-class CanvasWrapper extends Opaque {}
+final class CanvasWrapper extends Opaque {}
 
 typedef CanvasHandle = Pointer<CanvasWrapper>;
 
