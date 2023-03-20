@@ -1466,7 +1466,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return result!;
   }
 
-  // On Android: the user has pressed the back button.
+  // On Android: the user has triggered a system back, such as by pressing the
+  // system back button or performing a back gesture.
   @override
   Future<bool> didPopRoute() async {
     assert(mounted);
@@ -1480,11 +1481,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    print('justin WidgetsApp didPopRoute calling maybePop');
-    final bool popped = await navigator.maybePop();
-    print('justin WidgetsApp didPopRoute called maybePop, got $popped');
-    return popped;
-    //return navigator.maybePop();
+    return navigator.maybePop();
   }
 
   @override
