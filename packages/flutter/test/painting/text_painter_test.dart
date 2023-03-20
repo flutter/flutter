@@ -8,9 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-
 void main() {
   test('TextPainter caret test', () {
     final TextPainter painter = TextPainter()
