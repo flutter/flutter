@@ -39,10 +39,13 @@ class TopLevelGradleBuildFileMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    String newContents = fileContents;
-    if (newContents.contains(_eagerCleanTaskDeclaration)) {
+    final String newContents = fileContents.replaceAll(
+      _eagerCleanTaskDeclaration,
+      _lazyCleanTaskDeclaration,
+    );
+
+    if (newContents != fileContents) {
       logger.printTrace('Migrating "clean" Gradle task to lazy declaration style.');
-      newContents = newContents.replaceAll(_eagerCleanTaskDeclaration, _lazyCleanTaskDeclaration);
     }
     
     return newContents;
