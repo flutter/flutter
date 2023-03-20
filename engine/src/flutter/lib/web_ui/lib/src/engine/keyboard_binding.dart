@@ -35,8 +35,8 @@ final int _kLogicalMetaRight = kWebLogicalLocationMap['Meta']![_kLocationRight]!
 
 final int _kPhysicalAltLeft = kWebToPhysicalKey['AltLeft']!;
 final int _kPhysicalAltRight = kWebToPhysicalKey['AltRight']!;
-final int _kPhysicalControlLeft = kWebToPhysicalKey['ControlLeft']!;
-final int _kPhysicalControlRight = kWebToPhysicalKey['ControlRight']!;
+final int kPhysicalControlLeft = kWebToPhysicalKey['ControlLeft']!;
+final int kPhysicalControlRight = kWebToPhysicalKey['ControlRight']!;
 final int _kPhysicalShiftLeft = kWebToPhysicalKey['ShiftLeft']!;
 final int _kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
 final int _kPhysicalMetaLeft = kWebToPhysicalKey['MetaLeft']!;
@@ -615,8 +615,8 @@ class KeyboardConverter {
       eventTimestamp,
     );
     _synthesizeModifierIfNeeded(
-      _kPhysicalControlLeft,
-      _kPhysicalControlRight,
+      kPhysicalControlLeft,
+      kPhysicalControlRight,
       _kLogicalControlLeft,
       controlPressed ? ui.KeyEventType.down : ui.KeyEventType.up,
       eventTimestamp,
@@ -694,8 +694,7 @@ class KeyboardConverter {
     _pressingRecords.remove(physical);
   }
 
-  @visibleForTesting
-  bool debugKeyIsPressed(int physical) {
+  bool keyIsPressed(int physical) {
     return _pressingRecords.containsKey(physical);
   }
 }

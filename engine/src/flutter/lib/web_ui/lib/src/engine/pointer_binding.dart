@@ -456,21 +456,43 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
 
     final List<ui.PointerData> data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, glassPaneElement);
-    _pointerDataConverter.convert(
-      data,
-      change: ui.PointerChange.hover,
-      timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
-      kind: kind,
-      signalKind: ui.PointerSignalKind.scroll,
-      device: deviceId,
-      physicalX: offset.dx * ui.window.devicePixelRatio,
-      physicalY: offset.dy * ui.window.devicePixelRatio,
-      buttons: event.buttons!.toInt(),
-      pressure: 1.0,
-      pressureMax: 1.0,
-      scrollDeltaX: deltaX,
-      scrollDeltaY: deltaY,
-    );
+    bool ignoreCtrlKey = false;
+    if (operatingSystem == OperatingSystem.macOs) {
+      ignoreCtrlKey = (KeyboardBinding.instance?.converter.keyIsPressed(kPhysicalControlLeft) ?? false) ||
+                      (KeyboardBinding.instance?.converter.keyIsPressed(kPhysicalControlRight) ?? false);
+    }
+    if (event.ctrlKey && !ignoreCtrlKey) {
+      _pointerDataConverter.convert(
+        data,
+        change: ui.PointerChange.hover,
+        timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
+        kind: kind,
+        signalKind: ui.PointerSignalKind.scale,
+        device: deviceId,
+        physicalX: offset.dx * ui.window.devicePixelRatio,
+        physicalY: offset.dy * ui.window.devicePixelRatio,
+        buttons: event.buttons!.toInt(),
+        pressure: 1.0,
+        pressureMax: 1.0,
+        scale: math.exp(-deltaY / 200),
+      );
+    } else {
+      _pointerDataConverter.convert(
+        data,
+        change: ui.PointerChange.hover,
+        timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
+        kind: kind,
+        signalKind: ui.PointerSignalKind.scroll,
+        device: deviceId,
+        physicalX: offset.dx * ui.window.devicePixelRatio,
+        physicalY: offset.dy * ui.window.devicePixelRatio,
+        buttons: event.buttons!.toInt(),
+        pressure: 1.0,
+        pressureMax: 1.0,
+        scrollDeltaX: deltaX,
+        scrollDeltaY: deltaY,
+      );
+    }
     _lastWheelEvent = event;
     _lastWheelEventWasTrackpad = kind == ui.PointerDeviceKind.trackpad;
     return data;
@@ -491,14 +513,6 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       print(event.type);
     }
     _callback(_convertWheelEventToPointerData(event));
-    if (event.getModifierState('Control') &&
-        operatingSystem != OperatingSystem.macOs &&
-        operatingSystem != OperatingSystem.iOs) {
-      // Ignore Control+wheel events since the default handler
-      // will change browser zoom level instead of scrolling.
-      // The exception is MacOs where Control+wheel will still scroll and zoom.
-      return;
-    }
     // Prevent default so mouse wheel event doesn't get converted to
     // a scroll event that semantic nodes would process.
     //
