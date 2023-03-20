@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -295,7 +294,6 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
-      FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
     });
 
     testUsingContext('device.discoverDevices should respond with list', () async {
@@ -800,13 +798,6 @@ void main() {
 bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
-
-class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
-  FakeFuchsiaWorkflow({ this.canListDevices = true });
-
-  @override
-  final bool canListDevices;
-}
 
 class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   FakeAndroidWorkflow({ this.canListDevices = true });

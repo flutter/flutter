@@ -192,7 +192,6 @@ void main() {
         isLinuxEnabled: true,
         isMacOSEnabled: true,
         isWindowsEnabled: true,
-        isFuchsiaEnabled: true,
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -205,7 +204,6 @@ void main() {
         '--macos',
         '--linux',
         '--windows',
-        '--fuchsia',
         '--flutter_runner',
       ],
     );
@@ -219,8 +217,6 @@ void main() {
       DevelopmentArtifact.macOS,
       DevelopmentArtifact.linux,
       DevelopmentArtifact.windows,
-      DevelopmentArtifact.fuchsia,
-      DevelopmentArtifact.flutterRunner,
     }));
   });
 
@@ -303,7 +299,6 @@ void main() {
         isLinuxEnabled: true,
         isMacOSEnabled: true,
         isWindowsEnabled: true,
-        isFuchsiaEnabled: true,
       ),
       platform: FakePlatform(environment: <String, String>{}),
     );
@@ -325,8 +320,6 @@ void main() {
       DevelopmentArtifact.macOS,
       DevelopmentArtifact.linux,
       DevelopmentArtifact.windows,
-      DevelopmentArtifact.fuchsia,
-      DevelopmentArtifact.flutterRunner,
     }));
   });
 

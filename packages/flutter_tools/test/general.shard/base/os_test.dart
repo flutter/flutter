@@ -156,7 +156,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
+      createOSUtils(FakePlatform(operatingSystem: 'asdasasd'));
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -746,7 +746,7 @@ void main() {
       final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'fuchsia'),
+        platform: FakePlatform(operatingSystem: 'asdasd1'),
         processManager: fakeProcessManager,
       );
 

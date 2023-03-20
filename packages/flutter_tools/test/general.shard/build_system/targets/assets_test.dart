@@ -198,7 +198,7 @@ flutter:
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
         'engineRevision': '2',
-        'platform': 'fuchsia-arm64',
+        'platform': 'linux-arm64',
         'data': <String, Object>{},
       }
     ));

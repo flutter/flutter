@@ -38,9 +38,6 @@ abstract class FeatureFlags {
   /// Whether iOS is enabled.
   bool get isIOSEnabled => true;
 
-  /// Whether fuchsia is enabled.
-  bool get isFuchsiaEnabled => true;
-
   /// Whether custom devices are enabled.
   bool get areCustomDevicesEnabled => false;
 
@@ -65,7 +62,6 @@ const List<Feature> allFeatures = <Feature>[
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
-  flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
   flutterWebWasm,
 ];
@@ -113,16 +109,6 @@ const Feature flutterAndroidFeature = Feature.fullyEnabled(
 const Feature flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
-);
-
-/// The [Feature] for Fuchsia support.
-const Feature flutterFuchsiaFeature = Feature(
-  name: 'Flutter for Fuchsia',
-  configSetting: 'enable-fuchsia',
-  environmentOverride: 'FLUTTER_FUCHSIA',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
 );
 
 const Feature flutterCustomDevicesFeature = Feature(

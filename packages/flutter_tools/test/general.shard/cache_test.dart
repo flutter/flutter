@@ -478,27 +478,6 @@ void main() {
     expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
   });
 
-  testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache = FakeSecondaryCache()
-      ..artifactDirectory = fileSystem.currentDirectory
-      ..version = '123456';
-
-    final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
-    final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
-      cache,
-      packageResolver: packageResolver,
-      platform: FakePlatform(),
-    );
-
-    await flutterRunnerDebugSymbols.updateInner(FakeArtifactUpdater(), fileSystem, FakeOperatingSystemUtils());
-
-    expect(packageResolver.resolved, <List<String>>[
-      <String>['fuchsia-debug-symbols-x64', '123456'],
-      <String>['fuchsia-debug-symbols-arm64', '123456'],
-    ]);
-  });
-
   testWithoutContext('FontSubset in universal artifacts', () {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
@@ -559,21 +538,11 @@ void main() {
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
   });
 
-  testWithoutContext('FontSubset artifacts on fuchsia', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
-
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: fuchsia'));
-  });
-
   testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
       fakeProcessManager.addCommand(unameCommandForX64);
 
-      final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
-      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'macOS'));
+      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macOS'));
       cache.includeAllPlatforms = true;
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -586,8 +555,8 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
       fakeProcessManager.addCommand(unameCommandForArm64);
 
-      final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
-      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'macOS'));
+      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macOS'));
       cache.includeAllPlatforms = true;
 
       expect(artifacts.getBinaryDirs(), <List<String>>[

@@ -435,9 +435,6 @@ class DaemonDomain extends Domain {
       if (featureFlags.isWebEnabled && supportedPlatforms.contains(SupportedPlatform.web)) {
         result.add('web');
       }
-      if (featureFlags.isFuchsiaEnabled && supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
-        result.add('fuchsia');
-      }
       if (featureFlags.areCustomDevicesEnabled) {
         result.add('custom');
       }

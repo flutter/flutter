@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
@@ -65,7 +64,6 @@ Future<void> run(List<String> args) async {
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages] as String?,
-    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 
   if (assets == null) {

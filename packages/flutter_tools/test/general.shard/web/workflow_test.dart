@@ -45,15 +45,6 @@ void main() {
     expect(workflow.canListEmulators, false);
   });
 
-  testWithoutContext('WebWorkflow does not apply on other platforms', () {
-    final WebWorkflow workflow = WebWorkflow(
-      platform: FakePlatform(operatingSystem: 'fuchsia'),
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-    );
-
-    expect(workflow.appliesToHostPlatform, false);
-  });
-
   testWithoutContext('WebWorkflow does not apply if feature flag is disabled', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(),

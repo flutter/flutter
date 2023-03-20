@@ -390,11 +390,6 @@ void main() {
         environment: <String, String>{'WT_SESSION': ''},
         executableArguments: <String>[],
       ),
-      FakePlatform(
-        operatingSystem: 'fuchsia',
-        environment: <String, String>{},
-        executableArguments: <String>[],
-      ),
     ];
     final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
 

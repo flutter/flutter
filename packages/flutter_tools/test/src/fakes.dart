@@ -421,7 +421,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
-    this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
     this.isFlutterWebWasmEnabled = false,
   });
@@ -448,9 +447,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isIOSEnabled;
 
   @override
-  final bool isFuchsiaEnabled;
-
-  @override
   final bool areCustomDevicesEnabled;
 
   @override
@@ -473,8 +469,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isAndroidEnabled;
       case flutterIOSFeature:
         return isIOSEnabled;
-      case flutterFuchsiaFeature:
-        return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
     }

@@ -48,8 +48,6 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for Windows desktop development.');
     argParser.addFlag('macos',
         help: 'Precache artifacts for macOS desktop development.');
-    argParser.addFlag('fuchsia',
-        help: 'Precache artifacts for Fuchsia development.');
     argParser.addFlag('universal', defaultsTo: true,
         help: 'Precache artifacts required for any development platform.');
     argParser.addFlag('flutter_runner',

@@ -32,7 +32,6 @@ void main() {
     final FakeDevice wirelessUnsupportedForProjectAndroidDevice = FakeDevice.wireless(deviceName: 'target-device-8', deviceSupportForProject: false);
 
     final FakeDevice nonEphemeralDevice = FakeDevice(deviceName: 'target-device-9', ephemeral: false);
-    final FakeDevice fuchsiaDevice = FakeDevice.fuchsia(deviceName: 'target-device-10');
 
     final FakeDevice exactMatchAndroidDevice = FakeDevice(deviceName: 'target-device');
     final FakeDevice exactMatchWirelessAndroidDevice = FakeDevice.wireless(deviceName: 'target-device');
@@ -244,35 +243,6 @@ No devices found.
           expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
           expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
         });
-
-        testUsingContext('when devices are either unsupported by flutter or project or all', () async {
-          deviceManager.androidDiscoverer.deviceList = <Device>[
-            attachedUnsupportedAndroidDevice,
-            attachedUnsupportedForProjectAndroidDevice,
-          ];
-          deviceManager.otherDiscoverer.deviceList = <Device>[fuchsiaDevice];
-
-          final TargetDevices targetDevices = TargetDevices(
-            deviceManager: deviceManager,
-            logger: logger,
-          );
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(logger.statusText, equals('''
-No devices found.
-
-The following devices were found, but are not supported by this project:
-target-device-3 (mobile)  • xxx • android       • Android 10 (unsupported)
-target-device-4 (mobile)  • xxx • android       • Android 10
-target-device-10 (mobile) • xxx • fuchsia-arm64 • tester
-If you would like your app to run on android or fuchsia, consider running `flutter create .` to generate projects for these platforms.
-'''));
-          expect(devices, isNull);
-          expect(deviceManager.androidDiscoverer.devicesCalled, 3);
-          expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
-          expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
-        });
-
       });
 
     });
@@ -871,30 +841,6 @@ target-device-6 (mobile) • xxx • android • Android 10
         setUp(() {
           deviceManager.hasSpecifiedAllDevices = true;
         });
-
-        testUsingContext('including attached, wireless, unsupported devices', () async {
-          deviceManager.androidDiscoverer.deviceList = <Device>[
-            attachedAndroidDevice1,
-            attachedUnsupportedAndroidDevice,
-            attachedUnsupportedForProjectAndroidDevice,
-            wirelessAndroidDevice1,
-            wirelessUnsupportedAndroidDevice,
-            wirelessUnsupportedForProjectAndroidDevice,
-          ];
-          deviceManager.otherDiscoverer.deviceList = <Device>[fuchsiaDevice];
-
-          final TargetDevices targetDevices = TargetDevices(
-            deviceManager: deviceManager,
-            logger: logger,
-          );
-          final List<Device>? devices = await targetDevices.findAllTargetDevices();
-
-          expect(logger.statusText, equals(''));
-          expect(devices, <Device>[attachedAndroidDevice1, wirelessAndroidDevice1]);
-          expect(deviceManager.androidDiscoverer.devicesCalled, 2);
-          expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
-          expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
-        });
       });
     });
 
@@ -1015,27 +961,10 @@ class FakeDevice extends Fake implements Device {
         _isSupportedForProject = deviceSupportForProject,
         _targetPlatform = deviceTargetPlatform;
 
-  FakeDevice.fuchsia({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
-    this.ephemeral = true,
-    this.isConnected = true,
-    this.connectionInterface = DeviceConnectionInterface.attached,
-    this.platformType = PlatformType.fuchsia,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.fuchsia_arm64,
-  })  : id = deviceId ?? 'xxx',
-        name = deviceName ?? 'test',
-        _isSupported = deviceSupported,
-        _isSupportedForProject = deviceSupportForProject,
-        _targetPlatform = deviceTargetPlatform,
-        _sdkNameAndVersion = 'tester';
-
   final bool _isSupported;
   final bool _isSupportedForProject;
   final TargetPlatform _targetPlatform;
-  String _sdkNameAndVersion = 'Android 10';
+  final String _sdkNameAndVersion = 'Android 10';
 
   @override
   String name;

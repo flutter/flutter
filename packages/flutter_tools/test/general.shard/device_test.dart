@@ -194,8 +194,6 @@ void main() {
     final FakeDevice unsupportedForProject = FakeDevice('unsupportedForProject', 'unsupportedForProject', isSupportedForProject: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-    final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     final FakeDevice unconnectedDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', isConnected: false);
     final FakeDevice wirelessDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', connectionInterface: DeviceConnectionInterface.wireless);
 
@@ -333,10 +331,9 @@ void main() {
       expect(filtered, <Device>[unsupportedForProject]);
     });
 
-    testUsingContext('Removes web and fuchsia from --all', () async {
+    testUsingContext('Removes web from --all', () async {
       final List<Device> devices = <Device>[
         webDevice,
-        fuchsiaDevice,
       ];
       final DeviceManager deviceManager = TestDeviceManager(
         devices,

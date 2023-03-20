@@ -857,7 +857,7 @@ abstract class FlutterCommand extends Command<void> {
       'module',
       abbr: 'm',
       hide: hide,
-      help: 'The name of the module (required if attaching to a fuchsia device).',
+      help: 'The name of the module.',
       valueHelp: 'module-name',
     );
   }
@@ -1690,8 +1690,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
       return null;
   }

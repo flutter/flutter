@@ -131,8 +131,6 @@ void main() {
         'web-javascript': true,
         'ios': false,
         'android': false,
-        'fuchsia-arm64': true,
-        'fuchsia-x64': true,
       };
 
       for (final String targetPlatform in canSkip.keys) {

@@ -52,7 +52,6 @@ enum PlatformType {
   linux._('linux'),
   macos._('macos'),
   windows._('windows'),
-  fuchsia._('fuchsia'),
   custom._('custom');
 
   const PlatformType._(this.value);
@@ -70,7 +69,6 @@ enum PlatformType {
       'linux': linux,
       'macos': macos,
       'windows': windows,
-      'fuchsia': fuchsia,
       'custom': custom,
     }[platformType];
   }
@@ -346,15 +344,13 @@ class DeviceDiscoverySupportFilter {
 
   /// User has specified `--device all`.
   ///
-  /// Always remove web and fuchsia devices from `all`. This setting
+  /// Always remove web devices from `all`. This setting
   /// currently requires devices to share a frontend_server and resident
-  /// runner instance. Both web and fuchsia require differently configured
-  /// compilers, and web requires an entirely different resident runner.
+  /// runner instance. Web requires a differently configured
+  /// compiler and an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
     final TargetPlatform devicePlatform = await device.targetPlatform;
     return device.isSupported() &&
-        devicePlatform != TargetPlatform.fuchsia_arm64 &&
-        devicePlatform != TargetPlatform.fuchsia_x64 &&
         devicePlatform != TargetPlatform.web_javascript &&
         isDeviceSupportedForProject(device);
   }

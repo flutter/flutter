@@ -182,11 +182,7 @@ class KernelSnapshot extends Target {
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
-    TargetModel targetModel = TargetModel.flutter;
-    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.fuchsia_arm64) {
-      targetModel = TargetModel.flutterRunner;
-    }
+    const TargetModel targetModel = TargetModel.flutter;
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
@@ -202,8 +198,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.tester:

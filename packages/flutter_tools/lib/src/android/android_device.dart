@@ -226,8 +226,6 @@ class AndroidDevice extends Device {
         return buildMode == BuildMode.debug;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_x64:
@@ -564,8 +562,6 @@ class AndroidDevice extends Device {
         break;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_x64:
