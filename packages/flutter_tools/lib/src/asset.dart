@@ -1076,7 +1076,7 @@ class _Asset {
 
   final AssetKind assetKind;
 
-  // todo document
+  // TODO document
   final AssetTransformer? transformer;
 
   File lookupAssetFile(FileSystem fileSystem) {

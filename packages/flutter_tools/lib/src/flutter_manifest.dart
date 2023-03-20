@@ -520,16 +520,15 @@ class FontAsset {
 }
 
 class AssetTransformer {
-  // TODO does constructor go first?
-  final String package;
-  final String executable;
-  final String args;
-
   AssetTransformer({
     required this.package,
     required this.executable,
     required this.args,
   });
+
+  final String package;
+  final String executable;
+  final String args;
 }
 
 bool _validate(Object? manifest, Logger logger) {
