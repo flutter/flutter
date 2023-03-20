@@ -571,29 +571,31 @@ Future<void> main() async {
     final Key key = UniqueKey();
     // Fix https://github.com/flutter/flutter/issues/13675
     Widget buildWidget(BoxBorder border) {
-      return Container(
-        width: 80,
-        height: 80,
-        color: Colors.red,
+      return Center(
         key: key,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              for (int i = 0; i < 10; i++)
-                Transform.translate(
-                  offset: Offset(i * 3, i * 3),
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color: Colors.black,
-                      border: border,
+        child: Container(
+          width: 80,
+          height: 80,
+          color: Colors.red,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                for (int i = 0; i < 10; i++)
+                  Transform.translate(
+                    offset: Offset(i * 3, i * 3),
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        color: Colors.black,
+                        border: border,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       );

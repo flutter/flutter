@@ -164,33 +164,35 @@ Future<void> main() async {
     // Fix https://github.com/flutter/flutter/issues/13675
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
-      return Container(
-        width: 80,
-        height: 80,
-        color: Colors.red,
+      return Center(
         key: key,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              for (int i = 0; i < 10; i++)
-                Transform.translate(
-                  offset: Offset(i * 3, i * 3),
-                  child: Container(
-                    height: 50,
-                    width: 50,
-                    decoration: ShapeDecoration(
-                      color: Colors.black,
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: color,
-                          width: 10,
+        child: Container(
+          width: 80,
+          height: 80,
+          color: Colors.red,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                for (int i = 0; i < 10; i++)
+                  Transform.translate(
+                    offset: Offset(i * 3, i * 3),
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: ShapeDecoration(
+                        color: Colors.black,
+                        shape: CircleBorder(
+                          side: BorderSide(
+                            color: color,
+                            width: 10,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       );
