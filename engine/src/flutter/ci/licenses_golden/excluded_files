@@ -2734,6 +2734,7 @@
 ../../../third_party/skia/package.json
 ../../../third_party/skia/platform_tools
 ../../../third_party/skia/public.bzl
+../../../third_party/skia/relnotes/README.md
 ../../../third_party/skia/requirements.txt
 ../../../third_party/skia/resources
 ../../../third_party/skia/site
