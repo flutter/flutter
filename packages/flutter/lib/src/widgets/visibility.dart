@@ -81,8 +81,6 @@ class Visibility extends StatelessWidget {
 
   /// Control whether the given [child] is [visible].
   ///
-  /// The [child] and [replacement] arguments must not be null.
-  ///
   /// This is equivalent to the default [Visibility] constructor with all
   /// "maintain" fields set to true. This constructor should be used in place of
   /// an [Opacity] widget that only takes on values of `0.0` or `1.0`, as it
