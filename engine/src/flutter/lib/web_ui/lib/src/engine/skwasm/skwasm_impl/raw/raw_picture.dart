@@ -9,10 +9,10 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-class RawPictureRecorder extends Opaque {}
+final class RawPictureRecorder extends Opaque {}
 typedef PictureRecorderHandle = Pointer<RawPictureRecorder>;
 
-class RawPicture extends Opaque {}
+final class RawPicture extends Opaque {}
 typedef PictureHandle = Pointer<RawPicture>;
 
 @Native<PictureRecorderHandle Function()>(

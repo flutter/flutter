@@ -8,7 +8,7 @@ library skwasm_impl;
 import 'dart:ffi';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-class RawSurface extends Opaque {}
+final class RawSurface extends Opaque {}
 typedef SurfaceHandle = Pointer<RawSurface>;
 
 @Native<SurfaceHandle Function(Pointer<Int8>)>(

@@ -309,9 +309,9 @@ final ffi.DynamicLibrary _dylib = () {
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
 }();
 
-class _SkPath extends ffi.Opaque {}
+final class _SkPath extends ffi.Opaque {}
 
-class _PathData extends ffi.Struct {
+final class _PathData extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> verbs;
 
   @ffi.Size()

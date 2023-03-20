@@ -9,7 +9,7 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-class RawPath extends Opaque {}
+final class RawPath extends Opaque {}
 
 typedef PathHandle = Pointer<RawPath>;
 

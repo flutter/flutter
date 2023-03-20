@@ -145,14 +145,14 @@ final ffi.DynamicLibrary _dylib = () {
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
 }();
 
-class _Vertices extends ffi.Struct {
+final class _Vertices extends ffi.Struct {
   external ffi.Pointer<ffi.Float> points;
 
   @ffi.Uint32()
   external int size;
 }
 
-class _PathBuilder extends ffi.Opaque {}
+final class _PathBuilder extends ffi.Opaque {}
 
 typedef _CreatePathBuilderType = ffi.Pointer<_PathBuilder> Function();
 typedef _create_path_builder_type = ffi.Pointer<_PathBuilder> Function();
