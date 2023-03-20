@@ -2337,6 +2337,10 @@ extension DomMouseEventExtension on DomMouseEvent {
   external JSNumber? get _buttons;
   double? get buttons => _buttons?.toDart;
 
+  @JS('ctrlKey')
+  external JSBoolean get _ctrlKey;
+  bool get ctrlKey => _ctrlKey.toDart;
+
   @JS('getModifierState')
   external JSBoolean _getModifierState(JSString keyArg);
   bool getModifierState(String keyArg) => _getModifierState(keyArg.toJS).toDart;
