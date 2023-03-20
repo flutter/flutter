@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -67,7 +66,6 @@ void main() {
         final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -97,7 +95,6 @@ void main() {
         );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -124,7 +121,6 @@ void main() {
         );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -166,7 +162,6 @@ void main() {
             );
 
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -201,7 +196,6 @@ void main() {
 
           testUsingContext('contains license and version', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -222,7 +216,6 @@ void main() {
 
           testUsingContext('debug URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -241,7 +234,6 @@ void main() {
 
           testUsingContext('profile URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -260,7 +252,6 @@ void main() {
 
           testUsingContext('release URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -304,7 +295,6 @@ void main() {
         final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -334,7 +324,6 @@ void main() {
         );
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -361,7 +350,6 @@ void main() {
         );
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -403,7 +391,6 @@ void main() {
             );
 
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -438,7 +425,6 @@ void main() {
 
           testUsingContext('contains license and version', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -459,7 +445,6 @@ void main() {
 
           testUsingContext('debug URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -478,7 +463,6 @@ void main() {
 
           testUsingContext('profile URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -497,7 +481,6 @@ void main() {
 
           testUsingContext('release URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
-              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,

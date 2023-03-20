@@ -67,7 +67,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }) {
     requiresPubspecYaml();
     usesPubOption();
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
@@ -420,7 +419,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
     Device? integrationTestDevice;

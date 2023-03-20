@@ -171,7 +171,6 @@ List<FlutterCommand> generateCommands({
     osUtils: globals.os,
     verboseHelp: verboseHelp,
     androidSdk: globals.androidSdk,
-    logger: globals.logger,
   ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),

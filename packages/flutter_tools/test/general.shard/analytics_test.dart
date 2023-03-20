@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -220,7 +219,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
