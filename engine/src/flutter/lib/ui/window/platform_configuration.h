@@ -296,7 +296,7 @@ class PlatformConfiguration final {
   ///
   /// @param[in]  data  The lifecycle state data.
   ///
-  void UpdateLifecycleState(const std::string& data);
+  void UpdateInitialLifecycleState(const std::string& data);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the PlatformConfiguration that the embedder has
@@ -436,7 +436,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue on_error_;
   tonic::DartPersistentValue update_locales_;
   tonic::DartPersistentValue update_user_settings_data_;
-  tonic::DartPersistentValue update_lifecycle_state_;
+  tonic::DartPersistentValue update_initial_lifecycle_state_;
   tonic::DartPersistentValue update_semantics_enabled_;
   tonic::DartPersistentValue update_accessibility_features_;
   tonic::DartPersistentValue dispatch_platform_message_;

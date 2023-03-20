@@ -67,8 +67,8 @@ void _updateUserSettingsData(String jsonData) {
 }
 
 @pragma('vm:entry-point')
-void _updateLifecycleState(String state) {
-  PlatformDispatcher.instance._updateLifecycleState(state);
+void _updateInitialLifecycleState(String state) {
+  PlatformDispatcher.instance._updateInitialLifecycleState(state);
 }
 
 @pragma('vm:entry-point')

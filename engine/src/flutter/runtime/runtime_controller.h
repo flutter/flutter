@@ -205,9 +205,11 @@ class RuntimeController : public PlatformConfigurationClient {
   bool SetUserSettingsData(const std::string& data);
 
   //----------------------------------------------------------------------------
-  /// @brief      Forward the lifecycle state data to the running isolate. If
-  ///             the isolate is not running, this data will be saved and
-  ///             flushed to the isolate when it starts running.
+  /// @brief      Forward the initial lifecycle state data to the running
+  ///             isolate. If the isolate is not running, this data will be
+  ///             saved and flushed to the isolate when it starts running.
+  ///             After the isolate starts running, the current lifecycle
+  ///             state is pushed to it via the "flutter/lifecycle" channel.
   ///
   /// @deprecated The persistent isolate data must be used for this purpose
   ///             instead.
@@ -217,7 +219,7 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @return     If the lifecycle state data was forwarded to the running
   ///             isolate.
   ///
-  bool SetLifecycleState(const std::string& data);
+  bool SetInitialLifecycleState(const std::string& data);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the running isolate about whether the semantics tree

@@ -119,7 +119,7 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
          SetAccessibilityFeatures(
              platform_data_.accessibility_feature_flags_) &&
          SetUserSettingsData(platform_data_.user_settings_data) &&
-         SetLifecycleState(platform_data_.lifecycle_state);
+         SetInitialLifecycleState(platform_data_.lifecycle_state);
 }
 
 bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
@@ -157,11 +157,11 @@ bool RuntimeController::SetUserSettingsData(const std::string& data) {
   return false;
 }
 
-bool RuntimeController::SetLifecycleState(const std::string& data) {
+bool RuntimeController::SetInitialLifecycleState(const std::string& data) {
   platform_data_.lifecycle_state = data;
 
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->UpdateLifecycleState(
+    platform_configuration->UpdateInitialLifecycleState(
         platform_data_.lifecycle_state);
     return true;
   }
