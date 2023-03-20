@@ -922,7 +922,7 @@ class PlatformDispatcher {
   bool _initialLifecycleStateAccessed = false;
 
   // Called from the engine, via hooks.dart
-  void _updateLifecycleState(String state) {
+  void _updateInitialLifecycleState(String state) {
     // We do not update the state if the state has already been used to initialize
     // the lifecycleState.
     if (!_initialLifecycleStateAccessed) {
