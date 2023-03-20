@@ -2188,4 +2188,76 @@ void main() {
     });
     expect(visited, true);
   });
+
+  testWidgets('Shrinkwrapping viewport asserts bounded cross axis', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    // Vertical
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              children: const <Widget>[ SizedBox.square(dimension: 500) ],
+            ),
+          ],
+        ),
+      ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    FlutterError error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // Horizontal
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        children: <Widget>[
+          ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: const <Widget>[ SizedBox.square(dimension: 500) ],
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // No children
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          ListView(
+            shrinkWrap: true,
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+  });
 }

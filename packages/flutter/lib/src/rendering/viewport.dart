@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -1388,73 +1389,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(() {
-      if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
-        switch (axis) {
-          case Axis.vertical:
-            if (!constraints.hasBoundedHeight) {
-              throw FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Vertical viewport was given unbounded height.'),
-                ErrorDescription(
-                  'Viewports expand in the scrolling direction to fill their container. '
-                  'In this case, a vertical viewport was given an unlimited amount of '
-                  'vertical space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.',
-                ),
-                ErrorHint(
-                  'If this widget is always nested in a scrollable widget there '
-                  'is no need to use a viewport because there will always be enough '
-                  'vertical space for the children. In this case, consider using a '
-                  'Column or Wrap instead. Otherwise, consider using a '
-                  'CustomScrollView to concatenate arbitrary slivers into a '
-                  'single scrollable.',
-                ),
-              ]);
-            }
-            if (!constraints.hasBoundedWidth) {
-              throw FlutterError(
-                'Vertical viewport was given unbounded width.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a vertical viewport was given an unlimited amount of '
-                'horizontal space in which to expand.',
-              );
-            }
-            break;
-          case Axis.horizontal:
-            if (!constraints.hasBoundedWidth) {
-              throw FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Horizontal viewport was given unbounded width.'),
-                ErrorDescription(
-                  'Viewports expand in the scrolling direction to fill their container. '
-                  'In this case, a horizontal viewport was given an unlimited amount of '
-                  'horizontal space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.',
-                ),
-                ErrorHint(
-                  'If this widget is always nested in a scrollable widget there '
-                  'is no need to use a viewport because there will always be enough '
-                  'horizontal space for the children. In this case, consider using a '
-                  'Row or Wrap instead. Otherwise, consider using a '
-                  'CustomScrollView to concatenate arbitrary slivers into a '
-                  'single scrollable.',
-                ),
-              ]);
-            }
-            if (!constraints.hasBoundedHeight) {
-              throw FlutterError(
-                'Horizontal viewport was given unbounded height.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a horizontal viewport was given an unlimited amount of '
-                'vertical space in which to expand.',
-              );
-            }
-            break;
-        }
-      }
-      return true;
-    }());
+    assert(debugCheckHasBoundedAxis(axis, constraints));
     return constraints.biggest;
   }
 
@@ -1858,17 +1793,48 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   late double _shrinkWrapExtent;
   bool _hasVisualOverflow = false;
 
+  bool _debugCheckHasBoundedCrossAxis() {
+    assert(() {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical shrinkwrapping viewport was given an '
+              'unlimited amount of horizontal space in which to expand.',
+            );
+          }
+          break;
+        case Axis.horizontal:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal shrinkwrapping viewport was given an '
+              'unlimited amount of vertical space in which to expand.',
+            );
+          }
+          break;
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (firstChild == null) {
+      // Shrinkwrapping viewport only requires the cross axis to be bounded.
+      assert(_debugCheckHasBoundedCrossAxis());
       switch (axis) {
         case Axis.vertical:
-          assert(constraints.hasBoundedWidth);
           size = Size(constraints.maxWidth, constraints.minHeight);
           break;
         case Axis.horizontal:
-          assert(constraints.hasBoundedHeight);
           size = Size(constraints.minWidth, constraints.maxHeight);
           break;
       }
@@ -1882,14 +1848,14 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
     final double mainAxisExtent;
     final double crossAxisExtent;
+    // Shrinkwrapping viewport only requires the cross axis to be bounded.
+    assert(_debugCheckHasBoundedCrossAxis());
     switch (axis) {
       case Axis.vertical:
-        assert(constraints.hasBoundedWidth);
         mainAxisExtent = constraints.maxHeight;
         crossAxisExtent = constraints.maxWidth;
         break;
       case Axis.horizontal:
-        assert(constraints.hasBoundedHeight);
         mainAxisExtent = constraints.maxWidth;
         crossAxisExtent = constraints.maxHeight;
         break;
