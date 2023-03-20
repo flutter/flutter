@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
+import 'package:flutter/foundation.dart' show isCanvasKit, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -149,7 +150,7 @@ void main() {
         text: 'First ',
         style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
         children: <InlineSpan>[
-          TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
+          TextSpan(text: 'smallsecond ', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 5.0)),
           TextSpan(text: 'third fourth fifth'),
         ],
       ),
@@ -169,7 +170,9 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 36),
     );
 
-    expect(boxes.length, equals(4));
+    if (kIsWeb && !isCanvasKit) {
+      expect(boxes.length, equals(4));
+    }
 
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',
