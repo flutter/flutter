@@ -4,7 +4,9 @@
 
 import 'package:pool/pool.dart';
 
+import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
@@ -12,6 +14,7 @@ import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
+import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -343,26 +346,29 @@ class CopyAssets extends Target {
   }
 }
 
-Future<bool> _transformAsset(
+Future<void> _transformAsset(
   String asset,
   String output,
   AssetTransformer transformer, {
   required FileSystem fileSystem,
   required Logger logger,
 }) async {
-  final List<String> arguments = <String>[
+  final String dartBinary = artifacts!.getArtifactPath(Artifact.engineDartBinary);
+  final List<String> transformerArguments = <String>[
     ...transformer.args.split(r'\w+'),
     '--input=$asset',
     '--output=$output',
   ];
   final ProcessResult result = await Process.run(
-    'dart run ${transformer.package}:${transformer.executable}', // TODO should executable be required?
-    arguments,
+    dartBinary,
+    <String>[
+      'run',
+      '${transformer.package}:${transformer.executable}', // TODO should executable be required?
+      ...transformerArguments,
+    ],
   );
-  // TODO does this work? also improve this
-  if (result.exitCode != 0) {
-    logger.printError(utf8.decode(result.stderr as List<int>));
-    return false;
+  if (!await fileSystem.file(output).exists()) {
+    // TODO improve message
+    throwToolExit('Transformer ${transformer.package} did not produce an output.');
   }
-  return true;
 }

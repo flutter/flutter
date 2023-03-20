@@ -339,12 +339,12 @@ class FlutterManifest {
 
   Map<Uri, AssetTransformer> _computeTransformedAssets() {
     String extractPackageNameFromKey(String packageKey) {
-      final Match? match = packageKey.matchAsPrefix(r'package:(.*):');
+      final Match? match = RegExp('package:(.*)').matchAsPrefix(packageKey);
       if (match == null) {
         // TODO make message more useful.
         throwToolExit('Invalid package key $packageKey');
       }
-      return match[0]!;
+      return match[1]!;
     }
 
     final Map<Uri, AssetTransformer>  result = <Uri, AssetTransformer>{};
@@ -581,6 +581,10 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
     final Object? yamlValue = kvp.value;
     if (yamlKey is! String) {
       errors.add('Expected YAML key to be a string, but got $yamlKey (${yamlValue.runtimeType}).');
+      continue;
+    }
+    // TODO actually implement validation
+    if (yamlKey.startsWith('package')) {
       continue;
     }
     switch (yamlKey) {
