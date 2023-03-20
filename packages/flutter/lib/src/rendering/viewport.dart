@@ -1793,11 +1793,43 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   late double _shrinkWrapExtent;
   bool _hasVisualOverflow = false;
 
+  bool _debugCheckHasBoundedCrossAxis() {
+    assert(() {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical shrinkwrapping viewport was given an '
+              'unlimited amount of horizontal space in which to expand.',
+            );
+          }
+          break;
+        case Axis.horizontal:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal shrinkwrapping viewport was given an '
+              'unlimited amount of vertical space in which to expand.',
+            );
+          }
+          break;
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (firstChild == null) {
-      assert(debugCheckHasBoundedAxis(axis, constraints));
+      // Shrinkwrapping viewport only requires the cross axis to be bounded.
+      assert(_debugCheckHasBoundedCrossAxis());
       switch (axis) {
         case Axis.vertical:
           size = Size(constraints.maxWidth, constraints.minHeight);
@@ -1816,7 +1848,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
     final double mainAxisExtent;
     final double crossAxisExtent;
-    assert(debugCheckHasBoundedAxis(axis, constraints));
+    // Shrinkwrapping viewport only requires the cross axis to be bounded.
+    assert(_debugCheckHasBoundedCrossAxis());
     switch (axis) {
       case Axis.vertical:
         mainAxisExtent = constraints.maxHeight;

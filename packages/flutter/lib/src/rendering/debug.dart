@@ -314,7 +314,8 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
 }
 
 /// Returns true if the given [Axis] is bounded within the given
-/// [BoxConstraints], throwing an exception otherwise.
+/// [BoxConstraints] in both the main and cross axis, throwing an exception
+/// otherwise.
 ///
 /// This is used by viewports during `performLayout` and `computeDryLayout`
 /// because bounded constraints are required in order to layout their children.
