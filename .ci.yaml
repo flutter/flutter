@@ -3314,6 +3314,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4698,6 +4699,7 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4719,6 +4721,7 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard"]
+      test_timeout_secs: "2700"
     runIf:
     - dev/**
     - packages/flutter_tools/**
