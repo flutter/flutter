@@ -43,7 +43,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     flutter.stdout.listen(printOnFailure);
     await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
-  }, skip: true); // Skipped for https://github.com/flutter/flutter/issues/123018
+  });
 
   testWithoutContext('$testName: hot restart works without error after delay', () async {
     flutter.stdout.listen(printOnFailure);
@@ -75,7 +75,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skipped for https://github.com/flutter/flutter/issues/123018
+  });
 
   testWithoutContext('$testName: newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
