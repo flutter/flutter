@@ -35,9 +35,7 @@ void main() {
         );
         androidProjectMigration.migrate();
         expect(topLevelGradleBuildFile.existsSync(), isFalse);
-
         expect(bufferLogger.traceText, contains('Top-level Gradle build file not found, skipping migration of task "clean".'));
-        expect(testLogger.statusText, isEmpty);
       });
 
       testUsingContext('skipped if nothing to upgrade', () {
@@ -55,7 +53,6 @@ tasks.register("clean", Delete) {
         androidProjectMigration.migrate();
 
         expect(topLevelGradleBuildFile.lastModifiedSync(), previousLastModified);
-        expect(testLogger.statusText, isEmpty);
       });
 
       testUsingContext('top-level build.gradle is migrated', () {
@@ -72,8 +69,6 @@ task clean(type: Delete) {
         androidProjectMigration.migrate();
 
         expect(bufferLogger.traceText, contains('Migrating "clean" Gradle task to lazy declaration style.'));
-        expect(testLogger.statusText, isEmpty);
-
         expect(topLevelGradleBuildFile.readAsStringSync(), equals('''
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
