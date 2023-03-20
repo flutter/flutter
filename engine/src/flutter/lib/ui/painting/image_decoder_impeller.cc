@@ -341,14 +341,11 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         auto upload_texture_and_invoke_result = [result, context, bitmap]() {
           result(UploadTexture(context, bitmap));
         };
-        // Depending on whether the context has threading restrictions, stay on
-        // the concurrent runner to perform texture upload or move to an IO
-        // runner.
-        if (context->GetDeviceCapabilities().HasThreadingRestrictions()) {
-          io_runner->PostTask(upload_texture_and_invoke_result);
-        } else {
-          upload_texture_and_invoke_result();
-        }
+        // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/123058
+        // Technically we don't need to post tasks to the io runner, but without
+        // this forced serialization we can end up overloading the GPU and/or
+        // competing with raster workloads.
+        io_runner->PostTask(upload_texture_and_invoke_result);
       });
 }
 
