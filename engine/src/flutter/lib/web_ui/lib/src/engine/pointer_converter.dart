@@ -97,6 +97,7 @@ class PointerDataConverter {
     required int platformData,
     required double scrollDeltaX,
     required double scrollDeltaY,
+    required double scale,
   }) {
     assert(_pointers.containsKey(device));
     final _PointerState state = _pointers[device]!;
@@ -132,6 +133,7 @@ class PointerDataConverter {
       platformData: platformData,
       scrollDeltaX: scrollDeltaX,
       scrollDeltaY: scrollDeltaY,
+      scale: scale,
     );
   }
 
@@ -165,6 +167,7 @@ class PointerDataConverter {
     required int platformData,
     required double scrollDeltaX,
     required double scrollDeltaY,
+    required double scale,
   }) {
     assert(_pointers.containsKey(device));
     final _PointerState state = _pointers[device]!;
@@ -204,6 +207,7 @@ class PointerDataConverter {
       platformData: platformData,
       scrollDeltaX: scrollDeltaX,
       scrollDeltaY: scrollDeltaY,
+      scale: scale,
     );
   }
 
@@ -235,6 +239,7 @@ class PointerDataConverter {
     int platformData = 0,
     double scrollDeltaX = 0.0,
     double scrollDeltaY = 0.0,
+    double scale = 1.0,
   }) {
     if (_debugLogPointerConverter) {
       print('>> device=$device change=$change buttons=$buttons');
@@ -273,6 +278,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           break;
@@ -307,6 +313,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
           }
@@ -336,6 +343,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           _activeButtons = buttons;
@@ -373,6 +381,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
           }
@@ -405,6 +414,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
           }
@@ -434,6 +444,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           _activeButtons = buttons;
@@ -467,6 +478,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           _activeButtons = buttons;
@@ -513,6 +525,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
           }
@@ -542,6 +555,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           if (kind == ui.PointerDeviceKind.touch) {
@@ -573,6 +587,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
             _pointers.remove(device);
@@ -608,6 +623,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           _pointers.remove(device);
@@ -653,6 +669,7 @@ class PointerDataConverter {
                 platformData: platformData,
                 scrollDeltaX: scrollDeltaX,
                 scrollDeltaY: scrollDeltaY,
+                scale: scale,
               )
             );
           }
@@ -687,6 +704,7 @@ class PointerDataConverter {
                   platformData: platformData,
                   scrollDeltaX: scrollDeltaX,
                   scrollDeltaY: scrollDeltaY,
+                  scale: scale,
                 )
               );
             } else {
@@ -715,6 +733,7 @@ class PointerDataConverter {
                   platformData: platformData,
                   scrollDeltaX: scrollDeltaX,
                   scrollDeltaY: scrollDeltaY,
+                  scale: scale,
                 )
               );
             }
@@ -745,6 +764,7 @@ class PointerDataConverter {
               platformData: platformData,
               scrollDeltaX: scrollDeltaX,
               scrollDeltaY: scrollDeltaY,
+              scale: scale,
             )
           );
           break;
