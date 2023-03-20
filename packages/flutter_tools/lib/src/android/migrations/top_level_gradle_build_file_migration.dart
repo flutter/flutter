@@ -21,9 +21,9 @@ tasks.register("clean", Delete) {
 /// Migrate the Gradle "clean" task to use modern, lazy declaration style.
 class TopLevelGradleBuildFileMigration extends ProjectMigrator {
   TopLevelGradleBuildFileMigration(
-  AndroidProject project,
+    AndroidProject project,
     super.logger,
-  )   : _topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
+  ) : _topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
 
   final File _topLevelGradleBuildFile;
 
