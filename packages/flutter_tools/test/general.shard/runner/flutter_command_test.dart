@@ -497,82 +497,6 @@ void main() {
       ));
     });
 
-    testUsingContext('reports null safety analytics when reportNullSafety is true', () async {
-      globals.fs.file('lib/main.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// @dart=2.12');
-      globals.fs.file('pubspec.yaml')
-        .writeAsStringSync('name: example\n');
-      globals.fs.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(r'''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ],
-  "generated": "2020-12-02T19:30:53.862346Z",
-  "generator": "pub",
-  "generatorVersion": "2.12.0-76.0.dev"
-}
-''');
-      final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['test']);
-
-      expect(usage.events, containsAll(<TestUsageEvent>[
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'runtime-mode',
-          label: 'NullSafetyMode.sound',
-        ),
-        TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'stats',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd49': '1', 'cd50': '1',
-          }),
-        ),
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'language-version',
-          label: '2.12',
-        ),
-      ]));
-    }, overrides: <Type, Generator>{
-      Pub: () => FakePub(),
-      Usage: () => usage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    });
-
-    testUsingContext('tool exits on non-sound-null-safe code when explicit flag not passed', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
-      flutterCommand.argParser
-          ..addFlag(FlutterOptions.kNullSafety, defaultsTo: true)
-          ..addOption('target');
-      final File targetFile = fileSystem.file('targetFile.dart')
-          ..writeAsStringSync('// @dart = 2.11');
-      expect(
-        () async => flutterCommand.getBuildInfo(
-          forcedBuildMode: BuildMode.debug,
-          forcedTargetFile: targetFile,
-        ),
-        throwsToolExit(
-          message: 'This application does not support sound null-safety (its language version is 2.11)',
-        ),
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    });
-
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
@@ -776,9 +700,6 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
 
   @override
   bool get shouldRunPub => true;
-
-  @override
-  bool get reportNullSafety => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

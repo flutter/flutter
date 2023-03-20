@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -31,7 +30,6 @@ void main() {
     final BuildAarCommand command = BuildAarCommand(
       androidSdk: FakeAndroidSdk(),
       fileSystem: globals.fs,
-      logger: BufferLogger.test(),
       verboseHelp: false,
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -189,7 +187,6 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
-      expect(buildInfo.nullSafetyMode, NullSafetyMode.sound);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => fakeAndroidBuilder,
     });
@@ -309,7 +306,6 @@ Future<BuildAarCommand> runBuildAarCommand(
   final BuildAarCommand command = BuildAarCommand(
     androidSdk: androidSdk,
     fileSystem: globals.fs,
-    logger: BufferLogger.test(),
     verboseHelp: false,
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
