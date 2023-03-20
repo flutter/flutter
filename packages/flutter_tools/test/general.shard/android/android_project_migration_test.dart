@@ -51,7 +51,7 @@ tasks.register("clean", Delete) {
           project,
           bufferLogger,
         );
-        final DateTime topLevelGradleBuildFileLastModified = topLevelGradleBuildFile.lastModifiedSync();
+        final DateTime previousLastModified = topLevelGradleBuildFile.lastModifiedSync();
         androidProjectMigration.migrate();
 
         expect(topLevelGradleBuildFile.lastModifiedSync(), topLevelGradleBuildFileLastModified);
