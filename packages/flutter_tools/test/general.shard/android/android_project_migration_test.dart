@@ -15,13 +15,6 @@ import '../../src/context.dart';
 
 void main() {
   group('Android migration', () {
-    
-    testWithoutContext('migrators succeed', () {
-      final FakeAndroidMigrator fakeAndroidMigrator = FakeAndroidMigrator();
-      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeAndroidMigrator]);
-      migration.run();
-    });
-
     group('migrate the Gradle "clean" task to lazy declaration', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
