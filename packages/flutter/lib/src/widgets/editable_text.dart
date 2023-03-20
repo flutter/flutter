@@ -2410,13 +2410,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
+    final bool spellCheckManuallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
-    if (configuration == null || configuration == const SpellCheckConfiguration.disabled() || !spellCheckServiceIsConfigured) {
+    if (spellCheckManuallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
       // a native spell checker must be supported.
       assert(() {
-        if (!spellCheckServiceIsConfigured) {
+        if (!spellCheckManuallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception: FlutterError(
@@ -2425,7 +2426,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 'service, and none was provided.',
               ),
               library: 'widget library',
-              stack: StackTrace.current, 
+              stack: StackTrace.current,
             ),
           );
         }
