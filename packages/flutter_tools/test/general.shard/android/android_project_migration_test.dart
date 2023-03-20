@@ -29,10 +29,9 @@ void main() {
       late File topLevelGradleBuildFile;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         bufferLogger = BufferLogger.test();
-        project = FakeAndroidProject();
-        project.hostAppGradleRoot = memoryFileSystem.currentDirectory;
+        project = FakeAndroidProject(memoryFileSystem.currentDirectory.childDirectory('android')..createSync());
         topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
       });
 
@@ -44,7 +43,7 @@ void main() {
         androidProjectMigration.migrate();
         expect(topLevelGradleBuildFile.existsSync(), isFalse);
 
-        expect(bufferLogger.traceText, contains('Top-level Gradle build file not found, skipping "clean" task migration.'));
+        expect(bufferLogger.traceText, contains('Top-level Gradle build file not found, skipping migration of task "clean".'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -93,13 +92,14 @@ tasks.register("clean", Delete) {
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
+  FakeAndroidProject(this.hostAppGradleRoot);
+
   @override
-  Directory hostAppGradleRoot = MemoryFileSystem.test().currentDirectory;
+  Directory hostAppGradleRoot;
 }
 
 class FakeAndroidMigrator extends ProjectMigrator {
-  FakeAndroidMigrator()
-    : super(BufferLogger.test());
+  FakeAndroidMigrator() : super(BufferLogger.test());
 
   @override
   void migrate() {}
