@@ -24,7 +24,9 @@ void main() {
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
         bufferLogger = BufferLogger.test();
-        project = FakeAndroidProject(memoryFileSystem.currentDirectory.childDirectory('android')..createSync());
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
+        );
         topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
       });
 
@@ -80,7 +82,7 @@ tasks.register("clean", Delete) {
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
-  FakeAndroidProject(this.hostAppGradleRoot);
+  FakeAndroidProject({required Directory root}) : hostAppGradleRoot = root;
 
   @override
   Directory hostAppGradleRoot;
