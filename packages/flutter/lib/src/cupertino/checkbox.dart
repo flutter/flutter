@@ -43,7 +43,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 ///  * [CupertinoSlider], for selecting a value in a range.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/components/selection-and-input/toggles/>
 class CupertinoCheckbox extends StatefulWidget {
-  /// Creates a macOS styled checkbox.
+  /// Creates a macOS-styled checkbox.
   ///
   /// The checkbox itself does not maintain any state. Instead, when the state of
   /// the checkbox changes, the widget calls the [onChanged] callback. Most
@@ -152,7 +152,8 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color and width of the checkbox's border.
   ///
-  /// If this property is null, then the side defaults to a width of 1.
+  /// If this property is null, then the side defaults to a one pixel wide
+  /// black, solid border.
   final BorderSide? side;
 
   /// The shape of the checkbox.
