@@ -81,8 +81,6 @@ class Visibility extends StatelessWidget {
 
   /// Control whether the given [child] is [visible].
   ///
-  /// The [child] and [replacement] arguments must not be null.
-  ///
   /// This is equivalent to the default [Visibility] constructor with all
   /// "maintain" fields set to true. This constructor should be used in place of
   /// an [Opacity] widget that only takes on values of `0.0` or `1.0`, as it
@@ -90,13 +88,13 @@ class Visibility extends StatelessWidget {
   const Visibility.maintain({
     super.key,
     required this.child,
-    this.replacement = const SizedBox.shrink(),
     this.visible = true,
   }) :  maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
-        maintainInteractivity = true;
+        maintainInteractivity = true,
+        replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
   ///
