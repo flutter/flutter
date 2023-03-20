@@ -1695,13 +1695,13 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
-  _SwitchDefaultsM3(BuildContext context)
-    : _colors = Theme.of(context).colorScheme;
+  _SwitchDefaultsM3(this.context);
 
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   MaterialStateProperty<Color> get thumbColor {

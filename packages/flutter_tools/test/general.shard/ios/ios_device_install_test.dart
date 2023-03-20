@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
@@ -62,7 +63,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceConnectionInterface.usb,
+      interfaceType: DeviceConnectionInterface.attached,
       artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
@@ -95,7 +96,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceConnectionInterface.network,
+      interfaceType: DeviceConnectionInterface.wireless,
       artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
@@ -319,7 +320,7 @@ IOSDevice setUpIOSDevice({
   required ProcessManager processManager,
   FileSystem? fileSystem,
   Logger? logger,
-  IOSDeviceConnectionInterface? interfaceType,
+  DeviceConnectionInterface? interfaceType,
   Artifacts? artifacts,
 }) {
   logger ??= BufferLogger.test();
@@ -357,6 +358,6 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
-    interfaceType: interfaceType ?? IOSDeviceConnectionInterface.usb,
+    connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
   );
 }

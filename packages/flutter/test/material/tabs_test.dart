@@ -288,24 +288,24 @@ void main() {
 
   testWidgets('Tab sizing - text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(text: 'x')))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(text: 'x')))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
   });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(fontFamily: 'Ahem'),
+        theme: ThemeData(fontFamily: 'FlutterTest'),
         home: const Center(
           child: Material(
             child: Tab(
@@ -322,15 +322,15 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
+      MaterialApp(theme: ThemeData(fontFamily: 'FlutterTest'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'Ahem');
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
   });
 
@@ -1118,6 +1118,65 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(animationDuration);
     expect(position.pixels, 800);
+  });
+
+  testWidgets('TabBarView animation can be interrupted', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(seconds: 2);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    expect(position.pixels, 0.0);
+
+    await tester.tap(find.text('C'));
+    await tester.pump(const Duration(milliseconds: 10)); // TODO(bleroux): find why this is needed.
+
+    // Runs the animation for half of the animation duration.
+    await tester.pump(const Duration(seconds: 1));
+
+    // The position should be between page 1 and page 2.
+    expect(position.pixels, greaterThan(400.0));
+    expect(position.pixels, lessThan(800.0));
+
+    // Switch to another tab before the end of the animation.
+    await tester.tap(find.text('A'));
+    await tester.pump(const Duration(milliseconds: 10)); // TODO(bleroux): find why this is needed.
+    await tester.pump(animationDuration);
+    expect(position.pixels, 0.0);
+
+    await tester.pumpAndSettle(); // Finish the animation.
   });
 
   testWidgets('TabBarView viewportFraction sets PageView viewport fraction', (WidgetTester tester) async {

@@ -340,9 +340,11 @@ class DatePickerDialog extends StatefulWidget {
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
+  /// {@template flutter.material.datePickerDialog}
   /// The keyboard type of the [TextField].
   ///
   /// If this is null, it will default to [TextInputType.datetime]
+  /// {@endtemplate}
   final TextInputType? keyboardType;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
@@ -991,6 +993,7 @@ Future<DateTimeRange?> showDateRangePicker({
   TextDirection? textDirection,
   TransitionBuilder? builder,
   Offset? anchorPoint,
+  TextInputType keyboardType = TextInputType.datetime,
 }) async {
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
@@ -1039,6 +1042,7 @@ Future<DateTimeRange?> showDateRangePicker({
     fieldEndHintText: fieldEndHintText,
     fieldStartLabelText: fieldStartLabelText,
     fieldEndLabelText: fieldEndLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -1125,6 +1129,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldEndHintText,
     this.fieldStartLabelText,
     this.fieldEndLabelText,
+    this.keyboardType = TextInputType.datetime,
     this.restorationId,
   });
 
@@ -1230,6 +1235,9 @@ class DateRangePickerDialog extends StatefulWidget {
   /// If null, the localized value of [MaterialLocalizations.dateRangeEndLabel]
   /// is used.
   final String? fieldEndLabelText;
+
+  /// {@macro flutter.material.datePickerDialog}
+  final TextInputType keyboardType;
 
   /// Restoration ID to save and restore the state of the [DateRangePickerDialog].
   ///
@@ -1427,6 +1435,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                   fieldEndHintText: widget.fieldEndHintText,
                   fieldStartLabelText: widget.fieldStartLabelText,
                   fieldEndLabelText: widget.fieldEndLabelText,
+                  keyboardType: widget.keyboardType,
                 ),
                 const Spacer(),
               ],
@@ -2773,6 +2782,7 @@ class _InputDateRangePicker extends StatefulWidget {
     this.fieldEndLabelText,
     this.autofocus = false,
     this.autovalidate = false,
+    this.keyboardType = TextInputType.datetime,
   }) : initialStartDate = initialStartDate == null ? null : DateUtils.dateOnly(initialStartDate),
        initialEndDate = initialEndDate == null ? null : DateUtils.dateOnly(initialEndDate),
        firstDate = DateUtils.dateOnly(firstDate),
@@ -2831,6 +2841,9 @@ class _InputDateRangePicker extends StatefulWidget {
   /// immediately after every change. Otherwise, you must call
   /// [_InputDateRangePickerState.validate] to validate.
   final bool autovalidate;
+
+  /// {@macro flutter.material.datePickerDialog}
+  final TextInputType keyboardType;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();
@@ -2972,7 +2985,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
             ),
-            keyboardType: TextInputType.datetime,
+            keyboardType: widget.keyboardType,
             onChanged: _handleStartChanged,
             autofocus: widget.autofocus,
           ),
@@ -2988,7 +3001,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
             ),
-            keyboardType: TextInputType.datetime,
+            keyboardType: widget.keyboardType,
             onChanged: _handleEndChanged,
           ),
         ),

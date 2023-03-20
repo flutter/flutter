@@ -369,6 +369,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // doesn't get generated for tests.
   }
 
+  @override
+  bool debugCheckZone(String entryPoint) {
+    // We skip all the zone checks in tests because the test framework makes heavy use
+    // of zones and so the zones never quite match the way the framework expects.
+    return true;
+  }
+
   /// Whether there is currently a test executing.
   bool get inTest;
 
@@ -485,8 +492,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -814,9 +822,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     FlutterError.demangleStackTrace = (StackTrace stack) {
       // package:stack_trace uses ZoneSpecification.errorCallback to add useful
-      // information to stack traces, in this case the Trace and Chain classes
-      // can be present. Because these StackTrace implementations do not follow
-      // the format the framework expects, we covert them to a vm trace here.
+      // information to stack traces, meaning Trace and Chain classes can be
+      // present. Because these StackTrace implementations do not follow the
+      // format the framework expects, we convert them to a vm trace here.
       if (stack is stack_trace.Trace) {
         return stack.vmTrace;
       }
@@ -1730,7 +1738,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      window: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1919,9 +1927,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return TestViewConfiguration(
+    return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      window: window,
+      view: platformDispatcher.implicitView!,
     );
   }
 
@@ -1945,20 +1953,31 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
-  /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
+  /// Deprecated. Will be removed in a future version of Flutter.
   ///
-  /// If a [window] instance is not provided it defaults to [ui.window].
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// Use [TestViewConfiguration.fromView] instead.
+  @Deprecated(
+    'Use TestViewConfiguration.fromView instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.FlutterView? window,
   }) {
-    return TestViewConfiguration._(size, window ?? ui.window);
+    return TestViewConfiguration.fromView(size: size, view: window ?? ui.window);
   }
 
-  TestViewConfiguration._(Size size, ui.FlutterView window)
-    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
-      _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size, devicePixelRatio: window.devicePixelRatio);
+  /// Creates a [TestViewConfiguration] with the given size and view.
+  ///
+  /// The [size] defaults to 800x600.
+  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
+      : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
+        _hitTestMatrix = _getMatrix(size, 1.0, view),
+        super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
