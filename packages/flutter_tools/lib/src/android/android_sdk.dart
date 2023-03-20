@@ -462,10 +462,62 @@ class AndroidSdk {
     return versionString.split('_').first;
   }
 
+  /// A value that would be appropriate to use as JAVA_HOME.
+  ///
+  /// This method considers jdk in the following order:
+  /// * the JDK bundled with Android Studio, if one is found;
+  /// * the JAVA_HOME in the ambient environment, if set;
+  /// * on macOS, the value provided by the `java_home` command.
+  String? get javaHome {
+    return findJavaHome(
+      androidStudio: globals.androidStudio,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      platform: globals.platform,
+    );
+  }
+
+
+  static String? findJavaHome({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+  }) {
+    if (androidStudio?.javaPath != null) {
+      globals.printTrace("Using Android Studio's java.");
+      return androidStudio!.javaPath!;
+    }
+
+    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+    if (javaHomeEnv != null) {
+      // Trust JAVA_HOME.
+      globals.printTrace('Using JAVA_HOME.');
+      return javaHomeEnv;
+    }
+
+    // MacOS specific logic to avoid popping up a dialog window.
+    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
+    if (platform.isMacOS) {
+      try {
+        final String javaHomeOutput = globals.processUtils.runSync(
+          <String>['/usr/libexec/java_home', '-v', '1.8'],
+          throwOnError: true,
+          hideStdout: true,
+        ).stdout.trim();
+        if (javaHomeOutput.isNotEmpty) {
+          final String javaHome = javaHomeOutput.split('\n').last.trim();
+          return javaHome;
+        }
+      } on Exception { /* ignore */ }
+    }
+    return null;
+  }
+
   /// Finds the java binary that is used for all operations across the tool.
   ///
-  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  ///
+  /// This comes from [findJavaHome] if that method returns non-null;
+  /// otherwise, it gets from searching PATH.
   // TODO(andrewkolos): To prevent confusion when debugging Android-related
   // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
   // this logic should be consistently followed by any Java-dependent operation
@@ -479,17 +531,15 @@ class AndroidSdk {
     required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
   }) {
-    if (androidStudio?.javaPath != null) {
-      globals.printTrace("Using Android Studio's java.");
-      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
-    }
+    final String? javaHome = findJavaHome(
+      androidStudio: androidStudio,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: platform,
+    );
 
-    final String? javaHomeEnv =
-        platform.environment[_javaHomeEnvironmentVariable];
-    if (javaHomeEnv != null) {
-      // Trust JAVA_HOME.
-      globals.printTrace('Using JAVA_HOME.');
-      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
+    if (javaHome != null) {
+      return fileSystem.path.join(javaHome, 'bin', 'java');
     }
 
     // Fallback to PATH based lookup.
@@ -520,16 +570,16 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String? javaBinary = findJavaBinary(
+      final String? path = findJavaBinary(
         androidStudio: globals.androidStudio,
         fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         platform: globals.platform,
       );
-      if (javaBinary != null && globals.platform.environment['PATH'] != null) {
-        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
-                                 globals.os.pathVarSeparator +
-                                 globals.platform.environment['PATH']!;
+      if (path != null && globals.platform.environment['PATH'] != null) {
+        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(path) +
+                                  globals.os.pathVarSeparator +
+                                  globals.platform.environment['PATH']!;
       }
     }
     return _sdkManagerEnv!;

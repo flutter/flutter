@@ -39,4 +39,6 @@ abstract class AndroidBuilder {
     bool deferredComponentsEnabled = false,
     bool configOnly = false,
   });
+
+  Future<List<String>> getBuildVariants({required FlutterProject project});
 }

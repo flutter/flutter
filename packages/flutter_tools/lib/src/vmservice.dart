@@ -313,6 +313,19 @@ Future<vm_service.VmService> setUpVmService({
     registrationRequests.add(
       vmService.registerService('flutterGetIOSBuildOptions', 'Flutter Tools'),
     );
+
+    vmService.registerServiceCallback('flutterGetAndroidBuildVariants', (Map<String, Object?> params) async {
+      final List<String> options = await flutterProject.android.getBuildVariants();
+      return <String, Object>{
+        'result': <String, Object>{
+          kResultType: kResultTypeSuccess,
+          'variants': options,
+        },
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService('flutterGetAndroidBuildVariants', 'Flutter Tools'),
+    );
   }
 
   if (printStructuredErrorLogMethod != null) {

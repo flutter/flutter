@@ -78,6 +78,10 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'service': 'flutterGetIOSBuildOptions',
     'alias': 'Flutter Tools',
   }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': 'flutterGetAndroidBuildVariants',
+    'alias': 'Flutter Tools',
+  }),
   FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{

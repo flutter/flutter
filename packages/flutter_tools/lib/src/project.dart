@@ -7,6 +7,7 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
+import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -473,6 +474,13 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Returns true if the current version of the Gradle plugin is supported.
   late final bool isSupportedVersion = _computeSupportedVersion();
+
+  Future<List<String>> getBuildVariants() async {
+    if (!existsSync()) {
+      return const <String>[];
+    }
+    return await androidBuilder?.getBuildVariants(project: parent) ?? const <String>[];
+  }
 
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
