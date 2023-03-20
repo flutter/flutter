@@ -259,6 +259,7 @@ dart_library("matcher") {
   deps = [ ":stack_trace" ]
 
   sources = [
+    "expect.dart",
     "matcher.dart",
     "mirror_matchers.dart",
     "src/core_matchers.dart",
@@ -266,6 +267,18 @@ dart_library("matcher") {
     "src/description.dart",
     "src/equals_matcher.dart",
     "src/error_matchers.dart",
+    "src/expect/async_matcher.dart",
+    "src/expect/expect.dart",
+    "src/expect/expect_async.dart",
+    "src/expect/future_matchers.dart",
+    "src/expect/never_called.dart",
+    "src/expect/prints_matcher.dart",
+    "src/expect/stream_matcher.dart",
+    "src/expect/stream_matchers.dart",
+    "src/expect/throws_matcher.dart",
+    "src/expect/throws_matchers.dart",
+    "src/expect/util/placeholder.dart",
+    "src/expect/util/pretty_print.dart",
     "src/feature_matcher.dart",
     "src/having_matcher.dart",
     "src/interfaces.dart",
