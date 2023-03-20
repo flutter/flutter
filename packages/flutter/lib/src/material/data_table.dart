@@ -1137,6 +1137,8 @@ class TableRowInkWell extends InkResponse {
     super.onDoubleTap,
     super.onLongPress,
     super.onHighlightChanged,
+    super.onSecondaryTap,
+    super.onSecondaryTapDown,
     super.overlayColor,
   }) : super(
     containedInkWell: true,

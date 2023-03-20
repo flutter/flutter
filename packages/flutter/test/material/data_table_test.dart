@@ -2072,4 +2072,49 @@ void main() {
     expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
+
+  group('TableRowInkWell', () {
+    testWidgets('can handle secondary taps', (WidgetTester tester) async {
+      bool secondaryTapped = false;
+      bool secondaryTappedDown = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Table(
+            children: <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableRowInkWell(
+                    onSecondaryTap: () {
+                      secondaryTapped = true;
+                    },
+                    onSecondaryTapDown: (TapDownDetails details) {
+                      secondaryTappedDown = true;
+                    },
+                    child: const SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      expect(secondaryTapped, isFalse);
+      expect(secondaryTappedDown, isFalse);
+
+      expect(find.byType(TableRowInkWell), findsOneWidget);
+      await tester.tap(
+        find.byType(TableRowInkWell),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(secondaryTapped, isTrue);
+      expect(secondaryTappedDown, isTrue);
+    });
+  });
 }
