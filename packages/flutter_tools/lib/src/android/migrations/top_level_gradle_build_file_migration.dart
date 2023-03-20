@@ -47,7 +47,7 @@ class TopLevelGradleBuildFileMigration extends ProjectMigrator {
     if (newContents != fileContents) {
       logger.printTrace('Migrating "clean" Gradle task to lazy declaration style.');
     }
-    
+
     return newContents;
   }
 }
