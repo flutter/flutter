@@ -16,6 +16,8 @@ import 'theme_data.dart';
 // late bool? _throwShotAway;
 // void setState(VoidCallback fn) { }
 
+enum _CheckboxType { material, adaptive }
+
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
@@ -192,7 +194,51 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(tristate || value != null),
+  }) : _checkboxType = _CheckboxType.material,
+       assert(tristate || value != null),
+       assert(!isThreeLine || subtitle != null);
+
+  /// Creates a combination of a list tile and a platform adaptive checkbox.
+  ///
+  /// The checkbox uses [Checkbox.adaptive] to show a [CupertinoCheckbox] for
+  /// iOS platforms, or [Checkbox] for all others.
+  ///
+  /// All other properties are the same as [CheckboxListTile].
+  const CheckboxListTile.adaptive({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.mouseCursor,
+    this.activeColor,
+    this.fillColor,
+    this.checkColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+    this.shape,
+    this.side,
+    this.isError = false,
+    this.enabled,
+    this.tileColor,
+    this.title,
+    this.subtitle,
+    this.isThreeLine = false,
+    this.dense,
+    this.secondary,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
+    this.contentPadding,
+    this.tristate = false,
+    this.checkboxShape,
+    this.selectedTileColor,
+    this.onFocusChange,
+    this.enableFeedback,
+  }) : _checkboxType = _CheckboxType.adaptive,
+       assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
 
   /// Whether this checkbox is checked.
@@ -406,6 +452,8 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  final _CheckboxType _checkboxType;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -420,7 +468,7 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = Checkbox(
+    final Widget materialControl = Checkbox(
       value: value,
       onChanged: enabled ?? true ? onChanged : null,
       mouseCursor: mouseCursor,
@@ -437,6 +485,28 @@ class CheckboxListTile extends StatelessWidget {
       side: side,
       isError: isError,
     );
+
+    final Widget adaptiveControl = Checkbox.adaptive(
+      value: value,
+      onChanged: enabled ?? true ? onChanged : null,
+      mouseCursor: mouseCursor,
+      activeColor: activeColor,
+      fillColor: fillColor,
+      checkColor: checkColor,
+      hoverColor: hoverColor,
+      overlayColor: overlayColor,
+      splashRadius: splashRadius,
+      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+      autofocus: autofocus,
+      tristate: tristate,
+      shape: checkboxShape,
+      side: side,
+      isError: isError,
+    );
+
+    final Widget control =
+      _checkboxType == _CheckboxType.material ? materialControl : adaptiveControl;
+
     Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
