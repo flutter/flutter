@@ -48,9 +48,9 @@ void PlatformConfiguration::DidCreateIsolate() {
   update_user_settings_data_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_updateUserSettingsData")));
-  update_lifecycle_state_.Set(
+  update_initial_lifecycle_state_.Set(
       tonic::DartState::Current(),
-      Dart_GetField(library, tonic::ToDart("_updateLifecycleState")));
+      Dart_GetField(library, tonic::ToDart("_updateInitialLifecycleState")));
   update_semantics_enabled_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_updateSemanticsEnabled")));
@@ -108,17 +108,18 @@ void PlatformConfiguration::UpdateUserSettingsData(const std::string& data) {
                                                }));
 }
 
-void PlatformConfiguration::UpdateLifecycleState(const std::string& data) {
+void PlatformConfiguration::UpdateInitialLifecycleState(
+    const std::string& data) {
   std::shared_ptr<tonic::DartState> dart_state =
-      update_lifecycle_state_.dart_state().lock();
+      update_initial_lifecycle_state_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  tonic::CheckAndHandleError(tonic::DartInvoke(update_lifecycle_state_.Get(),
-                                               {
-                                                   tonic::StdStringToDart(data),
-                                               }));
+  tonic::CheckAndHandleError(tonic::DartInvoke(
+      update_initial_lifecycle_state_.Get(), {
+                                                 tonic::StdStringToDart(data),
+                                             }));
 }
 
 void PlatformConfiguration::UpdateSemanticsEnabled(bool enabled) {

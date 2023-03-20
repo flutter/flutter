@@ -331,7 +331,7 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
       state == "AppLifecycleState.inactive") {
     ScheduleFrame();
   }
-  runtime_controller_->SetLifecycleState(state);
+  runtime_controller_->SetInitialLifecycleState(state);
   // Always forward these messages to the framework by returning false.
   return false;
 }
