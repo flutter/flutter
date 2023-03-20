@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'assets.dart';
 
-abstract class FontCollection {
+abstract class FlutterFontCollection {
 
   /// Fonts loaded with [loadFontFromList] do not need to be registered
   /// with [registerDownloadedFonts]. Fonts are both downloaded and registered

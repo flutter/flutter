@@ -24,7 +24,7 @@ const String _robotoUrl =
     'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
 /// Manages the fonts used in the Skia-based backend.
-class SkiaFontCollection implements FontCollection {
+class SkiaFontCollection implements FlutterFontCollection {
   final Set<String> _downloadedFontFamilies = <String>{};
 
   /// Fonts that started the download process, but are not yet registered.

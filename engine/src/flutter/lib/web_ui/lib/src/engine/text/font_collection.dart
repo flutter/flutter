@@ -20,7 +20,7 @@ import 'layout_service.dart';
 /// [downloadAssetFonts] with it to register fonts declared in the
 /// font manifest. If test fonts are enabled, then call
 /// [debugDownloadTestFonts] as well.
-class HtmlFontCollection implements FontCollection {
+class HtmlFontCollection implements FlutterFontCollection {
   FontManager? _assetFontManager;
   FontManager? _testFontManager;
 
