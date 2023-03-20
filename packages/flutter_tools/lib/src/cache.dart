@@ -466,7 +466,7 @@ class Cache {
 
   /// The base for URLs that store Flutter engine artifacts in CIPD.
   ///
-  /// For some platforms, such as Web and Fuchsia, CIPD artifacts are fetched
+  /// For some platforms, such as Web, CIPD artifacts are fetched
   /// during the installation of the Flutter SDK, in addition to those fetched
   /// from [storageBaseUrl].
   ///

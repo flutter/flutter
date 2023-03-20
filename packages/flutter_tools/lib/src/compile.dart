@@ -34,8 +34,6 @@ class TargetModel {
     switch (rawValue) {
       case 'flutter':
         return flutter;
-      case 'flutter_runner':
-        return flutterRunner;
       case 'vm':
         return vm;
       case 'dartdevc':
@@ -48,9 +46,6 @@ class TargetModel {
 
   /// The Flutter patched Dart SDK.
   static const TargetModel flutter = TargetModel._('flutter');
-
-  /// The Fuchsia patched SDK.
-  static const TargetModel flutterRunner = TargetModel._('flutter_runner');
 
   /// The Dart VM.
   static const TargetModel vm = TargetModel._('vm');

@@ -82,7 +82,6 @@ class AttachCommand extends FlutterCommand {
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesFilesystemOptions(hide: !verboseHelp);
-    usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
@@ -159,10 +158,6 @@ For attaching to Android or iOS devices, simply using `flutter attach` is
 usually sufficient. The tool will search for a running Flutter app or module,
 if available. Otherwise, the tool will wait for the next Flutter app or module
 to launch before attaching.
-
-For Fuchsia, the module name must be provided, e.g. `$flutter attach
---module=mod_name`. This can be called either before or after the application
-is started.
 
 If the app or module is already running and the specific vmService port is
 known, it can be explicitly provided to attach via the command-line, e.g.

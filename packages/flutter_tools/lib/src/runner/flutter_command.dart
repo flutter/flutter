@@ -845,23 +845,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesFuchsiaOptions({ bool hide = false }) {
-    argParser.addOption(
-      'target-model',
-      help: 'Target model that determines what core libraries are available.',
-      defaultsTo: 'flutter',
-      hide: hide,
-      allowed: const <String>['flutter', 'flutter_runner'],
-    );
-    argParser.addOption(
-      'module',
-      abbr: 'm',
-      hide: hide,
-      help: 'The name of the module.',
-      valueHelp: 'module-name',
-    );
-  }
-
   void addEnableExperimentation({ required bool hide }) {
     argParser.addMultiOption(
       FlutterOptions.kEnableExperiment,

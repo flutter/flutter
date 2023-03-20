@@ -137,7 +137,6 @@ void main() {
       expect(decoded.containsKey('Platform.isIOS'), true);
       expect(decoded.containsKey('Platform.isWindows'), true);
       expect(decoded.containsKey('Platform.isMacOS'), true);
-      expect(decoded.containsKey('Platform.isFuchsia'), true);
       expect(decoded.containsKey('Platform.pathSeparator'), true);
       expect(decoded.containsKey('Cache.flutterRoot'), true);
 
