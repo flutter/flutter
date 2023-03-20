@@ -404,36 +404,6 @@ void main() {
     expect(events, <String>['down#1', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
   });
 
-  // testGesture('Recognizer loses when competing against a DragGestureRecognizer when the pointer travels minimum distance to be considered a drag', (GestureTester tester) {
-  //   final PanGestureRecognizer pans = PanGestureRecognizer()
-  //     ..onStart = (DragStartDetails details) {
-  //       events.add('panstart');
-  //     }
-  //     ..onUpdate =  (DragUpdateDetails details) {
-  //       events.add('panupdate');
-  //     }
-  //     ..onEnd = (DragEndDetails details) {
-  //       events.add('panend');
-  //     }
-  //     ..onCancel = () {
-  //       events.add('pancancel');
-  //     };
-
-  //   final TestPointer pointer = TestPointer(5);
-  //   final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
-  //   // When competing against another [DragGestureRecognizer], the [TapAndDragGestureRecognizer]
-  //   // will only win when it is the last recognizer in the arena.
-  //   tapAndDrag.addPointer(downB);
-  //   pans.addPointer(downB);
-  //   tester.closeArena(5);
-  //   tester.route(downB);
-  //   tester.route(pointer.move(const Offset(40.0, 45.0)));
-  //   tester.route(pointer.up());
-  //   expect(events, <String>[
-  //     'panstart',
-  //     'panend']);
-  // });
-
   testGesture('Recognizer declares self-victory in a non-empty arena when pointer travels minimum distance to be considered a drag', (GestureTester tester) {
     final PanGestureRecognizer pans = PanGestureRecognizer()
       ..onStart = (DragStartDetails details) {
