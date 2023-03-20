@@ -90,13 +90,13 @@ class Visibility extends StatelessWidget {
   const Visibility.maintain({
     super.key,
     required this.child,
-    this.replacement = const SizedBox.shrink(),
     this.visible = true,
   }) :  maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
-        maintainInteractivity = true;
+        maintainInteractivity = true,
+        replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
   ///
