@@ -18,7 +18,6 @@ import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../commands/daemon.dart';
-import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
