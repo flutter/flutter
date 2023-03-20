@@ -135,7 +135,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  FontCollection get fontCollection => throw UnimplementedError('Skwasm not implemented on this platform.');
+  FlutterFontCollection get fontCollection => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
   FutureOr<void> initialize() {
