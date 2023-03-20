@@ -1156,6 +1156,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   /// Key to access navigator in the nested layout.
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
+  bool rootPopEnabled = true;
+
   @override
   void openDetailPage(Object arguments) {
     _cachedDetailArguments = arguments;
@@ -1194,36 +1196,59 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
-    return Navigator(
-      key: _navigatorKey,
-      initialRoute: 'initial',
-      onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
-        switch (focus) {
-          case _Focus.master:
-            return <Route<void>>[masterPageRoute];
-          case _Focus.detail:
-            return <Route<void>>[
-              masterPageRoute,
-              _detailPageRoute(_cachedDetailArguments),
-            ];
+    return CanPopScope(
+      // Push pop check into nested navigator.
+      popEnabled: rootPopEnabled,
+      onPop: () async {
+        if (rootPopEnabled) {
+          return;
         }
+        setState(() {
+          rootPopEnabled = true;
+        });
+        await _navigatorKey.currentState!.maybePop();
       },
-      onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          case _navMaster:
-            // Matching state to navigation event.
-            focus = _Focus.master;
-            return masterPageRoute;
-          case _navDetail:
-            // Matching state to navigation event.
-            focus = _Focus.detail;
-            // Cache detail page settings.
-            _cachedDetailArguments = settings.arguments;
-            return _detailPageRoute(_cachedDetailArguments);
-          default:
-            throw Exception('Unknown route ${settings.name}');
-        }
-      },
+      child: Navigator(
+        key: _navigatorKey,
+        initialRoute: 'initial',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+          switch (focus) {
+            case _Focus.master:
+              return <Route<void>>[masterPageRoute];
+            case _Focus.detail:
+              return <Route<void>>[
+                masterPageRoute,
+                _detailPageRoute(_cachedDetailArguments),
+              ];
+          }
+        },
+        onGenerateRoute: (RouteSettings settings) {
+          switch (settings.name) {
+            case _navMaster:
+              if (!rootPopEnabled) {
+                setState(() {
+                  rootPopEnabled = true;
+                });
+              }
+              // Matching state to navigation event.
+              focus = _Focus.master;
+              return masterPageRoute;
+            case _navDetail:
+              if (rootPopEnabled) {
+                setState(() {
+                  rootPopEnabled = false;
+                });
+              }
+              // Matching state to navigation event.
+              focus = _Focus.detail;
+              // Cache detail page settings.
+              _cachedDetailArguments = settings.arguments;
+              return _detailPageRoute(_cachedDetailArguments);
+            default:
+              throw Exception('Unknown route ${settings.name}');
+          }
+        },
+      ),
     );
   }
 
