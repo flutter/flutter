@@ -452,3 +452,66 @@ static BOOL _preparedOnce = NO;
 }
 
 @end
+
+@interface FlutterClippingMaskViewPool ()
+
+// The maximum number of `FlutterClippingMaskView` the pool can contain.
+// This prevents the pool to grow infinately and limits the maximum memory a pool can use.
+@property(assign, nonatomic) NSUInteger capacity;
+@property(retain, nonatomic) NSMutableArray<FlutterClippingMaskView*>* pool;
+// The index points to the first available FlutterClippingMaskView in the `pool`.
+@property(assign, nonatomic) NSUInteger availableIndex;
+
+@end
+
+@implementation FlutterClippingMaskViewPool : NSObject
+
+- (instancetype)initWithCapacity:(NSInteger)capacity {
+  if (self = [super init]) {
+    _pool = [[NSMutableArray alloc] initWithCapacity:capacity];
+    _capacity = capacity;
+    _availableIndex = 0;
+  }
+  return self;
+}
+
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
+  FML_DCHECK(self.availableIndex <= self.capacity);
+  FlutterClippingMaskView* maskView;
+  if (self.availableIndex == self.capacity) {
+    // The pool is full, alloc a new one.
+    maskView =
+        [[[FlutterClippingMaskView alloc] initWithFrame:frame
+                                            screenScale:[UIScreen mainScreen].scale] autorelease];
+    return maskView;
+  }
+
+  if (self.availableIndex >= self.pool.count) {
+    // The pool doesn't have enough maskViews, alloc a new one and add to the pool.
+    maskView =
+        [[[FlutterClippingMaskView alloc] initWithFrame:frame
+                                            screenScale:[UIScreen mainScreen].scale] autorelease];
+    [self.pool addObject:maskView];
+    FML_DCHECK(self.pool.count <= self.capacity);
+  } else {
+    // Reuse a maskView from the pool.
+    maskView = [self.pool objectAtIndex:self.availableIndex];
+    maskView.frame = frame;
+    [maskView reset];
+  }
+  self.availableIndex++;
+  return maskView;
+}
+
+- (void)recycleMaskViews {
+  self.availableIndex = 0;
+}
+
+- (void)dealloc {
+  [_pool release];
+  _pool = nil;
+
+  [super dealloc];
+}
+
+@end
