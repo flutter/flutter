@@ -4983,6 +4983,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging
