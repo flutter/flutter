@@ -30,7 +30,7 @@ struct Snapshot {
       SamplerDescriptor("Default Snapshot Sampler",
                         MinMagFilter::kLinear,
                         MinMagFilter::kLinear,
-                        MipFilter::kNone);
+                        MipFilter::kNearest);
 
   Scalar opacity = 1.0f;
 
