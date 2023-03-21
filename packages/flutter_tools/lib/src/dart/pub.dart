@@ -581,7 +581,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, '--no-analytics', 'pub'];
+    return <String>[sdkPath, 'pub', '--suppress-analytics'];
   }
 
   // Returns the environment value that should be used when running pub.

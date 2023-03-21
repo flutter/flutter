@@ -23,7 +23,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -60,7 +60,7 @@ homepage: http://flutter.dev
 version: 1.0.0
 
 environment:
-  sdk: ">=2.14.0-383.0.dev <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
 
 dependencies:

@@ -329,10 +329,11 @@ void main() {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: ExpansionTile(
+    // TODO(goderbauer): Reevaluate the following ignores when https://github.com/dart-lang/sdk/issues/51800 is fixed.
+    await tester.pumpWidget(MaterialApp( // ignore: prefer_const_constructors
+      home: Material( // ignore: prefer_const_constructors
+        child: Center( // ignore: prefer_const_constructors
+          child: ExpansionTile( // ignore: prefer_const_constructors
             title: const Text('title'),
             // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
             // of children widgets. This helps distinguish the effect of expandedAlignment
