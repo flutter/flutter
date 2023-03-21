@@ -512,10 +512,7 @@ class BrowserPlatform extends PlatformPlugin {
           <meta name="assetBase" content="/">
           <script>
             window.flutterConfiguration = {
-              canvasKitBaseUrl: "/canvaskit/",
-              // TODO(eyebrowsoffire): Put the actual variant to be used.
-              // https://github.com/flutter/engine/pull/39984
-              canvasKitVariant: "full",
+              canvasKitBaseUrl: "/canvaskit/"
             };
           </script>
           $link
