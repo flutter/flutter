@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_color.h"
-#include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/dl_paint.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/color_filter_layer.h"
 
-#include "flutter/display_list/display_list_color_filter.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/raster_cache.h"
@@ -17,9 +17,6 @@
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
-#include "include/core/SkColor.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/effects/SkColorMatrixFilter.h"
 
 namespace flutter {
 namespace testing {

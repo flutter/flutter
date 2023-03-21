@@ -5,8 +5,7 @@
 #include <type_traits>
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_ops.h"
+#include "flutter/display_list/dl_op_records.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {

@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/dl_canvas.h"
 
+#include "third_party/skia/include/core/SkPoint3.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace flutter {

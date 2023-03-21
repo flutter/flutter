@@ -4,6 +4,9 @@
 
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 
+#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "third_party/skia/include/effects/SkImageFilters.h"
+
 namespace flutter {
 
 sk_sp<SkShader> ToSk(const DlColorSource* source) {
@@ -208,7 +211,8 @@ sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter) {
     case DlMaskFilterType::kBlur: {
       const DlBlurMaskFilter* blur_filter = filter->asBlur();
       FML_DCHECK(blur_filter != nullptr);
-      return SkMaskFilter::MakeBlur(blur_filter->style(), blur_filter->sigma(),
+      return SkMaskFilter::MakeBlur(ToSk(blur_filter->style()),
+                                    blur_filter->sigma(),
                                     blur_filter->respectCTM());
     }
   }

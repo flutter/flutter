@@ -12,11 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/display_list_blend_mode.h"
-#include "display_list/display_list_color_filter.h"
-#include "display_list/display_list_color_source.h"
-#include "display_list/display_list_path_effect.h"
-#include "display_list/display_list_tile_mode.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/display_list/display_list_image_impeller.h"
@@ -641,15 +636,15 @@ void DisplayListDispatcher::setPathEffect(const flutter::DlPathEffect* effect) {
   UNIMPLEMENTED;
 }
 
-static FilterContents::BlurStyle ToBlurStyle(SkBlurStyle blur_style) {
+static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
   switch (blur_style) {
-    case kNormal_SkBlurStyle:
+    case flutter::DlBlurStyle::kNormal:
       return FilterContents::BlurStyle::kNormal;
-    case kSolid_SkBlurStyle:
+    case flutter::DlBlurStyle::kSolid:
       return FilterContents::BlurStyle::kSolid;
-    case kOuter_SkBlurStyle:
+    case flutter::DlBlurStyle::kOuter:
       return FilterContents::BlurStyle::kOuter;
-    case kInner_SkBlurStyle:
+    case flutter::DlBlurStyle::kInner:
       return FilterContents::BlurStyle::kInner;
   }
 }

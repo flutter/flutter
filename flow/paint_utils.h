@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FLOW_PAINT_UTILS_H_
 #define FLUTTER_FLOW_PAINT_UTILS_H_
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkRect.h"

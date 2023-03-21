@@ -8,9 +8,8 @@
 #include <memory>
 #include <optional>
 
-#include "flutter/display_list/display_list_rtree.h"
-#include "flutter/display_list/display_list_sampling_options.h"
-#include "flutter/display_list/types.h"
+#include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/geometry/dl_rtree.h"
 #include "flutter/fml/logging.h"
 
 // The Flutter DisplayList mechanism encapsulates a persistent sequence of

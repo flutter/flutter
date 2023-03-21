@@ -5,8 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_EQUALITY_H_
 #define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_EQUALITY_H_
 
-#include "flutter/display_list/display_list_attributes.h"
-#include "flutter/display_list/display_list_comparable.h"
+#include "flutter/display_list/dl_attributes.h"
+#include "flutter/display_list/utils/dl_comparable.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

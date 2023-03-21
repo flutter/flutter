@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "display_list/display_list_path_effect.h"
-#include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas.h"

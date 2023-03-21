@@ -54,7 +54,7 @@ TEST_F(ShellTest, ConvertPaintToDlPaint) {
   ASSERT_EQ(*dl_paint.getColorFilter(),
             DlBlendColorFilter(0x55667788, DlBlendMode::kXor));
   ASSERT_EQ(*dl_paint.getMaskFilter(),
-            DlBlurMaskFilter(SkBlurStyle::kInner_SkBlurStyle, 0.75));
+            DlBlurMaskFilter(DlBlurStyle::kInner, 0.75));
   ASSERT_EQ(dl_paint.getDrawStyle(), DlDrawStyle::kStroke);
 }
 
