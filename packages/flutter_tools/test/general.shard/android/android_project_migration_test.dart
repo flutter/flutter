@@ -6,7 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -86,16 +85,4 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   Directory hostAppGradleRoot;
-}
-
-class FakeAndroidMigrator extends ProjectMigrator {
-  FakeAndroidMigrator() : super(BufferLogger.test());
-
-  @override
-  void migrate() {}
-
-  @override
-  String migrateLine(String line) {
-    return line;
-  }
 }
