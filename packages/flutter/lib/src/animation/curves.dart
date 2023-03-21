@@ -1389,6 +1389,8 @@ abstract final class Curves {
   /// Specifically, transition animation positions were measured
   /// every frame and plotted against time. Then, a cubic curve was
   /// strictly fit to the measured data points.
+  /// 
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_ease_in_to_slow_ease_out.mp4}
   static const ThreePointCubic fastEaseInToSlowEaseOut = ThreePointCubic(
     Offset(0.056, 0.024),
     Offset(0.108, 0.3085),
