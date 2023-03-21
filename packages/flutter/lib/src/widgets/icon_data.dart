@@ -11,9 +11,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// In release builds, the Flutter tool will tree shake out of bundled fonts
 /// the code points (or instances of [IconData]) which are not referenced from
-/// Dart app code. This is a heuristic based on analyzing the output of the
-/// Dart frontend compiler and counting the references to instances of the
-/// [IconData] class.
+/// Dart app code. See the [staticIconProvider] annotation for more details.
 @immutable
 class IconData {
   /// Creates icon data.
@@ -108,8 +106,18 @@ class _StaticIconProvider {
 /// Annotation for classes that only provide static const [IconData] instances.
 ///
 /// This is a hint to the font tree shaker to ignore the constant instances
-/// of [IconData] appearing in the class when tracking which code points
-/// should be retained in the bundled font.
+/// of [IconData] appearing in the declaration of this class when tree-shaking
+/// unused code points from the bundled font.
 ///
-/// Classes with this annotation 
+/// Classes with this annotation should only have static const declarations of
+/// the [IconData] class, such as:
+///
+/// ```dart
+/// @staticIconProvider
+/// abstract final class MyCustomIcons {
+///   static const fontFamily = 'MyCustomIcons';
+///   static const happyFace = IconData(1, fontFamily: fontFamily);
+///   static const sadFace = IconData(2, fontFamily: fontFamily);
+/// }
+/// ```
 const Object staticIconProvider = _StaticIconProvider();
