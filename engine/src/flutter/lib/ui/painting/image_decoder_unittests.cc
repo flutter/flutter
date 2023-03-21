@@ -5,6 +5,9 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/impeller/geometry/size.h"
+#include "flutter/impeller/renderer/allocator.h"
+#include "flutter/impeller/renderer/device_buffer.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
@@ -23,6 +26,68 @@
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
+
+namespace impeller {
+
+class TestImpellerDeviceBuffer : public DeviceBuffer {
+ public:
+  explicit TestImpellerDeviceBuffer(DeviceBufferDescriptor desc)
+      : DeviceBuffer(desc) {
+    bytes_ = static_cast<uint8_t*>(malloc(desc.size));
+  }
+
+  ~TestImpellerDeviceBuffer() { free(bytes_); }
+
+ private:
+  std::shared_ptr<Texture> AsTexture(Allocator& allocator,
+                                     const TextureDescriptor& descriptor,
+                                     uint16_t row_bytes) const override {
+    return nullptr;
+  }
+
+  bool SetLabel(const std::string& label) override { return true; }
+
+  bool SetLabel(const std::string& label, Range range) override { return true; }
+
+  uint8_t* OnGetContents() const override { return bytes_; }
+
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        Range source_range,
+                        size_t offset) override {
+    for (auto i = source_range.offset; i < source_range.length; i++, offset++) {
+      bytes_[offset] = source[i];
+    }
+    return true;
+  }
+
+  uint8_t* bytes_;
+};
+
+class TestImpellerAllocator : public impeller::Allocator {
+ public:
+  TestImpellerAllocator() {}
+
+  ~TestImpellerAllocator() = default;
+
+ private:
+  uint16_t MinimumBytesPerRow(PixelFormat format) const override { return 0; }
+
+  ISize GetMaxTextureSizeSupported() const override {
+    return ISize{2048, 2048};
+  }
+
+  std::shared_ptr<DeviceBuffer> OnCreateBuffer(
+      const DeviceBufferDescriptor& desc) override {
+    return std::make_shared<TestImpellerDeviceBuffer>(desc);
+  }
+
+  std::shared_ptr<Texture> OnCreateTexture(
+      const TextureDescriptor& desc) override {
+    return nullptr;
+  }
+};
+
+}  // namespace impeller
 
 namespace flutter {
 namespace testing {
@@ -305,13 +370,15 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
       std::move(data), image->imageInfo(), 10 * 4);
 
 #if IMPELLER_SUPPORTS_RENDERING
-  std::shared_ptr<SkBitmap> decompressed =
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  std::optional<DecompressResult> decompressed =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true);
-  ASSERT_TRUE(decompressed);
-  ASSERT_EQ(decompressed->colorType(), kRGBA_8888_SkColorType);
-  ASSERT_EQ(decompressed->colorSpace(), nullptr);
+          /*supports_wide_gamut=*/true, allocator);
+  ASSERT_TRUE(decompressed.has_value());
+  ASSERT_EQ(decompressed->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_EQ(decompressed->image_info.colorSpace(), nullptr);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -330,14 +397,17 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
                                                          std::move(generator));
 
 #if IMPELLER_SUPPORTS_RENDERING
-  std::shared_ptr<SkBitmap> wide_bitmap =
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true);
-  ASSERT_TRUE(wide_bitmap);
-  ASSERT_EQ(wide_bitmap->colorType(), kRGBA_F16_SkColorType);
-  ASSERT_TRUE(wide_bitmap->colorSpace()->isSRGB());
-  const SkPixmap& wide_pixmap = wide_bitmap->pixmap();
+          /*supports_wide_gamut=*/true, allocator);
+  ASSERT_TRUE(wide_result.has_value());
+  ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
+  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+
+  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
   const uint16_t* half_ptr = static_cast<const uint16_t*>(wide_pixmap.addr());
   bool found_deep_red = false;
   for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
@@ -351,11 +421,15 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
       break;
     }
   }
+
   ASSERT_TRUE(found_deep_red);
-  std::shared_ptr<SkBitmap> bitmap = ImageDecoderImpeller::DecompressTexture(
-      descriptor.get(), SkISize::Make(100, 100), {100, 100},
-      /*supports_wide_gamut=*/false);
-  ASSERT_EQ(bitmap->colorType(), kRGBA_8888_SkColorType);
+  std::optional<DecompressResult> narrow_result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          /*supports_wide_gamut=*/false, allocator);
+
+  ASSERT_TRUE(narrow_result.has_value());
+  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -374,13 +448,16 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
       std::move(data), image->imageInfo(), 10 * 16);
 
 #if IMPELLER_SUPPORTS_RENDERING
-  std::shared_ptr<SkBitmap> decompressed =
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  std::optional<DecompressResult> decompressed =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true);
-  ASSERT_TRUE(decompressed);
-  ASSERT_EQ(decompressed->colorType(), kRGBA_F16_SkColorType);
-  ASSERT_EQ(decompressed->colorSpace(), nullptr);
+          /*supports_wide_gamut=*/true, allocator);
+
+  ASSERT_TRUE(decompressed.has_value());
+  ASSERT_EQ(decompressed->image_info.colorType(), kRGBA_F16_SkColorType);
+  ASSERT_EQ(decompressed->image_info.colorSpace(), nullptr);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -409,14 +486,18 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
                                                          std::move(generator));
 
 #if IMPELLER_SUPPORTS_RENDERING
-  std::shared_ptr<SkBitmap> wide_bitmap =
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
-          /*supports_wide_gamut=*/true);
-  ASSERT_TRUE(wide_bitmap);
-  ASSERT_EQ(wide_bitmap->colorType(), kBGR_101010x_XR_SkColorType);
-  ASSERT_TRUE(wide_bitmap->colorSpace()->isSRGB());
-  const SkPixmap& wide_pixmap = wide_bitmap->pixmap();
+          /*supports_wide_gamut=*/true, allocator);
+
+  ASSERT_TRUE(wide_result.has_value());
+  ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
+  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+
+  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
   const uint32_t* pixel_ptr = static_cast<const uint32_t*>(wide_pixmap.addr());
   bool found_deep_red = false;
   for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
@@ -431,10 +512,14 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
     }
   }
   ASSERT_TRUE(found_deep_red);
-  std::shared_ptr<SkBitmap> bitmap = ImageDecoderImpeller::DecompressTexture(
-      descriptor.get(), SkISize::Make(100, 100), {100, 100},
-      /*supports_wide_gamut=*/false);
-  ASSERT_EQ(bitmap->colorType(), kRGBA_8888_SkColorType);
+
+  std::optional<DecompressResult> narrow_result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          /*supports_wide_gamut=*/false, allocator);
+
+  ASSERT_TRUE(narrow_result.has_value());
+  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -453,10 +538,15 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
                                                          std::move(generator));
 
 #if IMPELLER_SUPPORTS_RENDERING
-  std::shared_ptr<SkBitmap> bitmap = ImageDecoderImpeller::DecompressTexture(
-      descriptor.get(), SkISize::Make(600, 200), {600, 200},
-      /*supports_wide_gamut=*/true);
-  ASSERT_EQ(bitmap->colorType(), kRGBA_8888_SkColorType);
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  std::optional<DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), SkISize::Make(600, 200), {600, 200},
+          /*supports_wide_gamut=*/true, allocator);
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -695,16 +785,17 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
             SkISize::Make(6, 2));
 
 #if IMPELLER_SUPPORTS_RENDERING
-  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(
-                descriptor.get(), SkISize::Make(6, 2), {100, 100},
-                /*supports_wide_gamut=*/false)
-                ->dimensions(),
-            SkISize::Make(6, 2));
-  ASSERT_EQ(ImageDecoderImpeller::DecompressTexture(
-                descriptor.get(), SkISize::Make(60, 20), {10, 10},
-                /*supports_wide_gamut=*/false)
-                ->dimensions(),
-            SkISize::Make(10, 10));
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  auto result_1 = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), SkISize::Make(6, 2), {100, 100},
+      /*supports_wide_gamut=*/false, allocator);
+  ASSERT_EQ(result_1->sk_bitmap->dimensions(), SkISize::Make(6, 2));
+
+  auto result_2 = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), SkISize::Make(60, 20), {10, 10},
+      /*supports_wide_gamut=*/false, allocator);
+  ASSERT_EQ(result_2->sk_bitmap->dimensions(), SkISize::Make(10, 10));
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

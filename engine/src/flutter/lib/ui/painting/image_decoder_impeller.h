@@ -10,12 +10,38 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "impeller/geometry/size.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace impeller {
 class Context;
+class Allocator;
+class DeviceBuffer;
 }  // namespace impeller
 
 namespace flutter {
+
+class ImpellerAllocator : public SkBitmap::Allocator {
+ public:
+  explicit ImpellerAllocator(std::shared_ptr<impeller::Allocator> allocator);
+
+  ~ImpellerAllocator() = default;
+
+  // |Allocator|
+  bool allocPixelRef(SkBitmap* bitmap) override;
+
+  std::optional<std::shared_ptr<impeller::DeviceBuffer>> GetDeviceBuffer()
+      const;
+
+ private:
+  std::shared_ptr<impeller::Allocator> allocator_;
+  std::optional<std::shared_ptr<impeller::DeviceBuffer>> buffer_;
+};
+
+struct DecompressResult {
+  std::shared_ptr<impeller::DeviceBuffer> device_buffer;
+  std::shared_ptr<SkBitmap> sk_bitmap;
+  SkImageInfo image_info;
+};
 
 class ImageDecoderImpeller final : public ImageDecoder {
  public:
@@ -33,15 +59,34 @@ class ImageDecoderImpeller final : public ImageDecoder {
               uint32_t target_height,
               const ImageResult& result) override;
 
-  static std::shared_ptr<SkBitmap> DecompressTexture(
+  static std::optional<DecompressResult> DecompressTexture(
       ImageDescriptor* descriptor,
       SkISize target_size,
       impeller::ISize max_texture_size,
-      bool supports_wide_gamut);
+      bool supports_wide_gamut,
+      const std::shared_ptr<impeller::Allocator>& allocator);
 
-  static sk_sp<DlImage> UploadTexture(
+  /// @brief Create a device private texture from the provided host buffer.
+  ///        This method is only suported on the metal backend.
+  /// @param context    The Impeller graphics context.
+  /// @param buffer     A host buffer containing the image to be uploaded.
+  /// @param image_info Format information about the particular image.
+  /// @return           A DlImage.
+  static sk_sp<DlImage> UploadTextureToPrivate(
       const std::shared_ptr<impeller::Context>& context,
-      std::shared_ptr<SkBitmap> bitmap);
+      const std::shared_ptr<impeller::DeviceBuffer>& buffer,
+      const SkImageInfo& image_info);
+
+  /// @brief Create a host visible texture from the provided bitmap.
+  /// @param context     The Impeller graphics context.
+  /// @param bitmap      A bitmap containg the image to be uploaded.
+  /// @param create_mips Whether mipmaps should be generated for the given
+  /// image.
+  /// @return            A DlImage.
+  static sk_sp<DlImage> UploadTextureToShared(
+      const std::shared_ptr<impeller::Context>& context,
+      std::shared_ptr<SkBitmap> bitmap,
+      bool create_mips = true);
 
  private:
   using FutureContext = std::shared_future<std::shared_ptr<impeller::Context>>;

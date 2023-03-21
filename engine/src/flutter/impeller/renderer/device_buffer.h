@@ -43,12 +43,12 @@ class DeviceBuffer : public Buffer,
 
   const DeviceBufferDescriptor& GetDeviceBufferDescriptor() const;
 
+  virtual uint8_t* OnGetContents() const = 0;
+
  protected:
   const DeviceBufferDescriptor desc_;
 
   explicit DeviceBuffer(DeviceBufferDescriptor desc);
-
-  virtual uint8_t* OnGetContents() const = 0;
 
   virtual bool OnCopyHostBuffer(const uint8_t* source,
                                 Range source_range,

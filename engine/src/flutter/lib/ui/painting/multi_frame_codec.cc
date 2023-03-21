@@ -147,8 +147,9 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
     // impeller, transfer to DlImageImpeller
     gpu_disable_sync_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
         [&result, &bitmap, &impeller_context_] {
-          result = ImageDecoderImpeller::UploadTexture(
-              impeller_context_, std::make_shared<SkBitmap>(bitmap));
+          result = ImageDecoderImpeller::UploadTextureToShared(
+              impeller_context_, std::make_shared<SkBitmap>(bitmap),
+              /*create_mips=*/false);
         }));
 
     return result;
