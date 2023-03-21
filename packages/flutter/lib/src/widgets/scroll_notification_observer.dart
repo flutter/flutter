@@ -35,7 +35,7 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
   bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final ScrollNotificationCallback listener;
 }
