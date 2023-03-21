@@ -26,8 +26,8 @@ void main() {
     expect(borderRadius.bottomRight, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(8.9, 8.7);
-    const Radius radius2 = Radius.elliptical(9.3, 9.7);
+    const Radius radius1 = Radius.elliptical(8.9, 6.7);
+    const Radius radius2 = Radius.elliptical(9.3, 7.7);
 
     borderRadius = const BorderRadius.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -187,8 +187,8 @@ void main() {
     expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
     expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(8.9, 8.7);
-    const Radius radius2 = Radius.elliptical(9.3, 9.7);
+    const Radius radius1 = Radius.elliptical(8.9, 6.7);
+    const Radius radius2 = Radius.elliptical(9.3, 7.7);
 
     borderRadius = const BorderRadiusDirectional.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -564,5 +564,36 @@ void main() {
     expect(borderRadius.copyWith(bottomLeft: Radius.zero).copyWith(bottomLeft: radius), borderRadius);
     expect(borderRadius.copyWith(bottomRight: Radius.zero).bottomRight, Radius.zero);
     expect(borderRadius.copyWith(bottomRight: Radius.zero).copyWith(bottomRight: radius), borderRadius);
+  });
+
+  test('BorderRadius toRRect when radius is larger than rect size', () {
+    const Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
+    const Radius radius1 = Radius.elliptical(88, 8);
+    const Radius radius2 = Radius.elliptical(9, 99);
+    const Radius radius1Expected = Radius.elliptical(10, 8);
+    const Radius radius2Expected = Radius.elliptical(9, 8);
+
+    BorderRadius borderRadius = const BorderRadius.vertical(top: radius1, bottom: radius2);
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
+      rect,
+      topLeft: radius1Expected,
+      topRight: radius1Expected,
+      bottomLeft: radius2Expected,
+      bottomRight: radius2Expected,
+    ));
+
+    borderRadius = const BorderRadius.only(topRight: radius1, bottomRight: radius2);
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
+      rect,
+      topRight: radius1Expected,
+      bottomRight: radius2Expected,
+    ));
+
+    const Radius radius3 = Radius.elliptical(11, 11);
+    borderRadius = const BorderRadius.all(radius3);
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndRadius(
+      rect,
+      const Radius.elliptical(10, 8),
+    ));
   });
 }

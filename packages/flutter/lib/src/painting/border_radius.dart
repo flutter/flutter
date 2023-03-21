@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -400,7 +398,12 @@ class BorderRadius extends BorderRadiusGeometry {
     // Because the current radii could be negative, we must clamp them before
     // converting them to an RRect to be rendered, since negative radii on
     // RRects don't make sense.
-    final Radius maxRadius = Radius.circular(math.max(rect.width, rect.height));
+    //
+    // We also clamp the radii to be no larger than [we need to define],
+    // to avoid a scenario where a rounded rectangle with a radius larger
+    // than 3.402823e+38 (max finite value of a float32) is displayed as
+    // a rectangle without rounded corners.
+    final Radius maxRadius = Radius.elliptical(rect.width, rect.height);
     return RRect.fromRectAndCorners(
       rect,
       topLeft: topLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
