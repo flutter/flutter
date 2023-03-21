@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 /// A set of platform-adaptive Material Design icons.
 ///
 /// Use [Icons.adaptive] to access a static instance of this class.
-class PlatformAdaptiveIcons implements Icons {
+final class PlatformAdaptiveIcons implements Icons {
   const PlatformAdaptiveIcons._();
 
   static bool _isCupertino() {
