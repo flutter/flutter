@@ -1351,6 +1351,13 @@ void main() {
     expect(controller.indexIsChanging, false);
   });
 
+  testWidgets('Scrollable TabBar does not have overscroll indicator', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', isScrollable: true));
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  });
+
   testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102600
     final List<String> tabs = <String>['A'];
