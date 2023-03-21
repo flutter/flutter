@@ -252,8 +252,8 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     while (width * height >
            static_cast<int64_t>(
                pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup)) {
-      width /= 2;
-      height /= 2;
+      width = std::max(1LL, width / 2);
+      height = std::max(1LL, height / 2);
     }
     auto size = MTLSizeMake(width, height, 1);
     [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
