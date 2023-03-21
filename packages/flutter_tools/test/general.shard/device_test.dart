@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -702,11 +701,9 @@ void main() {
     });
   });
 
-  testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
+  testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags', () {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
 
   group('JSON encode DebuggingOptions', () {
@@ -719,7 +716,7 @@ void main() {
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.enabled,
         enableDartProfiling: false,
         enableEmbedderApi: true,
       );
@@ -758,8 +755,7 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -779,7 +775,7 @@ void main() {
           '--disable-service-auth-codes',
           '--disable-vm-service-publication',
           '--start-paused',
-          '--dart-flags="--foo,--null_assertions"',
+          '--dart-flags="--foo"',
           '--use-test-fonts',
           '--enable-checked-mode',
           '--verify-entry-points',
@@ -796,7 +792,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=0',
         ].join(' '),
       );
@@ -832,7 +828,7 @@ void main() {
         EnvironmentType.physical,
         null,
         <String, Object?>{},
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(
@@ -856,7 +852,7 @@ void main() {
         null,
         <String, Object?>{},
         ipv6: true,
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(
@@ -875,7 +871,7 @@ void main() {
         BuildInfo.debug,
         traceAllowlist: 'foo',
         cacheSkSL: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -894,7 +890,7 @@ void main() {
           '--cache-sksl',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
         ].join(' '),
       );
     });
@@ -918,8 +914,7 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -939,7 +934,7 @@ void main() {
           '--disable-service-auth-codes',
           '--disable-vm-service-publication',
           '--start-paused',
-          '--dart-flags=--foo,--null_assertions',
+          '--dart-flags=--foo',
           '--use-test-fonts',
           '--enable-checked-mode',
           '--verify-entry-points',
@@ -956,7 +951,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=1',
         ].join(' '),
       );

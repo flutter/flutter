@@ -2338,7 +2338,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
             break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerMinInputSize.width;
+            timePickerWidth = _kTimePickerMinInputSize.width - (useMaterial3 ? 32 : 0);
             break;
         }
         return Size(timePickerWidth, _kTimePickerMinInputSize.height);
@@ -2383,7 +2383,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
             break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerInputSize.width;
+            timePickerWidth = _kTimePickerInputSize.width - (useMaterial3 ? 32 : 0);
             break;
         }
         timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
@@ -2457,7 +2457,6 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         tapTargetSizeOffset = const Offset(0, -12);
         break;
     }
-
     final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(

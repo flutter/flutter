@@ -5374,6 +5374,46 @@ void main() {
     );
   });
 
+  testWidgets('text styling info is sent on show keyboard (bold override)', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          textDirection: TextDirection.rtl,
+          controller: controller,
+          focusNode: FocusNode(),
+          style: const TextStyle(
+            fontSize: 20.0,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Roboto',
+        'fontWeightIndex': FontWeight.bold.index,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 0,
+      }),
+    );
+  });
+
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     late StateSetter setState;
@@ -13011,6 +13051,58 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
+    // Regression test for https://github.com/flutter/flutter/issues/120194.
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion without waiting for the throttling delay.
+      await sendUndo(tester);
+      expect(controller.value.selection.isValid, true);
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and do not wait for throttling delay before calling undo.
+      focusNode.requestFocus();
+      await tester.pump();
+      await sendUndo(tester);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion.
+      await sendUndo(tester);
+
+      // Initial text should have been recorded and restored.
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final FocusNode focusNode = FocusNode();
@@ -15466,6 +15558,27 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     },
       skip: !kIsWeb, // [intended]
     );
+  });
+
+  testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(fontWeight: FontWeight.normal),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.green,
+        ),
+      ),
+    ));
+
+    controller.text = 'foo';
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 }
 
