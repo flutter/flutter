@@ -99,6 +99,7 @@ void main() {
         processManager: processManager,
         logger: logger,
         terminal: terminal,
+        suppressAnalytics: true,
       );
 
       int errorCount = 0;
@@ -139,6 +140,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -166,6 +168,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -192,6 +195,7 @@ void main() {
             '--disable-server-feature-search',
             '--sdk',
             'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
         ),
@@ -235,6 +239,7 @@ void main() {
             '--disable-server-feature-search',
             '--sdk',
             'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
           stdout: '''
@@ -288,6 +293,7 @@ void main() {
                 '--disable-server-feature-search',
                 '--sdk',
                 'Artifact.engineDartSdkPath',
+                '--suppress-analytics',
               ],
               stdin: IOSink(stdin.sink),
               stdout: '''

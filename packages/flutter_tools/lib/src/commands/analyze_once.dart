@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -22,11 +21,12 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.processManager,
     required super.terminal,
     required super.artifacts,
+    required super.suppressAnalytics,
     this.workingDirectory,
   }) : super(
-        repoRoots: repoRoots,
-        repoPackages: repoPackages,
-      );
+          repoRoots: repoRoots,
+          repoPackages: repoPackages,
+        );
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
@@ -42,7 +42,8 @@ class AnalyzeOnce extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       items.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
+      if (argResults.wasParsed('current-package') &&
+          (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
       }
     } else {
@@ -67,6 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
 
     Stopwatch? timer;
@@ -82,10 +84,12 @@ class AnalyzeOnce extends AnalyzeBase {
         }
       }
 
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+      subscription = server.onAnalyzing
+          .listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
 
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+        fileErrors.errors
+            .removeWhere((AnalysisError error) => error.type == 'TODO');
 
         errors.addAll(fileErrors.errors);
       }
@@ -112,8 +116,8 @@ class AnalyzeOnce extends AnalyzeBase {
           : fileSystem.path.basename(items.first);
       progress = argResults['preamble'] == true
           ? logger.startProgress(
-            'Analyzing $message...',
-          )
+              'Analyzing $message...',
+            )
           : null;
 
       await analysisCompleter.future;
@@ -129,7 +133,8 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     // --write
-    dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+    dumpErrors(
+        errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     // report errors
     if (errors.isNotEmpty && (argResults['preamble'] as bool)) {
@@ -141,7 +146,8 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     final int errorCount = errors.length;
-    final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+    final String seconds =
+        (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
     final String errorsMessage = AnalyzeBase.generateErrorsMessage(
       issueCount: errorCount,
       seconds: seconds,
@@ -167,10 +173,12 @@ class AnalyzeOnce extends AnalyzeBase {
       if (severityLevel == AnalysisSeverity.error) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.warning && argResults['fatal-warnings'] as bool) {
+      if (severityLevel == AnalysisSeverity.warning &&
+          argResults['fatal-warnings'] as bool) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {
+      if (severityLevel == AnalysisSeverity.info &&
+          argResults['fatal-infos'] as bool) {
         return true;
       }
     }

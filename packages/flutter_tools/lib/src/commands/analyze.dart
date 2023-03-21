@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../globals.dart' as globals;
 import '../project_validator.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_base.dart';
@@ -29,13 +30,13 @@ class AnalyzeCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<ProjectValidator> allProjectValidators,
-  }) : _artifacts = artifacts,
-       _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _terminal = terminal,
-       _allProjectValidators = allProjectValidators,
-       _platform = platform {
+  })  : _artifacts = artifacts,
+        _fileSystem = fileSystem,
+        _processManager = processManager,
+        _logger = logger,
+        _terminal = terminal,
+        _allProjectValidators = allProjectValidators,
+        _platform = platform {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -44,16 +45,18 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help: '(deprecated) List every public member that is lacking documentation. '
-              'This command will be removed in a future version of Flutter.',
+        help:
+            '(deprecated) List every public member that is lacking documentation. '
+            'This command will be removed in a future version of Flutter.',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
         negatable: false);
     argParser.addOption('write',
         valueHelp: 'file',
-        help: 'Also output the results to a file. This is useful with "--watch" '
-              'if you want a file to always contain the latest results.');
+        help:
+            'Also output the results to a file. This is useful with "--watch" '
+            'if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk',
         valueHelp: 'path-to-sdk',
         help: 'The path to the Dart SDK.',
@@ -61,16 +64,17 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addOption('protocol-traffic-log',
         valueHelp: 'path-to-protocol-traffic-log',
         help: 'The path to write the request and response protocol. This is '
-              'only intended to be used for debugging the tooling.',
+            'only intended to be used for debugging the tooling.',
         hide: !verboseHelp);
     argParser.addFlag('suggestions',
-        help: 'Show suggestions about the current flutter project.'
-    );
-    argParser.addFlag('machine',
-        negatable: false,
-        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
-              'and environment.',
-        hide: !verboseHelp,
+        help: 'Show suggestions about the current flutter project.');
+    argParser.addFlag(
+      'machine',
+      negatable: false,
+      help:
+          'Dumps a JSON with a subset of relevant data about the tool, project, '
+          'and environment.',
+      hide: !verboseHelp,
     );
 
     // Hidden option to enable a benchmarking mode.
@@ -83,20 +87,19 @@ class AnalyzeCommand extends FlutterCommand {
 
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
-        help: 'Show output even when there are no errors, warnings, hints, or lints. '
-              'Ignored if "--watch" is specified.',
+        help:
+            'Show output even when there are no errors, warnings, hints, or lints. '
+            'Ignored if "--watch" is specified.',
         defaultsTo: true);
     argParser.addFlag('preamble',
         defaultsTo: true,
         help: 'When analyzing the flutter repository, display the number of '
-              'files that will be analyzed.\n'
-              'Ignored if "--watch" is specified.');
+            'files that will be analyzed.\n'
+            'Ignored if "--watch" is specified.');
     argParser.addFlag('fatal-infos',
-        help: 'Treat info level issues as fatal.',
-        defaultsTo: true);
+        help: 'Treat info level issues as fatal.', defaultsTo: true);
     argParser.addFlag('fatal-warnings',
-        help: 'Treat warning level issues as fatal.',
-        defaultsTo: true);
+        help: 'Treat warning level issues as fatal.', defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -121,6 +124,15 @@ class AnalyzeCommand extends FlutterCommand {
 
   @visibleForTesting
   List<ProjectValidator> allProjectValidators() => _allProjectValidators;
+
+  Future<bool> get _suppressAnalytics {
+    if (globals.flutterUsage.suppressAnalytics) {
+      return Future<bool>.value(true);
+    }
+    // The analysis server doesn't know about Flutter bots so set the flag if
+    // we're running there, too.
+    return globals.isRunningOnBot;
+  }
 
   @override
   bool get shouldRunPub {
@@ -151,11 +163,15 @@ class AnalyzeCommand extends FlutterCommand {
       }
       if (workingDirectory == null) {
         final Set<String> items = findDirectories(argResults!, _fileSystem);
-        if (items.isEmpty) { // user did not specify any path
+        if (items.isEmpty) {
+          // user did not specify any path
           directoryPath = _fileSystem.currentDirectory.path;
-          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
-        } else if (items.length > 1) { // if the user sends more than one path
-          throwToolExit('The suggestions flag can process only one directory path');
+          _logger.printTrace(
+              'Showing suggestions for current directory: $directoryPath');
+        } else if (items.length > 1) {
+          // if the user sends more than one path
+          throwToolExit(
+              'The suggestions flag can process only one directory path');
         } else {
           directoryPath = items.first;
         }
@@ -181,6 +197,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: await _suppressAnalytics,
       ).analyze();
     } else {
       await AnalyzeOnce(
@@ -194,6 +211,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: await _suppressAnalytics,
       ).analyze();
     }
     return FlutterCommandResult.success();
