@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+part of 'reporting.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
 
@@ -51,7 +51,7 @@ abstract class Usage {
 
   /// Sends a 'command' to the underlying analytics implementation.
   ///
-  /// Note that using [command] above is preferred to ensure that the parameter
+  /// Using [command] above is preferred to ensure that the parameter
   /// keys are well-defined in [CustomDimensions] above.
   void sendCommand(
     String command, {
@@ -60,8 +60,8 @@ abstract class Usage {
 
   /// Sends an 'event' to the underlying analytics implementation.
   ///
-  /// Note that this method should not be used directly, instead see the
-  /// event types defined in this directory in events.dart.
+  /// This method should not be used directly, instead see the
+  /// event types defined in this directory in `events.dart`.
   @visibleForOverriding
   @visibleForTesting
   void sendEvent(

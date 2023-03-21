@@ -60,20 +60,29 @@ class SnackBarThemeData with Diagnosticable {
     this.elevation,
     this.shape,
     this.behavior,
-  }) : assert(elevation == null || elevation >= 0.0);
+    this.width,
+    this.insetPadding,
+    this.showCloseIcon,
+    this.closeIconColor,
+    this.actionOverflowThreshold,
+  })  : assert(elevation == null || elevation >= 0.0),
+        assert(width == null || identical(behavior, SnackBarBehavior.floating),
+          'Width can only be set if behaviour is SnackBarBehavior.floating'),
+        assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+          'Action overflow threshold must be between 0 and 1 inclusive');
 
-  /// Default value for [SnackBar.backgroundColor].
+  /// Overrides the default value for [SnackBar.backgroundColor].
   ///
   /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
   final Color? backgroundColor;
 
-  /// Default value for [SnackBarAction.textColor].
+  /// Overrides the default value for [SnackBarAction.textColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
   /// [ThemeData.colorScheme] .
   final Color? actionTextColor;
 
-  /// Default value for [SnackBarAction.disabledTextColor].
+  /// Overrides the default value for [SnackBarAction.disabledTextColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.onSurface] with its
   /// opacity set to 0.30 if the [Theme]'s brightness is [Brightness.dark], 0.38
@@ -85,12 +94,12 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBar] defines its default.
   final TextStyle? contentTextStyle;
 
-  /// Default value for [SnackBar.elevation].
+  /// Overrides the default value for [SnackBar.elevation].
   ///
   /// If null, [SnackBar] uses a default of 6.0.
   final double? elevation;
 
-  /// Default value for [SnackBar.shape].
+  /// Overrides the default value for [SnackBar.shape].
   ///
   /// If null, [SnackBar] provides different defaults depending on the
   /// [SnackBarBehavior]. For [SnackBarBehavior.fixed], no overriding shape is
@@ -99,10 +108,37 @@ class SnackBarThemeData with Diagnosticable {
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
 
-  /// Default value for [SnackBar.behavior].
+  /// Overrides the default value for [SnackBar.behavior].
   ///
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
   final SnackBarBehavior? behavior;
+
+  /// Overrides the default value for [SnackBar.width].
+  ///
+  /// If this property is null, then the snack bar will take up the full device
+  /// width less the margin. This value is only used when [behavior] is
+  /// [SnackBarBehavior.floating].
+  final double? width;
+
+  /// Overrides the default value for [SnackBar.margin].
+  ///
+  /// This value is only used when [behavior] is [SnackBarBehavior.floating].
+  final EdgeInsets? insetPadding;
+
+  /// Overrides the default value for [SnackBar.showCloseIcon].
+  ///
+  /// Whether to show an optional "Close" icon.
+  final bool? showCloseIcon;
+
+  /// Overrides the default value for [SnackBar.closeIconColor].
+  ///
+  /// This value is only used if [showCloseIcon] is true.
+  final Color? closeIconColor;
+
+  /// Overrides the default value for [SnackBar.actionOverflowThreshold].
+  ///
+  /// Must be a value between 0 and 1, if present.
+  final double? actionOverflowThreshold;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -114,6 +150,11 @@ class SnackBarThemeData with Diagnosticable {
     double? elevation,
     ShapeBorder? shape,
     SnackBarBehavior? behavior,
+    double? width,
+    EdgeInsets? insetPadding,
+    bool? showCloseIcon,
+    Color? closeIconColor,
+    double? actionOverflowThreshold,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -123,6 +164,11 @@ class SnackBarThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       behavior: behavior ?? this.behavior,
+      width: width ?? this.width,
+      insetPadding: insetPadding ?? this.insetPadding,
+      showCloseIcon: showCloseIcon ?? this.showCloseIcon,
+      closeIconColor: closeIconColor ?? this.closeIconColor,
+      actionOverflowThreshold: actionOverflowThreshold ?? this.actionOverflowThreshold,
     );
   }
 
@@ -132,7 +178,9 @@ class SnackBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return SnackBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       actionTextColor: Color.lerp(a?.actionTextColor, b?.actionTextColor, t),
@@ -141,19 +189,28 @@ class SnackBarThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
+      width: lerpDouble(a?.width, b?.width, t),
+      insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
+      closeIconColor: Color.lerp(a?.closeIconColor, b?.closeIconColor, t),
+      actionOverflowThreshold: lerpDouble(a?.actionOverflowThreshold, b?.actionOverflowThreshold, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    actionTextColor,
-    disabledActionTextColor,
-    contentTextStyle,
-    elevation,
-    shape,
-    behavior,
-  );
+        backgroundColor,
+        actionTextColor,
+        disabledActionTextColor,
+        contentTextStyle,
+        elevation,
+        shape,
+        behavior,
+        width,
+        insetPadding,
+        showCloseIcon,
+        closeIconColor,
+        actionOverflowThreshold,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -170,7 +227,12 @@ class SnackBarThemeData with Diagnosticable {
         && other.contentTextStyle == contentTextStyle
         && other.elevation == elevation
         && other.shape == shape
-        && other.behavior == behavior;
+        && other.behavior == behavior
+        && other.width == width
+        && other.insetPadding == insetPadding
+        && other.showCloseIcon == showCloseIcon
+        && other.closeIconColor == closeIconColor
+        && other.actionOverflowThreshold == actionOverflowThreshold;
   }
 
   @override
@@ -183,5 +245,10 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showCloseIcon', showCloseIcon, defaultValue: null));
+    properties.add(ColorProperty('closeIconColor', closeIconColor, defaultValue: null));
+    properties.add(DoubleProperty('actionOverflowThreshold', actionOverflowThreshold, defaultValue: null));
   }
 }

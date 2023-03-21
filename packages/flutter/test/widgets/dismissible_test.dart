@@ -174,7 +174,6 @@ Future<void> dismissItem(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = dismissElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -188,7 +187,6 @@ Future<void> dragItem(
       required AxisDirection gestureDirection,
       required double amount,
     }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -202,7 +200,6 @@ Future<void> checkFlingItemBeforeMovementEnd(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -218,7 +215,6 @@ Future<void> checkFlingItemAfterMovement(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -644,14 +640,14 @@ void main() {
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
             width: 100.0,
             height: 1000.0,
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Test1215DismissibleWidget('1'),
                 Test1215DismissibleWidget('2'),
               ],
@@ -1149,5 +1145,33 @@ void main() {
     expect(reportedDismissUpdateReached, false);
     expect(reportedDismissUpdatePreviousReached, false);
     expect(reportedDismissUpdateProgress, 0.0);
+  });
+
+  testWidgets('Change direction does not lose child state', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/108961
+    Widget buildFrame(DismissDirection direction) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Dismissible(
+          dragStartBehavior: DragStartBehavior.down,
+          direction: direction,
+          key: const Key('Dismissible'),
+          resizeDuration: null,
+          child: const SizedBox(
+            width: 100.0,
+            height: 100.0,
+            child: Text('I Love Flutter!'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(DismissDirection.horizontal));
+    final RenderBox textRenderObjectBegin = tester.renderObject(find.text('I Love Flutter!'));
+
+    await tester.pumpWidget(buildFrame(DismissDirection.none));
+    final RenderBox textRenderObjectEnd = tester.renderObject(find.text('I Love Flutter!'));
+
+    expect(identical(textRenderObjectBegin, textRenderObjectEnd), true);
   });
 }

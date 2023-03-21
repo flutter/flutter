@@ -247,6 +247,11 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
+  void insertContent(KeyboardInsertedContent content) {
+    latestMethodCall = 'commitContent';
+  }
+
+  @override
   void updateEditingValue(TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
   }
@@ -286,5 +291,15 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
     latestMethodCall = 'showToolbar';
   }
 
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+  }
+
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+
+  @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
+  }
 }

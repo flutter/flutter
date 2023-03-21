@@ -30,8 +30,7 @@ class NavigationToolbar extends StatelessWidget {
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
-  }) : assert(centerMiddle != null),
-       assert(middleSpacing != null);
+  });
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;
@@ -85,8 +84,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     required this.centerMiddle,
     required this.middleSpacing,
     required this.textDirection,
-  }) : assert(middleSpacing != null),
-       assert(textDirection != null);
+  });
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -106,7 +104,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ToolbarSlot.leading)) {
       final BoxConstraints constraints = BoxConstraints(
-        maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
+        maxWidth: size.width,
         minHeight: size.height, // The height should be exactly the height of the bar.
         maxHeight: size.height,
       );
@@ -153,7 +151,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       if (centerMiddle) {
         middleStart = (size.width - middleSize.width) / 2.0;
         if (middleStart + middleSize.width > size.width - trailingWidth) {
-          middleStart = size.width - trailingWidth - middleSize.width;
+          middleStart = size.width - trailingWidth - middleSize.width - middleSpacing;
         } else if (middleStart < middleStartMargin) {
           middleStart = middleStartMargin;
         }

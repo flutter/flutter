@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for NavigationRail
+// Flutter code sample for [NavigationRail].
 
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,7 @@ class _NavRailExampleState extends State<NavRailExample> {
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
   bool showLeading = false;
   bool showTrailing = false;
-  double groupAligment = -1.0;
+  double groupAlignment = -1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class _NavRailExampleState extends State<NavRailExample> {
         children: <Widget>[
           NavigationRail(
             selectedIndex: _selectedIndex,
-            groupAlignment: groupAligment,
+            groupAlignment: groupAlignment,
             onDestinationSelected: (int index) {
               setState(() {
                 _selectedIndex = index;
@@ -118,7 +118,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text('Group alignment: $groupAligment'),
+                  Text('Group alignment: $groupAlignment'),
                   const SizedBox(height: 10),
                   OverflowBar(
                     spacing: 10.0,
@@ -126,7 +126,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            groupAligment = -1.0;
+                            groupAlignment = -1.0;
                           });
                         },
                         child: const Text('Top'),
@@ -134,7 +134,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            groupAligment = 0.0;
+                            groupAlignment = 0.0;
                           });
                         },
                         child: const Text('Center'),
@@ -142,7 +142,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            groupAligment = 1.0;
+                            groupAlignment = 1.0;
                           });
                         },
                         child: const Text('Bottom'),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder, Locale, StringAttribute, LocaleStringAttribute, SpellOutStringAttribute;
+import 'dart:ui' as ui show Locale, LocaleStringAttribute, ParagraphBuilder, SpellOutStringAttribute, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +11,9 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
+
+// Examples can assume:
+// late TextSpan myTextSpan;
 
 /// An immutable span of text.
 ///
@@ -214,7 +217,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// text value:
   ///
   /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// const TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String? semanticsLabel;
 
@@ -288,7 +291,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        assert(child != null);
         child.build(
           builder,
           textScaleFactor: textScaleFactor,
@@ -404,14 +406,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
+    final String? text = this.text;
     if (text == null) {
       return null;
     }
-    if (index - offset.value < text!.length) {
-      return text!.codeUnitAt(index - offset.value);
-    }
-    offset.increment(text!.length);
-    return null;
+    final int localOffset = index - offset.value;
+    assert(localOffset >= 0);
+    offset.increment(text.length);
+    return localOffset < text.length ? text.codeUnitAt(localOffset) : null;
   }
 
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
@@ -449,18 +451,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     assert(() {
       if (children != null) {
         for (final InlineSpan child in children!) {
-          if (child == null) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('TextSpan contains a null child.'),
-              ErrorDescription(
-                'A TextSpan object with a non-null child list should not have any nulls in its child list.',
-              ),
-              toDiagnosticsNode(
-                name: 'The full text in question was',
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ]);
-          }
           assert(child.debugAssertIsValid());
         }
       }
@@ -587,14 +577,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       return const <DiagnosticsNode>[];
     }
     return children!.map<DiagnosticsNode>((InlineSpan child) {
-      // `child` has a non-nullable return type, but might be null when running
-      // with weak checking, so we need to null check it anyway (and ignore the
-      // warning that the null-handling logic is dead code).
-      if (child != null) {
-        return child.toDiagnosticsNode();
-      } else {
-        return DiagnosticsNode.message('<null child>');
-      }
+      return child.toDiagnosticsNode();
     }).toList();
   }
 }

@@ -32,8 +32,8 @@ const Map<String, String> kObsoleteBranches = <String, String>{
 
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
-  // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
+  main,
   beta,
   stable,
 }
@@ -41,6 +41,7 @@ enum Channel {
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
   globals.kDefaultFrameworkChannel,
+  'main',
   'beta',
   'stable',
 };
@@ -100,7 +101,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel; // ignore: no_leading_underscores_for_local_identifiers
+    final String _ = channel;
     return _repositoryUrl;
   }
 
@@ -327,7 +328,7 @@ class FlutterVersion {
   }
 
   /// log.showSignature=false is a user setting and it will break things,
-  /// so we want to disable it for every git log call.  This is a convenience
+  /// so we want to disable it for every git log call. This is a convenience
   /// wrapper that does that.
   @visibleForTesting
   static List<String> gitLog(List<String> args) {
@@ -812,9 +813,9 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      // The next published release this commit will appear in will be a beta
-      // release, thus increment [y].
-      return '$x.${y! + 1}.0-0.0.pre.$commits';
+      // The next tag that will contain this commit will be the next candidate
+      // branch, which will increment the devVersion.
+      return '$x.$y.0-${devVersion! + 1}.0.pre.$commits';
     }
     return '$x.$y.${z! + 1}-0.0.pre.$commits';
   }

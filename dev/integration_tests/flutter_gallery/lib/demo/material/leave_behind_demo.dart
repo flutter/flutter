@@ -222,10 +222,11 @@ class _LeaveBehindListItem extends StatelessWidget {
         key: ObjectKey(item),
         direction: dismissDirection,
         onDismissed: (DismissDirection direction) {
-          if (direction == DismissDirection.endToStart)
+          if (direction == DismissDirection.endToStart) {
             _handleArchive();
-          else
+          } else {
             _handleDelete();
+          }
         },
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
@@ -242,7 +243,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           }
           return false;
         },
-        background: Container(
+        background: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -250,7 +251,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             ),
           ),
         ),
-        secondaryBackground: Container(
+        secondaryBackground: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(

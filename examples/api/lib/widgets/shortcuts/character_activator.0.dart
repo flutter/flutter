@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CharacterActivator
+// Flutter code sample for [CharacterActivator].
 
 import 'package:flutter/material.dart';
 
@@ -56,10 +56,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             },
           ),
         },
-        child: Focus(
+        child: const Focus(
           autofocus: true,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Text('Press question mark for help'),
             ],
           ),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for OrderedTraversalPolicy
+// Flutter code sample for [OrderedTraversalPolicy].
 
 import 'package:flutter/material.dart';
 
@@ -64,25 +64,25 @@ class MyStatelessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Six', order: 6),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Five', order: 5),
               DemoButton(name: 'Four', order: 4),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Three', order: 3),
               DemoButton(name: 'Two', order: 2),
               DemoButton(name: 'One', order: 1, autofocus: true),

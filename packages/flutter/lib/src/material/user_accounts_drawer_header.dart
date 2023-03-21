@@ -148,7 +148,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.0),
               child: DefaultTextStyle(
-                style: theme.primaryTextTheme.bodyText1!,
+                style: theme.primaryTextTheme.bodyLarge!,
                 overflow: TextOverflow.ellipsis,
                 child: widget.accountName!,
               ),
@@ -160,7 +160,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.0),
               child: DefaultTextStyle(
-                style: theme.primaryTextTheme.bodyText2!,
+                style: theme.primaryTextTheme.bodyMedium!,
                 overflow: TextOverflow.ellipsis,
                 child: widget.accountEmail!,
               ),

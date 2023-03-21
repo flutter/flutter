@@ -9,6 +9,9 @@ import 'framework.dart';
 
 export 'package:flutter/scheduler.dart' show TickerProvider;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Enables or disables tickers (and thus animation controllers) in the widget
 /// subtree.
 ///
@@ -23,7 +26,7 @@ class TickerMode extends StatefulWidget {
     super.key,
     required this.enabled,
     required this.child,
-  }) : assert(enabled != null);
+  });
 
   /// The requested ticker mode for this subtree.
   ///
@@ -72,7 +75,7 @@ class TickerMode extends StatefulWidget {
   /// the `context` and the [TickerMode] and the widget owning the `context`
   /// does not rebuild when the ticker mode changes from true to false or vice
   /// versa. This is preferable when the ticker mode does not impact what is
-  /// currently rendered on screen, e.g. because it is ony used to mute/unmute a
+  /// currently rendered on screen, e.g. because it is only used to mute/unmute a
   /// [Ticker]. Since no dependency is established, the widget owning the
   /// `context` is also not informed when it is moved to a new location in the
   /// tree where it may have a different [TickerMode] ancestor. When this
@@ -92,7 +95,7 @@ class TickerMode extends StatefulWidget {
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
   static ValueNotifier<bool> getNotifier(BuildContext context) {
-    final _EffectiveTickerMode? widget = context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;
+    final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? ValueNotifier<bool>(true);
   }
 
@@ -148,7 +151,7 @@ class _EffectiveTickerMode extends InheritedWidget {
     required this.enabled,
     required this.notifier,
     required super.child,
-  }) : assert(enabled != null);
+  });
 
   final bool enabled;
   final ValueNotifier<bool> notifier;

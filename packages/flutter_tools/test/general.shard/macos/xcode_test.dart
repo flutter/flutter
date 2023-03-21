@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -20,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   late BufferLogger logger;
@@ -59,6 +61,8 @@ void main() {
               'xcrun',
               'simctl',
               'list',
+              'devices',
+              'booted',
             ],
           ),
         );
@@ -68,7 +72,7 @@ void main() {
         );
 
         expect(xcode.isSimctlInstalled, isTrue);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('isSimctlInstalled is true when simctl list fails', () {
@@ -78,6 +82,8 @@ void main() {
               'xcrun',
               'simctl',
               'list',
+              'devices',
+              'booted',
             ],
             exitCode: 1,
           ),
@@ -88,7 +94,7 @@ void main() {
         );
 
         expect(xcode.isSimctlInstalled, isFalse);
-        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
       group('macOS', () {
@@ -107,10 +113,11 @@ void main() {
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>['/usr/bin/xcode-select', '--print-path'],
             stdout: xcodePath,
-          ));
+          ),
+          );
 
           expect(xcode.xcodeSelectPath, xcodePath);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('xcodeSelectPath returns null when xcode-select is not installed', () {
@@ -120,7 +127,7 @@ void main() {
           ));
 
           expect(xcode.xcodeSelectPath, isNull);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
 
           fakeProcessManager.addCommand(FakeCommand(
             command: const <String>['/usr/bin/xcode-select', '--print-path'],
@@ -128,7 +135,7 @@ void main() {
           ));
 
           expect(xcode.xcodeSelectPath, isNull);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('version checks fail when version is less than minimum', () {
@@ -182,7 +189,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
@@ -190,7 +197,7 @@ void main() {
           xcodeProjectInterpreter.version = Version(10, 2, 0);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
@@ -198,7 +205,7 @@ void main() {
           xcodeProjectInterpreter.version = Version(13, null, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
@@ -212,7 +219,7 @@ void main() {
           ]);
 
           expect(xcode.eulaSigned, isFalse);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('eulaSigned is false when clang is not installed', () {
@@ -237,7 +244,7 @@ void main() {
             ],
           );
           expect(xcode.eulaSigned, isTrue);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testWithoutContext('SDK name', () {
@@ -255,7 +262,7 @@ void main() {
             ));
 
             expect(await xcode.sdkLocation(EnvironmentType.physical), sdkroot);
-            expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
           testWithoutContext('--show-sdk-path fails', () async {
@@ -267,7 +274,7 @@ void main() {
 
             expect(() async => xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'));
-            expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
           });
         });
       });
@@ -473,20 +480,33 @@ void main() {
             stdout: devicesOutput,
           ));
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-          expect(devices, hasLength(3));
+          expect(devices, hasLength(4));
+
           expect(devices[0].id, '00008027-00192736010F802E');
           expect(devices[0].name, 'An iPhone (Space Gray)');
           expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
           expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
+
           expect(devices[1].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
           expect(devices[1].name, 'iPad 1');
           expect(await devices[1].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[1].cpuArchitecture, DarwinArch.armv7);
-          expect(devices[2].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
-          expect(devices[2].name, 'iPad 2');
+          expect(devices[1].connectionInterface, DeviceConnectionInterface.attached);
+
+          expect(devices[2].id, '234234234234234234345445687594e089dede3c44');
+          expect(devices[2].name, 'A networked iPad');
           expect(await devices[2].sdkNameAndVersion, 'iOS 10.1 14C54');
           expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(devices[2].connectionInterface, DeviceConnectionInterface.wireless);
+
+          expect(devices[3].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
+          expect(devices[3].name, 'iPad 2');
+          expect(await devices[3].sdkNameAndVersion, 'iOS 10.1 14C54');
+          expect(devices[3].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
+          expect(devices[3].connectionInterface, DeviceConnectionInterface.attached);
+
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
           Artifacts: () => Artifacts.test(),
@@ -507,7 +527,7 @@ void main() {
             stdout: '[]',
           ));
           await xcdevice.getAvailableIOSDevices(timeout: const Duration(seconds: 20));
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
         testUsingContext('ignores "Preparing debugger support for iPhone" error', () async {
@@ -542,7 +562,7 @@ void main() {
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices, hasLength(1));
           expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
           Artifacts: () => Artifacts.test(),
@@ -585,7 +605,7 @@ void main() {
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices[0].cpuArchitecture, DarwinArch.armv7);
           expect(devices[1].cpuArchitecture, DarwinArch.arm64);
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
           Artifacts: () => Artifacts.test(),
@@ -690,7 +710,7 @@ void main() {
           await xcdevice.getAvailableIOSDevices();
           final List<String> errors = await xcdevice.getDiagnostics();
           expect(errors, hasLength(1));
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });
@@ -832,7 +852,7 @@ void main() {
           expect(errors[2], 'Error: Xcode pairing error. (code -13)');
           expect(errors[3], 'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)');
           expect(errors, isNot(contains('Xcode will continue')));
-          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });

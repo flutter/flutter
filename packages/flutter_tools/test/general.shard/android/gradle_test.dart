@@ -121,6 +121,20 @@ void main() {
   });
 
   group('listApkPaths', () {
+    testWithoutContext('Finds APK without flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, '', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-debug.apk']);
+    });
+
+    testWithoutContext('Finds APK with flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'flavor1', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-flavor1-debug.apk']);
+    });
+
     testWithoutContext('Finds APK without flavor in release', () {
       final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),
@@ -443,9 +457,9 @@ flutter:
       expect(getGradleVersionFor('4.0.0'), '6.7');
       expect(getGradleVersionFor('4.1.0'), '6.7');
 
-      expect(getGradleVersionFor('7.0'), '7.4');
-      expect(getGradleVersionFor('7.1.2'), '7.4');
-      expect(getGradleVersionFor('7.2'), '7.4');
+      expect(getGradleVersionFor('7.0'), '7.5');
+      expect(getGradleVersionFor('7.1.2'), '7.5');
+      expect(getGradleVersionFor('7.2'), '7.5');
     });
 
     testWithoutContext('throws on unsupported versions', () {
@@ -540,9 +554,9 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      releaseImplementation 'com.mycompany:flutter:2.2:release'\n"
-          "      debugImplementation 'com.mycompany:flutter:2.2:debug'\n"
-          "      profileImplementation 'com.mycompany:flutter:2.2:profile'\n"
+          "      releaseImplementation 'com.mycompany:flutter_release:2.2'\n"
+          "      debugImplementation 'com.mycompany:flutter_debug:2.2'\n"
+          "      profileImplementation 'com.mycompany:flutter_profile:2.2'\n"
           '    }\n'
           '\n'
           '\n'
@@ -591,7 +605,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      releaseImplementation 'com.mycompany:flutter:1.0:release'\n"
+          "      releaseImplementation 'com.mycompany:flutter_release:1.0'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -629,7 +643,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      debugImplementation 'com.mycompany:flutter:1.0:debug'\n"
+          "      debugImplementation 'com.mycompany:flutter_debug:1.0'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -668,7 +682,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      profileImplementation 'com.mycompany:flutter:1.0:profile'\n"
+          "      profileImplementation 'com.mycompany:flutter_profile:1.0'\n"
           '    }\n'
           '\n'
           '\n'

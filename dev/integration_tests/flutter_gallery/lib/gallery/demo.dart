@@ -28,8 +28,9 @@ class ComponentDemoTabData {
 
   @override
   bool operator==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ComponentDemoTabData
         && other.tabName == tabName
         && other.description == description
@@ -40,7 +41,7 @@ class ComponentDemoTabData {
   int get hashCode => Object.hash(tabName, description, documentationUrl);
 }
 
-class TabbedComponentDemoScaffold extends StatelessWidget {
+class TabbedComponentDemoScaffold extends StatefulWidget {
   const TabbedComponentDemoScaffold({
     super.key,
     this.title,
@@ -56,8 +57,13 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   final bool isScrollable;
   final bool showExampleCodeAction;
 
+  @override
+  State<TabbedComponentDemoScaffold> createState() => _TabbedComponentDemoScaffoldState();
+}
+
+class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffold> {
   void _showExampleCode(BuildContext context) {
-    final String? tag = demos![DefaultTabController.of(context)!.index].exampleCodeTag;
+    final String? tag = widget.demos![DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
       Navigator.push(context, MaterialPageRoute<FullScreenCodeDialog>(
         builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag)
@@ -66,14 +72,15 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   }
 
   Future<void> _showApiDocumentation(BuildContext context) async {
-    final String? url = demos![DefaultTabController.of(context)!.index].documentationUrl;
-    if (url == null)
+    final String? url = widget.demos![DefaultTabController.of(context).index].documentationUrl;
+    if (url == null) {
       return;
+    }
 
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
-    } else {
+    } else if (mounted) {
       showDialog<void>(
         context: context,
         builder: (BuildContext context) {
@@ -94,12 +101,12 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: demos!.length,
+      length: widget.demos!.length,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(title!),
+          title: Text(widget.title!),
           actions: <Widget>[
-            ...?actions,
+            ...?widget.actions,
             Builder(
               builder: (BuildContext context) {
                 return IconButton(
@@ -108,7 +115,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                 );
               },
             ),
-            if (showExampleCodeAction)
+            if (widget.showExampleCodeAction)
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
@@ -120,12 +127,12 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               ),
           ],
           bottom: TabBar(
-            isScrollable: isScrollable,
-            tabs: demos!.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
+            isScrollable: widget.isScrollable,
+            tabs: widget.demos!.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
           ),
         ),
         body: TabBarView(
-          children: demos!.map<Widget>((ComponentDemoTabData demo) {
+          children: widget.demos!.map<Widget>((ComponentDemoTabData demo) {
             return SafeArea(
               top: false,
               bottom: false,
@@ -134,7 +141,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description!,
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
                   Expanded(child: demo.demoWidget!),

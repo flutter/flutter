@@ -193,10 +193,6 @@ class Ink extends StatefulWidget {
     this.height,
     this.child,
   }) : assert(padding == null || padding.isNonNegative),
-       assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        decoration = BoxDecoration(
          image: DecorationImage(
            image: image,
@@ -225,7 +221,7 @@ class Ink extends StatefulWidget {
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   ///
   /// A shorthand for specifying just an image is also available using the
@@ -241,10 +237,10 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
+    if (decoration == null) {
       return padding ?? EdgeInsets.zero;
     }
-    final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
@@ -284,7 +280,7 @@ class _InkState extends State<Ink> {
       _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
-        controller: Material.of(context)!,
+        controller: Material.of(context),
         referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
@@ -292,7 +288,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? Container();
+    return widget.child ?? ConstrainedBox(constraints: const BoxConstraints.expand());
   }
 
   @override
@@ -334,12 +330,10 @@ class InkDecoration extends InkFeature {
   InkDecoration({
     required Decoration? decoration,
     required ImageConfiguration configuration,
-    required MaterialInkController controller,
+    required super.controller,
     required super.referenceBox,
     super.onRemoved,
-  }) : assert(configuration != null),
-       _configuration = configuration,
-       super(controller: controller) {
+  }) : _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
@@ -370,7 +364,6 @@ class InkDecoration extends InkFeature {
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
     if (value == _configuration) {
       return;
     }

@@ -20,7 +20,7 @@ void main() {
       testConfig = Config.test();
       platform = FakePlatform(environment: <String, String>{});
 
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in allConfigurableFeatures) {
         testConfig.setValue(feature.configSetting!, false);
       }
 
@@ -79,6 +79,12 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
+    });
+
+    testWithoutContext('Flutter web wasm only enable on master', () {
+      expect(flutterWebWasm.getSettingForChannel('master').enabledByDefault, isTrue);
+      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isFalse);
+      expect(flutterWebWasm.getSettingForChannel('stable').enabledByDefault, isFalse);
     });
 
     testWithoutContext('Flutter web help string', () {
@@ -381,6 +387,21 @@ void main() {
       test('${feature.name} available and enabled by default on stable', () {
         expect(feature.stable.enabledByDefault, true);
         expect(feature.stable.available, true);
+      });
+    }
+
+    // Custom devices on all channels
+    for (final String channel in <String>['master', 'beta', 'stable']) {
+      testWithoutContext('Custom devices are enabled with flag on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        testConfig.setValue('enable-custom-devices', true);
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
+
+      testWithoutContext('Custom devices are enabled with environment variable on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        platform.environment = <String, String>{'FLUTTER_CUSTOM_DEVICES': 'true'};
+        expect(featureFlags.areCustomDevicesEnabled, true);
       });
     }
 

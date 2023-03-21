@@ -17,7 +17,7 @@ void main() {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, isA<Navigator>());
+        expect(child, isA<FocusScope>());
         return const Placeholder();
       },
     );

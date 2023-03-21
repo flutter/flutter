@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -318,7 +319,7 @@ void main() {
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
 
-    testWithoutContext('overridden storage base url prints warning to STDERR', () async {
+    testWithoutContext('overridden storage base url prints warning', () async {
       final BufferLogger logger = BufferLogger.test();
       const String baseUrl = 'https://storage.com';
       final Cache cache = Cache.test(
@@ -330,7 +331,7 @@ void main() {
       );
 
       expect(cache.storageBaseUrl, baseUrl);
-      expect(logger.errorText, contains('Flutter assets will be downloaded from $baseUrl'));
+      expect(logger.warningText, contains('Flutter assets will be downloaded from $baseUrl'));
       expect(logger.statusText, isEmpty);
     });
   });
@@ -395,6 +396,30 @@ void main() {
     await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
     expect(unzippedFramework, exists);
     expect(staleFile, isNot(exists));
+  });
+
+  testWithoutContext('Try to remove without a parent', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory parent = fileSystem.directory('dir');
+    parent.createSync();
+    final Directory child = parent.childDirectory('child');
+    child.createSync();
+    final Directory tempStorage = parent.childDirectory('temp');
+    tempStorage.createSync();
+    final FakeArtifactUpdaterDownload fakeArtifact = FakeArtifactUpdaterDownload(
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      tempStorage: tempStorage,
+      httpClient: HttpClient(),
+      platform: FakePlatform(),
+      allowedBaseUrls: <String>[]
+    );
+    final File file = child.childFile('file');
+    file.createSync();
+    fakeArtifact.addFiles(<File>[file]);
+    child.deleteSync(recursive: true);
+    fakeArtifact.removeDownloadedFiles();
   });
 
   testWithoutContext('IosUsbArtifacts verifies executables for libimobiledevice in isUpToDateInner', () async {
@@ -566,9 +591,9 @@ void main() {
       cache.includeAllPlatforms = true;
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
-        <String>['darwin-x64', 'darwin-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+        <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 windows hosts are not supported now
       ]);
   });
 
@@ -643,7 +668,7 @@ void main() {
       );
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
-        <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64', 'linux-x64-debug/linux-x64-flutter-gtk.zip'],
         <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
         <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
       ]);
@@ -659,7 +684,7 @@ void main() {
       );
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
-        <String>['linux-arm64', 'linux-arm64/linux-arm64-flutter-gtk.zip'],
+        <String>['linux-arm64', 'linux-arm64-debug/linux-arm64-flutter-gtk.zip'],
         <String>['linux-arm64-profile', 'linux-arm64-profile/linux-arm64-flutter-gtk.zip'],
         <String>['linux-arm64-release', 'linux-arm64-release/linux-arm64-flutter-gtk.zip'],
       ]);
@@ -759,7 +784,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     final List<String> messages = <String>[];
     final List<String> downloads = <String>[];
@@ -777,16 +802,13 @@ void main() {
 
     expect(messages, <String>[
       'Downloading Web SDK...',
-      'Downloading CanvasKit...',
     ]);
 
     expect(downloads, <String>[
-      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-      'https://chrome-infra-packages.appspot.com/dl/flutter/web/canvaskit_bundle/+/abcdefg',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
     ]);
 
     expect(locations, <String>[
-      'cache/bin/cache/flutter_web_sdk',
       'cache/bin/cache/flutter_web_sdk',
     ]);
 
@@ -819,7 +841,7 @@ void main() {
     );
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     final List<String> downloads = <String>[];
     final List<String> locations = <String>[];
@@ -834,8 +856,7 @@ void main() {
     await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
     expect(downloads, <String>[
-      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg',
+      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
     ]);
   });
 
@@ -845,7 +866,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
       location.createSync(recursive: true);
@@ -908,6 +929,7 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => FakePub(),
+      projectFactory: FakeFlutterProjectFactory(),
     );
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
@@ -936,7 +958,7 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // dependencies are missing.
 
-    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/lib/foo.dart')
+    fileSystem.file('.pub-cache/hosted/pub.dartlang.org/example-7.0.0/pubspec.yaml')
       .createSync(recursive: true);
 
     expect(await pubDependencies.isUpToDate(fileSystem), true);
@@ -950,11 +972,19 @@ void main() {
       flutterRoot: () => '',
       logger: logger,
       pub: () => pub,
+      projectFactory: FakeFlutterProjectFactory()
     );
 
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+    expect(
+      pub.invocations.first,
+      predicate<FakePubInvocation>(
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        'Pub invoked with PubOutputMode.none',
+      ),
+    );
   });
 
   testUsingContext('Check current DevTools version', () async {
@@ -1149,14 +1179,22 @@ class FakeVersionedPackageResolver extends Fake implements VersionedPackageResol
   }
 }
 
+class FakePubInvocation {
+  FakePubInvocation({
+    required this.outputMode,
+  });
+
+  final PubOutputMode outputMode;
+}
+
 class FakePub extends Fake implements Pub {
-  int calledGet = 0;
+  final List<FakePubInvocation> invocations = <FakePubInvocation>[];
+  int get calledGet => invocations.length;
 
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
-    bool skipIfAbsent = false,
+    required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -1164,8 +1202,9 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    calledGet += 1;
+    invocations.add(FakePubInvocation(outputMode: outputMode));
   }
 }
 
@@ -1212,4 +1251,20 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
 
   @override
   void removeDownloadedFiles() { }
+}
+
+class FakeArtifactUpdaterDownload extends ArtifactUpdater {
+  FakeArtifactUpdaterDownload({
+    required super.operatingSystemUtils,
+    required super.logger,
+    required super.fileSystem,
+    required super.tempStorage,
+    required super.httpClient,
+    required super.platform,
+    required super.allowedBaseUrls
+  });
+
+  void addFiles(List<File> files) {
+    downloadedFiles.addAll(files);
+  }
 }

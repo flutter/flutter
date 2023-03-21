@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [DataTable]
 /// widgets.
 ///
@@ -37,7 +40,13 @@ class DataTableThemeData with Diagnosticable {
   const DataTableThemeData({
     this.decoration,
     this.dataRowColor,
-    this.dataRowHeight,
+    @Deprecated(
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.7.0-5.0.pre.',
+    )
+    double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -46,7 +55,11 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
-  });
+  }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
+       assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -56,7 +69,17 @@ class DataTableThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? dataRowColor;
 
   /// {@macro flutter.material.dataTable.dataRowHeight}
-  final double? dataRowHeight;
+  @Deprecated(
+    'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+    'This feature was deprecated after v3.7.0-5.0.pre.',
+  )
+  double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
+
+  /// {@macro flutter.material.dataTable.dataRowMinHeight}
+  final double? dataRowMinHeight;
+
+  /// {@macro flutter.material.dataTable.dataRowMaxHeight}
+  final double? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.dataTextStyle}
   final TextStyle? dataTextStyle;
@@ -88,7 +111,13 @@ class DataTableThemeData with Diagnosticable {
   DataTableThemeData copyWith({
     Decoration? decoration,
     MaterialStateProperty<Color?>? dataRowColor,
+    @Deprecated(
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.7.0-5.0.pre.',
+    )
     double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     TextStyle? dataTextStyle,
     MaterialStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
@@ -102,6 +131,8 @@ class DataTableThemeData with Diagnosticable {
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
       dataRowHeight: dataRowHeight ?? this.dataRowHeight,
+      dataRowMinHeight: dataRowMinHeight ?? this.dataRowMinHeight,
+      dataRowMaxHeight: dataRowMaxHeight ?? this.dataRowMaxHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
@@ -119,11 +150,14 @@ class DataTableThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
-    assert(t != null);
+    if (identical(a, b)) {
+      return a;
+    }
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
-      dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
+      dataRowMinHeight: lerpDouble(a.dataRowMinHeight, b.dataRowMinHeight, t),
+      dataRowMaxHeight: lerpDouble(a.dataRowMaxHeight, b.dataRowMaxHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
       headingRowColor: MaterialStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
@@ -139,7 +173,8 @@ class DataTableThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     decoration,
     dataRowColor,
-    dataRowHeight,
+    dataRowMinHeight,
+    dataRowMaxHeight,
     dataTextStyle,
     headingRowColor,
     headingRowHeight,
@@ -161,7 +196,8 @@ class DataTableThemeData with Diagnosticable {
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
-      && other.dataRowHeight == dataRowHeight
+      && other.dataRowMinHeight == dataRowMinHeight
+      && other.dataRowMaxHeight == dataRowMaxHeight
       && other.dataTextStyle == dataTextStyle
       && other.headingRowColor == headingRowColor
       && other.headingRowHeight == headingRowHeight
@@ -177,7 +213,8 @@ class DataTableThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
-    properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
+    properties.add(DoubleProperty('dataRowMinHeight', dataRowMinHeight, defaultValue: null));
+    properties.add(DoubleProperty('dataRowMaxHeight', dataRowMaxHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
@@ -211,7 +248,7 @@ class DataTableTheme extends InheritedWidget {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties used for all descendant [DataTable] widgets.
   final DataTableThemeData data;

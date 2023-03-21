@@ -296,9 +296,9 @@ class _SlidersState extends State<_Sliders> {
               const Text('Continuous with Editable Numerical Value'),
             ],
           ),
-          Column(
+          const Column(
             mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
+            children: <Widget>[
               Slider.adaptive(value: 0.25, onChanged: null),
               Text('Disabled'),
             ],
@@ -334,7 +334,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

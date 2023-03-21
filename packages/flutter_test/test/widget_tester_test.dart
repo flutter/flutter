@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
@@ -98,7 +99,7 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
+      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
 
@@ -116,7 +117,7 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
+      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
   });
@@ -215,7 +216,7 @@ void main() {
 
   group('find.descendant', () {
     testWidgets('finds one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -229,7 +230,7 @@ void main() {
     });
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -244,11 +245,11 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          const Text('bar', textDirection: TextDirection.ltr),
+          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
@@ -274,7 +275,7 @@ void main() {
 
   group('find.ancestor', () {
     testWidgets('finds one ancestor', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -289,7 +290,7 @@ void main() {
 
     testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
             children: <Widget>[
@@ -306,11 +307,11 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          const Text('bar', textDirection: TextDirection.ltr),
+          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
@@ -334,7 +335,7 @@ void main() {
     });
 
     testWidgets('Root not matched by default', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -348,7 +349,7 @@ void main() {
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -359,6 +360,30 @@ void main() {
         of: find.byType(Column),
         matching: find.widgetWithText(Column, 'foo'),
         matchRoot: true,
+      ), findsOneWidget);
+    });
+
+    testWidgets('is fast in deep tree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: _deepWidgetTree(
+            depth: 1000,
+            child: Row(
+              children: <Widget>[
+                _deepWidgetTree(
+                  depth: 1000,
+                  child: const Column(children: fooBarTexts),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.byType(Row),
       ), findsOneWidget);
     });
   });
@@ -606,6 +631,23 @@ void main() {
         key: 'abczed',
       });
     });
+
+    testWidgets('control test (return value)', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<String>(() async => 'Judy Turner');
+      expect(result, 'Judy Turner');
+    });
+
+    testWidgets('async throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() async => throw Exception('Lois Dilettente'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('sync throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() => throw Exception('Butch Barton'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
   });
 
   group('showKeyboard', () {
@@ -780,6 +822,78 @@ void main() {
       binding.postTest();
     });
   });
+
+  group('Accessibility announcements testing API', () {
+    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+
+      // Make sure the handler is properly set
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
+
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+
+      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
+      expect(list, hasLength(3));
+      final CapturedAccessibilityAnnouncement first = list[0];
+      expect(first.message, 'announcement 1');
+      expect(first.textDirection, TextDirection.ltr);
+
+      final CapturedAccessibilityAnnouncement second = list[1];
+      expect(second.message, 'announcement 2');
+      expect(second.textDirection, TextDirection.rtl);
+      expect(second.assertiveness, Assertiveness.assertive);
+
+      final CapturedAccessibilityAnnouncement third = list[2];
+      expect(third.message, 'announcement 3');
+      expect(third.textDirection, TextDirection.rtl);
+      expect(third.assertiveness, Assertiveness.polite);
+
+      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
+      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+    });
+
+    test('New test API is not breaking existing tests', () async {
+      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+
+      Future<dynamic> handleMessage(dynamic mockMessage) async {
+        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        log.add(message);
+      }
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, handleMessage);
+
+      await SemanticsService.announce('announcement 1', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      expect(
+          log,
+          equals(<Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'announce',
+              'data': <String, dynamic>{
+                'message': 'announcement 1',
+                'textDirection': 0,
+                'assertiveness': 1
+              }
+            },
+      ]));
+
+      // Remove the handler
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, null);
+    });
+
+    tearDown(() {
+      // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
+    });
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
@@ -853,4 +967,13 @@ class _AlwaysRepaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
+}
+
+/// Wraps [child] in [depth] layers of [SizedBox]
+Widget _deepWidgetTree({required int depth, required Widget child}) {
+  Widget tree = child;
+  for (int i = 0; i < depth; i += 1) {
+    tree = SizedBox(child: tree);
+  }
+  return tree;
 }

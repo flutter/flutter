@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -271,7 +273,8 @@ void main() {
     });
 
     test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
-      TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle handle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      addTearDown(handle.dispose);
 
       TestRender middle;
       final TestRender root = TestRender(
@@ -676,7 +679,7 @@ void main() {
     );
   });
 
-  test('Attributed String can concate', () {
+  test('Attributed String can concat', () {
     final AttributedString string1 = AttributedString(
       'string1',
       attributes: <StringAttribute>[
@@ -698,7 +701,9 @@ void main() {
   });
 
   test('Semantics id does not repeat', () {
-    final SemanticsOwner owner = SemanticsOwner();
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (SemanticsUpdate update) {},
+    );
     const int expectId = 1400;
     SemanticsNode? nodeToRemove;
     for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {

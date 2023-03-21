@@ -181,7 +181,7 @@ Future<void> main() async {
 
 /// Calculates the smoothness measure from `scrollOffset` and `delays` list.
 ///
-/// Smoothness (`abs_jerk`) is measured by  the absolute value of the discrete
+/// Smoothness (`abs_jerk`) is measured by the absolute value of the discrete
 /// 2nd derivative of the scroll offset.
 ///
 /// It was experimented that jerk (3rd derivative of the position) is a good
@@ -239,8 +239,9 @@ Map<String, dynamic> scrollSummary(
     //
     final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
     absJerkAvg += absJerk;
-    if (absJerk > 0.5)
+    if (absJerk > 0.5) {
       jankyCount += 1;
+    }
   }
   // expect(lostFrame < 0.1 * frameTimestamp.length, true);
   absJerkAvg /= frameTimestamp.length - lostFrame;

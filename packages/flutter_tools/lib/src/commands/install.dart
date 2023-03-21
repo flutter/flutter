@@ -12,11 +12,15 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand() {
+  InstallCommand({
+    required bool verboseHelp,
+  }) {
+    addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
-    usesDeviceUserOption();
-    usesDeviceTimeoutOption();
     usesApplicationBinaryOption();
+    usesDeviceTimeoutOption();
+    usesDeviceUserOption();
+    usesFlavorOption();
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
@@ -33,10 +37,10 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   Device? device;
 
-  bool get uninstallOnly => boolArgDeprecated('uninstall-only');
-  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
+  bool get uninstallOnly => boolArg('uninstall-only');
+  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  String? get _applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+  String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary => _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
 
   @override
@@ -60,6 +64,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
       applicationBinary: _applicationBinary,
+      buildInfo: await getBuildInfo(),
     );
     if (package == null) {
       throwToolExit('Could not find or build package');
@@ -99,10 +104,6 @@ Future<bool> installApp(
   String? userIdentifier,
   bool uninstall = true
 }) async {
-  if (package == null) {
-    return false;
-  }
-
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Card
+// Flutter code sample for [Card].
 
 import 'package:flutter/material.dart';
 
@@ -17,8 +17,8 @@ class CardExamplesApp extends StatelessWidget {
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('Card Examples')),
-        body: Column(
-          children: const <Widget>[
+        body: const Column(
+          children: <Widget>[
             Spacer(),
             ElevatedCardExample(),
             FilledCardExample(),

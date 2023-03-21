@@ -36,7 +36,6 @@ String? _keyLabel(LogicalKeyboardKey key) {
   return null;
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// A class that serves as a namespace for a bunch of keyboard-key generation
 /// utilities.
 class KeyEventSimulator {
@@ -681,7 +680,7 @@ class KeyEventSimulator {
   static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> buildKeyData) async {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
         (ByteData? data) {
@@ -723,7 +722,7 @@ class KeyEventSimulator {
   // its values.
   //
   // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
-  // overridden with [debugKeyEventSimulatorTransitModeOverride].  In widget tests, it
+  // overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
   // is often set with [KeySimulationModeVariant].
   static KeyDataTransitMode get _transitMode {
     KeyDataTransitMode? result;
@@ -743,8 +742,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -791,8 +789,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -836,8 +833,7 @@ class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on. Some
-  /// platforms (e.g. Windows, iOS) are not yet supported.
+  /// system. Defaults to the operating system that the test is running on.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -886,8 +882,7 @@ class KeyEventSimulator {
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
@@ -902,8 +897,13 @@ Future<bool> simulateKeyDownEvent(
   String? platform,
   PhysicalKeyboardKey? physicalKey,
   String? character,
-}) {
-  return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+}) async {
+  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  final ServicesBinding binding = ServicesBinding.instance;
+  if (!handled && binding is TestWidgetsFlutterBinding) {
+    await binding.testTextInput.handleKeyDownEvent(key);
+  }
+  return handled;
 }
 
 /// Simulates sending a hardware key up event through the system channel.
@@ -916,8 +916,7 @@ Future<bool> simulateKeyDownEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -929,8 +928,13 @@ Future<bool> simulateKeyUpEvent(
   LogicalKeyboardKey key, {
   String? platform,
   PhysicalKeyboardKey? physicalKey,
-}) {
-  return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+}) async {
+  final bool handled = await KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+  final ServicesBinding binding = ServicesBinding.instance;
+  if (!handled && binding is TestWidgetsFlutterBinding) {
+    await binding.testTextInput.handleKeyUpEvent(key);
+  }
+  return handled;
 }
 
 /// Simulates sending a hardware key repeat event through the system channel.
@@ -940,8 +944,7 @@ Future<bool> simulateKeyUpEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on. Some
-/// platforms (e.g. Windows, iOS) are not yet supported.
+/// system. Defaults to the operating system that the test is running on.
 ///
 /// Returns true if the key event was handled by the framework.
 ///

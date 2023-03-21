@@ -68,8 +68,6 @@ import 'image_provider.dart';
 ///
 ///  * [DecoratedBox] and [Container], widgets that can be configured with
 ///    [BoxDecoration] objects.
-///  * [SliverDecoration],a widget that can be configured with [BoxDecoration]
-///    objects that is specialized for rendering with slivers.
 ///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
 ///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {
@@ -95,8 +93,7 @@ class BoxDecoration extends Decoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null),
-       assert(
+  }) : assert(
          backgroundBlendMode == null || color != null || gradient != null,
          "backgroundBlendMode applies to BoxDecoration's background color or "
          'gradient, but no color or gradient was provided.',
@@ -211,7 +208,7 @@ class BoxDecoration extends Decoration {
   final BoxShape shape;
 
   @override
-  EdgeInsetsGeometry? get padding => border?.dimensions;
+  EdgeInsetsGeometry get padding => border?.dimensions ?? EdgeInsets.zero;
 
   @override
   Path getClipPath(Rect rect, TextDirection textDirection) {
@@ -291,9 +288,8 @@ class BoxDecoration extends Decoration {
   ///    and which use [BoxDecoration.lerp] when interpolating two
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration? lerp(BoxDecoration? a, BoxDecoration? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -367,7 +363,6 @@ class BoxDecoration extends Decoration {
 
   @override
   bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
-    assert(shape != null);
     assert((Offset.zero & size).contains(position));
     switch (shape) {
       case BoxShape.rectangle:
@@ -393,16 +388,13 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, VoidCallback? onChanged)
-    : assert(_decoration != null),
-      super(onChanged);
+  _BoxDecorationPainter(this._decoration, super.onChanged);
 
   final BoxDecoration _decoration;
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
   Paint _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
-    assert(rect != null);
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
@@ -433,7 +425,7 @@ class _BoxDecorationPainter extends BoxPainter {
         canvas.drawCircle(center, radius, paint);
         break;
       case BoxShape.rectangle:
-        if (_decoration.borderRadius == null) {
+        if (_decoration.borderRadius == null || _decoration.borderRadius == BorderRadius.zero) {
           canvas.drawRect(rect, paint);
         } else {
           canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
@@ -492,7 +484,6 @@ class _BoxDecorationPainter extends BoxPainter {
   /// Paint the box decoration into the given location on the given canvas.
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

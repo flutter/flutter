@@ -21,6 +21,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/text_input_action.dart';
 import '../common/wait.dart';
 import 'timeline.dart';
 import 'vmservice_driver.dart';
@@ -431,11 +432,6 @@ abstract class FlutterDriver {
     double dyScroll = 0.0,
     Duration? timeout,
   }) async {
-    assert(scrollable != null);
-    assert(item != null);
-    assert(alignment != null);
-    assert(dxScroll != null);
-    assert(dyScroll != null);
     assert(dxScroll != 0.0 || dyScroll != 0.0);
 
     // Kick off an (unawaited) waitFor that will complete when the item we're
@@ -508,8 +504,34 @@ abstract class FlutterDriver {
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
   /// channel will be mocked out.
   Future<void> setTextEntryEmulation({ required bool enabled, Duration? timeout }) async {
-    assert(enabled != null);
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
+  }
+
+  /// Simulate the user posting a text input action.
+  ///
+  /// The available action types can be found in [TextInputAction]. The [sendTextInputAction]
+  /// does not check whether the [TextInputAction] performed is acceptable
+  /// based on the client arguments of the text input.
+  ///
+  /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
+  ///
+  /// Example:
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// test('submit text in a text field', () async {
+  ///   var textField = find.byValueKey('enter-text-field');
+  ///   await driver.tap(textField);  // acquire focus
+  ///   await driver.enterText('Hello!');  // enter text
+  ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
+  ///   await driver.sendTextInputAction(TextInputAction.done);  // submit text
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
+  Future<void> sendTextInputAction(TextInputAction action,
+      {Duration? timeout}) async {
+    await sendCommand(SendTextInputAction(action, timeout: timeout));
   }
 
   /// Sends a string and returns a string.

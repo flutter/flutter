@@ -329,8 +329,7 @@ class Router<T> extends StatefulWidget {
   }) : assert(
          routeInformationProvider == null || routeInformationParser != null,
          'A routeInformationParser must be provided when a routeInformationProvider is specified.',
-       ),
-       assert(routerDelegate != null);
+       );
 
   /// Creates a router with a [RouterConfig].
   ///
@@ -620,7 +619,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     RouteInformationReportingType status,
     VoidCallback fn,
   ) {
-    assert(status != null);
     assert(status.index >= RouteInformationReportingType.neglect.index);
     assert(() {
       if (_currentIntentionToReport != null &&
@@ -721,7 +719,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   void _handleRouteInformationProviderNotification() {
-    assert(widget.routeInformationProvider!.value != null);
     _routeParsePending = true;
     _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
   }
@@ -786,9 +783,7 @@ class _RouterScope extends InheritedWidget {
     required this.routerDelegate,
     required this.routerState,
     required super.child,
-  })  : assert(routeInformationProvider == null || routeInformationParser != null),
-        assert(routerDelegate != null),
-        assert(routerState != null);
+  })  : assert(routeInformationProvider == null || routeInformationParser != null);
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
@@ -818,7 +813,7 @@ class _RouterScope extends InheritedWidget {
 /// See also:
 ///
 ///  * [Listenable] and its subclasses, which provide a similar mechanism for
-///    one-way signalling.
+///    one-way signaling.
 class _CallbackHookProvider<T> {
   final ObserverList<ValueGetter<T>> _callbacks = ObserverList<ValueGetter<T>>();
 
@@ -1050,7 +1045,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   /// Creates a back button dispatcher that acts as the child of another.
   ///
   /// The [parent] must not be null.
-  ChildBackButtonDispatcher(this.parent) : assert(parent != null);
+  ChildBackButtonDispatcher(this.parent);
 
   /// The back button dispatcher that this object will attempt to take priority
   /// over when [takePriority] is called.
@@ -1060,7 +1055,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   final BackButtonDispatcher parent;
 
   /// The parent of this child back button dispatcher decide to let this
-  /// child to handle the invoke the  callback request in
+  /// child to handle the invoke the callback request in
   /// [BackButtonDispatcher.invokeCallback].
   ///
   /// Return a boolean future with true if this child will handle the request;
@@ -1203,7 +1198,7 @@ abstract class RouteInformationParser<T> {
   ///
   /// The input [BuildContext] can be used for looking up [InheritedWidget]s
   /// If one uses [BuildContext.dependOnInheritedWidgetOfExactType], a
-  /// dependency will be created. The [Router] will reparse the
+  /// dependency will be created. The [Router] will re-parse the
   /// [RouteInformation] from its [RouteInformationProvider] if the dependency
   /// notifies its listeners.
   ///

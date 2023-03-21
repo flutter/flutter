@@ -21,7 +21,7 @@ abstract class MergeableMaterialItem {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The argument is the [key], which must not be null.
-  const MergeableMaterialItem(this.key) : assert(key != null);
+  const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.
   ///
@@ -42,8 +42,7 @@ class MaterialSlice extends MergeableMaterialItem {
     required LocalKey key,
     required this.child,
     this.color,
-  }) : assert(key != null),
-       super(key);
+  }) : super(key);
 
   /// The contents of this slice.
   ///
@@ -52,7 +51,7 @@ class MaterialSlice extends MergeableMaterialItem {
 
   /// Defines the color for the slice.
   ///
-  /// By default, the value of `color` is [ThemeData.cardColor].
+  /// By default, the value of [color] is [ThemeData.cardColor].
   final Color? color;
 
   @override
@@ -69,8 +68,7 @@ class MaterialGap extends MergeableMaterialItem {
   const MaterialGap({
     required LocalKey key,
     this.size = 16.0,
-  }) : assert(key != null),
-       super(key);
+  }) : super(key);
 
   /// The main axis extent of this gap. For example, if the [MergeableMaterial]
   /// is vertical, then this is the height of the gap.
@@ -130,7 +128,7 @@ class MergeableMaterial extends StatefulWidget {
 
   /// Defines color used for dividers if [hasDividers] is true.
   ///
-  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 
@@ -657,7 +655,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 }
 
 class _MergeableMaterialListBody extends ListBody {
-  _MergeableMaterialListBody({
+  const _MergeableMaterialListBody({
     required super.children,
     super.mainAxis,
     required this.items,

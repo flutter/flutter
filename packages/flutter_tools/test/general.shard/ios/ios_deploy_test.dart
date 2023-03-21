@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -73,7 +73,7 @@ void main () {
         bundlePath: '/',
         appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
         uninstallFirst: true,
       );
 
@@ -91,6 +91,22 @@ void main () {
 
       setUp(() {
         logger = BufferLogger.test();
+      });
+
+      testWithoutContext('custom lldb prompt', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: "(mylldb)    platform select remote-'ios' --sysroot\r\n(mylldb)     run\r\nsuccess\r\n",
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
       });
 
       testWithoutContext('debugger attached and stopped', () async {
@@ -258,11 +274,26 @@ void main () {
         expect(logger.errorText, contains('No Provisioning Profile was found'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('device locked code', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
             stdout: 'e80000e2',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        expect(logger.errorText, contains('Your device is locked.'));
+      });
+
+      testWithoutContext('device locked message', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout: '[  +95 ms] error: The operation couldn’t be completed. Unable to launch io.flutter.examples.gallery because the device was not, or could not be, unlocked.',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(

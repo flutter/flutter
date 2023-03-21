@@ -120,7 +120,7 @@ class CommandHelp {
 
   late final CommandHelpOption j = _makeOption(
     'j',
-    'Dump frame raster stats for the current frame.',
+    'Dump frame raster stats for the current frame. (Unsupported for web)',
   );
 
   late final CommandHelpOption k = _makeOption(
@@ -220,7 +220,7 @@ class CommandHelpOption {
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
-  bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
+  bool get _hasTextInParenthesis => inParenthesis.isNotEmpty;
 
   int get _rawMessageLength => key.length + description.length;
 

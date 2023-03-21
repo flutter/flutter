@@ -37,9 +37,9 @@ class InkHighlight extends InteractiveInkFeature {
   ///
   /// When the highlight is removed, `onRemoved` will be called.
   InkHighlight({
-    required MaterialInkController controller,
+    required super.controller,
     required super.referenceBox,
-    required Color color,
+    required super.color,
     required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     double? radius,
@@ -48,17 +48,12 @@ class InkHighlight extends InteractiveInkFeature {
     RectCallback? rectCallback,
     super.onRemoved,
     Duration fadeDuration = _kDefaultHighlightFadeDuration,
-  }) : assert(color != null),
-       assert(shape != null),
-       assert(textDirection != null),
-       assert(fadeDuration != null),
-       _shape = shape,
+  }) : _shape = shape,
        _radius = radius,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
-       _rectCallback = rectCallback,
-       super(controller: controller, color: color) {
+       _rectCallback = rectCallback {
     _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
@@ -110,7 +105,6 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
-    assert(_shape != null);
     canvas.save();
     if (_customBorder != null) {
       canvas.clipPath(_customBorder!.getOuterPath(rect, textDirection: _textDirection));

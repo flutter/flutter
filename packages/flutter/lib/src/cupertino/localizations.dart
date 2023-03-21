@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
 enum DatePickerDateTimeOrder {
@@ -79,12 +82,17 @@ abstract class CupertinoLocalizations {
   /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given day index.
   ///
+  /// If weekDay is provided then it will also show weekday name alongside the numerical day.
+  ///
   /// Examples: datePickerDayOfMonth(1) in:
   ///
   ///  - US English: 1
   ///  - Korean: 1일
+  /// Examples: datePickerDayOfMonth(1, 1) in:
+  ///
+  ///  - US English: Mon 1
   // The global version uses date symbols data from the intl package.
-  String datePickerDayOfMonth(int dayIndex);
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]);
 
   /// The medium-width date format that is shown in [CupertinoDatePicker]
   /// spinner. Abbreviates month and days of week.
@@ -289,7 +297,8 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultCupertinoLocalizations();
 
-  static const List<String> _shortWeekdays = <String>[
+  /// Short version of days of week.
+  static const List<String> shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -338,7 +347,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
 
   @override
-  String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+    if (weekDay != null) {
+      return ' ${shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+    }
+
+    return dayIndex.toString();
+  }
 
   @override
   String datePickerHour(int hour) => hour.toString();
@@ -359,7 +374,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMediumDate(DateTime date) {
-    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
+    return '${shortWeekdays[date.weekday - DateTime.monday]} '
       '${_shortMonths[date.month - DateTime.january]} '
       '${date.day.toString().padRight(2)}';
   }

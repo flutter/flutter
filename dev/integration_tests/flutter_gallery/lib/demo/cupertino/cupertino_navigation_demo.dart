@@ -214,7 +214,7 @@ class Tab1RowItem extends StatelessWidget {
           ),
         ));
       },
-      child: Container(
+      child: ColoredBox(
         color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
         child: SafeArea(
           top: false,
