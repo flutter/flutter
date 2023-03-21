@@ -170,9 +170,7 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 36),
     );
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(boxes.length, equals(4));
-    }
+    expect(boxes.length, equals(4));
 
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',

@@ -15,7 +15,7 @@ import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({
-    required super.logger, bool verboseHelp = false
+    bool verboseHelp = false
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -32,7 +32,6 @@ class BuildApkCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addMultidexOption();
@@ -111,7 +110,6 @@ class BuildApkCommand extends BuildSubCommand {
       multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildApk(
       project: FlutterProject.current(),
