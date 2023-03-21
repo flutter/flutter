@@ -15,7 +15,6 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
-    required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
@@ -126,12 +125,9 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildInfo buildInfo = await getBuildInfo();
-    displayNullSafetyMode(buildInfo);
-
     await _bundleBuilder.build(
       platform: platform,
-      buildInfo: buildInfo,
+      buildInfo: await getBuildInfo(),
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
