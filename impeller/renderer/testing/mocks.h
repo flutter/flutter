@@ -61,7 +61,11 @@ class MockBlitPass : public BlitPass {
                     IRect source_region,
                     size_t destination_offset,
                     std::string label));
-
+  MOCK_METHOD4(OnCopyBufferToTextureCommand,
+               bool(BufferView source,
+                    std::shared_ptr<Texture> destination,
+                    IPoint destination_origin,
+                    std::string label));
   MOCK_METHOD2(OnGenerateMipmapCommand,
                bool(std::shared_ptr<Texture> texture, std::string label));
 };
