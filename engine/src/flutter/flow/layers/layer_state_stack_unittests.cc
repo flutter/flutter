@@ -4,8 +4,8 @@
 
 #include "gtest/gtest.h"
 
-#include "flutter/display_list/display_list_color_filter.h"
-#include "flutter/display_list/display_list_image_filter.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/layer_state_stack.h"
 #include "flutter/testing/display_list_testing.h"

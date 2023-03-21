@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
-#include "flutter/display_list/display_list_image.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"

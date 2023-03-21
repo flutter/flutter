@@ -7,8 +7,8 @@
 #include <memory>
 #include <utility>
 
-#include "flutter/display_list/display_list_color_source.h"
-#include "flutter/display_list/display_list_tile_mode.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/scene/scene_node.h"
 #include "flutter/lib/ui/ui_dart_state.h"

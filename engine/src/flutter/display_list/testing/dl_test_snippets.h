@@ -6,8 +6,9 @@
 #define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SNIPPETS_H_
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
@@ -178,11 +179,11 @@ static const std::shared_ptr<DlPathEffect> kTestPathEffect1 =
     DlDashPathEffect::Make(kTestDashes1, 2, 0.0f);
 static const std::shared_ptr<DlPathEffect> kTestPathEffect2 =
     DlDashPathEffect::Make(kTestDashes2, 2, 0.0f);
-static const DlBlurMaskFilter kTestMaskFilter1(kNormal_SkBlurStyle, 3.0);
-static const DlBlurMaskFilter kTestMaskFilter2(kNormal_SkBlurStyle, 5.0);
-static const DlBlurMaskFilter kTestMaskFilter3(kSolid_SkBlurStyle, 3.0);
-static const DlBlurMaskFilter kTestMaskFilter4(kInner_SkBlurStyle, 3.0);
-static const DlBlurMaskFilter kTestMaskFilter5(kOuter_SkBlurStyle, 3.0);
+static const DlBlurMaskFilter kTestMaskFilter1(DlBlurStyle::kNormal, 3.0);
+static const DlBlurMaskFilter kTestMaskFilter2(DlBlurStyle::kNormal, 5.0);
+static const DlBlurMaskFilter kTestMaskFilter3(DlBlurStyle::kSolid, 3.0);
+static const DlBlurMaskFilter kTestMaskFilter4(DlBlurStyle::kInner, 3.0);
+static const DlBlurMaskFilter kTestMaskFilter5(DlBlurStyle::kOuter, 3.0);
 constexpr SkRect kTestBounds = SkRect::MakeLTRB(10, 10, 50, 60);
 static const SkRRect kTestRRect = SkRRect::MakeRectXY(kTestBounds, 5, 5);
 static const SkRRect kTestRRectRect = SkRRect::MakeRect(kTestBounds);

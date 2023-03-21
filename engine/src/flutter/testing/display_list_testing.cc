@@ -233,12 +233,12 @@ std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const SkBlurStyle& style) {
+std::ostream& operator<<(std::ostream& os, const DlBlurStyle& style) {
   switch (style) {
-    case kNormal_SkBlurStyle: return os << "BlurStyle::kNormal";
-    case kSolid_SkBlurStyle:  return os << "BlurStyle::kSolid";
-    case kOuter_SkBlurStyle:  return os << "BlurStyle::kOuter";
-    case kInner_SkBlurStyle:  return os << "BlurStyle::kInner";
+    case DlBlurStyle::kNormal: return os << "BlurStyle::kNormal";
+    case DlBlurStyle::kSolid:  return os << "BlurStyle::kSolid";
+    case DlBlurStyle::kOuter:  return os << "BlurStyle::kOuter";
+    case DlBlurStyle::kInner:  return os << "BlurStyle::kInner";
   }
 }
 

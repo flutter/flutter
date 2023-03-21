@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 #define FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 
-#include "flutter/display_list/display_list_blend_mode.h"
-#include "flutter/display_list/display_list_flags.h"
+#include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_op_flags.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"

@@ -17,65 +17,67 @@ config("display_list_config") {
 
 source_set("display_list") {
   sources = [
+    "benchmarking/dl_complexity.cc",
+    "benchmarking/dl_complexity.h",
+    "benchmarking/dl_complexity_gl.cc",
+    "benchmarking/dl_complexity_gl.h",
+    "benchmarking/dl_complexity_metal.cc",
+    "benchmarking/dl_complexity_metal.h",
     "display_list.cc",
     "display_list.h",
-    "display_list_attributes.h",
-    "display_list_blend_mode.cc",
-    "display_list_blend_mode.h",
-    "display_list_builder.cc",
-    "display_list_builder.h",
-    "display_list_color.h",
-    "display_list_color_filter.cc",
-    "display_list_color_filter.h",
-    "display_list_color_source.cc",
-    "display_list_color_source.h",
-    "display_list_complexity.cc",
-    "display_list_complexity.h",
-    "display_list_complexity_gl.cc",
-    "display_list_complexity_gl.h",
-    "display_list_complexity_metal.cc",
-    "display_list_complexity_metal.h",
-    "display_list_flags.cc",
-    "display_list_flags.h",
-    "display_list_image.cc",
-    "display_list_image.h",
-    "display_list_image_filter.cc",
-    "display_list_image_filter.h",
-    "display_list_image_skia.cc",
-    "display_list_image_skia.h",
-    "display_list_mask_filter.cc",
-    "display_list_mask_filter.h",
-    "display_list_matrix_clip_tracker.cc",
-    "display_list_matrix_clip_tracker.h",
-    "display_list_ops.cc",
-    "display_list_ops.h",
-    "display_list_paint.cc",
-    "display_list_paint.h",
-    "display_list_path_effect.cc",
-    "display_list_path_effect.h",
-    "display_list_rtree.cc",
-    "display_list_rtree.h",
-    "display_list_runtime_effect.cc",
-    "display_list_runtime_effect.h",
-    "display_list_sampling_options.h",
-    "display_list_tile_mode.h",
-    "display_list_utils.cc",
-    "display_list_utils.h",
-    "display_list_vertices.cc",
-    "display_list_vertices.h",
+    "dl_attributes.h",
+    "dl_blend_mode.cc",
+    "dl_blend_mode.h",
+    "dl_builder.cc",
+    "dl_builder.h",
     "dl_canvas.cc",
     "dl_canvas.h",
+    "dl_color.h",
+    "dl_op_flags.cc",
+    "dl_op_flags.h",
     "dl_op_receiver.cc",
     "dl_op_receiver.h",
+    "dl_op_records.cc",
+    "dl_op_records.h",
+    "dl_paint.cc",
+    "dl_paint.h",
+    "dl_sampling_options.h",
+    "dl_tile_mode.h",
+    "dl_vertices.cc",
+    "dl_vertices.h",
+    "effects/dl_color_filter.cc",
+    "effects/dl_color_filter.h",
+    "effects/dl_color_source.cc",
+    "effects/dl_color_source.h",
+    "effects/dl_image_filter.cc",
+    "effects/dl_image_filter.h",
+    "effects/dl_mask_filter.cc",
+    "effects/dl_mask_filter.h",
+    "effects/dl_path_effect.cc",
+    "effects/dl_path_effect.h",
+    "effects/dl_runtime_effect.cc",
+    "effects/dl_runtime_effect.h",
+    "geometry/dl_rtree.cc",
+    "geometry/dl_rtree.h",
+    "image/dl_image.cc",
+    "image/dl_image.h",
+    "image/dl_image_skia.cc",
+    "image/dl_image_skia.h",
     "skia/dl_sk_canvas.cc",
     "skia/dl_sk_canvas.h",
     "skia/dl_sk_conversions.cc",
     "skia/dl_sk_conversions.h",
     "skia/dl_sk_dispatcher.cc",
     "skia/dl_sk_dispatcher.h",
-    "skia/dl_sk_utils.cc",
-    "skia/dl_sk_utils.h",
-    "types.h",
+    "skia/dl_sk_paint_dispatcher.cc",
+    "skia/dl_sk_paint_dispatcher.h",
+    "skia/dl_sk_types.h",
+    "utils/dl_bounds_accumulator.cc",
+    "utils/dl_bounds_accumulator.h",
+    "utils/dl_matrix_clip_tracker.cc",
+    "utils/dl_matrix_clip_tracker.h",
+    "utils/dl_receiver_utils.cc",
+    "utils/dl_receiver_utils.h",
   ]
 
   public_configs = [ ":display_list_config" ]
@@ -100,20 +102,20 @@ if (enable_unittests) {
     testonly = true
 
     sources = [
-      "display_list_color_filter_unittests.cc",
-      "display_list_color_source_unittests.cc",
-      "display_list_color_unittests.cc",
-      "display_list_complexity_unittests.cc",
-      "display_list_image_filter_unittests.cc",
-      "display_list_mask_filter_unittests.cc",
-      "display_list_matrix_clip_tracker_unittests.cc",
-      "display_list_paint_unittests.cc",
-      "display_list_path_effect_unittests.cc",
-      "display_list_rtree_unittests.cc",
+      "benchmarking/dl_complexity_unittests.cc",
       "display_list_unittests.cc",
-      "display_list_vertices_unittests.cc",
+      "dl_color_unittests.cc",
+      "dl_paint_unittests.cc",
+      "dl_vertices_unittests.cc",
+      "effects/dl_color_filter_unittests.cc",
+      "effects/dl_color_source_unittests.cc",
+      "effects/dl_image_filter_unittests.cc",
+      "effects/dl_mask_filter_unittests.cc",
+      "effects/dl_path_effect_unittests.cc",
+      "geometry/dl_rtree_unittests.cc",
       "skia/dl_sk_conversions_unittests.cc",
-      "skia/dl_sk_utils_unittests.cc",
+      "skia/dl_sk_paint_dispatcher_unittests.cc",
+      "utils/dl_matrix_clip_tracker_unittests.cc",
     ]
 
     deps = [
@@ -141,7 +143,7 @@ if (enable_unittests) {
   executable("display_list_rendertests") {
     testonly = true
 
-    sources = [ "dl_rendering_unittests.cc" ]
+    sources = [ "testing/dl_rendering_unittests.cc" ]
 
     deps = [
       ":display_list",
@@ -169,7 +171,7 @@ if (enable_unittests) {
   executable("display_list_builder_benchmarks") {
     testonly = true
 
-    sources = [ "display_list_builder_benchmarks.cc" ]
+    sources = [ "benchmarking/dl_builder_benchmarks.cc" ]
 
     deps = [
       ":display_list",
@@ -189,8 +191,8 @@ source_set("display_list_benchmarks_source") {
   testonly = true
 
   sources = [
-    "display_list_benchmarks.cc",
-    "display_list_benchmarks.h",
+    "benchmarking/dl_benchmarks.cc",
+    "benchmarking/dl_benchmarks.h",
   ]
 
   deps = [

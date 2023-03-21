@@ -6,7 +6,7 @@
 
 #include "flutter/flow/layers/display_list_layer.h"
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/skia_gpu_object_layer_test.h"
