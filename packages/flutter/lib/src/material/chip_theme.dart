@@ -284,7 +284,7 @@ class ChipThemeData with Diagnosticable {
   /// [DisabledChipAttributes.disabledColor], the background color
   /// which indicates that the chip is not enabled.
   ///
-  /// This property applies to [ActionChip], [ChoiceChip]
+  /// This property applies to [ActionChip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
   final Color? disabledColor;
 
