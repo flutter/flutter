@@ -490,7 +490,6 @@ class CheckboxListTile extends StatelessWidget {
           isError: isError,
         );
         break;
-
       case _CheckboxType.adaptive:
         control = Checkbox.adaptive(
           value: value,
