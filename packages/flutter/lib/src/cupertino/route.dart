@@ -38,20 +38,6 @@ const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 /// A relatively rigorous eyeball estimation.
 const Color _kCupertinoPageTransitionBarrierColor = Color(0x18000000);
 
-/// Third-order Bézier curve used by [CupertinoPageTransition].
-///
-/// It has been derived from plots of native iOS animation frames.
-/// Specifically, transition animation positions were measured
-/// every frame and plotted against time. Then, a cubic curve was
-/// strictly fit to the measured data points.
-const ThreePointCubic _kCupertinoPageTransitionAnimationCurve = ThreePointCubic(
-  Offset(0.056, 0.024),
-  Offset(0.108, 0.3085),
-  Offset(0.198, 0.541),
-  Offset(0.3655, 1.0),
-  Offset(0.5465, 0.989),
-);
-
 /// Barrier color for a Cupertino modal barrier.
 ///
 /// Extracted from https://developer.apple.com/design/resources/.
@@ -472,8 +458,8 @@ class CupertinoPageTransition extends StatelessWidget {
              ? primaryRouteAnimation
              : CurvedAnimation(
                  parent: primaryRouteAnimation,
-                 curve: _kCupertinoPageTransitionAnimationCurve,
-                 reverseCurve: _kCupertinoPageTransitionAnimationCurve.flipped,
+                 curve: Curves.fastEaseInToSlowEaseOut,
+                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
                )
            ).drive(_kRightMiddleTween),
        _secondaryPositionAnimation =

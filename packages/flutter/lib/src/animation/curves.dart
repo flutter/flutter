@@ -1381,6 +1381,22 @@ abstract final class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
   static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
 
+  /// A curve that starts slowly, speeds up very quickly, and then ends slowly.
+  ///
+  /// This curve is used by default to animate page transitions used by [CoupertinoPageRoute].
+  /// 
+  /// It has been derived from plots of native iOS animation frames.
+  /// Specifically, transition animation positions were measured
+  /// every frame and plotted against time. Then, a cubic curve was
+  /// strictly fit to the measured data points.
+  static const ThreePointCubic fastEaseInToSlowEaseOut = ThreePointCubic(
+    Offset(0.056, 0.024),
+    Offset(0.108, 0.3085),
+    Offset(0.198, 0.541),
+    Offset(0.3655, 1.0),
+    Offset(0.5465, 0.989),
+  );
+
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
