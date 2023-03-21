@@ -128,8 +128,7 @@ TEST_P(AiksTest, CanRenderTiledTexture) {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
         Entity::TileMode::kMirror, Entity::TileMode::kDecal};
     const char* mip_filter_names[] = {"None", "Nearest", "Linear"};
-    const MipFilter mip_filters[] = {MipFilter::kNone, MipFilter::kNearest,
-                                     MipFilter::kLinear};
+    const MipFilter mip_filters[] = {MipFilter::kNearest, MipFilter::kLinear};
     const char* min_mag_filter_names[] = {"Nearest", "Linear"};
     const MinMagFilter min_mag_filters[] = {MinMagFilter::kNearest,
                                             MinMagFilter::kLinear};

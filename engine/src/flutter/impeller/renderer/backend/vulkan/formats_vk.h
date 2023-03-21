@@ -225,8 +225,6 @@ constexpr vk::SamplerMipmapMode ToVKSamplerMipmapMode(MipFilter filter) {
       return vk::SamplerMipmapMode::eNearest;
     case MipFilter::kLinear:
       return vk::SamplerMipmapMode::eLinear;
-    case MipFilter::kNone:
-      return vk::SamplerMipmapMode::eNearest;
   }
 
   FML_UNREACHABLE();
