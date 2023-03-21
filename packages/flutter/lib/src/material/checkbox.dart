@@ -454,24 +454,34 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   @override
   Widget build(BuildContext context) {
-    if(widget._checkboxType == _CheckboxType.adaptive) {
-      final TargetPlatform platform = Theme.of(context).platform;
-      if(platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
-        return CupertinoCheckbox(
-          value: value,
-          tristate: tristate,
-          onChanged: onChanged,
-          activeColor: widget.activeColor,
-          checkColor: widget.checkColor,
-          focusColor: widget.focusColor,
-          focusNode: widget.focusNode,
-          autofocus: widget.autofocus,
-          side: widget.side,
-          shape: widget.shape,
-        );
-      }
-    }
+    switch (widget._checkboxType) {
+      case _CheckboxType.material:
+        break;
 
+      case _CheckboxType.adaptive:
+        final TargetPlatform platform = Theme.of(context).platform;
+        switch (platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoCheckbox(
+              value: value,
+              tristate: tristate,
+              onChanged: onChanged,
+              activeColor: widget.activeColor,
+              checkColor: widget.checkColor,
+              focusColor: widget.focusColor,
+              focusNode: widget.focusNode,
+              autofocus: widget.autofocus,
+              side: widget.side,
+              shape: widget.shape,
+            );
+        }
+    }
 
     assert(debugCheckHasMaterial(context));
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);

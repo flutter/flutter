@@ -468,44 +468,49 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget materialControl = Checkbox(
-      value: value,
-      onChanged: enabled ?? true ? onChanged : null,
-      mouseCursor: mouseCursor,
-      activeColor: activeColor,
-      fillColor: fillColor,
-      checkColor: checkColor,
-      hoverColor: hoverColor,
-      overlayColor: overlayColor,
-      splashRadius: splashRadius,
-      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-      autofocus: autofocus,
-      tristate: tristate,
-      shape: checkboxShape,
-      side: side,
-      isError: isError,
-    );
+    final Widget control;
 
-    final Widget adaptiveControl = Checkbox.adaptive(
-      value: value,
-      onChanged: enabled ?? true ? onChanged : null,
-      mouseCursor: mouseCursor,
-      activeColor: activeColor,
-      fillColor: fillColor,
-      checkColor: checkColor,
-      hoverColor: hoverColor,
-      overlayColor: overlayColor,
-      splashRadius: splashRadius,
-      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-      autofocus: autofocus,
-      tristate: tristate,
-      shape: checkboxShape,
-      side: side,
-      isError: isError,
-    );
+    switch (_checkboxType) {
+      case _CheckboxType.material:
+        control = Checkbox(
+          value: value,
+          onChanged: enabled ?? true ? onChanged : null,
+          mouseCursor: mouseCursor,
+          activeColor: activeColor,
+          fillColor: fillColor,
+          checkColor: checkColor,
+          hoverColor: hoverColor,
+          overlayColor: overlayColor,
+          splashRadius: splashRadius,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+          autofocus: autofocus,
+          tristate: tristate,
+          shape: checkboxShape,
+          side: side,
+          isError: isError,
+        );
+        break;
 
-    final Widget control =
-      _checkboxType == _CheckboxType.material ? materialControl : adaptiveControl;
+      case _CheckboxType.adaptive:
+        control = Checkbox.adaptive(
+          value: value,
+          onChanged: enabled ?? true ? onChanged : null,
+          mouseCursor: mouseCursor,
+          activeColor: activeColor,
+          fillColor: fillColor,
+          checkColor: checkColor,
+          hoverColor: hoverColor,
+          overlayColor: overlayColor,
+          splashRadius: splashRadius,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+          autofocus: autofocus,
+          tristate: tristate,
+          shape: checkboxShape,
+          side: side,
+          isError: isError,
+        );
+        break;
+    }
 
     Widget? leading, trailing;
     switch (controlAffinity) {
