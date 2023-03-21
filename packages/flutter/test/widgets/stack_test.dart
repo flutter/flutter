@@ -264,16 +264,28 @@ void main() {
       );
     }
 
+    void expectFindsChild(int n) {
+      for (int i = 0; i < 3; i++) {
+        expect(find.text('$i', skipOffstage: false), findsOneWidget);
+
+        if (i == n) {
+          expect(find.text('$i'), findsOneWidget);
+        } else {
+          expect(find.text('$i'), findsNothing);
+        }
+      }
+    }
+
     await tester.pumpWidget(buildFrame(0));
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
+    expectFindsChild(0);
     expect(itemsPainted, equals(<int>[0]));
 
     await tester.pumpWidget(buildFrame(1));
+      expectFindsChild(1);
     expect(itemsPainted, equals(<int>[1]));
 
     await tester.pumpWidget(buildFrame(2));
+      expectFindsChild(2);
     expect(itemsPainted, equals(<int>[2]));
   });
 
