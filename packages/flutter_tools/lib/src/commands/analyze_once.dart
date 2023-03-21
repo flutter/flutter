@@ -25,9 +25,9 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.suppressAnalytics,
     this.workingDirectory,
   }) : super(
-          repoRoots: repoRoots,
-          repoPackages: repoPackages,
-        );
+        repoRoots: repoRoots,
+        repoPackages: repoPackages,
+      );
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;

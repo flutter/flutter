@@ -30,8 +30,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   String? analysisTarget;
   bool firstAnalysis = true;
   Set<String> analyzedPaths = <String>{};
-  Map<String, List<AnalysisError>> analysisErrors =
-      <String, List<AnalysisError>>{};
+  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   final Stopwatch analysisTimer = Stopwatch();
   int lastErrorCount = 0;
   Status? analysisStatus;
@@ -67,8 +66,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
     );
-    server.onAnalyzing.listen(
-        (bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
+    server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
     await server.start();
