@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/layers/image_filter_layer.h"
-#include "flutter/display_list/display_list_comparable.h"
+
+#include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache_util.h"
 

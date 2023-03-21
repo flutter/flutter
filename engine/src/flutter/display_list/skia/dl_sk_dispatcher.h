@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_CANVAS_DISPATCHER_H_
-#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_CANVAS_DISPATCHER_H_
+#ifndef FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_
+#define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_receiver.h"
-#include "flutter/display_list/skia/dl_sk_utils.h"
+#include "flutter/display_list/skia/dl_sk_paint_dispatcher.h"
+#include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/macros.h"
 
 namespace flutter {
@@ -19,10 +20,10 @@ namespace flutter {
 /// Receives all methods on Dispatcher and sends them to an SkCanvas
 ///
 class DlSkCanvasDispatcher : public virtual DlOpReceiver,
-                             public SkPaintDispatchHelper {
+                             public DlSkPaintDispatchHelper {
  public:
   explicit DlSkCanvasDispatcher(SkCanvas* canvas, SkScalar opacity = SK_Scalar1)
-      : SkPaintDispatchHelper(opacity),
+      : DlSkPaintDispatchHelper(opacity),
         canvas_(canvas),
         original_transform_(canvas->getLocalToDevice()) {}
 
@@ -120,4 +121,4 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_CANVAS_DISPATCHER_H_
+#endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_

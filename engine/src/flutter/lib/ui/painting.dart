@@ -890,7 +890,7 @@ enum FilterQuality {
 ///
 ///  * [Paint.strokeCap] for how this value is used.
 ///  * [StrokeJoin] for the different kinds of line segment joins.
-// These enum values must be kept in sync with SkPaint::Cap.
+// These enum values must be kept in sync with DlStrokeCap.
 enum StrokeCap {
   /// Begin and end contours with a flat edge and no extension.
   ///
@@ -936,7 +936,7 @@ enum StrokeCap {
 /// * [Paint.strokeJoin] and [Paint.strokeMiterLimit] for how this value is
 ///   used.
 /// * [StrokeCap] for the different kinds of line endings.
-// These enum values must be kept in sync with SkPaint::Join.
+// These enum values must be kept in sync with DlStrokeJoin.
 enum StrokeJoin {
   /// Joins between line segments form sharp corners.
   ///
@@ -987,9 +987,9 @@ enum StrokeJoin {
 /// Strategies for painting shapes and paths on a canvas.
 ///
 /// See [Paint.style].
-// These enum values must be kept in sync with SkPaint::Style.
+// These enum values must be kept in sync with DlDrawStyle.
 enum PaintingStyle {
-  // This list comes from Skia's SkPaint.h and the values (order) should be kept
+  // This list comes from dl_paint.h and the values (order) should be kept
   // in sync.
 
   /// Apply the [Paint] to the inside of the shape. For example, when
@@ -3265,9 +3265,9 @@ class _PathMeasure extends NativeFieldWrapperClass1 {
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
-// These enum values must be kept in sync with SkBlurStyle.
+// These enum values must be kept in sync with DlBlurStyle.
 enum BlurStyle {
-  // These mirror SkBlurStyle and must be kept in sync.
+  // These mirror DlBlurStyle and must be kept in sync.
 
   /// Fuzzy inside and outside. This is useful for painting shadows that are
   /// offset from the shape that ostensibly is casting the shadow.
@@ -3320,10 +3320,10 @@ class MaskFilter {
   final BlurStyle _style;
   final double _sigma;
 
-  // The type of MaskFilter class to create for Skia.
+  // The type of MaskFilter class to create for flutter::DisplayList.
   // These constants must be kept in sync with MaskFilterType in paint.cc.
   static const int _TypeNone = 0; // null
-  static const int _TypeBlur = 1; // SkBlurMaskFilter
+  static const int _TypeBlur = 1; // DlBlurMaskFilter
 
   @override
   bool operator ==(Object other) {
@@ -3446,13 +3446,13 @@ class ColorFilter implements ImageFilter {
   final List<double>? _matrix;
   final int _type;
 
-  // The type of SkColorFilter class to create for Skia.
+  // The type of DlColorFilter class to create.
   static const int _kTypeMode = 1; // MakeModeFilter
   static const int _kTypeMatrix = 2; // MakeMatrixFilterRowMajor255
   static const int _kTypeLinearToSrgbGamma = 3; // MakeLinearToSRGBGamma
   static const int _kTypeSrgbToLinearGamma = 4; // MakeSRGBToLinearGamma
 
-  // SkImageFilters::ColorFilter
+  // DlColorImageFilter
   @override
   _ImageFilter _toNativeImageFilter() => _ImageFilter.fromColorFilter(this);
 
@@ -3526,7 +3526,7 @@ class ColorFilter implements ImageFilter {
   }
 }
 
-/// A [ColorFilter] that is backed by a native SkColorFilter.
+/// A [ColorFilter] that is backed by a native DlColorFilter.
 ///
 /// This is a private class, rather than being the implementation of the public
 /// ColorFilter, because we want ColorFilter to be const constructible and
@@ -3628,8 +3628,8 @@ abstract class ImageFilter {
     return _ComposeImageFilter(innerFilter: inner, outerFilter: outer);
   }
 
-  // Converts this to a native SkImageFilter. See the comments of this method in
-  // subclasses for the exact type of SkImageFilter this method converts to.
+  // Converts this to a native DlImageFilter. See the comments of this method in
+  // subclasses for the exact type of DlImageFilter this method converts to.
   _ImageFilter _toNativeImageFilter();
 
   // The description text to show when the filter is part of a composite
@@ -3776,7 +3776,7 @@ class _ComposeImageFilter implements ImageFilter {
   final ImageFilter innerFilter;
   final ImageFilter outerFilter;
 
-  // SkImageFilters::Compose
+  // DlComposeImageFilter
   late final _ImageFilter nativeFilter = _ImageFilter.composed(this);
   @override
   _ImageFilter _toNativeImageFilter() => nativeFilter;
@@ -3801,7 +3801,7 @@ class _ComposeImageFilter implements ImageFilter {
   int get hashCode => Object.hash(innerFilter, outerFilter);
 }
 
-/// An [ImageFilter] that is backed by a native SkImageFilter.
+/// An [ImageFilter] that is backed by a native DlImageFilter.
 ///
 /// This is a private class, rather than being the implementation of the public
 /// ImageFilter, because we want ImageFilter to be efficiently comparable, so that
@@ -3956,7 +3956,7 @@ class Shader extends NativeFieldWrapperClass1 {
 ///  * [dart:ui.ImageFilter.blur], an ImageFilter that may sometimes need to
 ///    read samples from outside an image to combine with the pixels near the
 ///    edge of the image.
-// These enum values must be kept in sync with SkTileMode.
+// These enum values must be kept in sync with DlTileMode.
 enum TileMode {
   /// Samples beyond the edge are clamped to the nearest color in the defined inner area.
   ///
@@ -4517,7 +4517,7 @@ class FragmentShader extends Shader {
 /// Defines how a list of points is interpreted when drawing a set of triangles.
 ///
 /// Used by [Canvas.drawVertices].
-// These enum values must be kept in sync with SkVertices::VertexMode.
+// These enum values must be kept in sync with DlVertexMode.
 enum VertexMode {
   /// Draw each sequence of three points as the vertices of a triangle.
   triangles,
@@ -4855,7 +4855,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle, Pointer<Void>, Double, Double, Double, Double)>(symbol: 'Canvas::Create')
   external void _constructor(PictureRecorder recorder, double left, double top, double right, double bottom);
 
-  // The underlying Skia SkCanvas is owned by the PictureRecorder used to create this Canvas.
+  // The underlying DlCanvas is owned by the DisplayListBuilder used to create this Canvas.
   // The Canvas holds a reference to the PictureRecorder to prevent the recorder from being
   // garbage collected until PictureRecorder.endRecording is called.
   PictureRecorder? _recorder;

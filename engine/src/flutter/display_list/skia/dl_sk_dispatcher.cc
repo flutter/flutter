@@ -4,9 +4,11 @@
 
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 
-#include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/trace_event.h"
+
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace flutter {

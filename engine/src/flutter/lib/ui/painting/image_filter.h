@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 
-#include "flutter/display_list/display_list_image_filter.h"
-#include "flutter/display_list/display_list_sampling_options.h"
+#include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "third_party/tonic/typed_data/typed_list.h"

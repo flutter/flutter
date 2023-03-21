@@ -5,10 +5,18 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_CANVAS_H_
 #define FLUTTER_DISPLAY_LIST_DL_CANVAS_H_
 
-#include "flutter/display_list/display_list_blend_mode.h"
-#include "flutter/display_list/display_list_image.h"
-#include "flutter/display_list/display_list_paint.h"
-#include "flutter/display_list/display_list_vertices.h"
+#include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_vertices.h"
+#include "flutter/display_list/image/dl_image.h"
+
+#include "third_party/skia/include/core/SkM44.h"
+#include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkRRect.h"
+#include "third_party/skia/include/core/SkRSXform.h"
+#include "third_party/skia/include/core/SkRect.h"
+#include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {
 

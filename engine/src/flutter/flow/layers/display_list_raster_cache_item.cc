@@ -7,8 +7,8 @@
 #include <optional>
 #include <utility>
 
+#include "flutter/display_list/benchmarking/dl_complexity.h"
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_complexity.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/raster_cache_item.h"

@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/painting/paint.h"
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/image_filter.h"
@@ -184,8 +184,8 @@ const DlPaint* Paint::paint(DlPaint& paint,
         paint.setMaskFilter(nullptr);
         break;
       case kBlur:
-        SkBlurStyle blur_style =
-            static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
+        DlBlurStyle blur_style =
+            static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
         double sigma = float_data[kMaskFilterSigmaIndex];
         paint.setMaskFilter(DlBlurMaskFilter::Make(blur_style, sigma));
         break;
@@ -275,8 +275,8 @@ void Paint::toDlPaint(DlPaint& paint) const {
     case kNull:
       break;
     case kBlur:
-      SkBlurStyle blur_style =
-          static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
+      DlBlurStyle blur_style =
+          static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
       double sigma = float_data[kMaskFilterSigmaIndex];
       // Make could return a nullptr here if the values are NOP or
       // do not make sense. We could interpret that as if there was

@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CONVERSIONS_H_
 
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/skia/dl_sk_types.h"
 
 namespace flutter {
 
@@ -27,6 +28,10 @@ inline SkPaint::Join ToSk(DlStrokeJoin join) {
 
 inline SkTileMode ToSk(DlTileMode dl_mode) {
   return static_cast<SkTileMode>(dl_mode);
+}
+
+inline SkBlurStyle ToSk(const DlBlurStyle blur_style) {
+  return static_cast<SkBlurStyle>(blur_style);
 }
 
 inline SkFilterMode ToSk(const DlFilterMode filter_mode) {

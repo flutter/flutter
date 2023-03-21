@@ -5,7 +5,7 @@
 #include <memory>
 #include <sstream>
 
-#include "display_list/display_list_runtime_effect.h"
+#include "display_list/effects/dl_runtime_effect.h"
 #include "flutter/lib/ui/painting/fragment_program.h"
 
 #include "flutter/assets/asset_manager.h"

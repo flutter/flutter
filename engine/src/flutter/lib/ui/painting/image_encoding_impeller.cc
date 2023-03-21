@@ -9,6 +9,7 @@
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/device_buffer.h"
 #include "impeller/renderer/formats.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace flutter {
 namespace {

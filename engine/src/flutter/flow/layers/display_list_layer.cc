@@ -6,8 +6,7 @@
 
 #include <utility>
 
-#include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_flags.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/offscreen_surface.h"

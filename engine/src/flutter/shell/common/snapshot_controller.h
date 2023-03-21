@@ -6,7 +6,7 @@
 #define FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_H_
 
 #include "flutter/common/settings.h"
-#include "flutter/display_list/display_list_image.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/lib/ui/snapshot_delegate.h"

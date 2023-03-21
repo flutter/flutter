@@ -7,9 +7,6 @@
 
 #include <memory>
 #include "flutter/flow/layers/cacheable_layer.h"
-#include "flutter/flow/layers/layer.h"
-#include "include/core/SkRefCnt.h"
-#include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace flutter {
 

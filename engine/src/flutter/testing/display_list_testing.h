@@ -8,7 +8,6 @@
 #include <ostream>
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_path_effect.h"
 #include "flutter/display_list/dl_op_receiver.h"
 
 namespace flutter {
@@ -43,7 +42,7 @@ extern std::ostream& operator<<(std::ostream& os,
 extern std::ostream& operator<<(std::ostream& os, const DlStrokeCap& cap);
 extern std::ostream& operator<<(std::ostream& os, const DlStrokeJoin& join);
 extern std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style);
-extern std::ostream& operator<<(std::ostream& os, const SkBlurStyle& style);
+extern std::ostream& operator<<(std::ostream& os, const DlBlurStyle& style);
 extern std::ostream& operator<<(std::ostream& os, const DlFilterMode& mode);
 extern std::ostream& operator<<(std::ostream& os, const DlColor& color);
 extern std::ostream& operator<<(std::ostream& os, DlImageSampling sampling);

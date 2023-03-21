@@ -7,16 +7,15 @@
 #include <memory>
 #include <vector>
 
-#include "display_list/display_list_blend_mode.h"
-#include "display_list/display_list_color.h"
-#include "display_list/display_list_color_filter.h"
-#include "display_list/display_list_color_source.h"
-#include "display_list/display_list_image_filter.h"
-#include "display_list/display_list_paint.h"
-#include "display_list/display_list_tile_mode.h"
-#include "flutter/display_list/display_list_builder.h"
-#include "flutter/display_list/display_list_mask_filter.h"
-#include "flutter/display_list/types.h"
+#include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/display_list_playground.h"
@@ -402,7 +401,8 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
 
   // Mask blurred image.
   {
-    auto filter = flutter::DlBlurMaskFilter(kNormal_SkBlurStyle, 10.0f);
+    auto filter =
+        flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
     paint.setMaskFilter(&filter);
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
                       flutter::DlImageSampling::kNearestNeighbor, &paint);
@@ -411,14 +411,16 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   // Mask blurred filled path.
   {
     paint.setColor(SK_ColorYELLOW);
-    auto filter = flutter::DlBlurMaskFilter(kOuter_SkBlurStyle, 10.0f);
+    auto filter =
+        flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kOuter, 10.0f);
     paint.setMaskFilter(&filter);
     builder.DrawArc(SkRect::MakeXYWH(410, 110, 100, 100), 45, 270, true, paint);
   }
 
   // Mask blurred text.
   {
-    auto filter = flutter::DlBlurMaskFilter(kSolid_SkBlurStyle, 10.0f);
+    auto filter =
+        flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kSolid, 10.0f);
     paint.setMaskFilter(&filter);
     builder.DrawTextBlob(
         SkTextBlob::MakeFromString("Testing", CreateTestFont()), 220, 170,
@@ -431,7 +433,7 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
 TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
-  auto filter = flutter::DlBlurMaskFilter(kNormal_SkBlurStyle, 10.0f);
+  auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
   flutter::DlPaint paint;
   paint.setMaskFilter(&filter);
   builder.SaveLayer(nullptr, &paint);
@@ -1298,7 +1300,7 @@ TEST_P(DisplayListTest, CanDrawCorrectlyWithColorFilterAndImageFilter) {
 
 TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
   auto blur_filter = std::make_shared<flutter::DlBlurMaskFilter>(
-      SkBlurStyle::kNormal_SkBlurStyle, 10);
+      flutter::DlBlurStyle::kNormal, 10);
 
   flutter::DisplayListBuilder builder;
 

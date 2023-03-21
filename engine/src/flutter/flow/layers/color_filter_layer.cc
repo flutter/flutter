@@ -4,8 +4,8 @@
 
 #include "flutter/flow/layers/color_filter_layer.h"
 
-#include "flutter/display_list/display_list_comparable.h"
-#include "flutter/display_list/display_list_paint.h"
+#include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/raster_cache_util.h"
 

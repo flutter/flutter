@@ -10,7 +10,7 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_image.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/macros.h"
