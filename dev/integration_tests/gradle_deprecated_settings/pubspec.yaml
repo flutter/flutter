@@ -2,7 +2,7 @@ name: gradle_deprecated_settings
 description: Integration test for the current settings.gradle.
 
 environment:
-  sdk: '>=2.19.0-0 <4.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   flutter:
