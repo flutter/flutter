@@ -397,7 +397,7 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.verboseSystemLogs, true);
     expect(options.nativeNullAssertions, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.traceSystrace, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);

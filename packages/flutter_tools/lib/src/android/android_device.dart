@@ -660,8 +660,10 @@ class AndroidDevice extends Device {
       ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache)
         ...<String>['--ez', 'purge-persistent-cache', 'true'],
-      if (debuggingOptions.enableImpeller)
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         ...<String>['--ez', 'enable-impeller', 'true'],
+      if (debuggingOptions.enableImpeller == ImpellerStatus.disabled)
+        ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

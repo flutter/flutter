@@ -278,7 +278,7 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.enabled,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',
