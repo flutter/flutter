@@ -50,3 +50,30 @@ class PowerSource {
     return .unknown
   }
 }
+
+protocol PowerSourceStateChangeDelegate: AnyObject {
+  func onPowerSourceStateChanged()
+}
+
+/// A listener for system power source state change events. Notifies the delegate on each event.
+class PowerSourceStateChangeHandler {
+  private var runLoopSource: CFRunLoopSource?
+  weak var delegate: PowerSourceStateChangeDelegate?
+
+  init() {
+    let context = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+    self.runLoopSource = IOPSNotificationCreateRunLoopSource(
+      { (context: UnsafeMutableRawPointer?) in
+        let weakSelf = Unmanaged<PowerSourceStateChangeHandler>.fromOpaque(
+          UnsafeRawPointer(context!)
+        ).takeUnretainedValue()
+        weakSelf.delegate?.onPowerSourceStateChanged()
+      }, context
+    ).takeRetainedValue()
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, .defaultMode)
+  }
+
+  deinit {
+    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), self.runLoopSource, .defaultMode)
+  }
+}

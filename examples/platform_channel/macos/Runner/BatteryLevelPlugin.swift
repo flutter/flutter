@@ -5,10 +5,12 @@
 import FlutterMacOS
 import Foundation
 
-class BatteryLevelPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
+class BatteryLevelPlugin: NSObject, FlutterPlugin, FlutterStreamHandler,
+  PowerSourceStateChangeDelegate
+{
   private let powerSource = PowerSource()
+  private let stateChangeSource = PowerSourceStateChangeHandler()
   private var eventSink: FlutterEventSink?
-  private var runLoopSource: CFRunLoopSource?
 
   static func register(with registrar: FlutterPluginRegistrar) {
     let batteryChannel = FlutterMethodChannel(
@@ -44,26 +46,19 @@ class BatteryLevelPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     -> FlutterError?
   {
     self.eventSink = events
-
-    // Emit an initial power status event.
     self.emitPowerStatusEvent()
-
-    let context = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-    self.runLoopSource = IOPSNotificationCreateRunLoopSource(
-      { (context: UnsafeMutableRawPointer?) in
-        let weakSelf = Unmanaged<BatteryLevelPlugin>.fromOpaque(UnsafeRawPointer(context!))
-          .takeUnretainedValue()
-        weakSelf.emitPowerStatusEvent()
-      }, context
-    ).takeRetainedValue()
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, .defaultMode)
+    self.stateChangeSource.delegate = self
     return nil
   }
 
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
+    self.stateChangeSource.delegate = nil
     self.eventSink = nil
     return nil
+  }
+
+  func onPowerSourceStateChanged() {
+    self.emitPowerStatusEvent()
   }
 
   func emitPowerStatusEvent() {
