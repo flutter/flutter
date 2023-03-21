@@ -1384,7 +1384,7 @@ abstract final class Curves {
   /// A curve that starts slowly, speeds up very quickly, and then ends slowly.
   ///
   /// This curve is used by default to animate page transitions used by [CoupertinoPageRoute].
-  /// 
+  ///
   /// It has been derived from plots of native iOS animation frames.
   /// Specifically, transition animation positions were measured
   /// every frame and plotted against time. Then, a cubic curve was
