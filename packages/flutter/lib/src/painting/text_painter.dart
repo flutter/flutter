@@ -1236,10 +1236,11 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
+  /// The [selection] must be a valid range (with [TextSelection.isValid] true.)
+  ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
   /// the shape of the [TextBox]s. These properties default to
-  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
   ///
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
@@ -1257,6 +1258,7 @@ class TextPainter {
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(_debugAssertTextLayoutIsValid);
+    assert(selection.isValid);
     return _paragraph!.getBoxesForRange(
       selection.start,
       selection.end,
