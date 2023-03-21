@@ -91,7 +91,7 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.SingletonFlutterWindow get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError(); // ignore: deprecated_member_use
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
