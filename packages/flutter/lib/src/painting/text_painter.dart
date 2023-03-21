@@ -1046,8 +1046,9 @@ class TextPainter {
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character upstream from the given string offset.
   _CaretMetrics? _getMetricsFromUpstream(int offset) {
+    assert(offset >= 0);
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0 || offset > plainTextLength || offset < 0) {
+    if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
     }
     final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
@@ -1092,8 +1093,9 @@ class TextPainter {
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character downstream from the given string offset.
   _CaretMetrics? _getMetricsFromDownstream(int offset) {
+    assert(offset >= 0);
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0 || offset < 0) {
+    if (plainTextLength == 0) {
       return null;
     }
     // We cap the offset at the final index of plain text.
@@ -1161,7 +1163,13 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
+    final _CaretMetrics caretMetrics;
+    if (position.offset < 0) {
+      // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
+      caretMetrics = const _EmptyLineCaretMetrics(lineVerticalOffset: 0);
+    } else {
+      caretMetrics = _computeCaretMetrics(position);
+    }
 
     if (caretMetrics is _EmptyLineCaretMetrics) {
       final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
@@ -1196,6 +1204,10 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    if (position.offset < 0) {
+      // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
+      return null;
+    }
     final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
     return caretMetrics is _LineCaretMetrics ? caretMetrics.fullHeight : null;
   }
