@@ -171,7 +171,6 @@ List<FlutterCommand> generateCommands({
     osUtils: globals.os,
     verboseHelp: verboseHelp,
     androidSdk: globals.androidSdk,
-    logger: globals.logger,
   ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
@@ -199,7 +198,7 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
+  FormatCommand(),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

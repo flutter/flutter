@@ -1086,23 +1086,77 @@ void main() {
     });
   });
 
-group('Semantics', () {
-  testWidgets('calendar mode', (WidgetTester tester) async {
-    final SemanticsHandle semantics = tester.ensureSemantics();
-    currentDate = DateTime(2016, DateTime.january, 30);
-    addTearDown(semantics.dispose);
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
-      expect(
-        tester.getSemantics(find.text('30')),
-        matchesSemantics(
-          label: '30, Saturday, January 30, 2016, Today',
-          hasTapAction: true,
-          isFocusable: true,
-        ),
-      );
-    });
+  group('Semantics', () {
+    testWidgets('calendar mode', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      currentDate = DateTime(2016, DateTime.january, 30);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        expect(
+          tester.getSemantics(find.text('30')),
+          matchesSemantics(
+            label: '30, Saturday, January 30, 2016, Today',
+            hasTapAction: true,
+            isFocusable: true,
+          ),
+        );
+      });
+      semantics.dispose();
     });
   });
+
+  for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
+    testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
+      late BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      if (keyboardType == null) {
+        // If no keyboardType, expect the default.
+        showDateRangePicker(
+          context: buttonContext,
+          initialDateRange: initialDateRange,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          initialEntryMode: DatePickerEntryMode.input,
+        );
+      } else {
+        // If there is a keyboardType, expect it to be passed through.
+        showDateRangePicker(
+          context: buttonContext,
+          initialDateRange: initialDateRange,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          initialEntryMode: DatePickerEntryMode.input,
+          keyboardType: keyboardType,
+        );
+      }
+      await tester.pumpAndSettle();
+
+      final DateRangePickerDialog picker = tester.widget(find.byType(DateRangePickerDialog));
+      expect(picker.keyboardType, keyboardType ?? TextInputType.datetime);
+    });
+  }
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {

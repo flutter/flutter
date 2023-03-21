@@ -115,10 +115,10 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; dart __deprecated_pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; dart __deprecated_pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; dart __deprecated_pub get)
-        - (cd dev/bots; dart __deprecated_pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -131,8 +131,8 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; dart __deprecated_pub get)
-        - (cd dev/bots; dart __deprecated_pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only

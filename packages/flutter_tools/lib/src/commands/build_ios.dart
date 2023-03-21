@@ -26,7 +26,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
+  BuildIOSCommand({ required super.verboseHelp }) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -49,10 +49,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArgDeprecated('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArgDeprecated('config-only');
+  bool get configOnly => boolArg('config-only');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -91,7 +91,7 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
+  BuildIOSArchiveCommand({ required super.verboseHelp }) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -131,7 +131,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final bool configOnly = false;
 
-  String? get exportOptionsPlist => stringArgDeprecated('export-options-plist');
+  String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
@@ -412,8 +412,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = await cachedBuildInfo;
-    displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
     final List<ValidationResult?> validationResults = <ValidationResult?>[];
@@ -455,7 +453,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArgDeprecated('export-method')!;
+    final String exportMethod = stringArg('export-method')!;
     final bool isAppStoreUpload = exportMethod  == 'app-store';
     File? generatedExportPlist;
     try {
@@ -540,7 +538,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>${stringArgDeprecated('export-method')}</string>
+        <string>${stringArg('export-method')}</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -557,7 +555,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
-    required super.logger,
     required bool verboseHelp
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
@@ -574,7 +571,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     argParser.addFlag('codesign',
       defaultsTo: true,
@@ -596,7 +592,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArgDeprecated('codesign');
+  bool get shouldCodesign => boolArg('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
@@ -716,8 +712,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
       globals.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-        'flutter pub global activate devtools; flutter pub global run devtools '
-        '--appSizeBase=$relativeAppSizePath'
+        'dart devtools --appSizeBase=$relativeAppSizePath'
       );
     }
 

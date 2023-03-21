@@ -40,7 +40,6 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
-    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
@@ -53,11 +52,6 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
-
-  /// The null safety mode the application should be run in.
-  ///
-  /// If not provided, defaults to [NullSafetyMode.autodetect].
-  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
@@ -394,16 +388,16 @@ class BuildMode {
     throw ArgumentError('$value is not a supported build mode');
   }
 
-  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
+  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
   static const BuildMode debug = BuildMode._('debug');
 
-  /// Built in AOT mode with some optimizations and an observatory.
+  /// Built in AOT mode with some optimizations and a VM service.
   static const BuildMode profile = BuildMode._('profile');
 
-  /// Built in AOT mode with all optimizations and no observatory.
+  /// Built in AOT mode with all optimizations and no VM service.
   static const BuildMode release = BuildMode._('release');
 
-  /// Built in JIT mode with all optimizations and no observatory.
+  /// Built in JIT mode with all optimizations and no VM service.
   static const BuildMode jitRelease = BuildMode._('jit_release');
 
   static const List<BuildMode> values = <BuildMode>[

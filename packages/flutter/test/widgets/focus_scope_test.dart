@@ -1751,6 +1751,7 @@ void main() {
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
@@ -2043,6 +2044,7 @@ void main() {
       await tester.pumpWidget(ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/92693

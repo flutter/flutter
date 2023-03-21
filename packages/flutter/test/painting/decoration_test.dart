@@ -143,6 +143,12 @@ void main() {
     expect(c.color, equals(b.color));
   });
 
+  test('Decoration.lerp identical a,b', () {
+    expect(Decoration.lerp(null, null, 0), null);
+    const Decoration decoration = BoxDecoration();
+    expect(identical(Decoration.lerp(decoration, decoration, 0.5), decoration), true);
+  });
+
   test('Decoration equality', () {
     const BoxDecoration a = BoxDecoration(
       color: Color(0xFFFFFFFF),
