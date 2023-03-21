@@ -26,8 +26,8 @@ void main() {
     expect(borderRadius.bottomRight, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(89.0, 87.0);
-    const Radius radius2 = Radius.elliptical(103.0, 107.0);
+    const Radius radius1 = Radius.elliptical(8.9, 8.7);
+    const Radius radius2 = Radius.elliptical(9.3, 9.7);
 
     borderRadius = const BorderRadius.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -187,8 +187,8 @@ void main() {
     expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
     expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(89.0, 87.0);
-    const Radius radius2 = Radius.elliptical(103.0, 107.0);
+    const Radius radius1 = Radius.elliptical(8.9, 8.7);
+    const Radius radius2 = Radius.elliptical(9.3, 9.7);
 
     borderRadius = const BorderRadiusDirectional.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);

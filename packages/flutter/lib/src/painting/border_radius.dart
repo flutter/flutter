@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -398,12 +400,13 @@ class BorderRadius extends BorderRadiusGeometry {
     // Because the current radii could be negative, we must clamp them before
     // converting them to an RRect to be rendered, since negative radii on
     // RRects don't make sense.
+    final Radius maxRadius = Radius.circular(math.max(rect.width, rect.height));
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: topLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
+      topRight: topRight.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
+      bottomRight: bottomRight.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
     );
   }
 
