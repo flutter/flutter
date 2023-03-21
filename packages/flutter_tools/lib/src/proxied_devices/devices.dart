@@ -58,7 +58,7 @@ class ProxiedDevices extends DeviceDiscovery {
 
   @override
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async =>
-      _devices ?? await discoverDevices(filter: filter);
+      _filterDevices(_devices ?? await discoverDevices(), filter);
 
   @override
   Future<List<Device>> discoverDevices({
@@ -72,7 +72,14 @@ class ProxiedDevices extends DeviceDiscovery {
     ];
 
     _devices = devices;
-    return devices;
+    return _filterDevices(devices, filter);
+  }
+
+  Future<List<Device>> _filterDevices(List<Device> devices, DeviceDiscoveryFilter? filter) async {
+    if (filter == null) {
+      return devices;
+    }
+    return filter.filterDevices(devices);
   }
 
   @override
