@@ -1997,14 +1997,12 @@
 ../../../third_party/harfbuzz/CONFIG.md
 ../../../third_party/harfbuzz/NEWS
 ../../../third_party/harfbuzz/README
-../../../third_party/harfbuzz/README.fuchsia
 ../../../third_party/harfbuzz/README.md
 ../../../third_party/harfbuzz/README.mingw.md
 ../../../third_party/harfbuzz/README.python.md
 ../../../third_party/harfbuzz/RELEASING.md
 ../../../third_party/harfbuzz/TESTING.md
 ../../../third_party/harfbuzz/THANKS
-../../../third_party/harfbuzz/TODO
 ../../../third_party/harfbuzz/docs
 ../../../third_party/harfbuzz/git.mk
 ../../../third_party/harfbuzz/m4/ax_check_link_flag.m4
@@ -2012,6 +2010,7 @@
 ../../../third_party/harfbuzz/m4/ax_cxx_compile_stdcxx.m4
 ../../../third_party/harfbuzz/m4/ax_pthread.m4
 ../../../third_party/harfbuzz/meson.build
+../../../third_party/harfbuzz/perf/README.md
 ../../../third_party/harfbuzz/perf/meson.build
 ../../../third_party/harfbuzz/replace-enum-strings.cmake
 ../../../third_party/harfbuzz/src/Makefile.sources
@@ -2024,6 +2023,7 @@
 ../../../third_party/harfbuzz/src/check-symbols.py
 ../../../third_party/harfbuzz/src/fix_get_types.py
 ../../../third_party/harfbuzz/src/gen-arabic-joining-list.py
+../../../third_party/harfbuzz/src/gen-arabic-pua.py
 ../../../third_party/harfbuzz/src/gen-arabic-table.py
 ../../../third_party/harfbuzz/src/gen-def.py
 ../../../third_party/harfbuzz/src/gen-emoji-table.py
@@ -2036,6 +2036,7 @@
 ../../../third_party/harfbuzz/src/gen-ucd-table.py
 ../../../third_party/harfbuzz/src/gen-use-table.py
 ../../../third_party/harfbuzz/src/gen-vowel-constraints.py
+../../../third_party/harfbuzz/src/justify.py
 ../../../third_party/harfbuzz/src/meson.build
 ../../../third_party/harfbuzz/src/sample.py
 ../../../third_party/harfbuzz/subprojects/.gitignore

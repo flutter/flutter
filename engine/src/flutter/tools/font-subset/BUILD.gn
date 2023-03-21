@@ -13,7 +13,7 @@ executable("_font-subset") {
     "main.cc",
   ]
 
-  deps = [ "//third_party/harfbuzz" ]
+  deps = [ "//third_party/harfbuzz:harfbuzz_subset" ]
 
   if (is_mac) {
     frameworks = [
