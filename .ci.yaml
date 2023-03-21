@@ -523,15 +523,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux fuchsia_precache
-    recipe: flutter/flutter
-    timeout: 60
-    properties:
-      validation: fuchsia_precache
-      validation_name: Fuchsia precache
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-
   - name: Linux gradle_desugar_classes_test
     recipe: devicelab/devicelab_drone
     timeout: 60
