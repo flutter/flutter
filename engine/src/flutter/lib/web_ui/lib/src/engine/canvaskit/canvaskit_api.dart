@@ -28,10 +28,7 @@ import 'renderer.dart';
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
 
-// TODO(mdebbar): Turn this on when CanvasKit Chromium is ready.
-// Set it to `browserSupportsCanvasKitChromium`.
-// https://github.com/flutter/flutter/issues/122329
-const bool _enableCanvasKitChromiumInAutoMode = false;
+bool get _enableCanvasKitChromiumInAutoMode => browserSupportsCanvaskitChromium;
 
 /// Sets the [CanvasKit] object on `window` so we can use `@JS()` to bind to
 /// static APIs.
@@ -2699,8 +2696,10 @@ const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
-List<String> get _canvasKitJsFileNames {
-  switch (configuration.canvasKitVariant) {
+
+@visibleForTesting
+List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
+  switch (variant) {
     case CanvasKitVariant.auto:
       return <String>[
         if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
@@ -2713,7 +2712,9 @@ List<String> get _canvasKitJsFileNames {
   }
 }
 Iterable<String> get _canvasKitJsUrls {
-  return _canvasKitJsFileNames.map((String filename) => '$_canvasKitBaseUrl$filename');
+  return getCanvasKitJsFileNames(configuration.canvasKitVariant).map(
+    (String filename) => '$_canvasKitBaseUrl$filename',
+  );
 }
 @visibleForTesting
 String canvasKitWasmModuleUrl(String file, String canvasKitBase) =>
