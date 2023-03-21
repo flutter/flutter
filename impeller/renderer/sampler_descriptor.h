@@ -18,7 +18,7 @@ class Context;
 struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
   MinMagFilter min_filter = MinMagFilter::kNearest;
   MinMagFilter mag_filter = MinMagFilter::kNearest;
-  MipFilter mip_filter = MipFilter::kNearest;
+  MipFilter mip_filter = MipFilter::kNone;
 
   SamplerAddressMode width_address_mode = SamplerAddressMode::kClampToEdge;
   SamplerAddressMode height_address_mode = SamplerAddressMode::kClampToEdge;
