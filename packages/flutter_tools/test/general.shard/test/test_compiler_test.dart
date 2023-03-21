@@ -166,7 +166,7 @@ flutter:
       linux:
         dartPluginClass: APlugin
 environment:
-  sdk: ">=2.14.0 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=2.5.0"
 ''');
 

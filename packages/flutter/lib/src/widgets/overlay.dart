@@ -1638,7 +1638,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
 //
 // Since it can't implement operator== (it's mutable), the same `_OverlayEntryLocation`
 // instance must not be used to represent more than one locations.
-class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
+final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
   _OverlayEntryLocation(this._zOrderIndex, this._childModel, this._theater);
 
   final int _zOrderIndex;
@@ -1954,7 +1954,7 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 // 3. When invoked from `PipelineOwner.flushLayout`, or
 //    `_layoutSurrogate.performLayout`, this `RenderObject` behaves like an
 //    `Overlay` that has only one entry.
-class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
+final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
   _RenderDeferredLayoutBox(this._layoutSurrogate);
 
   StackParentData get stackParentData => parentData! as StackParentData;

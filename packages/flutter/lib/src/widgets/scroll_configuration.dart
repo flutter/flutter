@@ -194,16 +194,19 @@ class ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            return _buildGlowingOverscrollIndicator(details, child);
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: _kDefaultGlowColor,
-          child: child,
-        );
+        return _buildGlowingOverscrollIndicator(details, child);
     }
+  }
+
+  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(ScrollableDetails details, Widget child) {
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: _kDefaultGlowColor,
+      child: child,
+    );
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -379,6 +382,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   String toString() => objectRuntimeType(this, '_WrappedScrollBehavior');
+
+  @override
+  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(ScrollableDetails details, Widget child) {
+    return delegate._buildGlowingOverscrollIndicator(details, child);
+  }
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.
