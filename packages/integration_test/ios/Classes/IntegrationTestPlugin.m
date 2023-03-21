@@ -88,18 +88,11 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
   CGRect screenshotBounds = window.bounds;
   UIImage *image;
 
-  if (@available(iOS 10, *)) {
-    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenshotBounds];
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenshotBounds];
 
-    image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
-      [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
-    }];
-  } else {
-    UIGraphicsBeginImageContextWithOptions(screenshotBounds.size, NO, UIScreen.mainScreen.scale);
+  image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
     [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
-    image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-  }
+  }];
 
   return image;
 }

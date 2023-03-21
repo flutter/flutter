@@ -346,7 +346,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '9.0'"
+        ? "s.platform = :ios, '11.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
