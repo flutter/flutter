@@ -32,10 +32,14 @@ wasm_toolchain("canvaskit_chromium") {
     skia_use_client_icu = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
+    # TODO(mdebbar): Set these to false once all image decoding can be done
+    # using the browser's built-in codecs.
+    # https://github.com/flutter/flutter/issues/122331
+
     # In Chromium browsers, we can use the browser's built-in codecs.
-    skia_use_libjpeg_turbo_decode = false
-    skia_use_libpng_decode = false
-    skia_use_libwebp_decode = false
+    skia_use_libjpeg_turbo_decode = true
+    skia_use_libpng_decode = true
+    skia_use_libwebp_decode = true
   }
 }
 
