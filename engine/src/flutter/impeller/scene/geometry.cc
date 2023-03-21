@@ -246,7 +246,7 @@ void SkinnedVertexBufferGeometry::BindToCommand(
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kNearest;
   sampler_desc.mag_filter = MinMagFilter::kNearest;
-  sampler_desc.mip_filter = MipFilter::kNone;
+  sampler_desc.mip_filter = MipFilter::kNearest;
   sampler_desc.width_address_mode = SamplerAddressMode::kRepeat;
   sampler_desc.label = "NN Repeat";
 
