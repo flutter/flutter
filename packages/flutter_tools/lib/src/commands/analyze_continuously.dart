@@ -23,9 +23,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.artifacts,
     required super.suppressAnalytics,
   }) : super(
-          repoPackages: repoPackages,
-          repoRoots: repoRoots,
-        );
+        repoPackages: repoPackages,
+        repoRoots: repoRoots,
+      );
 
   String? analysisTarget;
   bool firstAnalysis = true;

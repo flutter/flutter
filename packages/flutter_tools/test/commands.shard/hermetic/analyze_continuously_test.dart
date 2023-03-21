@@ -103,9 +103,7 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server.onAnalyzing
-          .where((bool analyzing) => analyzing == false)
-          .first;
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
       server.onErrors.listen(
           (FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
@@ -147,8 +145,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone =
-        server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -200,6 +197,7 @@ void main() {
             '--disable-server-feature-search',
             '--sdk',
             'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
         ),
@@ -243,6 +241,7 @@ void main() {
             '--disable-server-feature-search',
             '--sdk',
             'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
           stdout: '''
@@ -296,6 +295,7 @@ void main() {
                 '--disable-server-feature-search',
                 '--sdk',
                 'Artifact.engineDartSdkPath',
+                '--suppress-analytics',
               ],
               stdin: IOSink(stdin.sink),
               stdout: '''

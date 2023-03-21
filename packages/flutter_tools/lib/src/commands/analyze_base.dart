@@ -250,7 +250,8 @@ class PackageDependencyTracker {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
-          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)');
+          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)'
+        );
       }
       message.write(
         'If this does not help, to track down the conflict you can use '

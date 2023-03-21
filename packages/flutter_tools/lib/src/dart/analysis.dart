@@ -27,12 +27,12 @@ class AnalysisServer {
     required Terminal terminal,
     required this.suppressAnalytics,
     String? protocolTrafficLog,
-  })  : _fileSystem = fileSystem,
-        _processManager = processManager,
-        _logger = logger,
-        _platform = platform,
-        _terminal = terminal,
-        _protocolTrafficLog = protocolTrafficLog;
+  }) : _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _platform = platform,
+       _terminal = terminal,
+       _protocolTrafficLog = protocolTrafficLog;
 
   final String sdkPath;
   final List<String> directories;
