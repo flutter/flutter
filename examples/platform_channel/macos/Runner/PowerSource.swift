@@ -21,7 +21,8 @@ class PowerSource {
   func getCurrentCapacity() -> Int {
     if !sources.isEmpty {
       let source = sources[0]
-      let description = IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
+      let description =
+        IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
       if let level = description[kIOPSCurrentCapacityKey] as? Int {
         return level
       }
@@ -33,7 +34,8 @@ class PowerSource {
   func getPowerState() -> PowerState {
     if !sources.isEmpty {
       let source = sources[0]
-      let description = IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
+      let description =
+        IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
       if let state = description[kIOPSPowerSourceStateKey] as? String {
         switch state {
         case kIOPSACPowerValue:

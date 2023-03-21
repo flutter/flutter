@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import Foundation
 import FlutterMacOS
+import Foundation
 
-class BatteryLevelPlugin : NSObject, FlutterPlugin, FlutterStreamHandler {
+class BatteryLevelPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
   private let powerSource = PowerSource()
   private var eventSink: FlutterEventSink?
   private var runLoopSource: CFRunLoopSource?
 
   static func register(with registrar: FlutterPluginRegistrar) {
-    let batteryChannel = FlutterMethodChannel(name: "samples.flutter.io/battery",
-                                              binaryMessenger: registrar.messenger)
+    let batteryChannel = FlutterMethodChannel(
+      name: "samples.flutter.io/battery",
+      binaryMessenger: registrar.messenger)
     let instance = BatteryLevelPlugin()
     registrar.addMethodCallDelegate(instance, channel: batteryChannel)
 
-    let chargingChannel = FlutterEventChannel(name: "samples.flutter.io/charging",
-                                              binaryMessenger: registrar.messenger)
+    let chargingChannel = FlutterEventChannel(
+      name: "samples.flutter.io/charging",
+      binaryMessenger: registrar.messenger)
     chargingChannel.setStreamHandler(instance)
   }
 
@@ -26,9 +28,11 @@ class BatteryLevelPlugin : NSObject, FlutterPlugin, FlutterStreamHandler {
     case "getBatteryLevel":
       let level = powerSource.getCurrentCapacity()
       if level == -1 {
-        result(FlutterError(code: "UNAVAILABLE",
-                            message: "Battery info unavailable",
-                            details: nil))
+        result(
+          FlutterError(
+            code: "UNAVAILABLE",
+            message: "Battery info unavailable",
+            details: nil))
       }
       result(level)
     default:
@@ -36,17 +40,22 @@ class BatteryLevelPlugin : NSObject, FlutterPlugin, FlutterStreamHandler {
     }
   }
 
-  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
     self.eventSink = events
 
     // Emit an initial power status event.
     self.emitPowerStatusEvent()
 
     let context = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-    self.runLoopSource = IOPSNotificationCreateRunLoopSource({ (context: UnsafeMutableRawPointer?) in
-      let weakSelf = Unmanaged<BatteryLevelPlugin>.fromOpaque(UnsafeRawPointer(context!)).takeUnretainedValue()
-      weakSelf.emitPowerStatusEvent()
-    }, context).takeRetainedValue()
+    self.runLoopSource = IOPSNotificationCreateRunLoopSource(
+      { (context: UnsafeMutableRawPointer?) in
+        let weakSelf = Unmanaged<BatteryLevelPlugin>.fromOpaque(UnsafeRawPointer(context!))
+          .takeUnretainedValue()
+        weakSelf.emitPowerStatusEvent()
+      }, context
+    ).takeRetainedValue()
     CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, .defaultMode)
     return nil
   }
