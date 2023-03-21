@@ -117,14 +117,6 @@ TaskFunction createCubicBezierPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
-  return PerfTestWithSkSL(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
-    'test_driver/transitions_perf.dart',
-    'transitions',
-  ).run;
-}
-
 TaskFunction createBackdropFilterPerfTest({
     bool measureCpuGpu = true,
     bool enableImpeller = false,
@@ -1010,9 +1002,7 @@ class PerfTest {
 
   @protected
   Future<TaskResult> internalRun({
-      bool cacheSkSL = false,
       String? existingApp,
-      String? writeSkslFileName,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
@@ -1048,9 +1038,6 @@ class PerfTest {
           ...<String>['--driver', testDriver!],
         if (existingApp != null)
           ...<String>['--use-existing-app', existingApp],
-        if (writeSkslFileName != null)
-          ...<String>['--write-sksl-on-exit', writeSkslFileName],
-        if (cacheSkSL) '--cache-sksl',
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
         if (enableImpeller) '--enable-impeller',
@@ -1138,149 +1125,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'new_gen_gc_count',
   'old_gen_gc_count',
 ];
-
-class PerfTestWithSkSL extends PerfTest {
-  PerfTestWithSkSL(
-    super.testDirectory,
-    super.testTarget,
-    String super.timelineFileName, {
-    super.measureCpuGpu = false,
-    super.testDriver,
-    super.needsFullTimeline,
-    super.benchmarkScoreKeys,
-  });
-
-
-  PerfTestWithSkSL.e2e(
-    super.testDirectory,
-    super.testTarget, {
-    String super.testDriver,
-    super.resultFilename,
-  }) : super.e2e(
-    needsFullTimeline: false,
-  );
-
-  @override
-  Future<TaskResult> run({int? timeoutSeconds}) async {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      // Some initializations
-      _device = await devices.workingDevice;
-      _flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
-
-      // Prepare the SkSL by running the driver test.
-      await _generateSkSL();
-
-      // Build the app with SkSL artifacts and run that app
-      final String observatoryUri = await _runApp(skslPath: _skslJsonFileName);
-
-      // Attach to the running app and run the final driver test to get metrics.
-      final TaskResult result = await internalRun(
-        existingApp: observatoryUri,
-      );
-
-      _runProcess.kill();
-      await _runProcess.exitCode;
-
-      return result;
-    });
-  }
-
-  Future<void> _generateSkSL() async {
-    // `flutter drive` without `flutter run`, and `flutter drive --existing-app`
-    // with `flutter run` may generate different SkSLs. Hence we run both
-    // versions to generate as many SkSLs as possible.
-    //
-    // 1st, `flutter drive --existing-app` with `flutter run`. The
-    // `--write-sksl-on-exit` option doesn't seem to be compatible with
-    // `flutter drive --existing-app` as it will complain web socket connection
-    // issues.
-    final String observatoryUri = await _runApp(cacheSkSL: true);
-    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
-    _runProcess.kill();
-    await _runProcess.exitCode;
-
-    // 2nd, `flutter drive` without `flutter run`. The --no-build option ensures
-    // that we won't remove the SkSLs generated earlier.
-    await super.internalRun(
-      cacheSkSL: true,
-      writeSkslFileName: _skslJsonFileName,
-    );
-  }
-
-  Future<String> _runApp({String? appBinary, bool cacheSkSL = false, String? skslPath}) async {
-    if (File(_vmserviceFileName).existsSync()) {
-      File(_vmserviceFileName).deleteSync();
-    }
-    final String? localEngine = localEngineFromEnv;
-    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
-    _runProcess = await startProcess(
-      _flutterPath,
-      <String>[
-        'run',
-        if (localEngine != null)
-          ...<String>['--local-engine', localEngine],
-        if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath],
-        '--no-dds',
-        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-          ...<String>[
-            '--device-timeout', '5',
-          ],
-        '--verbose',
-        '--verbose-system-logs',
-        '--purge-persistent-cache',
-        '--no-publish-port',
-        '--profile',
-        if (skslPath != null) '--bundle-sksl-path=$skslPath',
-        if (cacheSkSL) '--cache-sksl',
-        '-d', _device.deviceId,
-        '-t', testTarget,
-        '--endless-trace-buffer',
-        if (appBinary != null) ...<String>['--use-application-binary', _appBinary],
-        '--vmservice-out-file', _vmserviceFileName,
-      ],
-    );
-
-    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
-    _forwardStream(broadcastOut, 'run stdout');
-    _forwardStream(_runProcess.stderr, 'run stderr');
-
-    final File file = await waitForFile(_vmserviceFileName);
-    return file.readAsStringSync();
-  }
-
-  String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
-  String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
-
-  bool get _isAndroid => deviceOperatingSystem == DeviceOperatingSystem.android;
-
-  String get _appBinary {
-    if (_isAndroid) {
-      return '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-    }
-    for (final FileSystemEntity entry in Directory('$testDirectory/build/ios/iphoneos/').listSync()) {
-      if (entry.path.endsWith('.app')) {
-        return entry.path;
-      }
-    }
-    throw 'No app found.';
-  }
-
-  Stream<String> _transform(Stream<List<int>> stream) =>
-      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
-
-  void _forwardStream(Stream<List<int>> stream, String label) {
-    _transform(stream).listen((String line) {
-      print('$label: $line');
-    });
-  }
-
-  late String _flutterPath;
-  late Device _device;
-  late Process _runProcess;
-
-  static const String _kVmserviceOutFileName = 'vmservice.out';
-}
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
 /// big the compiled code is.
