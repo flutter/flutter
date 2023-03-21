@@ -261,6 +261,7 @@ if (enable_unittests) {
       ":ui",
       ":ui_unittests_fixtures",
       "//flutter/common",
+      "//flutter/impeller",
       "//flutter/lib/snapshot",
       "//flutter/shell/common:shell_test_fixture_sources",
       "//flutter/testing",

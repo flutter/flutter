@@ -61,8 +61,8 @@ class BlitPass {
                std::string label = "");
 
   //----------------------------------------------------------------------------
-  /// @brief      Record a command to copy the contents of the texture to
-  ///             the buffer.
+  /// @brief      Record a command to copy the contents of the buffer to
+  ///             the texture.
   ///             No work is encoded into the command buffer at this time.
   ///
   /// @param[in]  source              The texture to read for copying.
@@ -71,8 +71,8 @@ class BlitPass {
   /// @param[in]  source_region       The optional region of the source texture
   ///                                 to use for copying. If not specified, the
   ///                                 full size of the source texture is used.
-  /// @param[in]  destination_offset  The offset to start writing to in the
-  ///                                 destination buffer.
+  /// @param[in]  destination_origin  The origin to start writing to in the
+  ///                                 destination texture.
   /// @param[in]  label               The optional debug label to give the
   ///                                 command.
   ///
@@ -82,6 +82,26 @@ class BlitPass {
                std::shared_ptr<DeviceBuffer> destination,
                std::optional<IRect> source_region = std::nullopt,
                size_t destination_offset = 0,
+               std::string label = "");
+
+  //----------------------------------------------------------------------------
+  /// @brief      Record a command to copy the contents of the buffer to
+  ///             the texture.
+  ///             No work is encoded into the command buffer at this time.
+  ///
+  /// @param[in]  source              The buffer view to read for copying.
+  /// @param[in]  destination         The texture to overwrite using the source
+  ///                                 contents.
+  /// @param[in]  destination_offset  The offset to start writing to in the
+  ///                                 destination buffer.
+  /// @param[in]  label               The optional debug label to give the
+  ///                                 command.
+  ///
+  /// @return     If the command was valid for subsequent commitment.
+  ///
+  bool AddCopy(BufferView source,
+               std::shared_ptr<Texture> destination,
+               IPoint destination_origin = {},
                std::string label = "");
 
   //----------------------------------------------------------------------------
@@ -125,6 +145,12 @@ class BlitPass {
       std::shared_ptr<DeviceBuffer> destination,
       IRect source_region,
       size_t destination_offset,
+      std::string label) = 0;
+
+  virtual bool OnCopyBufferToTextureCommand(
+      BufferView source,
+      std::shared_ptr<Texture> destination,
+      IPoint destination_origin,
       std::string label) = 0;
 
   virtual bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,

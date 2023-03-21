@@ -94,6 +94,51 @@ bool BlitCopyTextureToBufferCommandMTL::Encode(
   return true;
 };
 
+BlitCopyBufferToTextureCommandMTL::~BlitCopyBufferToTextureCommandMTL() =
+    default;
+
+std::string BlitCopyBufferToTextureCommandMTL::GetLabel() const {
+  return label;
+}
+
+bool BlitCopyBufferToTextureCommandMTL::Encode(
+    id<MTLBlitCommandEncoder> encoder) const {
+  auto source_mtl = DeviceBufferMTL::Cast(*source.buffer).GetMTLBuffer();
+  if (!source_mtl) {
+    return false;
+  }
+
+  auto destination_mtl = TextureMTL::Cast(*destination).GetMTLTexture();
+  if (!destination_mtl) {
+    return false;
+  }
+
+  auto destination_origin_mtl =
+      MTLOriginMake(destination_origin.x, destination_origin.y, 0);
+
+  auto image_size = destination->GetTextureDescriptor().size;
+  auto source_size_mtl = MTLSizeMake(image_size.width, image_size.height, 1);
+
+  auto destination_bytes_per_pixel =
+      BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
+  auto destination_bytes_per_row =
+      source_size_mtl.width * destination_bytes_per_pixel;
+  auto destination_bytes_per_image =
+      source_size_mtl.height * destination_bytes_per_row;
+
+  [encoder copyFromBuffer:source_mtl
+             sourceOffset:source.range.offset
+        sourceBytesPerRow:destination_bytes_per_row
+      sourceBytesPerImage:destination_bytes_per_image
+               sourceSize:source_size_mtl
+                toTexture:destination_mtl
+         destinationSlice:0
+         destinationLevel:0
+        destinationOrigin:destination_origin_mtl];
+
+  return true;
+};
+
 BlitGenerateMipmapCommandMTL::~BlitGenerateMipmapCommandMTL() = default;
 
 std::string BlitGenerateMipmapCommandMTL::GetLabel() const {

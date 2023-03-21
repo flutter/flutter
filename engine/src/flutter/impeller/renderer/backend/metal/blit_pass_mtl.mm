@@ -123,6 +123,21 @@ bool BlitPassMTL::OnCopyTextureToBufferCommand(
   return true;
 }
 
+bool BlitPassMTL::OnCopyBufferToTextureCommand(
+    BufferView source,
+    std::shared_ptr<Texture> destination,
+    IPoint destination_origin,
+    std::string label) {
+  auto command = std::make_unique<BlitCopyBufferToTextureCommandMTL>();
+  command->label = label;
+  command->source = std::move(source);
+  command->destination = std::move(destination);
+  command->destination_origin = destination_origin;
+
+  commands_.emplace_back(std::move(command));
+  return true;
+}
+
 // |BlitPass|
 bool BlitPassMTL::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                           std::string label) {
