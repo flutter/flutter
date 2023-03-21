@@ -13,6 +13,15 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
+/// @brief      Additional compression to apply to a texture. This value is
+///             ignored on platforms which do not support it.
+///
+///             Lossy compression is only supported on iOS 15+ on A15 chips.
+enum class CompressionType {
+  kLossless,
+  kLossy,
+};
+//------------------------------------------------------------------------------
 /// @brief      A lightweight object that describes the attributes of a texture
 ///             that can then used an allocator to create that texture.
 ///
@@ -25,6 +34,7 @@ struct TextureDescriptor {
   TextureUsageMask usage =
       static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
   SampleCount sample_count = SampleCount::kCount1;
+  CompressionType compression_type = CompressionType::kLossless;
 
   constexpr size_t GetByteSizeOfBaseMipLevel() const {
     if (!IsValid()) {
