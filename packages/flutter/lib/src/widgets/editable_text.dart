@@ -2084,6 +2084,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
   late SpellCheckConfiguration _spellCheckConfiguration;
+  late TextStyle _style;
 
   /// Configuration that determines how spell check will be performed.
   ///
@@ -2589,6 +2590,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    _style = MediaQuery.boldTextOf(context)
+        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : widget.style;
+
     final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
@@ -2682,14 +2687,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (widget.style != oldWidget.style) {
-      final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
+      _style = MediaQuery.boldTextOf(context)
+          ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+          : widget.style;
       if (_hasInputConnection) {
         _textInputConnection!.setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         );
@@ -3154,12 +3161,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
-      final TextStyle style = widget.style;
       _textInputConnection!
         ..setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         )
@@ -3222,13 +3228,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
-    final TextStyle style = widget.style;
     newConnection
       ..show()
       ..setStyle(
-        fontFamily: style.fontFamily,
-        fontSize: style.fontSize,
-        fontWeight: style.fontWeight,
+        fontFamily: _style.fontFamily,
+        fontSize: _style.fontSize,
+        fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
       )
@@ -4636,6 +4641,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
+
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
@@ -4653,7 +4659,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
         }
       }
-      return TextSpan(style: widget.style, text: text);
+      return TextSpan(style: _style, text: text);
     }
     if (_placeholderLocation >= 0 && _placeholderLocation <= _value.text.length) {
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
@@ -4665,7 +4671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       } else {
         placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size(100.0, 0.0)));
       }
-      return TextSpan(style: widget.style, children: <InlineSpan>[
+      return TextSpan(style: _style, children: <InlineSpan>[
           TextSpan(text: _value.text.substring(0, placeholderLocation)),
           ...placeholders,
           TextSpan(text: _value.text.substring(placeholderLocation)),
@@ -4684,7 +4690,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return buildTextSpanWithSpellCheckSuggestions(
         _value,
         composingRegionOutOfRange,
-        widget.style,
+        _style,
         _spellCheckConfiguration.misspelledTextStyle!,
         spellCheckResults!,
       );
@@ -4693,7 +4699,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
-      style: widget.style,
+      style: _style,
       withComposing: withComposing,
     );
   }

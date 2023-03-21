@@ -5374,6 +5374,46 @@ void main() {
     );
   });
 
+  testWidgets('text styling info is sent on show keyboard (bold override)', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          textDirection: TextDirection.rtl,
+          controller: controller,
+          focusNode: FocusNode(),
+          style: const TextStyle(
+            fontSize: 20.0,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Roboto',
+        'fontWeightIndex': FontWeight.bold.index,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 0,
+      }),
+    );
+  });
+
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     late StateSetter setState;
@@ -15518,6 +15558,27 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     },
       skip: !kIsWeb, // [intended]
     );
+  });
+
+  testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(fontWeight: FontWeight.normal),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.green,
+        ),
+      ),
+    ));
+
+    controller.text = 'foo';
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 }
 
