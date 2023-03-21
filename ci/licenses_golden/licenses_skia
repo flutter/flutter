@@ -1,4 +1,4 @@
-Signature: 54318ca1255aa47df376c082592a5593
+Signature: 460666a9ff3aa92d4dd832bcd68b3e2f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8986,6 +8986,8 @@ ORIGIN: ../../../third_party/skia/src/core/SkReadPixelsRec.cpp + ../../../third_
 ORIGIN: ../../../third_party/skia/src/core/SkScan_SAAPath.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkEncoder.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/dawn/DawnUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.h + ../../../third_party/skia/LICENSE
@@ -9044,6 +9046,8 @@ FILE: ../../../third_party/skia/src/core/SkReadPixelsRec.cpp
 FILE: ../../../third_party/skia/src/core/SkScan_SAAPath.cpp
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp
 FILE: ../../../third_party/skia/src/encode/SkEncoder.cpp
+FILE: ../../../third_party/skia/src/gpu/DitherUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/DitherUtils.h
 FILE: ../../../third_party/skia/src/gpu/dawn/DawnUtilsPriv.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.h
