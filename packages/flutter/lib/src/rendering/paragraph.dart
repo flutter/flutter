@@ -119,7 +119,9 @@ class RenderParagraph extends RenderBox
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
-  AttributedString? _cachedAttributedLabel;
+
+  List<AttributedString>? _cachedAttributedLabels;
+
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
@@ -135,7 +137,7 @@ class RenderParagraph extends RenderBox
         break;
       case RenderComparison.paint:
         _textPainter.text = value;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
@@ -144,7 +146,7 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
@@ -1035,12 +1037,23 @@ class RenderParagraph extends RenderBox
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
+    bool needsAssembleSemanticsNode = false;
+    bool needsChildConfigrationsDelegate = false;
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+      if (info.recognizer != null) {
+        needsAssembleSemanticsNode = true;
+        break;
+      }
+      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
+    }
 
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
+    } else if (needsChildConfigrationsDelegate) {
+      config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
-      if (_cachedAttributedLabel == null) {
+      if (_cachedAttributedLabels == null) {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
         final List<StringAttribute> attributes = <StringAttribute>[];
@@ -1050,19 +1063,75 @@ class RenderParagraph extends RenderBox
             final TextRange originalRange = infoAttribute.range;
             attributes.add(
               infoAttribute.copy(
-                  range: TextRange(start: offset + originalRange.start,
-                      end: offset + originalRange.end)
+                range: TextRange(
+                  start: offset + originalRange.start,
+                  end: offset + originalRange.end,
+                ),
               ),
             );
           }
           buffer.write(label);
           offset += label.length;
         }
-        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
+        _cachedAttributedLabels = <AttributedString>[AttributedString(buffer.toString(), attributes: attributes)];
       }
-      config.attributedLabel = _cachedAttributedLabel!;
+      config.attributedLabel = _cachedAttributedLabels![0];
       config.textDirection = textDirection;
     }
+  }
+
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+    int placeholderIndex = 0;
+    int childConfigsIndex = 0;
+    int attributedLabelCacheIndex = 0;
+    InlineSpanSemanticsInformation? seenTextInfo;
+    _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
+    for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
+      if (info.isPlaceholder) {
+        if (seenTextInfo != null) {
+          builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
+          attributedLabelCacheIndex += 1;
+        }
+        // Mark every childConfig belongs to this placeholder to merge up group.
+        while (childConfigsIndex < childConfigs.length &&
+            childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          builder.markAsMergeUp(childConfigs[childConfigsIndex]);
+          childConfigsIndex += 1;
+        }
+        placeholderIndex += 1;
+      } else {
+        seenTextInfo = info;
+      }
+    }
+
+    // Handle plain text info at the end.
+    if (seenTextInfo != null) {
+      builder.markAsMergeUp(_createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex));
+    }
+    return builder.build();
+  }
+
+  SemanticsConfiguration _createSemanticsConfigForTextInfo(InlineSpanSemanticsInformation textInfo, int cacheIndex) {
+    assert(!textInfo.requiresOwnNode);
+    final List<AttributedString> cachedStrings = _cachedAttributedLabels ??= <AttributedString>[];
+    assert(cacheIndex <= cachedStrings.length);
+    final bool hasCache = cacheIndex < cachedStrings.length;
+
+    late AttributedString attributedLabel;
+    if (hasCache) {
+      attributedLabel = cachedStrings[cacheIndex];
+    } else {
+      assert(cachedStrings.length == cacheIndex);
+      attributedLabel = AttributedString(
+        textInfo.semanticsLabel ?? textInfo.text,
+        attributes: textInfo.stringAttributes,
+      );
+      cachedStrings.add(attributedLabel);
+    }
+    return SemanticsConfiguration()
+      ..textDirection = textDirection
+      ..attributedLabel = attributedLabel;
   }
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they

@@ -250,7 +250,7 @@ void main() {
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
         '--ez', 'disable-service-auth-codes', 'true',
-        '--es', 'dart-flags', 'foo,--null_assertions',
+        '--es', 'dart-flags', 'foo',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
         '--user', '10',
@@ -278,14 +278,13 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.enabled,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',
     );
 
-    // This fails to start due to observatory discovery issues.
+    // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });

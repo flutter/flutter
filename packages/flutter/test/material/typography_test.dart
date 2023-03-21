@@ -16,6 +16,11 @@ void main() {
     }
   });
 
+  test('Typography lerp special cases', () {
+    final Typography typography = Typography();
+    expect(identical(Typography.lerp(typography, typography, 0.5), typography), true);
+  });
+
   test('Typography on non-Apple platforms defaults to the correct font', () {
     expect(Typography.material2018().black.titleLarge!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily, 'Roboto');
@@ -109,10 +114,10 @@ void main() {
     ];
 
     for (final Typography fromTypography in all) {
-      for (final Typography toTypegraphy in all) {
+      for (final Typography toTypography in all) {
         Object? error;
         try {
-          Typography.lerp(fromTypography, toTypegraphy, 0.5);
+          Typography.lerp(fromTypography, toTypography, 0.5);
         } catch (e) {
           error = e;
         }

@@ -67,6 +67,7 @@ Widget buildDropdown({
     Color? focusColor,
     Color? dropdownColor,
     double? menuMaxHeight,
+    EdgeInsetsGeometry? padding,
   }) {
   final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
@@ -101,6 +102,7 @@ Widget buildDropdown({
         itemHeight: itemHeight,
         alignment: alignment,
         menuMaxHeight: menuMaxHeight,
+        padding: padding,
       ),
     );
   }
@@ -127,6 +129,7 @@ Widget buildDropdown({
     itemHeight: itemHeight,
     alignment: alignment,
     menuMaxHeight: menuMaxHeight,
+    padding: padding,
   );
 }
 
@@ -156,6 +159,7 @@ Widget buildFrame({
   Color? dropdownColor,
   bool isFormField = false,
   double? menuMaxHeight,
+  EdgeInsetsGeometry? padding,
   Alignment dropdownAlignment = Alignment.center,
 }) {
   return TestApp(
@@ -189,6 +193,7 @@ Widget buildFrame({
             itemHeight: itemHeight,
             alignment: alignment,
             menuMaxHeight: menuMaxHeight,
+            padding: padding,
           ),
         ),
       ),
@@ -401,7 +406,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromView(tester.binding.window),
+          data: MediaQueryData.fromView(tester.view),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
@@ -1538,7 +1543,7 @@ void main() {
   });
 
   testWidgets(
-    'DropdowwnButton hint displays when the items list is empty, '
+    'DropdownButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
@@ -3162,10 +3167,9 @@ void main() {
     // The default item height is 48.0 pixels and needs two items padding since
     // the menu requires empty space surrounding the menu. Finally, the constraint height
     // is 47.0 pixels for the menu rendering.
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    tester.view.physicalSize = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
@@ -3932,5 +3936,29 @@ void main() {
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
     expect(renderClip.borderRadius, BorderRadius.circular(radius));
+  });
+
+  testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
+    const double padVertical = 5;
+    const double padHorizontal = 10;
+    final Key buttonKey = UniqueKey();
+    EdgeInsets? padding;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, padding: padding);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxNoPadding = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxNoPadding.attached);
+    final Size noPaddingSize = Size.copy(buttonBoxNoPadding.size);
+
+    padding = const EdgeInsets.symmetric(vertical: padVertical, horizontal: padHorizontal);
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxPadded = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxPadded.attached);
+    final Size paddedSize = Size.copy(buttonBoxPadded.size);
+
+    // dropdowns with padding should be that much larger than with no padding
+    expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
+    expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
 }

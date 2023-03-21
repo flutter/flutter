@@ -1663,7 +1663,7 @@ void main() {
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
-  testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
+  testUsingContext('can re-gen default template over existing app project with no metadata and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1950,14 +1950,14 @@ void main() {
       await runner.run(<String>['create', '--pub', projectDir.path]);
       final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && !c.contains('--offline')
       )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && c.contains('--offline')
       )));
     },
     overrides: <Type, Generator>{
@@ -2452,6 +2452,63 @@ void main() {
     Logger: () => logger,
   });
 
+  testUsingContext('plugin includes native Kotlin unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--org=com.example',
+      '--platforms=android',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('test')
+        .childDirectory('kotlin')
+        .childDirectory('com')
+        .childDirectory('example')
+        .childDirectory('flutter_project')
+        .childFile('FlutterProjectPluginTest.kt'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Java unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--org=com.example',
+      '--platforms=android',
+      '-a', 'java',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('test')
+        .childDirectory('java')
+        .childDirectory('com')
+        .childDirectory('example')
+        .childDirectory('flutter_project')
+        .childFile('FlutterProjectPluginTest.java'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
   testUsingContext('plugin includes native Objective-C unit tests', () async {
     Cache.flutterRoot = '../..';
 
@@ -2495,6 +2552,28 @@ void main() {
         .childFile('flutter_project_plugin_test.cpp'), exists);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Linux unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platforms=linux',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('linux')
+        .childDirectory('test')
+        .childFile('flutter_project_plugin_test.cc'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Logger: () => logger,
   });
 

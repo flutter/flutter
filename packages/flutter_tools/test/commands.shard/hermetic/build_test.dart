@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -44,7 +43,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       try {
@@ -66,7 +64,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
@@ -88,7 +85,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
@@ -107,7 +103,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       testLogger.printError('Error: Danger Will Robinson!');
@@ -147,11 +142,10 @@ class FakeBuildCommand extends BuildCommand {
     required super.fileSystem,
     required super.buildSystem,
     required super.osUtils,
-    required Logger logger,
     required super.androidSdk,
     bool verboseHelp = false,
-  }) : super(logger: logger, verboseHelp: verboseHelp,) {
-    addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
+  }) : super(verboseHelp: verboseHelp,) {
+    addSubcommand(FakeBuildSubcommand(verboseHelp: verboseHelp));
   }
 
   @override
@@ -167,7 +161,7 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({required super.logger, required super.verboseHelp});
+  FakeBuildSubcommand({required super.verboseHelp});
 
   @override
   String get description => '';

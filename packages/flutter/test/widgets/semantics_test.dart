@@ -60,6 +60,42 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
+  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Container(padding: const EdgeInsets.only(top: 20.0)),
+                      const Text('label'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    await tester.pump();
+    // Semantics should stay the same after a frame update.
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
   testWidgets('Semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -551,7 +587,7 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Note: checked state and toggled state are mutually exclusive.
+    // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         Semantics(
           key: const Key('a'),

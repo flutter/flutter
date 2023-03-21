@@ -592,6 +592,56 @@ void main() {
       );
     });
 
+    testWidgets('width of wheel in background does not increase at large widths', (WidgetTester tester) async {
+
+      final Widget dateWidget = CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (_) { },
+        initialDateTime: DateTime(2018, 1, 1, 10, 30),
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 300.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      double decemberX = tester.getBottomLeft(find.text('December')).dx;
+      double octoberX = tester.getBottomLeft(find.text('October')).dx;
+      final double distance = octoberX - decemberX;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 3000.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      decemberX = tester.getBottomLeft(find.text('December')).dx;
+      octoberX = tester.getBottomLeft(find.text('October')).dx;
+
+      // The wheel does not bend outwards at large widths.
+      expect(
+        distance >= (octoberX - decemberX),
+        true,
+      );
+    });
+
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
       late DateTime date;
       await tester.pumpWidget(
@@ -1663,6 +1713,30 @@ void main() {
       date,
       DateTime(2022, 6, 14, 3, 45),
     );
+  });
+
+  testWidgets('date picker has expected day of week', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) { },
+              initialDateTime: DateTime(2018, 9, 15),
+              showDayOfWeek: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('September'), findsOneWidget);
+    expect(find.textContaining('Sat').last, findsOneWidget);
+    expect(find.textContaining('15').last, findsOneWidget);
+    expect(find.text('2018'), findsOneWidget);
   });
 }
 

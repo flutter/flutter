@@ -15,6 +15,11 @@ void main() {
     expect(const SliderThemeData().hashCode, const SliderThemeData().copyWith().hashCode);
   });
 
+  test('SliderThemeData lerp special cases', () {
+    const SliderThemeData data = SliderThemeData();
+    expect(identical(SliderThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);

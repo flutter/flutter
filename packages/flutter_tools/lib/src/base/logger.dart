@@ -625,7 +625,7 @@ class StdoutLogger extends Logger {
   }
 }
 
-typedef _Writter = void Function(String message);
+typedef _Writer = void Function(String message);
 
 /// Wraps the message in a box, and writes the bytes by calling [write].
 ///
@@ -643,7 +643,7 @@ typedef _Writter = void Function(String message);
 void _generateBox({
   required String message,
   required int wrapColumn,
-  required _Writter write,
+  required _Writer write,
   required Terminal terminal,
   String? title,
 }) {
@@ -1360,7 +1360,9 @@ class AnonymousSpinnerStatus extends Status {
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        _clear(_currentLineLength);
+        if (_currentLineLength > _lastAnimationFrameLength) {
+          _clear(_currentLineLength - _lastAnimationFrameLength);
+        }
       }
       if (_slowWarning == '' && slowWarningCallback != null) {
         _slowWarning = slowWarningCallback!();
@@ -1398,7 +1400,8 @@ class AnonymousSpinnerStatus extends Status {
     assert(timer!.isActive);
     timer?.cancel();
     timer = null;
-    _clear(_lastAnimationFrameLength);
+    _clear(_lastAnimationFrameLength + _slowWarning.length);
+    _slowWarning = '';
     _lastAnimationFrameLength = 0;
     super.finish();
   }
