@@ -182,6 +182,44 @@ void main() {
     await server.dispose();
   });
 
+  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            '--disable-dart-dev',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+          ],
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+
+    final Artifacts artifacts = Artifacts.test();
+    final AnalyzeCommand command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: false,
+    );
+
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testUsingContext('Can run AnalysisService with customized cache location', () async {
     final StreamController<List<int>> stdin = StreamController<List<int>>();
     final FakeProcessManager processManager = FakeProcessManager.list(
