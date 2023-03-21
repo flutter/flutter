@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -42,26 +41,6 @@ class _MatchesMethodCall extends Matcher {
     }
     return newDescription;
   }
-}
-
-// Used to set window.viewInsets since the real ui.WindowPadding has only a
-// private constructor.
-class _TestViewPadding implements ui.ViewPadding {
-  const _TestViewPadding({
-    required this.bottom,
-  });
-
-  @override
-  final double bottom;
-
-  @override
-  double get top => 0.0;
-
-  @override
-  double get left => 0.0;
-
-  @override
-  double get right => 0.0;
 }
 
 late TextEditingController controller;
@@ -134,6 +113,8 @@ void main() {
 
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     final TextEditingController textController = TextEditingController.fromValue(
       const TextEditingValue(text: 'I love flutter'),
@@ -164,8 +145,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
-    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
     textController.selection = TextSelection(
       baseOffset: 0,
       extentOffset: textController.text.length,
@@ -173,13 +153,15 @@ void main() {
 
     await tester.pump();
 
-    // The offset of the scrollController should change immediately after window changes its metrics.
+    // The offset of the scrollController should change immediately after view changes its metrics.
     final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
-  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the view changes metrics', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     final Widget widget = MaterialApp(
       home: Scaffold(
@@ -215,11 +197,10 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText));
-    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestViewPadding(bottom: 500);
-    addTearDown(TestWidgetsFlutterBinding.instance.window.clearViewInsetsTestValue);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
     await tester.pump();
 
-    // The offset of the scrollController should change immediately after window changes its metrics.
+    // The offset of the scrollController should change immediately after view changes its metrics.
     final double offsetAfter = scrollController.offset;
     expect(offsetAfter, isNot(0.0));
   });
@@ -1841,7 +1822,7 @@ void main() {
   });
 
   testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1871,7 +1852,7 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
 
     // Hide the menu by changing orientation.
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), findsNothing);
 
@@ -2751,6 +2732,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectionCause, SelectionChangedCause.scribble);
+
+    await tester.testTextInput.finishScribbleInteraction();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
@@ -5174,9 +5157,9 @@ void main() {
   });
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.view.reset);
     // Ensure selection rects are sent on iPhone (using SE 3rd gen size)
-    tester.binding.window.physicalSizeTestValue = const Size(750.0, 1334.0);
+    tester.view.physicalSize = const Size(750.0, 1334.0);
 
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -12411,6 +12394,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     EditableText.debugDeterministicCursor = true;
     final FocusNode focusNode = FocusNode();
     final GlobalKey key = GlobalKey();
+    SelectionChangedCause? lastSelectionChangedCause;
 
     final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890');
     controller.selection = const TextSelection.collapsed(offset: 0);
@@ -12425,6 +12409,9 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
           cursorOpacityAnimates: true,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            lastSelectionChangedCause = cause;
+          },
           maxLines: 2,
         ),
       ),
@@ -12461,6 +12448,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // Selection should be updated based on the floating cursor location.
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
@@ -12486,7 +12475,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     ));
 
     // Simulate UIKit setting the selection using keyboard selection.
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection(baseOffset: 0, extentOffset: 4)));
     await tester.pump();
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
@@ -12496,9 +12485,11 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     // Now test using keyboard selection in a forwards direction.
-    controller.selection = const TextSelection.collapsed(offset: 0);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 0)));
     await tester.pump();
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
     await tester.pump();
@@ -12523,7 +12514,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     ));
 
     // Simulate UIKit setting the selection using keyboard selection.
-    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection(baseOffset: 0, extentOffset: 4)));
     await tester.pump();
 
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
@@ -12533,11 +12524,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, false);
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 4);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     // Test that the affinity is updated in case the floating cursor ends at the same offset.
 
     // Put the selection at the beginning of the second line.
-    controller.selection = const TextSelection.collapsed(offset: 27);
+    state.updateEditingValue(state.currentTextEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 27)));
     await tester.pump();
 
     // Now test using keyboard selection in a forwards direction.
@@ -12572,6 +12565,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, 27);
     expect(controller.selection.extentOffset, 27);
+    expect(lastSelectionChangedCause, SelectionChangedCause.forcePress);
+    lastSelectionChangedCause = null;
 
     EditableText.debugDeterministicCursor = false;
   });
@@ -13015,6 +13010,58 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
+
+    // Regression test for https://github.com/flutter/flutter/issues/120194.
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion without waiting for the throttling delay.
+      await sendUndo(tester);
+      expect(controller.value.selection.isValid, true);
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and do not wait for throttling delay before calling undo.
+      focusNode.requestFocus();
+      await tester.pump();
+      await sendUndo(tester);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion.
+      await sendUndo(tester);
+
+      // Initial text should have been recorded and restored.
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();

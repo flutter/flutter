@@ -17,7 +17,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
-import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -245,76 +244,11 @@ abstract class DeviceManager {
     ];
   }
 
-  /// Find and return all target [Device]s based upon currently connected
-  /// devices, the current project, and criteria entered by the user on
-  /// the command line.
-  ///
-  /// If no device can be found that meets specified criteria,
-  /// then print an error message and return null.
-  ///
-  /// Returns a list of devices specified by the user.
-  ///
-  /// * If the user specified '-d all', then return all connected devices which
-  /// support the current project, except for fuchsia and web.
-  ///
-  /// * If the user specified a device id, then do nothing as the list is already
-  /// filtered by [getDevices].
-  ///
-  /// * If the user did not specify a device id and there is more than one
-  /// device connected, then filter out unsupported devices and prioritize
-  /// ephemeral devices.
-  ///
-  /// * If [promptUserToChooseDevice] is true, and there are more than one
-  /// device after the aforementioned filters, and the user is connected to a
-  /// terminal, then show a prompt asking the user to choose one.
-  Future<List<Device>> findTargetDevices({
-    bool includeDevicesUnsupportedByProject = false,
-    Duration? timeout,
-  }) async {
-    if (timeout != null) {
-      // Reset the cache with the specified timeout.
-      await refreshAllDevices(timeout: timeout);
-    }
-
-    final List<Device> devices = await getDevices(
-      filter: DeviceDiscoveryFilter(
-        supportFilter: deviceSupportFilter(
-          includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-        ),
-      ),
-    );
-
-    if (!hasSpecifiedDeviceId) {
-      // User did not specify the device.
-
-      if (devices.length > 1) {
-        // If there are still multiple devices and the user did not specify to run
-        // all, then attempt to prioritize ephemeral devices. For example, if the
-        // user only typed 'flutter run' and both an Android device and desktop
-        // device are available, choose the Android device.
-
-        // Ephemeral is nullable for device types where this is not well
-        // defined.
-        final List<Device> ephemeralDevices = <Device>[
-          for (final Device device in devices)
-            if (device.ephemeral == true)
-              device,
-        ];
-
-        if (ephemeralDevices.length == 1) {
-          return ephemeralDevices;
-        }
-      }
-    }
-
-    return devices;
-  }
-
   /// Determines how to filter devices.
   ///
   /// By default, filters to only include devices that are supported by Flutter.
   ///
-  /// If the user has not specificied a device, filters to only include devices
+  /// If the user has not specified a device, filters to only include devices
   /// that are supported by Flutter and supported by the project.
   ///
   /// If the user has specified `--device all`, filters to only include devices
@@ -342,6 +276,27 @@ abstract class DeviceManager {
     } else {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter();
     }
+  }
+
+  /// If the user did not specify to run all or a specific device, then attempt
+  /// to prioritize ephemeral devices.
+  ///
+  /// If there is not exactly one ephemeral device return null.
+  ///
+  /// For example, if the user only typed 'flutter run' and both an Android
+  /// device and desktop device are available, choose the Android device.
+  ///
+  /// Note: ephemeral is nullable for device types where this is not well
+  /// defined.
+  Device? getSingleEphemeralDevice(List<Device> devices){
+    if (!hasSpecifiedDeviceId) {
+      try {
+        return devices.singleWhere((Device device) => device.ephemeral == true);
+      } on StateError {
+        return null;
+      }
+    }
+    return null;
   }
 }
 
@@ -961,7 +916,6 @@ class DebuggingOptions {
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
-    this.nullAssertions = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
@@ -1012,7 +966,6 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
-      nullAssertions = false,
       nativeNullAssertions = false,
       serveObservatory = false;
 
@@ -1055,7 +1008,6 @@ class DebuggingOptions {
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
@@ -1129,8 +1081,6 @@ class DebuggingOptions {
   final String? vmserviceOutFile;
   final bool fastStart;
 
-  final bool nullAssertions;
-
   /// Additional null runtime checks inserted for web applications.
   ///
   /// See also:
@@ -1142,7 +1092,7 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
-    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+    DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1181,7 +1131,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
-      if (interfaceType == IOSDeviceConnectionInterface.network)
+      if (interfaceType == DeviceConnectionInterface.wireless)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
       if (enableEmbedderApi) '--enable-embedder-api',
     ];
@@ -1225,7 +1175,6 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
-    'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
     'serveObservatory': serveObservatory,
@@ -1273,7 +1222,6 @@ class DebuggingOptions {
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
-      nullAssertions: json['nullAssertions']! as bool,
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
@@ -1355,13 +1303,9 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   void dispose() { }
 }
 
-/// Append --null_assertions to any existing Dart VM flags if
-/// [debuggingOptions.nullAssertions] is true.
 String computeDartVmFlags(DebuggingOptions debuggingOptions) {
-  return <String>[
-    if (debuggingOptions.dartFlags.isNotEmpty)
-      debuggingOptions.dartFlags,
-    if (debuggingOptions.nullAssertions)
-      '--null_assertions',
-  ].join(',');
+  if (debuggingOptions.dartFlags.isNotEmpty) {
+    return debuggingOptions.dartFlags;
+  }
+  return '';
 }
