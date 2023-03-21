@@ -68,10 +68,18 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    _keyboard.syncKeyboardState().then((_) {
+    if (!kIsWeb) {
+      // On non web platforms query the initial keyboard state.
+      _keyboard.syncKeyboardState().then((_) {
+        platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
+        SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+      });
+    } else {
+      // TODO(bleroux): find a way to get the async call working on web, for the moment
+      // it results in many test failures.
       platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
       SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
-    });
+    }
   }
 
   /// The default instance of [BinaryMessenger].

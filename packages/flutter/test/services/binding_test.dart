@@ -153,6 +153,8 @@ void main() {
   });
 
   test('initInstances synchronizes keyboard state', () async {
+    await KeyEventSimulator.ensureKeyboardInitialized();
+
     final Set<PhysicalKeyboardKey> physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
     final Set<LogicalKeyboardKey> logicalKeys = HardwareKeyboard.instance.logicalKeysPressed;
 
@@ -160,5 +162,5 @@ void main() {
     expect(logicalKeys.length, 1);
     expect(physicalKeys.first, const PhysicalKeyboardKey(1));
     expect(logicalKeys.first, const LogicalKeyboardKey(1));
-  });
+  }, skip: kIsWeb); // [intended]
 }

@@ -495,6 +495,14 @@ abstract final class SystemChannels {
   /// [OptionalMethodChannel.invokeMethod]):
   ///
   ///  * `getKeyboardState`: Obtains keyboard pressed keys from the engine.
+  ///    The keyboard state is sent as a `Map<int, int>?` where each entry
+  ///    represents a pressed keyboard key.  The entry key is the physical key ID
+  ///    and the entry value is the logical key ID.
+  ///
+  /// See also:
+  ///
+  ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize
+  ///    the `HardwareKeyboard` pressed state.
   static const MethodChannel keyboard = OptionalMethodChannel(
     'flutter/keyboard',
   );
