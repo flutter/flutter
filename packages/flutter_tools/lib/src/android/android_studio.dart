@@ -49,7 +49,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return null;
     }
 
-    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
+    final String? versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
 
     Version? version;
     if (versionString != null) {
@@ -110,7 +110,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // and <base dir>/system/.home for Android Studio < 4.1
     String dotHomeFilePath;
 
-    if (major != null && major >= 4 && minor != null && minor >= 1) {
+    if (major >= 4 && minor >= 1) {
       dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
     } else {
       dotHomeFilePath =
@@ -161,7 +161,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     if (globals.platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
-      if (major != null && major >= 4 && minor != null && minor >= 1) {
+      if (major >= 4 && minor >= 1) {
         return globals.fs.path.join(
           homeDirPath,
           'Library',
@@ -185,7 +185,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         return toolboxPluginsPath;
       }
 
-      if (major != null && major >= 4 && minor != null && minor >= 1 &&
+      if (major >= 4 && minor >= 1 &&
           globals.platform.isLinux) {
         return globals.fs.path.join(
           homeDirPath,
@@ -394,7 +394,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
                 version: Version.parse(version),
                 studioAppName: title,
               );
-              if (studio != null && !hasStudioAt(studio.directory, newerThan: studio.version)) {
+              if (!hasStudioAt(studio.directory, newerThan: studio.version)) {
                 studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
                 studios.add(studio);
               }
@@ -425,9 +425,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
-    if (plistValue == null || keyMatcher == null) {
-      return null;
-    }
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
@@ -444,11 +441,22 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return;
     }
 
-    final String javaPath = globals.platform.isMacOS ?
-        version != null && version.major < 2020 ?
-        globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
-        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
-        globals.fs.path.join(directory, 'jre');
+    final String javaPath;
+    if (globals.platform.isMacOS) {
+      if (version != null && version.major < 2020) {
+        javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
+      } else if (version != null && version.major == 2022) {
+        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+      }
+    } else {
+      if (version != null && version.major == 2022) {
+        javaPath = globals.fs.path.join(directory, 'jbr');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jre');
+      }
+    }
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
     if (!globals.processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');

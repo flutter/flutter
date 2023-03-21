@@ -12,7 +12,7 @@ class _PageSelector extends StatelessWidget {
   final List<Icon>? icons;
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
-    final TabController controller = DefaultTabController.of(context)!;
+    final TabController controller = DefaultTabController.of(context);
     if (!controller.indexIsChanging) {
       controller.animateTo((controller.index + delta).clamp(0, icons!.length - 1));
     }
@@ -20,7 +20,7 @@ class _PageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TabController? controller = DefaultTabController.of(context);
+    final TabController? controller = DefaultTabController.maybeOf(context);
     final Color color = Theme.of(context).colorScheme.secondary;
     return SafeArea(
       top: false,

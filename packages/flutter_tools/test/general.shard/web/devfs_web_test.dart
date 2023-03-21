@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' hide Directory, File;
 
@@ -15,15 +13,15 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
-import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:logging/logging.dart' as logging;
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
@@ -41,14 +39,14 @@ const List<int> kTransparentImage = <int>[
 ];
 
 void main() {
-  Testbed testbed;
-  WebAssetServer webAssetServer;
-  ReleaseAssetServer releaseAssetServer;
-  Platform linux;
-  PackageConfig packages;
-  Platform windows;
-  FakeHttpServer httpServer;
-  BufferLogger logger;
+  late Testbed testbed;
+  late WebAssetServer webAssetServer;
+  late ReleaseAssetServer releaseAssetServer;
+  late Platform linux;
+  late PackageConfig packages;
+  late Platform windows;
+  late FakeHttpServer httpServer;
+  late BufferLogger logger;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -66,17 +64,15 @@ void main() {
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
-        fileSystem: null, // ignore: avoid_redundant_argument_values
+        fileSystem: globals.fs,
         flutterRoot: null, // ignore: avoid_redundant_argument_values
-        platform: null, // ignore: avoid_redundant_argument_values
+        platform: FakePlatform(),
         webBuildDirectory: null, // ignore: avoid_redundant_argument_values
-        basePath: null,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
@@ -183,10 +179,10 @@ void main() {
       }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
-    final String merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
+    final String? merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
     expect(merged, equals(metadataContents));
 
-    final String single = await webAssetServer.metadataContents('foo.js.metadata');
+    final String? single = await webAssetServer.metadataContents('foo.js.metadata');
     expect(single, equals(metadataContents));
   }, overrides: <Type, Generator>{
     Platform: () => linux,
@@ -292,9 +288,8 @@ void main() {
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
-      null,
-      null,
-      null,
+      <String, String>{},
+      <String, String>{},
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -311,9 +306,8 @@ void main() {
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
-      null,
-      null,
-      null,
+      <String, String>{},
+      <String, String>{},
     );
 
     // Defaults to "/" when there's no base element.
@@ -332,9 +326,8 @@ void main() {
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
       ),
       throwsToolExit(),
     );
@@ -352,9 +345,8 @@ void main() {
         httpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
-        null,
-        null,
+        <String, String>{},
+        <String, String>{},
       ),
       throwsToolExit(),
     );
@@ -380,7 +372,7 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     final Response cachedResponse = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js'), headers: <String, String>{
@@ -595,12 +587,12 @@ void main() {
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, '0'),
-      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.contentTypeHeader, 'text/javascript'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
-  test('serves asset files files from in filesystem with unknown mime type', () => testbed.run(() async {
+  test('serves asset files from in filesystem with unknown mime type', () => testbed.run(() async {
     final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(100, 0));
@@ -622,14 +614,14 @@ void main() {
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
-    final String etag = response.headers[HttpHeaders.etagHeader];
+    final String etag = response.headers[HttpHeaders.etagHeader]!;
 
     expect(etag.runes, everyElement(predicate((int char) => char < 255)));
   }));
 
   test('serves /packages/<package>/<path> files as if they were '
        'package:<package>/<path> uris', () => testbed.run(() async {
-    final Uri expectedUri = packages.resolve(
+    final Uri? expectedUri = packages.resolve(
         Uri.parse('package:flutter_tools/foo.dart'));
     final File source = globals.fs.file(globals.fs.path.fromUri(expectedUri))
       ..createSync(recursive: true)
@@ -670,13 +662,11 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.unsound,
       ),
       enableDwds: false,
       enableDds: false,
@@ -684,21 +674,20 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    final String webPrecompiledSdk = globals.artifacts
-      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
+    final String webPrecompiledSdk = globals.artifacts!
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -783,7 +772,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -796,7 +784,6 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -808,13 +795,13 @@ void main() {
       .childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
-    final String webPrecompiledSdk = globals.artifacts
+    final String webPrecompiledSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
-    final String webPrecompiledSdkSourcemaps = globals.artifacts
+    final String webPrecompiledSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
-    final String webPrecompiledCanvaskitSdk = globals.artifacts
+    final String webPrecompiledCanvaskitSdk = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
+    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
@@ -892,7 +879,6 @@ void main() {
         useSseForDebugProxy: true,
         useSseForDebugBackend: true,
         useSseForInjectedClient: true,
-        nullAssertions: true,
         nativeNullAssertions: true,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -905,7 +891,6 @@ void main() {
         testMode: true,
         expressionCompiler: null,
         chromiumLauncher: null,
-        nullSafetyMode: NullSafetyMode.sound,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -917,7 +902,7 @@ void main() {
         webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
 
         int vmServiceFactoryInvocationCount = 0;
-        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions compression, @required Logger logger}) {
+        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions? compression, required Logger logger}) {
           if (vmServiceFactoryInvocationCount > 0) {
             fail('Called vmServiceFactory twice!');
           }
@@ -927,7 +912,7 @@ void main() {
             () => FakeVmService(),
           );
         }
-        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult firstConnectionResult) {
+        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult? firstConnectionResult) {
           return webDevFS.destroy();
         });
       });
@@ -961,9 +946,7 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullAssertions: true,
       nativeNullAssertions: true,
-      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -989,7 +972,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -1005,7 +987,6 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1032,7 +1013,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
@@ -1048,7 +1028,6 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1077,7 +1056,6 @@ void main() {
       false,
       false,
       Uri.base,
-      null,
       null,
       testMode: true);
 
@@ -1112,7 +1090,6 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      NullSafetyMode.sound,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1142,7 +1119,6 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
-      nullAssertions: true,
       nativeNullAssertions: true,
       buildInfo: BuildInfo.debug,
       enableDwds: false,
@@ -1151,7 +1127,6 @@ void main() {
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1179,20 +1154,20 @@ class FakeHttpServer extends Fake implements HttpServer {
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  CompilerOutput output;
+  CompilerOutput? output;
 
   @override
   void addFileSystemRoot(String root) { }
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    String projectRootPath,
-    FileSystem fs,
+  Future<CompilerOutput?> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
+    String? outputPath,
+    PackageConfig? packageConfig,
+    String? projectRootPath,
+    FileSystem? fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
-    File dartPluginRegistrant,
+    File? dartPluginRegistrant,
   }) async {
     return output;
   }
@@ -1202,7 +1177,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

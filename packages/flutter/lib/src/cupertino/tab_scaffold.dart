@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
 import 'theme.dart';
@@ -35,7 +36,6 @@ class CupertinoTabController extends ChangeNotifier {
   /// greater than or equal to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
     : _index = initialIndex,
-      assert(initialIndex != null),
       assert(initialIndex >= 0);
 
   bool _isDisposed = false;
@@ -51,7 +51,6 @@ class CupertinoTabController extends ChangeNotifier {
   int get index => _index;
   int _index;
   set index(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (_index == value) {
       return;
@@ -134,9 +133,7 @@ class CupertinoTabScaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     this.restorationId,
-  }) : assert(tabBar != null),
-       assert(tabBuilder != null),
-       assert(
+  }) : assert(
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
          'out of bounds for the tab bar with ${tabBar.items.length} tabs',
@@ -161,9 +158,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
-  /// By default `tabBar` has its text scale factor set to 1.0 and does not
+  /// By default [tabBar] has its text scale factor set to 1.0 and does not
   /// respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override this behavior, wrap each of the `tabBar`'s
+  /// the native iOS behavior. To override this behavior, wrap each of the [tabBar]'s
   /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
@@ -323,12 +320,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
       contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
     }
 
-    if (widget.tabBar != null &&
-        // Only pad the content with the height of the tab bar if the tab
-        // isn't already entirely obstructed by a keyboard or other view insets.
-        // Don't double pad.
-        (!widget.resizeToAvoidBottomInset ||
-            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
+    // Only pad the content with the height of the tab bar if the tab
+    // isn't already entirely obstructed by a keyboard or other view insets.
+    // Don't double pad.
+    if (!widget.resizeToAvoidBottomInset || widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding =
@@ -405,9 +400,7 @@ class _TabSwitchingView extends StatefulWidget {
     required this.currentTabIndex,
     required this.tabCount,
     required this.tabBuilder,
-  }) : assert(currentTabIndex != null),
-       assert(tabCount != null && tabCount > 0),
-       assert(tabBuilder != null);
+  }) : assert(tabCount > 0);
 
   final int currentTabIndex;
   final int tabCount;
@@ -457,7 +450,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     _focusActiveTab();
   }
 
-  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // Will focus the active tab if the FocusScope above it has focus already. If
   // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
     if (tabFocusNodes.length != widget.tabCount) {
@@ -529,8 +522,7 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   /// The `initialIndex` must not be null and defaults to 0. The value must be
   /// greater than or equal to 0, and less than the total number of tabs.
   RestorableCupertinoTabController({ int initialIndex = 0 })
-    : assert(initialIndex != null),
-      assert(initialIndex >= 0),
+    : assert(initialIndex >= 0),
       _initialIndex = initialIndex;
 
   final int _initialIndex;

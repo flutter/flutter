@@ -275,11 +275,23 @@ void main() {
 
   testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
+    final ThemeData themeDataM2 = ThemeData(
+      useMaterial3: material3,
+      visualDensity: const VisualDensity(horizontal: 1, vertical: -1),
+    );
+    final ThemeData themeDataM3 = ThemeData(
+      useMaterial3: material3,
+      iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+              visualDensity: const VisualDensity(horizontal: 1, vertical: -1)
+          )
+      ),
+    );
     await tester.pumpWidget(
       wrap(
         useMaterial3: material3,
         child: Theme(
-          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1), useMaterial3: material3),
+          data: material3 ? themeDataM3 : themeDataM2,
           child: IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction.handler,
@@ -435,6 +447,7 @@ void main() {
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -454,7 +467,8 @@ void main() {
 
     final RenderBox barBox = tester.renderObject(find.byType(AppBar));
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
-    expect(iconBox.size.height, equals(barBox.size.height));
+    expect(iconBox.size.height, material3 ? 48 : equals(barBox.size.height));
+    expect(tester.getCenter(find.byType(IconButton)).dy, 28);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
@@ -1064,7 +1078,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1088,7 +1102,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -1113,10 +1127,613 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('IconButton.fill defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filled(
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onPrimary);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.filled(
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled selected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filled(
+            isSelected: true,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onPrimary);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.primary);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Enabled unselected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filled(
+            isSelected: false,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.surfaceVariant);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.primary);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.filled(
+            isSelected: true,
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled IconButton.tonal
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filledTonal(
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onSecondaryContainer);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.secondaryContainer);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.secondaryContainer);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.filledTonal(
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled selected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filledTonal(
+            isSelected: true,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onSecondaryContainer);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.secondaryContainer);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.secondaryContainer);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Enabled unselected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.filledTonal(
+            isSelected: false,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.surfaceVariant);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurfaceVariant);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.filledTonal(
+            isSelected: true,
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('IconButton.outlined defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled IconButton.tonal
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.outlined(
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onSurfaceVariant);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.outline)));
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.outline)));
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.outlined(
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12))));
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
+
+    // Enabled selected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.outlined(
+            isSelected: true,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    );
+    Color? iconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+    expect(iconColor(), colorScheme.onInverseSurface);
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.inverseSurface);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+    expect(tester.getSize(find.byIcon(Icons.ac_unit)), const Size(24.0, 24.0));
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(buttonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.inverseSurface);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+
+    // Enabled unselected IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: Center(
+          child: IconButton.outlined(
+            isSelected: false,
+            onPressed: () { },
+            icon: const Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colorScheme.outline)));
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurfaceVariant);
+
+    // Disabled IconButton
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeM3,
+        home: const Center(
+          child: IconButton.outlined(
+            isSelected: true,
+            onPressed: null,
+            icon: Icon(Icons.ac_unit),
+          ),
+        ),
+      ),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, colorScheme.onSurface.withOpacity(0.12));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.transparent);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle, null);
+    expect(material.type, MaterialType.button);
+    expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
   testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
@@ -1627,6 +2244,56 @@ void main() {
     expect(buttonWidget().isSelected, true);
     expect(find.byIcon(Icons.account_box), findsNothing);
     expect(find.byIcon(Icons.ac_unit), findsOneWidget);
+  });
+
+  testWidgets('The visualDensity of M3 IconButton can be configured by IconButtonTheme, '
+      'but cannot be configured by ThemeData - M3' , (WidgetTester tester) async {
+    Future<void> buildTest({VisualDensity? iconButtonThemeVisualDensity, VisualDensity? themeVisualDensity}) async {
+      return tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+              iconButtonTheme: IconButtonThemeData(
+                  style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity)
+              ),
+              visualDensity: themeVisualDensity
+          ),
+          home: Material(
+            child: Center(
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.play_arrow),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.standard);
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(iconButtonThemeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(40, 40)));
+
+    await buildTest(iconButtonThemeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(64, 64)));
+
+    // ThemeData.visualDensity will be ignored because useMaterial3 is true
+    await buildTest(themeVisualDensity: VisualDensity.standard);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: VisualDensity.compact);
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(themeVisualDensity: const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
   });
 
   group('IconTheme tests in Material 3', () {

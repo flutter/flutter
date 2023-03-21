@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -43,10 +41,9 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-
-  ProcessManager processManager;
-  TestUsage usage;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
+  late TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -75,7 +72,7 @@ void main() {
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
-    void Function() onRun,
+    void Function()? onRun,
     String generator = _defaultGenerator,
   }) {
     return FakeCommand(
@@ -95,7 +92,7 @@ void main() {
   // Returns the command matching the build_windows call to build.
   FakeCommand buildCommand(String buildMode, {
     bool verbose = false,
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -923,7 +920,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(usage.events, contains(
         const TestUsageEvent('code-size-analysis', 'windows'),
     ));
@@ -974,7 +971,7 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   });
 
   @override
-  final String cmakePath;
+  final String? cmakePath;
 
   @override
   final String cmakeGenerator;

@@ -390,7 +390,7 @@ List<Object?> _makeArray(int length) {
   return List<Object?>.filled(length, null);
 }
 
-/// This helper method becomes an noop when compiled with dart2js on
+/// This helper method becomes an no-op when compiled with dart2js on
 /// with high level of optimizations enabled.
 @pragma('dart2js:tryInline')
 @pragma('dart2js:as:trust')

@@ -26,7 +26,7 @@ abstract class TokenTemplate {
   /// Defaults to 'Theme.of(context).colorScheme.'
   final String colorSchemePrefix;
 
-  /// Optional prefix prepended to text style definitians.
+  /// Optional prefix prepended to text style definitions.
   ///
   /// Defaults to 'Theme.of(context).textTheme.'
   final String textThemePrefix;
@@ -97,15 +97,27 @@ abstract class TokenTemplate {
   /// If there is a value for the given token, this will return
   /// the value prepended with [colorSchemePrefix].
   ///
-  /// Otherwise it will return 'null'.
+  /// Otherwise it will return [defaultValue].
   ///
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
-  String color(String colorToken) {
+  String color(String colorToken, [String defaultValue = 'null']) {
     return tokens.containsKey(colorToken)
       ? '$colorSchemePrefix${tokens[colorToken]}'
-      : 'null';
+      : defaultValue;
   }
+
+  /// Generate a [ColorScheme] color name for the given token or a transparent
+  /// color if there is no value for the token.
+  ///
+  /// If there is a value for the given token, this will return
+  /// the value prepended with [colorSchemePrefix].
+  ///
+  /// Otherwise it will return 'Colors.transparent'.
+  ///
+  /// See also:
+  ///   * [componentColor], that provides support for an optional opacity.
+  String? colorOrTransparent(String token) => color(token, 'Colors.transparent');
 
   /// Generate a [ColorScheme] color name for the given component's color
   /// with opacity if available.
@@ -133,13 +145,17 @@ abstract class TokenTemplate {
   }
 
   /// Generate the opacity value for the given token.
-  String? opacity(String token) {
-    final dynamic value = tokens[token];
+  String? opacity(String token) => _numToString(tokens[token]);
+
+  String? _numToString(Object? value, [int? digits]) {
     if (value == null) {
       return null;
     }
-    if (value is double) {
-      return value.toString();
+    if (value is num) {
+      if (value == double.infinity) {
+        return 'double.infinity';
+      }
+      return digits == null ? value.toString() : value.toStringAsFixed(digits);
     }
     return tokens[value].toString();
   }
@@ -149,23 +165,58 @@ abstract class TokenTemplate {
     return tokens[tokens['$componentToken.elevation']!]!.toString();
   }
 
+  /// Generate a size value for the given component token.
+  ///
+  /// Non-square sizes are specified as width and height.
+  String size(String componentToken) {
+    final String sizeToken = '$componentToken.size';
+    if (!tokens.containsKey(sizeToken)) {
+      final String widthToken = '$componentToken.width';
+      final String heightToken = '$componentToken.height';
+      if (!tokens.containsKey(widthToken) && !tokens.containsKey(heightToken)) {
+        throw Exception('Unable to find width, height, or size tokens for $componentToken');
+      }
+      final String? width = _numToString(tokens.containsKey(widthToken) ? tokens[widthToken]! as num : double.infinity, 0);
+      final String? height = _numToString(tokens.containsKey(heightToken) ? tokens[heightToken]! as num : double.infinity, 0);
+      return 'const Size($width, $height)';
+    }
+    return 'const Size.square(${_numToString(tokens[sizeToken])})';
+  }
+
   /// Generate a shape constant for the given component token.
   ///
   /// Currently supports family:
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
-  String shape(String componentToken) {
+  String shape(String componentToken, [String prefix = 'const ']) {
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
-        return 'const RoundedRectangleBorder(borderRadius: '
-            'BorderRadius.only('
-            'topLeft: Radius.circular(${shape['topLeft']}), '
-            'topRight: Radius.circular(${shape['topRight']}), '
-            'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
-            'bottomRight: Radius.circular(${shape['bottomRight']})))';
-      case 'SHAPE_FAMILY_CIRCULAR':
-        return 'const StadiumBorder()';
+        final double topLeft = shape['topLeft'] as double;
+        final double topRight = shape['topRight'] as double;
+        final double bottomLeft = shape['bottomLeft'] as double;
+        final double bottomRight = shape['bottomRight'] as double;
+        if (topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight) {
+          if (topLeft == 0) {
+            return '${prefix}RoundedRectangleBorder()';
+          }
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular($topLeft)))';
+        }
+        if (topLeft == topRight && bottomLeft == bottomRight) {
+          return '${prefix}RoundedRectangleBorder(borderRadius: BorderRadius.vertical('
+            '${topLeft > 0 ? 'top: Radius.circular($topLeft)':''}'
+            '${topLeft > 0 && bottomLeft > 0 ? ',':''}'
+            '${bottomLeft > 0 ? 'bottom: Radius.circular($bottomLeft)':''}'
+            '))';
+        }
+        return '${prefix}RoundedRectangleBorder(borderRadius: '
+          'BorderRadius.only('
+          'topLeft: Radius.circular(${shape['topLeft']}), '
+          'topRight: Radius.circular(${shape['topRight']}), '
+          'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
+          'bottomRight: Radius.circular(${shape['bottomRight']})))';
+    case 'SHAPE_FAMILY_CIRCULAR':
+        return '${prefix}StadiumBorder()';
     }
     print('Unsupported shape family type: ${shape['family']} for $componentToken');
     return '';
@@ -177,12 +228,23 @@ abstract class TokenTemplate {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (tokens['$componentToken.width'] ?? 1.0) as double;
+    final double width = (tokens['$componentToken.width'] ?? tokens['$componentToken.height'] ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
     return '$textThemePrefix${tokens["$componentToken.text-style"]}';
+  }
+
+  String textStyleWithColor(String componentToken) {
+    if (!tokens.containsKey('$componentToken.text-style')) {
+      return 'null';
+    }
+    String style = textStyle(componentToken);
+    if (tokens.containsKey('$componentToken.color')) {
+      style = '$style?.copyWith(color: ${componentColor(componentToken)})';
+    }
+    return style;
   }
 }

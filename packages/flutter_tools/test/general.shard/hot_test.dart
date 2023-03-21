@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -16,12 +16,12 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -116,8 +116,8 @@ void main() {
 
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    FileSystem fileSystem;
-    TestUsage testUsage;
+    late FileSystem fileSystem;
+    late TestUsage testUsage;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -125,7 +125,7 @@ void main() {
     });
 
     group('fails to setup', () {
-      TestHotRunnerConfig failingTestingConfig;
+      late TestHotRunnerConfig failingTestingConfig;
       setUp(() {
         failingTestingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: false,
@@ -174,13 +174,13 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           reassembleHelper: (
-            List<FlutterDevice> flutterDevices,
-            Map<FlutterDevice, List<FlutterView>> viewCache,
-            void Function(String message) onSlow,
+            List<FlutterDevice?> flutterDevices,
+            Map<FlutterDevice?, List<FlutterView>> viewCache,
+            void Function(String message)? onSlow,
             String reloadMessage,
-            String fastReassembleClassName,
+            String? fastReassembleClassName,
           ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
+              <FlutterView?, FlutterVmService?>{null: null},
               false,
               true,
             ),
@@ -198,7 +198,7 @@ void main() {
     });
 
     group('shutdown hook tests', () {
-      TestHotRunnerConfig shutdownTestingConfig;
+      late TestHotRunnerConfig shutdownTestingConfig;
 
       setUp(() {
         shutdownTestingConfig = TestHotRunnerConfig();
@@ -250,7 +250,7 @@ void main() {
     });
 
     group('successful hot restart', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: true,
@@ -279,7 +279,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,
@@ -318,7 +318,7 @@ void main() {
     });
 
     group('successful hot reload', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotReloadSetup: true,
@@ -349,7 +349,7 @@ void main() {
           },
         );
 
-        (fakeFlutterDevice.devFS as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
+        (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
         final OperationResult result = await HotRunner(
           devices,
@@ -359,13 +359,13 @@ void main() {
           stopwatchFactory: fakeStopwatchFactory,
           reloadSourcesHelper: (
             HotRunner hotRunner,
-            List<FlutterDevice> flutterDevices,
-            bool pause,
+            List<FlutterDevice?> flutterDevices,
+            bool? pause,
             Map<String, dynamic> firstReloadDetails,
-            String targetPlatform,
-            String sdkName,
-            bool emulator,
-            String reason,
+            String? targetPlatform,
+            String? sdkName,
+            bool? emulator,
+            String? reason,
           ) async {
             firstReloadDetails['finalLibraryCount'] = 2;
             firstReloadDetails['receivedLibraryCount'] = 3;
@@ -374,13 +374,13 @@ void main() {
             return OperationResult.ok;
           },
           reassembleHelper: (
-            List<FlutterDevice> flutterDevices,
-            Map<FlutterDevice, List<FlutterView>> viewCache,
-            void Function(String message) onSlow,
+            List<FlutterDevice?> flutterDevices,
+            Map<FlutterDevice?, List<FlutterView>> viewCache,
+            void Function(String message)? onSlow,
             String reloadMessage,
-            String fastReassembleClassName,
+            String? fastReassembleClassName,
           ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
+              <FlutterView?, FlutterVmService?>{null: null},
               false,
               true,
             ),
@@ -421,7 +421,7 @@ void main() {
     });
 
     group('hot restart that failed to sync dev fs', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotRestartSetup: true,
@@ -455,7 +455,7 @@ void main() {
     });
 
     group('hot reload that failed to sync dev fs', () {
-      TestHotRunnerConfig testingConfig;
+      late TestHotRunnerConfig testingConfig;
       setUp(() {
         testingConfig = TestHotRunnerConfig(
           successfulHotReloadSetup: true,
@@ -490,7 +490,7 @@ void main() {
   });
 
   group('hot attach', () {
-    FileSystem fileSystem;
+    late FileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -561,10 +561,10 @@ class FakeDevFs extends Fake implements DevFS {
   List<Uri> sources = <Uri>[];
 
   @override
-  DateTime lastCompiled;
+  DateTime? lastCompiled;
 
   @override
-  PackageConfig lastPackageConfig;
+  PackageConfig? lastPackageConfig;
 
   @override
   Set<String> assetPathsToEvict = <String>{};
@@ -573,7 +573,10 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict= <String>{};
 
   @override
-  Uri baseUri;
+  Set<String> scenePathsToEvict= <String>{};
+
+  @override
+  Uri? baseUri;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -608,8 +611,8 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     return true;
   }
@@ -624,7 +627,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   bool stoppedEchoingDeviceLog = false;
-  Future<UpdateFSReport> Function() updateDevFSReportCallback;
+  late Future<UpdateFSReport> Function() updateDevFSReportCallback;
 
   @override
   final FakeDevice device;
@@ -635,55 +638,55 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  DevFS devFS = FakeDevFs();
+  DevFS? devFS = FakeDevFs();
 
   @override
   FlutterVmService get vmService => FakeFlutterVmService();
 
   @override
-  ResidentCompiler generator;
+  ResidentCompiler? generator;
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    Uri mainUri,
-    String target,
-    AssetBundle bundle,
-    DateTime firstBuildTime,
+    Uri? mainUri,
+    String? target,
+    AssetBundle? bundle,
+    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String projectRootPath,
-    String pathToReload,
-    @required String dillOutputPath,
-    @required List<Uri> invalidatedFiles,
-    @required PackageConfig packageConfig,
+    String? projectRootPath,
+    String? pathToReload,
+    required String dillOutputPath,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
 }
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
-    @required Device device,
-    @required this.exception,
-    @required ResidentCompiler generator,
-  })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+    required Device device,
+    required this.exception,
+    required ResidentCompiler generator,
+  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
-    ReloadSources reloadSources,
-    Restart restart,
-    CompileExpression compileExpression,
-    GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    ReloadSources? reloadSources,
+    Restart? restart,
+    CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
+    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
     bool cacheStartupProfile = false,
-    bool ipv6 = false,
-    int hostVmServicePort,
-    int ddsPort,
+    bool? ipv6 = false,
+    int? hostVmServicePort,
+    int? ddsPort,
     bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
@@ -692,19 +695,19 @@ class TestFlutterDevice extends FlutterDevice {
 
 class TestHotRunnerConfig extends HotRunnerConfig {
   TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
-  bool successfulHotRestartSetup;
-  bool successfulHotReloadSetup;
+  bool? successfulHotRestartSetup;
+  bool? successfulHotReloadSetup;
   bool shutdownHookCalled = false;
   bool updateDevFSCompleteCalled = false;
 
   @override
-  Future<bool> setupHotRestart() async {
+  Future<bool?> setupHotRestart() async {
     assert(successfulHotRestartSetup != null, 'setupHotRestart is not expected to be called in this test.');
     return successfulHotRestartSetup;
   }
 
   @override
-  Future<bool> setupHotReload() async {
+  Future<bool?> setupHotReload() async {
     assert(successfulHotReloadSetup != null, 'setupHotReload is not expected to be called in this test.');
     return successfulHotReloadSetup;
   }
@@ -749,7 +752,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform platform, { @required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

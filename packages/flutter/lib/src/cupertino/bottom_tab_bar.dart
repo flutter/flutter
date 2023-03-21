@@ -15,7 +15,7 @@ import 'theme.dart';
 const double _kTabBarHeight = 50.0;
 
 const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x4C000000),
+  color: Color(0x4D000000),
   darkColor: Color(0x29000000),
 );
 const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
@@ -37,7 +37,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
-/// When used as [CupertinoTabScaffold.tabBar], by default `CupertinoTabBar` has
+/// When used as [CupertinoTabScaffold.tabBar], by default [CupertinoTabBar] has
 /// its text scale factor set to 1.0 and does not respond to text scale factor
 /// changes from the operating system, to match the native iOS behavior. To override
 /// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
@@ -74,16 +74,12 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         width: 0.0, // 0.0 means one physical pixel
       ),
     ),
-  }) : assert(items != null),
-       assert(
+  }) : assert(
          items.length >= 2,
          "Tabs need at least 2 items to conform to Apple's HIG",
        ),
-       assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(iconSize != null),
-       assert(height != null && height >= 0.0),
-       assert(inactiveColor != null);
+       assert(height >= 0.0);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///
@@ -156,7 +152,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     final Color backgroundColor = CupertinoDynamicColor.resolve(
       this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,

@@ -181,7 +181,7 @@ Future<void> main() async {
 
 /// Calculates the smoothness measure from `scrollOffset` and `delays` list.
 ///
-/// Smoothness (`abs_jerk`) is measured by  the absolute value of the discrete
+/// Smoothness (`abs_jerk`) is measured by the absolute value of the discrete
 /// 2nd derivative of the scroll offset.
 ///
 /// It was experimented that jerk (3rd derivative of the position) is a good

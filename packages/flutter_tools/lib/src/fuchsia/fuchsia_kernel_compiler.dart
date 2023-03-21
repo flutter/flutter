@@ -48,7 +48,6 @@ class FuchsiaKernelCompiler {
       throwToolExit('Fuchsia platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
-      '--no-sound-null-safety',
       '--target',
       'flutter_runner',
       '--platform',
@@ -70,7 +69,7 @@ class FuchsiaKernelCompiler {
       '$multiRootScheme:///$target',
     ];
 
-    final String? engineDartBinaryPath = globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String? engineDartBinaryPath = globals.artifacts?.getArtifactPath(Artifact.engineDartBinary);
     if (engineDartBinaryPath == null) {
       throwToolExit('Engine dart binary not found at "$engineDartBinaryPath"');
     }

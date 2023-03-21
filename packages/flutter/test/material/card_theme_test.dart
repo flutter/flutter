@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,9 +16,16 @@ void main() {
     expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
   });
 
+  test('CardTheme lerp special cases', () {
+    expect(CardTheme.lerp(null, null, 0), const CardTheme());
+    const CardTheme theme = CardTheme();
+    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: theme,
       home: const Scaffold(
         body: Card(),
       ),
@@ -27,9 +35,9 @@ void main() {
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, Colors.white);
-    expect(material.shadowColor, Colors.black);
-    expect(material.surfaceTintColor, Colors.blue); // Default primary color
+    expect(material.color, theme.colorScheme.surface);
+    expect(material.shadowColor, theme.colorScheme.shadow);
+    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint); // Default primary color
     expect(material.elevation, 1.0);
     expect(container.margin, const EdgeInsets.all(4.0));
     expect(material.shape, const RoundedRectangleBorder(

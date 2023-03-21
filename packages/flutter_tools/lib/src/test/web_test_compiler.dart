@@ -49,22 +49,14 @@ class WebTestCompiler {
     required List<String> testFiles,
     required BuildInfo buildInfo,
   }) async {
-    LanguageVersion languageVersion = LanguageVersion(2, 8);
-    HostArtifact platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
-    // TODO(zanderso): to support autodetect this would need to partition the source code into a
-    // a sound and unsound set and perform separate compilations.
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillArtifact = HostArtifact.webPlatformKernelDill;
-      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-        extraFrontEndOptions.add('--no-sound-null-safety');
-      }
-    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-        extraFrontEndOptions.add('--sound-null-safety');
-      }
-    }
+    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    const String platformDillName = 'ddc_outline_sound.dill';
+
+    final String platformDillPath = _fileSystem.path.join(
+      getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,
+      platformDillName
+    );
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -116,9 +108,7 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: _artifacts
-        .getHostArtifact(platformDillArtifact)
-        .absolute.uri.toString(),
+      platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,

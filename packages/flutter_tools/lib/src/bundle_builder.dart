@@ -13,6 +13,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
+import 'build_system/targets/scene_importer.dart';
 import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -84,18 +85,16 @@ class BundleBuilder {
       }
       throwToolExit('Failed to build bundle.');
     }
-    if (depfilePath != null) {
-      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      final File outputDepfile = globals.fs.file(depfilePath);
-      if (!outputDepfile.parent.existsSync()) {
-        outputDepfile.parent.createSync(recursive: true);
-      }
-      final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-      depfileService.writeToFile(depfile, outputDepfile);
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = globals.fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
     }
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    depfileService.writeToFile(depfile, outputDepfile);
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -121,7 +120,6 @@ Future<AssetBundle?> buildAssets({
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
   );
@@ -135,9 +133,10 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds,
-  { Logger? loggerOverride }
-) async {
+  Map<String, AssetKind> entryKinds, {
+  Logger? loggerOverride,
+  required TargetPlatform targetPlatform,
+}) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
@@ -158,6 +157,13 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -166,7 +172,7 @@ Future<void> writeBundle(
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`.  However, we have to keep it this way since the
+        // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
@@ -186,6 +192,13 @@ Future<void> writeBundle(
                 input: input,
                 outputPath: file.path,
                 target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                json: targetPlatform == TargetPlatform.web_javascript,
+              );
+              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: input,
+                outputPath: file.path,
               );
               break;
           }

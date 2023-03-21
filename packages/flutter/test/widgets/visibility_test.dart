@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -423,5 +424,51 @@ void main() {
     log.clear();
 
     semantics.dispose();
+  });
+
+  testWidgets('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Visibility(
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: Text('hello', textDirection: TextDirection.ltr),
+      ),
+    );
+
+    // Root transform from the tester and then the picture created by the text.
+    expect(tester.layers, hasLength(2));
+    expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
+    expect(tester.layers.last, isA<PictureLayer>());
+  });
+
+  testWidgets('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverVisibility(
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              sliver: SliverList(
+              delegate: SliverChildListDelegate.fixed(
+                addRepaintBoundaries: false,
+                <Widget>[
+                  Text('hello'),
+                ],
+              ),
+            ))
+          ]
+        ),
+      ),
+    );
+
+    // This requires a lot more layers due to including sliver lists which do manage additional
+    // offset layers. Just trust me this is one fewer layers than before...
+    expect(tester.layers, hasLength(6));
+    expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
+    expect(tester.layers.last, isA<PictureLayer>());
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -26,8 +24,8 @@ void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -108,11 +106,11 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    String gradlew;
-    AndroidSdk mockAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late FakeProcessManager processManager;
+    late String gradlew;
+    late AndroidSdk mockAndroidSdk;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -429,7 +427,7 @@ void main() {
 
 Future<BuildApkCommand> runBuildApkCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
   final BuildApkCommand command = BuildApkCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);

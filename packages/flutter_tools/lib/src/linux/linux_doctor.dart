@@ -59,7 +59,7 @@ class LinuxDoctorValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    ValidationType validationType = ValidationType.installed;
+    ValidationType validationType = ValidationType.success;
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{

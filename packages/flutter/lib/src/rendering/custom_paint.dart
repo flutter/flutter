@@ -294,8 +294,7 @@ class CustomPainterSemantics {
     required this.properties,
     this.transform,
     this.tags,
-  }) : assert(rect != null),
-       assert(properties != null);
+  });
 
   /// Identifies this object in a list of siblings.
   ///
@@ -371,8 +370,7 @@ class RenderCustomPaint extends RenderProxyBox {
     this.isComplex = false,
     this.willChange = false,
     RenderBox? child,
-  }) : assert(preferredSize != null),
-       _painter = painter,
+  }) : _painter = painter,
        _foregroundPainter = foregroundPainter,
        _preferredSize = preferredSize,
        super(child);
@@ -467,7 +465,6 @@ class RenderCustomPaint extends RenderProxyBox {
   Size get preferredSize => _preferredSize;
   Size _preferredSize;
   set preferredSize(Size value) {
-    assert(value != null);
     if (preferredSize == value) {
       return;
     }
@@ -871,6 +868,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.checked != null) {
       config.isChecked = properties.checked;
+    }
+    if (properties.mixed != null) {
+      config.isCheckStateMixed = properties.mixed;
     }
     if (properties.selected != null) {
       config.isSelected = properties.selected!;
