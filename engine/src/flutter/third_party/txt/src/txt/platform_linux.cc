@@ -4,12 +4,6 @@
 
 #include "txt/platform.h"
 
-#ifdef FLUTTER_USE_FONTCONFIG
-#include "third_party/skia/include/ports/SkFontMgr_fontconfig.h"
-#else
-#include "third_party/skia/include/ports/SkFontMgr_directory.h"
-#endif
-
 namespace txt {
 
 std::vector<std::string> GetDefaultFontFamilies() {
@@ -17,11 +11,7 @@ std::vector<std::string> GetDefaultFontFamilies() {
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
-#ifdef FLUTTER_USE_FONTCONFIG
-  return SkFontMgr_New_FontConfig(nullptr);
-#else
-  return SkFontMgr_New_Custom_Directory("/usr/share/fonts/");
-#endif
+  return SkFontMgr::RefDefault();
 }
 
 }  // namespace txt
