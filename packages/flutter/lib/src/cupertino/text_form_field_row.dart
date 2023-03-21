@@ -104,6 +104,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     this.prefix,
     this.padding,
     this.controller,
+    this.onChanged,
     String? initialValue,
     FocusNode? focusNode,
     BoxDecoration? decoration,
@@ -133,7 +134,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     int? minLines,
     bool expands = false,
     int? maxLength,
-    ValueChanged<String>? onChanged,
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
@@ -259,7 +259,8 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
-
+  /// {@macro flutter.material.CupertinoFormRow.onChanged}
+  final ValueChanged<String>? onChanged;
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
@@ -334,6 +335,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
         _effectiveController!.text = widget.initialValue!;
       });
     }
+    _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController!.text);
+
+
   }
 
   void _handleControllerChanged() {

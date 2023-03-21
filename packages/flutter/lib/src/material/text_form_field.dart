@@ -98,6 +98,7 @@ class TextFormField extends FormField<String> {
   TextFormField({
     super.key,
     this.controller,
+    this.onChanged,
     String? initialValue,
     FocusNode? focusNode,
     InputDecoration? decoration = const InputDecoration(),
@@ -128,7 +129,6 @@ class TextFormField extends FormField<String> {
     int? minLines,
     bool expands = false,
     int? maxLength,
-    ValueChanged<String>? onChanged,
     GestureTapCallback? onTap,
     TapRegionCallback? onTapOutside,
     VoidCallback? onEditingComplete,
@@ -246,7 +246,8 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
-
+  /// {@macro flutter.material.TextField.onChanged}
+  final ValueChanged<String>? onChanged;
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
@@ -343,6 +344,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     // setState will be called in the superclass, so even though state is being
     // manipulated, no setState call is needed here.
     _effectiveController.text = widget.initialValue ?? '';
+    _textFormField.onChanged?.call(_effectiveController.text);
     super.reset();
   }
 
