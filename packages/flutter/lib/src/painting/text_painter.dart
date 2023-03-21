@@ -17,6 +17,7 @@ import 'dart:ui' as ui show
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:characters/characters.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
@@ -799,21 +800,42 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
+  // Find the characters that `index` of code-point belong to.
+  // Then return characters' grapheme cluster length.
+  int _getCharactersGraphemeClusterLengthAtIndex(String flattenedText,
+      int index) {
+    CharacterRange characterRange = flattenedText.characters.iterator;
+    while (characterRange.moveNext()) {
+      int graphemeClusterLength = characterRange.utf16CodeUnits.length;
+      int start = characterRange.stringBeforeLength;
+      int end = start + graphemeClusterLength;
+      // if the index is between start and end that mean in character.
+      bool indexIsInCurrentCharacter = start <= index && index <= end;
+      if (indexIsInCurrentCharacter) {
+        return graphemeClusterLength;
+      }
+    }
+    return 1;
+  }
+
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
-    final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
+    int firstOrPrevIdx = max(0, offset - 1);
+    final int? prevCodeUnit = _text!.codeUnitAt(firstOrPrevIdx);
     if (prevCodeUnit == null) {
       return null;
     }
-
     // If the upstream character is a newline, cursor is at start of next line
     const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
     final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
-    int graphemeClusterLength = needsSearch ? 2 : 1;
+    // Get the characters grapheme cluster length.
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(
+        flattenedText, firstOrPrevIdx);
+
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int prevRuneOffset = offset - graphemeClusterLength;
@@ -856,13 +878,16 @@ class TextPainter {
   Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
     // We cap the offset at the final index of the _text.
-    final int? nextCodeUnit = _text!.codeUnitAt(min(offset, flattenedText.length - 1));
+    int nextCodeUnitIdx = min(offset, flattenedText.length - 1);
+    final int? nextCodeUnit = _text!.codeUnitAt(nextCodeUnitIdx);
     if (nextCodeUnit == null) {
       return null;
     }
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
-    int graphemeClusterLength = needsSearch ? 2 : 1;
+    // Get the characters grapheme cluster length.
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(
+        flattenedText, nextCodeUnitIdx);
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int nextRuneOffset = offset + graphemeClusterLength;
