@@ -459,8 +459,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         break;
 
       case _CheckboxType.adaptive:
-        final TargetPlatform platform = Theme.of(context).platform;
-        switch (platform) {
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
