@@ -298,8 +298,7 @@ Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
       final FileSystemEntityType type = fileSystem.typeSync(item);
 
       if (type == FileSystemEntityType.notFound) {
-        throwToolExit(
-            "You provided the path '$item', however it does not exist on disk");
+        throwToolExit("You provided the path '$item', however it does not exist on disk");
       }
     }
   }
