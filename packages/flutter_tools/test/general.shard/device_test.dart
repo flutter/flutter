@@ -716,7 +716,7 @@ void main() {
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.enabled,
         enableDartProfiling: false,
         enableEmbedderApi: true,
       );
@@ -755,7 +755,7 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -792,7 +792,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=0',
         ].join(' '),
       );
@@ -871,7 +871,7 @@ void main() {
         BuildInfo.debug,
         traceAllowlist: 'foo',
         cacheSkSL: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -890,7 +890,7 @@ void main() {
           '--cache-sksl',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
         ].join(' '),
       );
     });
@@ -914,7 +914,7 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -951,7 +951,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=1',
         ].join(' '),
       );
