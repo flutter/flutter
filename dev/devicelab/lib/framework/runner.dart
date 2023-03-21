@@ -172,6 +172,8 @@ Future<TaskResult> runTask(
       ..add('--browser-name=android-chrome');
   }
 
+  stdout.writeln('Starting process for task: [$taskName]');
+
   final Process runner = await startProcess(
     dartBin,
     <String>[
@@ -208,7 +210,7 @@ Future<TaskResult> runTask(
       }
     }
     if (!silent) {
-      stdout.writeln('[$taskName] [STDOUT] $line');
+      stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
     }
   });
 
@@ -216,7 +218,7 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[$taskName] [STDERR] $line');
+    stderr.writeln('[${DateTime.now()}] [STDERR] $line');
   });
 
   try {
