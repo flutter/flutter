@@ -52,35 +52,6 @@
         {
             "archives": [
                 {
-                    "name": "android_debug_unopt",
-                    "type": "gcs",
-                    "base_path": "out/android_release/zip_archives/",
-                    "include_paths": []
-                }
-            ],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_custom_vars": {
-                "download_android_deps": false
-            },
-            "gn": [
-                "--android",
-                "--unoptimized",
-                "--runtime-mode=debug",
-                "--no-lto"
-            ],
-            "name": "android_debug_unopt",
-            "ninja": {
-                "config": "android_debug_unopt",
-                "targets": []
-            },
-            "tests": []
-        },
-        {
-            "archives": [
-                {
                     "name": "android_debug",
                     "type": "gcs",
                     "base_path": "out/android_debug/zip_archives/",
