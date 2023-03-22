@@ -887,17 +887,25 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    Widget? leading = widget.leading;
-    if (leading == null && widget.automaticallyImplyLeading) {
+    Widget? leading;
+    if (widget.automaticallyImplyLeading) {
       if (hasDrawer) {
-        leading = DrawerButton(
-          style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
+        leading = IconButton(
+          icon: const Icon(Icons.menu),
+          iconSize: overallIconTheme.size ?? 24,
+          onPressed: _handleDrawerButton,
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
         // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
         // are migrated.
         // https://github.com/flutter/flutter/issues/80256.
-      } else if ((!hasEndDrawer && canPop) || (parentRoute?.impliesAppBarDismissal ?? false)) {
-        leading = useCloseButton ? const CloseButton() : const BackButton();
+      } else if ((!hasEndDrawer && canPop) ||
+          (parentRoute?.impliesAppBarDismissal ?? false)) {
+        if (useCloseButton) {
+          leading = const CloseButton();
+        } else {
+          leading = widget.leading ?? const BackButton();
+        }
       }
     }
     if (leading != null) {
