@@ -163,7 +163,7 @@ void main() {
     expect(unselectedLabel.text.style!.fontSize, equals(14.0));
     expect(unselectedLabel.text.style!.color, equals(theme.colorScheme.onSurfaceVariant));
 
-      // Test default labelPadding.
+    // Test default labelPadding.
     await tester.pumpWidget(buildTabBar(
       secondaryTabBar: true,
       tabs: _sizedTabs,

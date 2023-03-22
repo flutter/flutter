@@ -708,8 +708,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
-  })  : _isPrimary = true,
-        assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = true,
+       assert(indicator != null || (indicatorWeight > 0.0));
 
   /// Creates a Material Design secondary tab bar.
   ///
@@ -757,8 +757,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
-  })  : _isPrimary = false,
-        assert(indicator != null || (indicatorWeight > 0.0));
+  }) : _isPrimary = false,
+       assert(indicator != null || (indicatorWeight > 0.0));
 
   /// Typically a list of two or more [Tab] widgets.
   ///
