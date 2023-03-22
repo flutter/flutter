@@ -50,8 +50,7 @@ class Utf8Decoder extends Converter<List<int>, String> {
 
   @override
   String convert(List<int> input, [int start = 0, int? end]) {
-    const cnv.Utf8Decoder decoder = cnv.Utf8Decoder(allowMalformed: true);
-    final String result = decoder.convert(input, start, end);
+    final String result = _systemDecoder.convert(input, start, end);
     // Finding a Unicode replacement character indicates that the input
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
