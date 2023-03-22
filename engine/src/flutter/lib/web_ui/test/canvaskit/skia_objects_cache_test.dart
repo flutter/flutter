@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:js/js.dart';
 
 import 'package:test/bootstrap/browser.dart';
@@ -363,7 +365,8 @@ class TestSkDeletableMock {
     deleteCount++;
   }
 
-  JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
+  JsConstructor get constructor => TestJsConstructor(name:
+      'TestSkDeletable'.toJS);
 }
 
 @JS()
@@ -373,14 +376,14 @@ class TestSkDeletable implements SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
     return TestSkDeletable._(
-        isDeleted: allowInterop(() => mock.isDeleted()),
-        delete: allowInterop(() => mock.delete()),
+        isDeleted: () { return mock.isDeleted(); }.toJS,
+        delete: () { return mock.delete(); }.toJS,
         constructor: mock.constructor);
   }
 
   external factory TestSkDeletable._({
-    bool Function() isDeleted,
-    void Function() delete,
+    JSFunction isDeleted,
+    JSFunction delete,
     JsConstructor constructor});
 }
 
@@ -388,7 +391,7 @@ class TestSkDeletable implements SkDeletable {
 @anonymous
 @staticInterop
 class TestJsConstructor implements JsConstructor {
-  external factory TestJsConstructor({String name});
+  external factory TestJsConstructor({JSString name});
 }
 
 class TestSkiaObject extends ManagedSkiaObject<SkPaint> {

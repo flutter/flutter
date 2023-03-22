@@ -43,8 +43,8 @@ class HighContrastSupport {
 
   /// Reference to css media query that indicates whether high contrast is on.
   final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(_highContrastMediaQueryString);
-  late final DomEventListener _onHighContrastChangeListener =
-      allowInterop(_onHighContrastChange);
+  late final JSFunction _onHighContrastChangeListener =
+      _onHighContrastChange.toJS;
 
   bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
 
@@ -64,7 +64,7 @@ class HighContrastSupport {
     }
   }
 
-  void _onHighContrastChange(DomEvent event) {
+  JSVoid _onHighContrastChange(DomEvent event) {
     final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {
@@ -1031,7 +1031,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
   ///
   /// Updates the [_platformBrightness] with the new user preference.
-  DomEventListener? _brightnessMediaQueryListener;
+  JSFunction? _brightnessMediaQueryListener;
 
   /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
   void _addBrightnessMediaQueryListener() {
@@ -1039,12 +1039,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         ? ui.Brightness.dark
         : ui.Brightness.light);
 
-    _brightnessMediaQueryListener = allowInterop((DomEvent event) {
+    _brightnessMediaQueryListener = (DomEvent event) {
       final DomMediaQueryListEvent mqEvent =
           event as DomMediaQueryListEvent;
       _updatePlatformBrightness(
           mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    });
+    }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 

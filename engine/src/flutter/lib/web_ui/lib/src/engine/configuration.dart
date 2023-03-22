@@ -44,6 +44,7 @@
 @JS()
 library configuration;
 
+import 'dart:js_interop';
 import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'canvaskit/renderer.dart';
@@ -266,16 +267,35 @@ external JsFlutterConfiguration? get _jsConfiguration;
 class JsFlutterConfiguration {}
 
 extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
-  external String? get canvasKitBaseUrl;
-  external String? get canvasKitVariant;
-  external bool? get canvasKitForceCpuOnly;
-  external double? get canvasKitMaximumSurfaces;
-  external bool? get debugShowSemanticsNodes;
+  @JS('canvasKitBaseUrl')
+  external JSString? get _canvasKitBaseUrl;
+  String? get canvasKitBaseUrl => _canvasKitBaseUrl?.toDart;
+
+  @JS('canvasKitVariant')
+  external JSString? get _canvasKitVariant;
+  String? get canvasKitVariant => _canvasKitVariant?.toDart;
+
+  @JS('canvasKitForceCpuOnly')
+  external JSBoolean? get _canvasKitForceCpuOnly;
+  bool? get canvasKitForceCpuOnly => _canvasKitForceCpuOnly?.toDart;
+
+  @JS('canvasKitMaximumSurfaces')
+  external JSNumber? get _canvasKitMaximumSurfaces;
+  double? get canvasKitMaximumSurfaces => _canvasKitMaximumSurfaces?.toDart;
+
+  @JS('debugShowSemanticsNodes')
+  external JSBoolean? get _debugShowSemanticsNodes;
+  bool? get debugShowSemanticsNodes => _debugShowSemanticsNodes?.toDart;
+
   external DomElement? get hostElement;
-  external String? get renderer;
+
+  @JS('renderer')
+  external JSString? get _renderer;
+  String? get renderer => _renderer?.toDart;
 }
 
 /// A JavaScript entrypoint that allows developer to set rendering backend
 /// at runtime before launching the application.
 @JS('window.flutterWebRenderer')
-external String? get _requestedRendererType;
+external JSString? get __requestedRendererType;
+String? get _requestedRendererType => __requestedRendererType?.toDart;
