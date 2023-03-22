@@ -96,6 +96,7 @@ void main() {
               '--disable-server-feature-search',
               '--sdk',
               'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
             ],
             exitCode: SIGABRT,
             stderr: stderr,
