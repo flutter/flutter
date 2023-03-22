@@ -247,6 +247,8 @@ void EmbedderConfigBuilder::SetIsolateCreateCallbackHook() {
 }
 
 void EmbedderConfigBuilder::SetSemanticsCallbackHooks() {
+  project_args_.update_semantics_callback2 =
+      context_.GetUpdateSemanticsCallback2Hook();
   project_args_.update_semantics_callback =
       context_.GetUpdateSemanticsCallbackHook();
   project_args_.update_semantics_node_callback =
