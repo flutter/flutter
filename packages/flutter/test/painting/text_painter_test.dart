@@ -150,6 +150,24 @@ void main() {
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
+  test('TextPainter caret emoji with more then two UTF-16 codepoints', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+    // Need add more different length emoji after this issue fixed https://github.com/flutter/flutter/issues/36062
+    const String text = '👩‍🚀';
+    painter.text = const TextSpan(text: text);
+    painter.layout(maxWidth: 10000);
+    expect(text.length, 5);
+    Offset caretOffset = painter.getOffsetForCaret(
+        const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(
+        const ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 28);
+    painter.dispose();
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
