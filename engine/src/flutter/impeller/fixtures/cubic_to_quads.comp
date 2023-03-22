@@ -28,6 +28,19 @@ config;
 shared uint quad_counts[512];
 shared uint count_sums[512];
 
+uint ComputePosition(uint index) {
+  if (index < gl_SubgroupSize) {
+    return count_sums[index];
+  }
+  int position = -1;
+  uint count_sum = count_sums[index];
+  do {
+    position += int(gl_SubgroupSize);
+    count_sum += count_sums[position];
+  } while (position < index);
+  return count_sum;
+}
+
 void main() {
   uint ident = gl_GlobalInvocationID.x;
   CubicData cubic;
@@ -45,9 +58,9 @@ void main() {
 
   count_sums[ident] = subgroupInclusiveAdd(quad_counts[ident]);
 
-  quads.count = count_sums[cubics.count - 1];
+  quads.count = ComputePosition(cubics.count - 1);
+  uint offset = ComputePosition(ident) - quad_count;
   for (uint i = 0; i < quad_count; i++) {
-    uint offset = count_sums[ident] - quad_count;
     quads.data[offset + i] = GenerateQuadraticFromCubic(cubic, i, quad_count);
   }
 }
