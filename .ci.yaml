@@ -343,7 +343,6 @@ targets:
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
-    bringup: true # New target: https://github.com/flutter/flutter/pull/115511
     timeout: 60
     properties:
       dependencies: >-
