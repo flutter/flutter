@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  // Regression test for <TODO: file issue>
+  // Regression test for https://github.com/flutter/flutter/issues/123283
   testWidgets('throws if `shape` requested in Material 3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
