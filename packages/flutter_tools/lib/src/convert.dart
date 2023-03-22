@@ -31,9 +31,8 @@ class Utf8Codec extends Encoding {
   final bool reportErrors;
 
   @override
-  Converter<List<int>, String> get decoder => reportErrors
-    ? const Utf8Decoder()
-    : const Utf8Decoder(reportErrors: false);
+  Converter<List<int>, String> get decoder =>
+      reportErrors ? Utf8Decoder() : Utf8Decoder(reportErrors: false);
 
   @override
   Converter<String, List<int>> get encoder => cnv.utf8.encoder;
@@ -44,14 +43,16 @@ class Utf8Codec extends Encoding {
 
 const Encoding utf8 = Utf8Codec();
 
-class Utf8Decoder extends cnv.Utf8Decoder {
-  const Utf8Decoder({this.reportErrors = true}) : super(allowMalformed: true);
+class Utf8Decoder extends Converter<List<int>, String> {
+  Utf8Decoder({this.reportErrors = true})
+      : decoder = const cnv.Utf8Decoder(allowMalformed: true);
 
+  final cnv.Utf8Decoder decoder;
   final bool reportErrors;
 
   @override
-  String convert(List<int> codeUnits, [ int start = 0, int? end ]) {
-    final String result = super.convert(codeUnits, start, end);
+  String convert(List<int> input, [int start = 0, int? end]) {
+    final String result = decoder.convert(input, start, end);
     // Finding a unicode replacement character indicates that the input
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
@@ -60,8 +61,14 @@ class Utf8Decoder extends cnv.Utf8Decoder {
         'The Flutter team would greatly appreciate if you could file a bug explaining '
         'exactly what you were doing when this happened:\n'
         'https://github.com/flutter/flutter/issues/new/choose\n'
-        'The source bytes were:\n$codeUnits\n\n');
+        'The source bytes were:\n$input\n\n');
     }
     return result;
   }
+
+  @override
+  ByteConversionSink startChunkedConversion(Sink<String> sink) {
+    return decoder.startChunkedConversion(sink);
+  }
+
 }
