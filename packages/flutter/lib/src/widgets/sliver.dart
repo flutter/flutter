@@ -976,6 +976,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// A sliver that places multiple box children in a linear array along the main
 /// axis.
 ///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
 /// Each child is forced to have the [SliverConstraints.crossAxisExtent] in the
 /// cross axis but determines its own main axis extent.
 ///
@@ -1071,8 +1073,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
          addSemanticIndexes: addSemanticIndexes,
        ));
 
-  /// A sliver that places multiple box children, separated by box widgets, in a linear array along the main
-  /// axis.
+  /// A sliver that places multiple box children, separated by box widgets, in a
+  /// linear array along the main axis.
   ///
   /// This constructor is appropriate for sliver lists with a large (or
   /// infinite) number of children because the builder is called only for those
@@ -1202,6 +1204,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 
 /// A sliver that places multiple box children with the same main axis extent in
 /// a linear array.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFixedExtentList] places its children in a linear array along the main
 /// axis starting at offset zero and without gaps. Each child is forced to have
@@ -1379,6 +1383,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 }
 
 /// A sliver that places multiple box children in a two dimensional arrangement.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverGrid] places its children in arbitrary positions determined by
 /// [gridDelegate]. Each child is forced to have the size specified by the
@@ -1961,7 +1967,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// See also:
 ///
 ///  * [Opacity], which can apply a uniform alpha effect to its child using the
-///    RenderBox layout protocol.
+///    [RenderBox] layout protocol.
 ///  * [AnimatedOpacity], which uses an animation internally to efficiently
 ///    animate [Opacity].
 ///  * [SliverVisibility], which can hide a child more efficiently (albeit less
@@ -2041,6 +2047,10 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// When [ignoringSemantics] is true, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
+///
+/// See also:
+///
+///  * [IgnorePointer], the equivalent widget for boxes.
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
   ///
@@ -2101,6 +2111,10 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
 /// To hide a sliver widget from view while it is
 /// not needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
+///
+/// See also:
+///
+///  * [Offstage], the equivalent widget for boxes.
 class SliverOffstage extends SingleChildRenderObjectWidget {
   /// Creates a sliver that visually hides its sliver child.
   const SliverOffstage({
