@@ -1119,7 +1119,7 @@ class TextPainter {
     }
     // We cap the offset at the final index of plain text.
     int nextCodeUnitIdx = min(offset, plainTextLength - 1);
-    final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
+    final int nextCodeUnit = plainText.codeUnitAt(nextCodeUnitIdx);
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isHighSurrogate(nextCodeUnit) || _isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
