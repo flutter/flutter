@@ -153,6 +153,7 @@ document.head.appendChild(requireEl);
 /// this object is the module.
 String generateMainModule({
   required String entrypoint,
+  required bool nullAssertions,
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
@@ -167,6 +168,7 @@ require.config({
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
+  dart_sdk.dart.nonNullAsserts($nullAssertions);
   dart_sdk.dart.nativeNonNullAsserts($nativeNullAssertions);
 
   // See the generateMainModule doc comment.
