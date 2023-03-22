@@ -55,6 +55,13 @@ abstract class AssetBundle {
   /// Retrieve a binary resource from the asset bundle as a data stream.
   ///
   /// Throws an exception if the asset is not found.
+  ///
+  /// The returned [ByteData] can be converted to a [Uint8List] (a list of bytes)
+  /// using [ByteData.buffer] to obtain a [ByteBuffer], and then
+  /// [ByteBuffer.asUint8List] to obtain the byte list. Lists of bytes can be
+  /// used with APIs that accept [Uint8List] objects, such as
+  /// [decodeImageFromList], as well as any API that accepts a [List<int>], such
+  /// as [File.writeAsBytes] or [Utf8Codec.decode] (accessible via [utf8]).
   Future<ByteData> load(String key);
 
   /// Retrieve a binary resource from the asset bundle as an immutable

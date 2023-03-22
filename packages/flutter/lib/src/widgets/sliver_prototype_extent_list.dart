@@ -10,6 +10,8 @@ import 'sliver.dart';
 /// A sliver that places its box children in a linear array and constrains them
 /// to have the same extent as a prototype item along the main axis.
 ///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
 /// [SliverPrototypeExtentList] arranges its children in a line along
 /// the main axis starting at offset zero and without gaps. Each child is
 /// constrained to the same extent as the [prototypeItem] along the main axis
@@ -23,13 +25,12 @@ import 'sliver.dart';
 ///
 /// See also:
 ///
-///  * [SliverFixedExtentList], whose itemExtent is a pixel value.
+///  * [SliverFixedExtentList], whose children are forced to a given pixel
+///    extent.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [SliverFillViewport], which sizes its children based on the
 ///    size of the viewport, regardless of what else is in the scroll view.
-///  * [SliverList], which shows a list of variable-sized children in a
-///    viewport.
 class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places its box children in a linear array and
   /// constrains them to have the same extent as a prototype item along

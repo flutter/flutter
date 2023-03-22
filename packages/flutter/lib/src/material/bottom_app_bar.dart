@@ -81,8 +81,8 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   ///
-  /// Typically this the child will be a [Row], with the first child
-  /// being an [IconButton] with the [Icons.menu] icon.
+  /// Typically the child will be a [Row] whose first child
+  /// is an [IconButton] with the [Icons.menu] icon.
   final Widget? child;
 
   /// The amount of space to surround the child inside the bounds of the [BottomAppBar].

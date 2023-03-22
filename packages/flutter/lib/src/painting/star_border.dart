@@ -88,8 +88,9 @@ class StarBorder extends OutlinedBorder {
   /// This is a floating point number: if this is not a whole number, then an
   /// additional star point or corner shorter than the others will be added to
   /// finish the shape. Only whole-numbered values will yield a symmetric shape.
+  /// (This enables the number of points to be animated smoothly.)
   ///
-  /// For stars created with [StarBorder], this the number of points on
+  /// For stars created with [StarBorder], this is the number of points on
   /// the star. For polygons created with [StarBorder.polygon], this is the
   /// number of sides on the polygon.
   ///

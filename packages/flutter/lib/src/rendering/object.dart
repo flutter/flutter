@@ -4386,7 +4386,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// Disallows this fragment to merge any configuration into its parent's
   /// [SemanticsNode].
   ///
-  /// After calling this the fragment will only produce children to be added
+  /// After calling this, the fragment will only produce children to be added
   /// to the parent and it will return null for [config].
   void markAsExplicit();
 

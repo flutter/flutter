@@ -114,6 +114,8 @@ abstract class SliverPersistentHeaderDelegate {
 ///
 /// This is the layout primitive that [SliverAppBar] uses for its
 /// shrinking/growing effect.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 class SliverPersistentHeader extends StatelessWidget {
   /// Creates a sliver that varies its size when it is scrolled to the start of
   /// a viewport.

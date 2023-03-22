@@ -477,12 +477,17 @@ class RenderCustomPaint extends RenderProxyBox {
   /// The compositor contains a raster cache that holds bitmaps of layers in
   /// order to avoid the cost of repeatedly rendering those layers on each
   /// frame. If this flag is not set, then the compositor will apply its own
-  /// heuristics to decide whether the this layer is complex enough to benefit
-  /// from caching.
+  /// heuristics to decide whether the layer containing this render object is
+  /// complex enough to benefit from caching.
   bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This hint tells the compositor not to cache the layer containing this
+  /// render object because the cache will not be used in the future. If this
+  /// hint is not set, the compositor will apply its own heuristics to decide
+  /// whether this layer is likely to be reused in the future.
   bool willChange;
 
   @override
