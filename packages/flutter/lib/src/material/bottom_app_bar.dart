@@ -60,7 +60,7 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [clipBehavior] argument defaults to [Clip.none] and must not be null.
+  /// The [clipBehavior] argument defaults to [Clip.none].
   /// Additionally, [elevation] must be non-negative.
   ///
   /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
@@ -126,7 +126,7 @@ class BottomAppBar extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   ///
   /// Has no effect if there is no notch; see [shape].
   final Clip clipBehavior;
