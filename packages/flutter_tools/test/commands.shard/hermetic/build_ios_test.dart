@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -186,7 +185,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -206,7 +204,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -226,7 +223,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -234,7 +230,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+    final bool supported = BuildIOSCommand(verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
@@ -250,7 +246,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -277,7 +272,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -304,7 +298,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -330,7 +323,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -356,7 +348,6 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -406,7 +397,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -437,7 +427,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -472,7 +461,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -506,7 +494,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -535,7 +522,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -570,7 +556,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -605,7 +590,6 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -642,7 +626,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -676,7 +659,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -714,7 +696,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -748,7 +729,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -783,7 +763,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -820,7 +799,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -855,7 +833,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -891,7 +868,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -929,7 +905,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 

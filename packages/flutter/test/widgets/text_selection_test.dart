@@ -595,7 +595,6 @@ void main() {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
         expect(renderEditable.lastCause, SelectionChangedCause.tap);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -603,7 +602,6 @@ void main() {
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
         expect(renderEditable.lastCause, SelectionChangedCause.tap);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -628,7 +626,6 @@ void main() {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isFalse);
         expect(state.toggleToolbarCalled, isTrue);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -636,7 +633,6 @@ void main() {
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
         expect(renderEditable.lastCause, SelectionChangedCause.tap);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 

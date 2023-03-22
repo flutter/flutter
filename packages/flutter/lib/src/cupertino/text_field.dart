@@ -1032,7 +1032,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.longPress) {
           _editableText.bringIntoView(selection.extent);
         }
-        break;
     }
 
     switch (defaultTargetPlatform) {
@@ -1046,7 +1045,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.drag) {
           _editableText.hideToolbar();
         }
-        break;
     }
   }
 
@@ -1213,7 +1211,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-        break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -1224,7 +1221,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     final bool enabled = widget.enabled ?? true;

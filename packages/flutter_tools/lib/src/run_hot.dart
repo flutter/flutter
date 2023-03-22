@@ -253,7 +253,10 @@ class HotRunner extends ResidentRunner {
       await device!.initLogReader();
       device
         .developmentShaderCompiler
-        .configureCompiler(device.targetPlatform, enableImpeller: debuggingOptions.enableImpeller);
+        .configureCompiler(
+          device.targetPlatform,
+          impellerStatus: debuggingOptions.enableImpeller,
+        );
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -1039,16 +1042,6 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
-      globals.printStatus('');
-      globals.printStatus(
-        'Running without sound null safety ⚠️',
-        emphasis: true,
-      );
-      globals.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
     globals.printStatus('');
     printDebuggerList();
   }
@@ -1401,25 +1394,18 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
-      break;
     case vm_service.EventKind.kPauseExit:
       message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-      break;
     case vm_service.EventKind.kPauseBreakpoint:
       message.write('paused in the debugger on a breakpoint');
-      break;
     case vm_service.EventKind.kPauseInterrupted:
       message.write('paused due in the debugger');
-      break;
     case vm_service.EventKind.kPauseException:
       message.write('paused in the debugger after an exception was thrown');
-      break;
     case vm_service.EventKind.kPausePostRequest:
       message.write('paused');
-      break;
     case '':
       message.write('paused for various reasons');
-      break;
     default:
       message.write('paused');
   }

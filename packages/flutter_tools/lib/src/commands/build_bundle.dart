@@ -15,7 +15,6 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
-    required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
@@ -101,18 +100,15 @@ class BuildBundleCommand extends BuildSubCommand {
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-        break;
       case TargetPlatform.windows_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-        break;
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -126,12 +122,9 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildInfo buildInfo = await getBuildInfo();
-    displayNullSafetyMode(buildInfo);
-
     await _bundleBuilder.build(
       platform: platform,
-      buildInfo: buildInfo,
+      buildInfo: await getBuildInfo(),
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),

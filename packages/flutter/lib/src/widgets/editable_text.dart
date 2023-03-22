@@ -1923,7 +1923,6 @@ class EditableText extends StatefulWidget {
           if (keyboardType != null) {
             return keyboardType;
           }
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2084,6 +2083,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
 
   late SpellCheckConfiguration _spellCheckConfiguration;
+  late TextStyle _style;
 
   /// Configuration that determines how spell check will be performed.
   ///
@@ -2237,7 +2237,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             ),
             SelectionChangedCause.toolbar,
           );
-          break;
       }
     }
     clipboardStatus.update();
@@ -2339,7 +2338,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           bringIntoView(textEditingValue.selection.extent);
-          break;
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           break;
@@ -2571,6 +2569,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    _style = MediaQuery.boldTextOf(context)
+        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : widget.style;
+
     final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
@@ -2664,14 +2666,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (widget.style != oldWidget.style) {
-      final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
+      _style = MediaQuery.boldTextOf(context)
+          ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
+          : widget.style;
       if (_hasInputConnection) {
         _textInputConnection!.setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         );
@@ -2817,7 +2821,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (!_isMultiline) {
           _finalizeEditing(action, shouldUnfocus: true);
         }
-        break;
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.next:
@@ -2825,7 +2828,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case TextInputAction.search:
       case TextInputAction.send:
         _finalizeEditing(action, shouldUnfocus: true);
-        break;
       case TextInputAction.continueAction:
       case TextInputAction.emergencyCall:
       case TextInputAction.join:
@@ -2835,7 +2837,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
         _finalizeEditing(action, shouldUnfocus: false);
-        break;
     }
   }
 
@@ -2892,7 +2893,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
@@ -2900,7 +2900,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
         _startCursorBlink();
@@ -2909,7 +2908,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController!.value = 0.0;
           _floatingCursorResetController!.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
         }
-        break;
     }
   }
 
@@ -2969,13 +2967,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           case TextInputAction.emergencyCall:
           case TextInputAction.newline:
             widget.focusNode.unfocus();
-            break;
           case TextInputAction.next:
             widget.focusNode.nextFocus();
-            break;
           case TextInputAction.previous:
             widget.focusNode.previousFocus();
-            break;
         }
       }
     }
@@ -3136,12 +3131,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
-      final TextStyle style = widget.style;
       _textInputConnection!
         ..setStyle(
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontWeight: style.fontWeight,
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         )
@@ -3204,13 +3198,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
-    final TextStyle style = widget.style;
     newConnection
       ..show()
       ..setStyle(
-        fontFamily: style.fontFamily,
-        fontSize: style.fontSize,
-        fontWeight: style.fontWeight,
+        fontFamily: _style.fontFamily,
+        fontSize: _style.fontSize,
+        fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
       )
@@ -3340,12 +3333,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
-        break;
       case SelectionChangedCause.keyboard:
         if (_hasFocus) {
           requestKeyboard();
         }
-        break;
     }
     if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();
@@ -3597,7 +3588,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             cause == SelectionChangedCause.drag) {
           bringIntoView(newSelection.extent);
         }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
@@ -3609,7 +3599,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             bringIntoView(newSelection.extent);
           }
         }
-        break;
     }
   }
 
@@ -4188,10 +4177,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // boundary, and do this instead:
         // final int graphemeStart = CharacterRange.at(string, extent.offset).stringBeforeLength - 1;
         caretOffset = math.max(0, extent.offset - 1);
-        break;
       case TextAffinity.downstream:
         caretOffset = extent.offset;
-        break;
     }
     // The line boundary range does not include some control characters
     // (most notably, Line Feed), in which case there's
@@ -4413,22 +4400,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             if (kIsWeb) {
               widget.focusNode.unfocus();
             }
-            break;
           case ui.PointerDeviceKind.mouse:
           case ui.PointerDeviceKind.stylus:
           case ui.PointerDeviceKind.invertedStylus:
           case ui.PointerDeviceKind.unknown:
             widget.focusNode.unfocus();
-            break;
           case ui.PointerDeviceKind.trackpad:
             throw UnimplementedError('Unexpected pointer down event for trackpad');
         }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         widget.focusNode.unfocus();
-        break;
     }
   }
 
@@ -4510,7 +4493,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     if (!widget.controller.value.composing.isCollapsed) {
                       return false;
                     }
-                    break;
                   case TargetPlatform.android:
                     // Gboard on Android puts non-CJK words in composing regions. Coalesce
                     // composing text in order to allow the saving of partial words in that
@@ -4618,6 +4600,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
+
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
@@ -4635,7 +4618,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
         }
       }
-      return TextSpan(style: widget.style, text: text);
+      return TextSpan(style: _style, text: text);
     }
     if (_placeholderLocation >= 0 && _placeholderLocation <= _value.text.length) {
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
@@ -4647,7 +4630,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       } else {
         placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size(100.0, 0.0)));
       }
-      return TextSpan(style: widget.style, children: <InlineSpan>[
+      return TextSpan(style: _style, children: <InlineSpan>[
           TextSpan(text: _value.text.substring(0, placeholderLocation)),
           ...placeholders,
           TextSpan(text: _value.text.substring(placeholderLocation)),
@@ -4666,7 +4649,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return buildTextSpanWithSpellCheckSuggestions(
         _value,
         composingRegionOutOfRange,
-        widget.style,
+        _style,
         _spellCheckConfiguration.misspelledTextStyle!,
         spellCheckResults!,
       );
@@ -4675,7 +4658,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
-      style: widget.style,
+      style: _style,
       withComposing: withComposing,
     );
   }

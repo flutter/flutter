@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -84,7 +85,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           Feedback.forLongPress(_state.context);
-          break;
       }
     }
   }
@@ -1137,7 +1137,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.extent);
         }
-        break;
     }
 
     switch (Theme.of(context).platform) {
@@ -1151,7 +1150,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.drag) {
           _editableText?.hideToolbar();
         }
-        break;
     }
   }
 
@@ -1193,6 +1191,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
+  Set<MaterialState> get _materialState {
+    return <MaterialState>{
+      if (!_isEnabled) MaterialState.disabled,
+      if (_isHovering) MaterialState.hovered,
+      if (_effectiveFocusNode.hasFocus) MaterialState.focused,
+      if (_hasError) MaterialState.error,
+    };
+  }
+
+  TextStyle _getInputStyleForState(TextStyle style) {
+    final ThemeData theme = Theme.of(context);
+    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!, _materialState);
+    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
+    return providedStyle.merge(stateStyle);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1206,7 +1220,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = (theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
+    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
@@ -1256,7 +1270,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         autocorrectionTextRectColor = selectionColor;
-        break;
 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
@@ -1274,7 +1287,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1284,7 +1296,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         cursorColor = _hasError ? _errorColor : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
@@ -1293,7 +1304,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         cursorColor = _hasError ? _errorColor : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
 
       case TargetPlatform.windows:
         forcePressEnabled = false;
@@ -1308,7 +1318,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     Widget child = RepaintBoundary(
@@ -1404,12 +1413,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      <MaterialState>{
-        if (!_isEnabled) MaterialState.disabled,
-        if (_isHovering) MaterialState.hovered,
-        if (focusNode.hasFocus) MaterialState.focused,
-        if (_hasError) MaterialState.error,
-      },
+      _materialState,
     );
 
     final int? semanticsMaxValueLength;
@@ -1455,6 +1459,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
+TextStyle? _m2StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  final ThemeData theme = Theme.of(context);
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: theme.disabledColor);
+  }
+  return TextStyle(color: theme.textTheme.titleMedium?.color);
+});
+
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
@@ -1466,6 +1478,13 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // Token database version: v0_162
+
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
+  }
+  return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
+});
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
