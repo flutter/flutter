@@ -518,7 +518,9 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
           final ShapeBorder shape = _shapeTween.evaluate(curvedAnimation)!;
           final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
-          final double topPadding = lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!;
+          final double topPadding = showFullScreenView
+            ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!
+            : 0.0;
 
           return FadeTransition(
             opacity: CurvedAnimation(
