@@ -251,7 +251,7 @@ void main() {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--web-resources-cdn']);
     final BuildInfo buildInfo =
         await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
     expect(buildInfo.dartDefines, contains(startsWith('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/')));
@@ -267,7 +267,7 @@ void main() {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=FLUTTER_WEB_CANVASKIT_URL=abcdefg']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--web-resources-cdn', '--dart-define=FLUTTER_WEB_CANVASKIT_URL=abcdefg']);
     final BuildInfo buildInfo =
         await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
