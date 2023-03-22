@@ -118,28 +118,23 @@ class BottomAppBar extends StatefulWidget {
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
   /// be rectangular with no notch.
   ///
-  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
-  /// spec defines the shape without a notch:
-  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
+  /// If the ambient [ThemeData.useMaterial3] is true,
+  /// then there is never a notch, and this property must be null.
+  /// (The Material 3 spec does not provide for a notch:
+  /// <https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9>.)
   final NotchedShape? shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   ///
-  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
-  /// spec defines the shape without a notch:
-  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
+  /// Has no effect if there is no notch; see [shape].
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
   /// notch.
   ///
-  /// Not used if [shape] is null.
-  ///
-  /// Ignored if the ambient [ThemeData.useMaterial3] is true; the Material 3
-  /// spec defines the shape without a notch:
-  ///   https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9
+  /// Has no effect if there is no notch; see [shape].
   final double notchMargin;
 
   /// The color used as an overlay on [color] to indicate elevation.
