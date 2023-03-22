@@ -105,6 +105,15 @@ abstract class SwapperElement extends RenderObjectElement {
     swapper = updateChild(swapper, widget.swapper, swapperIsOnTop);
     swapperIsOnTop = !swapperIsOnTop;
   }
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
