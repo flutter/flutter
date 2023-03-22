@@ -61,6 +61,10 @@ import 'package:flutter/widgets.dart';
 ///  * [Icon], used to show these icons.
 @staticIconProvider
 abstract final class CupertinoIcons {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  CupertinoIcons._();
+
   /// The icon font used for Cupertino icons.
   static const String iconFont = 'CupertinoIcons';
 
