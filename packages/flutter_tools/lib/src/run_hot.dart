@@ -1394,25 +1394,18 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
-      break;
     case vm_service.EventKind.kPauseExit:
       message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-      break;
     case vm_service.EventKind.kPauseBreakpoint:
       message.write('paused in the debugger on a breakpoint');
-      break;
     case vm_service.EventKind.kPauseInterrupted:
       message.write('paused due in the debugger');
-      break;
     case vm_service.EventKind.kPauseException:
       message.write('paused in the debugger after an exception was thrown');
-      break;
     case vm_service.EventKind.kPausePostRequest:
       message.write('paused');
-      break;
     case '':
       message.write('paused for various reasons');
-      break;
     default:
       message.write('paused');
   }

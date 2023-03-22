@@ -4741,10 +4741,8 @@ AttributedString _concatAttributedString({
     switch (otherTextDirection) {
       case TextDirection.rtl:
         otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
       case TextDirection.ltr:
         otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
     }
   }
   if (thisAttributedString.string.isEmpty) {

@@ -264,7 +264,6 @@ class EdgeDraggingAutoScroller {
           final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
           newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
-        break;
       case AxisDirection.right:
       case AxisDirection.down:
         if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
@@ -274,7 +273,6 @@ class EdgeDraggingAutoScroller {
           final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
           newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
-        break;
     }
 
     if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {
