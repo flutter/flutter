@@ -1051,15 +1051,14 @@ class TextPainter {
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
     }
-    final int prevCodeUnitIdx = max(0, offset - 1);
-    final int prevCodeUnit = plainText.codeUnitAt(prevCodeUnitIdx);
+    final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
 
     // If the upstream character is a newline, cursor is at start of next line
     const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
     final bool needsSearch = _isHighSurrogate(prevCodeUnit) || _isLowSurrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
-    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, prevCodeUnitIdx);
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, offset);
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int prevRuneOffset = offset - graphemeClusterLength;
@@ -1118,12 +1117,11 @@ class TextPainter {
       return null;
     }
     // We cap the offset at the final index of plain text.
-    final int nextCodeUnitIdx = min(offset, plainTextLength - 1);
-    final int nextCodeUnit = plainText.codeUnitAt(nextCodeUnitIdx);
+    final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isHighSurrogate(nextCodeUnit) || _isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
-    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, nextCodeUnitIdx);
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, offset);
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int nextRuneOffset = offset + graphemeClusterLength;
