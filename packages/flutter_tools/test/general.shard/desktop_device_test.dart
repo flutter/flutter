@@ -159,9 +159,10 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
           'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
           'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_18': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '18',
+          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '19',
         }
       ),
     ]);
@@ -189,6 +190,7 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        nullAssertions: true,
       ),
     );
 
