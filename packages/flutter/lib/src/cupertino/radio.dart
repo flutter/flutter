@@ -13,8 +13,10 @@ import 'toggleable.dart';
 // late SingingCharacter? _character;
 // late StateSetter setState;
 
-const double _kOuterRadius = 8.0;
-const double _kInnerRadius = 3.4;
+// const double _kOuterRadius = 8.0;
+// const double _kInnerRadius = 3.4;
+const double _kOuterRadius = 7.0;
+const double _kInnerRadius = 2.975;
 
 // The relative values needed to transform a color to it's equivilant focus
 // outline color.
@@ -82,6 +84,7 @@ class CupertinoRadio<T> extends StatefulWidget {
     required this.onChanged,
     this.toggleable = false,
     this.activeColor,
+    this.inactiveColor,
     this.fillColor,
     this.focusColor,
     this.focusNode,
@@ -157,6 +160,14 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeColor;
+
+  /// The color to use when this radio button is selected.
+  ///
+  /// Defaults to [ColorScheme.secondary].
+  ///
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
+  final Color? inactiveColor;
 
   /// {@template flutter.material.radio.fillColor}
   /// The color that fills the radio button, in all [MaterialState]s.
@@ -260,7 +271,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
     final Color effectiveActiveColor = widget.activeColor
       ?? CupertinoColors.activeBlue;
-    const Color effectiveInactiveColor = CupertinoColors.inactiveGray;
+    final Color effectiveInactiveColor = widget.inactiveColor
+      ?? CupertinoColors.white;
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
@@ -271,6 +283,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
     final Color effectiveActivePressedOverlayColor =
       HSLColor.fromColor(effectiveActiveColor).withLightness(0.45).toColor();
+
+    final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -286,6 +300,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
           ..isFocused = focused
           ..activeColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
+          ..fillColor = effectiveFillColor
           ..value = value,
       ),
     );
@@ -303,6 +318,16 @@ class _RadioPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  Color get fillColor => _fillColor!;
+  Color? _fillColor;
+  set fillColor(Color value) {
+    if (value == _fillColor) {
+      return;
+    }
+    _fillColor = value;
+    notifyListeners();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
 
@@ -315,11 +340,15 @@ class _RadioPainter extends ToggleablePainter {
       ..strokeWidth = 0.1;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
+    paint.style = PaintingStyle.stroke;
+    paint.color = CupertinoColors.inactiveGray;
+    canvas.drawCircle(center, _kOuterRadius, paint);
+
     if (value ?? false) {
       paint.style = PaintingStyle.fill;
       paint.color = activeColor;
       canvas.drawCircle(center, _kOuterRadius, paint);
-      paint.color = CupertinoColors.white;
+      paint.color = fillColor;
       canvas.drawCircle(center, _kInnerRadius, paint);
     }
 
