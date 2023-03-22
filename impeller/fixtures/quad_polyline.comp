@@ -28,6 +28,19 @@ config;
 shared uint point_counts[512];
 shared uint count_sums[512];
 
+uint ComputePosition(uint index) {
+  if (index < gl_SubgroupSize) {
+    return count_sums[index];
+  }
+  int position = -1;
+  uint count_sum = count_sums[index];
+  do {
+    position += int(gl_SubgroupSize);
+    count_sum += count_sums[position];
+  } while (position < index);
+  return count_sum;
+}
+
 void main() {
   uint ident = gl_GlobalInvocationID.x;
   QuadData quad;
@@ -45,15 +58,16 @@ void main() {
   }
   count_sums[ident] = subgroupInclusiveAdd(point_counts[ident]);
 
-  polyline.count = count_sums[quads.count - 1] + 1;
+  polyline.count = ComputePosition(quads.count - 1) + 1;
   polyline.data[0] = quads.data[0].p1;
 
   // In theory this could be unrolled into a separate shader, but in practice
   // line_count usually pretty low and currently lack benchmark data to show
   // how much it would even help.
+  uint position = ComputePosition(ident);
+  uint offset = position - uint(decomposition.line_count);
   for (uint i = 1; i < decomposition.line_count; i += 1) {
-    uint offset = count_sums[ident] - uint(decomposition.line_count);
     polyline.data[offset + i] = GenerateLineFromQuad(quad, i, decomposition);
   }
-  polyline.data[count_sums[ident]] = quad.p2;
+  polyline.data[position] = quad.p2;
 }
