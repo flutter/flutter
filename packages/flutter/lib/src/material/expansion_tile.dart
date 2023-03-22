@@ -15,6 +15,91 @@ import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
+/// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
+///
+/// It can be useful to expand or collapse an [ExpansionTile]
+/// programatically, for example to reconfigure an existing expansion
+/// tile based on a system event. To do so, create an [ExpansionTile]
+/// with an [ExpansionTileController] that's owned by a stateful widget.
+///
+/// The controller's [expand] and [collapse] methods cause the
+/// the [ExpansionTile] to rebuild, so they may not be called from
+/// a build method.
+class ExpansionTileController {
+  /// Create a controller to be used with [ExpansionTile.controller].
+  ExpansionTileController();
+
+  _ExpansionTileState? _state;
+
+  /// Whether the [ExpansionTile] built with this controller is in expanded state.
+  ///
+  /// This property doesn't take the animation into account. It reports `true`
+  /// even if the expansion animation is not completed.
+  ///
+  /// See also:
+  ///
+  ///  * [expand], which expands the [ExpansionTile].
+  ///  * [collapse], which collapses the [ExpansionTile].
+  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
+  bool get isExpanded {
+    assert(_state != null);
+    return _state!._isExpanded;
+  }
+
+  /// Expands the [ExpansionTile] that was built with this controller;
+  ///
+  /// Normally the tile is expanded automatically when the user taps on the header.
+  /// It is sometimes useful to trigger the expansion programmatically due
+  /// to external changes.
+  ///
+  /// If the tile is already in the expanded state (see [isExpanded]), calling
+  /// this method has no effect.
+  ///
+  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
+  /// not be called from a build method.
+  ///
+  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
+  ///
+  /// See also:
+  ///
+  ///  * [collapse], which collapses the tile.
+  ///  * [isExpanded] to check whether the tile is expanded.
+  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
+  void expand() {
+    assert(_state != null);
+    if (!isExpanded) {
+      _state!._toggleExpansion();
+    }
+  }
+
+  /// Collapses the [ExpansionTile] that was built with this controller.
+  ///
+  /// Normally the tile is collapsed automatically when the user tap on the header.
+  /// It can be useful sometime to trigger the collapse programmatically due
+  /// to some external changes.
+  ///
+  /// If the tile is already in the collapsed state (see [isExpanded]), calling
+  /// this method has no effect.
+  ///
+  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
+  /// not be called from a build method.
+  ///
+  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
+  ///
+  /// See also:
+  ///
+  ///  * [expand], which expands the tile.
+  ///  * [isExpanded] to check whether the tile is expanded.
+  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
+  void collapse() {
+    assert(_state != null);
+    if (isExpanded) {
+      _state!._toggleExpansion();
+    }
+  }
+}
+
+
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
 /// the tile to reveal or hide the [children].
 ///
@@ -38,6 +123,13 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// can be customized.
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates how an [ExpansionTileController] can be used to
+/// programatically expand or collapse an [ExpansionTile].
+///
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -74,11 +166,13 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedShape,
     this.clipBehavior,
     this.controlAffinity,
+    this.controller,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
        );
+
 
   /// A widget to display before the title.
   ///
@@ -310,6 +404,9 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
+  ///
+  final ExpansionTileController? controller;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -349,15 +446,23 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     if (_isExpanded) {
       _controller.value = 1.0;
     }
+
+    if (widget.controller != null) {
+      assert(widget.controller!._state == null);
+      widget.controller!._state = this;
+    }
   }
 
   @override
   void dispose() {
+    if (widget.controller != null) {
+      widget.controller!._state = null;
+    }
     _controller.dispose();
     super.dispose();
   }
 
-  void _handleTap() {
+  void _toggleExpansion() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -372,9 +477,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           });
         });
       }
-      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
+      PageStorage.of(context).writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
+  }
+
+  void _handleTap() {
+    _toggleExpansion();
   }
 
   // Platform or null affinity defaults to trailing.
