@@ -691,7 +691,7 @@ void main() {
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-191, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(192, epsilon: 1));
 
-    // Finish the rest of the animan
+    // Finish the rest of the animation
     await tester.pump(const Duration(milliseconds: 350));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
