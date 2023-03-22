@@ -1051,14 +1051,15 @@ class TextPainter {
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
     }
-    final int prevCodeUnit = plainText.codeUnitAt(max(0, offset - 1));
+    final int prevCodeUnitIdx = max(0, offset - 1);
+    final int prevCodeUnit = plainText.codeUnitAt(prevCodeUnitIdx);
 
     // If the upstream character is a newline, cursor is at start of next line
     const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
     final bool needsSearch = _isHighSurrogate(prevCodeUnit) || _isLowSurrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
-    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, offset);
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, prevCodeUnitIdx);
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int prevRuneOffset = offset - graphemeClusterLength;
@@ -1100,8 +1101,8 @@ class TextPainter {
       final int graphemeClusterLength = characterRange.utf16CodeUnits.length;
       final int start = characterRange.stringBeforeLength;
       final int end = start + graphemeClusterLength;
-      // if the index is between start and end that mean in character.
-      final bool indexIsInCurrentCharacter = start <= index && index <= end;
+      // if the index is between [start,end) that mean in character.
+      final bool indexIsInCurrentCharacter = start <= index && index < end;
       if (indexIsInCurrentCharacter) {
         return graphemeClusterLength;
       }
@@ -1117,11 +1118,12 @@ class TextPainter {
       return null;
     }
     // We cap the offset at the final index of plain text.
+    final int nextCodeUnitIdx = min(offset, plainTextLength - 1);
     final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
     final bool needsSearch = _isHighSurrogate(nextCodeUnit) || _isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
-    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, offset);
+    int graphemeClusterLength = _getCharactersGraphemeClusterLengthAtIndex(plainText, nextCodeUnitIdx);
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
       final int nextRuneOffset = offset + graphemeClusterLength;
