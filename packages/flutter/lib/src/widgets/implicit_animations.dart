@@ -368,7 +368,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       switch (status) {
         case AnimationStatus.completed:
           widget.onEnd?.call();
-          break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
         case AnimationStatus.reverse:

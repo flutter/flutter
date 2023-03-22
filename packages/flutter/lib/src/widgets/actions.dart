@@ -1196,10 +1196,8 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       switch (FocusManager.instance.highlightMode) {
         case FocusHighlightMode.touch:
           _canShowHighlight = false;
-          break;
         case FocusHighlightMode.traditional:
           _canShowHighlight = true;
-          break;
       }
     });
   }
