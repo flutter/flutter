@@ -54,6 +54,27 @@ class AccessibilityBridge
   ///             To flush the pending updates, call the CommitUpdates().
   ///
   /// @param[in]  node           A reference to the semantics node update.
+  void AddFlutterSemanticsNodeUpdate(const FlutterSemanticsNode2& node);
+
+  //------------------------------------------------------------------------------
+  /// @brief      Adds a custom semantics action update to the pending semantics
+  ///             update. Calling this method alone will NOT update the
+  ///             semantics tree. To flush the pending updates, call the
+  ///             CommitUpdates().
+  ///
+  /// @param[in]  action           A reference to the custom semantics action
+  ///                              update.
+  void AddFlutterSemanticsCustomActionUpdate(
+      const FlutterSemanticsCustomAction2& action);
+
+  //------------------------------------------------------------------------------
+  /// @brief      Adds a semantics node update to the pending semantics update.
+  ///             Calling this method alone will NOT update the semantics tree.
+  ///             To flush the pending updates, call the CommitUpdates().
+  ///
+  /// @param[in]  node           A reference to the semantics node update.
+  //  TODO(loicsharma): Remove this as FlutterSemanticsNode is deprecated.
+  //  See: https://github.com/flutter/flutter/issues/121176
   void AddFlutterSemanticsNodeUpdate(const FlutterSemanticsNode& node);
 
   //------------------------------------------------------------------------------
@@ -64,6 +85,9 @@ class AccessibilityBridge
   ///
   /// @param[in]  action           A reference to the custom semantics action
   ///                              update.
+  //  TODO(loicsharma): Remove this as FlutterSemanticsCustomAction is
+  //  deprecated.
+  //  See: https://github.com/flutter/flutter/issues/121176
   void AddFlutterSemanticsCustomActionUpdate(
       const FlutterSemanticsCustomAction& action);
 
@@ -245,7 +269,18 @@ class AccessibilityBridge
                                    const SemanticsNode& node);
   void SetTreeData(const SemanticsNode& node, ui::AXTreeUpdate& tree_update);
   SemanticsNode FromFlutterSemanticsNode(
+      const FlutterSemanticsNode2& flutter_node);
+  SemanticsCustomAction FromFlutterSemanticsCustomAction(
+      const FlutterSemanticsCustomAction2& flutter_custom_action);
+
+  // TODO(loicsharma): Remove this as FlutterSemanticsNode is deprecated.
+  // See: https://github.com/flutter/flutter/issues/121176
+  SemanticsNode FromFlutterSemanticsNode(
       const FlutterSemanticsNode& flutter_node);
+
+  // TODO(loicsharma): Remove this as FlutterSemanticsCustomAction is
+  // deprecated.
+  // See: https://github.com/flutter/flutter/issues/121176
   SemanticsCustomAction FromFlutterSemanticsCustomAction(
       const FlutterSemanticsCustomAction& flutter_custom_action);
 
