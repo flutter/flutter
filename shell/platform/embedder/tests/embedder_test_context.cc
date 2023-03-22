@@ -121,6 +121,11 @@ void EmbedderTestContext::AddNativeCallback(const char* name,
   native_resolver_->AddNativeCallback({name}, function);
 }
 
+void EmbedderTestContext::SetSemanticsUpdateCallback2(
+    SemanticsUpdateCallback2 update_semantics_callback) {
+  update_semantics_callback2_ = std::move(update_semantics_callback);
+}
+
 void EmbedderTestContext::SetSemanticsUpdateCallback(
     SemanticsUpdateCallback update_semantics_callback) {
   update_semantics_callback_ = std::move(update_semantics_callback);
@@ -152,6 +157,20 @@ void EmbedderTestContext::PlatformMessageCallback(
 void EmbedderTestContext::SetLogMessageCallback(
     const LogMessageCallback& callback) {
   log_message_callback_ = callback;
+}
+
+FlutterUpdateSemanticsCallback2
+EmbedderTestContext::GetUpdateSemanticsCallback2Hook() {
+  if (update_semantics_callback2_ == nullptr) {
+    return nullptr;
+  }
+
+  return [](const FlutterSemanticsUpdate2* update, void* user_data) {
+    auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
+    if (context->update_semantics_callback2_) {
+      context->update_semantics_callback2_(update);
+    }
+  };
 }
 
 FlutterUpdateSemanticsCallback
