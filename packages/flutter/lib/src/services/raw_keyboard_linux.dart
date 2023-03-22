@@ -279,25 +279,19 @@ class GLFWKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierAlt;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierNumericPad;
-        break;
       default:
         break;
     }
@@ -422,26 +416,20 @@ class GtkKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierMod1;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
       case shiftLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierMod2;
-        break;
       default:
         break;
     }

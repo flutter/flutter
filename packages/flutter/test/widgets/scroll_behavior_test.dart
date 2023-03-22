@@ -59,7 +59,6 @@ void main() {
       case TargetPlatform.iOS:
         // Does not throw if we aren't using it.
         defaultBehavior.buildScrollbar(capturedContext, child, details);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -72,7 +71,6 @@ void main() {
               'description', contains('details.controller != null')),
           ),
         );
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 

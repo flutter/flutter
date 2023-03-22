@@ -112,7 +112,6 @@ class InkHighlight extends InteractiveInkFeature {
     switch (_shape) {
       case BoxShape.circle:
         canvas.drawCircle(rect.center, _radius ?? Material.defaultSplashRadius, paint);
-        break;
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {
           final RRect clipRRect = RRect.fromRectAndCorners(
@@ -124,7 +123,6 @@ class InkHighlight extends InteractiveInkFeature {
         } else {
           canvas.drawRect(rect, paint);
         }
-        break;
     }
     canvas.restore();
   }

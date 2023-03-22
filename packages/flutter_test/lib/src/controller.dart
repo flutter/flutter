@@ -1599,16 +1599,12 @@ abstract class WidgetController {
       switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
-          break;
         case AxisDirection.down:
           moveStep = Offset(0, -delta);
-          break;
         case AxisDirection.left:
           moveStep = Offset(delta, 0);
-          break;
         case AxisDirection.right:
           moveStep = Offset(-delta, 0);
-          break;
       }
       await dragUntilVisible(
         finder,

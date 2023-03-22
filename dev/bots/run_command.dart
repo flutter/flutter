@@ -113,7 +113,6 @@ Future<Command> startCommand(String executable, List<String> arguments, {
         switch (outputMode) {
           case OutputMode.print:
             print(line);
-            break;
           case OutputMode.capture:
             break;
         }
@@ -127,7 +126,6 @@ Future<Command> startCommand(String executable, List<String> arguments, {
         switch (outputMode) {
           case OutputMode.print:
             print(line);
-            break;
           case OutputMode.capture:
             break;
         }
@@ -188,7 +186,6 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
       case OutputMode.capture:
         print(result.flattenedStdout);
         print(result.flattenedStderr);
-        break;
     }
     String allOutput;
     if (failureMessage == null) {

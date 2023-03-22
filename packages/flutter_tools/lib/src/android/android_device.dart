@@ -552,16 +552,12 @@ class AndroidDevice extends Device {
     switch (devicePlatform) {
       case TargetPlatform.android_arm:
         androidArch = AndroidArch.armeabi_v7a;
-        break;
       case TargetPlatform.android_arm64:
         androidArch = AndroidArch.arm64_v8a;
-        break;
       case TargetPlatform.android_x64:
         androidArch = AndroidArch.x86_64;
-        break;
       case TargetPlatform.android_x86:
         androidArch = AndroidArch.x86;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -949,25 +945,18 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
       switch (key) {
         case AndroidMemoryInfo._kJavaHeapKey:
           androidMemoryInfo.javaHeap = value;
-          break;
         case AndroidMemoryInfo._kNativeHeapKey:
           androidMemoryInfo.nativeHeap = value;
-          break;
         case AndroidMemoryInfo._kCodeKey:
           androidMemoryInfo.code = value;
-          break;
         case AndroidMemoryInfo._kStackKey:
           androidMemoryInfo.stack = value;
-          break;
         case AndroidMemoryInfo._kGraphicsKey:
           androidMemoryInfo.graphics = value;
-          break;
         case AndroidMemoryInfo._kPrivateOtherKey:
           androidMemoryInfo.privateOther = value;
-          break;
         case AndroidMemoryInfo._kSystemKey:
           androidMemoryInfo.system = value;
-          break;
       }
   });
   return androidMemoryInfo;

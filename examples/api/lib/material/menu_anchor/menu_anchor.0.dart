@@ -178,22 +178,17 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuEntry.hideMessage:
       case MenuEntry.showMessage:
         showingMessage = !showingMessage;
-        break;
       case MenuEntry.colorMenu:
         break;
       case MenuEntry.colorRed:
         backgroundColor = Colors.red;
-        break;
       case MenuEntry.colorGreen:
         backgroundColor = Colors.green;
-        break;
       case MenuEntry.colorBlue:
         backgroundColor = Colors.blue;
-        break;
     }
   }
 }

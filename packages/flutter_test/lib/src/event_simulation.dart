@@ -80,22 +80,16 @@ class KeyEventSimulator {
     switch (platform) {
       case 'android':
         map = kAndroidToPhysicalKey;
-        break;
       case 'fuchsia':
         map = kFuchsiaToPhysicalKey;
-        break;
       case 'macos':
         map = kMacOsToPhysicalKey;
-        break;
       case 'ios':
         map = kIosToPhysicalKey;
-        break;
       case 'linux':
         map = kLinuxToPhysicalKey;
-        break;
       case 'windows':
         map = kWindowsToPhysicalKey;
-        break;
       case 'web':
         // web doesn't have int type code
         return -1;
@@ -122,10 +116,8 @@ class KeyEventSimulator {
       switch (platform) {
         case 'android':
           map = kAndroidToLogicalKey;
-          break;
         case 'fuchsia':
           map = kFuchsiaToLogicalKey;
-          break;
         case 'macos':
         // macOS doesn't do key codes, just scan codes.
           return -1;
@@ -137,10 +129,8 @@ class KeyEventSimulator {
           return -1;
         case 'linux':
           map = kGlfwToLogicalKey;
-          break;
         case 'windows':
           map = kWindowsToLogicalKey;
-          break;
       }
       int? keyCode;
       for (final int code in map.keys) {
@@ -212,25 +202,18 @@ class KeyEventSimulator {
       switch (platform) {
         case 'android':
           map = kAndroidToPhysicalKey;
-          break;
         case 'fuchsia':
           map = kFuchsiaToPhysicalKey;
-          break;
         case 'macos':
           map = kMacOsToPhysicalKey;
-          break;
         case 'ios':
           map = kIosToPhysicalKey;
-          break;
         case 'linux':
           map = kLinuxToPhysicalKey;
-          break;
         case 'web':
           map = kWebToPhysicalKey;
-          break;
         case 'windows':
           map = kWindowsToPhysicalKey;
-          break;
       }
     }
     PhysicalKeyboardKey? result;
@@ -291,21 +274,18 @@ class KeyEventSimulator {
         }
         result['scanCode'] = scanCode;
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
-        break;
       case 'fuchsia':
         result['hidUsage'] = physicalKey.usbHidUsage;
         if (resultCharacter.isNotEmpty) {
           result['codePoint'] = resultCharacter.codeUnitAt(0);
         }
         result['modifiers'] = _getFuchsiaModifierFlags(key, isDown);
-        break;
       case 'linux':
         result['toolkit'] = 'glfw';
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
         result['unicodeScalarValues'] = resultCharacter.isNotEmpty ? resultCharacter.codeUnitAt(0) : 0;
-        break;
       case 'macos':
         result['keyCode'] = scanCode;
         if (resultCharacter.isNotEmpty) {
@@ -313,13 +293,11 @@ class KeyEventSimulator {
           result['charactersIgnoringModifiers'] = resultCharacter;
         }
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
-        break;
       case 'ios':
         result['keyCode'] = scanCode;
         result['characters'] = resultCharacter;
         result['charactersIgnoringModifiers'] = resultCharacter;
         result['modifiers'] = _getIOSModifierFlags(key, isDown);
-        break;
       case 'windows':
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
@@ -327,10 +305,8 @@ class KeyEventSimulator {
           result['characterCodePoint'] = resultCharacter.codeUnitAt(0);
         }
         result['modifiers'] = _getWindowsModifierFlags(key, isDown);
-        break;
       case 'web':
         assignWeb();
-        break;
     }
     return result;
   }

@@ -903,7 +903,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
               onCancel == null) {
             return false;
           }
-          break;
         default:
           return false;
       }
@@ -971,7 +970,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       case _DragState.ready:
         _checkCancel();
         resolve(GestureDisposition.rejected);
-        break;
 
       case _DragState.possible:
         if (_pastSlopTolerance) {
@@ -994,13 +992,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
             _checkTapUp(currentUp!);
           }
         }
-        break;
 
       case _DragState.accepted:
         // For the case when the pointer has been accepted as a drag.
         // Meaning [_checkTapDown] and [_checkDragStart] have already ran.
         _checkDragEnd();
-        break;
     }
 
     _stopDeadlineTimer();

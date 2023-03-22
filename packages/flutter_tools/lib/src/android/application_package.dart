@@ -327,7 +327,6 @@ class ApkManifestData {
           case 'A':
             currentElement
                 .addChild(_Attribute.fromLine(line, currentElement));
-            break;
           case 'E':
             final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);

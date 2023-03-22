@@ -728,10 +728,8 @@ void main() {
               buttonBox.localToGlobal(buttonBox.size.bottomRight(Offset.zero)),
               equals(itemBox.localToGlobal(itemBox.size.bottomRight(Offset.zero))),
             );
-            break;
           case TextDirection.ltr:
             expect(buttonBox.localToGlobal(Offset.zero), equals(itemBox.localToGlobal(Offset.zero)));
-            break;
         }
         expect(buttonBox.size.height, equals(itemBox.size.height));
       }

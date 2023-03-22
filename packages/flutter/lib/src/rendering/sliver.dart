@@ -1452,13 +1452,11 @@ abstract class RenderSliver extends RenderObject {
       switch (direction) {
         case GrowthDirection.forward:
           dx1 = dx2 = dy1 = dy2 = d;
-          break;
         case GrowthDirection.reverse:
           temp = p0;
           p0 = p1;
           p1 = temp;
           dx1 = dx2 = dy1 = dy2 = -d;
-          break;
       }
       if (p0.dx == p1.dx) {
         dx2 = -dx2;
@@ -1517,7 +1515,6 @@ abstract class RenderSliver extends RenderObject {
               offset.translate(constraints.crossAxisExtent * 3.0 / 4.0, arrowExtent - padding),
               constraints.normalizedGrowthDirection,
             );
-            break;
           case Axis.horizontal:
             canvas.drawLine(
               offset,
@@ -1538,7 +1535,6 @@ abstract class RenderSliver extends RenderObject {
               offset.translate(arrowExtent - padding, constraints.crossAxisExtent * 3.0 / 4.0),
               constraints.normalizedGrowthDirection,
             );
-            break;
         }
       }
       return true;
@@ -1564,18 +1560,15 @@ mixin RenderSliverHelpers implements RenderSliver {
       case AxisDirection.up:
       case AxisDirection.left:
         rightWayUp = false;
-        break;
       case AxisDirection.down:
       case AxisDirection.right:
         rightWayUp = true;
-        break;
     }
     switch (constraints.growthDirection) {
       case GrowthDirection.forward:
         break;
       case GrowthDirection.reverse:
         rightWayUp = !rightWayUp;
-        break;
     }
     return rightWayUp;
   }
@@ -1606,7 +1599,6 @@ mixin RenderSliverHelpers implements RenderSliver {
         }
         paintOffset = Offset(delta, crossAxisDelta);
         transformedPosition = Offset(absolutePosition, absoluteCrossAxisPosition);
-        break;
       case Axis.vertical:
         if (!rightWayUp) {
           absolutePosition = child.size.height - absolutePosition;
@@ -1614,7 +1606,6 @@ mixin RenderSliverHelpers implements RenderSliver {
         }
         paintOffset = Offset(crossAxisDelta, delta);
         transformedPosition = Offset(absoluteCrossAxisPosition, absolutePosition);
-        break;
     }
     return result.addWithOutOfBandPosition(
       paintOffset: paintOffset,
@@ -1643,13 +1634,11 @@ mixin RenderSliverHelpers implements RenderSliver {
           delta = geometry!.paintExtent - child.size.width - delta;
         }
         transform.translate(delta, crossAxisDelta);
-        break;
       case Axis.vertical:
         if (!rightWayUp) {
           delta = geometry!.paintExtent - child.size.height - delta;
         }
         transform.translate(crossAxisDelta, delta);
-        break;
     }
   }
 }
@@ -1691,16 +1680,12 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         childParentData.paintOffset = Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)));
-        break;
       case AxisDirection.right:
         childParentData.paintOffset = Offset(-constraints.scrollOffset, 0.0);
-        break;
       case AxisDirection.down:
         childParentData.paintOffset = Offset(0.0, -constraints.scrollOffset);
-        break;
       case AxisDirection.left:
         childParentData.paintOffset = Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0);
-        break;
     }
   }
 
@@ -1764,10 +1749,8 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     switch (constraints.axis) {
       case Axis.horizontal:
         childExtent = child!.size.width;
-        break;
       case Axis.vertical:
         childExtent = child!.size.height;
-        break;
     }
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
     final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: childExtent);

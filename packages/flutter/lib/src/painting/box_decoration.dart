@@ -423,14 +423,12 @@ class _BoxDecorationPainter extends BoxPainter {
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
-        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius == null || _decoration.borderRadius == BorderRadius.zero) {
           canvas.drawRect(rect, paint);
         } else {
           canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
         }
-        break;
     }
   }
 
@@ -465,12 +463,10 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
-        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
           clipPath = Path()..addRRect(_decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect));
         }
-        break;
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);
   }

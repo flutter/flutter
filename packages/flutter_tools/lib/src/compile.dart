@@ -144,10 +144,8 @@ class StdoutHandler {
       switch (message[0]) {
         case '+':
           sources.add(Uri.parse(message.substring(1)));
-          break;
         case '-':
           sources.remove(Uri.parse(message.substring(1)));
-          break;
         default:
           _logger.printTrace('Unexpected prefix for $message uri - ignoring');
       }

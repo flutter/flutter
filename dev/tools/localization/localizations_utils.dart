@@ -71,12 +71,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
             case 'CN':
             case 'SG':
               scriptCode = 'Hans';
-              break;
             case 'TW':
             case 'HK':
             case 'MO':
               scriptCode = 'Hant';
-              break;
           }
           break;
         }
@@ -339,13 +337,10 @@ void precacheLanguageAndRegionTags() {
       switch (type) {
         case 'language':
           _languages[subtag] = description;
-          break;
         case 'region':
           _regions[subtag] = description;
-          break;
         case 'script':
           _scripts[subtag] = description;
-          break;
       }
     }
   }

@@ -753,10 +753,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           positionController.value -= delta;
-          break;
         case TextDirection.ltr:
           positionController.value += delta;
-          break;
       }
     }
   }
@@ -1279,10 +1277,8 @@ class _SwitchPainter extends ToggleablePainter {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
-        break;
       case TextDirection.ltr:
         visualPosition = currentValue;
-        break;
     }
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;

@@ -428,7 +428,6 @@ class CupertinoDatePicker extends StatefulWidget {
             longestText = date;
           }
         }
-        break;
       case _PickerColumnType.hour:
         for (int i = 0; i < 24; i++) {
           final String hour = localizations.datePickerHour(i);
@@ -436,7 +435,6 @@ class CupertinoDatePicker extends StatefulWidget {
             longestText = hour;
           }
         }
-        break;
       case _PickerColumnType.minute:
         for (int i = 0; i < 60; i++) {
           final String minute = localizations.datePickerMinute(i);
@@ -444,13 +442,11 @@ class CupertinoDatePicker extends StatefulWidget {
             longestText = minute;
           }
         }
-        break;
       case _PickerColumnType.dayPeriod:
         longestText =
           localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
             ? localizations.anteMeridiemAbbreviation
             : localizations.postMeridiemAbbreviation;
-        break;
       case _PickerColumnType.dayOfMonth:
         int longestDayOfMonth = 1;
         for (int i = 1; i <=31; i++) {
@@ -468,7 +464,6 @@ class CupertinoDatePicker extends StatefulWidget {
             }
           }
         }
-        break;
       case _PickerColumnType.month:
         for (int i = 1; i <=12; i++) {
           final String month = localizations.datePickerMonth(i);
@@ -476,10 +471,8 @@ class CupertinoDatePicker extends StatefulWidget {
             longestText = month;
           }
         }
-        break;
       case _PickerColumnType.year:
         longestText = localizations.datePickerYear(2018);
-        break;
     }
 
     assert(longestText != '', 'column type is not appropriate');
@@ -1400,7 +1393,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           estimatedColumnWidths[_PickerColumnType.dayOfMonth.index]!,
           estimatedColumnWidths[_PickerColumnType.year.index]!,
         ];
-        break;
       case DatePickerDateOrder.dmy:
         pickerBuilders = <_ColumnBuilder>[_buildDayPicker, _buildMonthPicker, _buildYearPicker];
         columnWidths = <double>[
@@ -1408,7 +1400,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           estimatedColumnWidths[_PickerColumnType.month.index]!,
           estimatedColumnWidths[_PickerColumnType.year.index]!,
         ];
-        break;
       case DatePickerDateOrder.ymd:
         pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker, _buildDayPicker];
         columnWidths = <double>[
@@ -1416,7 +1407,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           estimatedColumnWidths[_PickerColumnType.month.index]!,
           estimatedColumnWidths[_PickerColumnType.dayOfMonth.index]!,
         ];
-        break;
       case DatePickerDateOrder.ydm:
         pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildDayPicker, _buildMonthPicker];
         columnWidths = <double>[
@@ -1424,7 +1414,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           estimatedColumnWidths[_PickerColumnType.dayOfMonth.index]!,
           estimatedColumnWidths[_PickerColumnType.month.index]!,
         ];
-        break;
     }
 
     final List<Widget> pickers = <Widget>[];
@@ -2099,7 +2088,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                   _endSelectionOverlay,
               ),
             ];
-            break;
           case CupertinoTimerPickerMode.ms:
             final double secondLabelContentWidth = baseLabelContentWidth + secondLabelWidth;
             double secondColumnEndPadding =
@@ -2130,7 +2118,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                   _endSelectionOverlay,
               ),
             ];
-            break;
           case CupertinoTimerPickerMode.hms:
             final double hourColumnEndPadding =
                 pickerColumnWidth - baseLabelContentWidth - hourLabelWidth - _kTimerPickerMinHorizontalPadding;
@@ -2162,7 +2149,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                   _endSelectionOverlay,
               ),
             ];
-            break;
         }
         final CupertinoThemeData themeData = CupertinoTheme.of(context);
         return MediaQuery(

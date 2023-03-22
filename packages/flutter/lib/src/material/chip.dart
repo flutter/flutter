@@ -1295,10 +1295,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           minWidth: kMinInteractiveDimension + densityAdjustment.dx,
           minHeight: kMinInteractiveDimension + densityAdjustment.dy,
         );
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
-        break;
     }
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
@@ -1842,7 +1840,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         } else {
           _pressRect = Rect.zero;
         }
-        break;
       case TextDirection.ltr:
         double start = left;
         if (theme.showCheckmark || theme.showAvatar) {
@@ -1875,7 +1872,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         } else {
           _deleteButtonRect = Rect.zero;
         }
-        break;
     }
     // Center the label vertically.
     labelOffset = labelOffset +
@@ -1919,13 +1915,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           begin: Colors.white.withAlpha(_kDisabledAlpha),
           end: Colors.white,
         );
-        break;
       case Brightness.dark:
         enableTween = ColorTween(
           begin: Colors.black.withAlpha(_kDisabledAlpha),
           end: Colors.black,
         );
-        break;
     }
     return enableTween.evaluate(enableAnimation)!;
   }
@@ -1938,10 +1932,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       switch (theme.brightness) {
         case Brightness.light:
           paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-          break;
         case Brightness.dark:
           paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-          break;
       }
     }
 

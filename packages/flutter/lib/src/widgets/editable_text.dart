@@ -1923,7 +1923,6 @@ class EditableText extends StatefulWidget {
           if (keyboardType != null) {
             return keyboardType;
           }
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2238,7 +2237,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             ),
             SelectionChangedCause.toolbar,
           );
-          break;
       }
     }
     clipboardStatus.update();
@@ -2340,7 +2338,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           bringIntoView(textEditingValue.selection.extent);
-          break;
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           break;
@@ -2842,7 +2839,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (!_isMultiline) {
           _finalizeEditing(action, shouldUnfocus: true);
         }
-        break;
       case TextInputAction.done:
       case TextInputAction.go:
       case TextInputAction.next:
@@ -2850,7 +2846,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case TextInputAction.search:
       case TextInputAction.send:
         _finalizeEditing(action, shouldUnfocus: true);
-        break;
       case TextInputAction.continueAction:
       case TextInputAction.emergencyCall:
       case TextInputAction.join:
@@ -2860,7 +2855,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // Finalize editing, but don't give up focus because this keyboard
         // action does not imply the user is done inputting information.
         _finalizeEditing(action, shouldUnfocus: false);
-        break;
     }
   }
 
@@ -2917,7 +2911,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
@@ -2925,7 +2918,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
         _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
-        break;
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
         _startCursorBlink();
@@ -2934,7 +2926,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _floatingCursorResetController!.value = 0.0;
           _floatingCursorResetController!.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
         }
-        break;
     }
   }
 
@@ -2994,13 +2985,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           case TextInputAction.emergencyCall:
           case TextInputAction.newline:
             widget.focusNode.unfocus();
-            break;
           case TextInputAction.next:
             widget.focusNode.nextFocus();
-            break;
           case TextInputAction.previous:
             widget.focusNode.previousFocus();
-            break;
         }
       }
     }
@@ -3363,12 +3351,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
-        break;
       case SelectionChangedCause.keyboard:
         if (_hasFocus) {
           requestKeyboard();
         }
-        break;
     }
     if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();
@@ -3620,7 +3606,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             cause == SelectionChangedCause.drag) {
           bringIntoView(newSelection.extent);
         }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
@@ -3632,7 +3617,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             bringIntoView(newSelection.extent);
           }
         }
-        break;
     }
   }
 
@@ -4211,10 +4195,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // boundary, and do this instead:
         // final int graphemeStart = CharacterRange.at(string, extent.offset).stringBeforeLength - 1;
         caretOffset = math.max(0, extent.offset - 1);
-        break;
       case TextAffinity.downstream:
         caretOffset = extent.offset;
-        break;
     }
     // The line boundary range does not include some control characters
     // (most notably, Line Feed), in which case there's
@@ -4436,22 +4418,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             if (kIsWeb) {
               widget.focusNode.unfocus();
             }
-            break;
           case ui.PointerDeviceKind.mouse:
           case ui.PointerDeviceKind.stylus:
           case ui.PointerDeviceKind.invertedStylus:
           case ui.PointerDeviceKind.unknown:
             widget.focusNode.unfocus();
-            break;
           case ui.PointerDeviceKind.trackpad:
             throw UnimplementedError('Unexpected pointer down event for trackpad');
         }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         widget.focusNode.unfocus();
-        break;
     }
   }
 
@@ -4533,7 +4511,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     if (!widget.controller.value.composing.isCollapsed) {
                       return false;
                     }
-                    break;
                   case TargetPlatform.android:
                     // Gboard on Android puts non-CJK words in composing regions. Coalesce
                     // composing text in order to allow the saving of partial words in that

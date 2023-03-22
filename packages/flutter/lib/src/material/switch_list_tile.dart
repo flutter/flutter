@@ -537,7 +537,6 @@ class SwitchListTile extends StatelessWidget {
           splashRadius: splashRadius,
           overlayColor: overlayColor,
         );
-        break;
 
       case _SwitchListTileType.material:
         control = Switch(
@@ -570,12 +569,10 @@ class SwitchListTile extends StatelessWidget {
       case ListTileControlAffinity.leading:
         leading = control;
         trailing = secondary;
-        break;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
         trailing = control;
-        break;
     }
 
     final ThemeData theme = Theme.of(context);

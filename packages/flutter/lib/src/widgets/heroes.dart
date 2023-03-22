@@ -664,11 +664,9 @@ class _HeroFlight {
       case HeroFlightDirection.pop:
         _proxyAnimation.parent = ReverseAnimation(manifest.animation);
         shouldIncludeChildInPlaceholder = false;
-        break;
       case HeroFlightDirection.push:
         _proxyAnimation.parent = manifest.animation;
         shouldIncludeChildInPlaceholder = true;
-        break;
     }
 
     heroRectTween = manifest.createHeroRectTween(begin: manifest.fromHeroLocation, end: manifest.toHeroLocation);
@@ -861,12 +859,10 @@ class HeroController extends NavigatorObserver {
           if (from.animation!.value == 0.0) {
             return;
           }
-          break;
         case HeroFlightDirection.push:
           if (to.animation!.value == 1.0) {
             return;
           }
-          break;
       }
 
       // For pop transitions driven by a user gesture: if the "to" page has

@@ -743,10 +743,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
       switch (decelerationRate) {
         case ScrollDecelerationRate.fast:
           constantDeceleration = 1400;
-          break;
         case ScrollDecelerationRate.normal:
           constantDeceleration = 0;
-          break;
       }
       return BouncingScrollSimulation(
         spring: spring,

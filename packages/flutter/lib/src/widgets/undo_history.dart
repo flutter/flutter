@@ -196,10 +196,8 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     switch(direction) {
       case UndoDirection.undo:
         undo();
-        break;
       case UndoDirection.redo:
         redo();
-        break;
     }
   }
 

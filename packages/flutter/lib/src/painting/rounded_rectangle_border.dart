@@ -133,7 +133,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
           final RRect outer = borderRect.inflate(side.strokeOutset);
           canvas.drawDRRect(outer, inner, paint);
         }
-        break;
     }
   }
 

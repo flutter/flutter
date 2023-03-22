@@ -163,12 +163,10 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
       case AnimationStatus.forward:
         _forwardAnimation.parent = widget.animation;
         _reverseAnimation.parent = kAlwaysDismissedAnimation;
-        break;
       case AnimationStatus.reverse:
       case AnimationStatus.completed:
         _forwardAnimation.parent = kAlwaysCompleteAnimation;
         _reverseAnimation.parent = ReverseAnimation(widget.animation);
-        break;
     }
   }
 

@@ -360,14 +360,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBars.isNotEmpty) {
           _snackBarController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snackBar.
         });
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -497,10 +495,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_materialBanners.isNotEmpty) {
           _materialBannerController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -2927,7 +2923,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           removeRightPadding: false,
           removeBottomPadding: true,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

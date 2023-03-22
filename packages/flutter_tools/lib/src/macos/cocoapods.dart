@@ -198,7 +198,6 @@ class CocoaPods {
           'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
-        break;
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
@@ -214,7 +213,6 @@ class CocoaPods {
           'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
-        break;
       case CocoaPodsStatus.recommended:
         break;
     }

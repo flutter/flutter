@@ -308,10 +308,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         switch (data.textDirection!) {
           case TextDirection.rtl:
             effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
-            break;
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;
-            break;
         }
       }
       if (annotations.isEmpty) {

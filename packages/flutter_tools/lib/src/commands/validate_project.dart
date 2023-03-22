@@ -102,17 +102,13 @@ class ValidateProject {
     switch(result.status) {
       case StatusProjectValidator.error:
         icon = '[✗]';
-        break;
       case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
-        break;
       case StatusProjectValidator.warning:
         icon = '[!]';
-        break;
       case StatusProjectValidator.crash:
         icon = '[☠]';
-        break;
     }
 
     return '$icon $result';

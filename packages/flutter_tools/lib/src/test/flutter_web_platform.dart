@@ -378,10 +378,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     switch (extension) {
       case '.js':
         contentType = 'text/javascript';
-        break;
       case '.wasm':
         contentType = 'application/wasm';
-        break;
       default:
         final String error = 'Failed to determine Content-Type for "${request.url.path}".';
         _logger.printError(error);
@@ -787,12 +785,10 @@ class BrowserManager {
           break;
         case 'restart':
           _onRestartController.add(null);
-          break;
         case 'resume':
           if (_pauseCompleter != null) {
             _pauseCompleter!.complete();
           }
-          break;
         default:
         // Unreachable.
           assert(false);

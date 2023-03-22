@@ -183,12 +183,10 @@ class FormState extends State<Form> {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate();
-        break;
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
-        break;
       case AutovalidateMode.disabled:
         break;
     }
@@ -495,12 +493,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
-          break;
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
             _validate();
           }
-          break;
         case AutovalidateMode.disabled:
           break;
       }

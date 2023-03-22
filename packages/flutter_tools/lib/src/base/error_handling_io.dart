@@ -743,7 +743,6 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.';
-      break;
     case eperm:
     case eacces:
       final StringBuffer errorBuffer = StringBuffer();
@@ -758,7 +757,6 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
         errorBuffer.writeln(posixPermissionSuggestion);
       }
       errorMessage = errorBuffer.toString();
-      break;
     default:
       // Caller must rethrow the exception.
       break;
@@ -799,31 +797,26 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
         '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.';
-      break;
     case kDeviceFull:
       errorMessage =
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.';
-      break;
     case kUserMappedSectionOpened:
       errorMessage =
         '$message. The file is being used by another program.'
         '\n$e\n'
         'Do you have an antivirus program running? '
         'Try disabling your antivirus program and try again.';
-      break;
     case kFatalDeviceHardwareError:
       errorMessage =
         '$message. There is a problem with the device driver '
         'that this file or directory is stored on.';
-      break;
     case kDeviceDoesNotExist:
       errorMessage =
         '$message. The device was not found.'
         '\n$e\n'
         'Verify the device is mounted and try again.';
-      break;
     default:
       // Caller must rethrow the exception.
       break;

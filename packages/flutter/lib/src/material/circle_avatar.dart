@@ -207,19 +207,15 @@ class CircleAvatar extends StatelessWidget {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
-          break;
         case Brightness.light:
           effectiveBackgroundColor = theme.primaryColorDark;
-          break;
       }
     } else if (effectiveForegroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
           textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
         case Brightness.light:
           textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
       }
     }
     final double minDiameter = _minDiameter;

@@ -285,18 +285,14 @@ class BorderSide with Diagnosticable {
     switch (a.style) {
       case BorderStyle.solid:
         colorA = a.color;
-        break;
       case BorderStyle.none:
         colorA = a.color.withAlpha(0x00);
-        break;
     }
     switch (b.style) {
       case BorderStyle.solid:
         colorB = b.color;
-        break;
       case BorderStyle.none:
         colorB = b.color.withAlpha(0x00);
-        break;
     }
     if (a.strokeAlign != b.strokeAlign) {
       return BorderSide(
@@ -927,7 +923,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -946,7 +941,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -965,7 +959,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -984,7 +977,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }

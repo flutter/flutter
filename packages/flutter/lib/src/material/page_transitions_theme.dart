@@ -858,11 +858,9 @@ mixin _ZoomTransitionBase {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         controller.allowSnapshotting = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         controller.allowSnapshotting = useSnapshot;
-        break;
     }
   }
 }

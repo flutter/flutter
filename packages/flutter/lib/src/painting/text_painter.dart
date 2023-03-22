@@ -915,10 +915,8 @@ class TextPainter {
           // the paragraph's width needs to be as close to the width of its
           // longest line as possible.
           newWidth = _applyFloatingPointHack(_paragraph!.longestLine);
-          break;
         case TextWidthBasis.parent:
           newWidth = maxIntrinsicWidth;
-          break;
       }
       newWidth = clampDouble(newWidth, minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
@@ -1176,10 +1174,8 @@ class TextPainter {
     switch ((caretMetrics as _LineCaretMetrics).writingDirection) {
       case TextDirection.rtl:
         offset = Offset(caretMetrics.offset.dx - caretPrototype.width, caretMetrics.offset.dy);
-        break;
       case TextDirection.ltr:
         offset = caretMetrics.offset;
-        break;
     }
     // If offset.dx is outside of the advertised content area, then the associated
     // glyph cluster belongs to a trailing newline character. Ideally the behavior

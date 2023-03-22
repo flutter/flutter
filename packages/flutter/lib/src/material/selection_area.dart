@@ -126,17 +126,13 @@ class _SelectionAreaState extends State<SelectionArea> {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         controls ??= materialTextSelectionHandleControls;
-        break;
       case TargetPlatform.iOS:
         controls ??= cupertinoTextSelectionHandleControls;
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         controls ??= desktopTextSelectionHandleControls;
-        break;
       case TargetPlatform.macOS:
         controls ??= cupertinoDesktopTextSelectionHandleControls;
-        break;
     }
 
     return SelectableRegion(

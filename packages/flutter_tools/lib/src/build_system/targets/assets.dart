@@ -129,7 +129,6 @@ Future<Depfile> copyAssets(
                 outputPath: file.path,
                 relativePath: entry.key,
               );
-              break;
             case AssetKind.shader:
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
@@ -137,13 +136,11 @@ Future<Depfile> copyAssets(
                 target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(
                 input: content.file as File,
                 outputPath: file.path,
               );
-              break;
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);

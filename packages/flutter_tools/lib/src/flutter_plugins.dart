@@ -424,7 +424,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         );
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-      break;
     case AndroidEmbeddingVersion.v1:
       globals.printWarning(
         'This app is using a deprecated version of the Android embedding.\n'
@@ -444,7 +443,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
-      break;
   }
   globals.printTrace('Generating $registryPath');
   _renderTemplateToFile(

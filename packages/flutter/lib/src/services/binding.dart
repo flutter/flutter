@@ -149,7 +149,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
-        break;
     }
     return;
   }
@@ -272,7 +271,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         if (_systemUiChangeCallback != null) {
           await _systemUiChangeCallback!(args[0] as bool);
         }
-        break;
       case 'System.requestAppExit':
         return <String, dynamic>{'response': (await handleRequestAppExit()).name};
     }

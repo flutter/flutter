@@ -32,10 +32,8 @@ void main() {
         } else {
           axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
         }
-        break;
       case Axis.vertical:
         axisDirection = reverse ? AxisDirection.up : AxisDirection.down;
-        break;
     }
 
     return Directionality(

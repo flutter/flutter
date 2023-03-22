@@ -294,19 +294,14 @@ class Doctor {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
           sawACrash = true;
-          break;
         case ValidationType.missing:
           lineBuffer.write('is not installed.');
-          break;
         case ValidationType.partial:
           lineBuffer.write('is partially installed; more components are available.');
-          break;
         case ValidationType.notAvailable:
           lineBuffer.write('is not available.');
-          break;
         case ValidationType.success:
           lineBuffer.write('is fully installed.');
-          break;
       }
 
       if (result.statusInfo != null) {
@@ -392,15 +387,12 @@ class Doctor {
         case ValidationType.crash:
           doctorResult = false;
           issues += 1;
-          break;
         case ValidationType.missing:
           doctorResult = false;
           issues += 1;
-          break;
         case ValidationType.partial:
         case ValidationType.notAvailable:
           issues += 1;
-          break;
         case ValidationType.success:
           break;
       }

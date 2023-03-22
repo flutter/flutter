@@ -234,10 +234,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);
-        break;
       case AutofillContextAction.commit:
         TextInput.finishAutofillContext();
-        break;
     }
   }
 }

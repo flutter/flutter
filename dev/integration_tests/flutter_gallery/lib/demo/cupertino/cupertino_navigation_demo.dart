@@ -603,11 +603,9 @@ class Tab2ConversationBubble extends StatelessWidget {
       case Tab2ConversationBubbleColor.gray:
         backgroundColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context);
         foregroundColor = CupertinoDynamicColor.resolve(CupertinoColors.label, context);
-        break;
       case Tab2ConversationBubbleColor.blue:
         backgroundColor = CupertinoTheme.of(context).primaryColor;
         foregroundColor = CupertinoColors.white;
-        break;
       case null:
         break;
     }

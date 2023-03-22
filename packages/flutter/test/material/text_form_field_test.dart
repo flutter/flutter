@@ -1104,7 +1104,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1115,7 +1114,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -1131,7 +1129,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1142,7 +1139,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select all'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),

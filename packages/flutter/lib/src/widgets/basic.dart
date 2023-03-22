@@ -4141,11 +4141,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
     return Positioned(
       key: key,

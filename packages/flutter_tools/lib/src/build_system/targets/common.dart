@@ -196,7 +196,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.windows_x64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -209,7 +208,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
-        break;
     }
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(

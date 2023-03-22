@@ -366,12 +366,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         defaultStyle = MenuItemButton.styleFrom(
           padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
         );
-        break;
       case TextDirection.ltr:
         defaultStyle = MenuItemButton.styleFrom(
           padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
         );
-        break;
     }
 
     for (int i = 0; i < filteredEntries.length; i++) {

@@ -378,14 +378,12 @@ void main() {
           log.last,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(log, isEmpty);
-        break;
     }
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
@@ -1261,12 +1259,10 @@ void main() {
         case TargetPlatform.windows:
           alt = false;
           control = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           alt = true;
           control = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1371,12 +1367,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1462,12 +1456,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1749,17 +1741,14 @@ void main() {
         expect(regionState.selectionOverlay, isNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
-        break;
       case TargetPlatform.iOS:
         expect(regionState.selectionOverlay, isNotNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(regionState.selectionOverlay, isNotNull);
-        break;
     }
   },
     skip: kIsWeb, // [intended]
@@ -1805,7 +1794,6 @@ void main() {
         expect(regionState.selectionOverlay, isNotNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:

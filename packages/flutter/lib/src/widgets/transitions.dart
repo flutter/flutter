@@ -296,11 +296,9 @@ class ScaleTransition extends AnimatedWidget {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         useFilterQuality = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         useFilterQuality = true;
-        break;
     }
     return Transform.scale(
       scale: scale.value,
@@ -379,11 +377,9 @@ class RotationTransition extends AnimatedWidget {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         useFilterQuality = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         useFilterQuality = true;
-        break;
     }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,

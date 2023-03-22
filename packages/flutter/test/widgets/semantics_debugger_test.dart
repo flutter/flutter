@@ -329,13 +329,11 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(value, equals(0.65));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(value, equals(0.70));
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 

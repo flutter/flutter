@@ -101,24 +101,19 @@ class SourceVisitor implements ResolvedFiles {
       case Environment.kProjectDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kBuildDirectory:
         segments.addAll(environment.fileSystem.path.split(
           environment.buildDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kCacheDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kFlutterRootDirectory:
         // flutter root will not contain a symbolic link.
         segments.addAll(
           environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
-        break;
       case Environment.kOutputDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
-        break;
       default:
         throw InvalidPatternException(pattern);
     }

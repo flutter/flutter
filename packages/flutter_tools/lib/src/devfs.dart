@@ -671,7 +671,6 @@ class DevFS {
                 shaderPathsToEvict.add(archivePath);
               }
             });
-            break;
           case AssetKind.model:
             if (sceneImporter == null) {
               break;
@@ -689,7 +688,6 @@ class DevFS {
                 scenePathsToEvict.add(archivePath);
               }
             });
-            break;
           case AssetKind.regular:
           case AssetKind.font:
           case null:

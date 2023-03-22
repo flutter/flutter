@@ -105,7 +105,6 @@ class SignUpPage extends StatelessWidget {
             // Assume CollectPersonalInfoPage collects personal info and then
             // navigates to 'signup/choose_credentials'.
             builder = (BuildContext context) => const CollectPersonalInfoPage();
-            break;
           case 'signup/choose_credentials':
             // Assume ChooseCredentialsPage collects new credentials and then
             // invokes 'onSignupComplete()'.
@@ -119,7 +118,6 @@ class SignUpPage extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                 );
-            break;
           default:
             throw Exception('Invalid route: ${settings.name}');
         }

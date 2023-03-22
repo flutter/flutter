@@ -2768,7 +2768,6 @@ class RenderFittedBox extends RenderProxyBox {
           final BoxConstraints sizeConstraints = constraints.loosen();
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           size = constraints.constrain(unconstrainedSize);
-          break;
         case BoxFit.contain:
         case BoxFit.cover:
         case BoxFit.fill:
@@ -2776,7 +2775,6 @@ class RenderFittedBox extends RenderProxyBox {
         case BoxFit.fitWidth:
         case BoxFit.none:
           size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
-          break;
       }
       _clearPaintData();
     } else {

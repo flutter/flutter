@@ -448,7 +448,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             listPadding = EdgeInsets.fromLTRB(widget.header != null ? 0 : padding.left, padding.top, widget.footer != null ? 0 : padding.right, padding.bottom);
             footerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
           }
-          break;
         case Axis.vertical:
           if (widget.reverse) {
             headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
@@ -459,7 +458,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             listPadding = EdgeInsets.fromLTRB(padding.left, widget.header != null ? 0 : padding.top, padding.right, widget.footer != null ? 0 : padding.bottom);
             footerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
           }
-         break;
       }
     }
 

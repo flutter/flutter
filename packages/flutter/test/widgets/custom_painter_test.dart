@@ -377,16 +377,13 @@ void _defineTests() {
         case SemanticsAction.moveCursorBackwardByWord:
         case SemanticsAction.moveCursorForwardByWord:
           semanticsOwner.performAction(expectedId, action, true);
-          break;
         case SemanticsAction.setSelection:
           semanticsOwner.performAction(expectedId, action, <String, int>{
             'base': 4,
             'extent': 5,
           });
-          break;
         case SemanticsAction.setText:
           semanticsOwner.performAction(expectedId, action, 'text');
-          break;
         case SemanticsAction.copy:
         case SemanticsAction.customAction:
         case SemanticsAction.cut:
@@ -404,7 +401,6 @@ void _defineTests() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
-          break;
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);

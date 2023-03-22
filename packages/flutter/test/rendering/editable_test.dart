@@ -77,7 +77,6 @@ void main() {
             selection: const TextSelection(baseOffset: 0, extentOffset: 0),
             clipBehavior: clip!,
           );
-          break;
         case null:
           editable = RenderEditable(
             text: TextSpan(text: longString),
@@ -88,7 +87,6 @@ void main() {
             textSelectionDelegate: _FakeEditableTextState(),
             selection: const TextSelection(baseOffset: 0, extentOffset: 0),
           );
-          break;
       }
       layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       context.paintChild(editable, Offset.zero);

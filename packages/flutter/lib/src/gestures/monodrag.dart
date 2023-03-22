@@ -411,10 +411,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         case DragStartBehavior.start:
           _initialPosition = _initialPosition + delta;
           localUpdateDelta = Offset.zero;
-          break;
         case DragStartBehavior.down:
           localUpdateDelta = _getDeltaForDetails(delta.local);
-          break;
       }
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
@@ -460,11 +458,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       case _DragState.possible:
         resolve(GestureDisposition.rejected);
         _checkCancel();
-        break;
 
       case _DragState.accepted:
         _checkEnd(pointer);
-        break;
     }
     _velocityTrackers.clear();
     _initialButtons = null;

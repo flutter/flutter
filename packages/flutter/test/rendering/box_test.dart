@@ -451,7 +451,6 @@ void main() {
                 ),
               ),
             );
-            break;
           case null:
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
@@ -464,7 +463,6 @@ void main() {
                 ),
               ),
             );
-            break;
         }
         layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
         context.paintChild(box, Offset.zero);
@@ -474,12 +472,10 @@ void main() {
           case null:
           case Clip.none:
             expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
-            break;
           case Clip.hardEdge:
           case Clip.antiAlias:
           case Clip.antiAliasWithSaveLayer:
             expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
-            break;
         }
         hadErrors = false;
       }
@@ -727,7 +723,6 @@ void main() {
             child: box200x200,
             clipBehavior: clip!,
           );
-          break;
         case null:
           box = RenderConstraintsTransformBox(
             constraintsTransform: ConstraintsTransformBox.unconstrained,
@@ -735,19 +730,16 @@ void main() {
             textDirection: TextDirection.ltr,
             child: box200x200,
           );
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       switch (clip) {
         case null:
         case Clip.none:
           expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
-          break;
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
-          break;
       }
       hadErrors = false;
       context.paintChild(box, Offset.zero);
