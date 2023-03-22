@@ -329,17 +329,17 @@ void main() {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
-            title: const Text('title'),
+            title: Text('title'),
             // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
             // of children widgets. This helps distinguish the effect of expandedAlignment
             // and expandedCrossAxisAlignment later in the test.
             expandedAlignment: Alignment.centerRight,
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(height: 100, width: 100, key: child0Key),
               SizedBox(height: 100, width: 80, key: child1Key),
             ],
