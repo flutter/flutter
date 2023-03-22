@@ -311,7 +311,7 @@ class _RadioPainter extends ToggleablePainter {
     // Outer border
     final Paint paint = Paint()
       ..color = inactiveColor
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 0.1;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
@@ -321,6 +321,13 @@ class _RadioPainter extends ToggleablePainter {
       canvas.drawCircle(center, _kOuterRadius, paint);
       paint.color = CupertinoColors.white;
       canvas.drawCircle(center, _kInnerRadius, paint);
+    }
+
+    if (isFocused) {
+      paint.style = PaintingStyle.stroke;
+      paint.color = focusColor;
+      paint.strokeWidth = 3.0;
+      canvas.drawCircle(center, _kOuterRadius + 1.5, paint);
     }
   }
 }
