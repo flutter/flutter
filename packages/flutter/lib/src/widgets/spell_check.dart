@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
@@ -145,11 +146,13 @@ List<SuggestionSpan> _correctSpellCheckResults(
       // (resultsText), so apply it to new text by adding it to the list of
       // corrected results.
       searchStart = currentSpan.range.end + offset;
+      int actualEnd = newText.substring(searchStart) == ' ' ? searchStart : searchStart + 1; // TODO(camsim99): fix this to actually extend where needed.
       adjustedSpan = SuggestionSpan(
           TextRange(
-              start: currentSpan.range.start + offset, end: searchStart),
+              start: currentSpan.range.start + offset, end: actualEnd),
           currentSpan.suggestions
       );
+        print('adjusted span 1: ${adjustedSpan.range}');
       correctedSpellCheckResults.add(adjustedSpan);
     } else {
       // Search for currentSpan in new text and if found, apply it to new text
@@ -167,6 +170,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
         );
         offset = foundIndex - currentSpan.range.start;
 
+        print('adjusted span 2: ${adjustedSpan.range}');
         correctedSpellCheckResults.add(adjustedSpan);
       }
     }
@@ -197,6 +201,7 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
   final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
   if (spellCheckResultsText != value.text) {
+    print('CORRECTING SPELL CHECK RESULTS AS EXPECTED');
     spellCheckResultsSpans = _correctSpellCheckResults(
         value.text, spellCheckResultsText, spellCheckResultsSpans);
   }
@@ -208,13 +213,117 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
           value,
           style,
           misspelledTextStyle,
-          composingWithinCurrentTextRange
+          composingWithinCurrentTextRange,
+          defaultTargetPlatform == TargetPlatform.android,
       )
     );
 }
 
-/// Builds [TextSpan] subtree for text with misspelled words.
+/// Delegator for building [TextSpan] subtrees with misspelled words on
+/// the basis of whether or not the consider a valid composing region having a
+/// unique style.
 List<TextSpan> _buildSubtreesWithMisspelledWordsIndicated(
+    List<SuggestionSpan>? spellCheckSuggestions,
+    TextEditingValue value,
+    TextStyle? style,
+    TextStyle misspelledStyle,
+    bool composingWithinCurrentTextRange,
+    bool shouldConsiderComposingRegion,
+) {
+  if (shouldConsiderComposingRegion) {
+    return _buildSubtreesWithComposingRegion(
+      spellCheckSuggestions,
+      value,
+      style,
+      misspelledStyle,
+      composingWithinCurrentTextRange,
+    );
+  }
+
+  return _buildSubtreesWithoutComposingRegion(
+      spellCheckSuggestions,
+      value,
+      style,
+      misspelledStyle,
+      value.selection.baseOffset,
+  );
+}
+
+/// Builds [TextSpan] subtree for text with misspelled words with no logic based
+/// on a valid composing region, and instead, ignoring misspelled words adjacent
+/// to the cursor.
+List<TextSpan> _buildSubtreesWithoutComposingRegion(
+    List<SuggestionSpan>? spellCheckSuggestions,
+    TextEditingValue value,
+    TextStyle? style,
+    TextStyle misspelledStyle,
+    int cursorIndex,
+) {
+  final List<TextSpan> tsTreeChildren = <TextSpan>[];
+
+  int textPointer = 0;
+  int currSpanPointer = 0;
+  int endIndex;
+  SuggestionSpan currSpan;
+  final String text = value.text;
+  final TextStyle misspelledJointStyle =
+      style?.merge(misspelledStyle) ?? misspelledStyle;
+  bool cursorInCurrSpan = false;
+
+  // Add text interwoven with any misspelled words to the tree.
+  if (spellCheckSuggestions != null) {
+    while (textPointer < text.length &&
+      currSpanPointer < spellCheckSuggestions.length) {
+      currSpan = spellCheckSuggestions[currSpanPointer];
+
+      if (currSpan.range.start > textPointer) {
+        endIndex = currSpan.range.start < text.length
+            ? currSpan.range.start
+            : text.length;
+        tsTreeChildren.add(
+          TextSpan(
+            style: style,
+            text: text.substring(textPointer, endIndex)
+          )
+        );
+        textPointer = endIndex;
+      } else {
+        endIndex =
+            currSpan.range.end < text.length ? currSpan.range.end : text.length;
+        cursorInCurrSpan = currSpan.range.start <= cursorIndex && currSpan.range.end >= cursorIndex;
+        print('curr span start: ${currSpan.range.start}');
+        print('curr span end: ${currSpan.range.end}');
+        print('cursor in curr span: $cursorInCurrSpan');
+        tsTreeChildren.add(
+          TextSpan(
+            style: cursorInCurrSpan
+                ? style
+                : misspelledJointStyle,
+            text: text.substring(currSpan.range.start, endIndex)
+          )
+        );
+
+        textPointer = endIndex;
+        currSpanPointer++;
+      }
+    }
+  }
+
+  // Add any remaining text to the tree if applicable.
+  if (textPointer < text.length) {
+    tsTreeChildren.add(
+      TextSpan(
+        style: style, text: text.substring(textPointer, text.length)
+      )
+    );
+  }
+
+  return tsTreeChildren;
+}
+
+/// Builds [TextSpan] subtree for text with misspelled words with logic based on
+/// a valid composing region.
+List<TextSpan> _buildSubtreesWithComposingRegion(
     List<SuggestionSpan>? spellCheckSuggestions,
     TextEditingValue value,
     TextStyle? style,

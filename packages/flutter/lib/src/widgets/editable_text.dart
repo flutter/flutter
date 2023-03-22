@@ -4681,12 +4681,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       final bool composingRegionOutOfRange = !_value.isComposingRangeValid || !withComposing;
 
+      print('CURSOR INDEX: ${_value.selection.baseOffset}');
       return buildTextSpanWithSpellCheckSuggestions(
         _value,
         composingRegionOutOfRange,
         widget.style,
         _spellCheckConfiguration.misspelledTextStyle!,
-        spellCheckResults!,
+        spellCheckResults!
       );
     }
 
