@@ -489,7 +489,6 @@ class CheckboxListTile extends StatelessWidget {
           side: side,
           isError: isError,
         );
-        break;
       case _CheckboxType.adaptive:
         control = Checkbox.adaptive(
           value: value,
@@ -508,7 +507,6 @@ class CheckboxListTile extends StatelessWidget {
           side: side,
           isError: isError,
         );
-        break;
     }
 
     Widget? leading, trailing;
