@@ -2,75 +2,59 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Radio].
+// Flutter code sample for [CupertinoButton].
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoButtonApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoButtonApp extends StatelessWidget {
+  const CupertinoButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
       theme: CupertinoThemeData(brightness: Brightness.light),
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text(_title),
-        ),
-        child: SafeArea(
-          child: MyStatefulWidget(),
-        ),
-      ),
+      home: CupertinoButtonExample(),
     );
   }
 }
 
-enum SingingCharacter { lafayette, jefferson }
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  SingingCharacter? _character = SingingCharacter.lafayette;
+class CupertinoButtonExample extends StatelessWidget {
+  const CupertinoButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection(
-      children: <Widget>[
-        CupertinoListTile(
-          title: const Text('Lafayette'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.lafayette,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
-          ),
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoButton Sample'),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const CupertinoButton(
+              onPressed: null,
+              child: Text('Disabled'),
+            ),
+            const SizedBox(height: 30),
+            const CupertinoButton.filled(
+              onPressed: null,
+              child: Text('Disabled'),
+            ),
+            const SizedBox(height: 30),
+            CupertinoButton(
+              onPressed: () {},
+              child: const Text('Enabled'),
+            ),
+            const SizedBox(height: 30),
+            CupertinoButton.filled(
+              onPressed: () {},
+              child: const Text('Enabled'),
+            ),
+          ],
         ),
-        CupertinoListTile(
-          title: const Text('Thomas Jefferson'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.jefferson,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
