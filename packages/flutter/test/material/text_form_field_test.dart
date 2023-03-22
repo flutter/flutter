@@ -1165,8 +1165,14 @@ void main() {
 
     // Can't do equality comparison on spellCheckConfiguration itself because it
     // will have been copied.
-    expect(editableText.spellCheckConfiguration?.spellCheckService, equals(mySpellCheckConfiguration.spellCheckService));
-    expect(editableText.spellCheckConfiguration?.misspelledTextStyle, equals(mySpellCheckConfiguration.misspelledTextStyle));
+    expect(
+      editableText.spellCheckConfiguration?.spellCheckService,
+      equals(mySpellCheckConfiguration.spellCheckService),
+    );
+    expect(
+      editableText.spellCheckConfiguration?.misspelledTextStyle,
+      equals(mySpellCheckConfiguration.misspelledTextStyle),
+    );
   });
 
   testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
