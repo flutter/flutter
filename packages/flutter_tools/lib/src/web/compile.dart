@@ -18,6 +18,8 @@ import '../plugins.dart';
 import '../project.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
+export '../build_system/targets/web.dart' show kDart2jsDefaultOptimizationLevel;
+
 Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
@@ -25,8 +27,9 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  bool nativeNullAssertions, {
-  String? dart2jsOptimization,
+  bool nativeNullAssertions,
+  bool isWasm, {
+  String dart2jsOptimization = kDart2jsDefaultOptimizationLevel,
   String? baseHref,
   bool dumpInfo = false,
   bool noFrequencyBasedMinification = false,
@@ -35,7 +38,7 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
-      ? globals.fs.directory(getWebBuildDirectory())
+      ? globals.fs.directory(getWebBuildDirectory(isWasm))
       : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
@@ -51,7 +54,7 @@ Future<void> buildWeb(
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(
-      WebServiceWorker(globals.fs, globals.cache, buildInfo.webRenderer),
+      WebServiceWorker(globals.fs, buildInfo.webRenderer, isWasm: isWasm),
       Environment(
         projectDir: globals.fs.currentDirectory,
         outputDir: outputDirectory,
@@ -66,9 +69,7 @@ Future<void> buildWeb(
             kBaseHref : baseHref,
           kSourceMapsEnabled: sourceMaps.toString(),
           kNativeNullAssertions: nativeNullAssertions.toString(),
-          if (serviceWorkerStrategy != null)
           kServiceWorkerStrategy: serviceWorkerStrategy,
-          if (dart2jsOptimization != null)
           kDart2jsOptimization: dart2jsOptimization,
           kDart2jsDumpInfo: dumpInfo.toString(),
           kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
@@ -118,33 +119,15 @@ enum WebRendererMode {
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
-  },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdk,
-  },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdk,
-  },
+const Map<WebRendererMode, HostArtifact> kDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.autoDetect: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledCanvaskitSoundSdk,
+  WebRendererMode.html: HostArtifact.webPrecompiledSoundSdk,
 };
 
 /// The correct source map artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-  },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdkSourcemaps,
-  },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
-  },
+const Map<WebRendererMode, HostArtifact> kDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.autoDetect: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+  WebRendererMode.html: HostArtifact.webPrecompiledSoundSdkSourcemaps,
 };

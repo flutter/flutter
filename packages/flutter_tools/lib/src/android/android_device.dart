@@ -89,6 +89,14 @@ class AndroidDevice extends Device {
   final String modelID;
   final String? deviceCodeName;
 
+  @override
+  // Wirelessly paired Android devices should have `adb-tls-connect` in the id.
+  // Source: https://android.googlesource.com/platform/packages/modules/adb/+/f4ba8d73079b99532069dbe888a58167b8723d6c/adb_mdns.h#30
+  DeviceConnectionInterface get connectionInterface =>
+      id.contains('adb-tls-connect')
+          ? DeviceConnectionInterface.wireless
+          : DeviceConnectionInterface.attached;
+
   late final Future<Map<String, String>> _properties = () async {
     Map<String, String> properties = <String, String>{};
 
@@ -366,7 +374,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     // This call takes 400ms - 600ms.
@@ -388,14 +396,14 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(AndroidApk app) async {
+  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
     final String installedSha1 = await _getDeviceApkSha1(app);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
   Future<bool> installApp(
-    AndroidApk app, {
+    covariant AndroidApk app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -478,7 +486,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     if (!await _adbIsValid) {
@@ -519,7 +527,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    AndroidApk package, {
+    AndroidApk? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -599,12 +607,12 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // observatory discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dipose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
@@ -652,8 +660,10 @@ class AndroidDevice extends Device {
       ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache)
         ...<String>['--ez', 'purge-persistent-cache', 'true'],
-      if (debuggingOptions.enableImpeller)
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         ...<String>['--ez', 'enable-impeller', 'true'],
+      if (debuggingOptions.enableImpeller == ImpellerStatus.disabled)
+        ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -687,13 +697,13 @@ class AndroidDevice extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on...".
-    _logger.printTrace('Waiting for observatory port to be available...');
+    // device has printed "VM Service is listening on...".
+    _logger.printTrace('Waiting for VM Service port to be available...');
     try {
-      Uri? observatoryUri;
+      Uri? vmServiceUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
-        observatoryUri = await observatoryDiscovery?.uri;
-        if (observatoryUri == null) {
+        vmServiceUri = await vmServiceDiscovery?.uri;
+        if (vmServiceUri == null) {
           _logger.printError(
             'Error waiting for a debug connection: '
             'The log reader stopped unexpectedly',
@@ -701,12 +711,12 @@ class AndroidDevice extends Device {
           return LaunchResult.failed();
         }
       }
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
   }
 
@@ -721,11 +731,11 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    AndroidApk? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
-  }) {
+  }) async {
     if (app == null) {
-      return Future<bool>.value(false);
+      return false;
     }
     final List<String> command = adbCommandForDevice(<String>[
       'shell',
@@ -767,7 +777,7 @@ class AndroidDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    AndroidApk? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) async {
     // The Android log reader isn't app-specific. The `app` parameter isn't used.

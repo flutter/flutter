@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SharedAppData].
+// Flutter code sample for [SharedAppData].
 
 import 'package:flutter/material.dart';
 
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
                 _fooVersion += 1;
                 // Changing the SharedAppData's value for 'foo' causes the
                 // widgets that depend on 'foo' to be rebuilt.
-                SharedAppData.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
+                SharedAppData.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // no need to call setState()
               },
             ),
             const SizedBox(height: 16),
@@ -60,7 +60,7 @@ class _HomeState extends State<Home> {
               child: const Text('change bar'),
               onPressed: () {
                 _barVersion += 1;
-                SharedAppData.setValue<String, String?>(context, 'bar', 'BAR $_barVersion');  // note: no setState()
+                SharedAppData.setValue<String, String?>(context, 'bar', 'BAR $_barVersion');  // no need to call setState()
               },
             ),
           ],

@@ -25,6 +25,12 @@ void main() {
     expect(const ScrollbarThemeData().hashCode, const ScrollbarThemeData().copyWith().hashCode);
   });
 
+  test('ScrollbarThemeData lerp special cases', () {
+    expect(ScrollbarThemeData.lerp(null, null, 0), const ScrollbarThemeData());
+    const ScrollbarThemeData data = ScrollbarThemeData();
+    expect(identical(ScrollbarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no ScrollbarTheme returns defaults', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(

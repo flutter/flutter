@@ -319,6 +319,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   Offset? lastSecondaryTapDownPosition;
 
+  /// The [SelectionOverlay] that is currently visible on the screen.
+  ///
+  /// Can be null if there is no visible [SelectionOverlay].
+  @visibleForTesting
+  SelectionOverlay? get selectionOverlay => _selectionOverlay;
+
   @override
   void initState() {
     super.initState();
@@ -350,7 +356,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     if (_lastOrientation == null) {
       _lastOrientation = orientation;
       return;
@@ -506,7 +512,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionEndEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd) {
@@ -559,7 +565,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionStartEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart) {
@@ -738,10 +744,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
@@ -973,7 +980,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// * [SelectableRegion.getSelectableButtonItems], which performs a similar role,
   ///   but for any selectable text, not just specifically SelectableRegion.
-  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  /// * [EditableTextState.contextMenuButtonItems], which performs a similar role
   ///   but for content that is not just selectable but also editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
   ///   context menu.
@@ -987,11 +994,37 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
         _copy();
-        hideToolbar();
+
+        // In Android copy should clear the selection.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            _clearSelection();
+            break;
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+            break;
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            hideToolbar();
+            break;
+        }
       },
       onSelectAll: () {
-        selectAll();
-        hideToolbar();
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.iOS:
+          case TargetPlatform.fuchsia:
+            selectAll(SelectionChangedCause.toolbar);
+            break;
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            selectAll();
+            hideToolbar();
+            break;
+        }
       },
     );
   }
@@ -1771,11 +1804,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect drawableArea = Rect
+      final Rect? drawableArea = hasSize ? Rect
         .fromLTWH(0, 0, containerSize.width, containerSize.height)
-        .inflate(_kSelectionHandleDrawableAreaPadding);
-      final bool hideStartHandle = value.startSelectionPoint == null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
-      final bool hideEndHandle = value.endSelectionPoint == null || !drawableArea.contains(value.endSelectionPoint!.localPosition);
+        .inflate(_kSelectionHandleDrawableAreaPadding) : null;
+      final bool hideStartHandle = value.startSelectionPoint == null || drawableArea ==  null || !drawableArea.contains(value.startSelectionPoint!.localPosition);
+      final bool hideEndHandle = value.endSelectionPoint == null || drawableArea ==  null|| !drawableArea.contains(value.endSelectionPoint!.localPosition);
       effectiveStartHandle = hideStartHandle ? null : _startHandleLayer;
       effectiveEndHandle = hideEndHandle ? null : _endHandleLayer;
     }

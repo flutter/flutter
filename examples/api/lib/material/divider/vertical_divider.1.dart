@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Divider].
+// Flutter code sample for [Divider].
 
 import 'package:flutter/material.dart';
 
@@ -28,11 +28,11 @@ class DividerExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Row(
-          children: const <Widget>[
+          children: <Widget>[
             Expanded(
               child: Card(
                 child: SizedBox.expand(),

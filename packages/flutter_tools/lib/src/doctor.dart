@@ -15,6 +15,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
@@ -132,7 +133,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ),
       if (platform.isWindows)
         WindowsVersionValidator(
-          processManager: globals.processManager,
+          operatingSystemUtils: globals.os,
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -303,7 +304,7 @@ class Doctor {
         case ValidationType.notAvailable:
           lineBuffer.write('is not available.');
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           lineBuffer.write('is fully installed.');
           break;
       }
@@ -320,7 +321,7 @@ class Doctor {
       ));
       buffer.writeln();
 
-      if (result.type != ValidationType.installed) {
+      if (result.type != ValidationType.success) {
         missingComponent = true;
       }
     }
@@ -400,7 +401,7 @@ class Doctor {
         case ValidationType.notAvailable:
           issues += 1;
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           break;
       }
       if (sendEvent) {
@@ -528,11 +529,11 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
       messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
-      final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
+      final String? pubUrl = _platform.environment[kPubDevOverride];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
       }
-      final String? storageBaseUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+      final String? storageBaseUrl = _platform.environment[kFlutterStorageBaseUrl];
       if (storageBaseUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterMirrorURL(storageBaseUrl)));
       }
@@ -558,7 +559,7 @@ class FlutterValidator extends DoctorValidator {
 
     ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
-      valid = ValidationType.installed;
+      valid = ValidationType.success;
     } else {
       // The issues for this validator stem from broken git configuration of the local install;
       // in that case, make it clear that it is fine to continue, but freshness check/upgrades
@@ -635,7 +636,7 @@ class FlutterValidator extends DoctorValidator {
   bool _filePathContainsDirPath(String directory, String file) {
     // calling .canonicalize() will normalize for alphabetic case and path
     // separators
-    return (_fileSystem.path.canonicalize(file))
+    return _fileSystem.path.canonicalize(file)
         .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
@@ -687,7 +688,7 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<Device> devices = await _deviceManager.getAllConnectedDevices();
+    final List<Device> devices = await _deviceManager.getAllDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
       installedMessages = (await Device.descriptions(devices))
@@ -707,13 +708,13 @@ class DeviceValidator extends DoctorValidator {
     } else if (diagnostics.isNotEmpty) {
       installedMessages.addAll(diagnosticMessages);
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
     } else {
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );

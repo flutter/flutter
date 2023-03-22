@@ -137,11 +137,11 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
 /// reverse.
 ///
 /// This is typically only used on MacOS.
-class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalTextEditingIntent {
+class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false, true);
 }
 
 /// Expands the current selection to the document boundary in the direction
@@ -154,11 +154,11 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
 ///
 ///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
 ///   moves the extent.
-class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+class ExpandSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
   const ExpandSelectionToDocumentBoundaryIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false);
 }
 
 /// Expands the current selection to the closest line break in the direction
@@ -173,11 +173,11 @@ class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingInte
 ///
 ///   [ExtendSelectionToLineBreakIntent], which is similar but always moves the
 ///   extent.
-class ExpandSelectionToLineBreakIntent extends DirectionalTextEditingIntent {
+class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToLineBreakIntent].
   const ExpandSelectionToLineBreakIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false);
 }
 
 /// Extends, or moves the current selection from the current
@@ -219,6 +219,34 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
     required bool forward,
     required bool collapseSelection,
   }) : super(forward, collapseSelection);
+}
+
+/// Extends, or moves the current selection from the current
+/// [TextSelection.extent] position to the previous or the next paragraph
+/// boundary.
+class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionToNextParagraphBoundaryIntent].
+  const ExtendSelectionToNextParagraphBoundaryIntent({
+    required bool forward,
+    required bool collapseSelection,
+  }) : super(forward, collapseSelection);
+}
+
+/// Extends, or moves the current selection from the current
+/// [TextSelection.extent] position to the previous or the next paragraph
+/// boundary depending on the [forward] parameter.
+///
+/// This [Intent] typically has the same effect as an
+/// [ExtendSelectionToNextParagraphBoundaryIntent], except it collapses the selection
+/// when the order of [TextSelection.base] and [TextSelection.extent] would
+/// reverse.
+///
+/// This is typically only used on MacOS.
+class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent].
+  const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent({
+    required bool forward,
+  }) : super(forward, false, true);
 }
 
 /// Extends, or moves the current selection from the current

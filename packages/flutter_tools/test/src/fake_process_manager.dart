@@ -33,9 +33,7 @@ class FakeCommand {
     this.stdin,
     this.exception,
     this.outputFollowsExit = false,
-  }) : assert(command != null),
-       assert(duration != null),
-       assert(exitCode != null);
+  });
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
@@ -110,15 +108,8 @@ class FakeCommand {
     Map<String, String>? environment,
     Encoding? encoding,
   ) {
-    expect(command.length, this.command.length);
-    for(int i = 0; i < command.length; i++) {
-      final Pattern expected = this.command[i];
-      if (expected is String) {
-        expect(command[i], expected);
-      } else {
-        expect(command[i], matches(this.command[i]));
-      }
-    }
+    final List<dynamic> matchers = this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
+    expect(command, matchers);
     if (this.workingDirectory != null) {
       expect(this.workingDirectory, workingDirectory);
     }

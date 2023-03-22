@@ -34,7 +34,7 @@ class GenL10nProject extends Project {
   final String pubspec = '''
 name: test_l10n_project
 environment:
-  sdk: ">=2.12.0-0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   flutter:
@@ -700,9 +700,9 @@ void main() {
 }
 ''';
 
-  /// All messages are simply the template language's message with 'ES - '
-  /// appended. This makes validating test behavior easier. The interpolated
-  /// messages are different where applicable.
+  // All these messages are the template language's message with 'ES - '
+  // appended. This makes validating test behavior easier. The interpolated
+  // messages are different where applicable.
   final String appEs = r'''
 {
   "@@locale": "es",

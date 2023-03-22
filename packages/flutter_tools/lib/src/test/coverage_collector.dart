@@ -100,21 +100,18 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
-    _logMessage('collecting coverage data from $observatoryUri...');
+  Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
+    _logMessage('collecting coverage data from $vmServiceUri...');
     final Map<String, dynamic> data = await collect(
-        observatoryUri, libraryNames, branchCoverage: branchCoverage);
-    if (data == null) {
-      throw Exception('Failed to collect coverage.');
-    }
+        vmServiceUri, libraryNames, branchCoverage: branchCoverage);
 
-    _logMessage('($observatoryUri): collected coverage data; merging...');
+    _logMessage('($vmServiceUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
       packagePath: packageDirectory,
       checkIgnoredLines: true,
     ));
-    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('($vmServiceUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -132,23 +129,25 @@ class CoverageCollector extends TestWatcher {
 
     final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
-    final Future<void> processComplete = testDevice.finished.catchError(
-      (Object error) => throw Exception(
-          'Failed to collect coverage, test device terminated prematurely with '
-          'error: ${(error as TestDeviceException).message}.'),
-      test: (Object error) => error is TestDeviceException,
+    final Future<void> processComplete = testDevice.finished.then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (error is TestDeviceException) {
+          throw Exception(
+            'Failed to collect coverage, test device terminated prematurely with '
+            'error: ${error.message}.\n$stackTrace');
+        }
+        return Future<Object?>.error(error, stackTrace);
+      }
     );
 
-    final Future<void> collectionComplete = testDevice.observatoryUri
-      .then((Uri? observatoryUri) {
-        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
+    final Future<void> collectionComplete = testDevice.vmServiceUri
+      .then((Uri? vmServiceUri) {
+        _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
         return collect(
-            observatoryUri!, libraryNames, serviceOverride: serviceOverride,
+            vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
             branchCoverage: branchCoverage)
           .then<void>((Map<String, dynamic> result) {
-            if (result == null) {
-              throw Exception('Failed to collect coverage.');
-            }
             _logMessage('Collected coverage data.');
             data = result;
           });

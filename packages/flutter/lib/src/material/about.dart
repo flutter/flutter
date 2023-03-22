@@ -184,8 +184,6 @@ void showAboutDialog({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -230,8 +228,6 @@ void showLicensePage({
   String? applicationLegalese,
   bool useRootNavigator = false,
 }) {
-  assert(context != null);
-  assert(useRootNavigator != null);
   Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
@@ -467,11 +463,11 @@ class _LicensePageState extends State<LicensePage> {
 
   Widget _packagesView(final BuildContext _, final bool isLateral) {
     final Widget about = _AboutProgram(
-        name: widget.applicationName ?? _defaultApplicationName(context),
-        icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
-        version: widget.applicationVersion ?? _defaultApplicationVersion(context),
-        legalese: widget.applicationLegalese,
-      );
+      name: widget.applicationName ?? _defaultApplicationName(context),
+      icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
+      version: widget.applicationVersion ?? _defaultApplicationVersion(context),
+      legalese: widget.applicationLegalese,
+    );
     return _PackagesView(
       about: about,
       isLateral: isLateral,
@@ -486,8 +482,7 @@ class _AboutProgram extends StatelessWidget {
     required this.version,
     this.icon,
     this.legalese,
-  })  : assert(name != null),
-        assert(version != null);
+  });
 
   final String name;
   final String version;
@@ -542,8 +537,7 @@ class _PackagesView extends StatefulWidget {
     required this.about,
     required this.isLateral,
     required this.selectedId,
-  })  : assert(about != null),
-        assert(isLateral != null);
+  });
 
   final Widget about;
   final bool isLateral;
@@ -571,6 +565,17 @@ class _PackagesViewState extends State<_PackagesView> {
           builder: (BuildContext context, BoxConstraints constraints) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
+                if (snapshot.hasError) {
+                  assert(() {
+                    FlutterError.reportError(FlutterErrorDetails(
+                      exception: snapshot.error!,
+                      stack: snapshot.stackTrace,
+                      context: ErrorDescription('while decoding the license file'),
+                    ));
+                    return true;
+                  }());
+                  return Center(child: Text(snapshot.error.toString()));
+                }
                 _initDefaultDetailPage(snapshot.data!, context);
                 return ValueListenableBuilder<int?>(
                   valueListenable: widget.selectedId,
@@ -745,7 +750,7 @@ class _DetailArguments {
   final List<LicenseEntry> licenseEntries;
 
   @override
-  bool operator ==(final dynamic other) {
+  bool operator ==(final Object other) {
     if (other is _DetailArguments) {
       return other.packageName == packageName;
     }
@@ -865,9 +870,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       page = Scaffold(
         appBar: AppBar(
           title: _PackageLicensePageTitle(
-            title,
-            subtitle,
-            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
+            title: title,
+            subtitle: subtitle,
+            theme: theme.useMaterial3 ? theme.textTheme : theme.primaryTextTheme,
+            titleTextStyle: theme.appBarTheme.titleTextStyle,
+            foregroundColor: theme.appBarTheme.foregroundColor,
           ),
         ),
         body: Center(
@@ -883,7 +890,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
                   // A Scrollbar is built-in below.
                   behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: Scrollbar(
-                    child: ListView(padding: padding, children: listWidgets),
+                    child: ListView(
+                      primary: true,
+                      padding: padding,
+                      children: listWidgets,
+                    ),
                   ),
                 ),
               ),
@@ -899,7 +910,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             automaticallyImplyLeading: false,
             pinned: true,
             backgroundColor: theme.cardColor,
-            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
+            title: _PackageLicensePageTitle(
+              title: title,
+              subtitle: subtitle,
+              theme: theme.textTheme,
+              titleTextStyle: theme.textTheme.titleLarge,
+            ),
           ),
           SliverPadding(
             padding: padding,
@@ -925,26 +941,29 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
 }
 
 class _PackageLicensePageTitle extends StatelessWidget {
-  const _PackageLicensePageTitle(
-    this.title,
-    this.subtitle,
-    this.theme,
-  );
+  const _PackageLicensePageTitle({
+    required this.title,
+    required this.subtitle,
+    required this.theme,
+    this.titleTextStyle,
+    this.foregroundColor,
+  });
 
   final String title;
   final String subtitle;
   final TextTheme theme;
+  final TextStyle? titleTextStyle;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final Color? color = Theme.of(context).appBarTheme.foregroundColor;
-
+    final TextStyle? effectiveTitleTextStyle = titleTextStyle ?? theme.titleLarge;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.titleLarge?.copyWith(color: color)),
-        Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
+        Text(title, style: effectiveTitleTextStyle?.copyWith(color: foregroundColor)),
+        Text(subtitle, style: theme.titleSmall?.copyWith(color: foregroundColor)),
       ],
     );
   }
@@ -976,7 +995,7 @@ const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.sizeOf(context).width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1033,14 +1052,11 @@ class _MasterDetailFlow extends StatefulWidget {
   const _MasterDetailFlow({
     required this.detailPageBuilder,
     required this.masterViewBuilder,
-    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyLeading = true, // ignore: unused_element
     this.detailPageFABlessGutterWidth,
-    this.displayMode = _LayoutMode.auto,
+    this.displayMode = _LayoutMode.auto, // ignore: unused_element
     this.title,
-  })  : assert(masterViewBuilder != null),
-        assert(automaticallyImplyLeading != null),
-        assert(detailPageBuilder != null),
-        assert(displayMode != null);
+  });
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -1217,16 +1233,18 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   MaterialPageRoute<void> _masterPageRoute(BuildContext context) {
     return MaterialPageRoute<dynamic>(
-      builder: (BuildContext c) => BlockSemantics(
-        child: _MasterPage(
-                leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
-                        ? BackButton(onPressed: () => Navigator.of(context).pop())
-                        : null,
-                title: widget.title,
-                automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                masterViewBuilder: widget.masterViewBuilder,
-              ),
-      ),
+      builder: (BuildContext c) {
+        return BlockSemantics(
+          child: _MasterPage(
+            leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+              ? BackButton(onPressed: () { Navigator.of(context).pop(); })
+              : null,
+            title: widget.title,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
+            masterViewBuilder: widget.masterViewBuilder,
+          ),
+        );
+      },
     );
   }
 
@@ -1275,14 +1293,14 @@ class _MasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: title,
-          leading: leading,
-          actions: const <Widget>[],
-          automaticallyImplyLeading: automaticallyImplyLeading,
-        ),
-        body: masterViewBuilder!(context, false),
-      );
+      appBar: AppBar(
+        title: title,
+        leading: leading,
+        actions: const <Widget>[],
+        automaticallyImplyLeading: automaticallyImplyLeading,
+      ),
+      body: masterViewBuilder!(context, false),
+    );
   }
 
 }
@@ -1301,8 +1319,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.title,
     required this.automaticallyImplyLeading,
     this.detailPageFABlessGutterWidth,
-  })  : assert(detailPageBuilder != null),
-        assert(masterViewBuilder != null);
+  });
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1391,7 +1408,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _masterPanel(context),
+          body: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _masterPanel(context),
+          ),
         ),
         // Detail view stacked above main scaffold and master view.
         SafeArea(
@@ -1451,8 +1471,7 @@ class _DetailView extends StatelessWidget {
   const _DetailView({
     required _DetailPageBuilder builder,
     Object? arguments,
-  })  : assert(builder != null),
-        _builder = builder,
+  })  : _builder = builder,
         _arguments = arguments;
 
   final _DetailPageBuilder _builder;
@@ -1463,7 +1482,7 @@ class _DetailView extends StatelessWidget {
     if (_arguments == null) {
       return const SizedBox.shrink();
     }
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(

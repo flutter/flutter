@@ -9,6 +9,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -142,6 +143,12 @@ void main() {
     expect(c.color, equals(b.color));
   });
 
+  test('Decoration.lerp identical a,b', () {
+    expect(Decoration.lerp(null, null, 0), null);
+    const Decoration decoration = BoxDecoration();
+    expect(identical(Decoration.lerp(decoration, decoration, 0.5), decoration), true);
+  });
+
   test('Decoration equality', () {
     const BoxDecoration a = BoxDecoration(
       color: Color(0xFFFFFFFF),
@@ -240,7 +247,6 @@ void main() {
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
-      assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
         final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
@@ -669,6 +675,75 @@ void main() {
     }
   });
 
+  test('paintImage with repeatX and fitHeight', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as wide as it is
+    // tall. One copy of the image should be painted, aligned so that a repeating
+    // tile mode causes it to appear twice.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitHeight,
+      repeat: ImageRepeat.repeatX,
+    );
+
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
+
+    expect(calls, hasLength(1));
+    final Invocation call = calls[0];
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(2));
+
+    // A tiled image is drawn as a rect with a shader.
+    expect(call.positionalArguments[0], isA<Rect>());
+    expect(call.positionalArguments[1], isA<Paint>());
+
+    final Paint paint = call.positionalArguments[1] as Paint;
+
+    expect(paint.shader, isA<ImageShader>());
+    expect(call.positionalArguments[0], outputRect);
+  });
+
+  test('paintImage with repeatY and fitWidth', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as tall as it is
+    // wide.  One copy of the image should be painted, aligned so that a repeating
+    // tile mode causes it to appear twice.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitWidth,
+      repeat: ImageRepeat.repeatY,
+    );
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
+
+    expect(calls, hasLength(1));
+    final Invocation call = calls[0];
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(2));
+
+    // A tiled image is drawn as a rect with a shader.
+    expect(call.positionalArguments[0], isA<Rect>());
+    expect(call.positionalArguments[1], isA<Paint>());
+
+    final Paint paint = call.positionalArguments[1] as Paint;
+
+    expect(paint.shader, isA<ImageShader>());
+    expect(call.positionalArguments[0], outputRect);
+  });
+
   test('DecorationImage scale test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     final DecorationImage backgroundImage = DecorationImage(
@@ -715,4 +790,52 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('Compute image tiling', () {
+    expect(() => createTilingInfo(ImageRepeat.noRepeat, Rect.zero, Rect.zero, Rect.zero), throwsAssertionError);
+
+    // These tests draw a 16x9 image into a 100x50 container with a destination
+    // size of and make assertions based on observed behavior and the original
+    // rectangles from https://github.com/flutter/flutter/pull/119495/
+
+    final ImageTilingInfo repeatX = createTilingInfo(
+      ImageRepeat.repeatX,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+
+    expect(repeatX.tmx, TileMode.repeated);
+    expect(repeatX.tmy, TileMode.decal);
+    expect(repeatX.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(-12.0, 0.0, 0.0)
+    ));
+
+    final ImageTilingInfo repeatY = createTilingInfo(
+      ImageRepeat.repeatY,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+    expect(repeatY.tmx, TileMode.decal);
+    expect(repeatY.tmy, TileMode.repeated);
+    expect(repeatY.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(84.0, 0.0, 0.0)
+    ));
+
+    final ImageTilingInfo repeat = createTilingInfo(
+      ImageRepeat.repeat,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+    expect(repeat.tmx, TileMode.repeated);
+    expect(repeat.tmy, TileMode.repeated);
+    expect(repeat.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(-12.0, 0.0, 0.0)
+    ));
+  });
 }

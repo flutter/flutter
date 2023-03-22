@@ -260,7 +260,6 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _waitForCondition(Command command) async {
-    assert(command != null);
     final WaitForCondition waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
     await condition.wait();
@@ -444,13 +443,13 @@ mixin CommandHandlerFactory {
   }
 
   SemanticsHandle? _semantics;
-  bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
+  bool get _semanticsIsEnabled => SemanticsBinding.instance.semanticsEnabled;
 
   Future<SetSemanticsResult> _setSemantics(Command command) async {
     final SetSemantics setSemanticsCommand = command as SetSemantics;
     final bool semanticsWasEnabled = _semanticsIsEnabled;
     if (setSemanticsCommand.enabled && _semantics == null) {
-      _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      _semantics = SemanticsBinding.instance.ensureSemantics();
       if (!semanticsWasEnabled) {
         // wait for the first frame where semantics is enabled.
         final Completer<void> completer = Completer<void>();

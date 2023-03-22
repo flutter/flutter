@@ -274,8 +274,6 @@ class ResidentWebRunner extends ResidentRunner {
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
-          nullAssertions: debuggingOptions.nullAssertions,
-          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device!.devFS!.create();
@@ -298,6 +296,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
+            false,
           );
         }
         await device!.device!.startApp(
@@ -370,7 +369,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
-          baseHref: kBaseHref,
+          false,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -559,18 +558,13 @@ class ResidentWebRunner extends ResidentRunner {
         // thrown if we're not already subscribed.
       }
       await setUpVmService(
-        (String isolateId, {
-          bool? force,
-          bool? pause,
-        }) async {
+        reloadSources: (String isolateId, {bool? force, bool? pause}) async {
           await restart(pause: pause);
         },
-        null,
-        null,
-        device!.device,
-        null,
-        printStructuredErrorLog,
-        _vmService.service,
+        device: device!.device,
+        flutterProject: flutterProject,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
+        vmService: _vmService.service,
       );
 
 
@@ -607,18 +601,6 @@ class ResidentWebRunner extends ResidentRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
-      _logger.printStatus('');
-      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-      } else {
-        _logger.printStatus(
-          'Running without sound null safety ⚠️',
-          emphasis: true,
-        );
-        _logger.printStatus(
-          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-        );
-      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));

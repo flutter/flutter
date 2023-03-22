@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SliverOpacity].
+// Flutter code sample for [SliverOpacity].
 
 import 'package:flutter/material.dart';
 
@@ -46,7 +46,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       body: CustomScrollView(
         slivers: <Widget>[
           const SliverToBoxAdapter(
-            child: ListTile(title: Text('Press on the button to toggle the list visibilty.')),
+            child: ListTile(title: Text('Press on the button to toggle the list visibility.')),
           ),
           const SliverToBoxAdapter(
             child: ListTile(title: Text('Before the list...')),

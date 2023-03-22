@@ -14,8 +14,10 @@ import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
+import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
+import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
@@ -23,8 +25,10 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 /// Passing this regexp to trace moves the stdout output to stderr.
 ///
 /// Filter out xcodebuild logging unrelated to macOS builds:
+/// ```
 /// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 /// note: Using new build system
+/// ```
 final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extension point with identifier|note\:).)*$');
 
 /// Builds the macOS project through xcodebuild.
@@ -34,6 +38,7 @@ Future<void> buildMacOS({
   required BuildInfo buildInfo,
   String? targetOverride,
   required bool verboseLogging,
+  bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
@@ -52,6 +57,8 @@ Future<void> buildMacOS({
     MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
     XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
     XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
+    XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
+    FlutterApplicationMigration(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -76,6 +83,9 @@ Future<void> buildMacOS({
   if (!flutterProject.macos.outputFileList.existsSync()) {
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
+  if (configOnly) {
+    return;
+  }
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
@@ -95,7 +105,6 @@ Future<void> buildMacOS({
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
-
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
@@ -109,7 +118,7 @@ Future<void> buildMacOS({
       'xcodebuild',
       '-workspace', xcodeWorkspace.path,
       '-configuration', configuration,
-      '-scheme', 'Runner',
+      '-scheme', scheme,
       '-derivedDataPath', flutterBuildDir.absolute.path,
       '-destination', 'platform=macOS',
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
@@ -169,8 +178,7 @@ Future<void> buildMacOS({
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'flutter pub global activate devtools; flutter pub global run devtools '
-      '--appSizeBase=$relativeAppSizePath'
+      'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));

@@ -128,5 +128,9 @@
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Meny med menylinje",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

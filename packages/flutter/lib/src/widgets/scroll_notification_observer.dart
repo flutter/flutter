@@ -35,7 +35,7 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
   bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final ScrollNotificationCallback listener;
 }
@@ -78,7 +78,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   const ScrollNotificationObserver({
     super.key,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The subtree below this widget.
   final Widget child;

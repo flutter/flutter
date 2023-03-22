@@ -166,11 +166,11 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
 
     final Completer<ForwardedPort?> completer = Completer<ForwardedPort?>();
 
-    // read the outputs of the process, if we find a line that matches
+    // Read the outputs of the process; if we find a line that matches
     // the configs forwardPortSuccessRegex, we complete with a successfully
-    // forwarded port
-    // Note that if that regex never matches, this will potentially run forever
-    // and the forwarding will never complete
+    // forwarded port.
+    // If that regex never matches, this will potentially run forever
+    // and the forwarding will never complete.
     final CustomDeviceLogReader reader = CustomDeviceLogReader(_deviceName)..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
@@ -309,7 +309,7 @@ class CustomDeviceAppSession {
         'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
-          'observatory-port=${debuggingOptions.deviceVmServicePort}',
+          'vm-service-port=${debuggingOptions.deviceVmServicePort}',
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           'enable-checked-mode=true',
           'verify-entry-points=true',
@@ -374,7 +374,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
+    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -388,14 +388,14 @@ class CustomDeviceAppSession {
     // in the same microtask AFAICT but this way we're on the safe side.
     logReader.listenToProcessOutput(process);
 
-    final Uri? observatoryUri = await discovery.uri;
+    final Uri? vmServiceUri = await discovery.uri;
     await discovery.cancel();
 
     if (_device._config.usesPortForwarding) {
-      _forwardedHostPort = observatoryUri?.port;
+      _forwardedHostPort = vmServiceUri?.port;
     }
 
-    return LaunchResult.succeeded(observatoryUri: observatoryUri);
+    return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
   }
 
   void _maybeUnforwardPort() {
@@ -475,7 +475,7 @@ class CustomDevice extends Device {
   @override
   final DevicePortForwarder portForwarder;
 
-  CustomDeviceAppSession _getOrCreateAppSession(covariant ApplicationPackage app) {
+  CustomDeviceAppSession _getOrCreateAppSession(ApplicationPackage app) {
     return _sessions.putIfAbsent(
       app,
       () {
@@ -663,7 +663,7 @@ class CustomDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false
   }) {
     if (app != null) {
@@ -674,7 +674,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null || !await tryUninstall(appName: appName)) {
       return false;
@@ -689,12 +689,12 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async {
     return false;
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async {
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
     return false;
   }
 
@@ -742,7 +742,7 @@ class CustomDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    ApplicationPackage package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -796,7 +796,10 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    if (app == null) {
+      return false;
+    }
     return _getOrCreateAppSession(app).stop();
   }
 
@@ -804,7 +807,7 @@ class CustomDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null) {
       return false;

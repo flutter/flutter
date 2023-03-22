@@ -29,7 +29,7 @@ class VsCodeValidator extends DoctorValidator {
         : userMessages.vsCodeVersion(_vsCode.version.toString());
 
     return ValidationResult(
-      ValidationType.installed,
+      ValidationType.success,
       _vsCode.validationMessages.toList(),
       statusInfo: vsCodeVersionText,
     );

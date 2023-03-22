@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,11 @@ void main() {
     expect(const TabBarTheme().overlayColor, null);
     expect(const TabBarTheme().splashFactory, null);
     expect(const TabBarTheme().mouseCursor, null);
+  });
+
+  test('TabBarTheme lerp special cases', () {
+    const TabBarTheme theme = TabBarTheme();
+    expect(identical(TabBarTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
   testWidgets('Tab bar defaults', (WidgetTester tester) async {

@@ -30,4 +30,10 @@ void main() {
     checkInstallationURL((Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform));
     checkInstallationURL((Platform platform) => userMessages.androidStudioInstallation(platform));
   });
+
+  testWithoutContext('Xcode installation instructions', () {
+    final UserMessages userMessages = UserMessages();
+    expect(userMessages.xcodeMissing, contains('iOS and macOS'));
+    expect(userMessages.xcodeIncomplete, contains('iOS and macOS'));
+  });
 }

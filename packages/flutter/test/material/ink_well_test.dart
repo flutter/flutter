@@ -1722,6 +1722,56 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(hover, false);
   });
 
+  testWidgets('hovered ink well draws a transparent highlight when disabled', (WidgetTester tester) async {
+    Widget buildFrame({ required bool enabled }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                onTap: enabled ? () { } : null,
+                onHover: (bool value) { },
+                hoverColor: const Color(0xff00ff00),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    // Hover the enabled InkWell.
+    await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Material),
+      paints
+        ..rect(
+            color: const Color(0xff00ff00),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
+    );
+
+    // Disable the hovered InkWell.
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Material),
+      paints
+        ..rect(
+            color: const Color(0x0000ff00),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
+    );
+  });
+
+
   testWidgets('Changing InkWell.enabled should not trigger TextButton setState()', (WidgetTester tester) async {
     Widget buildFrame({ required bool enabled }) {
       return Material(
@@ -1964,5 +2014,42 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     // 50ms fadeout is 50% complete, overlay color alpha goes from 0xff to 0x80
     await tester.pump(const Duration(milliseconds: 25));
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0x8000ff00)));
+  });
+
+  testWidgets('InkWell secondary tap test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onSecondaryTap: () {
+              log.add('secondary-tap');
+            },
+            onSecondaryTapDown: (TapDownDetails details) {
+              log.add('secondary-tap-down');
+            },
+            onSecondaryTapUp: (TapUpDetails details) {
+              log.add('secondary-tap-up');
+            },
+            onSecondaryTapCancel: () {
+              log.add('secondary-tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1, buttons: kSecondaryButton);
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-up', 'secondary-tap']));
+    log.clear();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)), pointer: 2, buttons: kSecondaryButton);
+    await gesture.moveTo(const Offset(100, 100));
+    await gesture.up();
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-cancel']));
   });
 }

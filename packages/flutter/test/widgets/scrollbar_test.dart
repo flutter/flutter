@@ -83,6 +83,7 @@ void main() {
     pixels: 0,
     viewportDimension: 100,
     axisDirection: AxisDirection.down,
+    devicePixelRatio: 3.0,
   );
 
   test(
@@ -2037,7 +2038,9 @@ void main() {
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
   });
 
-  testWidgets('The bar can show or hide when the window size change', (WidgetTester tester) async {
+  testWidgets('The bar can show or hide when the view size change', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     final ScrollController scrollController = ScrollController();
     Widget buildFrame() {
       return Directionality(
@@ -2060,21 +2063,19 @@ void main() {
         ),
       );
     }
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    tester.view.physicalSize = const Size(800.0, 600.0);
+    tester.view.devicePixelRatio = 1;
 
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
 
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 599.0);
+    tester.view.physicalSize = const Size(800.0, 599.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
 
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 600.0);
+    tester.view.physicalSize = const Size(800.0, 600.0);
     await tester.pumpAndSettle();
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
@@ -2739,7 +2740,6 @@ void main() {
               controller: scrollController,
               child: CustomScrollView(
                 controller: scrollController,
-                // cacheExtent: double.maxFinite,
                 slivers: <Widget>[
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
@@ -2793,6 +2793,70 @@ void main() {
           color: const Color(0x66BCBCBC),
         ),
     );
+  });
+
+  testWidgets('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/121574
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        final double height;
+                        if (index < 10) {
+                          height = 500;
+                        } else {
+                          height = 100;
+                        }
+                        return SizedBox(
+                          height: height,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 100,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 100;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    final double lastPosition = scrollController.offset;
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(lastPosition, greaterThan((100.0 * 10 + 500.0 * 90) / 6));
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, greaterThan(lastPosition));
   });
 
   testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {

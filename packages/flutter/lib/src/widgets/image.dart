@@ -53,7 +53,7 @@ export 'package:flutter/painting.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
     locale: Localizations.maybeLocaleOf(context),
     textDirection: Directionality.maybeOf(context),
     size: size,
@@ -288,8 +288,9 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// memory usage of [ImageCache].
 ///
 /// In the case where a network image is used on the Web platform, the
-/// `cacheWidth` and `cacheHeight` parameters are ignored as the Web engine
-/// delegates image decoding of network images to the Web, which does not support
+/// `cacheWidth` and `cacheHeight` parameters are only supported when the application is
+/// running with the CanvasKit renderer. When the application is using the HTML renderer,
+/// the web engine delegates image decoding of network images to the Web, which does not support
 /// custom decode sizes.
 ///
 /// See also:
@@ -342,12 +343,7 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       assert(isAntiAlias != null);
+  });
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -405,12 +401,8 @@ class Image extends StatefulWidget {
     int? cacheWidth,
     int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null);
+       assert(cacheHeight == null || cacheHeight > 0);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -474,13 +466,8 @@ class Image extends StatefulWidget {
         ),
        image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null);
+       assert(cacheHeight == null || cacheHeight > 0);
 
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   //
@@ -640,12 +627,8 @@ class Image extends StatefulWidget {
            : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null);
+       assert(cacheHeight == null || cacheHeight > 0);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
@@ -702,12 +685,8 @@ class Image extends StatefulWidget {
     int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null);
+       assert(cacheHeight == null || cacheHeight > 0);
 
   /// The image to display.
   final ImageProvider image;
@@ -1106,7 +1085,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.maybeOf(context)?.invertColors
+    _invertColors = MediaQuery.maybeInvertColorsOf(context)
         ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
@@ -1120,7 +1099,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width!, widget.height!) : null,
       ));
-    assert(newStream != null);
     _updateSourceStream(newStream);
   }
 

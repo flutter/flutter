@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
@@ -158,7 +154,7 @@ class PathPointsMatcher extends Matcher {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -649,7 +645,7 @@ void main() {
   );
 
   testWidgets(
-    'decoration can be overrriden',
+    'decoration can be overridden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -1499,7 +1495,7 @@ void main() {
     expect(controller.text, 'abcdef');
   });
 
-  testWidgets('toolbar has the same visual regardless of theming', (WidgetTester tester) async {
+  testWidgets('toolbar colors change with theme brightness, but nothing else', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: "j'aime la poutine",
     );
@@ -1523,7 +1519,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     Text text = tester.widget<Text>(find.text('Paste'));
-    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.color!.value, CupertinoColors.black.value);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
@@ -1555,7 +1551,7 @@ void main() {
 
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
-    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.color!.value, CupertinoColors.white.value);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
@@ -1701,9 +1697,9 @@ void main() {
 
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             CupertinoTextField(
               placeholder: 'field 1',
             ),
@@ -2121,6 +2117,105 @@ void main() {
 
       // Selected text shows nothing.
       expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Can double click + drag with a mouse to select word by word',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+      final Offset hPos = textOffsetToPosition(tester, testValue.indexOf('h'));
+
+      // Tap on text field to gain focus, and set selection to '|e'.
+      final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+      // Here we tap on '|e' again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(ePos);
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      // Drag, right after the double tap, to select word by word.
+      // Moving to the position of 'h', will extend the selection to 'ghi'.
+      await gesture.moveTo(hPos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, testValue.indexOf('d'));
+      expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+    },
+  );
+
+  testWidgets(
+    'Can double tap + drag to select word by word',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+      final Offset hPos = textOffsetToPosition(tester, testValue.indexOf('h'));
+
+      // Tap on text field to gain focus, and set selection to '|e'.
+      final TestGesture gesture = await tester.startGesture(ePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+      // Here we tap on '|e' again, to register a double tap. This will select
+      // the word at the tapped position.
+      await gesture.down(ePos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      // Drag, right after the double tap, to select word by word.
+      // Moving to the position of 'h', will extend the selection to 'ghi'.
+      await gesture.moveTo(hPos);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, testValue.indexOf('d'));
+      expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
     },
   );
 
@@ -3008,7 +3103,7 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-309.30, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-310.30, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
@@ -3396,10 +3491,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -3450,7 +3542,7 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -3601,7 +3693,9 @@ void main() {
       renderEditable,
     );
     handlePos = endpoints[0].point + startHandleAdjustment;
-    newHandlePos = handlePos - toNextLine;
+    // Move handle a sufficient global distance so it can be considered a drag
+    // by the selection handle's [PanGestureRecognizer].
+    newHandlePos = handlePos - (toNextLine * 2);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -3625,6 +3719,12 @@ void main() {
     handlePos = endpoints[0].point + startHandleAdjustment;
     newHandlePos = handlePos + toNextLine;
     gesture = await tester.startGesture(handlePos, pointer: 7);
+    // Move handle up a small amount before dragging it down so the total global
+    // distance travelled can be accepted by the selection handle's [PanGestureRecognizer] as a drag.
+    // This way it can declare itself the winner before the [TapAndDragGestureRecognizer] that
+    // is on the selection overlay.
+    await tester.pump();
+    await gesture.moveTo(handlePos - toNextLine);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
@@ -3937,10 +4037,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -3966,6 +4063,97 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|g'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for [kDoubleTapTimeout] after the up event, so our next down
+    // event does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(ePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 7);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    // Tap on text field to gain focus, and set selection to '|e'.
+    // We await for [kDoubleTapTimeout] after the up event, so our
+    // next down event does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(ePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+    // Here we tap on '|d', and move to '|g'.
+    await gesture.down(textOffsetToPosition(tester, testValue.indexOf('d')));
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
     int selectionChangedCount = 0;
     const String testValue = 'abc def ghi';
@@ -3981,10 +4169,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(
-              fontFamily: 'Ahem',
-              fontSize: 10.0,
-            ),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -4399,7 +4584,7 @@ void main() {
       );
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      await tester.pump(const Duration(milliseconds: 300)); // skip past the frame where the opacity is zero
 
       // Verify the selection toolbar position
       Offset toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
@@ -4623,7 +4808,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 25.0);
+    expect(scrollController.offset, 27.0);
   });
 
   testWidgets('disabled state golden', (WidgetTester tester) async {
@@ -4654,11 +4839,170 @@ void main() {
     );
   });
 
+  testWidgets(
+    'Can drag the left handle while the right handle remains off-screen',
+    (WidgetTester tester) async {
+      // Text is longer than textfield width.
+      const String testValue = 'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              scrollController: scrollController,
+            ),
+          ),
+        ),
+      );
+
+      // Double tap 'b' to show handles.
+      final Offset bPos = textOffsetToPosition(tester, testValue.indexOf('b'));
+      await tester.tapAt(bPos);
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(bPos);
+      await tester.pumpAndSettle();
+
+      final TextSelection selection = controller.selection;
+      expect(selection.baseOffset, 28);
+      expect(selection.extentOffset, testValue.length);
+
+      // Move to the left edge.
+      scrollController.jumpTo(0);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Left handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(endpoints[0].point.dx - textFieldLeftPosition.dx, isPositive);
+      final Offset textFieldRightPosition =
+          tester.getTopRight(find.byType(CupertinoTextField));
+      expect(textFieldRightPosition.dx - endpoints[0].point.dx, isPositive);
+      // Right handle should remain off-screen.
+      expect(endpoints[1].point.dx - textFieldRightPosition.dx, isPositive);
+
+      // Drag the left handle to the right by 25 offset.
+      const int toOffset = 25;
+      final double beforeScrollOffset = scrollController.offset;
+      final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+      final Offset newHandlePos = textOffsetToPosition(tester, toOffset);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(newHandlePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          // On Apple platforms, dragging the base handle makes it the extent.
+          expect(controller.selection.baseOffset, testValue.length);
+          expect(controller.selection.extentOffset, toOffset);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection.baseOffset, toOffset);
+          expect(controller.selection.extentOffset, testValue.length);
+          break;
+      }
+
+      // The scroll area of text field should not move.
+      expect(scrollController.offset, beforeScrollOffset);
+    },
+  );
+
+  testWidgets(
+    'Can drag the right handle while the left handle remains off-screen',
+    (WidgetTester tester) async {
+      // Text is longer than textfield width.
+      const String testValue = 'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              scrollController: scrollController,
+            ),
+          ),
+        ),
+      );
+
+      // Double tap 'a' to show handles.
+      final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+      await tester.tapAt(aPos);
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(aPos);
+      await tester.pumpAndSettle();
+
+      final TextSelection selection = controller.selection;
+      expect(selection.baseOffset, 0);
+      expect(selection.extentOffset, 27);
+
+      // Move to the right edge.
+      scrollController.jumpTo(800);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Right handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(endpoints[1].point.dx - textFieldLeftPosition.dx, isPositive);
+      final Offset textFieldRightPosition =
+          tester.getTopRight(find.byType(CupertinoTextField));
+      expect(textFieldRightPosition.dx - endpoints[1].point.dx, isPositive);
+      // Left handle should remain off-screen.
+      expect(endpoints[0].point.dx, isNegative);
+
+      // Drag the right handle to the left by 50 offset.
+      const int toOffset = 50;
+      final double beforeScrollOffset = scrollController.offset;
+      final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+      final Offset newHandlePos = textOffsetToPosition(tester, toOffset);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(newHandlePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, toOffset);
+
+      // The scroll area of text field should not move.
+      expect(scrollController.offset, beforeScrollOffset);
+    },
+  );
+
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       TextEditingController controller;
       EditableTextState state;
       Offset bottomLeftSelectionPosition;
@@ -4836,15 +5180,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -4906,15 +5249,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -4980,9 +5322,6 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for
@@ -6298,16 +6637,19 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
+    await tester.pumpAndSettle();
     if (isTargetPlatformMobile) {
       await gesture.up();
+      // Not a double tap + drag.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
-    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
 
     // Expand the selection a bit.
     if (isTargetPlatformMobile) {
       await gesture.down(textOffsetToPosition(tester, 24));
+      await tester.pumpAndSettle();
     }
     await gesture.moveTo(textOffsetToPosition(tester, 28));
     await tester.pumpAndSettle();
@@ -6402,16 +6744,19 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
+    await tester.pumpAndSettle();
     if (isTargetPlatformMobile) {
       await gesture.up();
+      // Not a double tap + drag.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
-    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
 
     // Expand the selection a bit.
     if (isTargetPlatformMobile) {
       await gesture.down(textOffsetToPosition(tester, 24));
+      await tester.pumpAndSettle();
     }
     await gesture.moveTo(textOffsetToPosition(tester, 28));
     await tester.pumpAndSettle();
@@ -6505,8 +6850,11 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
+    await tester.pumpAndSettle();
     if (isTargetPlatformMobile) {
       await gesture.up();
+      // Not a double tap + drag.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
@@ -6515,6 +6863,7 @@ void main() {
     // Expand the selection a bit.
     if (isTargetPlatformMobile) {
       await gesture.down(textOffsetToPosition(tester, 7));
+      await tester.pumpAndSettle();
     }
     await gesture.moveTo(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
@@ -6609,16 +6958,19 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
+    await tester.pumpAndSettle();
     if (isTargetPlatformMobile) {
       await gesture.up();
+      // Not a double tap + drag.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
     }
-    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
 
     // Expand the selection a bit.
     if (isTargetPlatformMobile) {
       await gesture.down(textOffsetToPosition(tester, 7));
+      await tester.pumpAndSettle();
     }
     await gesture.moveTo(textOffsetToPosition(tester, 5));
     await tester.pumpAndSettle();
@@ -7489,7 +7841,6 @@ void main() {
   testWidgets('placeholder style overflow works', (WidgetTester tester) async {
     final String placeholder = 'hint text' * 20;
     const TextStyle placeholderStyle = TextStyle(
-      fontFamily: 'Ahem',
       fontSize: 14.0,
       overflow: TextOverflow.fade,
     );

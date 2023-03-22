@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui show BoxHeightStyle;
 
@@ -81,7 +82,7 @@ void main() {
   }
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -91,7 +92,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -245,8 +246,8 @@ void main() {
 
     testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(800, 800);
+      addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -317,8 +318,8 @@ void main() {
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
-      tester.binding.window.physicalSizeTestValue = const Size(640, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(640, 800);
+      addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(

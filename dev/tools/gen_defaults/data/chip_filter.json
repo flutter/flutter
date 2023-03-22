@@ -1,14 +1,14 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.comp.filter-chip.container.height": 32.0,
-  "md.comp.filter-chip.container.shadow-color": "shadow",
   "md.comp.filter-chip.container.shape": "md.sys.shape.corner.small",
   "md.comp.filter-chip.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.filter-chip.disabled.label-text.color": "onSurface",
   "md.comp.filter-chip.disabled.label-text.opacity": 0.38,
   "md.comp.filter-chip.dragged.container.elevation": "md.sys.elevation.level4",
   "md.comp.filter-chip.elevated.container.elevation": "md.sys.elevation.level1",
+  "md.comp.filter-chip.elevated.container.shadow-color": "shadow",
   "md.comp.filter-chip.elevated.disabled.container.color": "onSurface",
   "md.comp.filter-chip.elevated.disabled.container.elevation": "md.sys.elevation.level0",
   "md.comp.filter-chip.elevated.disabled.container.opacity": 0.12,

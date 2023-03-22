@@ -39,9 +39,7 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
-  }) : assert(isExpanded != null),
-       assert(size != null),
-       assert(padding != null);
+  });
 
   /// Whether the icon is in an expanded state.
   ///
@@ -66,7 +64,7 @@ class ExpandIcon extends StatefulWidget {
   /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
 
-
+  /// {@template flutter.material.ExpandIcon.color}
   /// The color of the icon.
   ///
   /// Defaults to [Colors.black54] when the theme's
@@ -74,6 +72,7 @@ class ExpandIcon extends StatefulWidget {
   /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
+  /// {@endtemplate}
   final Color? color;
 
   /// The color of the icon when it is disabled,

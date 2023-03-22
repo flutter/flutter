@@ -59,7 +59,7 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
-  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  buf.writeln("  sdk: '>=3.0.0-0 <4.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -143,11 +143,12 @@ Future<void> main(List<String> arguments) async {
 
   // Dartdoc warnings and errors in these packages are considered fatal.
   // All packages owned by flutter should be in the list.
-  // TODO(goderbauer): Figure out how to add 'dart:ui'.
   final List<String> flutterPackages = <String>[
     kDummyPackageName,
     kPlatformIntegrationPackageName,
     ...findPackageNames(),
+    // TODO(goderbauer): Figure out how to only include `dart:ui` of `sky_engine` below, https://github.com/dart-lang/dartdoc/issues/2278.
+    // 'sky_engine',
   ];
 
   // Generate the documentation.
@@ -437,7 +438,7 @@ void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
 
   // Check a "dartpad" example, any one will do, and check for the correct URL
   // arguments.
-  // Just use "master" for any branch other than the LUCH_BRANCH.
+  // Just use "master" for any branch other than the LUCI_BRANCH.
   final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
   final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
   final List<String> argumentRegExps = <String>[
@@ -581,8 +582,6 @@ Iterable<String> libraryRefs() sync* {
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
-  assert(prefix != null);
-  assert(filter != null);
   stream
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

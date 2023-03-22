@@ -425,8 +425,60 @@ void main() {
         engineRevisionFile.writeAsStringSync(oldEngineVersion, flush: true);
       });
 
-      test('with no dart, engine or framework cherrypicks, no user input, no PR needed', () async {
-        state = pb.ConductorState(
+      test('with no dart, engine or framework cherrypicks, updates engine revision if version mismatch', () async {
+        stdio.stdin.add('n');
+          processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          FakeCommand(
+            command: const <String>['git', 'checkout', workingBranch],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
+              _initializeCiYamlFile(file);
+            },
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/release-candidate-branch.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision4,
+          ),
+        ]);
+        final pb.ConductorState state = pb.ConductorState(
+          releaseChannel: releaseChannel,
+          releaseVersion: releaseVersion,
+          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
           framework: pb.Repository(
             candidateBranch: candidateBranch,
             checkoutPath: frameworkCheckoutPath,
@@ -438,16 +490,14 @@ void main() {
             candidateBranch: candidateBranch,
             checkoutPath: engineCheckoutPath,
             upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
+            currentGitHead: revision1,
           ),
-          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
         );
-
         writeStateToFile(
           fileSystem.file(stateFile),
           state,
           <String>[],
         );
-
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
@@ -456,23 +506,16 @@ void main() {
           stdio: stdio,
         );
         final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-
         await runner.run(<String>[
           'next',
           '--$kStateOption',
           stateFile,
         ]);
 
-        final pb.ConductorState finalState = readStateFromFile(
-          fileSystem.file(stateFile),
-        );
-
-        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-        expect(stdio.error, isEmpty);
-        expect(
-          stdio.stdout,
-          contains('pull request is not required'),
-        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('release-candidate-branch.version containing $candidateBranch'));
+        expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
+        expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
 
       test('with no engine cherrypicks but a dart revision update, updates engine revision', () async {
@@ -758,6 +801,10 @@ void main() {
             candidateBranch: candidateBranch,
             upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
           ),
+          engine: pb.Repository(
+            candidateBranch: candidateBranch,
+            upstream: pb.Remote(url: EngineRepository.defaultUpstream),
+          ),
           releaseVersion: releaseVersion,
         );
         platform = FakePlatform(
@@ -773,6 +820,18 @@ void main() {
         stdio.stdin.add('n');
         final FakeProcessManager processManager = FakeProcessManager.list(
           <FakeCommand>[
+            // Framework checkout
+            const FakeCommand(
+              command: <String>['git', 'fetch', 'upstream'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'rev-parse', 'HEAD'],
+              stdout: revision1,
+            ),
+            // Engine checkout
             const FakeCommand(
               command: <String>['git', 'fetch', 'upstream'],
             ),
@@ -818,6 +877,7 @@ void main() {
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          // Framework checkout
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
@@ -828,8 +888,27 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
+          // Engine checkout
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
+          ),
+          // Framework tag
           const FakeCommand(
             command: <String>['git', 'tag', releaseVersion, revision1],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', remoteName, releaseVersion],
+          ),
+          // Engine tag
+          const FakeCommand(
+            command: <String>['git', 'tag', releaseVersion, revision2],
           ),
           const FakeCommand(
             command: <String>['git', 'push', remoteName, releaseVersion],
@@ -990,7 +1069,8 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+          contains(
+              'Release archive packages must be verified on cloud storage: https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console'),
         );
         expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });

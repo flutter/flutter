@@ -107,6 +107,11 @@ void main() {
         expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
       });
 
+      testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (WidgetTester tester) async {
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 20, minute: 32)), '20.32');
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
+      });
+
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
       });

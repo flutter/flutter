@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -545,7 +546,7 @@ void main() {
     bool completed;
 
     completed = false;
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -572,7 +573,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

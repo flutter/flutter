@@ -67,7 +67,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
-        port = int.parse(stringArgDeprecated('listen-on-tcp-port')!);
+        port = int.parse(stringArg('listen-on-tcp-port')!);
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -123,10 +123,12 @@ class _DaemonServer {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        });
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            logger.printError('Socket error: $error');
+            logger.printTrace('$stackTrace');
+          });
         final Daemon daemon = Daemon(
           DaemonConnection(
             daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
@@ -210,7 +212,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -279,7 +280,7 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
       return null;
     });
@@ -882,7 +883,7 @@ class DeviceDomain extends Domain {
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices())
           await _deviceToMap(device),
     ];
   }
@@ -1015,7 +1016,9 @@ class DeviceDomain extends Domain {
     );
     return <String, Object?>{
       'started': result.started,
-      'observatoryUri': result.observatoryUri?.toString(),
+      'vmServiceUri': result.vmServiceUri?.toString(),
+      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 
@@ -1066,7 +1069,7 @@ class DeviceDomain extends Domain {
   /// Return the device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
@@ -1417,7 +1420,9 @@ class ProxyDomain extends Domain {
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+    unawaited(socket.done.then<Object?>(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     }).then((Object? _) {
@@ -1529,7 +1534,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);
@@ -1565,14 +1570,11 @@ class LogMessage {
 }
 
 /// The method by which the Flutter app was launched.
-class LaunchMode {
+enum LaunchMode {
+  run._('run'),
+  attach._('attach');
+
   const LaunchMode._(this._value);
-
-  /// The app was launched via `flutter run`.
-  static const LaunchMode run = LaunchMode._('run');
-
-  /// The app was launched via `flutter attach`.
-  static const LaunchMode attach = LaunchMode._('attach');
 
   final String _value;
 

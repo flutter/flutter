@@ -36,7 +36,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -50,7 +50,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'));
@@ -65,7 +65,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
@@ -79,7 +79,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'bogus']),
           throwsToolExit(message: 'Prebuilt binary bogus does not exist'));
@@ -94,7 +94,7 @@ void main() {
       command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
       final FakeAndroidDevice device = FakeAndroidDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
       fileSystem.file('binary').createSync(recursive: true);
 
       await createTestCommandRunner(command).run(<String>['install', '--use-application-binary', 'binary']);
@@ -111,7 +111,7 @@ void main() {
       command.applicationPackages = fakeAppFactory;
 
       final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.addDevice(device);
+      testDeviceManager.addAttachedDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);
       expect(fakeAppFactory.buildInfo, isNotNull);
@@ -148,7 +148,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   Future<bool> isAppInstalled(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 
@@ -157,6 +157,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     IOSApp app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'iOS';
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -168,7 +171,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 
@@ -177,4 +180,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     AndroidApk app, {
     String? userIdentifier,
   }) async => true;
+
+  @override
+  String get name => 'Android';
+
+  @override
+  bool get ephemeral => true;
 }
