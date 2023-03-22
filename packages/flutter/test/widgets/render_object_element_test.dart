@@ -297,26 +297,4 @@ void main() {
     expect(swapper.removeSlots, contains('stable'));
     expect(swapper.removeSlots, contains(false));
   });
-
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithNoOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(widget());
-    final FlutterError error = tester.takeException() as FlutterError;
-    final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
-    expect(summary.toString(), contains('deprecated'));
-  });
 }
