@@ -206,8 +206,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : NO;
   settings.enable_wide_gamut = enableWideGamut;
 
-  // Whether to enable Impeller.
-  NSNumber* enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  // Whether to enable Impeller. First, look in the app bundle.
+  NSNumber* enableImpeller = [bundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  if (enableImpeller == nil) {
+    // If it isn't in the app bundle, look in the main bundle.
+    enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  }
   // Change the default only if the option is present.
   if (enableImpeller != nil) {
     settings.enable_impeller = enableImpeller.boolValue;
