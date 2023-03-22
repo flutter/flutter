@@ -148,7 +148,7 @@ static void InsertImageMemoryBarrier(const vk::CommandBuffer& cmd,
 }
 
 bool BlitGenerateMipmapCommandVK::Encode(CommandEncoderVK& encoder) const {
-  const auto& src = TextureVK::Cast(*texture);
+  auto& src = TextureVK::Cast(*texture);
 
   const auto size = src.GetTextureDescriptor().size;
   uint32_t mip_count = src.GetTextureDescriptor().mip_count;
@@ -249,6 +249,7 @@ bool BlitGenerateMipmapCommandVK::Encode(CommandEncoderVK& encoder) const {
   // state so it doesn't try to perform redundant transitions under the hood.
   src.SetLayoutWithoutEncoding(vk::ImageLayout::eShaderReadOnlyOptimal);
 
+  src.SetMipmapGenerated();
   return true;
 }
 

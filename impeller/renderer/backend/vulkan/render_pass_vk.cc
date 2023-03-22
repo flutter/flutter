@@ -351,6 +351,12 @@ static bool UpdateDescriptorSets(vk::Device device,
     }
 
     auto texture = bindings.textures.at(index).resource;
+    if (texture->NeedsMipmapGeneration()) {
+      VALIDATION_LOG
+          << "Texture at binding index " << index
+          << " has a mip count > 1, but the mipmap has not been generated.";
+      return false;
+    }
     const auto& texture_vk = TextureVK::Cast(*texture);
     const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
 

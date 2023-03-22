@@ -85,6 +85,10 @@ vk::ImageLayout TextureVK::GetLayout() const {
   return layout_;
 }
 
+void TextureVK::SetMipmapGenerated() {
+  mipmap_generated_ = true;
+}
+
 vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(
     vk::ImageLayout layout) const {
   WriterLock lock(layout_mutex_);

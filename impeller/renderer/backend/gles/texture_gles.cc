@@ -425,7 +425,7 @@ bool TextureGLES::Bind() const {
   return true;
 }
 
-bool TextureGLES::GenerateMipmaps() const {
+bool TextureGLES::GenerateMipmap() {
   if (!IsValid()) {
     return false;
   }
@@ -453,6 +453,7 @@ bool TextureGLES::GenerateMipmaps() const {
 
   const auto& gl = reactor_->GetProcTable();
   gl.GenerateMipmap(ToTextureType(type));
+  mipmap_generated_ = true;
   return true;
 }
 

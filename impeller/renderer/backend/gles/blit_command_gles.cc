@@ -163,7 +163,7 @@ std::string BlitGenerateMipmapCommandGLES::GetLabel() const {
 
 bool BlitGenerateMipmapCommandGLES::Encode(const ReactorGLES& reactor) const {
   auto texture_gles = TextureGLES::Cast(texture.get());
-  if (!texture_gles->GenerateMipmaps()) {
+  if (!texture_gles->GenerateMipmap()) {
     return false;
   }
 

@@ -73,4 +73,8 @@ Scalar Texture::GetYCoordScale() const {
   return 1.0;
 }
 
+bool Texture::NeedsMipmapGeneration() const {
+  return !mipmap_generated_ && desc_.mip_count > 1;
+}
+
 }  // namespace impeller
