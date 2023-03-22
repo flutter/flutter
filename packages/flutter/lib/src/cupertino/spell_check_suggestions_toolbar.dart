@@ -74,14 +74,14 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
-          if (!editableTextState.mounted) {
-            return;
-          }
-          _replaceText(
-            editableTextState,
-            suggestion,
-            spanAtCursorIndex.range,
-          );
+          // if (!editableTextState.mounted) {
+          //   return;
+          // }
+          // _replaceText(
+          //   editableTextState,
+          //   suggestion,
+          //   spanAtCursorIndex.range,
+          // );
         },
         label: suggestion,
       ));
