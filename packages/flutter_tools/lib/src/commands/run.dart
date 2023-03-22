@@ -220,7 +220,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        port: featureFlags.isWebEnabled ? ('web-port') : '',
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArg('web-server-debug-injected-client-protocol') == 'sse',
@@ -384,6 +384,7 @@ class RunCommand extends RunCommandBase {
 
   List<Device>? devices;
   bool webMode = false;
+  String? get webPort => stringArg('web-port');
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -504,6 +505,23 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    void validatePort() {
+      if (webPort == null) {
+        return;
+      }
+      final int? parsed = int.tryParse(webPort!);
+      if (parsed == null) {
+        return;
+      }
+
+      if (parsed < 0 || parsed > 65535) {
+        throwToolExit('''
+Invalid value for --web-port: $parsed
+Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
+''');
+      }
+    }
+
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {
@@ -533,6 +551,10 @@ class RunCommand extends RunCommandBase {
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    if (webMode) {
+      validatePort();
+    }
   }
 
   @visibleForTesting
