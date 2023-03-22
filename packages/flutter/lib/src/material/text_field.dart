@@ -85,7 +85,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           Feedback.forLongPress(_state.context);
-          break;
       }
     }
   }
@@ -1136,7 +1135,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.extent);
         }
-        break;
     }
 
     switch (Theme.of(context).platform) {
@@ -1150,7 +1148,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         if (cause == SelectionChangedCause.drag) {
           _editableText?.hideToolbar();
         }
-        break;
     }
   }
 
@@ -1271,7 +1268,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         autocorrectionTextRectColor = selectionColor;
-        break;
 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
@@ -1289,7 +1285,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1299,7 +1294,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         cursorColor = _hasError ? _errorColor : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
@@ -1308,7 +1302,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         cursorColor = _hasError ? _errorColor : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
 
       case TargetPlatform.windows:
         forcePressEnabled = false;
@@ -1323,7 +1316,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     Widget child = RepaintBoundary(

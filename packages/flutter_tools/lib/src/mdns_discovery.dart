@@ -480,7 +480,6 @@ class MDnsVmServiceDiscovery {
           'under System Preferences > Network > iPhone USB. '
           'See https://github.com/flutter/flutter/issues/46698 for details.'
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -495,7 +494,6 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
-        break;
     }
   }
 

@@ -2,11 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for a [ValueNotifier] with a [ListenableBuilder].
+// Flutter code sample for a [ChangeNotifier] with a [ListenableBuilder].
 
 import 'package:flutter/material.dart';
 
 void main() { runApp(const ListenableBuilderExample()); }
+
+class CounterModel with ChangeNotifier {
+  int _count = 0;
+  int get count => _count;
+
+  void increment() {
+    _count += 1;
+    notifyListeners();
+  }
+}
 
 class ListenableBuilderExample extends StatefulWidget {
   const ListenableBuilderExample({super.key});
@@ -16,16 +26,16 @@ class ListenableBuilderExample extends StatefulWidget {
 }
 
 class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
-  final ValueNotifier<int> _counter = ValueNotifier<int>(0);
+  final CounterModel _counter = CounterModel();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
-        body: CounterBody(counterValueNotifier: _counter),
+        body: CounterBody(counterNotifier: _counter),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => _counter.value++,
+          onPressed: _counter.increment,
           child: const Icon(Icons.add),
         ),
       ),
@@ -34,9 +44,9 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
 }
 
 class CounterBody extends StatelessWidget {
-  const CounterBody({super.key, required this.counterValueNotifier});
+  const CounterBody({super.key, required this.counterNotifier});
 
-  final ValueNotifier<int> counterValueNotifier;
+  final CounterModel counterNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +60,9 @@ class CounterBody extends StatelessWidget {
           // listeners. The Text widget above and CounterBody itself aren't
           // rebuilt.
           ListenableBuilder(
-            listenable: counterValueNotifier,
+            listenable: counterNotifier,
             builder: (BuildContext context, Widget? child) {
-              return Text('${counterValueNotifier.value}');
+              return Text('${counterNotifier.count}');
             },
           ),
         ],
